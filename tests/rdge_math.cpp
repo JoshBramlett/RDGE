@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 
+#include <rdge/math/functions.hpp>
 #include <cmath>
-#include <rdge/util/fp.hpp>
 
-using namespace RDGE::Util;
+using namespace RDGE::Math;
 
 TEST(RDGE_UtilTest, FloatingPoint)
 {

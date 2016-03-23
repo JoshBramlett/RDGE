@@ -7,7 +7,7 @@
 #pragma once
 
 #include <rdge/types.hpp>
-#include <rdge/util/fp.hpp>
+#include <rdge/math/functions.hpp>
 
 #include <ostream>
 

@@ -1,8 +1,7 @@
 #include <rdge/random.hpp>
 #include <rdge/types.hpp>
-#include <rdge/util/fp.hpp>
 
-#include <cmath>
+#include <limits>
 #include <random>
 
 //! \namespace RDGE Rainbow Drop Game Engine

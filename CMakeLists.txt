@@ -32,7 +32,7 @@ endif ()
 enable_testing ()
 find_package (GTest REQUIRED)
 include_directories (${GTEST_INCLUDE_DIRS})
-add_executable (rdge_test tests/rdge_util.cpp)
+add_executable (rdge_test tests/rdge_math.cpp)
 target_link_libraries (rdge_test ${GTEST_BOTH_LIBRARIES})
 #add_test(RDGE_UtilTest rdge_test)
 

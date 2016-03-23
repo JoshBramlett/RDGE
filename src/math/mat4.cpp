@@ -94,7 +94,7 @@ mat4::perspective (
     mat4 result(1.0f);
 
     // toRadians = degrees * (PI / 180.0f)
-    float q = 1.0f / tan(toRadians(0.5f * field_of_view));
+    float q = 1.0f / tan(to_radians(0.5f * field_of_view));
     float a = q / aspect_ratio;
     float b = (near + far) / (near - far);
     float c = (2.0f * near * far) / (near - far);
@@ -125,7 +125,7 @@ mat4::rotate (float angle, const vec3& axis)
 {
     mat4 result(1.0f);
 
-    float r = toRadians(angle);
+    float r = to_radians(angle);
     float c = cos(r);
     float s = sin(r);
     float omc = 1.0f - c;
