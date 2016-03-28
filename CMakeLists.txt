@@ -2,8 +2,8 @@ cmake_minimum_required (VERSION 3.4)
 project (RDGE)
 
 set (RDGE_VERSION_MAJOR 0)
-set (RDGE_VERSION_MINOR 1)
-set (RDGE_VERSION_PACKAGE 0)
+set (RDGE_VERSION_MINOR 0)
+set (RDGE_VERSION_PACKAGE 2)
 
 set (CMAKE_MODULE_PATH ${RDGE_SOURCE_DIR}/cmake)
 set (LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
@@ -39,10 +39,14 @@ target_link_libraries (rdge_test ${GTEST_BOTH_LIBRARIES})
 find_package (SDL2 REQUIRED)
 find_package (SDL2_image REQUIRED)
 find_package (SDL2_ttf REQUIRED)
+find_package (GLEW REQUIRED)
+find_package (OpenGL REQUIRED)
 
 include_directories (${SDL2_INCLUDE_DIR})
 include_directories (${SDL2_IMAGE_INCLUDE_DIR})
 include_directories (${SDL2_TTF_INCLUDE_DIR})
+include_directories (${GLEW_INCLUDE_DIRS})
+include_directories (${OPENGL_INCLUDE_DIR})
 
 # project includes
 include_directories (include)
@@ -66,14 +70,28 @@ add_library (
              src/gameobjects/scene.cpp
              src/gameobjects/game.cpp
              src/gameobjects/text.cpp
+             src/math/mat4.cpp
+             src/math/vec2.cpp
+             src/math/vec3.cpp
+             src/math/vec4.cpp
              src/util/exception.cpp
              src/util/logger.cpp
              src/util/timer.cpp
             )
 
-target_link_libraries (RDGE ${SDL2_LIBRARY} ${SDL2_IMAGE_LIBRARY} ${SDL2_TTF_LIBRARY})
+target_link_libraries (
+                       RDGE
+                       ${SDL2_LIBRARY}
+                       ${SDL2_IMAGE_LIBRARY}
+                       ${SDL2_TTF_LIBRARY}
+                       ${GLEW_LIBRARIES}
+                       ${OPENGL_LIBRARIES}
+                      )
 
-add_subdirectory (examples/pong)
+#add_subdirectory (examples/pong)
+
+
+
 #target_include_directories (RDGE PUBLIC ${LIB_DIR})
 
 # currently unused - both headers and libs should be moved to e.g. /usr/local/

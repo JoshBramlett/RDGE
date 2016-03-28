@@ -1,6 +1,6 @@
 //! \headerfile <rdge/math/vec3.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.1
+//! \version 0.0.2
 //! \date 03/22/2016
 //! \bug
 
@@ -10,6 +10,7 @@
 #include <rdge/math/functions.hpp>
 
 #include <ostream>
+#include <iomanip>
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {

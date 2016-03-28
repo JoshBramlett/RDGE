@@ -11,6 +11,7 @@
 
 #include <rdge/font.hpp>
 #include <rdge/surface.hpp>
+#include <rdge/texture.hpp>
 #include <rdge/types.hpp>
 #include <rdge/window.hpp>
 #include <rdge/graphics/point.hpp>

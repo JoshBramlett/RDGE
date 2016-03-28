@@ -1,4 +1,5 @@
 #include <rdge/math/mat4.hpp>
+#include <rdge/math/functions.hpp>
 
 #include <cmath>
 
@@ -7,51 +8,45 @@ namespace Math {
 
 mat4::mat4 (void)
 {
-    for (int i = 0; i < 16; ++i)
-    {
-        elements[i] = 0.0f;
-    }
+    memset(elements, 0, sizeof(elements));
 }
 
 mat4::mat4 (float diagonal)
 {
-    for (int i = 0; i < 16; ++i)
-    {
-        elements[i] = 0.0f;
-    }
+    memset(elements, 0, sizeof(elements));
 
-    elements[0 + 0 * 4] = diagonal;
-    elements[1 + 1 * 4] = diagonal;
-    elements[2 + 2 * 4] = diagonal;
-    elements[3 + 3 * 4] = diagonal;
-}
-
-mat4&
-mat4::multiply (const mat4& rhs)
-{
-    mat4 result;
-
-    for (int col = 0; col < 4; ++col)
-    {
-        for (int row = 0; row < 4; ++row)
-        {
-            float sum = 0.0f;
-            for (int e = 0; e < 4; ++e)
-            {
-                sum += elements[row + e * 4] * rhs.elements[e + col * 4];
-            }
-
-            elements[x + y * 4] = sum;
-        }
-    }
-
-    return *this;
+    elements[0]  = diagonal;    // | I 0 0 0 |
+    elements[5]  = diagonal;    // | 0 I 0 0 |
+    elements[10] = diagonal;    // | 0 0 I 0 |
+    elements[15] = diagonal;    // | 0 0 0 I |
 }
 
 mat4&
 mat4::operator*= (const mat4& rhs)
 {
     return multiply(rhs);
+}
+
+mat4&
+mat4::multiply (const mat4& rhs)
+{
+    float data[16];
+    for (int y = 0; y < 4; y++)
+    {
+        for (int x = 0; x < 4; x++)
+        {
+            float sum = 0.0f;
+            for (int e = 0; e < 4; e++)
+            {
+                sum += elements[x + e * 4] * rhs.elements[e + y * 4];
+            }
+
+            data[x + y * 4] = sum;
+        }
+    }
+
+    memcpy(elements, data, 4 * 4 * sizeof(float));
+    return *this;
 }
 
 /* static */ mat4
@@ -93,7 +88,6 @@ mat4::perspective (
 {
     mat4 result(1.0f);
 
-    // toRadians = degrees * (PI / 180.0f)
     float q = 1.0f / tan(to_radians(0.5f * field_of_view));
     float a = q / aspect_ratio;
     float b = (near + far) / (near - far);
@@ -142,7 +136,7 @@ mat4::rotate (float angle, const vec3& axis)
     result.elements[1 + 1 * 4] = y * omc + c;
     result.elements[2 + 1 * 4] = y * z * omc + x * s;
 
-    result.elements[0 + 2 * 4] = x * z * omc + y * s
+    result.elements[0 + 2 * 4] = x * z * omc + y * s;
     result.elements[1 + 2 * 4] = y * z * omc - x * s;
     result.elements[2 + 2 * 4] = z * omc + c;
 

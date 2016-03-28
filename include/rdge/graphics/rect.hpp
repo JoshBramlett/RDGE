@@ -45,7 +45,7 @@ public:
 
     //! \brief Rect ctor
     //! \details Initialize rect to [0,0,0,0]
-    constexpr Rect ()
+    constexpr Rect (void)
         : SDL_Rect{0, 0, 0, 0}
     { }
 

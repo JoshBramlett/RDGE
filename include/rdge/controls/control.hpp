@@ -14,6 +14,7 @@
 
 #include <rdge/types.hpp>
 #include <rdge/window.hpp>
+#include <rdge/graphics/rect.hpp>
 #include <rdge/gameobjects/ientity.hpp>
 
 //! \namespace RDGE Rainbow Drop Game Engine

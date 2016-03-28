@@ -1,6 +1,6 @@
 //! \headerfile <rdge/math/vec2.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.1
+//! \version 0.0.2
 //! \date 03/22/2016
 //! \bug
 
