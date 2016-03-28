@@ -1,12 +1,16 @@
 //! \headerfile <rdge/graphics/shader.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.1
+//! \version 0.0.2
 //! \date 03/22/2016
 //! \bug
 
 #pragma once
 
 #include <rdge/types.hpp>
+#include <rdge/math/vec2.hpp>
+#include <rdge/math/vec3.hpp>
+#include <rdge/math/vec4.hpp>
+#include <rdge/math/mat4.hpp>
 
 #include <GL/glew.h>
 
@@ -28,14 +32,14 @@ public:
 
     void Disable (void) const;
 
-    void SetUniform1i (const GLchar* name, int value);
-    void SetUniform2f (const GLchar* name, const maths::vec2& vec);
-    void SetUniform3f (const GLchar* name, const maths::vec3& vec);
-    void SetUniform4f (const GLchar* name, const maths::vec4& vec);
-    void SetUniformMat4 (const GLchar* name, const maths::mat4& matrix);
+    void SetUniform1f (const GLchar* name, float value);
+    void SetUniform2f (const GLchar* name, const RDGE::Math::vec2& vec);
+    void SetUniform3f (const GLchar* name, const RDGE::Math::vec3& vec);
+    void SetUniform4f (const GLchar* name, const RDGE::Math::vec4& vec);
+    void SetUniformMat4 (const GLchar* name, const RDGE::Math::mat4& matrix);
 
 private:
-    GLuint GetUniformLocation (const GLchar* name);
+    GLint GetUniformLocation (const GLchar* name);
 
     GLuint m_shaderId;
 };

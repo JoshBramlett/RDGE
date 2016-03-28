@@ -70,6 +70,7 @@ add_library (
              src/gameobjects/scene.cpp
              src/gameobjects/game.cpp
              src/gameobjects/text.cpp
+             src/graphics/shader.cpp
              src/math/mat4.cpp
              src/math/vec2.cpp
              src/math/vec3.cpp
