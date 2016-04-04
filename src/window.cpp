@@ -4,18 +4,6 @@
 
 #include <algorithm>
 
-/* TODO: When I implement OpenGL support, make sure to look into:
- *
- *  "On Apple's OS X you must set the NSHighResolutionCapable Info.plist
- *  property to YES, otherwise you will not receive a High DPI OpenGL canvas."
- *
- *  see: https://wiki.libsdl.org/SDL_WindowFlags
- */
-
-// TODO Remove
-#include <iostream>
-#include <iomanip>
-
 namespace RDGE {
 
 namespace {

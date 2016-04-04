@@ -6,10 +6,10 @@
 
 #pragma once
 
+#include <rdge/types.hpp>
+
 #include <string>
 #include <exception>
-
-#include <rdge/types.hpp>
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {
@@ -103,13 +103,13 @@ public:
     //! \param [in] sdl_fn_name SDL function which failed
     //! \param [in] file File where exception occurred
     //! \param [in] line Line where exception occurred
-    //! \param [in] fn_name Function name where exception occurred
+    //! \param [in] parent_fn_name Function name where exception occurred
     explicit SDLException (
                            const std::string& message,
                            std::string        sdl_fn_name,
-                           std::string        file     = "",
-                           RDGE::UInt32       line     = 0,
-                           std::string        fn_name  = ""
+                           std::string        file           = "",
+                           RDGE::UInt32       line           = 0,
+                           std::string        parent_fn_name = ""
                           );
 
     //! \brief SDLException dtor
@@ -134,10 +134,61 @@ private:
     std::string m_SDLError;
 };
 
+//! \class GLException
+//! \brief Wraps OpenGL error information
+//! \details Should be thrown any time an OpenGL call or status check failed.
+//!          If the error code is zero, the exception was created from a
+//!          failed status check.
+class GLException final : public Exception
+{
+public:
+    //! \brief GLException ctor
+    //! \param [in] message Exception details
+    //! \param [in] gl_fn_name OpenGL function which failed
+    //! \param [in] gl_error_code OpenGL defined error code
+    //! \param [in] file File where exception occurred
+    //! \param [in] line Line where exception occurred
+    //! \param [in] parent_fn_name Function name where exception occurred
+    explicit GLException (
+                          const std::string& message,
+                          std::string        gl_fn_name,
+                          RDGE::UInt32       gl_error_code  = 0,
+                          std::string        file           = "",
+                          RDGE::UInt32       line           = 0,
+                          std::string        parent_fn_name = ""
+                         );
+
+    //! \brief GLException dtor
+    virtual ~GLException (void) { }
+
+    //! \brief Get the OpenGL function name which failed
+    //! \returns Failed OpenGL function name
+    std::string GLFunction (void) const
+    {
+        return m_GLFunction;
+    }
+
+    //! \brief Get the OpenGL error code
+    //! \return OpenGL error code
+    RDGE::UInt32 GLErrorCode (void) const
+    {
+        return m_GLErrorCode;
+    }
+
+    //! \brief Get the OpenGL error code in string format
+    //! \return OpenGL error code string
+    std::string GLErrorCodeString (void) const;
+
+private:
+    std::string  m_GLFunction;
+    RDGE::UInt32 m_GLErrorCode;
+};
+
 } // namespace Util
 
 // Protmote to RDGE namespace
 using Util::Exception;
 using Util::SDLException;
+using Util::GLException;
 
 } // namespace RDGE

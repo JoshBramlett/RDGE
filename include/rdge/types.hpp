@@ -13,6 +13,9 @@
 #include <memory>
 #include <string>
 
+#define RDGE_DEBUG
+#define RDGE_THROW_ON_GL_ERROR
+
 /***********************************
 /    Compiler specific defines
 ***********************************/

@@ -55,7 +55,6 @@ include_directories (internal)
 add_library (
              RDGE SHARED
              src/application.cpp
-             src/window.cpp
              src/color.cpp
              src/font.cpp
              src/random.cpp
@@ -63,6 +62,8 @@ add_library (
              src/texture.cpp
              src/cursor.cpp
              src/viewport.cpp
+             src/window.cpp
+             src/glwindow.cpp
              src/controls/control.cpp
              src/controls/button.cpp
              src/gameobjects/icollidable.cpp
@@ -71,6 +72,10 @@ add_library (
              src/gameobjects/game.cpp
              src/gameobjects/text.cpp
              src/graphics/shader.cpp
+             src/graphics/opengl/wrapper.cpp
+             src/graphics/buffers/vertex_array.cpp
+             src/graphics/buffers/vertex_buffer.cpp
+             src/graphics/buffers/index_buffer.cpp
              src/math/mat4.cpp
              src/math/vec2.cpp
              src/math/vec3.cpp
@@ -88,6 +93,8 @@ target_link_libraries (
                        ${GLEW_LIBRARIES}
                        ${OPENGL_LIBRARIES}
                       )
+
+add_subdirectory (tutorials/opengl/ex01_triangle)
 
 #add_subdirectory (examples/pong)
 

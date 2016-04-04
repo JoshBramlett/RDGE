@@ -93,10 +93,10 @@ mat4::perspective (
     float b = (near + far) / (near - far);
     float c = (2.0f * near * far) / (near - far);
 
-    result.elements[0 + 0 * 4] = a;
-    result.elements[1 + 1 * 4] = q;
-    result.elements[2 + 2 * 4] = b;
-    result.elements[3 + 2 * 4] = -1.0f;
+    result.elements[0 + 0 * 4] = a;         // | a  0  0  0 |
+    result.elements[1 + 1 * 4] = q;         // | 0  q  0  0 |
+    result.elements[2 + 2 * 4] = b;         // | 0  0  b  c |
+    result.elements[3 + 2 * 4] = -1.0f;     // | 0  0  -1 1 |
     result.elements[2 + 3 * 4] = c;
 
     return result;

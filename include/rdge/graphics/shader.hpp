@@ -14,6 +14,9 @@
 
 #include <GL/glew.h>
 
+#include <string>
+#include <vector>
+
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {
 namespace Graphics {
@@ -29,7 +32,6 @@ public:
     ~Shader (void);
 
     void Enable (void) const;
-
     void Disable (void) const;
 
     void SetUniform1f (const GLchar* name, float value);
@@ -39,61 +41,29 @@ public:
     void SetUniformMat4 (const GLchar* name, const RDGE::Math::mat4& matrix);
 
 private:
+    void PreProcess (void);
+
+    //! \brief Compile shader source
+    //! \details Creates a shader, and loads and compiles the source.
+    //! \param [in] shader_type Type of shader to compile
+    //! \param [in] source GLSL source code of the shader
+    //! \returns Unique shader handle
+    //! \throws RDGE::GLException Shader could not be compiled
+    RDGE::UInt32 Compile (RDGE::UInt32 shader_type, const std::string& source);
+
+    //! \brief Create and link program object
+    //! \details Creates a program, attaches the provided shaders and links
+    //!          the program.  Shaders are detached and deleted upon success.
+    //! \param [in] shaders Collection of shader handles to attach
+    //! \returns Unique program handle
+    //! \throws RDGE::GLException Program could not be linked
+    RDGE::UInt32 Link (const std::vector<RDGE::UInt32>& shaders);
+
+
     GLint GetUniformLocation (const GLchar* name);
 
-    GLuint m_shaderId;
+    GLuint m_programId;
 };
-
-/* Example setunifrorm call:
- *
- * mat4 ortho = mat4::orthographic(0.0f, 16.0f, 0.0f, 9.0f, -1.0f, 1.0f);
- *
- * shader.enable();
- * shader.setUniformMat4("pr_matrix", ortho);
- * shader.setUniformMat4("ml_matrix", mat4::translation(vec3(4, 3, 0)));
- *
- * shader.setUniform2f("light_pos", vec2(4.0f, 1.5f));
- * shader.setUniform4f("colour", vec4(0.2f, 0.3f, 0.8f, 1.0f));
- *
- */
-
-/* vert shader code from sparky
- *
- * #version 330 core
- *
- * layout (location = 0) in vec4 position;
- *
- * uniform mat4 pr_matrix;
- * uniform mat4 vw_matrix = mat4(1.0);
- * uniform mat4 ml_matrix = mat4(1.0);
- *
- * out vec4 pos;
- *
- * void main()
- * {
- *     gl_Position = pr_matrix * vw_matrix * ml_matrix * position;
- *     pos = position;
- * }
- */
-
-/* frag shader code from sparky
- *
- * #version 330 core
- *
- * layout (location = 0) out vec4 color;
- *
- * uniform vec4 colour;
- * uniform vec4 light_pos;
- *
- * int vec4 pos;
- *
- * void main()
- * {
- *     float intensity = 1.0f / length(pos.xy - light_pos);
- *     color = colour * intensity;
- * }
- *
- */
 
 } // namespace Graphics
 } // namespace RDGE

@@ -1,78 +1,59 @@
 #include <rdge/graphics/shader.hpp>
+#include <rdge/graphics/opengl/wrapper.hpp>
 #include <rdge/util/io.hpp>
+#include <rdge/internal/exception_macros.hpp>
 
-#include <string>
-#include <vector>
+#include <sstream>
 
 namespace RDGE {
 namespace Graphics {
+
+namespace {
+
+std::string ShaderTypeString (RDGE::UInt32 shader_type)
+{
+    switch (shader_type)
+    {
+    case GL_VERTEX_SHADER:
+        return "vertex";
+    case GL_FRAGMENT_SHADER:
+        return "fragment";
+    case GL_GEOMETRY_SHADER:
+        return "geometry";
+    default:
+        break;
+    }
+
+    return "unknown";
+}
+
+} // anonymous namespace
 
 Shader::Shader (
                 const char* restrict vertex_path,
                 const char* restrict fragment_path
                )
 {
-    m_shaderId = glCreateProgram();
-    GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
-    GLuint fragment = glCreateShader(GL_FRAGMENT_SHADER);
+    std::vector<RDGE::UInt32> shaders;
 
     std::string vert_source = RDGE::Util::read_text_file(vertex_path);
     std::string frag_source = RDGE::Util::read_text_file(fragment_path);
 
-    const char* c_vert_source = vert_source.c_str();
-    const char* c_frag_source = frag_source.c_str();
+    shaders.emplace_back(Compile(GL_VERTEX_SHADER, vert_source));
+    shaders.emplace_back(Compile(GL_FRAGMENT_SHADER, frag_source));
 
-    glShaderSource(vertex, 1, &c_vert_source, NULL);
-    glCompileShader(vertex);
-
-    GLint result;
-    glGetShaderiv(vertex, GL_COMPILE_STATUS, &result);
-    if (UNLIKELY(result == GL_FALSE))
-    {
-        GLint length;
-        glGetShaderiv(vertex, GL_INFO_LOG_LENGTH, &length);
-        std::vector<char> error(length);
-        glGetShaderInfoLog(vertex, length, &length, &error[0]);
-        glDeleteShader(vertex);
-
-        // throw GLException
-    }
-
-    glShaderSource(fragment, 1, &c_frag_source, NULL);
-    glCompileShader(fragment);
-
-    glGetShaderiv(fragment, GL_COMPILE_STATUS, &result);
-    if (UNLIKELY(result == GL_FALSE))
-    {
-        GLint length;
-        glGetShaderiv(fragment, GL_INFO_LOG_LENGTH, &length);
-        std::vector<char> error(length);
-        glGetShaderInfoLog(fragment, length, &length, &error[0]);
-        glDeleteShader(vertex);
-        glDeleteShader(fragment);
-
-        // throw GLException
-    }
-
-    glAttachShader(m_shaderId, vertex);
-    glAttachShader(fragment, vertex);
-
-    glLinkProgram(m_shaderId);
-    glValidateProgram(m_shaderId);
-
-    glDeleteShader(vertex);
-    glDeleteShader(fragment);
+    m_programId = Link(shaders);
 }
 
 Shader::~Shader (void)
 {
-    glDeleteProgram(m_shaderId);
+    glDeleteProgram(m_programId);
 }
 
 void
 Shader::Enable (void) const
 {
-    glUseProgram(m_shaderId);
+    glUseProgram(m_programId);
 }
 
 void
@@ -116,7 +97,83 @@ Shader::GetUniformLocation (const GLchar* name)
 {
     // TODO: this is slow, so we'll cache values in a later episode LUL
 
-    return glGetUniformLocation(m_shaderId, name);
+    return glGetUniformLocation(m_programId, name);
+}
+
+void
+Shader::PreProcess (void)
+{
+
+}
+
+RDGE::UInt32
+Shader::Compile (RDGE::UInt32 shader_type, const std::string& source)
+{
+    const char* src = source.c_str();
+
+    RDGE::UInt32 shader = OpenGL::CreateShader(shader_type);
+
+    OpenGL::SetShaderSource(shader, &src);
+    OpenGL::CompileShader(shader);
+
+    GLint status;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+    if (UNLIKELY(status == GL_FALSE))
+    {
+        GLint length;
+        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
+
+        std::vector<char> error(length);
+        glGetShaderInfoLog(shader, length, &length, &error[0]);
+        glDeleteShader(shader);
+
+        std::stringstream ss;
+        ss << "Shader compilation failed. "
+           << "type=" << ShaderTypeString(shader_type)
+           << "info=" << error.data();
+
+        GL_THROW(ss.str(), "", 0);
+    }
+
+    return shader;
+}
+
+RDGE::UInt32
+Shader::Link (const std::vector<RDGE::UInt32>& shaders)
+{
+    RDGE::UInt32 program = OpenGL::CreateProgram();
+
+    for (auto shader : shaders)
+    {
+        OpenGL::AttachShader(program, shader);
+    }
+
+    OpenGL::LinkProgram(program);
+
+    GLint status;
+    glGetProgramiv(program, GL_LINK_STATUS, &status);
+    if (UNLIKELY(status == GL_FALSE))
+    {
+        GLint length;
+        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
+
+        std::vector<char> error(length);
+        glGetProgramInfoLog(program, length, &length, &error[0]);
+
+        std::stringstream ss;
+        ss << "Program linking failed. "
+           << "info=" << error.data();
+
+        GL_THROW(ss.str(), "", 0);
+    }
+
+    for (auto shader : shaders)
+    {
+        OpenGL::DetachShader(program, shader);
+        OpenGL::DeleteShader(shader);
+    }
+
+    return program;
 }
 
 } // namespace Graphics

@@ -1,6 +1,7 @@
 #include <rdge/util/exception.hpp>
 
 #include <SDL.h>
+#include <GL/glew.h>
 
 #include <memory>
 
@@ -45,12 +46,58 @@ SDLException::SDLException (
                             std::string        sdl_fn_name,
                             std::string        file,
                             RDGE::UInt32       line,
-                            std::string        fn_name
+                            std::string        parent_fn_name
                            )
-    : Exception(message, file, line, fn_name)
+    : Exception(message, file, line, parent_fn_name)
     , m_SDLFunction(std::move(sdl_fn_name))
     , m_SDLError(SDL_GetError())
 { }
+
+GLException::GLException (
+                          const std::string& message,
+                          std::string        gl_fn_name,
+                          RDGE::UInt32       gl_error_code,
+                          std::string        file,
+                          RDGE::UInt32       line,
+                          std::string        parent_fn_name
+                         )
+    : Exception(message, file, line, parent_fn_name)
+    , m_GLFunction(std::move(gl_fn_name))
+    , m_GLErrorCode(gl_error_code)
+{ }
+
+std::string
+GLException::GLErrorCodeString (void) const
+{
+    if (m_GLErrorCode != 0)
+    {
+        switch(m_GLErrorCode)
+        {
+        case GL_NO_ERROR:
+            return "GL_NO_ERROR";
+        case GL_INVALID_ENUM:
+            return "GL_INVALID_ENUM";
+        case GL_INVALID_VALUE:
+            return "GL_INVALID_VALUE";
+        case GL_INVALID_OPERATION:
+            return "GL_INVALID_OPERATION";
+        case GL_STACK_OVERFLOW:
+            return "GL_STACK_OVERFLOW";
+        case GL_STACK_UNDERFLOW:
+            return "GL_STACK_UNDERFLOW";
+        case GL_OUT_OF_MEMORY:
+            return "GL_OUT_OF_MEMORY";
+        case GL_INVALID_FRAMEBUFFER_OPERATION:
+            return "GL_INVALID_FRAMEBUFFER_OPERATION";
+        case GL_CONTEXT_LOST:
+            return "GL_CONTEXT_LOST";
+        default:
+            break;
+        }
+    }
+
+    return "Unknown Error (" + std::to_string(m_GLErrorCode) + ")";
+}
 
 } // namespace Util
 } // namespace RDGE

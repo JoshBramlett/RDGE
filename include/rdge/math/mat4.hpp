@@ -11,7 +11,7 @@
 #include <rdge/math/vec3.hpp>
 #include <rdge/math/vec4.hpp>
 
-#include <ostream>
+//#include <ostream>
 
 /* TODO
  *
@@ -105,14 +105,16 @@ struct mat4
                              );
 
     //! \brief Create a perspective matrix
-    //! \details TODO Describe
-    //! \param [in] field_of_view TODO Describe
+    //! \details Transformation between the camaera space and the normal device
+    //!          coordinates.  The camera view frustrum is converted to a cube,
+    //!          and everything within is transformed accordingly.
+    //! \param [in] fov Field of view, in degrees (the amount of "zoom")
     //! \param [in] aspect_ratio Aspect ratio of the drawing screen
-    //! \param [in] near Near bound
-    //! \param [in] far Far bound
+    //! \param [in] near Near clipping plane
+    //! \param [in] far Far clipping plane
     //! \returns New perspective matrix
     static mat4 perspective (
-                             float field_of_view,
+                             float fov,
                              float aspect_ratio,
                              float near,
                              float far

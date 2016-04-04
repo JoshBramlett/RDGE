@@ -2,7 +2,6 @@
 //! \author Josh Bramlett
 //! \version 0.0.1
 //! \date 12/23/2015
-//! \bug
 
 /* TODO - Methods/functionality missing from libSDL2pp
  *
