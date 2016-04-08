@@ -71,6 +71,7 @@ add_library (
              src/gameobjects/scene.cpp
              src/gameobjects/game.cpp
              src/gameobjects/text.cpp
+             src/graphics/renderer2d.cpp
              src/graphics/shader.cpp
              src/graphics/opengl/wrapper.cpp
              src/graphics/buffers/vertex_array.cpp

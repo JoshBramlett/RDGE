@@ -2,7 +2,6 @@
 #include <rdge/internal/exception_macros.hpp>
 
 #include <iomanip>
-#include <ostream>
 #include <sstream>
 
 namespace RDGE {

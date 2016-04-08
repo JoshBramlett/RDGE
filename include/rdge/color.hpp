@@ -6,11 +6,13 @@
 
 #pragma once
 
-#include <string>
+#include <rdge/types.hpp>
+//#include <rdge/math/vec4.hpp>
 
 #include <SDL.h>
 
-#include <rdge/types.hpp>
+#include <string>
+#include <ostream>
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {
@@ -77,6 +79,21 @@ public:
     //! \brief Color Move Assignment Operator
     //! \details Default-movable
     Color& operator=(Color&&) noexcept = default;
+
+    constexpr RDGE::UInt32 ToRgba (void)
+    {
+        return a << 24 | b << 16 | g << 8 | r;
+    }
+
+    //constexpr RDGE::Math::vec4 ToVec4 (void)
+    //{
+        //return RDGE::Math::vec4(
+                                //static_cast<float>(r / 255.0f),
+                                //static_cast<float>(b / 255.0f),
+                                //static_cast<float>(g / 255.0f),
+                                //static_cast<float>(a / 255.0f)
+                               //);
+    //}
 
     //! \brief Build color from RGB string
     //! \param [in] color Hex color string

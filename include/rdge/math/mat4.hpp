@@ -88,12 +88,12 @@ struct mat4
 
     //! \brief Create an orthographic matrix
     //! \details TODO Describe
-    //! \param [in] left Left bound
-    //! \param [in] right Right bound
-    //! \param [in] bottom Bottom bound
-    //! \param [in] top Top bound
-    //! \param [in] near Near bound
-    //! \param [in] far Far bound
+    //! \param [in] left Left clipping plane
+    //! \param [in] right Right clipping plane
+    //! \param [in] bottom Bottom clipping plane
+    //! \param [in] top Top clipping plane
+    //! \param [in] near Near clipping plane
+    //! \param [in] far Far clipping plane
     //! \returns New orthographic matrix
     static mat4 orthographic (
                               float left,
@@ -107,7 +107,8 @@ struct mat4
     //! \brief Create a perspective matrix
     //! \details Transformation between the camaera space and the normal device
     //!          coordinates.  The camera view frustrum is converted to a cube,
-    //!          and everything within is transformed accordingly.
+    //!          and everything within is transformed accordingly.  All vertices
+    //!          are shifted towards the "eye" vertex.
     //! \param [in] fov Field of view, in degrees (the amount of "zoom")
     //! \param [in] aspect_ratio Aspect ratio of the drawing screen
     //! \param [in] near Near clipping plane

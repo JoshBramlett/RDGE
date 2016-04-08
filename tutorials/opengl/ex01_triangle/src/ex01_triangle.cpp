@@ -78,7 +78,7 @@ int main ()
 
         mat4 ortho = mat4::orthographic(0.0f, 16.0f, 0.0f, 9.0f, -1.0f, 1.0f);
 
-        Shader shader("basic.vert", "basic.frag");
+        Shader shader = Shader::FromFile("basic.vert", "basic.frag");
         shader.Enable();
 	    shader.SetUniformMat4("pr_matrix", ortho);
 	    shader.SetUniformMat4("ml_matrix", mat4::translate(vec3(4, 3, 0)));

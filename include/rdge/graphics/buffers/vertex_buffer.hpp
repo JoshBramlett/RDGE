@@ -30,6 +30,9 @@ public:
     //!       is the data made up of a vec4 (count = 1) or 2 vec2s (count = 2).
     explicit VertexBuffer (GLfloat* data, GLsizei count, GLuint component_count = 1);
 
+    //! \brief VertexBuffer dtor
+    ~VertexBuffer (void);
+
     //! \brief Get the number of components that make up the data
     //! \returns Component count
     GLuint ComponentCount (void) const noexcept

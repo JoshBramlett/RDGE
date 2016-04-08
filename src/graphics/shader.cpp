@@ -30,19 +30,25 @@ std::string ShaderTypeString (RDGE::UInt32 shader_type)
 } // anonymous namespace
 
 Shader::Shader (
-                const char* restrict vertex_path,
-                const char* restrict fragment_path
+                const std::string& vert_source,
+                const std::string& frag_source
                )
 {
     std::vector<RDGE::UInt32> shaders;
-
-    std::string vert_source = RDGE::Util::read_text_file(vertex_path);
-    std::string frag_source = RDGE::Util::read_text_file(fragment_path);
 
     shaders.emplace_back(Compile(GL_VERTEX_SHADER, vert_source));
     shaders.emplace_back(Compile(GL_FRAGMENT_SHADER, frag_source));
 
     m_programId = Link(shaders);
+}
+
+/* static */ Shader
+Shader::FromFile (const char* restrict vert_path, const char* restrict frag_path)
+{
+    auto v = RDGE::Util::read_text_file(vert_path);
+    auto f = RDGE::Util::read_text_file(frag_path);
+
+    return Shader(v, f);
 }
 
 Shader::~Shader (void)

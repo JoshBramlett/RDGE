@@ -2,7 +2,6 @@
 //! \author Josh Bramlett
 //! \version 0.0.2
 //! \date 03/22/2016
-//! \bug
 
 #pragma once
 
@@ -24,12 +23,25 @@ namespace Graphics {
 class Shader
 {
 public:
-    explicit Shader (
-                     const char* restrict vertex_path,
-                     const char* restrict fragment_path
-                    );
+    //! \brief Shader ctor
+    //! \details Loads and compiles the shader source.  A program is created and linked,
+    //!          and should be considered valid and ready for use.
+    //! \param [in] vert_source GLSL source code for the vertex shader
+    //! \param [in] frag_source GLSL source code for the fragment shader
+    //! \throws RDGE::GLException Shader could not be built
+    explicit Shader (const std::string& vert_source, const std::string& frag_source);
 
+    //! \brief Shader dtor
+    //! \details Deletes the program from OpenGL
     ~Shader (void);
+
+    //! \brief Create a program from source files
+    //! \details Performs all setup as defined in the constructor.
+    //! \param [in] vert_path File path to GLSL source code for the vertex shader
+    //! \param [in] frag_path File path to GLSL source code for the fragment shader
+    //! \returns Initialized Shader object
+    //! \throws RDGE::GLException Shader could not be built
+    static Shader FromFile (const char* restrict vert_path, const char* restrict frag_path);
 
     void Enable (void) const;
     void Disable (void) const;
@@ -41,6 +53,10 @@ public:
     void SetUniformMat4 (const GLchar* name, const RDGE::Math::mat4& matrix);
 
 private:
+    // TODO: Ideally this is where the parsing occurs in order to cache the uniform
+    // locations, but I'm not sure if that data is available yet.  The sparky code
+    // to cache uniforms is very convoluted, so we'll wait to finish this and keep
+    // our naive method alone: GetUniformLocation
     void PreProcess (void);
 
     //! \brief Compile shader source

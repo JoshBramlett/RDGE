@@ -13,6 +13,11 @@ VertexBuffer::VertexBuffer (GLfloat* data, GLsizei count, GLuint component_count
     OpenGL::BindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
+VertexBuffer::~VertexBuffer (void)
+{
+    glDeleteBuffers(1, &m_bufferId);
+}
+
 void
 VertexBuffer::Bind (void) const
 {
