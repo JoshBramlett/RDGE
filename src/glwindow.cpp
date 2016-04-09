@@ -114,12 +114,11 @@ GLWindow::GLWindow (
     // Query for the OpenGL error to clear the value for later lookup
     glGetError();
 
-    if (use_vsync)
+    RDGE::Int32 interval = use_vsync ? 1 : 0;
+    if (SDL_GL_SetSwapInterval(interval) != 0)
     {
-        if (SDL_GL_SetSwapInterval(1) != 0)
-        {
-            SDL_THROW("SDL failed to set VSYNC", "SDL_GL_SetSwapInterval");
-        }
+        auto msg = "SDL failed to set interval VSYNC=" + std::to_string(interval);
+        SDL_THROW(msg, "SDL_GL_SetSwapInterval");
     }
 }
 

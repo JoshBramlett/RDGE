@@ -106,23 +106,27 @@ Renderer2D::Submit (const Renderable2D* renderable)
     auto size     = renderable->Size();
     auto color    = renderable->Color().ToRgba();
 
-    m_buffer->vertex = position;
+    //m_buffer->vertex = position;
+    m_buffer->vertex.x = position.x;
+    m_buffer->vertex.y = position.y;
     m_buffer->color = color;
     m_buffer++;
 
-    m_buffer->vertex = position;
-    m_buffer->vertex.y += size.y;
+    //m_buffer->vertex = RDGE::Math::vec3(position.x, position.y + size.y, position.z);
+    m_buffer->vertex.x = position.x;
+    m_buffer->vertex.y = position.y + size.y;
     m_buffer->color = color;
     m_buffer++;
 
-    m_buffer->vertex = position;
-    m_buffer->vertex.x += size.x;
-    m_buffer->vertex.y += size.y;
+    //m_buffer->vertex = RDGE::Math::vec3(position.x + size.x, position.y + size.y, position.z);
+    m_buffer->vertex.x = position.x + size.x;
+    m_buffer->vertex.y = position.y + size.y;
     m_buffer->color = color;
     m_buffer++;
 
-    m_buffer->vertex = position;
-    m_buffer->vertex.x += size.x;
+    //m_buffer->vertex = RDGE::Math::vec3(position.x + size.x, position.y, position.z);
+    m_buffer->vertex.x = position.x + size.x;
+    m_buffer->vertex.y = position.y;
     m_buffer->color = color;
     m_buffer++;
 
