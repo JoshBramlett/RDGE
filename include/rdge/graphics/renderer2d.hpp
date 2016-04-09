@@ -32,7 +32,7 @@ public:
 
     void Begin (void);
 
-    void Submit (const Renderable2D& renderable);
+    void Submit (const Renderable2D* renderable);
 
     void End (void);
 

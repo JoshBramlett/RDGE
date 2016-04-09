@@ -88,22 +88,24 @@ int main ()
 		//shader.SetUniform2f("light_pos", vec2(4.0f, 1.5f));
 		//shader.SetUniform4f("colour", vec4(0.2f, 0.3f, 0.8f, 1.0f));
 
-        mat4 ortho = mat4::orthographic(0.0f, 15.0f, 0.0f, 8.0f, -1.0f, 1.0f);
+        mat4 ortho = mat4::orthographic(0.0f, 16.0f, 0.0f, 9.0f, -1.0f, 1.0f);
         Shader shader = Shader::FromFile("basic.vert", "basic.frag");
         shader.Enable();
 	    shader.SetUniformMat4("pr_matrix", ortho);
 		shader.SetUniform2f("light_pos", vec2(4.0f, 1.5f));
 		shader.SetUniform4f("colour", vec4(0.2f, 0.3f, 0.8f, 1.0f));
 
-        std::vector<Sprite> sprites;
+        std::vector<Sprite*> sprites;
 
-        for (float y = 0; y < 9.0f; y += 0.5f)
+        for (float y = 0; y < 9.0f; y += 0.05f)
         {
-            for (float x = 0; x < 16.0f; x += 0.5f)
+            for (float x = 0; x < 16.0f; x += 0.05f)
             {
-                sprites.emplace_back(Sprite(x, y, 0.4f, 0.4f, RDGE::Color::Blue()));
+                sprites.emplace_back(new Sprite(x, y, 0.04f, 0.04f, RDGE::Color::Blue()));
             }
         }
+
+        std::cout << "sprites=" << sprites.size() << std::endl;
 
         Renderer2D renderer;
 
@@ -165,6 +167,7 @@ int main ()
             //sprite2.Unbind();
 
             window.Present();
+            printf("%f fps\n", window.FrameRate());
         }
     }
     catch (const RDGE::SDLException& ex)

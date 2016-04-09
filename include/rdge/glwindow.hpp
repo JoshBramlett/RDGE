@@ -93,6 +93,8 @@ public:
     //! \returns Surface screenshot
     RDGE::Surface Screenshot (void);
 
+    double FrameRate (void) const;
+
 private:
     SDL_Window*   m_window;
     SDL_GLContext m_context;

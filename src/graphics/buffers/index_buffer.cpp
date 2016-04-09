@@ -14,7 +14,7 @@ IndexBuffer::IndexBuffer (void)
     , m_data(nullptr)
 { }
 
-IndexBuffer::IndexBuffer (RDGE::UInt16* data, RDGE::UInt32 count)
+IndexBuffer::IndexBuffer (RDGE::UInt32* data, RDGE::UInt32 count)
     : m_count(count)
     , m_data(nullptr)
 {
@@ -22,7 +22,7 @@ IndexBuffer::IndexBuffer (RDGE::UInt16* data, RDGE::UInt32 count)
     OpenGL::BindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_bufferId);
     OpenGL::SetBufferData(
                           GL_ELEMENT_ARRAY_BUFFER,
-                          count * sizeof(RDGE::UInt16),
+                          count * sizeof(RDGE::UInt32),
                           data,
                           GL_STATIC_DRAW
                          );
@@ -37,7 +37,7 @@ IndexBuffer::IndexBuffer (IndexBufferData data, RDGE::UInt32 count)
     OpenGL::BindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_bufferId);
     OpenGL::SetBufferData(
                           GL_ELEMENT_ARRAY_BUFFER,
-                          count * sizeof(RDGE::UInt16),
+                          count * sizeof(RDGE::UInt32),
                           m_data.get(),
                           GL_STATIC_DRAW
                          );

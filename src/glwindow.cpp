@@ -1,5 +1,8 @@
 #include <rdge/glwindow.hpp>
+#include <rdge/util/timer.hpp>
 #include <rdge/internal/exception_macros.hpp>
+
+#include <algorithm>
 
 namespace RDGE {
 
@@ -12,6 +15,17 @@ namespace RDGE {
  */
 
 namespace {
+    /*
+     * Frame rate timer
+     */
+
+    // Number of frames stored to calculate the moving average
+    constexpr RDGE::UInt32 FRAME_SAMPLES = 100;
+
+    RDGE::Util::Timer s_frameTimer;
+    RDGE::UInt32      s_tickIndex;
+    RDGE::UInt32      s_tickSum;
+    RDGE::UInt32      s_tickSamples[FRAME_SAMPLES];
 
     constexpr RDGE::Int32 MinGLContextMajorVersion = 4;
     constexpr RDGE::Int32 MinGLContextMinorVersion = 1;
@@ -162,6 +176,29 @@ GLWindow::Screenshot (void)
 {
     // TODO: Implement
     return RDGE::Surface(nullptr);
+}
+
+double
+GLWindow::FrameRate (void) const
+{
+    if (s_frameTimer.IsRunning() == false)
+    {
+        // make sure all values are set to zero before starting
+        std::fill(s_tickSamples, s_tickSamples + FRAME_SAMPLES, 0);
+        s_frameTimer.Start();
+    }
+
+    // calculate moving average
+    auto new_tick = s_frameTimer.TickDelta();
+    s_tickSum -= s_tickSamples[s_tickIndex];
+    s_tickSum += new_tick;
+    s_tickSamples[s_tickIndex] = new_tick;
+    if (++s_tickIndex == FRAME_SAMPLES)
+    {
+        s_tickIndex = 0;
+    }
+
+    return 1000.0f / (static_cast<double>(s_tickSum) / static_cast<double>(FRAME_SAMPLES));
 }
 
 } // namespace RDGE

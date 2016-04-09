@@ -60,8 +60,8 @@ Renderer2D::Renderer2D (void)
                                      );
     OpenGL::UnbindBuffers(GL_ARRAY_BUFFER);
 
-    IndexBufferData ibo_data(new RDGE::UInt16[INDICES_SIZE]);
-    RDGE::UInt16 offset = 0;
+    IndexBufferData ibo_data(new RDGE::UInt32[INDICES_SIZE]);
+    RDGE::UInt32 offset = 0;
     for (RDGE::UInt32 i = 0; i < INDICES_SIZE; i += 6)
     {
         ibo_data[i] = offset;
@@ -76,6 +76,7 @@ Renderer2D::Renderer2D (void)
     }
 
     m_ibo = IndexBuffer(std::move(ibo_data), INDICES_SIZE);
+
     OpenGL::UnbindVertexArrays();
 }
 
@@ -99,11 +100,11 @@ Renderer2D::End (void)
 }
 
 void
-Renderer2D::Submit (const Renderable2D& renderable)
+Renderer2D::Submit (const Renderable2D* renderable)
 {
-    auto position = renderable.Position();
-    auto size     = renderable.Size();
-    auto color    = renderable.Color().ToRgba();
+    auto position = renderable->Position();
+    auto size     = renderable->Size();
+    auto color    = renderable->Color().ToRgba();
 
     m_buffer->vertex = position;
     m_buffer->color = color;
@@ -134,7 +135,7 @@ Renderer2D::Flush (void)
     OpenGL::BindVertexArray(m_vao);
     m_ibo.Bind();
 
-    OpenGL::DrawElements(GL_TRIANGLES, m_indexCount, GL_UNSIGNED_SHORT, nullptr);
+    OpenGL::DrawElements(GL_TRIANGLES, m_indexCount, GL_UNSIGNED_INT, nullptr);
 
     m_ibo.Unbind();
     OpenGL::UnbindVertexArrays();

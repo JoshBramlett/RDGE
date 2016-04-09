@@ -15,7 +15,7 @@ namespace Graphics {
 
 //! \typedef IndexBufferData
 //! \brief Index buffer data storage container
-using IndexBufferData = std::unique_ptr<RDGE::UInt16[]>;
+using IndexBufferData = std::unique_ptr<RDGE::UInt32[]>;
 
 //! \class IndexBuffer
 //! \brief Create an OpenGL buffer for indices to vertex data
@@ -23,8 +23,6 @@ using IndexBufferData = std::unique_ptr<RDGE::UInt16[]>;
 //!          since triangles often share vertices.  The indices provided map
 //!          directly to values of the vertex buffer, specifying which vertex
 //!          will be used to render the triangles.
-//! \note The underlying type is an unsigned short, which carries a maximum
-//!       value of 65536.
 class IndexBuffer
 {
 public:
@@ -36,7 +34,7 @@ public:
     //!          is retained by the caller.
     //! \param [in] data Pointer to the array of indices
     //! \param [in] count Number of elements in the array
-    explicit IndexBuffer (RDGE::UInt16* data, RDGE::UInt32 count);
+    explicit IndexBuffer (RDGE::UInt32* data, RDGE::UInt32 count);
 
     //! \brief IndexBuffer ctor
     //! \details Copies the provided data to the GPU.  Ownership of the data
