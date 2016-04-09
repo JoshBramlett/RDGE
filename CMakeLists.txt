@@ -73,6 +73,7 @@ add_library (
              src/gameobjects/text.cpp
              src/graphics/renderer2d.cpp
              src/graphics/shader.cpp
+             src/graphics/sprite.cpp
              src/graphics/opengl/wrapper.cpp
              src/graphics/buffers/vertex_array.cpp
              src/graphics/buffers/vertex_buffer.cpp

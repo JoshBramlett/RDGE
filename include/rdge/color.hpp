@@ -7,7 +7,7 @@
 #pragma once
 
 #include <rdge/types.hpp>
-//#include <rdge/math/vec4.hpp>
+#include <rdge/math/vec4.hpp>
 
 #include <SDL.h>
 
@@ -80,12 +80,14 @@ public:
     //! \details Default-movable
     Color& operator=(Color&&) noexcept = default;
 
-    constexpr RDGE::UInt32 ToRgba (void)
+    // TODO: Test big endian to see if I need to reverse the order
+    constexpr RDGE::UInt32 ToRgba (void) const
     {
         return a << 24 | b << 16 | g << 8 | r;
     }
 
-    //constexpr RDGE::Math::vec4 ToVec4 (void)
+    // TODO Implement once vectors are constexpr
+    //constexpr RDGE::Math::vec4 ToVec4 (void) const
     //{
         //return RDGE::Math::vec4(
                                 //static_cast<float>(r / 255.0f),

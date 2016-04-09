@@ -19,20 +19,10 @@ namespace Graphics {
 class Renderable2D
 {
 public:
-    //! \struct vertex_data
-    //! \brief Represents the organization of vertex data stored in the buffer
-    //! \details The data is for a single vertex, and is used to provide a
-    //!          logical mapping to the data allocated in the GPU
-    struct vertex_data
-    {
-        RDGE::Math::vec3 vertex;
-        RDGE::UInt32     color;
-    };
-
     //! \brief Renderable2D ctor
     //! \param [in] position Location coordinates.  Z-axis is for layering
     //! \param [in] size Width and height of the renderable
-    //! \param [in] color Color of each vertex
+    //! \param [in] color Color shared by each vertex
     explicit Renderable2D (
                            const RDGE::Math::vec3& position,
                            const RDGE::Math::vec2& size,
@@ -46,16 +36,22 @@ public:
     //! \brief Renderable2D dtor
     virtual ~Renderable2D (void) { }
 
+    //! \brief Get the position of the renderable object.
+    //! \returns vec3 of coordinates
     const RDGE::Math::vec3& Position (void) const noexcept
     {
         return m_position;
     }
 
+    //! \brief Get the size of the renderable object.
+    //! \returns vec2 of the width and height
     const RDGE::Math::vec2& Size (void) const noexcept
     {
         return m_size;
     }
 
+    //! \brief Get the color of the renderable object.
+    //! \returns Fill color
     const RDGE::Color& Color (void) const noexcept
     {
         return m_color;

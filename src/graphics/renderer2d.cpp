@@ -9,11 +9,11 @@ namespace Graphics {
 
 namespace {
 
-    constexpr RDGE::UInt32 MAX_SPRITES  = 60000;
+    constexpr RDGE::UInt16 MAX_SPRITES  = 60000;
     constexpr RDGE::UInt32 VERTEX_SIZE  = sizeof(vertex_data);
     constexpr RDGE::UInt32 SPRITE_SIZE  = VERTEX_SIZE * 4;
-    constexpr RDGE::UInt32 BUFFER_SIZE  = SPRITE_SIZE * MAX_SPRITES;
-    constexpr RDGE::UInt32 INDICES_SIZE = MAX_SPRITES * 6;
+    constexpr RDGE::UInt32 BUFFER_SIZE  = SPRITE_SIZE * static_cast<RDGE::UInt32>(MAX_SPRITES);
+    constexpr RDGE::UInt32 INDICES_SIZE = static_cast<RDGE::UInt32>(MAX_SPRITES) * 6;
 
     constexpr RDGE::UInt32 SHADER_VERTEX_INDEX = 0;
     constexpr RDGE::UInt32 SHADER_COLOR_INDEX = 1;
@@ -49,19 +49,20 @@ Renderer2D::Renderer2D (void)
     //        "GL_RGBA with GL_UNSIGNED_BYTE will store the bytes in RGBA order
     //        regardless whether the computer is little-endian or big-endian."
     //  http://stackoverflow.com/questions/7786187/opengl-texture-upload-unsigned-byte-vs-unsigned-int-8-8-8-8
+
     OpenGL::SetVertexAttributePointer(
                                       SHADER_COLOR_INDEX,
                                       4,
                                       GL_UNSIGNED_BYTE,
                                       true,
                                       VERTEX_SIZE,
-                                      static_cast<void*>(offsetof(vertex_data, vertex_data::color))
+                                      reinterpret_cast<void*>(offsetof(vertex_data, color))
                                      );
     OpenGL::UnbindBuffers(GL_ARRAY_BUFFER);
 
     IndexBufferData ibo_data(new RDGE::UInt16[INDICES_SIZE]);
     RDGE::UInt16 offset = 0;
-    for (int i = 0; i < INDICES_SIZE; i += 6)
+    for (RDGE::UInt32 i = 0; i < INDICES_SIZE; i += 6)
     {
         ibo_data[i] = offset;
         ibo_data[i + 1] = offset + 1;
@@ -75,7 +76,6 @@ Renderer2D::Renderer2D (void)
     }
 
     m_ibo = IndexBuffer(std::move(ibo_data), INDICES_SIZE);
-
     OpenGL::UnbindVertexArrays();
 }
 
@@ -134,7 +134,7 @@ Renderer2D::Flush (void)
     OpenGL::BindVertexArray(m_vao);
     m_ibo.Bind();
 
-    OpenGL::DrawElements(GL_TRIANGLES, m_indexCount, GL_UNSIGNED_INT, nullptr);
+    OpenGL::DrawElements(GL_TRIANGLES, m_indexCount, GL_UNSIGNED_SHORT, nullptr);
 
     m_ibo.Unbind();
     OpenGL::UnbindVertexArrays();

@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include <rdge/types.hpp>
 #include <rdge/application.hpp>
 #include <rdge/glwindow.hpp>
@@ -7,6 +5,8 @@
 #include <rdge/graphics/buffers/vertex_buffer.hpp>
 #include <rdge/graphics/buffers/index_buffer.hpp>
 #include <rdge/graphics/shader.hpp>
+#include <rdge/graphics/renderer2d.hpp>
+#include <rdge/graphics/sprite.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/math/vec3.hpp>
 #include <rdge/math/vec4.hpp>
@@ -17,41 +17,43 @@
 #include <SDL.h>
 #include <GL/glew.h>
 
+#include <iostream>
+#include <vector>
 
 using namespace RDGE::Graphics;
 using namespace RDGE::Math;
 
 int main ()
 {
-    GLfloat vertices[] =
-    {
-        0, 0, 0,
-        0, 3, 0,
-        8, 3, 0,
-        8, 0, 0
-    };
+    //GLfloat vertices[] =
+    //{
+        //0, 0, 0,
+        //0, 3, 0,
+        //8, 3, 0,
+        //8, 0, 0
+    //};
 
-    GLushort indices[] =
-    {
-        0, 1, 2,
-        2, 3, 0
-    };
+    //GLushort indices[] =
+    //{
+        //0, 1, 2,
+        //2, 3, 0
+    //};
 
-    GLfloat colorsA[] =
-    {
-        1, 0, 1, 1,
-        1, 0, 1, 1,
-        1, 0, 1, 1,
-        1, 0, 1, 1
-    };
+    //GLfloat colorsA[] =
+    //{
+        //1, 0, 1, 1,
+        //1, 0, 1, 1,
+        //1, 0, 1, 1,
+        //1, 0, 1, 1
+    //};
 
-    GLfloat colorsB[] =
-    {
-        0.2f, 0.3f, 0.8f, 1,
-        0.2f, 0.3f, 0.8f, 1,
-        0.2f, 0.3f, 0.8f, 1,
-        0.2f, 0.3f, 0.8f, 1
-    };
+    //GLfloat colorsB[] =
+    //{
+        //0.2f, 0.3f, 0.8f, 1,
+        //0.2f, 0.3f, 0.8f, 1,
+        //0.2f, 0.3f, 0.8f, 1,
+        //0.2f, 0.3f, 0.8f, 1
+    //};
 
     try
     {
@@ -66,25 +68,44 @@ int main ()
                                false, false, true // uses vsync
                               );
 
-        VertexArray sprite1;
-        VertexArray sprite2;
-        IndexBuffer ibo(indices, 6);
+        //VertexArray sprite1;
+        //VertexArray sprite2;
+        //IndexBuffer ibo(indices, 6);
 
-        sprite1.AddBuffer(new VertexBuffer(vertices, 4 * 3, 3), 0);
-        sprite1.AddBuffer(new VertexBuffer(colorsA, 4 * 4, 4), 1);
+        //sprite1.AddBuffer(new VertexBuffer(vertices, 4 * 3, 3), 0);
+        //sprite1.AddBuffer(new VertexBuffer(colorsA, 4 * 4, 4), 1);
 
-        sprite2.AddBuffer(new VertexBuffer(vertices, 4 * 3, 3), 0);
-        sprite2.AddBuffer(new VertexBuffer(colorsB, 4 * 4, 4), 1);
+        //sprite2.AddBuffer(new VertexBuffer(vertices, 4 * 3, 3), 0);
+        //sprite2.AddBuffer(new VertexBuffer(colorsB, 4 * 4, 4), 1);
 
-        mat4 ortho = mat4::orthographic(0.0f, 16.0f, 0.0f, 9.0f, -1.0f, 1.0f);
+        //mat4 ortho = mat4::orthographic(0.0f, 16.0f, 0.0f, 9.0f, -1.0f, 1.0f);
 
+        //Shader shader = Shader::FromFile("basic.vert", "basic.frag");
+        //shader.Enable();
+		//shader.SetUniformMat4("pr_matrix", ortho);
+		//shader.SetUniformMat4("ml_matrix", mat4::translate(vec3(4, 3, 0)));
+
+		//shader.SetUniform2f("light_pos", vec2(4.0f, 1.5f));
+		//shader.SetUniform4f("colour", vec4(0.2f, 0.3f, 0.8f, 1.0f));
+
+        mat4 ortho = mat4::orthographic(0.0f, 15.0f, 0.0f, 8.0f, -1.0f, 1.0f);
         Shader shader = Shader::FromFile("basic.vert", "basic.frag");
         shader.Enable();
 	    shader.SetUniformMat4("pr_matrix", ortho);
-	    shader.SetUniformMat4("ml_matrix", mat4::translate(vec3(4, 3, 0)));
+		shader.SetUniform2f("light_pos", vec2(4.0f, 1.5f));
+		shader.SetUniform4f("colour", vec4(0.2f, 0.3f, 0.8f, 1.0f));
 
-	    shader.SetUniform2f("light_pos", vec2(4.0f, 1.5f));
-	    shader.SetUniform4f("colour", vec4(0.2f, 0.3f, 0.8f, 1.0f));
+        std::vector<Sprite> sprites;
+
+        for (float y = 0; y < 9.0f; y += 0.5f)
+        {
+            for (float x = 0; x < 16.0f; x += 0.5f)
+            {
+                sprites.emplace_back(Sprite(x, y, 0.4f, 0.4f, RDGE::Color::Blue()));
+            }
+        }
+
+        Renderer2D renderer;
 
         bool running = true;
         SDL_Event event;
@@ -121,19 +142,27 @@ int main ()
                           );
             shader.SetUniform2f("light_pos", lp);
 
-            sprite1.Bind();
-            ibo.Bind();
-            shader.SetUniformMat4("ml_matrix", mat4::translate(vec3(4, 3, 0)));
-            glDrawElements(GL_TRIANGLES, ibo.Count(), GL_UNSIGNED_SHORT, 0);
-            ibo.Unbind();
-            sprite1.Unbind();
+            renderer.Begin();
+            for (auto sprite : sprites)
+            {
+                renderer.Submit(sprite);
+            }
+            renderer.End();
+            renderer.Flush();
 
-            sprite2.Bind();
-            ibo.Bind();
-            shader.SetUniformMat4("ml_matrix", mat4::translate(vec3(0, 0, 0)));
-            glDrawElements(GL_TRIANGLES, ibo.Count(), GL_UNSIGNED_SHORT, 0);
-            ibo.Unbind();
-            sprite2.Unbind();
+            //sprite1.Bind();
+            //ibo.Bind();
+            //shader.SetUniformMat4("ml_matrix", mat4::translate(vec3(4, 3, 0)));
+            //glDrawElements(GL_TRIANGLES, ibo.Count(), GL_UNSIGNED_SHORT, 0);
+            //ibo.Unbind();
+            //sprite1.Unbind();
+
+            //sprite2.Bind();
+            //ibo.Bind();
+            //shader.SetUniformMat4("ml_matrix", mat4::translate(vec3(0, 0, 0)));
+            //glDrawElements(GL_TRIANGLES, ibo.Count(), GL_UNSIGNED_SHORT, 0);
+            //ibo.Unbind();
+            //sprite2.Unbind();
 
             window.Present();
         }

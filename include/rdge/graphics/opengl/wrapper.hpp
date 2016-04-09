@@ -224,14 +224,24 @@ UnbindBuffers (RDGE::UInt32 target)
     GL_CHECK_ERROR(glBindBuffer(target, 0));
 }
 
-inline void FreeBuffer(RDGE::UInt32 buffer)
+//! \brief Delete the existing buffer with the provided name
+//! \param [in] name Name of the buffer
+//! \see https://www.opengl.org/sdk/docs/man/html/glDeleteBuffers.xhtml
+inline void
+DeleteBuffer (RDGE::UInt32 name)
 {
-    GL_CHECK_ERROR(glDeleteBuffers(1, &buffer));
+    GL_CHECK_ERROR(glDeleteBuffers(1, &name));
 }
 
-inline void FreeBuffers(RDGE::UInt32 size, RDGE::UInt32* buffers)
+//! \brief Direct map to glDeleteBuffers
+//! \details Deletes n buffer objects named by the elements in the array.
+//! \param [in] n Number of buffers to delete
+//! \param [in] buffers Array of buffer objects to be deleted
+//! \see https://www.opengl.org/sdk/docs/man/html/glDeleteBuffers.xhtml
+inline void
+DeleteBuffers (RDGE::UInt32 n, RDGE::UInt32* buffers)
 {
-    GL_CHECK_ERROR(glDeleteBuffers(size, buffers));
+    GL_CHECK_ERROR(glDeleteBuffers(n, buffers));
 }
 
 //! \brief Direct map to glBufferData

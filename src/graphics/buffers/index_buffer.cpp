@@ -3,10 +3,18 @@
 
 #include <GL/glew.h>
 
+#include <algorithm>
+
 namespace RDGE {
 namespace Graphics {
 
-IndexBuffer::IndexBuffer (RDGE::UInt16* data, RDGE::UInt16 count)
+IndexBuffer::IndexBuffer (void)
+    : m_bufferId(0)
+    , m_count(0)
+    , m_data(nullptr)
+{ }
+
+IndexBuffer::IndexBuffer (RDGE::UInt16* data, RDGE::UInt32 count)
     : m_count(count)
     , m_data(nullptr)
 {
@@ -18,10 +26,10 @@ IndexBuffer::IndexBuffer (RDGE::UInt16* data, RDGE::UInt16 count)
                           data,
                           GL_STATIC_DRAW
                          );
-    OpenGL::BindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    OpenGL::UnbindBuffers(GL_ELEMENT_ARRAY_BUFFER);
 }
 
-IndexBuffer::IndexBuffer (IndexBufferData data, RDGE::UInt16 count)
+IndexBuffer::IndexBuffer (IndexBufferData data, RDGE::UInt32 count)
     : m_count(count)
     , m_data(std::move(data))
 {
@@ -33,7 +41,7 @@ IndexBuffer::IndexBuffer (IndexBufferData data, RDGE::UInt16 count)
                           m_data.get(),
                           GL_STATIC_DRAW
                          );
-    OpenGL::BindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    OpenGL::UnbindBuffers(GL_ELEMENT_ARRAY_BUFFER);
 }
 
 IndexBuffer::~IndexBuffer (void)
@@ -42,14 +50,21 @@ IndexBuffer::~IndexBuffer (void)
 }
 
 IndexBuffer::IndexBuffer (IndexBuffer&& rhs) noexcept
-    : m_data(std::move(rhs.m_data))
-{ }
+    : m_count(rhs.m_count)
+    , m_data(std::move(rhs.m_data))
+{
+    // The destructor deletes the OpenGL buffer, therefore we swap the buffer
+    // ids so the moved-from object will destroy the buffer it's replacing
+    std::swap(m_bufferId, rhs.m_bufferId);
+}
 
 IndexBuffer&
 IndexBuffer::operator= (IndexBuffer&& rhs) noexcept
 {
     if (this != &rhs)
     {
+        std::swap(m_bufferId, rhs.m_bufferId);
+        m_count = rhs.m_count;
         m_data = std::move(rhs.m_data);
     }
 

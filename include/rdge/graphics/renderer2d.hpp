@@ -13,6 +13,16 @@
 namespace RDGE {
 namespace Graphics {
 
+//! \struct vertex_data
+//! \brief Represents the organization of vertex data stored in the buffer
+//! \details The data is for a single vertex, and is used to provide a
+//!          logical mapping to the data allocated in the GPU
+struct vertex_data
+{
+    RDGE::Math::vec3 vertex;
+    RDGE::UInt32     color;
+};
+
 class Renderer2D
 {
 public:
@@ -31,7 +41,7 @@ public:
 private:
     RDGE::UInt32 m_vao;
     RDGE::UInt32 m_vbo;
-    vertex_data*  m_buffer;
+    vertex_data* m_buffer;
 
     IndexBuffer m_ibo;
     RDGE::Int32 m_indexCount;

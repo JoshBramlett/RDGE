@@ -13,6 +13,8 @@
 #include <memory>
 #include <string>
 
+#include <iostream>
+
 #define RDGE_DEBUG
 #define RDGE_THROW_ON_GL_ERROR
 

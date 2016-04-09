@@ -13,33 +13,37 @@
 namespace RDGE {
 namespace Graphics {
 
+//! \typedef IndexBufferData
+//! \brief Index buffer data storage container
+using IndexBufferData = std::unique_ptr<RDGE::UInt16[]>;
+
 //! \class IndexBuffer
 //! \brief Create an OpenGL buffer for indices to vertex data
 //! \details An index buffer is designed to reduce the size of the vertex buffer
 //!          since triangles often share vertices.  The indices provided map
 //!          directly to values of the vertex buffer, specifying which vertex
 //!          will be used to render the triangles.
-//! \note The underlying type is an unsigned short, which carries a maximum of
-//!       65536 elements.
+//! \note The underlying type is an unsigned short, which carries a maximum
+//!       value of 65536.
 class IndexBuffer
 {
 public:
-    //! \typedef IndexBufferData
-    //! \brief Index buffer data storage container
-    using IndexBufferData = std::unique_ptr<RDGE::UInt16[]>;
+    //! \brief IndexBuffer default ctor
+    IndexBuffer (void);
 
     //! \brief IndexBuffer ctor
     //! \details Copies the provided data to the GPU.  Ownership of the data
     //!          is retained by the caller.
     //! \param [in] data Pointer to the array of indices
     //! \param [in] count Number of elements in the array
-    explicit IndexBuffer (RDGE::UInt16* data, RDGE::UInt16 count);
+    explicit IndexBuffer (RDGE::UInt16* data, RDGE::UInt32 count);
 
     //! \brief IndexBuffer ctor
     //! \details Copies the provided data to the GPU.  Ownership of the data
     //!          is aquired by the object.
     //! \param [in] data Unique pointer storing the data
-    explicit IndexBuffer (IndexBufferData data);
+    //! \param [in] count Number of elements in the array
+    explicit IndexBuffer (IndexBufferData data, RDGE::UInt32 count);
 
     //! \brief IndexBuffer dtor
     ~IndexBuffer (void);
@@ -62,7 +66,7 @@ public:
 
     //! \brief Get the number of indices that make up the data
     //! \returns index count
-    RDGE::UInt16 Count (void) const noexcept
+    RDGE::UInt32 Count (void) const noexcept
     {
         return m_count;
     }
@@ -75,7 +79,7 @@ public:
 
 private:
     RDGE::UInt32    m_bufferId;
-    RDGE::UInt16    m_count;
+    RDGE::UInt32    m_count;
     IndexBufferData m_data;
 };
 
