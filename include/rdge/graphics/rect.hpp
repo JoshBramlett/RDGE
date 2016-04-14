@@ -20,11 +20,13 @@
 
 #pragma once
 
-#include <SDL2/SDL_rect.h>
-
 #include <rdge/types.hpp>
 #include <rdge/graphics/point.hpp>
 #include <rdge/graphics/size.hpp>
+
+#include <SDL2/SDL_rect.h>
+
+#include <ostream>
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {

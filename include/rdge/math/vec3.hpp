@@ -2,7 +2,6 @@
 //! \author Josh Bramlett
 //! \version 0.0.2
 //! \date 03/22/2016
-//! \bug
 
 #pragma once
 
@@ -16,6 +15,8 @@
 namespace RDGE {
 namespace Math {
 
+//! \struct vec3
+//! \brief Three dimensional floating point vector
 struct vec3
 {
     float x;
@@ -23,8 +24,18 @@ struct vec3
     float z;
 
     vec3 (void);
+    //constexpr vec3 (void)
+        //: x(0.0f)
+        //, y(0.0f)
+        //, z(0.0f)
+    //{ }
 
     explicit vec3 (float x, float y, float z);
+    //constexpr vec3 (float x, float y, float z)
+        //: x(x)
+        //, y(y)
+        //, z(z)
+    //{ }
 
     vec3& add (const vec3& rhs);
 

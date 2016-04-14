@@ -31,16 +31,12 @@ namespace Math {
 //! \brief Represents a 4x4 matrix, ordered by column major
 struct mat4
 {
-    //! \var VECTOR_COUNT Number of vectors (rows or columns)
-    static constexpr RDGE::UInt8 VECTOR_COUNT = 4;
-    //! \var ELEMENT_COUNT Total number of elements
-    static constexpr RDGE::UInt8 ELEMENT_COUNT = 16;
-
     union
     {
         //! \var elements Data container array
-        float elements[ELEMENT_COUNT];
-        vec4 columns[VECTOR_COUNT];
+        float elements[16];
+        //! \var column Data container by column
+        vec4 columns[4];
     };
 
     //! \brief mat4 ctor
@@ -66,11 +62,11 @@ struct mat4
 
     //! \brief mat4 Copy Assignment Operator
     //! \details Default-copyable
-    mat4& operator=(const mat4&) noexcept = default;
+    mat4& operator= (const mat4&) noexcept = default;
 
     //! \brief mat4 Move Assignment Operator
     //! \details Default-movable
-    mat4& operator=(mat4&&) noexcept = default;
+    mat4& operator= (mat4&&) noexcept = default;
 
     //! \brief Multiplication assignment operator
     //! \details Multiplies by another mat4 matrix
@@ -121,13 +117,71 @@ struct mat4
                              float far
                             );
 
-    static mat4 translate (const vec3& translation);
+    //! \brief Create a translation matrix
+    //! \details Geometric transformation that moves every vertex in a model by
+    //!          the same amount in the same direction.
+    //! \param [in] translation Three dimensional vector
+    //! \returns New translation matrix
+    //! \see https://en.wikipedia.org/wiki/Translation_(geometry)
+    static mat4 translation (const vec3& translation);
 
     static mat4 rotate (float angle, const vec3& axis);
 
     static mat4 scale (const vec3& scale);
 };
 
+//! \brief mat4 multiplication operator
+//! \param [in] lhs First mat4
+//! \param [in] rhs Second mat4
+//! \returns Multiplied mat4 result
+inline mat4 operator* (const mat4& lhs, const mat4& rhs)
+{
+    mat4 result;
+    for (int y = 0; y < 4; ++y)
+    {
+        for (int x = 0; x < 4; ++x)
+        {
+            int idx = x + y * 4;
+            for (int e = 0; e < 4; ++e)
+            {
+                result.elements[idx] += lhs.elements[x + e * 4] * rhs.elements[e + y * 4];
+            }
+        }
+    }
+
+    return result;
+}
+
+//! \brief mat4-vec4 multiplication operator
+//! \param [in] lhs mat4 to multiply
+//! \param [in] rhs vec4 to multiply
+//! \returns Multiplied vec4 result
+inline vec4 operator* (const mat4& lhs, const vec4& rhs)
+{
+    auto col = lhs.columns;
+    return vec4
+    {
+        col[0].x * rhs.x + col[1].x * rhs.y + col[2].x * rhs.z + col[3].x * rhs.w,
+        col[0].y * rhs.x + col[1].y * rhs.y + col[2].y * rhs.z + col[3].y * rhs.w,
+        col[0].z * rhs.x + col[1].z * rhs.y + col[2].z * rhs.z + col[3].z * rhs.w,
+        col[0].w * rhs.x + col[1].w * rhs.y + col[2].w * rhs.z + col[3].w * rhs.w
+    };
+}
+
+//! \brief mat4-vec3 multiplication operator
+//! \param [in] lhs mat4 to multiply
+//! \param [in] rhs vec3 to multiply
+//! \returns Multiplied vec3 result
+inline vec3 operator* (const mat4& lhs, const vec3& rhs)
+{
+    auto col = lhs.columns;
+    return vec3
+    {
+        col[0].x * rhs.x + col[1].x * rhs.y + col[2].x * rhs.z + col[3].x,
+        col[0].y * rhs.x + col[1].y * rhs.y + col[2].y * rhs.z + col[3].y,
+        col[0].z * rhs.x + col[1].z * rhs.y + col[2].z * rhs.z + col[3].z
+    };
+}
 
 } // namespace Math
 } // namespace RDGE

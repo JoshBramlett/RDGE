@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.4)
 project (ex01_triangle)
 
 message (STATUS "== Configuring example: ex01_triangle ==")
-message (STATUS "RDGE lib dir: ${RDGE_SOURCE_DIR}/build/lib")
+message (STATUS "RDGE lib dir: ${RDGE_SOURCE_DIR}/debug/lib")
 message (STATUS "RDGE include dir: ${RDGE_SOURCE_DIR}/include")
 
 set (BIN_DIR ${ex01_triangle_SOURCE_DIR}/bin)
@@ -26,7 +26,7 @@ find_package (SDL2 REQUIRED)
 find_package (GLEW REQUIRED)
 find_package (OpenGL REQUIRED)
 
-link_directories (${RDGE_SOURCE_DIR}/build/lib)
+link_directories (${RDGE_SOURCE_DIR}/debug/lib)
 
 include_directories (${SDL2_INCLUDE_DIR})
 include_directories (${GLEW_INCLUDE_DIRS})

@@ -23,6 +23,9 @@ namespace Graphics {
 class Shader
 {
 public:
+    //! \brief Shader default ctor
+    Shader (void);
+
     //! \brief Shader ctor
     //! \details Loads and compiles the shader source.  A program is created and linked,
     //!          and should be considered valid and ready for use.
@@ -35,6 +38,35 @@ public:
     //! \details Deletes the program from OpenGL
     ~Shader (void);
 
+    //! \brief Shader Copy ctor
+    //! \details Non-copyable
+    Shader (const Shader&) = delete;
+
+    //! \brief Shader Move ctor
+    //! \details Transfers ownership of the shader program
+    Shader (Shader&& rhs) noexcept;
+
+    //! \brief Shader Copy Assignment Operator
+    //! \details Non-copyable
+    Shader& operator= (const Shader&) = delete;
+
+    //! \brief Shader Move Assignment Operator
+    //! \details Transfers ownership of the shader program
+    Shader& operator= (Shader&& rhs) noexcept;
+
+    //! \brief Installs the program as part of current rendering state
+    void Enable (void) const;
+
+    //! \brief Uninstalls the program as part of current rendering state
+    void Disable (void) const;
+
+    // TODO Consider overloading
+    void SetUniform1f (const GLchar* name, float value);
+    void SetUniform2f (const GLchar* name, const RDGE::Math::vec2& vec);
+    void SetUniform3f (const GLchar* name, const RDGE::Math::vec3& vec);
+    void SetUniform4f (const GLchar* name, const RDGE::Math::vec4& vec);
+    void SetUniformMat4 (const GLchar* name, const RDGE::Math::mat4& matrix);
+
     //! \brief Create a program from source files
     //! \details Performs all setup as defined in the constructor.
     //! \param [in] vert_path File path to GLSL source code for the vertex shader
@@ -42,15 +74,6 @@ public:
     //! \returns Initialized Shader object
     //! \throws RDGE::GLException Shader could not be built
     static Shader FromFile (const char* restrict vert_path, const char* restrict frag_path);
-
-    void Enable (void) const;
-    void Disable (void) const;
-
-    void SetUniform1f (const GLchar* name, float value);
-    void SetUniform2f (const GLchar* name, const RDGE::Math::vec2& vec);
-    void SetUniform3f (const GLchar* name, const RDGE::Math::vec3& vec);
-    void SetUniform4f (const GLchar* name, const RDGE::Math::vec4& vec);
-    void SetUniformMat4 (const GLchar* name, const RDGE::Math::mat4& matrix);
 
 private:
     // TODO: Ideally this is where the parsing occurs in order to cache the uniform

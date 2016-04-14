@@ -6,6 +6,7 @@
 #pragma once
 
 #include <rdge/types.hpp>
+#include <rdge/graphics/renderer2d.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/math/vec3.hpp>
 #include <rdge/color.hpp>
@@ -19,6 +20,9 @@ namespace Graphics {
 class Renderable2D
 {
 public:
+    //! \brief Renderable2D default empty ctor
+    Renderable2D (void) { }
+
     //! \brief Renderable2D ctor
     //! \param [in] position Location coordinates.  Z-axis is for layering
     //! \param [in] size Width and height of the renderable
@@ -35,6 +39,11 @@ public:
 
     //! \brief Renderable2D dtor
     virtual ~Renderable2D (void) { }
+
+    virtual void Submit (Renderer2D* renderer) const
+    {
+        renderer->Submit(this);
+    }
 
     //! \brief Get the position of the renderable object.
     //! \returns vec3 of coordinates

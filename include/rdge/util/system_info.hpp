@@ -41,10 +41,28 @@ PrintRendererDriverInfo (void)
            << "name=" << info.name << std::endl
            << "max_texture_width=" << info.max_texture_width << std::endl
            << "max_texture_height=" << info.max_texture_height << std::endl
+           << "*** FLAGS ***" << std::endl
            << "SDL_RENDERER_SOFTWARE=" << (info.flags&SDL_RENDERER_SOFTWARE) << std::endl
            << "SDL_RENDERER_ACCELERATED=" << (info.flags&SDL_RENDERER_ACCELERATED) << std::endl
            << "SDL_RENDERER_PRESENTVSYNC=" << (info.flags&SDL_RENDERER_PRESENTVSYNC) << std::endl
-           << "SDL_RENDERER_TARGETTEXTURE=" << (info.flags&SDL_RENDERER_TARGETTEXTURE) << std::endl;
+           << "SDL_RENDERER_TARGETTEXTURE=" << (info.flags&SDL_RENDERER_TARGETTEXTURE) << std::endl
+           << "*** TEXTURE FORMATS ***" << std::endl;
+
+        for (RDGE::UInt32 i = 0; i < info.num_texture_formats; ++i)
+        {
+            auto f = info.texture_formats[i];
+            ss << "pixel_format_name=" << SDL_GetPixelFormatName(f) << std::endl
+               << "  SDL_PIXELTYPE=" << SDL_PIXELTYPE(f) << std::endl
+               << "  SDL_PIXELORDER=" << SDL_PIXELORDER(f) << std::endl
+               << "  SDL_PIXELLAYOUT=" << SDL_PIXELLAYOUT(f) << std::endl
+               << "  SDL_BITSPERPIXEL=" << SDL_BITSPERPIXEL(f) << std::endl
+               << "  SDL_BYTESPERPIXEL=" << SDL_BYTESPERPIXEL(f) << std::endl
+               << "  SDL_ISPIXELFORMAT_INDEXED=" << SDL_ISPIXELFORMAT_INDEXED(f) << std::endl
+               << "  SDL_ISPIXELFORMAT_ALPHA=" << SDL_ISPIXELFORMAT_ALPHA(f) << std::endl
+               << "  SDL_ISPIXELFORMAT_FOURCC=" << SDL_ISPIXELFORMAT_FOURCC(f) << std::endl;
+        }
+
+        ss << std::endl;
     }
 
     return ss.str();

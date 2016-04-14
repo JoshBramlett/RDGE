@@ -3,6 +3,7 @@
 #include <rdge/util/io.hpp>
 #include <rdge/internal/exception_macros.hpp>
 
+#include <algorithm>
 #include <sstream>
 
 namespace RDGE {
@@ -29,10 +30,12 @@ std::string ShaderTypeString (RDGE::UInt32 shader_type)
 
 } // anonymous namespace
 
-Shader::Shader (
-                const std::string& vert_source,
-                const std::string& frag_source
-               )
+Shader::Shader (void)
+    : m_programId(0)
+{ }
+
+Shader::Shader (const std::string& vert_source, const std::string& frag_source)
+    : m_programId(0)
 {
     std::vector<RDGE::UInt32> shaders;
 
@@ -42,30 +45,39 @@ Shader::Shader (
     m_programId = Link(shaders);
 }
 
-/* static */ Shader
-Shader::FromFile (const char* restrict vert_path, const char* restrict frag_path)
-{
-    auto v = RDGE::Util::read_text_file(vert_path);
-    auto f = RDGE::Util::read_text_file(frag_path);
-
-    return Shader(v, f);
-}
-
 Shader::~Shader (void)
 {
     glDeleteProgram(m_programId);
 }
 
+Shader::Shader (Shader&& rhs) noexcept
+{
+    // The destructor deletes the OpenGL program, therefore we swap the program
+    // ids so the moved-from object will destroy the program it's replacing
+    std::swap(m_programId, rhs.m_programId);
+}
+
+Shader&
+Shader::operator= (Shader&& rhs) noexcept
+{
+    if (this != &rhs)
+    {
+        std::swap(m_programId, rhs.m_programId);
+    }
+
+    return *this;
+}
+
 void
 Shader::Enable (void) const
 {
-    glUseProgram(m_programId);
+    OpenGL::UseProgram(m_programId);
 }
 
 void
 Shader::Disable (void) const
 {
-    glUseProgram(0);
+    OpenGL::UseProgram(0);
 }
 
 void
@@ -104,6 +116,15 @@ Shader::GetUniformLocation (const GLchar* name)
     // TODO: this is slow, so we'll cache values in a later episode LUL
 
     return glGetUniformLocation(m_programId, name);
+}
+
+/* static */ Shader
+Shader::FromFile (const char* restrict vert_path, const char* restrict frag_path)
+{
+    auto v = RDGE::Util::read_text_file(vert_path);
+    auto f = RDGE::Util::read_text_file(frag_path);
+
+    return Shader(v, f);
 }
 
 void

@@ -1,4 +1,5 @@
 #include <rdge/graphics/renderer2d.hpp>
+#include <rdge/graphics/renderable2d.hpp>
 #include <rdge/graphics/opengl/wrapper.hpp>
 #include <rdge/color.hpp>
 
@@ -22,6 +23,9 @@ namespace {
 
 Renderer2D::Renderer2D (void)
 {
+    m_transformationStack.push_back(RDGE::Math::mat4::identity());
+    m_currentTransformation = &m_transformationStack.back();
+
     m_vao = OpenGL::CreateVertexArray();
     m_vbo = OpenGL::CreateBuffer();
 
@@ -86,51 +90,45 @@ Renderer2D::~Renderer2D (void)
 }
 
 void
-Renderer2D::Begin (void)
+Renderer2D::PrepSubmit (void)
 {
     OpenGL::BindBuffer(GL_ARRAY_BUFFER, m_vbo);
     m_buffer = reinterpret_cast<vertex_data*>(OpenGL::GetBufferPointer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
 }
 
 void
-Renderer2D::End (void)
-{
-    OpenGL::ReleaseBufferPointer(GL_ARRAY_BUFFER);
-    OpenGL::UnbindBuffers(GL_ARRAY_BUFFER);
-}
-
-void
 Renderer2D::Submit (const Renderable2D* renderable)
 {
-    auto position = renderable->Position();
-    auto size     = renderable->Size();
-    auto color    = renderable->Color().ToRgba();
+    using namespace RDGE::Math;
 
-    //m_buffer->vertex = position;
-    m_buffer->vertex.x = position.x;
-    m_buffer->vertex.y = position.y;
+    auto pos   = renderable->Position();
+    auto size  = renderable->Size();
+    auto color = renderable->Color().ToRgba();
+
+    m_buffer->vertex = *m_currentTransformation * pos;
     m_buffer->color = color;
     m_buffer++;
 
-    //m_buffer->vertex = RDGE::Math::vec3(position.x, position.y + size.y, position.z);
-    m_buffer->vertex.x = position.x;
-    m_buffer->vertex.y = position.y + size.y;
+    m_buffer->vertex = *m_currentTransformation * vec3(pos.x, pos.y + size.y, pos.z);
     m_buffer->color = color;
     m_buffer++;
 
-    //m_buffer->vertex = RDGE::Math::vec3(position.x + size.x, position.y + size.y, position.z);
-    m_buffer->vertex.x = position.x + size.x;
-    m_buffer->vertex.y = position.y + size.y;
+    m_buffer->vertex = *m_currentTransformation * vec3(pos.x + size.x, pos.y + size.y, pos.z);
     m_buffer->color = color;
     m_buffer++;
 
-    //m_buffer->vertex = RDGE::Math::vec3(position.x + size.x, position.y, position.z);
-    m_buffer->vertex.x = position.x + size.x;
-    m_buffer->vertex.y = position.y;
+    m_buffer->vertex = *m_currentTransformation * vec3(pos.x + size.x, pos.y, pos.z);
     m_buffer->color = color;
     m_buffer++;
 
     m_indexCount += 6;
+}
+
+void
+Renderer2D::EndSubmit (void)
+{
+    OpenGL::ReleaseBufferPointer(GL_ARRAY_BUFFER);
+    OpenGL::UnbindBuffers(GL_ARRAY_BUFFER);
 }
 
 void
@@ -145,6 +143,32 @@ Renderer2D::Flush (void)
     OpenGL::UnbindVertexArrays();
 
     m_indexCount = 0;
+}
+
+void
+Renderer2D::PushTransformation (RDGE::Math::mat4 matrix, bool override)
+{
+    if (override)
+    {
+        m_transformationStack.push_back(matrix);
+    }
+    else
+    {
+        m_transformationStack.push_back(m_transformationStack.back() * matrix);
+    }
+
+    m_currentTransformation = &m_transformationStack.back();
+}
+
+void
+Renderer2D::PopTransformation (void)
+{
+    if (m_transformationStack.size() > 1)
+    {
+        m_transformationStack.pop_back();
+    }
+
+    m_currentTransformation = &m_transformationStack.back();
 }
 
 } // namespace Graphics

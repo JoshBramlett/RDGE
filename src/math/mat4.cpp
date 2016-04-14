@@ -103,14 +103,14 @@ mat4::perspective (
 }
 
 /* static */ mat4
-mat4::translate (const vec3& translation)
+mat4::translation (const vec3& translation)
 {
     mat4 result(1.0f);
 
-    result.elements[0 + 3 * 4] = translation.x;
-    result.elements[1 + 3 * 4] = translation.y;
-    result.elements[2 + 3 * 4] = translation.z;
-
+    result.elements[12] = translation.x;     // | 1 0 0 Vx |
+    result.elements[13] = translation.y;     // | 0 1 0 Vy |
+    result.elements[14] = translation.z;     // | 0 0 1 Vz |
+                                             // | 0 0 0 1  |
     return result;
 }
 

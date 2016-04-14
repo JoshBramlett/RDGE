@@ -6,12 +6,16 @@
 #pragma once
 
 #include <rdge/types.hpp>
-#include <rdge/graphics/renderable2d.hpp>
 #include <rdge/graphics/buffers/index_buffer.hpp>
+#include <rdge/math/mat4.hpp>
+
+#include <vector>
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {
 namespace Graphics {
+
+class Renderable2D;
 
 //! \struct vertex_data
 //! \brief Represents the organization of vertex data stored in the buffer
@@ -30,13 +34,17 @@ public:
 
     ~Renderer2D (void);
 
-    void Begin (void);
+    void PrepSubmit (void);
 
     void Submit (const Renderable2D* renderable);
 
-    void End (void);
+    void EndSubmit (void);
 
     void Flush (void);
+
+    void PushTransformation (RDGE::Math::mat4 matrix, bool override = false);
+
+    void PopTransformation (void);
 
 private:
     RDGE::UInt32 m_vao;
@@ -45,6 +53,9 @@ private:
 
     IndexBuffer m_ibo;
     RDGE::Int32 m_indexCount;
+
+    std::vector<RDGE::Math::mat4> m_transformationStack;
+    RDGE::Math::mat4*             m_currentTransformation;
 };
 
 } // namespace Graphics

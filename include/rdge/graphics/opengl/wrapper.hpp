@@ -14,7 +14,7 @@ namespace OpenGL {
 //! \throws RDGE::GLException with corresponding error code
 void gl_throw_on_error (const char* func);
 
-#ifdef RDGE_THROW_ON_GL_ERROR
+#ifdef RDGE_DEBUG
 #define GL_CHECK_ERROR(x) \
 do { \
     x; \
@@ -32,7 +32,7 @@ do { \
 //! \details Creates an empty shader object.
 //! \param [in] shader_type Type of shader to be created
 //! \returns Unique non-zero identifier
-//! \see
+//! \see https://www.opengl.org/sdk/docs/man/html/glCreateShader.xhtml
 inline RDGE::UInt32
 CreateShader (RDGE::UInt32 shader_type)
 {
@@ -41,12 +41,12 @@ CreateShader (RDGE::UInt32 shader_type)
     return handle;
 }
 
-//! \brief Direct map to glShaderSource
+//! \brief Set the shader source for a single shader
 //! \details Replaces source code in a shader object.  Wrapper assumes source is
 //!          a null terminated string.
 //! \param [in] shader Handle of the shader
 //! \param [in] source Source code to be loaded into the shader
-//! \see
+//! \see https://www.opengl.org/sdk/docs/man/html/glShaderSource.xhtml
 inline void
 SetShaderSource (RDGE::UInt32 shader, const char** source)
 {
@@ -56,7 +56,7 @@ SetShaderSource (RDGE::UInt32 shader, const char** source)
 //! \brief Direct map to glCompileShader
 //! \details Compile a shader object.
 //! \param [in] shader Handle of the shader
-//! \see
+//! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glCompileShader.xml
 inline void
 CompileShader (RDGE::UInt32 shader)
 {
@@ -66,7 +66,7 @@ CompileShader (RDGE::UInt32 shader)
 //! \brief Direct map to glDeleteShader
 //! \details Free up memory allocated to the shader
 //! \param [in] shader Handle of the shader
-//! \see
+//! \see https://www.opengl.org/sdk/docs/man/html/glDeleteShader.xhtml
 inline void
 DeleteShader (RDGE::UInt32 shader)
 {
@@ -76,7 +76,7 @@ DeleteShader (RDGE::UInt32 shader)
 //! \brief Direct map to glCreateProgram
 //! \details Create a empty shader program object
 //! \returns Unique non-zero identifier
-//! \see
+//! \see https://www.opengl.org/sdk/docs/man2/xhtml/glCreateProgram.xml
 inline RDGE::UInt32
 CreateProgram (void)
 {
@@ -86,10 +86,10 @@ CreateProgram (void)
 }
 
 //! \brief Direct map to glAttachShader
-//! \details Attach a shader to a program object
+//! \details Attach a shader to a program object.
 //! \param [in] program Handle of the program
 //! \param [in] shader Handle of the shader
-//! \see
+//! \see https://www.opengl.org/sdk/docs/man/html/glAttachShader.xhtml
 inline void
 AttachShader (RDGE::UInt32 program, RDGE::UInt32 shader)
 {
@@ -97,10 +97,10 @@ AttachShader (RDGE::UInt32 program, RDGE::UInt32 shader)
 }
 
 //! \brief Direct map to glDetachShader
-//! \details Detach a shader from a program object
+//! \details Detach a shader from a program object.
 //! \param [in] program Handle of the program
 //! \param [in] shader Handle of the shader
-//! \see
+//! \see https://www.opengl.org/sdk/docs/man/html/glDetachShader.xhtml
 inline void
 DetachShader (RDGE::UInt32 program, RDGE::UInt32 shader)
 {
@@ -108,13 +108,25 @@ DetachShader (RDGE::UInt32 program, RDGE::UInt32 shader)
 }
 
 //! \brief Direct map to glLinkProgram
-//! \details Links specified program
+//! \details Links specified program.
 //! \param [in] program Handle of the program
-//! \see
+//! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glLinkProgram.xml
 inline void
 LinkProgram (RDGE::UInt32 program)
 {
     GL_CHECK_ERROR(glLinkProgram(program));
+}
+
+//! \brief Direct map to glUseProgram
+//! \details Installs the program as part of the current rendering state.
+//! \param [in] program Handle of the program
+//! \note If zero is provided the rendering state will refer to an invalid
+//!       program, and will have undefined behavior.
+//! \see https://www.opengl.org/sdk/docs/man/html/glUseProgram.xhtml
+inline void
+UseProgram (RDGE::UInt32 program)
+{
+    GL_CHECK_ERROR(glUseProgram(program));
 }
 
 /*
