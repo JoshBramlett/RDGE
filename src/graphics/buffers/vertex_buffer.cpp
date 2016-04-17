@@ -1,5 +1,5 @@
 #include <rdge/graphics/buffers/vertex_buffer.hpp>
-#include <rdge/graphics/opengl/wrapper.hpp>
+#include <rdge/internal/opengl_wrapper.hpp>
 
 namespace RDGE {
 namespace Graphics {

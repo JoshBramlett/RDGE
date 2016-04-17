@@ -1,5 +1,5 @@
 #include <rdge/graphics/buffers/index_buffer.hpp>
-#include <rdge/graphics/opengl/wrapper.hpp>
+#include <rdge/internal/opengl_wrapper.hpp>
 
 #include <GL/glew.h>
 

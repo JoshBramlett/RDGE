@@ -1,3 +1,8 @@
+//! \headerfile <rdge/internal/exception_macros.hpp>
+//! \author Josh Bramlett
+//! \version 0.0.2
+//! \date 04/13/2016
+
 #pragma once
 
 #include <rdge/types.hpp>

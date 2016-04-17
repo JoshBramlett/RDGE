@@ -11,7 +11,9 @@
 #include <rdge/math/vec3.hpp>
 #include <rdge/math/vec4.hpp>
 
-//#include <ostream>
+#include <ostream>
+#include <sstream>
+#include <iomanip>
 
 /* TODO
  *
@@ -181,6 +183,28 @@ inline vec3 operator* (const mat4& lhs, const vec3& rhs)
         col[0].y * rhs.x + col[1].y * rhs.y + col[2].y * rhs.z + col[3].y,
         col[0].z * rhs.x + col[1].z * rhs.y + col[2].z * rhs.z + col[3].z
     };
+}
+
+//! \brief mat4 stream output operator
+//! \param [in] os Output stream
+//! \param [in] matrix mat4 to write to the stream
+//! \returns Output stream
+inline std::ostream& operator<< (std::ostream& os, const mat4& matrix)
+{
+    std::stringstream ss;
+    ss << "mat4: ["
+       << std::fixed << std::setprecision(5);
+
+    for (RDGE::UInt32 i = 0; i < 4; ++i)
+    {
+        ss << "[" << matrix.columns[i].x << ","
+           << matrix.columns[i].y << ","
+           << matrix.columns[i].z << ","
+           << matrix.columns[i].w << "]"
+           << ((i == 3) ? "]" : ", ");
+    }
+
+    return os << ss.str();
 }
 
 } // namespace Math

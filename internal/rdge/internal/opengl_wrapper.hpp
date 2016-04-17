@@ -1,6 +1,12 @@
+//! \headerfile <rdge/internal/opengl_wrapper.hpp>
+//! \author Josh Bramlett
+//! \version 0.0.2
+//! \date 04/13/2016
+
 #pragma once
 
 #include <rdge/types.hpp>
+#include <rdge/internal/exception_macros.hpp>
 
 #include <GL/glew.h>
 #include <cstddef>
@@ -11,8 +17,17 @@ namespace Graphics {
 namespace OpenGL {
 
 //! \brief Throw exception if OpenGL error flag is set
+//! \param [in] func OpenGL function name
 //! \throws RDGE::GLException with corresponding error code
-void gl_throw_on_error (const char* func);
+inline void
+gl_throw_on_error (const char* func)
+{
+    GLenum code = glGetError();
+    if (code != GL_NO_ERROR)
+    {
+        GL_THROW("OpenGL call failed", func, static_cast<RDGE::UInt32>(code));
+    }
+}
 
 #ifdef RDGE_DEBUG
 #define GL_CHECK_ERROR(x) \
@@ -24,9 +39,9 @@ do { \
 #define GL_CHECK_ERROR(x) x
 #endif
 
-/*
- * Shader
- */
+/******************************************************************
+ *                          Shaders
+ *****************************************************************/
 
 //! \brief Direct map to glCreateShader
 //! \details Creates an empty shader object.
@@ -129,9 +144,9 @@ UseProgram (RDGE::UInt32 program)
     GL_CHECK_ERROR(glUseProgram(program));
 }
 
-/*
- * Vertex Array
- */
+/******************************************************************
+ *                       Vertex Arrays
+ *****************************************************************/
 
 //! \brief Create a single vertex array from glGenVertexArrays
 //! \details Generates a single vertex array object
@@ -174,11 +189,6 @@ UnbindVertexArrays (void)
     GL_CHECK_ERROR(glBindVertexArray(0));
 }
 
-inline void FreeArray(RDGE::UInt32 array)
-{
-    GL_CHECK_ERROR(glDeleteVertexArrays(1, &array));
-}
-
 inline void FreeVertexArray(RDGE::UInt32 array)
 {
     GL_CHECK_ERROR(glDeleteVertexArrays(1, &array));
@@ -189,9 +199,64 @@ inline void FreeVertexArrays(RDGE::UInt32 size, RDGE::UInt32* arrays)
     GL_CHECK_ERROR(glDeleteVertexArrays(size, arrays));
 }
 
-/*
- * Buffers
- */
+//! \brief Direct map to glEnableVertexAttribArray
+//! \details Enables a generic vertex attribute array
+//! \param [in] index Index (used by shaders) of the generic vertex attribute
+//! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glEnableVertexAttribArray.xml
+inline void
+EnableVertexAttribute (RDGE::UInt32 index)
+{
+    GL_CHECK_ERROR(glEnableVertexAttribArray(index));
+}
+
+inline void DisableVertexAttribute(RDGE::UInt32 index)
+{
+    GL_CHECK_ERROR(glDisableVertexAttribArray(index));
+}
+
+//! \brief Direct map to glVertexAttribPointer
+//! \details Defines an array of generic vertex attribute data.  Essentially this
+//!          tells OpenGL how to interpret the data within the buffer.
+//! \param [in] index Index (used by shaders) of the generic vertex attribute
+//! \param [in] size Number of components per attribute (3 for vec3, etc.)
+//! \param [in] type Data type of each component in the array
+//! \param [in] normalized True if integer formats should be mapped to floating point
+//! \param [in] stride Byte offset between consecutive generic vertex attributes
+//! \param [in] offset Offset of the first component of the first attribute
+//! \see https://www.opengl.org/sdk/docs/man/html/glVertexAttribPointer.xhtml
+inline void
+SetVertexAttributePointer (
+                           RDGE::UInt32 index,
+                           RDGE::Int32  size,
+                           RDGE::UInt32 type,
+                           bool         normalized,
+                           RDGE::UInt32 stride,
+                           void*        offset
+                          )
+{
+    GL_CHECK_ERROR(glVertexAttribPointer(
+                                         index, size, type,
+                                         static_cast<RDGE::UInt32>(normalized),
+                                         stride, offset
+                                        ));
+}
+
+//! \brief Direct map to glDrawElements
+//! \details Renders primitives from array data.
+//! \param [in] mode Type of primitive to render
+//! \param [in] count The number of elements to be rendered
+//! \param [in] type The type of values in indices parameter
+//! \param [in] indices Pointer to indices storage
+//! \see https://www.opengl.org/sdk/docs/man/html/glDrawElements.xhtml
+inline void
+DrawElements (RDGE::UInt32 mode, RDGE::UInt32 count, RDGE::UInt32 type, const void* indices)
+{
+    GL_CHECK_ERROR(glDrawElements(mode, count, type, indices));
+}
+
+/******************************************************************
+ *                           Buffers
+ *****************************************************************/
 
 //! \brief Create a single buffer from glGenBuffers
 //! \details Generates a single buffer object
@@ -297,15 +362,15 @@ ReleaseBufferPointer (RDGE::UInt32 target)
     return result == GL_TRUE;
 }
 
-/*
- * Frame Buffers
- */
+/******************************************************************
+ *                         Frame Buffers
+ *****************************************************************/
 
 inline RDGE::UInt32 CreateFrameBuffer()
 {
-    RDGE::UInt32 result;
-    GL_CHECK_ERROR(glGenFramebuffers(1, &result));
-    return result;
+    RDGE::UInt32 name;
+    GL_CHECK_ERROR(glGenFramebuffers(1, &name));
+    return name;
 }
 
 inline void CreateFramebuffers(RDGE::UInt32 size, RDGE::UInt32* buffers)
@@ -328,9 +393,9 @@ inline void FreeFramebuffers(RDGE::UInt32 size, RDGE::UInt32* buffers)
     GL_CHECK_ERROR(glDeleteFramebuffers(size, buffers));
 }
 
-/*
- * Render Buffers
- */
+/******************************************************************
+ *                         Render Buffers
+ *****************************************************************/
 
 inline RDGE::UInt32 CreateRenderBuffer()
 {
@@ -349,8 +414,123 @@ inline void BindRenderbuffer(RDGE::UInt32 target, RDGE::UInt32 buffer)
     GL_CHECK_ERROR(glBindRenderbuffer(target, buffer));
 }
 
+/******************************************************************
+ *                          Textures
+ *****************************************************************/
 
+//! \brief Create a single texture from glGenTextures
+//! \details Generates a single texture object
+//! \returns Identifier of the generated texture
+//! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glGenTextures.xml
+inline RDGE::UInt32
+CreateTexture (void)
+{
+    RDGE::UInt32 name;
+    GL_CHECK_ERROR(glGenTextures(1, &name));
+    return name;
+}
 
+//! \brief Direct map to glGenTextures
+//! \details Generates multiple texture object names
+//! \param [in] n Number of texture names to generate
+//! \param [out] textures Array where generated names are stored
+//! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glGenTextures.xml
+inline void
+CreateTextures (RDGE::UInt32 n, RDGE::UInt32* textures)
+{
+    GL_CHECK_ERROR(glGenTextures(n, textures));
+}
+
+//! \brief Direct map to glBindTexture
+//! \details Bind the texture object to the binding target
+//! \param [in] target The target to which the texture is bound
+//! \param [in] texture Identifier of the texture object
+//! \see https://www.opengl.org/sdk/docs/man/html/glBindTexture.xhtml
+inline void
+BindTexture (RDGE::UInt32 target, RDGE::UInt32 texture)
+{
+    GL_CHECK_ERROR(glBindTexture(target, texture));
+}
+
+//! \brief Break all existing texture bindings for the target
+//! \param [in] target The target to which the texture will be unbound
+//! \see https://www.opengl.org/sdk/docs/man/html/glBindTexture.xhtml
+inline void
+UnbindTexture (RDGE::UInt32 target)
+{
+    GL_CHECK_ERROR(glBindTexture(target, 0));
+}
+
+//! \brief Direct map to glTexParameteri
+//! \details Set texture parameters to the binding target
+//! \param [in] target The target to which the texture is bound
+//! \param [in] pname Parameter name
+//! \param [in] param Parameter value
+//! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glTexParameter.xml
+inline void
+SetTextureParameter (RDGE::UInt32 target, RDGE::UInt32 pname, RDGE::Int32 param)
+{
+    GL_CHECK_ERROR(glTexParameteri(target, pname, param));
+}
+
+//! \brief Defines a texture image
+//! \details Describes the parameters of the image, and how the texture will be
+//!          stored in memory.
+//! \param [in] target The target to which the texture is bound
+//! \param [in] internalformat Internal format of the texture
+//! \param [in] width Texture width
+//! \param [in] height Texture height
+//! \param [in] format Format of the texel data
+//! \param [in] type Data type of the texel data
+//! \param [in] data Pointer to the image data in memory
+//! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glTexImage2D.xml
+inline void
+SetTextureData (
+                RDGE::UInt32 target,
+                RDGE::Int32  internalformat,
+                RDGE::Int32  width,
+                RDGE::Int32  height,
+                RDGE::Int32  format,
+                RDGE::UInt32 type,
+                const void*  data
+               )
+{
+    GL_CHECK_ERROR(glTexImage2D(
+                                target,
+                                0,              // level-of-detail
+                                internalformat,
+                                width,
+                                height,
+                                0,              // width of the border.  must be 0.
+                                format,
+                                type,
+                                data
+                               ));
+}
+
+//! \brief Direct map to glActiveTexture
+//! \details Set the active texture unit.
+//! \param [in] texture Texture unit to activate
+//! \see https://www.opengl.org/sdk/docs/man/docbook4/xhtml/glActiveTexture.xml
+inline void
+SetActiveTexture (RDGE::UInt32 texture)
+{
+    GL_CHECK_ERROR(glActiveTexture(texture));
+}
+
+inline void DeleteTexture(RDGE::UInt32 texture)
+{
+    GL_CHECK_ERROR(glDeleteTextures(1, &texture));
+}
+
+inline void DeleteTextures(RDGE::UInt32 size, RDGE::UInt32* textures)
+{
+    GL_CHECK_ERROR(glDeleteTextures(size, textures));
+}
+
+/******************************************************************
+ *                          TODO
+ *****************************************************************/
 
 inline int GetScreenBuffer()
 {
@@ -394,107 +574,6 @@ inline void SetClearColor(float r, float g, float b, float a)
     GL_CHECK_ERROR(glClearColor(r, g, b, a));
 }
 
-inline RDGE::UInt32 CreateTexture()
-{
-    GLuint result;
-    GL_CHECK_ERROR(glGenTextures(1, &result));
-    return result;
-}
-
-inline void CreateTextures(RDGE::UInt32 size, RDGE::UInt32* textures)
-{
-    GL_CHECK_ERROR(glGenTextures(size, textures));
-}
-
-inline void BindTexture(RDGE::UInt32 target, RDGE::UInt32 texture)
-{
-    GL_CHECK_ERROR(glBindTexture(target, texture));
-}
-
-inline void UnbindTexture(RDGE::UInt32 target)
-{
-    GL_CHECK_ERROR(glBindTexture(target, 0));
-}
-
-inline void SetTextureParameter(RDGE::UInt32 target, RDGE::UInt32 parameter, int value)
-{
-    GL_CHECK_ERROR(glTexParameteri(target, parameter, value));
-}
-
-inline void SetTextureData(RDGE::UInt32 target, RDGE::UInt32 internalformat, RDGE::UInt32 width, RDGE::UInt32 height, RDGE::UInt32 format, RDGE::UInt32 type, const void* pixels)
-{
-    GL_CHECK_ERROR(glTexImage2D(target, 0, internalformat, width, height, 0, format, type, pixels));
-}
-
-inline void SetActiveTexture(RDGE::UInt32 texture)
-{
-    GL_CHECK_ERROR(glActiveTexture(texture));
-}
-
-//! \brief Direct map to glEnableVertexAttribArray
-//! \details Enables a generic vertex attribute array
-//! \param [in] index Index (used by shaders) of the generic vertex attribute
-//! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glEnableVertexAttribArray.xml
-inline void
-EnableVertexAttribute (RDGE::UInt32 index)
-{
-    GL_CHECK_ERROR(glEnableVertexAttribArray(index));
-}
-
-inline void DisableVertexAttribute(RDGE::UInt32 index)
-{
-    GL_CHECK_ERROR(glDisableVertexAttribArray(index));
-}
-
-//! \brief Direct map to glVertexAttribPointer
-//! \details Defines an array of generic vertex attribute data.  Essentially this
-//!          tells OpenGL how to interpret the data within the buffer.
-//! \param [in] index Index (used by shaders) of the generic vertex attribute
-//! \param [in] size Number of components per attribute (3 for vec3, etc.)
-//! \param [in] type Data type of each component in the array
-//! \param [in] normalized True if integer formats should be mapped to floating point
-//! \param [in] stride Byte offset between consecutive generic vertex attributes
-//! \param [in] offset Offset of the first component of the first attribute
-//! \see https://www.opengl.org/sdk/docs/man/html/glVertexAttribPointer.xhtml
-inline void
-SetVertexAttributePointer (
-                           RDGE::UInt32 index,
-                           RDGE::Int32  size,
-                           RDGE::UInt32 type,
-                           bool         normalized,
-                           RDGE::UInt32 stride,
-                           void*        offset
-                          )
-{
-    GL_CHECK_ERROR(glVertexAttribPointer(
-                                         index, size, type,
-                                         static_cast<RDGE::UInt32>(normalized),
-                                         stride, offset
-                                        ));
-}
-
-inline void FreeTexture(RDGE::UInt32 texture)
-{
-    GL_CHECK_ERROR(glDeleteTextures(1, &texture));
-}
-
-inline void FreeTextures(RDGE::UInt32 size, RDGE::UInt32* textures)
-{
-    GL_CHECK_ERROR(glDeleteTextures(size, textures));
-}
-
-//! \brief Direct map to glDrawElements
-//! \details Renders primitives from array data.
-//! \param [in] mode Type of primitive to render
-//! \param [in] count The number of elements to be rendered
-//! \param [in] type The type of values in indices parameter
-//! \param [in] indices Pointer to indices storage
-//! \see https://www.opengl.org/sdk/docs/man/html/glDrawElements.xhtml
-inline void
-DrawElements (RDGE::UInt32 mode, RDGE::UInt32 count, RDGE::UInt32 type, const void* indices)
-{
-    GL_CHECK_ERROR(glDrawElements(mode, count, type, indices));
-}
 
 } // namespace OpenGL
 } // namespace Graphics

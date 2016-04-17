@@ -74,9 +74,9 @@ add_library (
              src/graphics/renderer2d.cpp
              src/graphics/shader.cpp
              src/graphics/sprite.cpp
+             src/graphics/gltexture.cpp
              src/graphics/layers/layer2d.cpp
              src/graphics/layers/group.cpp
-             src/graphics/opengl/wrapper.cpp
              src/graphics/buffers/vertex_array.cpp
              src/graphics/buffers/vertex_buffer.cpp
              src/graphics/buffers/index_buffer.cpp

@@ -1,7 +1,7 @@
 #include <rdge/graphics/shader.hpp>
-#include <rdge/graphics/opengl/wrapper.hpp>
 #include <rdge/util/io.hpp>
 #include <rdge/internal/exception_macros.hpp>
+#include <rdge/internal/opengl_wrapper.hpp>
 
 #include <algorithm>
 #include <sstream>
@@ -78,6 +78,12 @@ void
 Shader::Disable (void) const
 {
     OpenGL::UseProgram(0);
+}
+
+void
+Shader::SetUniform1i (const GLchar* name, RDGE::Int32 value)
+{
+    glUniform1i(GetUniformLocation(name), value);
 }
 
 void

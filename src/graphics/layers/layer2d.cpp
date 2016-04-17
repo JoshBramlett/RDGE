@@ -34,7 +34,6 @@ Layer2D::Render (void)
 
     m_renderer.EndSubmit();
     m_renderer.Flush();
-    //m_shader.Disable();
 }
 
 } // namespace Graphics

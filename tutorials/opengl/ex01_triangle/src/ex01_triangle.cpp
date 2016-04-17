@@ -1,4 +1,5 @@
 #include <rdge/types.hpp>
+#include <rdge/surface.hpp>
 #include <rdge/application.hpp>
 #include <rdge/glwindow.hpp>
 #include <rdge/graphics/buffers/vertex_array.hpp>
@@ -9,6 +10,7 @@
 #include <rdge/graphics/sprite.hpp>
 #include <rdge/graphics/layers/layer2d.hpp>
 #include <rdge/graphics/layers/group.hpp>
+#include <rdge/graphics/gltexture.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/math/vec3.hpp>
 #include <rdge/math/vec4.hpp>
@@ -27,43 +29,37 @@
 using namespace RDGE::Graphics;
 using namespace RDGE::Math;
 
+enum class Josh
+{
+    Harmie,
+    Calder
+};
+
+//const char*
+std::string
+JoshString (Josh josh)
+{
+    switch (josh) {
+#define CASE(X) case X: return #X;
+    CASE(Josh::Harmie)
+    CASE(Josh::Calder)
+#undef CASE
+        default:
+        return "Unknown";
+    }
+}
+
 int main ()
 {
-    //GLfloat vertices[] =
-    //{
-        //0, 0, 0,
-        //0, 3, 0,
-        //8, 3, 0,
-        //8, 0, 0
-    //};
-
-    //GLushort indices[] =
-    //{
-        //0, 1, 2,
-        //2, 3, 0
-    //};
-
-    //GLfloat colorsA[] =
-    //{
-        //1, 0, 1, 1,
-        //1, 0, 1, 1,
-        //1, 0, 1, 1,
-        //1, 0, 1, 1
-    //};
-
-    //GLfloat colorsB[] =
-    //{
-        //0.2f, 0.3f, 0.8f, 1,
-        //0.2f, 0.3f, 0.8f, 1,
-        //0.2f, 0.3f, 0.8f, 1,
-        //0.2f, 0.3f, 0.8f, 1
-    //};
+    std::cout << JoshString(Josh::Harmie) << std::endl;
 
     try
     {
         std::cout << "Running ex01_triangle" << std::endl;
         // 1 - initialize SDL
         RDGE::Application app(SDL_INIT_EVERYTHING, 0, true);
+
+        std::cout << app.SDLVersion() << std::endl;
 
         //std::cout << RDGE::Util::PrintRendererDriverInfo() << std::endl;
 
@@ -74,62 +70,38 @@ int main ()
                                false, false, false // uses vsync
                               );
 
-
-        //VertexArray sprite1;
-        //VertexArray sprite2;
-        //IndexBuffer ibo(indices, 6);
-
-        //sprite1.AddBuffer(new VertexBuffer(vertices, 4 * 3, 3), 0);
-        //sprite1.AddBuffer(new VertexBuffer(colorsA, 4 * 4, 4), 1);
-
-        //sprite2.AddBuffer(new VertexBuffer(vertices, 4 * 3, 3), 0);
-        //sprite2.AddBuffer(new VertexBuffer(colorsB, 4 * 4, 4), 1);
-
-        //mat4 ortho = mat4::orthographic(0.0f, 16.0f, 0.0f, 9.0f, -1.0f, 1.0f);
-
-        //Shader shader = Shader::FromFile("basic.vert", "basic.frag");
-        //shader.Enable();
-		//shader.SetUniformMat4("pr_matrix", ortho);
-		//shader.SetUniformMat4("ml_matrix", mat4::translate(vec3(4, 3, 0)));
-
-		//shader.SetUniform2f("light_pos", vec2(4.0f, 1.5f));
-		//shader.SetUniform4f("colour", vec4(0.2f, 0.3f, 0.8f, 1.0f));
-
-        //mat4 ortho = mat4::orthographic(0.0f, 16.0f, 0.0f, 9.0f, -1.0f, 1.0f);
-
         auto v = RDGE::Util::read_text_file("basic.vert");
         auto f = RDGE::Util::read_text_file("basic.frag");
         auto shader = std::make_unique<Shader>(v, f);
 
-        //Shader shader = Shader::FromFile("basic.vert", "basic.frag");
         shader->Enable();
-		//shader.SetUniformMat4("pr_matrix", ortho);
 		shader->SetUniform2f("light_pos", vec2(4.0f, 1.5f));
-		//shader.SetUniform4f("colour", vec4(0.2f, 0.3f, 0.8f, 1.0f));
-
-        //std::vector<Sprite*> sprites;
+        shader->SetUniform1i("tex", 0);
 
         Layer2D layer(std::move(shader));
-        //for (float y = 0; y < 9.0f; y += 0.05f)
-        //{
-            //for (float x = 0; x < 16.0f; x += 0.05f)
-            //{
-                ////sprites.emplace_back(new Sprite(x, y, 0.04f, 0.04f, RDGE::Color::Blue()));
-                //layer.AddRenderable(new Sprite(x, y, 0.04f, 0.04f, RDGE::Color::Blue()));
-            //}
-        //}
+        for (float y = 0; y < 9.0f; y++)
+        {
+            for (float x = 0; x < 16.0f; x++)
+            {
+                layer.AddRenderable(new Sprite(x, y, 0.9f, 0.9f, RDGE::Color::Blue()));
+            }
+        }
 
-        //Group* button = new Group(mat4::translate(vec3(1.0f, 0.0f, 0.0f)));
-        Group* button = new Group(mat4::rotate(45.0f, vec3(0.0f, 0.0f, 1.0f)));
-        //Group* button = new Group(mat4::identity());
-        button->AddRenderable(new Sprite(0, 0, 5.0f, 2.0f, RDGE::Color::Blue()));
-        button->AddRenderable(new Sprite(0.5f, 0.5f, 3.0f, 1.0f, RDGE::Color::Red()));
+        //Group* button = new Group(mat4::translation(vec3(1.0f, 0.0f, 0.0f)));
+        //button->AddRenderable(new Sprite(0, 0, 5.0f, 2.0f, RDGE::Color::Blue()));
+        //button->AddRenderable(new Sprite(0.5f, 0.5f, 3.0f, 1.0f, RDGE::Color::Red()));
+        //layer.AddRenderable(button);
 
-        layer.AddRenderable(button);
+        //glActiveTexture(GL_TEXTURE0);
+        GLTexture texture("test.gif", 0);
+        texture.Bind();
 
-        //std::cout << "sprites=" << sprites.size() << std::endl;
 
-        //Renderer2D renderer;
+            //auto ts = layer.GetShader();
+            //ts->Enable();
+            //ts->SetUniform1i("tex", 0);
+            //ts->SetUniformMat4("pr_matrix", mat4::orthographic(0.0f, 16.0f, 0.0f, 9.0f, -1.0f, 1.0f));
+
 
         bool running = true;
         SDL_Event event;
@@ -169,30 +141,9 @@ int main ()
             layer_shader->SetUniform2f("light_pos", lp);
 
             layer.Render();
-            //renderer.PrepSubmit();
-            //for (auto sprite : sprites)
-            //{
-                //renderer.Submit(sprite);
-            //}
-            //renderer.EndSubmit();
-            //renderer.Flush();
-
-            //sprite1.Bind();
-            //ibo.Bind();
-            //shader.SetUniformMat4("ml_matrix", mat4::translate(vec3(4, 3, 0)));
-            //glDrawElements(GL_TRIANGLES, ibo.Count(), GL_UNSIGNED_SHORT, 0);
-            //ibo.Unbind();
-            //sprite1.Unbind();
-
-            //sprite2.Bind();
-            //ibo.Bind();
-            //shader.SetUniformMat4("ml_matrix", mat4::translate(vec3(0, 0, 0)));
-            //glDrawElements(GL_TRIANGLES, ibo.Count(), GL_UNSIGNED_SHORT, 0);
-            //ibo.Unbind();
-            //sprite2.Unbind();
 
             window.Present();
-            printf("%f fps\n", window.FrameRate());
+            //printf("%f fps\n", window.FrameRate());
         }
     }
     catch (const RDGE::SDLException& ex)

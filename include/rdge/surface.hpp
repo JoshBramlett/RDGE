@@ -2,17 +2,16 @@
 //! \author Josh Bramlett
 //! \version 0.0.1
 //! \date 03/07/2016
-//! \bug
 
 #pragma once
 
-#include <string>
-#include <memory>
+#include <rdge/types.hpp>
+#include <rdge/graphics/size.hpp>
 
 #include <SDL.h>
 
-#include <rdge/types.hpp>
-#include <rdge/graphics/size.hpp>
+#include <string>
+#include <memory>
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {
@@ -48,7 +47,7 @@ public:
     //! \brief Surface ctor
     //! \details Uses the SDL_image library to load from file
     //! \param [in] file File path of the image to load
-    //! \throws Image initialization failed
+    //! \throws RDGE::SDLException Image initialization failed
     explicit Surface (const std::string& file);
 
     //! \brief Surface ctor
@@ -60,7 +59,7 @@ public:
     //! \param [in] g_mask Green mask for the pixels
     //! \param [in] b_mask Blue mask for the pixels
     //! \param [in] a_mask Alpha mask for the pixels
-    //! \throws Image initialization failed
+    //! \throws RDGE::SDLException Image initialization failed
     explicit Surface (
                       RDGE::Int32  width,
                       RDGE::Int32  height,
@@ -73,7 +72,7 @@ public:
 
     //! \brief Surface ctor
     //! \details Create an RGB surface from pixel data.  The pixel data is
-    //!          provided through an r-value unique_ptr so the object can take
+    //!          provided through a unique_ptr so the object can take
     //!          ownership as the SDL documentation states the pixel data
     //!          cannot be de-allocated until the surface has been freed
     //! \param [in] pixels R-value reference unique pointer to pixel data
@@ -85,21 +84,21 @@ public:
     //! \param [in] g_mask Green mask for the pixels
     //! \param [in] b_mask Blue mask for the pixels
     //! \param [in] a_mask Alpha mask for the pixels
-    //! \note If depth is 4 or 8 bits, and empty palette is allocated.  If
+    //! \note If depth is 4 or 8 bits, an empty palette is allocated.  If
     //!       greater than 8 bits, the pixel format is set using the RGBA
     //!       mask parameters
     //! \see https://wiki.libsdl.org/SDL_CreateRGBSurfaceFrom
-    //! \throws Image initialization failed
+    //! \throws RDGE::SDLException Image initialization failed
     explicit Surface (
-                      std::unique_ptr<unsigned char[]>&& pixels,
-                      RDGE::Int32                        width,
-                      RDGE::Int32                        height,
-                      RDGE::Int32                        depth,
-                      RDGE::Int32                        pitch,
-                      RDGE::UInt32                       r_mask,
-                      RDGE::UInt32                       g_mask,
-                      RDGE::UInt32                       b_mask,
-                      RDGE::UInt32                       a_mask
+                      std::unique_ptr<unsigned char[]> pixels,
+                      RDGE::Int32                      width,
+                      RDGE::Int32                      height,
+                      RDGE::Int32                      depth,
+                      RDGE::Int32                      pitch,
+                      RDGE::UInt32                     r_mask,
+                      RDGE::UInt32                     g_mask,
+                      RDGE::UInt32                     b_mask,
+                      RDGE::UInt32                     a_mask
                      );
 
     //! \brief Surface dtor
@@ -138,6 +137,20 @@ public:
     //! \brief Get the size (width and height) of the surface
     //! \return Size structure
     RDGE::Graphics::Size Size (void) const noexcept;
+
+    //! \brief Get the internal pixel format of the surface
+    //! \details Will return the SDL_PixelFormatEnum value
+    //! \return Pixel format enumeration value
+    //! \see https://wiki.libsdl.org/SDL_PixelFormatEnum
+    RDGE::UInt32 PixelFormat (void) const noexcept;
+
+    //! \brief Change the internal pixel format of the surface
+    //! \details If there is no change from the current format, the call is a no-op.
+    //! \param [in] pixel_format SDL_PixelFormatEnum value to change to
+    //! \throws RDGE::Exception If surface is null
+    //! \throws RDGE::SDLException If SDL failed the conversion
+    //! \see https://wiki.libsdl.org/SDL_PixelFormatEnum
+    void ChangePixelFormat (RDGE::UInt32 pixel_format);
 
 private:
     SDL_Surface*                     m_surface;

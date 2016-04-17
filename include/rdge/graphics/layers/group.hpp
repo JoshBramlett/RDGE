@@ -38,7 +38,7 @@ public:
     Group (const Group&) = delete;
 
     //! \brief Group Move ctor
-    //! \details Transfers ownership to moved to Group
+    //! \details Transfers ownership to moved-to Group
     Group (Group&&) noexcept;
 
     //! \brief Group Copy Assignment Operator
@@ -46,7 +46,7 @@ public:
     Group& operator= (const Group&) = delete;
 
     //! \brief Group Move Assignment Operator
-    //! \details Transfers ownership to moved to Group
+    //! \details Transfers ownership to moved-to Group
     Group& operator= (Group&&) noexcept;
 
     //! \brief Add renderable to the group

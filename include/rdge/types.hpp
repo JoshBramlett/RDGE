@@ -15,6 +15,7 @@
 
 #include <iostream>
 
+// TODO: This needs to be a configuration flag
 #define RDGE_DEBUG
 
 /***********************************
@@ -61,6 +62,10 @@
                                   : __FILE__
 #endif
 
+/***********************************
+/  Ignore unused variable warnings
+***********************************/
+
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
     #ifndef DEFAULT_R_MASK
         #define DEFAULT_R_MASK 0xff000000
@@ -88,7 +93,6 @@
         #define DEFAULT_A_MASK 0xff000000
     #endif
 #endif
-
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {

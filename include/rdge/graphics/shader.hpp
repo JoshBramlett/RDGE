@@ -61,6 +61,7 @@ public:
     void Disable (void) const;
 
     // TODO Consider overloading
+    void SetUniform1i (const GLchar* name, RDGE::Int32 value);
     void SetUniform1f (const GLchar* name, float value);
     void SetUniform2f (const GLchar* name, const RDGE::Math::vec2& vec);
     void SetUniform3f (const GLchar* name, const RDGE::Math::vec3& vec);

@@ -2,7 +2,6 @@
 //! \author Josh Bramlett
 //! \version 0.0.1
 //! \date 12/29/2015
-//! \bug
 
 #pragma once
 
@@ -17,6 +16,10 @@
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {
 
+//! \class Color
+//! \brief Storage representing RGBA colors
+//! \details RGBA values are on an integer scale of 0-255, but helpers
+//!          exist to convert to other types
 class Color final : public SDL_Color
 {
 public:
