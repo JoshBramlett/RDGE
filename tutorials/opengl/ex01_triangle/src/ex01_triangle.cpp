@@ -2,12 +2,16 @@
 #include <rdge/surface.hpp>
 #include <rdge/application.hpp>
 #include <rdge/glwindow.hpp>
+#include <rdge/random.hpp>
+#include <rdge/font.hpp>
 #include <rdge/graphics/buffers/vertex_array.hpp>
 #include <rdge/graphics/buffers/vertex_buffer.hpp>
 #include <rdge/graphics/buffers/index_buffer.hpp>
 #include <rdge/graphics/shader.hpp>
 #include <rdge/graphics/renderer2d.hpp>
+#include <rdge/graphics/renderable2d.hpp>
 #include <rdge/graphics/sprite.hpp>
+#include <rdge/graphics/label.hpp>
 #include <rdge/graphics/layers/layer2d.hpp>
 #include <rdge/graphics/layers/group.hpp>
 #include <rdge/graphics/gltexture.hpp>
@@ -56,52 +60,75 @@ int main ()
     try
     {
         std::cout << "Running ex01_triangle" << std::endl;
+
         // 1 - initialize SDL
         RDGE::Application app(SDL_INIT_EVERYTHING, 0, true);
-
         std::cout << app.SDLVersion() << std::endl;
-
-        //std::cout << RDGE::Util::PrintRendererDriverInfo() << std::endl;
 
         // 2 - create window and OpenGL context
         RDGE::GLWindow window (
                                "ex01_triangle",
                                960, 540,
-                               false, false, false // uses vsync
+                               false, false,
+                               false // vsync
                               );
 
         auto v = RDGE::Util::read_text_file("basic.vert");
         auto f = RDGE::Util::read_text_file("basic.frag");
         auto shader = std::make_unique<Shader>(v, f);
 
-        shader->Enable();
-		shader->SetUniform2f("light_pos", vec2(4.0f, 1.5f));
-        shader->SetUniform1i("tex", 0);
+        auto font = RDGE::Font("OpenSansPX.ttf", 32);
 
         Layer2D layer(std::move(shader));
+        //auto myText = new Label("Josh", 1.0f, 4.0f, std::move(font), RDGE::Color::Red());
+
+        auto texture = std::make_shared<GLTexture>("test.gif");
+        auto texture2 = std::make_shared<GLTexture>("test2.gif");
+
+        //auto texture = std::make_shared<GLTexture>("test_map.gif");
+        //auto uv1 = Renderable2D::UVCoordinates {
+            //RDGE::Math::vec2(0, 1),
+            //RDGE::Math::vec2(0, 0),
+            //RDGE::Math::vec2(0.5f, 0),
+            //RDGE::Math::vec2(0.5f, 1)
+        //};
+        //auto uv2 = Renderable2D::UVCoordinates {
+            //RDGE::Math::vec2(0.5f, 1),
+            //RDGE::Math::vec2(0.5f, 0),
+            //RDGE::Math::vec2(1, 0),
+            //RDGE::Math::vec2(1, 1)
+        //};
+
+        RDGE::Random rng;
         for (float y = 0; y < 9.0f; y++)
         {
             for (float x = 0; x < 16.0f; x++)
             {
-                layer.AddRenderable(new Sprite(x, y, 0.9f, 0.9f, RDGE::Color::Blue()));
+                auto random = rng.Next(2);
+                if (random == 0)
+                {
+                    layer.AddRenderable(new Sprite(x, y, 0.9f, 0.9f, RDGE::Color::Blue()));
+                }
+                else if (random == 1)
+                {
+                    layer.AddRenderable(new Sprite(x, y, 0.9f, 0.9f, texture));
+                    //layer.AddRenderable(new Sprite(x, y, 0.9f, 0.9f, texture, uv1));
+                }
+                else
+                {
+                    layer.AddRenderable(new Sprite(x, y, 0.9f, 0.9f, texture2));
+                    //layer.AddRenderable(new Sprite(x, y, 0.9f, 0.9f, texture, uv2));
+                }
             }
         }
+
+        auto myText = new Label("Josh", 1.0f, 4.0f, std::move(font), RDGE::Color::Red());
+        layer.AddRenderable(myText);
 
         //Group* button = new Group(mat4::translation(vec3(1.0f, 0.0f, 0.0f)));
         //button->AddRenderable(new Sprite(0, 0, 5.0f, 2.0f, RDGE::Color::Blue()));
         //button->AddRenderable(new Sprite(0.5f, 0.5f, 3.0f, 1.0f, RDGE::Color::Red()));
         //layer.AddRenderable(button);
-
-        //glActiveTexture(GL_TEXTURE0);
-        GLTexture texture("test.gif", 0);
-        texture.Bind();
-
-
-            //auto ts = layer.GetShader();
-            //ts->Enable();
-            //ts->SetUniform1i("tex", 0);
-            //ts->SetUniformMat4("pr_matrix", mat4::orthographic(0.0f, 16.0f, 0.0f, 9.0f, -1.0f, 1.0f));
-
 
         bool running = true;
         SDL_Event event;
@@ -121,6 +148,9 @@ int main ()
                     {
                     case SDLK_ESCAPE:
                         running = false;
+                        break;
+                    case SDLK_j:
+                        myText->SetText("Josh Two");
                         break;
                     }
                 }

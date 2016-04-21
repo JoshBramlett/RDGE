@@ -3,30 +3,38 @@
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
 
+#include <GL/glew.h>
+
 #include <algorithm>
+#include <memory>
 #include <sstream>
+#include <utility>
 
 namespace RDGE {
 namespace Graphics {
 
 namespace {
 
-std::string ShaderTypeString (RDGE::UInt32 shader_type)
-{
-    switch (shader_type)
-    {
-    case GL_VERTEX_SHADER:
-        return "vertex";
-    case GL_FRAGMENT_SHADER:
-        return "fragment";
-    case GL_GEOMETRY_SHADER:
-        return "geometry";
-    default:
-        break;
-    }
+    // cache value for multiple lookups
+    RDGE::Int32 s_maxFragmentShaderUnits = -1;
 
-    return "unknown";
-}
+    std::string
+    ShaderTypeString (RDGE::UInt32 shader_type)
+    {
+        switch (shader_type)
+        {
+        case GL_VERTEX_SHADER:
+            return "vertex";
+        case GL_FRAGMENT_SHADER:
+            return "fragment";
+        case GL_GEOMETRY_SHADER:
+            return "geometry";
+        default:
+            break;
+        }
+
+        return "unknown";
+    }
 
 } // anonymous namespace
 
@@ -51,6 +59,7 @@ Shader::~Shader (void)
 }
 
 Shader::Shader (Shader&& rhs) noexcept
+    : m_uniforms(std::move(rhs.m_uniforms))
 {
     // The destructor deletes the OpenGL program, therefore we swap the program
     // ids so the moved-from object will destroy the program it's replacing
@@ -62,6 +71,7 @@ Shader::operator= (Shader&& rhs) noexcept
 {
     if (this != &rhs)
     {
+        m_uniforms = std::move(rhs.m_uniforms);
         std::swap(m_programId, rhs.m_programId);
     }
 
@@ -81,47 +91,45 @@ Shader::Disable (void) const
 }
 
 void
-Shader::SetUniform1i (const GLchar* name, RDGE::Int32 value)
+Shader::SetUniform1i (const std::string& name, RDGE::Int32 value)
 {
     glUniform1i(GetUniformLocation(name), value);
 }
 
 void
-Shader::SetUniform1f (const GLchar* name, float value)
+Shader::SetUniform1iv (const std::string& name, RDGE::Int32 count, RDGE::Int32* values)
+{
+    glUniform1iv(GetUniformLocation(name), count, values);
+}
+
+void
+Shader::SetUniform1f (const std::string& name, float value)
 {
     glUniform1f(GetUniformLocation(name), value);
 }
 
 void
-Shader::SetUniform2f (const GLchar* name, const RDGE::Math::vec2& vec)
+Shader::SetUniform2f (const std::string& name, const RDGE::Math::vec2& vec)
 {
     glUniform2f(GetUniformLocation(name), vec.x, vec.y);
 }
 
 void
-Shader::SetUniform3f (const GLchar* name, const RDGE::Math::vec3& vec)
+Shader::SetUniform3f (const std::string& name, const RDGE::Math::vec3& vec)
 {
     glUniform3f(GetUniformLocation(name), vec.x, vec.y, vec.z);
 }
 
 void
-Shader::SetUniform4f (const GLchar* name, const RDGE::Math::vec4& vec)
+Shader::SetUniform4f (const std::string& name, const RDGE::Math::vec4& vec)
 {
     glUniform4f(GetUniformLocation(name), vec.x, vec.y, vec.z, vec.w);
 }
 
 void
-Shader::SetUniformMat4 (const GLchar* name, const RDGE::Math::mat4& matrix)
+Shader::SetUniformMat4 (const std::string& name, const RDGE::Math::mat4& matrix)
 {
     glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, matrix.elements);
-}
-
-GLint
-Shader::GetUniformLocation (const GLchar* name)
-{
-    // TODO: this is slow, so we'll cache values in a later episode LUL
-
-    return glGetUniformLocation(m_programId, name);
 }
 
 /* static */ Shader
@@ -131,6 +139,17 @@ Shader::FromFile (const char* restrict vert_path, const char* restrict frag_path
     auto f = RDGE::Util::read_text_file(frag_path);
 
     return Shader(v, f);
+}
+
+/* static */ RDGE::Int32
+Shader::MaxFragmentShaderUnits (void)
+{
+    if (s_maxFragmentShaderUnits < 0)
+    {
+        s_maxFragmentShaderUnits = OpenGL::GetIntegerValue(GL_MAX_TEXTURE_IMAGE_UNITS);
+    }
+
+    return s_maxFragmentShaderUnits;
 }
 
 void
@@ -207,6 +226,24 @@ Shader::Link (const std::vector<RDGE::UInt32>& shaders)
     }
 
     return program;
+}
+
+RDGE::Int32
+Shader::GetUniformLocation (const std::string& name)
+{
+    auto it = m_uniforms.find(name);
+    if (it != m_uniforms.end())
+    {
+        return it->second;
+    }
+
+    auto location = OpenGL::GetUniformLocation(m_programId, name);
+    if (location >= 0)
+    {
+        m_uniforms.emplace(std::make_pair(name, location));
+    }
+
+    return location;
 }
 
 } // namespace Graphics

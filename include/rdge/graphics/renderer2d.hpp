@@ -7,10 +7,12 @@
 
 #include <rdge/types.hpp>
 #include <rdge/graphics/buffers/index_buffer.hpp>
+#include <rdge/graphics/gltexture.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/math/vec3.hpp>
 #include <rdge/math/mat4.hpp>
 
+#include <memory>
 #include <vector>
 
 //! \namespace RDGE Rainbow Drop Game Engine
@@ -29,6 +31,8 @@ struct vertex_data
     RDGE::Math::vec3 vertex;
     //! \var uv Texture coordinates
     RDGE::Math::vec2 uv;
+    //! \var tid Texture unit ID
+    float            tid;
     //! \var color Vertex color
     RDGE::UInt32     color;
 };
@@ -107,13 +111,16 @@ public:
     //! \brief Pop the top-most transformation off the stack
     void PopTransformation (void);
 
+    void RegisterTexture (std::shared_ptr<GLTexture>& texture);
+
 private:
     RDGE::UInt32 m_vao;
     RDGE::UInt32 m_vbo;
+    IndexBuffer  m_ibo;
+    RDGE::Int32  m_indexCount;
     vertex_data* m_buffer;
 
-    IndexBuffer m_ibo;
-    RDGE::Int32 m_indexCount;
+    std::vector<std::shared_ptr<GLTexture>> m_textures;
 
     std::vector<RDGE::Math::mat4> m_transformationStack;
     RDGE::Math::mat4*             m_currentTransformation;

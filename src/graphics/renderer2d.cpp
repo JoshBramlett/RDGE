@@ -1,5 +1,6 @@
 #include <rdge/graphics/renderer2d.hpp>
 #include <rdge/graphics/renderable2d.hpp>
+#include <rdge/graphics/shader.hpp>
 #include <rdge/color.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
 #include <rdge/internal/exception_macros.hpp>
@@ -19,7 +20,8 @@ namespace {
     // Vertex attribute indices (maps to vertex_data struct)
     constexpr RDGE::UInt32 VATTR_VERTEX_INDEX = 0;
     constexpr RDGE::UInt32 VATTR_UV_INDEX     = 1;
-    constexpr RDGE::UInt32 VATTR_COLOR_INDEX  = 2;
+    constexpr RDGE::UInt32 VATTR_TID_INDEX    = 2;
+    constexpr RDGE::UInt32 VATTR_COLOR_INDEX  = 3;
 
 } // anonymous namespace
 
@@ -55,6 +57,7 @@ Renderer2D::Renderer2D (RDGE::UInt16 max_sprite_count)
 
     OpenGL::EnableVertexAttribute(VATTR_VERTEX_INDEX);
     OpenGL::EnableVertexAttribute(VATTR_UV_INDEX);
+    OpenGL::EnableVertexAttribute(VATTR_TID_INDEX);
     OpenGL::EnableVertexAttribute(VATTR_COLOR_INDEX);
 
     OpenGL::SetVertexAttributePointer(
@@ -73,6 +76,15 @@ Renderer2D::Renderer2D (RDGE::UInt16 max_sprite_count)
                                       false,
                                       VERTEX_SIZE,
                                       reinterpret_cast<void*>(offsetof(vertex_data, uv))
+                                     );
+
+    OpenGL::SetVertexAttributePointer(
+                                      VATTR_TID_INDEX,
+                                      1,
+                                      GL_FLOAT,
+                                      false,
+                                      VERTEX_SIZE,
+                                      reinterpret_cast<void*>(offsetof(vertex_data, tid))
                                      );
 
     // TODO:  Need to figure out what's going on with color.  Supposedly when using
@@ -123,6 +135,29 @@ Renderer2D::~Renderer2D (void)
 }
 
 void
+Renderer2D::RegisterTexture (std::shared_ptr<GLTexture>& texture)
+{
+    // no texture or already added
+    if (!texture || texture->UnitID() >= 0)
+    {
+        return;
+    }
+
+    auto size = static_cast<RDGE::Int32>(m_textures.size());
+    if (size >= (Shader::MaxFragmentShaderUnits() - 1))
+    {
+        RDGE_THROW(
+                   "Unable to register texture.  Max limit of " +
+                   std::to_string(Shader::MaxFragmentShaderUnits()) +
+                   " already reached."
+                  );
+    }
+
+    texture->SetUnitID(size);
+    m_textures.emplace_back(texture->GetSharedPtr());
+}
+
+void
 Renderer2D::PrepSubmit (void)
 {
     OpenGL::BindBuffer(GL_ARRAY_BUFFER, m_vbo);
@@ -149,25 +184,35 @@ Renderer2D::Submit (const Renderable2D* renderable)
     auto pos   = renderable->Position();
     auto size  = renderable->Size();
     auto uv    = renderable->UV();
-    auto color = renderable->Color().ToRgba();
+    auto tid   = static_cast<float>(renderable->TextureUnitID());
+    RDGE::UInt32 color = 0;
+
+    if (tid < 0.0f)
+    {
+        color = renderable->Color().ToRgba();
+    }
 
     m_buffer->vertex = *m_currentTransformation * pos;
     m_buffer->uv = uv[0];
+    m_buffer->tid = tid;
     m_buffer->color = color;
     m_buffer++;
 
     m_buffer->vertex = *m_currentTransformation * vec3(pos.x, pos.y + size.y, pos.z);
     m_buffer->uv = uv[1];
+    m_buffer->tid = tid;
     m_buffer->color = color;
     m_buffer++;
 
     m_buffer->vertex = *m_currentTransformation * vec3(pos.x + size.x, pos.y + size.y, pos.z);
     m_buffer->uv = uv[2];
+    m_buffer->tid = tid;
     m_buffer->color = color;
     m_buffer++;
 
     m_buffer->vertex = *m_currentTransformation * vec3(pos.x + size.x, pos.y, pos.z);
     m_buffer->uv = uv[3];
+    m_buffer->tid = tid;
     m_buffer->color = color;
     m_buffer++;
 
@@ -184,6 +229,11 @@ Renderer2D::EndSubmit (void)
 void
 Renderer2D::Flush (void)
 {
+    for (auto texture : m_textures)
+    {
+        texture->Activate();
+    }
+
     OpenGL::BindVertexArray(m_vao);
     m_ibo.Bind();
 

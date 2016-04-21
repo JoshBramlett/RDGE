@@ -86,14 +86,9 @@ Surface::~Surface (void)
 }
 
 Surface::Surface (Surface&& rhs) noexcept
-    : m_pixelData(std::move(rhs.m_pixelData))
+    : m_surface(rhs.m_surface)
+    , m_pixelData(std::move(rhs.m_pixelData))
 {
-    if (m_surface != nullptr)
-    {
-        SDL_FreeSurface(m_surface);
-    }
-
-    m_surface = rhs.m_surface;
     rhs.m_surface = nullptr;
 }
 

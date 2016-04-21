@@ -118,6 +118,10 @@ GLWindow::GLWindow (
     // Query for the OpenGL error to clear the value for later lookup
     glGetError();
 
+    // TODO:  This enables alpha blending.  Look into it further when I have time.
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     RDGE::Int32 interval = use_vsync ? 1 : 0;
     if (SDL_GL_SetSwapInterval(interval) != 0)
     {

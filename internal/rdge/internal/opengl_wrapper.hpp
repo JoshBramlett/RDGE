@@ -144,6 +144,20 @@ UseProgram (RDGE::UInt32 program)
     GL_CHECK_ERROR(glUseProgram(program));
 }
 
+//! \brief Direct map to glGetUniformLocation
+//! \details Get the location of a uniform variable
+//! \param [in] program Handle of the program
+//! \param [in] name Name of the uniform variable
+//! \returns Uniform variable location
+//! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glGetUniformLocation.xml
+inline RDGE::Int32
+GetUniformLocation (RDGE::UInt32 program, const std::string& name)
+{
+    RDGE::Int32 result;
+    GL_CHECK_ERROR(result = glGetUniformLocation(program, name.c_str()));
+    return result;
+}
+
 /******************************************************************
  *                       Vertex Arrays
  *****************************************************************/
@@ -526,6 +540,43 @@ inline void DeleteTexture(RDGE::UInt32 texture)
 inline void DeleteTextures(RDGE::UInt32 size, RDGE::UInt32* textures)
 {
     GL_CHECK_ERROR(glDeleteTextures(size, textures));
+}
+
+/******************************************************************
+ *                      OpenGL Get Values
+ *****************************************************************/
+
+//! \brief Query OpenGL for the boolean value of a given parameter
+//! \param [in] pname Parameter name
+//! \see https://www.opengl.org/sdk/docs/man2/xhtml/glGet.xml
+inline bool
+GetBooleanValue (RDGE::UInt32 pname)
+{
+    GLboolean value;
+    GL_CHECK_ERROR(glGetBooleanv(pname, &value));
+    return (value == GL_TRUE);
+}
+
+//! \brief Query OpenGL for the float value of a given parameter
+//! \param [in] pname Parameter name
+//! \see https://www.opengl.org/sdk/docs/man2/xhtml/glGet.xml
+inline float
+GetFloatValue (RDGE::UInt32 pname)
+{
+    GLfloat value;
+    GL_CHECK_ERROR(glGetFloatv(pname, &value));
+    return value;
+}
+
+//! \brief Query OpenGL for the integer value of a given parameter
+//! \param [in] pname Parameter name
+//! \see https://www.opengl.org/sdk/docs/man2/xhtml/glGet.xml
+inline RDGE::Int32
+GetIntegerValue (RDGE::UInt32 pname)
+{
+    GLint value;
+    GL_CHECK_ERROR(glGetIntegerv(pname, &value));
+    return static_cast<RDGE::Int32>(value);
 }
 
 /******************************************************************

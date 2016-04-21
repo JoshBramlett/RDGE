@@ -33,6 +33,9 @@ namespace Graphics {
 //             objects positions.
 //         5)  The ctor could also accept a max # of renderables so the vector
 //             doessn't have to re-allocate when the sprite count is high.
+//         6)  This and the renderer are so intertwined with the shader code
+//             that the shader code really should be moved internal to the layer
+//             and the shader should no longer be a parameter in the ctor
 
 //! \class Layer2D
 //! \brief

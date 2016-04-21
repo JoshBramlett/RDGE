@@ -7,19 +7,25 @@
 namespace RDGE {
 namespace Graphics {
 
-GLTexture::GLTexture (const std::string& file, RDGE::UInt32 unit)
+GLTexture::GLTexture (const std::string& file)
     : m_textureId(0)
-    , m_textureUnit(unit)
+    , m_textureUnitId(-1)
+    , m_width(0)
+    , m_height(0)
 {
     RDGE::Surface surface(file);
-    Init(surface);
+    m_textureId = OpenGL::CreateTexture();
+    ResetData(surface);
 }
 
-GLTexture::GLTexture (RDGE::Surface& surface, RDGE::UInt32 unit)
+GLTexture::GLTexture (RDGE::Surface& surface)
     : m_textureId(0)
-    , m_textureUnit(unit)
+    , m_textureUnitId(-1)
+    , m_width(0)
+    , m_height(0)
 {
-    Init(surface);
+    m_textureId = OpenGL::CreateTexture();
+    ResetData(surface);
 }
 
 GLTexture::~GLTexture (void)
@@ -28,28 +34,21 @@ GLTexture::~GLTexture (void)
 }
 
 void
-GLTexture::Bind (void)
+GLTexture::Activate (void) const
 {
-    OpenGL::SetActiveTexture(GL_TEXTURE0 + m_textureUnit);
+    OpenGL::SetActiveTexture(GL_TEXTURE0 + m_textureUnitId);
     OpenGL::BindTexture(GL_TEXTURE_2D, m_textureId);
 }
 
 void
-GLTexture::Unbind (void)
+GLTexture::SetUnitID (RDGE::Int32 id)
 {
-    OpenGL::UnbindTexture(GL_TEXTURE_2D);
+    m_textureUnitId = id;
 }
 
 void
-GLTexture::Init (RDGE::Surface& surface)
+GLTexture::ResetData (RDGE::Surface& surface)
 {
-    int texture_units;
-    glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &texture_units);
-    std::cout << "samplers=" << texture_units << std::endl;
-
-    glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &texture_units);
-    std::cout << "total samplers=" << texture_units << std::endl;
-
     // TODO: [00036] Add support for 24bpp (no alpha channel) images.  Gimp doesn't
     //       support it out of the box.  I believe the changes would be to convert
     //       the surface to SDL_PIXELFORMAT_BGR888, and set GL_RGB in the OpenGL call.
@@ -57,8 +56,9 @@ GLTexture::Init (RDGE::Surface& surface)
 
     // Change pixel format to what OpenGL understands
     surface.ChangePixelFormat(SDL_PIXELFORMAT_ABGR8888);
+    m_width = surface.Width();
+    m_height = surface.Height();
 
-    m_textureId = OpenGL::CreateTexture();
     OpenGL::BindTexture(GL_TEXTURE_2D, m_textureId);
 
     // TODO: This is a naive implementation.  The following filters are used to

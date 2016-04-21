@@ -11,10 +11,9 @@
 #include <rdge/math/vec4.hpp>
 #include <rdge/math/mat4.hpp>
 
-#include <GL/glew.h>
-
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {
@@ -61,12 +60,13 @@ public:
     void Disable (void) const;
 
     // TODO Consider overloading
-    void SetUniform1i (const GLchar* name, RDGE::Int32 value);
-    void SetUniform1f (const GLchar* name, float value);
-    void SetUniform2f (const GLchar* name, const RDGE::Math::vec2& vec);
-    void SetUniform3f (const GLchar* name, const RDGE::Math::vec3& vec);
-    void SetUniform4f (const GLchar* name, const RDGE::Math::vec4& vec);
-    void SetUniformMat4 (const GLchar* name, const RDGE::Math::mat4& matrix);
+    void SetUniform1i (const std::string& name, RDGE::Int32 value);
+    void SetUniform1iv (const std::string& name, RDGE::Int32 count, RDGE::Int32* values);
+    void SetUniform1f (const std::string& name, float value);
+    void SetUniform2f (const std::string& name, const RDGE::Math::vec2& vec);
+    void SetUniform3f (const std::string& name, const RDGE::Math::vec3& vec);
+    void SetUniform4f (const std::string& name, const RDGE::Math::vec4& vec);
+    void SetUniformMat4 (const std::string& name, const RDGE::Math::mat4& matrix);
 
     //! \brief Create a program from source files
     //! \details Performs all setup as defined in the constructor.
@@ -75,6 +75,13 @@ public:
     //! \returns Initialized Shader object
     //! \throws RDGE::GLException Shader could not be built
     static Shader FromFile (const char* restrict vert_path, const char* restrict frag_path);
+
+    //! \brief Number of textures supported in the fragment shader
+    //! \details Queries OpenGL for the maximum amount of texture image units the
+    //!          sampler in the fragment shader can access.  The minimum required
+    //!          as defined by OpenGL is 16.
+    //! \returns Number of supported textures in the fragment shader
+    static RDGE::Int32 MaxFragmentShaderUnits (void);
 
 private:
     // TODO: Ideally this is where the parsing occurs in order to cache the uniform
@@ -99,10 +106,18 @@ private:
     //! \throws RDGE::GLException Program could not be linked
     RDGE::UInt32 Link (const std::vector<RDGE::UInt32>& shaders);
 
+    //! \brief Get the uniform location by name
+    //! \details Uniform locations are unknown until the program is linked and
+    //!          the query to OpenGL is slow so values are cached once the first
+    //!          lookup is performed
+    //! /param [in] name Uniform name
+    //! /returns Shader program uniform location
+    RDGE::Int32 GetUniformLocation (const std::string& name);
 
-    GLint GetUniformLocation (const GLchar* name);
+private:
+    RDGE::UInt32 m_programId;
 
-    GLuint m_programId;
+    std::unordered_map<std::string, RDGE::Int32> m_uniforms;
 };
 
 } // namespace Graphics

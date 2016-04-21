@@ -7,7 +7,10 @@
 
 #include <rdge/types.hpp>
 #include <rdge/graphics/renderable2d.hpp>
+#include <rdge/graphics/gltexture.hpp>
 #include <rdge/color.hpp>
+
+#include <memory>
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {
@@ -25,6 +28,20 @@ public:
     //! \param [in] height Height of the sprite
     //! \param [in] color Color of all vertices
     explicit Sprite (float x, float y, float width, float height, const RDGE::Color& color);
+
+    //! \brief Sprite ctor
+    //! \param [in] x x-coordinate location
+    //! \param [in] y y-coordinate location
+    //! \param [in] width Width of the sprite
+    //! \param [in] height Height of the sprite
+    //! \param [in] texture Texture the sprite will use
+    //! \param [in] uv UV coordinates
+    explicit Sprite (
+                     float x, float y,
+                     float width, float height,
+                     std::shared_ptr<GLTexture> texture,
+                     UVCoordinates uv = DefaultUVCoordinates()
+                    );
 };
 
 } // namespace Graphics

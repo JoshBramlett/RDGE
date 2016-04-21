@@ -7,10 +7,13 @@
 
 #include <rdge/types.hpp>
 #include <rdge/graphics/renderer2d.hpp>
+#include <rdge/graphics/gltexture.hpp>
+#include <rdge/math/functions.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/math/vec3.hpp>
 #include <rdge/color.hpp>
 
+#include <memory>
 #include <vector>
 
 //! \namespace RDGE Rainbow Drop Game Engine
@@ -22,31 +25,31 @@ namespace Graphics {
 class Renderable2D
 {
 public:
+    //! \typedef UVCoordinates Collection of UV coordinates
+    using UVCoordinates = std::vector<RDGE::Math::vec2>;
+
     //! \brief Renderable2D default empty ctor
     Renderable2D (void)
-    {
-        SetUVDefaults();
-    }
+        : m_texture(nullptr)
+        , m_uv(DefaultUVCoordinates())
+    { }
 
     //! \brief Renderable2D ctor
     //! \param [in] position Location coordinates.  Z-axis is for layering
     //! \param [in] size Width and height of the renderable
-    //! \param [in] color Color shared by each vertex
-    explicit Renderable2D (
-                           const RDGE::Math::vec3& position,
-                           const RDGE::Math::vec2& size,
-                           const RDGE::Color&      color
-                          )
-        : m_position(position)
+    explicit Renderable2D (const RDGE::Math::vec3& position, const RDGE::Math::vec2& size)
+        : m_texture(nullptr)
+        , m_uv(DefaultUVCoordinates())
+        , m_position(position)
         , m_size(size)
-        , m_color(color)
-    {
-        SetUVDefaults();
-    }
+    { }
 
     //! \brief Renderable2D dtor
     virtual ~Renderable2D (void) { }
 
+    //! \brief Submit renderable to the renderer
+    //! \details Base class implementation that simply performs the submission.
+    //! \param [in] renderer Renderer2D to submit to
     virtual void Submit (Renderer2D* renderer) const
     {
         renderer->Submit(this);
@@ -73,6 +76,18 @@ public:
         return m_color;
     }
 
+    //! \brief Get the shader unit id of the renderable object
+    //! \returns Unit id, or -1 if not available
+    RDGE::Int32 TextureUnitID (void) const noexcept
+    {
+        return m_texture ? static_cast<RDGE::Int32>(m_texture->UnitID()) : -1;
+    }
+
+    std::shared_ptr<GLTexture> Texture (void) const noexcept
+    {
+        return m_texture;
+    }
+
     //! \brief Get the texture coordinates of the renderable object.
     //! \returns Vector of coordinates
     const std::vector<RDGE::Math::vec2>& UV (void) const noexcept
@@ -80,36 +95,42 @@ public:
         return m_uv;
     }
 
-private:
-
-    void SetUVDefaults (void) noexcept
+    void SetSize (const RDGE::Math::vec2& size)
     {
-        //m_uv.emplace_back(RDGE::Math::vec2(0, 0));
-        //m_uv.emplace_back(RDGE::Math::vec2(0, 1));
-        //m_uv.emplace_back(RDGE::Math::vec2(1, 1));
-        //m_uv.emplace_back(RDGE::Math::vec2(1, 0));
-
-        // TODO: Important note, LUL used the code above, but I need to use one of the
-        //       two below.  Without it my texture was upside down, which makes sense
-        //       because I was correlating the 0,0 axis to the top-left uv of the
-        //       image.  If I process the vertices starting with a y-axis of 1, (the
-        //       same as the image) the texture draws correctly.
-
-        m_uv.emplace_back(RDGE::Math::vec2(0, 1));
-        m_uv.emplace_back(RDGE::Math::vec2(0, 0));
-        m_uv.emplace_back(RDGE::Math::vec2(1, 0));
-        m_uv.emplace_back(RDGE::Math::vec2(1, 1));
-
-        //m_uv.emplace_back(RDGE::Math::vec2(1, 1));
-        //m_uv.emplace_back(RDGE::Math::vec2(1, 0));
-        //m_uv.emplace_back(RDGE::Math::vec2(0, 0));
-        //m_uv.emplace_back(RDGE::Math::vec2(0, 1));
+        m_size = size;
     }
 
-    RDGE::Math::vec3              m_position;
-    RDGE::Math::vec2              m_size;
-    RDGE::Color                   m_color;
+    //! \brief Set the Z-Index position value
+    //! \param [in] zindex Z-Index value
+    void SetZIndex (float zindex)
+    {
+        m_position.z = RDGE::Math::clamp(zindex, 0.0f, 1.0f);
+    }
+
+    //! \brief Get the default UV coordinates
+    //! \details The default UV coordinates makeup the entire texture.  The
+    //!          ordering of the coordinates is important and must follow
+    //!          in counter-clockwise starting with the top left coordinate.
+    //! \returns UV coordinates container with default values
+    static UVCoordinates DefaultUVCoordinates (void)
+    {
+        return UVCoordinates {
+            RDGE::Math::vec2(0, 1),
+            RDGE::Math::vec2(0, 0),
+            RDGE::Math::vec2(1, 0),
+            RDGE::Math::vec2(1, 1)
+        };
+    }
+
+protected:
+    RDGE::Color m_color;
+
+    std::shared_ptr<GLTexture>    m_texture;
     std::vector<RDGE::Math::vec2> m_uv;
+
+private:
+    RDGE::Math::vec3 m_position;
+    RDGE::Math::vec2 m_size;
 };
 
 } // namespace Graphics

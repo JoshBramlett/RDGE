@@ -74,6 +74,7 @@ add_library (
              src/graphics/renderer2d.cpp
              src/graphics/shader.cpp
              src/graphics/sprite.cpp
+             src/graphics/label.cpp
              src/graphics/gltexture.cpp
              src/graphics/layers/layer2d.cpp
              src/graphics/layers/group.cpp
