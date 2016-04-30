@@ -91,45 +91,51 @@ Shader::Disable (void) const
 }
 
 void
-Shader::SetUniform1i (const std::string& name, RDGE::Int32 value)
+Shader::SetUniformValue (const std::string& name, RDGE::Int32 value)
 {
-    glUniform1i(GetUniformLocation(name), value);
+    OpenGL::SetUniformValue1i(GetUniformLocation(name), value);
 }
 
 void
-Shader::SetUniform1iv (const std::string& name, RDGE::Int32 count, RDGE::Int32* values)
+Shader::SetUniformValue (const std::string& name, float value)
 {
-    glUniform1iv(GetUniformLocation(name), count, values);
+    OpenGL::SetUniformValue1f(GetUniformLocation(name), value);
 }
 
 void
-Shader::SetUniform1f (const std::string& name, float value)
+Shader::SetUniformValue (const std::string& name, const RDGE::Math::vec2& vec)
 {
-    glUniform1f(GetUniformLocation(name), value);
+    OpenGL::SetUniformValue2f(GetUniformLocation(name), vec.x, vec.y);
 }
 
 void
-Shader::SetUniform2f (const std::string& name, const RDGE::Math::vec2& vec)
+Shader::SetUniformValue (const std::string& name, const RDGE::Math::vec3& vec)
 {
-    glUniform2f(GetUniformLocation(name), vec.x, vec.y);
+    OpenGL::SetUniformValue3f(GetUniformLocation(name), vec.x, vec.y, vec.z);
 }
 
 void
-Shader::SetUniform3f (const std::string& name, const RDGE::Math::vec3& vec)
+Shader::SetUniformValue (const std::string& name, const RDGE::Math::vec4& vec)
 {
-    glUniform3f(GetUniformLocation(name), vec.x, vec.y, vec.z);
+    OpenGL::SetUniformValue4f(GetUniformLocation(name), vec.x, vec.y, vec.z, vec.w);
 }
 
 void
-Shader::SetUniform4f (const std::string& name, const RDGE::Math::vec4& vec)
+Shader::SetUniformValue (const std::string& name, RDGE::UInt32 count, RDGE::Int32* values)
 {
-    glUniform4f(GetUniformLocation(name), vec.x, vec.y, vec.z, vec.w);
+    OpenGL::SetUniformValue1iv(GetUniformLocation(name), count, values);
 }
 
 void
-Shader::SetUniformMat4 (const std::string& name, const RDGE::Math::mat4& matrix)
+Shader::SetUniformValue (const std::string& name, RDGE::UInt32 count, float* values)
 {
-    glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, matrix.elements);
+    OpenGL::SetUniformValue1fv(GetUniformLocation(name), count, values);
+}
+
+void
+Shader::SetUniformValue (const std::string& name, const RDGE::Math::mat4& matrix)
+{
+    OpenGL::SetUniformValueMatrix4fv(GetUniformLocation(name), matrix.elements);
 }
 
 /* static */ Shader
@@ -155,7 +161,7 @@ Shader::MaxFragmentShaderUnits (void)
 void
 Shader::PreProcess (void)
 {
-
+    // TODO: Implement
 }
 
 RDGE::UInt32

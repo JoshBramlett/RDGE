@@ -86,6 +86,7 @@ public:
     // TODO: Test big endian to see if I need to reverse the order
     constexpr RDGE::UInt32 ToRgba (void) const
     {
+        //DEFAULT_R_MASK
         return a << 24 | b << 16 | g << 8 | r;
     }
 

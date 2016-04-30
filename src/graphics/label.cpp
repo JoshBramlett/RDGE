@@ -8,8 +8,9 @@ namespace RDGE {
 namespace Graphics {
 
 using namespace RDGE::Math;
+using namespace RDGE::Assets;
 
-Label::Label (const std::string& text, float x, float y, RDGE::Font font, const RDGE::Color& color)
+Label::Label (const std::string& text, float x, float y, Font font, const RDGE::Color& color)
     : Renderable2D(vec3(x, y, 0), vec2(0, 0))
     , m_font(std::move(font))
 {
@@ -18,7 +19,7 @@ Label::Label (const std::string& text, float x, float y, RDGE::Font font, const 
 
     m_color = color;
 
-    auto surface = m_font.RenderUTF8(text, m_color, RDGE::Font::RenderMode::Solid);
+    auto surface = m_font.RenderUTF8(text, m_color, Font::RenderMode::Solid);
     m_texture = std::make_shared<GLTexture>(surface);
 
     SetSize(vec2(
@@ -30,7 +31,7 @@ Label::Label (const std::string& text, float x, float y, RDGE::Font font, const 
 void
 Label::SetText (const std::string& text)
 {
-    auto surface = m_font.RenderUTF8(text, m_color, RDGE::Font::RenderMode::Solid);
+    auto surface = m_font.RenderUTF8(text, m_color, Font::RenderMode::Solid);
     m_texture->ResetData(surface);
     SetSize(vec2(
                  16.0f * (m_texture->Width() / 960.0f),

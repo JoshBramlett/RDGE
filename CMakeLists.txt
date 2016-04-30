@@ -56,21 +56,20 @@ add_library (
              RDGE SHARED
              src/application.cpp
              src/color.cpp
-             src/font.cpp
-             src/random.cpp
-             src/surface.cpp
              src/texture.cpp
              src/cursor.cpp
              src/viewport.cpp
              src/window.cpp
              src/glwindow.cpp
+             src/assets/font.cpp
+             src/assets/surface.cpp
              src/controls/control.cpp
              src/controls/button.cpp
              src/gameobjects/icollidable.cpp
              src/gameobjects/ientity.cpp
              src/gameobjects/scene.cpp
              src/gameobjects/game.cpp
-             src/gameobjects/text.cpp
+             #src/gameobjects/text.cpp
              src/graphics/renderer2d.cpp
              src/graphics/shader.cpp
              src/graphics/sprite.cpp
@@ -81,6 +80,7 @@ add_library (
              src/graphics/buffers/vertex_array.cpp
              src/graphics/buffers/vertex_buffer.cpp
              src/graphics/buffers/index_buffer.cpp
+             src/math/random.cpp
              src/math/mat4.cpp
              src/math/vec2.cpp
              src/math/vec3.cpp

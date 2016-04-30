@@ -137,6 +137,24 @@ Renderer2D::~Renderer2D (void)
 void
 Renderer2D::RegisterTexture (std::shared_ptr<GLTexture>& texture)
 {
+    /*
+     * There's two ways to implement activating a texture within OpenGL
+     *     1) Activate when the texture is registered with the renderer.
+     *        The major con is that all textures to be registered must
+     *        be generated (assigned a texture id) prior to activating them
+     *        (assigning a shader unit id).
+     *     2) Activate during render (flush) phase.
+     *        This is safer and allows textures to be created at any time,
+     *        however, this takes up cycles during the most performance
+     *        critical time.  Also, activation is performed every frame,
+     *        whereas in option 1 it's only done once.
+     *
+     * Currently, option 2 is implemented.
+     *
+     * TODO: Perform a perf test to determine the actual cost of activating
+     *       textures within the loop.
+     */
+
     // no texture or already added
     if (!texture || texture->UnitID() >= 0)
     {
@@ -185,12 +203,7 @@ Renderer2D::Submit (const Renderable2D* renderable)
     auto size  = renderable->Size();
     auto uv    = renderable->UV();
     auto tid   = static_cast<float>(renderable->TextureUnitID());
-    RDGE::UInt32 color = 0;
-
-    if (tid < 0.0f)
-    {
-        color = renderable->Color().ToRgba();
-    }
+    auto color = renderable->Color().ToRgba();
 
     m_buffer->vertex = *m_currentTransformation * pos;
     m_buffer->uv = uv[0];

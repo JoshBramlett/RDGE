@@ -1,4 +1,5 @@
 #include <rdge/graphics/gltexture.hpp>
+#include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
 
 #include <SDL.h>
@@ -13,18 +14,20 @@ GLTexture::GLTexture (const std::string& file)
     , m_width(0)
     , m_height(0)
 {
-    RDGE::Surface surface(file);
     m_textureId = OpenGL::CreateTexture();
+
+    auto surface = std::make_shared<RDGE::Assets::Surface>(file);
     ResetData(surface);
 }
 
-GLTexture::GLTexture (RDGE::Surface& surface)
+GLTexture::GLTexture (std::shared_ptr<RDGE::Assets::Surface>& surface)
     : m_textureId(0)
     , m_textureUnitId(-1)
     , m_width(0)
     , m_height(0)
 {
     m_textureId = OpenGL::CreateTexture();
+
     ResetData(surface);
 }
 
@@ -34,20 +37,25 @@ GLTexture::~GLTexture (void)
 }
 
 void
-GLTexture::Activate (void) const
-{
-    OpenGL::SetActiveTexture(GL_TEXTURE0 + m_textureUnitId);
-    OpenGL::BindTexture(GL_TEXTURE_2D, m_textureId);
-}
-
-void
 GLTexture::SetUnitID (RDGE::Int32 id)
 {
     m_textureUnitId = id;
 }
 
 void
-GLTexture::ResetData (RDGE::Surface& surface)
+GLTexture::Activate (void) const
+{
+    if (m_textureUnitId < 0)
+    {
+        RDGE_THROW("Attempting to activate to an invalid sampler index");
+    }
+
+    OpenGL::SetActiveTexture(GL_TEXTURE0 + m_textureUnitId);
+    OpenGL::BindTexture(GL_TEXTURE_2D, m_textureId);
+}
+
+void
+GLTexture::ResetData (std::shared_ptr<RDGE::Assets::Surface>& surface)
 {
     // TODO: [00036] Add support for 24bpp (no alpha channel) images.  Gimp doesn't
     //       support it out of the box.  I believe the changes would be to convert
@@ -55,9 +63,9 @@ GLTexture::ResetData (RDGE::Surface& surface)
     //       To check whether 24 or 32bpp, BytesPerPixel should be 3 or 4.
 
     // Change pixel format to what OpenGL understands
-    surface.ChangePixelFormat(SDL_PIXELFORMAT_ABGR8888);
-    m_width = surface.Width();
-    m_height = surface.Height();
+    surface->ChangePixelFormat(SDL_PIXELFORMAT_ABGR8888);
+    m_width = surface->Width();
+    m_height = surface->Height();
 
     OpenGL::BindTexture(GL_TEXTURE_2D, m_textureId);
 
@@ -70,7 +78,7 @@ GLTexture::ResetData (RDGE::Surface& surface)
     OpenGL::SetTextureParameter(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     OpenGL::SetTextureParameter(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    auto surface_ptr = surface.RawPtr();
+    auto surface_ptr = surface->RawPtr();
     OpenGL::SetTextureData(
                            GL_TEXTURE_2D,
                            GL_RGBA,

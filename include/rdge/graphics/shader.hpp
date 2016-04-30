@@ -59,14 +59,47 @@ public:
     //! \brief Uninstalls the program as part of current rendering state
     void Disable (void) const;
 
-    // TODO Consider overloading
-    void SetUniform1i (const std::string& name, RDGE::Int32 value);
-    void SetUniform1iv (const std::string& name, RDGE::Int32 count, RDGE::Int32* values);
-    void SetUniform1f (const std::string& name, float value);
-    void SetUniform2f (const std::string& name, const RDGE::Math::vec2& vec);
-    void SetUniform3f (const std::string& name, const RDGE::Math::vec3& vec);
-    void SetUniform4f (const std::string& name, const RDGE::Math::vec4& vec);
-    void SetUniformMat4 (const std::string& name, const RDGE::Math::mat4& matrix);
+    //! \brief Set the integer uniform variable value
+    //! \param [in] name Name of the uniform variable
+    //! \param [in] value Value to set the uniform to
+    void SetUniformValue (const std::string& name, RDGE::Int32 value);
+
+    //! \brief Set the float uniform variable value
+    //! \param [in] name Name of the uniform variable
+    //! \param [in] value Value to set the uniform to
+    void SetUniformValue (const std::string& name, float value);
+
+    //! \brief Set the vec2 float uniform variable value
+    //! \param [in] name Name of the uniform variable
+    //! \param [in] value Value to set the uniform to
+    void SetUniformValue (const std::string& name, const RDGE::Math::vec2& vec);
+
+    //! \brief Set the vec3 float uniform variable value
+    //! \param [in] name Name of the uniform variable
+    //! \param [in] value Value to set the uniform to
+    void SetUniformValue (const std::string& name, const RDGE::Math::vec3& vec);
+
+    //! \brief Set the vec4 float uniform variable value
+    //! \param [in] name Name of the uniform variable
+    //! \param [in] value Value to set the uniform to
+    void SetUniformValue (const std::string& name, const RDGE::Math::vec4& vec);
+
+    //! \brief Set the integer array uniform variable value
+    //! \param [in] name Name of the uniform variable
+    //! \param [in] count Number of elements to be modified
+    //! \param [in] values Array of values to update
+    void SetUniformValue (const std::string& name, RDGE::UInt32 count, RDGE::Int32* values);
+
+    //! \brief Set the float array uniform variable value
+    //! \param [in] name Name of the uniform variable
+    //! \param [in] count Number of elements to be modified
+    //! \param [in] values Array of values to update
+    void SetUniformValue (const std::string& name, RDGE::UInt32 count, float* values);
+
+    //! \brief Set the mat4 float uniform variable value
+    //! \param [in] name Name of the uniform variable
+    //! \param [in] matrix Matrix to update
+    void SetUniformValue (const std::string& name, const RDGE::Math::mat4& matrix);
 
     //! \brief Create a program from source files
     //! \details Performs all setup as defined in the constructor.

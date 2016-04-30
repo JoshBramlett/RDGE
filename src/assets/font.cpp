@@ -1,7 +1,8 @@
-#include <rdge/font.hpp>
+#include <rdge/assets/font.hpp>
 #include <rdge/internal/exception_macros.hpp>
 
 namespace RDGE {
+namespace Assets {
 
 Font::Font (TTF_Font* font)
     : m_font(font)
@@ -126,7 +127,7 @@ Font::SampleSizeUTF8 (const std::string& text)
     return RDGE::Graphics::Size(w, h);
 }
 
-RDGE::Surface
+std::shared_ptr<Surface>
 Font::RenderUTF8 (
                   const std::string& text,
                   const RDGE::Color& color,
@@ -173,7 +174,8 @@ Font::RenderUTF8 (
         SDL_THROW("Render text failed", fn_name);
     }
 
-    return RDGE::Surface { surface };
+    return std::make_shared<Surface>(surface);
 }
 
+} // namespace Assets
 } // namespace RDGE

@@ -15,6 +15,7 @@
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {
+namespace Assets {
 
 //! \typedef SDLSurfaceUniquePtr
 //! \details Proper unique_ptr type implementing SDL custom deleter
@@ -33,11 +34,13 @@ inline auto CreateSDLSurfaceUniquePtr (SDL_Surface* surface) -> SDLSurfaceUnique
 }
 
 //! \class Surface
-//! \details RAII complient wrapper for SDL_Surface
-//! \brief Surface data is stored in ram and is slower than it's
-//!        drawing counterpart \ref Texture.  Surface objects should
-//!        not be used for rendering
-class Surface
+//! \brief Can be used as an RAII complient wrapper for SDL_Surface, or
+//!        has functionality to be used as a shared_ptr.
+//! \details Surface data is stored in ram so the pixel data within should
+//!          not be used for rendering.  Rather, it should simply be used to
+//!          cache an image asset and the pixel data should be transferred to
+//!          the texture for rendering.
+class Surface : public std::enable_shared_from_this<Surface>
 {
 public:
     //! \brief Surface ctor
@@ -120,6 +123,15 @@ public:
     //! \details Transfers ownership of pointer
     Surface& operator= (Surface&& rhs) noexcept;
 
+    //! \brief Safely retrieve additional shared_ptr instance
+    //! \returns Shared pointer of the current object
+    //! \throws std::bad_weak_ptr If called when object is not managed
+    //!         by a shared_ptr
+    std::shared_ptr<Surface> GetSharedPtr (void) noexcept
+    {
+        return shared_from_this();
+    }
+
     //! \brief Return the raw SDL_Surface pointer
     //! \details Raw pointer is returned so caller must ensure
     //!          Surface object will not fall out of scope
@@ -157,4 +169,5 @@ private:
     std::unique_ptr<unsigned char[]> m_pixelData;
 };
 
+} // namespace Assets
 } // namespace RDGE

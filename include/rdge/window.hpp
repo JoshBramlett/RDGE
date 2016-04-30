@@ -13,7 +13,7 @@
 
 #include <rdge/types.hpp>
 #include <rdge/color.hpp>
-#include <rdge/surface.hpp>
+#include <rdge/assets/surface.hpp>
 #include <rdge/texture.hpp>
 #include <rdge/graphics/rect.hpp>
 
@@ -237,7 +237,7 @@ public:
     //!          be used sparingly (i.e. not within the game loop).
     //! \note Result can be passed to SDL_SaveBMP to save to file
     //! \returns Surface screenshot
-    RDGE::Surface Screenshot (void);
+    //RDGE::Surface Screenshot (void);
 
     //! \brief Get the avarge frame rate
     //! \details It's imperative this be called every frame or the values

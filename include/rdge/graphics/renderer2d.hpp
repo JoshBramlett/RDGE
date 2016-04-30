@@ -111,6 +111,16 @@ public:
     //! \brief Pop the top-most transformation off the stack
     void PopTransformation (void);
 
+    //! \brief Register a texture to the renderer.
+    //! \details All textures must be registered with the renderer before
+    //!          any renderables are submitted.  OpenGL limits the amount
+    //!          of textures within a shader, so it's recommended renderables
+    //!          share textures to limit the amount of active textures to
+    //!          within the supported amount.  If the provided texture does
+    //!          not have a valid sampler unit id, it will be assigned one.
+    //! \param [in] texture Shared pointer to the texture
+    //! \throws RDGE::Exception Attempting to register a new texture after the
+    //!                         maximum amount has already been reached
     void RegisterTexture (std::shared_ptr<GLTexture>& texture);
 
 private:

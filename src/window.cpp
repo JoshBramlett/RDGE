@@ -297,7 +297,7 @@ Window::DrawPrimitiveRect (
         }
     }
 }
-
+/*
 RDGE::Surface
 Window::Screenshot (void)
 {
@@ -355,7 +355,7 @@ Window::Screenshot (void)
 
     return ws;
 }
-
+*/
 double
 Window::FrameRate (void) const
 {

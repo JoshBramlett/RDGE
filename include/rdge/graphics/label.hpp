@@ -8,7 +8,7 @@
 #include <rdge/types.hpp>
 #include <rdge/graphics/renderable2d.hpp>
 #include <rdge/graphics/gltexture.hpp>
-#include <rdge/font.hpp>
+#include <rdge/assets/font.hpp>
 #include <rdge/color.hpp>
 
 #include <string>
@@ -28,12 +28,12 @@ public:
     //! \param [in] y y-coordinate location
     //! \param [in] font Font to render text
     //! \param [in] color Color of all vertices
-    explicit Label (const std::string& text, float x, float y, RDGE::Font font, const RDGE::Color& color);
+    explicit Label (const std::string& text, float x, float y, RDGE::Assets::Font font, const RDGE::Color& color);
 
     void SetText (const std::string& text);
 
 private:
-    RDGE::Font m_font;
+    RDGE::Assets::Font m_font;
 };
 
 } // namespace Graphics

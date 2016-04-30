@@ -1,9 +1,8 @@
 #include <rdge/types.hpp>
-#include <rdge/surface.hpp>
+#include <rdge/assets/surface.hpp>
 #include <rdge/application.hpp>
 #include <rdge/glwindow.hpp>
-#include <rdge/random.hpp>
-#include <rdge/font.hpp>
+#include <rdge/assets/font.hpp>
 #include <rdge/graphics/buffers/vertex_array.hpp>
 #include <rdge/graphics/buffers/vertex_buffer.hpp>
 #include <rdge/graphics/buffers/index_buffer.hpp>
@@ -15,6 +14,7 @@
 #include <rdge/graphics/layers/layer2d.hpp>
 #include <rdge/graphics/layers/group.hpp>
 #include <rdge/graphics/gltexture.hpp>
+#include <rdge/math/random.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/math/vec3.hpp>
 #include <rdge/math/vec4.hpp>
@@ -29,6 +29,7 @@
 #include <iostream>
 #include <vector>
 #include <memory>
+#include <typeinfo>
 
 using namespace RDGE::Graphics;
 using namespace RDGE::Math;
@@ -77,7 +78,7 @@ int main ()
         auto f = RDGE::Util::read_text_file("basic.frag");
         auto shader = std::make_unique<Shader>(v, f);
 
-        auto font = RDGE::Font("OpenSansPX.ttf", 32);
+        auto font = RDGE::Assets::Font("OpenSansPX.ttf", 32);
 
         Layer2D layer(std::move(shader));
         //auto myText = new Label("Josh", 1.0f, 4.0f, std::move(font), RDGE::Color::Red());
@@ -99,7 +100,7 @@ int main ()
             //RDGE::Math::vec2(1, 1)
         //};
 
-        RDGE::Random rng;
+        Random rng;
         for (float y = 0; y < 9.0f; y++)
         {
             for (float x = 0; x < 16.0f; x++)
@@ -107,7 +108,7 @@ int main ()
                 auto random = rng.Next(2);
                 if (random == 0)
                 {
-                    layer.AddRenderable(new Sprite(x, y, 0.9f, 0.9f, RDGE::Color::Blue()));
+                    layer.AddRenderable(new Sprite(x, y, 0.9f, 0.9f, RDGE::Color::Cyan()));
                 }
                 else if (random == 1)
                 {
@@ -122,7 +123,8 @@ int main ()
             }
         }
 
-        auto myText = new Label("Josh", 1.0f, 4.0f, std::move(font), RDGE::Color::Red());
+        //auto myText = new Label("Josh", 1.0f, 4.0f, std::move(font), RDGE::Color::White());
+        auto myText = new Label("Josh", 1.0f, 4.0f, std::move(font), RDGE::Color(255, 255, 255, 100));
         layer.AddRenderable(myText);
 
         //Group* button = new Group(mat4::translation(vec3(1.0f, 0.0f, 0.0f)));
@@ -168,7 +170,7 @@ int main ()
                           );
             auto layer_shader = layer.GetShader();
             layer_shader->Enable();
-            layer_shader->SetUniform2f("light_pos", lp);
+            layer_shader->SetUniformValue("light_pos", lp);
 
             layer.Render();
 

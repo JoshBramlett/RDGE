@@ -13,8 +13,8 @@ Layer2D::Layer2D (std::unique_ptr<Shader> shader)
     std::generate(texture_units.begin(), texture_units.end(), [&n]{ return n++; });
 
     m_shader->Enable();
-    m_shader->SetUniformMat4("pr_matrix", m_projectionMatrix);
-    m_shader->SetUniform1iv("textures", texture_units.size(), texture_units.data());
+    m_shader->SetUniformValue("pr_matrix", m_projectionMatrix);
+    m_shader->SetUniformValue("textures", texture_units.size(), texture_units.data());
     m_shader->Disable();
 }
 

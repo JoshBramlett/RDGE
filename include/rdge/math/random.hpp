@@ -1,8 +1,7 @@
-//! \headerfile <rdge/random.hpp>
+//! \headerfile <rdge/math/random.hpp>
 //! \author Josh Bramlett
 //! \version 0.0.1
 //! \date 01/08/2016
-//! \bug
 
 #pragma once
 
@@ -10,19 +9,24 @@
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {
+namespace Math {
 
 //! \class Random
-//! \brief RAII compliant class used for random number generation.
+//! \brief Simple class used for random number generation.
 //! \details Due to limited compiler support math error handling is
 //!          not available so use of this class comes with the caveat
 //!          that ranges at or outside overflow/underflow will cause
 //!          undefined behavior.
 //! \see https://llvm.org/bugs/show_bug.cgi?id=10409
 //! \see https://gcc.gnu.org/bugzilla/show_bug.cgi?id=37838
-class Random final
+class Random
 {
 public:
-    explicit Random (void);
+    //! \brief Random ctor
+    Random (void);
+
+    //! \brief Random dtor
+    ~Random (void);
 
     //! \brief Random Copy ctor
     //! \details Non-copyable
@@ -34,14 +38,11 @@ public:
 
     //! \brief Random Copy Assignment Operator
     //! \details Non-copyable
-    Random& operator= (const Random) = delete;
+    Random& operator= (const Random&) = delete;
 
     //! \brief Random Move Assignment Operator
     //! \details Non-moveable
     Random& operator= (Random&&) = delete;
-
-    //! \brief Random dtor
-    ~Random (void);
 
     //! \brief Generates a random integer within [0, MAX_INT]
     //! \details Each random number has a uniform probability of occurring
@@ -71,4 +72,5 @@ public:
     double Sample (void) const;
 };
 
+} // namespace Math
 } // namespace RDGE

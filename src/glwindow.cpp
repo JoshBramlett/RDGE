@@ -168,7 +168,7 @@ void
 GLWindow::Clear (void)
 {
     // TODO: Values need to be set from the m_clearColor once fp is supported [00032]
-    glClearColor(1.0f, 0.0f, 1.0f, 0.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
@@ -178,13 +178,14 @@ GLWindow::Present (void)
     SDL_GL_SwapWindow(m_window);
 }
 
+/*
 RDGE::Surface
 GLWindow::Screenshot (void)
 {
     // TODO: Implement
     return RDGE::Surface(nullptr);
 }
-
+*/
 double
 GLWindow::FrameRate (void) const
 {

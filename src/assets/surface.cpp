@@ -1,9 +1,10 @@
-#include <rdge/surface.hpp>
+#include <rdge/assets/surface.hpp>
 #include <rdge/internal/exception_macros.hpp>
 
 #include <SDL_image.h>
 
 namespace RDGE {
+namespace Assets {
 
 Surface::Surface (SDL_Surface* surface)
     : m_surface(surface)
@@ -185,4 +186,5 @@ Surface::ChangePixelFormat (RDGE::UInt32 pixel_format)
     m_surface = new_surface;
 }
 
+} // namespace Assets
 } // namespace RDGE

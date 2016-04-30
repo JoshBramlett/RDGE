@@ -9,10 +9,10 @@ namespace GameObjects {
 
 Text::Text (
             std::string                 text,
-            std::shared_ptr<RDGE::Font> font,
+            std::shared_ptr<RDGE::Assets::Font> font,
             RDGE::Graphics::Point       destination,
             RDGE::Color                 color,
-            RDGE::Font::RenderMode      mode,
+            RDGE::Assets::Font::RenderMode      mode,
             TextAlignment               align
            )
     : m_text(std::move(text))

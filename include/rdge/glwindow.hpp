@@ -7,7 +7,7 @@
 #pragma once
 
 #include <rdge/types.hpp>
-#include <rdge/surface.hpp>
+#include <rdge/assets/surface.hpp>
 
 #include <SDL.h>
 #include <GL/glew.h>
@@ -91,7 +91,7 @@ public:
     //!          be used sparingly (i.e. not within the game loop).
     //! \note Result can be passed to SDL_SaveBMP to save to file
     //! \returns Surface screenshot
-    RDGE::Surface Screenshot (void);
+    //RDGE::Surface Screenshot (void);
 
     double FrameRate (void) const;
 

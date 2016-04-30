@@ -158,6 +158,102 @@ GetUniformLocation (RDGE::UInt32 program, const std::string& name)
     return result;
 }
 
+//! \brief Direct map to glUniform1i
+//! \details Set the single integer uniform value for the current program
+//! \param [in] location Location of the uniform to be modified
+//! \param [in] v0 Value to set
+//! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glUniform.xml
+inline void
+SetUniformValue1i (RDGE::Int32 location, RDGE::Int32 v0)
+{
+    GL_CHECK_ERROR(glUniform1i(location, v0));
+}
+
+//! \brief Direct map to glUniform1f
+//! \details Set the single float uniform value for the current program
+//! \param [in] location Location of the uniform to be modified
+//! \param [in] v0 Value to set
+//! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glUniform.xml
+inline void
+SetUniformValue1f (RDGE::Int32 location, float v0)
+{
+    GL_CHECK_ERROR(glUniform1f(location, v0));
+}
+
+//! \brief Direct map to glUniform2f
+//! \details Set the vec2 float uniform value for the current program
+//! \param [in] location Location of the uniform to be modified
+//! \param [in] v0 Vector x value to set
+//! \param [in] v1 Vector y value to set
+//! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glUniform.xml
+inline void
+SetUniformValue2f (RDGE::Int32 location, float v0, float v1)
+{
+    GL_CHECK_ERROR(glUniform2f(location, v0, v1));
+}
+
+//! \brief Direct map to glUniform3f
+//! \details Set the vec3 float uniform value for the current program
+//! \param [in] location Location of the uniform to be modified
+//! \param [in] v0 Vector x value to set
+//! \param [in] v1 Vector y value to set
+//! \param [in] v2 Vector z value to set
+//! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glUniform.xml
+inline void
+SetUniformValue3f (RDGE::Int32 location, float v0, float v1, float v2)
+{
+    GL_CHECK_ERROR(glUniform3f(location, v0, v1, v2));
+}
+
+//! \brief Direct map to glUniform4f
+//! \details Set the vec4 float uniform value for the current program
+//! \param [in] location Location of the uniform to be modified
+//! \param [in] v0 Vector x value to set
+//! \param [in] v1 Vector y value to set
+//! \param [in] v2 Vector z value to set
+//! \param [in] v3 Vector w value to set
+//! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glUniform.xml
+inline void
+SetUniformValue4f (RDGE::Int32 location, float v0, float v1, float v2, float v3)
+{
+    GL_CHECK_ERROR(glUniform4f(location, v0, v1, v2, v3));
+}
+
+//! \brief Direct map to glUniform1iv
+//! \details Set the integer array uniform value for the current program
+//! \param [in] location Location of the uniform to be modified
+//! \param [in] count Number of elements to be modified
+//! \param [in] value Pointer to an array of values to update
+//! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glUniform.xml
+inline void
+SetUniformValue1iv (RDGE::Int32 location, RDGE::UInt32 count, RDGE::Int32* value)
+{
+    GL_CHECK_ERROR(glUniform1iv(location, count, value));
+}
+
+//! \brief Direct map to glUniform1fv
+//! \details Set the float array uniform value for the current program
+//! \param [in] location Location of the uniform to be modified
+//! \param [in] count Number of elements to be modified
+//! \param [in] value Pointer to an array of values to update
+//! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glUniform.xml
+inline void
+SetUniformValue1fv (RDGE::Int32 location, RDGE::UInt32 count, float* value)
+{
+    GL_CHECK_ERROR(glUniform1fv(location, count, value));
+}
+
+//! \brief Modified map to glUniformMatrix4fv
+//! \details Set the float mat4 uniform value for the current program
+//! \param [in] location Location of the uniform to be modified
+//! \param [in] value Pointer to an array of values to update
+//! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glUniform.xml
+inline void
+SetUniformValueMatrix4fv (RDGE::Int32 location, const float* value)
+{
+    GL_CHECK_ERROR(glUniformMatrix4fv(location, 1, GL_FALSE, value));
+}
+
 /******************************************************************
  *                       Vertex Arrays
  *****************************************************************/

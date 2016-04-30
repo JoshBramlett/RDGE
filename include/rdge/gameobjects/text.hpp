@@ -9,11 +9,11 @@
 #include <string>
 #include <memory>
 
-#include <rdge/font.hpp>
-#include <rdge/surface.hpp>
-#include <rdge/texture.hpp>
 #include <rdge/types.hpp>
+#include <rdge/texture.hpp>
 #include <rdge/window.hpp>
+#include <rdge/assets/font.hpp>
+#include <rdge/assets/surface.hpp>
 #include <rdge/graphics/point.hpp>
 #include <rdge/gameobjects/ientity.hpp>
 
@@ -38,7 +38,7 @@ enum class TextAlignment : RDGE::UInt8
 
 //! \class Text
 //! \brief Helper for rendering text to the screen
-//! \details Supported \ref RDGE::Font::RenderMode values are Solid
+//! \details Supported \ref RDGE::Assets::Font::RenderMode values are Solid
 //!          (quick and low quality) or Blended (slow and high quality).
 //!          Caching of surface and texture objects is done so as to
 //!          allow the rendering code to be as lightweight as possible.
@@ -54,10 +54,10 @@ public:
     //! \param [in] align Text alignment relative to desination
     explicit Text (
                    std::string                 text,
-                   std::shared_ptr<RDGE::Font> font,
+                   std::shared_ptr<RDGE::Assets::Font> font,
                    RDGE::Graphics::Point       destination,
                    RDGE::Color                 color = RDGE::Color::White(),
-                   RDGE::Font::RenderMode      mode  = RDGE::Font::RenderMode::Solid,
+                   RDGE::Assets::Font::RenderMode      mode  = RDGE::Assets::Font::RenderMode::Solid,
                    TextAlignment               align = TextAlignment::TopLeft
                   );
 
@@ -122,15 +122,15 @@ private:
     void CalculateDestination (void);
 
     std::string                 m_text;
-    std::shared_ptr<RDGE::Font> m_font;
+    std::shared_ptr<RDGE::Assets::Font> m_font;
     RDGE::Graphics::Point       m_destination;
     RDGE::Color                 m_color;
-    RDGE::Font::RenderMode      m_renderMode;
+    RDGE::Assets::Font::RenderMode      m_renderMode;
     TextAlignment               m_align;
 
     // cache vars to avoid logic in game loop
     bool                  m_textureValid;
-    RDGE::Surface         m_cacheSurface;
+    RDGE::Assets::Surface         m_cacheSurface;
     RDGE::Texture         m_cacheTexture;
     RDGE::Graphics::Point m_finalDestination;
 };
