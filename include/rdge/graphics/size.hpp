@@ -2,7 +2,6 @@
 //! \author Josh Bramlett
 //! \version 0.0.1
 //! \date 12/22/2015
-//! \bug
 
 #pragma once
 
@@ -16,7 +15,7 @@ namespace Graphics {
 
 //! \class Size
 //! \brief Structure of width and height values
-class Size final
+class Size
 {
 public:
     //! \var RDGE::UInt32 w Width
@@ -27,7 +26,7 @@ public:
 public:
     //! \brief Size ctor
     //! \details Initialize size to [0,0]
-    constexpr Size ()
+    constexpr Size (void)
         : w(0)
         , h(0)
     { }

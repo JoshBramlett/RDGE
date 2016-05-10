@@ -83,11 +83,16 @@ public:
     //! \details Default-movable
     Color& operator=(Color&&) noexcept = default;
 
-    // TODO: Test big endian to see if I need to reverse the order
-    constexpr RDGE::UInt32 ToRgba (void) const
+    //! \brief Get the 32-bit value of the color structure
+    //! \details Checks endianness to return appropriate format.
+    //! \returns Unsigned integer with the color data
+    constexpr RDGE::UInt32 ToInteger (void) const
     {
-        //DEFAULT_R_MASK
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+        return r << 24 | g << 16 | b << 8 | a;
+#else
         return a << 24 | b << 16 | g << 8 | r;
+#endif
     }
 
     // TODO Implement once vectors are constexpr

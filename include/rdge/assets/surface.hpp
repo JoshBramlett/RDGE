@@ -67,10 +67,10 @@ public:
                       RDGE::Int32  width,
                       RDGE::Int32  height,
                       RDGE::Int32  depth,
-                      RDGE::UInt32 r_mask = DEFAULT_R_MASK,
-                      RDGE::UInt32 g_mask = DEFAULT_G_MASK,
-                      RDGE::UInt32 b_mask = DEFAULT_B_MASK,
-                      RDGE::UInt32 a_mask = DEFAULT_A_MASK
+                      RDGE::UInt32 r_mask = BYTEORDER_R_MASK,
+                      RDGE::UInt32 g_mask = BYTEORDER_G_MASK,
+                      RDGE::UInt32 b_mask = BYTEORDER_B_MASK,
+                      RDGE::UInt32 a_mask = BYTEORDER_A_MASK
                      );
 
     //! \brief Surface ctor

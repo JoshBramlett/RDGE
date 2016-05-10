@@ -33,11 +33,14 @@ struct vec2
 
     vec2& divide (const vec2& rhs);
 
+    vec2& scale (float value);
+
     vec2& operator+= (const vec2& rhs);
 
     vec2& operator-= (const vec2& rhs);
 
     vec2& operator*= (const vec2& rhs);
+    vec2& operator*= (float rhs);
 
     vec2& operator/= (const vec2& rhs);
 };

@@ -642,6 +642,8 @@ inline void DeleteTextures(RDGE::UInt32 size, RDGE::UInt32* textures)
  *                      OpenGL Get Values
  *****************************************************************/
 
+// TODO: These take arrays as params, so this will need refactoring
+
 //! \brief Query OpenGL for the boolean value of a given parameter
 //! \param [in] pname Parameter name
 //! \see https://www.opengl.org/sdk/docs/man2/xhtml/glGet.xml
@@ -676,6 +678,46 @@ GetIntegerValue (RDGE::UInt32 pname)
 }
 
 /******************************************************************
+ *                     OpenGL Render Phase
+ *****************************************************************/
+
+//! \brief Direct map to glClear
+//! \details Clear buffer to preset values.
+//! \param [in] mask Bitwise OR of masks that indicate the buffers to be cleared
+//! \see https://www.opengl.org/sdk/docs/man2/xhtml/glClear.xml
+inline void
+Clear (RDGE::UInt32 mask)
+{
+    GL_CHECK_ERROR(glClear(mask));
+}
+
+//! \brief Direct map to glClearColor
+//! \details Specify clear values for the color buffers.
+//! \param [in] red Red value
+//! \param [in] green Green value
+//! \param [in] blue Blue value
+//! \param [in] alpha Alpha value
+//! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glClearColor.xml
+inline void
+SetClearColor (float red, float green, float blue, float alpha)
+{
+    GL_CHECK_ERROR(glClearColor(red, green, blue, alpha));
+}
+
+//! \brief Direct map to glViewport
+//! \details Set the viewport.
+//! \param [in] x lower left x-coordinate of the viewport
+//! \param [in] y lower left y-coordinate of the viewport
+//! \param [in] width Width of the viewport
+//! \param [in] height Height of the viewport
+//! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glViewport.xml
+inline void
+SetViewport (RDGE::Int32 x, RDGE::Int32 y, RDGE::UInt32 width, RDGE::UInt32 height)
+{
+    GL_CHECK_ERROR(glViewport(x, y, width, height));
+}
+
+/******************************************************************
  *                          TODO
  *****************************************************************/
 
@@ -705,22 +747,6 @@ inline void RenderbufferStorage(RDGE::UInt32 target, RDGE::UInt32 format, RDGE::
 {
     GL_CHECK_ERROR(glRenderbufferStorage(target, format, width, height));
 }
-
-inline void SetViewport(RDGE::UInt32 x, RDGE::UInt32 y, RDGE::UInt32 width, RDGE::UInt32 height)
-{
-    GL_CHECK_ERROR(glViewport(x, y, width, height));
-}
-
-inline void Clear(RDGE::UInt32 flags)
-{
-    GL_CHECK_ERROR(glClear(flags));
-}
-
-inline void SetClearColor(float r, float g, float b, float a)
-{
-    GL_CHECK_ERROR(glClearColor(r, g, b, a));
-}
-
 
 } // namespace OpenGL
 } // namespace Graphics

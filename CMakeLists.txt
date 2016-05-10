@@ -58,7 +58,6 @@ add_library (
              src/color.cpp
              src/texture.cpp
              src/cursor.cpp
-             src/viewport.cpp
              src/window.cpp
              src/glwindow.cpp
              src/assets/font.cpp
@@ -69,12 +68,12 @@ add_library (
              src/gameobjects/ientity.cpp
              src/gameobjects/scene.cpp
              src/gameobjects/game.cpp
-             #src/gameobjects/text.cpp
              src/graphics/renderer2d.cpp
              src/graphics/shader.cpp
              src/graphics/sprite.cpp
-             src/graphics/label.cpp
+             src/graphics/text.cpp
              src/graphics/gltexture.cpp
+             src/graphics/renderable2d.cpp
              src/graphics/layers/layer2d.cpp
              src/graphics/layers/group.cpp
              src/graphics/buffers/vertex_array.cpp

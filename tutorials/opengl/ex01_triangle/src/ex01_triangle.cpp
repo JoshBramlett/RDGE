@@ -10,7 +10,7 @@
 #include <rdge/graphics/renderer2d.hpp>
 #include <rdge/graphics/renderable2d.hpp>
 #include <rdge/graphics/sprite.hpp>
-#include <rdge/graphics/label.hpp>
+#include <rdge/graphics/text.hpp>
 #include <rdge/graphics/layers/layer2d.hpp>
 #include <rdge/graphics/layers/group.hpp>
 #include <rdge/graphics/gltexture.hpp>
@@ -33,6 +33,32 @@
 
 using namespace RDGE::Graphics;
 using namespace RDGE::Math;
+
+std::string PrintWindowEvent (SDL_WindowEvent* event)
+{
+
+                    switch (event->event)
+                    {
+#define CASE(X) case X: return #X;
+                        CASE(SDL_WINDOWEVENT_SHOWN)
+                        CASE(SDL_WINDOWEVENT_HIDDEN)
+                        CASE(SDL_WINDOWEVENT_EXPOSED)
+                        CASE(SDL_WINDOWEVENT_MOVED)
+                        CASE(SDL_WINDOWEVENT_RESIZED)
+                        CASE(SDL_WINDOWEVENT_SIZE_CHANGED)
+                        CASE(SDL_WINDOWEVENT_MINIMIZED)
+                        CASE(SDL_WINDOWEVENT_MAXIMIZED)
+                        CASE(SDL_WINDOWEVENT_RESTORED)
+                        CASE(SDL_WINDOWEVENT_ENTER)
+                        CASE(SDL_WINDOWEVENT_LEAVE)
+                        CASE(SDL_WINDOWEVENT_FOCUS_GAINED)
+                        CASE(SDL_WINDOWEVENT_FOCUS_LOST)
+                        CASE(SDL_WINDOWEVENT_CLOSE)
+#undef CASE
+                        default:
+                            return "Unknown";
+                    }
+}
 
 enum class Josh
 {
@@ -70,18 +96,20 @@ int main ()
         RDGE::GLWindow window (
                                "ex01_triangle",
                                960, 540,
-                               false, false,
-                               false // vsync
+                               false, // fullscreen
+                               true, // resizable
+                               true  // vsync
                               );
 
         auto v = RDGE::Util::read_text_file("basic.vert");
         auto f = RDGE::Util::read_text_file("basic.frag");
         auto shader = std::make_unique<Shader>(v, f);
 
-        auto font = RDGE::Assets::Font("OpenSansPX.ttf", 32);
+        auto font = std::make_shared<RDGE::Assets::Font>("OpenSansPX.ttf", 128);
 
-        Layer2D layer(std::move(shader));
-        //auto myText = new Label("Josh", 1.0f, 4.0f, std::move(font), RDGE::Color::Red());
+        auto ortho = RDGE::Math::mat4::orthographic(0.0f, 16.0f, 0.0f, 9.0f, -1.0f, 1.0f);
+        Layer2D layer(std::move(shader), ortho);
+        //auto myText = new Text("Josh", 1.0f, 4.0f, std::move(font), RDGE::Color::Red());
 
         auto texture = std::make_shared<GLTexture>("test.gif");
         auto texture2 = std::make_shared<GLTexture>("test2.gif");
@@ -123,8 +151,7 @@ int main ()
             }
         }
 
-        //auto myText = new Label("Josh", 1.0f, 4.0f, std::move(font), RDGE::Color::White());
-        auto myText = new Label("Josh", 1.0f, 4.0f, std::move(font), RDGE::Color(255, 255, 255, 100));
+        auto myText = new Text("Josh", 1.0f, 4.0f, font, RDGE::Color::White());
         layer.AddRenderable(myText);
 
         //Group* button = new Group(mat4::translation(vec3(1.0f, 0.0f, 0.0f)));
@@ -132,6 +159,7 @@ int main ()
         //button->AddRenderable(new Sprite(0.5f, 0.5f, 3.0f, 1.0f, RDGE::Color::Red()));
         //layer.AddRenderable(button);
 
+        RDGE::UInt8 opacity = 255;
         bool running = true;
         SDL_Event event;
         while (running)
@@ -151,14 +179,55 @@ int main ()
                     case SDLK_ESCAPE:
                         running = false;
                         break;
+                    //case SDLK_q:
+                        //window.Viewport();
+                        //break;
+                    case SDLK_a:
+                        // aspect ratio: 4x3
+                        window.SetSize(1024, 768);
+                        break;
+                    case SDLK_s:
+                        // aspect ratio: 16x10
+                        window.SetSize(1280, 800);
+                        break;
+                    case SDLK_d:
+                        // aspect ratio: 16x9
+                        window.SetSize(960, 540);
+                        break;
                     case SDLK_j:
                         myText->SetText("Josh Two");
+                        break;
+                    case SDLK_k:
+                        myText->SetColor(RDGE::Color::Red());
+                        break;
+                    case SDLK_l:
+                        myText->Scale(0.5);
+                        if (opacity <= 0)
+                            opacity = 255;
+
+                        myText->SetOpacity(opacity--);
                         break;
                     }
                 }
                 else if (event.type == SDL_MOUSEMOTION)
                 {
                     SDL_GetMouseState(&x, &y);
+                }
+                else if (event.type == SDL_WINDOWEVENT)
+                {
+                    if (event.window.event == SDL_WINDOWEVENT_MOVED)
+                    {
+                    }
+                    //else if (event.window.event == SDL_WINDOWEVENT_RESIZED)
+                    //{
+                        //std::cout << "Window Resized" << std::endl;
+                        //window.ResetViewport();
+                    //}
+                    //else if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
+                    //{
+                        //std::cout << "Window Size Changed" << std::endl;
+                        //window.ResetViewport();
+                    //}
                 }
             }
 

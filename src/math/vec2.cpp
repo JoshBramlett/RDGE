@@ -50,6 +50,15 @@ vec2::divide (const vec2& rhs)
 }
 
 vec2&
+vec2::scale (float value)
+{
+    x *= value;
+    y *= value;
+
+    return *this;
+}
+
+vec2&
 vec2::operator+= (const vec2& rhs)
 {
     return add(rhs);
@@ -65,6 +74,12 @@ vec2&
 vec2::operator*= (const vec2& rhs)
 {
     return multiply(rhs);
+}
+
+vec2&
+vec2::operator*= (float rhs)
+{
+    return scale(rhs);
 }
 
 vec2&

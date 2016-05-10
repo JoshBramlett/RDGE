@@ -23,7 +23,6 @@ Sprite::Sprite (
 {
     m_texture = std::move(texture);
     m_uv = uv;
-    m_color = RDGE::Color::White();
 }
 
 } // namespace Graphics

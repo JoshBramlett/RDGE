@@ -19,37 +19,46 @@ namespace RDGE {
 namespace Graphics {
 
 // TODO: A couple issues with this class:
-//         1)  The projection matrix is hard-coded.  Either needs to be supplied
-//             at construction or allow it to be updated.  The biggest reason it's
-//             a problem is b/c it hard codes the aspect ratio
-//         2)  The reason for the GetShader() method was to allow an external
+//         1)  The reason for the GetShader() method was to allow an external
 //             source to update the shader uniform values.  Either this needs to
 //             be a helper method or removed completely.
-//         3)  The renderable objects are not managed.  I don't think the layer
+//         2)  The renderable objects are not managed.  I don't think the layer
 //             should own them, and if not to make it truly safe I'd have to use
 //             weak pointers
-//         4)  Should this class have it's own z-index setting?  It would make
-//             sense, and should overwrite the z value in the renderable
-//             objects positions.
-//         5)  The ctor could also accept a max # of renderables so the vector
-//             doessn't have to re-allocate when the sprite count is high.
-//         6)  This and the renderer are so intertwined with the shader code
+//         3)  This and the renderer are so intertwined with the shader code
 //             that the shader code really should be moved internal to the layer
 //             and the shader should no longer be a parameter in the ctor
 
 //! \class Layer2D
-//! \brief
+//! \brief Layer of renderables
+//! \details Layers have their own shader and renderer, and can therefore manage
+//!          the max textures supported by OpenGL.  The renderables are not
+//!          managed by the layer, and therefore should should outlive the layer.
 class Layer2D
 {
 public:
     //! \brief Layer2D ctor
     //! \param [in] shader Shader the layer will take ownership of
-    Layer2D (std::unique_ptr<Shader> shader);
+    //! \param [in] projection_matrix Projection matrix
+    //! \param [in] zindex Z-Index order
+    //! \param [in] num_renderables Used to pre-allocate the renderables vector
+    explicit Layer2D (
+                      std::unique_ptr<Shader> shader,
+                      RDGE::Math::mat4        projection_matrix,
+                      float                   zindex          = 1.0f,
+                      RDGE::UInt16            num_renderables = 0
+                     );
 
+    //! \brief Layer2D dtor
     virtual ~Layer2D (void);
 
+    // TODO: Add copy and move (note the impl of such in the renderer2d)
+
+    //! \brief Cache a pointer to a renderable to be submitted to the renderer
+    //! \param [in] renderable Renderable object
     virtual void AddRenderable (Renderable2D* renderable);
 
+    //! \brief Render all cached renderables
     virtual void Render (void);
 
     // TODO: Remove?
@@ -61,6 +70,8 @@ public:
 private:
     Renderer2D                 m_renderer;
     std::vector<Renderable2D*> m_renderables;
+    float                      m_zIndex;
+
     std::unique_ptr<Shader>    m_shader;
     RDGE::Math::mat4           m_projectionMatrix;
 };
