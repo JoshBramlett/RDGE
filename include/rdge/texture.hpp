@@ -114,7 +114,7 @@ public:
     RDGE::Graphics::Size Size (void) const;
 
 private:
-    SDL_Texture*  m_texture;
+    SDL_Texture* m_texture;
 };
 
 } // namespace RDGE

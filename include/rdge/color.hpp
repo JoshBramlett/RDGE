@@ -2,19 +2,24 @@
 //! \author Josh Bramlett
 //! \version 0.0.1
 //! \date 12/29/2015
-//! \bug
 
 #pragma once
 
-#include <string>
+#include <rdge/types.hpp>
+#include <rdge/math/vec4.hpp>
 
 #include <SDL.h>
 
-#include <rdge/types.hpp>
+#include <string>
+#include <ostream>
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {
 
+//! \class Color
+//! \brief Storage representing RGBA colors
+//! \details RGBA values are on an integer scale of 0-255, but helpers
+//!          exist to convert to other types
 class Color final : public SDL_Color
 {
 public:
@@ -77,6 +82,29 @@ public:
     //! \brief Color Move Assignment Operator
     //! \details Default-movable
     Color& operator=(Color&&) noexcept = default;
+
+    //! \brief Get the 32-bit value of the color structure
+    //! \details Checks endianness to return appropriate format.
+    //! \returns Unsigned integer with the color data
+    constexpr RDGE::UInt32 ToInteger (void) const
+    {
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+        return r << 24 | g << 16 | b << 8 | a;
+#else
+        return a << 24 | b << 16 | g << 8 | r;
+#endif
+    }
+
+    // TODO Implement once vectors are constexpr
+    //constexpr RDGE::Math::vec4 ToVec4 (void) const
+    //{
+        //return RDGE::Math::vec4(
+                                //static_cast<float>(r / 255.0f),
+                                //static_cast<float>(b / 255.0f),
+                                //static_cast<float>(g / 255.0f),
+                                //static_cast<float>(a / 255.0f)
+                               //);
+    //}
 
     //! \brief Build color from RGB string
     //! \param [in] color Hex color string

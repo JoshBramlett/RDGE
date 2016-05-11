@@ -1,31 +1,29 @@
-//! \headerfile <rdge/font.hpp>
+//! \headerfile <rdge/assets/font.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.1
-//! \date 12/30/2015
-//! \bug
+//! \version 0.0.2
+//! \date 04/29/2016
 //! \todo Add support for Unicode
 
 /* TODO: A lot of rendering functionality needs to be built in (there's like 10
  *       different methods to render text).  There's a bunch of getters and setters
  *       that need to be implemented as well.
- *
- *       Update with enable_shared_from_this
- *       \see http://en.cppreference.com/w/cpp/memory/enable_shared_from_this
  */
 
 #pragma once
 
-#include <string>
+#include <rdge/types.hpp>
+#include <rdge/color.hpp>
+#include <rdge/assets/surface.hpp>
 
 #include <SDL.h>
 #include <SDL_ttf.h>
 
-#include <rdge/types.hpp>
-#include <rdge/color.hpp>
-#include <rdge/surface.hpp>
+#include <string>
+#include <memory>
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {
+namespace Assets {
 
 //! \typedef SDLFontUniquePtr
 //! \details Proper unique_ptr type implementing SDL custom deleter
@@ -52,7 +50,7 @@ inline auto CreateSDLFontUniquePtr (TTF_Font* font) -> SDLFontUniquePtr
 //!       TTF_Font is provided to many of it's functions.  The wrapper
 //!       instead will perform strict null checks and throw an exception.
 //! \warning UTF8 is currently the only supported text encoding
-class Font
+class Font : public std::enable_shared_from_this<Font>
 {
 public:
     //! \enum Style
@@ -125,10 +123,19 @@ public:
     //! \details Transfers ownership of pointer
     Font& operator= (Font&& rhs) noexcept;
 
+    //! \brief Safely retrieve additional shared_ptr instance
+    //! \returns Shared pointer of the current object
+    //! \throws std::bad_weak_ptr If called when object is not managed
+    //!         by a shared_ptr
+    std::shared_ptr<Font> GetSharedPtr (void) noexcept
+    {
+        return shared_from_this();
+    }
+
     //! \brief Return the TTF_Font pointer
     //! \details Raw pointer is returned so caller must ensure
     //!          Font object will not fall out of scope
-    //! \returns Raw pointer to an TTF_Font
+    //! \returns Raw pointer to a TTF_Font
     TTF_Font* RawPtr (void) const { return m_font; }
 
     //! \brief Bitmask of all set styles
@@ -177,12 +184,12 @@ public:
     //! \param [in] background Background color (for Shaded mode only)
     //! \returns Surface object of the rendered font
     //! \throws Text rendering failed
-    RDGE::Surface RenderUTF8 (
-                              const std::string& text,
-                              const RDGE::Color& color,
-                              RenderMode         mode       = RenderMode::Solid,
-                              const RDGE::Color& background = RDGE::Color::Black()
-                             );
+    std::shared_ptr<Surface> RenderUTF8 (
+                                         const std::string& text,
+                                         const RDGE::Color& color,
+                                         RenderMode         mode       = RenderMode::Solid,
+                                         const RDGE::Color& background = RDGE::Color::Black()
+                                        );
 
 private:
     TTF_Font*   m_font;
@@ -208,4 +215,5 @@ inline RDGE::UInt32 operator& (RDGE::UInt32 a, Font::Style b)
     return a & static_cast<RDGE::UInt32>(b);
 }
 
+} // namespace Assets
 } // namespace RDGE

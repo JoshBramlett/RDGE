@@ -1,12 +1,11 @@
-#include <rdge/random.hpp>
-#include <rdge/types.hpp>
-#include <rdge/util/fp.hpp>
+#include <rdge/math/random.hpp>
 
-#include <cmath>
+#include <limits>
 #include <random>
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {
+namespace Math {
 
 namespace {
     std::random_device s_rd;
@@ -43,4 +42,5 @@ Random::Sample (void) const
     return dist(s_mt);
 }
 
+} // namespace Math
 } // namespace RDGE

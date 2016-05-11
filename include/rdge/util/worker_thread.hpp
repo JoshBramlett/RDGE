@@ -17,7 +17,7 @@ public:
                  )
         : m_stopFunc(stop_func)
     {
-        m_thread = std::move(std::thread(work_func));
+        m_thread = std::thread(work_func);
     }
 
     WorkerThread (const WorkerThread&) = delete;

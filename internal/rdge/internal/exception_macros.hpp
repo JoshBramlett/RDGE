@@ -1,3 +1,8 @@
+//! \headerfile <rdge/internal/exception_macros.hpp>
+//! \author Josh Bramlett
+//! \version 0.0.2
+//! \date 04/13/2016
+
 #pragma once
 
 #include <rdge/types.hpp>
@@ -14,5 +19,12 @@
     #define SDL_THROW(msg, fn) \
         do { \
             throw RDGE::SDLException(msg, fn, __FILE__, __LINE__, __FUNCTION_NAME__); \
+        } while (false)
+#endif
+
+#ifndef GL_THROW
+    #define GL_THROW(msg, fn, code) \
+        do { \
+            throw RDGE::GLException(msg, fn, code, __FILE__, __LINE__, __FUNCTION_NAME__); \
         } while (false)
 #endif

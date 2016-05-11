@@ -13,6 +13,11 @@
 #include <memory>
 #include <string>
 
+#include <iostream>
+
+// TODO: This needs to be a configuration flag
+#define RDGE_DEBUG
+
 /***********************************
 /    Compiler specific defines
 ***********************************/
@@ -57,34 +62,24 @@
                                   : __FILE__
 #endif
 
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    #ifndef DEFAULT_R_MASK
-        #define DEFAULT_R_MASK 0xff000000
-    #endif
-    #ifndef DEFAULT_G_MASK
-        #define DEFAULT_G_MASK 0x00ff0000
-    #endif
-    #ifndef DEFAULT_B_MASK
-        #define DEFAULT_B_MASK 0x0000ff00
-    #endif
-    #ifndef DEFAULT_A_MASK
-        #define DEFAULT_A_MASK 0x000000ff
-    #endif
-#else
-    #ifndef DEFAULT_R_MASK
-        #define DEFAULT_R_MASK 0x000000ff
-    #endif
-    #ifndef DEFAULT_G_MASK
-        #define DEFAULT_G_MASK 0x0000ff00
-    #endif
-    #ifndef DEFAULT_B_MASK
-        #define DEFAULT_B_MASK 0x00ff0000
-    #endif
-    #ifndef DEFAULT_A_MASK
-        #define DEFAULT_A_MASK 0xff000000
-    #endif
-#endif
+/***********************************
+/           Byte Order
+***********************************/
 
+// The byte order is important for both SDL and OpenGL in regards
+// to how it interprets data.  Specifically images.
+
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+    #define BYTEORDER_R_MASK 0xff000000
+    #define BYTEORDER_G_MASK 0x00ff0000
+    #define BYTEORDER_B_MASK 0x0000ff00
+    #define BYTEORDER_A_MASK 0x000000ff
+#else
+    #define BYTEORDER_R_MASK 0x000000ff
+    #define BYTEORDER_G_MASK 0x0000ff00
+    #define BYTEORDER_B_MASK 0x00ff0000
+    #define BYTEORDER_A_MASK 0xff000000
+#endif
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {

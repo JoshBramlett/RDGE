@@ -2,7 +2,6 @@
 //! \author Josh Bramlett
 //! \version 0.0.1
 //! \date 12/23/2015
-//! \bug
 
 /* TODO - Methods/functionality missing from libSDL2pp
  *
@@ -21,11 +20,13 @@
 
 #pragma once
 
-#include <SDL2/SDL_rect.h>
-
 #include <rdge/types.hpp>
 #include <rdge/graphics/point.hpp>
 #include <rdge/graphics/size.hpp>
+
+#include <SDL2/SDL_rect.h>
+
+#include <ostream>
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {
@@ -45,7 +46,7 @@ public:
 
     //! \brief Rect ctor
     //! \details Initialize rect to [0,0,0,0]
-    constexpr Rect ()
+    constexpr Rect (void)
         : SDL_Rect{0, 0, 0, 0}
     { }
 

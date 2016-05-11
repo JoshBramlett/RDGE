@@ -11,9 +11,11 @@
 namespace RDGE {
 
 namespace {
+
     // cache basepath for multiple lookups
     std::string s_basePath = "";
-}
+
+} // anonymous namespace
 
 Application::Application (
                           RDGE::UInt32 flags,
