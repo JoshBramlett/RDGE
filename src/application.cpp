@@ -6,6 +6,7 @@
 #include <SDL_ttf.h>
 #include <SDL_version.h>
 
+#include <iostream>
 #include <sstream>
 
 namespace RDGE {
@@ -14,6 +15,10 @@ namespace {
 
     // cache basepath for multiple lookups
     std::string s_basePath = "";
+
+    // global loggers
+    RDGE::Util::FileLogger* s_fileLogger = nullptr;
+    RDGE::Util::ConsoleLogger* s_consoleLogger = nullptr;
 
 } // anonymous namespace
 
@@ -25,6 +30,20 @@ Application::Application (
                           bool         init_sdl_net
                          )
 {
+    // TODO: LogLevel should be from config file
+    s_fileLogger = new RDGE::Util::FileLogger(
+                                          "rdge.log",
+                                          RDGE::LogLevel::Debug,
+                                          true
+                                         );
+
+    s_consoleLogger = new RDGE::Util::ConsoleLogger(
+                                          RDGE::LogLevel::Debug,
+                                          true
+                                         );
+
+    s_fileLogger->Write(RDGE::LogLevel::Info, "Built with RDGE v" RDGE_VERSION);
+
     if (UNLIKELY(SDL_Init(flags) != 0))
     {
         SDL_THROW("SDL Failed to initialize", "SDL_Init");
@@ -56,6 +75,11 @@ Application::Application (
 
 Application::~Application (void)
 {
+    if (!s_fileLogger)
+    {
+        delete s_fileLogger;
+    }
+
     if (TTF_WasInit())
     {
         TTF_Quit();
@@ -142,6 +166,44 @@ Application::MessageBox (
     {
         RDGE_THROW("Failed to show message box");
     }
+}
+
+void
+WriteToLogFile (
+                RDGE::LogLevel     log_level,
+                const std::string& message,
+                const std::string& filename,
+                RDGE::UInt32       line
+               )
+{
+    if (!s_fileLogger)
+    {
+        std::cerr << "ERROR:  Attempting to use file logger before the RDGE::Application "
+                  << "has been instantiated." << std::endl;
+
+        return;
+    }
+
+    s_fileLogger->Write(log_level, message, filename, line);
+}
+
+void
+WriteToConsole (
+                RDGE::LogLevel     log_level,
+                const std::string& message,
+                const std::string& filename,
+                RDGE::UInt32       line
+               )
+{
+    if (!s_consoleLogger)
+    {
+        std::cerr << "ERROR:  Attempting to use console logger before the RDGE::Application "
+                  << "has been instantiated." << std::endl;
+
+        return;
+    }
+
+    s_consoleLogger->Write(log_level, message, filename, line);
 }
 
 } // namespace RDGE

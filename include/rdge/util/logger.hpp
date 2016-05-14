@@ -1,21 +1,19 @@
 //! \headerfile <rdge/util/logger.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.1
-//! \date 12/05/2015
-//! \bug
+//! \version 0.0.3
+//! \date 05/13/2016
 
 #pragma once
-
-#include <string>
-#include <iostream>
-#include <ostream>
-#include <fstream>
-#include <unordered_map>
-#include <utility>
 
 #include <rdge/types.hpp>
 #include <rdge/util/threadsafe_queue.hpp>
 #include <rdge/util/worker_thread.hpp>
+
+#include <string>
+#include <memory>
+#include <atomic>
+#include <fstream>
+#include <chrono>
 
 //! \namespace RDGE: Rainbow Drop Game Engine
 namespace RDGE {
@@ -29,7 +27,8 @@ enum class LogLevel : RDGE::UInt8
     Info,
     Warning,
     Error,
-    Fatal
+    Fatal,
+    Custom
 };
 
 //! \struct LogInfo
@@ -43,123 +42,43 @@ struct LogInfo
     RDGE::UInt32         line;
 };
 
-//! \class Logger
-//! \brief Base RDGE Logger class
-//! \details Base class for all logger objects that will be stored
-//!          and accessed through the \ref RDGE::Util::LoggerFactory.
-//!          Instantiation of the base class will write to a null stream.
-class Logger
-{
-public:
-    //! \brief Logger ctor
-    //! \details Initialize logger object
-    //! \param [in] id Unique identifier used to reference the object
-    //! \param [in] min_log_level Minimum logging threshold
-    explicit Logger (
-                     const std::string&   id,
-                     RDGE::Util::LogLevel min_log_level = RDGE::Util::LogLevel::Fatal
-                    );
-
-    //! \brief Logger Copy ctor
-    //! \details Non-copyable
-    Logger (const Logger&) = delete;
-
-    //! \brief Logger Move ctor
-    //! \details Default-moveable
-    Logger (Logger&& other) = default;
-
-    //! \brief Logger Copy Assignment Operator
-    //! \details Non-copyable
-    Logger& operator= (const Logger&) = delete;
-
-    //! \brief Logger Move Assignment Operator
-    //! \details Default-moveable
-    Logger& operator= (Logger&&) = default;
-
-    //! \brief Logger dtor
-    virtual ~Logger ();
-
-    //! \brief Unique ID used to access via /ref RDGE::LoggerFactory
-    //! \returns Logger UID
-    virtual std::string Id (void) const final
-    {
-        return m_id;
-    }
-
-    //! \brief Whether the logger object is actively logging
-    //! \returns True if logging is enabled
-    virtual bool IsActive (void) const final
-    {
-        return m_active;
-    }
-
-    //! \brief Toggles logger on/off state
-    virtual void ToggleActive (void) final
-    {
-        m_active = !m_active;
-    }
-
-    //! \brief Write message to the stream
-    //! \details Only implemented in derived classes
-    //! \param [in] level Log severity
-    //! \param [in] message Message to write to stream
-    //! \param [in] filename Name of file
-    //! \param [in] line Line number
-    virtual void Write (
-                        RDGE::Util::LogLevel level,
-                        const std::string&   message,
-                        const std::string&   filename,
-                        RDGE::UInt32         line
-                       )
-    {
-        RDGE::Unused(level);
-        RDGE::Unused(message);
-        RDGE::Unused(filename);
-        RDGE::Unused(line);
-    }
-
-protected:
-    std::string          m_id;
-    RDGE::Util::LogLevel m_minLogLevel;
-    bool                 m_active;
-
-private:
-    std::ostream* m_stream;
-};
-
 //! \class ConsoleLogger
 //! \brief Logger object for writing to the standard console
-//! \details Currently defaults to std::cout
-class ConsoleLogger final : public Logger
+//! \details Fatal and Error messages will be written to std::cerr whereas all
+//!          others will write to std::cout.  Messages are formatted appropriately
+//!          to ensure ease of visibility and help detect important messages.
+class ConsoleLogger
 {
 public:
     //! \brief ConsoleLogger ctor
-    //! \details Initialize logger object
-    //! \param [in] id Unique identifier used to reference the object
-    //! \param [in] min_log_level Minimum logging threshold
+    //! \details Initialize console logger object
+    //! \param [in] min_level Minimum logging threshold
+    //! \param [in] include_ms Include milliseconds in the timestamp
+    //! \param [in] use_gmt Timestamps in GMT (false is local time)
     explicit ConsoleLogger (
-                            const std::string&   id,
-                            RDGE::Util::LogLevel min_log_level
+                            LogLevel min_level  = LogLevel::Warning,
+                            bool     include_ms = false,
+                            bool     use_gmt    = false
                            );
 
     //! \brief ConsoleLogger Copy ctor
-    //! \details Non-copyable
-    ConsoleLogger (const ConsoleLogger&) = delete;
+    //! \details Default-copyable
+    ConsoleLogger (const ConsoleLogger&) = default;
 
     //! \brief ConsoleLogger Move ctor
     //! \details Default-moveable
     ConsoleLogger (ConsoleLogger&&) = default;
 
     //! \brief ConsoleLogger Copy Assignment Operator
-    //! \details Non-copyable
-    ConsoleLogger& operator= (const ConsoleLogger&) = delete;
+    //! \details Default-copyable
+    ConsoleLogger& operator= (const ConsoleLogger&) = default;
 
     //! \brief ConsoleLogger Move Assignment Operator
     //! \details Default-moveable
     ConsoleLogger& operator= (ConsoleLogger&&) = default;
 
     //! \brief ConsoleLogger dtor
-    virtual ~ConsoleLogger () { }
+    ~ConsoleLogger (void) { }
 
     //! \brief Write message to the stream
     //! \details Message will be written to console.  File and line number can be
@@ -173,37 +92,42 @@ public:
                         const std::string&   message,
                         const std::string&   filename = "",
                         RDGE::UInt32         line     = 0
-                       ) final override;
+                       );
 
 private:
-    std::ostream* m_stream;
+    LogLevel m_minLogLevel;
+    bool     m_includeMilliseconds;
+    bool     m_useGMT;
 };
 
 //! \class FileLogger
 //! \brief Logger object for writing to a file
-//! \details Logging performed on the invoked thread, or class can optionally
-//!          spawn it's own logging thread.
-class FileLogger final : public Logger
+//! \details Each FileLogger instance will create it's own thread for
+//!          processing.  The class is thread safe so messages can be
+//!          written from any thread.
+class FileLogger
 {
 public:
     //! \typedef LogQueue
     //! \brief Threadsafe queue for handling log requests
-    using LogQueue = RDGE::Util::ThreadsafeQueue<std::unique_ptr<RDGE::Util::LogInfo>>;
+    using LogQueue = ThreadsafeQueue<std::unique_ptr<LogInfo>>;
     //! \typedef LogWorker
     //! \brief Logging worker thread
-    using LogWorker = std::unique_ptr<RDGE::Util::WorkerThread>;
+    using LogWorker = std::unique_ptr<WorkerThread>;
 
     //! \brief FileLogger ctor
-    //! \details Initialize file logger object
-    //! \param [in] id Unique identifier used to reference the object
-    //! \param [in] min_log_level Minimum logging threshold
-    //! \param [in] file Full file path to write to
-    //! \param [in] overwrite Flag to overwrite current file content
+    //! \details Initialize logger object
+    //! \param [in] file File to write to
+    //! \param [in] min_level Minimum logging threshold
+    //! \param [in] overwrite Whether create a new file or append to existing
+    //! \param [in] include_ms Include milliseconds in the timestamp
+    //! \param [in] use_gmt Timestamps in GMT (false is local time)
     explicit FileLogger (
-                         const std::string&   id,
-                         RDGE::Util::LogLevel min_log_level,
-                         const std::string&   file,
-                         bool                 overwrite = true
+                         std::string file,
+                         LogLevel    min_level  = LogLevel::Warning,
+                         bool        overwrite  = true,
+                         bool        include_ms = false,
+                         bool        use_gmt    = false
                         );
 
     //! \brief FileLogger Copy ctor
@@ -211,138 +135,110 @@ public:
     FileLogger (const FileLogger&) = delete;
 
     //! \brief FileLogger Move ctor
-    //! \details Default-moveable
-    FileLogger (FileLogger&&) = default;
+    //! \details Transfers ownership
+    FileLogger (FileLogger&&) noexcept;
 
     //! \brief FileLogger Copy Assignment Operator
     //! \details Non-copyable
     FileLogger& operator= (const FileLogger&) = delete;
 
     //! \brief FileLogger Move Assignment Operator
-    //! \details Default-moveable
-    FileLogger& operator= (FileLogger&&) = default;
+    //! \details Transfers ownership
+    FileLogger& operator= (FileLogger&&) noexcept;
 
     //! \brief FileLogger dtor
-    virtual ~FileLogger ();
+    ~FileLogger (void);
+
+    //! \brief Whether the logger object is actively logging
+    //! \returns True if logging is enabled
+    bool IsActive (void) const { return m_active; }
+
+    //! \brief Sets whether the logger object is active
+    //! \details Activation/deactivation may not have an obvious immediate
+    //!          effect as the thread writes at a set interval.  For example,
+    //!          writing an entry and then deactivating the logger will not
+    //!          log the message if the deactivate value was set prior to the
+    //!          logger thread processing the message.
+    //! \param [in] active True to log messages, false to drop all requests
+    void SetActive (bool active);
 
     //! \brief Write message to the stream
-    //! \details Message will be wrote to file.  File and line number can be
-    //!          be optionally included, but both need to be valid to be logged.
+    //! \details Only implemented in derived classes
     //! \param [in] level Log severity
     //! \param [in] message Message to write to stream
     //! \param [in] filename Name of file
     //! \param [in] line Line number
-    virtual void Write (
-                        RDGE::Util::LogLevel level,
-                        const std::string&   message,
-                        const std::string&   filename = "",
-                        RDGE::UInt32         line     = 0
-                       ) final override;
+    void Write (
+                LogLevel           level,
+                const std::string& message,
+                const std::string& filename = "",
+                RDGE::UInt32       line     = 0
+               );
 
 private:
-    std::string    m_file;
-    std::ofstream* m_stream;
+    std::string      m_file;
+    LogLevel         m_minLogLevel;
+    bool             m_includeMilliseconds;
+    bool             m_useGMT;
+    std::atomic_bool m_active;
 
+    std::ofstream*   m_stream;
     LogQueue         m_queue;
     LogWorker        m_worker;
     std::atomic_bool m_workerRunning;
 };
 
-
-// TODO: ScopeLogger
-//class ScopeLogger : public Logger
-//{
-//public:
-    //explicit ScopeLogger (std::ostream
-                          //const std::string& id,
-                          //RDGE::
-                         //);
-//};
-
-//! \class LoggerFactory
-//! \brief Provides lookup/storage for logger objects
-//! \details Caller must be aware the factory is not static.  Ownership and scope
-//!          must be considered.
-class LoggerFactory final
+//! \class ScopeLogger
+//! \brief Logs to std::cout when created and destroyed
+//! \details RAII compliant object which implements a high frequency timer
+//!          and logs the delta between instantiation and destruction.  It's
+//!          intended purpose is for profiling.
+class ScopeLogger
 {
 public:
-    //! \typedef LoggerMap
-    //! \brief Factory container for \ref Logger derived objects
-    using LoggerMap = std::unordered_map<std::string, std::shared_ptr<Logger>>;
+    //! \brief ScopeLogger ctor
+    //! \details Initialize logger object
+    //! \param [in] identifier Used to identify the object
+    //! \param [in] function_name Name of the function where the object resides
+    //! \param [in] filename File where the object resides
+    explicit ScopeLogger (
+                          std::string        identifier,
+                          const std::string& function_name = "",
+                          const std::string& filename      = ""
+                         );
 
-    //! \brief LoggerFactory ctor
-    //! \details Initialize logger factory object
-    LoggerFactory (void) { }
-
-    //! \brief LoggerFactory dtor
-    ~LoggerFactory (void) { }
-
-    //! \brief LoggerFactory Copy ctor
+    //! \brief ScopeLogger Copy ctor
     //! \details Non-copyable
-    LoggerFactory (const LoggerFactory&) = delete;
+    ScopeLogger (const ScopeLogger&) = delete;
 
-    //! \brief LoggerFactory Move ctor
-    //! \details Move semantics performed on the collection
-    LoggerFactory (LoggerFactory&& rhs) noexcept
-    {
-        for (const auto& iter : rhs.m_map)
-        {
-            m_map.emplace(std::make_pair(iter.first, std::move(iter.second)));
-        }
-    }
+    //! \brief ScopeLogger Move ctor
+    //! \details Non-movable
+    ScopeLogger (ScopeLogger&&) = delete;
 
-    //! \brief LoggerFactory Copy Assignment Operator
+    //! \brief ScopeLogger Copy Assignment Operator
     //! \details Non-copyable
-    LoggerFactory& operator= (const LoggerFactory&) = delete;
+    ScopeLogger& operator= (const ScopeLogger&) = delete;
 
-    //! \brief LoggerFactory Move Assignment Operator
-    //! \details Move semantics performed on the collection
-    LoggerFactory& operator= (LoggerFactory&& rhs) noexcept
-    {
-        if (this != &rhs)
-        {
-            for (const auto& iter : m_map)
-            {
-                m_map.emplace(std::make_pair(iter.first, std::move(iter.second)));
-            }
-        }
+    //! \brief ScopeLogger Move Assignment Operator
+    //! \details Non-movable
+    ScopeLogger& operator= (ScopeLogger&&) = delete;
 
-        return *this;
-    }
-
-    //! \brief Get logger object from UID
-    //! \details If object cannot be found a generic null stream based
-    //!          logger will be added to the collection and returned.
-    //!          Objects should be casted when requested.  If cast is
-    //!          not done, the appropriate methods may not be called.
-    //!          For example:
-    //!          \code
-    //!          auto l = std::dynamic_pointer_cast<RDGE::ConsoleLogger>(factory->Get("cout"));
-    //!          \endcode
-    //! \param [in] id UID for the lookup
-    //! \returns Logger (or class derived from) shared pointer
-    //! \throws Add to collection failed
-    std::shared_ptr<Logger> Get (const std::string& id = "default");
-
-    //! \brief Add logger to our factory collection
-    //! \details If object cannot be found a generic null stream based
-    //!          logger will be added to the collection and returned.
-    //! \param [in] logger Logger object
-    //! \returns Logger (or class derived from) shared pointer
-    //! \throws Add to collection failed
-    void Add (std::shared_ptr<Logger> logger);
-
-    //! \brief Remove logger from our factory collection
-    //! \details A return value of false means either the item could
-    //!          not be located or an exception was silently handled
-    //!          trying to remove it from the collection
-    //! \param [in] id UID for the lookup
-    //! \returns Boolean success
-    bool Delete (const std::string& id);
+    //! \brief ScopeLogger dtor
+    ~ScopeLogger (void);
 
 private:
-    LoggerMap m_map;
+    using HiResClock = std::chrono::high_resolution_clock;
+    using Duration = std::chrono::microseconds;
+
+    std::string m_identifier;
+    std::chrono::time_point<HiResClock, Duration> m_startPoint;
 };
 
+
 } // namespace Util
+
+// Promote to RDGE namespace
+using Util::FileLogger;
+using Util::LogLevel;
+
 } // namespace RDGE

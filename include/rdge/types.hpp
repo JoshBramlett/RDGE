@@ -1,8 +1,7 @@
 //! \headerfile <rdge/types.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.1
-//! \date 11/13/2015
-//! \bug
+//! \version 0.0.3
+//! \date 05/13/2016
 
 #pragma once
 
@@ -13,7 +12,7 @@
 #include <memory>
 #include <string>
 
-#include <iostream>
+#define RDGE_VERSION "0.0.3"
 
 // TODO: This needs to be a configuration flag
 #define RDGE_DEBUG
@@ -59,7 +58,7 @@
                               ? strrchr(__FILE__, '/') + 1       \
                               : strrchr(__FILE__, '\\')          \
                                   ? strrchr(__FILE__, '\\') + 1  \
-                                  : __FILE__
+                                  : __FILE__)
 #endif
 
 /***********************************

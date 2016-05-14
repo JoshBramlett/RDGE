@@ -2,7 +2,6 @@
 //! \author Josh Bramlett
 //! \version 0.0.1
 //! \date 12/22/2015
-//! \bug
 
 /* TODO - Methods/functionality missing from libSDL2pp
  *
@@ -15,23 +14,29 @@
 
 #pragma once
 
-#include <ostream>
-
 #include <rdge/types.hpp>
+
+#include <SDL2/SDL_rect.h>
+
+#include <ostream>
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {
 namespace Graphics {
 
 //! \class Point
-//! \brief Structure of x and y coordinates that define a point
-//!        in a two-dimensional "Cartesian" plane.
-//! \details Derived from SDL_Point and provides helper methods
-//!          for coordinate values
+//! \brief Structure of x and y coordinates that define a point in a
+//!        two-dimensional "Cartesian" plane.
+//! \details Derived from SDL_Point and provides helper methods for
+//!          coordinate values
 //! \see http://wiki.libsdl.org/SDL_Point
 class Point final : public SDL_Point
 {
 public:
+    //! \brief Empty
+    //! \returns An empty Point object
+    static constexpr Point Empty (void) { return {0, 0}; };
+
     //! \brief Point ctor
     //! \details Initialize point to [0,0]
     constexpr Point ()

@@ -30,6 +30,11 @@ Renderer2D::Renderer2D (RDGE::UInt16 max_sprite_count)
     , m_submissionCount(0)
     , m_maxSubmissions(max_sprite_count)
 {
+#ifndef RDGE_DEBUG
+    // Avoids compiler warnings
+    RDGE::Unused(m_maxSubmissions);
+#endif
+
     if (max_sprite_count > MAX_SUPPORTED_SPRITE_COUNT)
     {
         RDGE_THROW(

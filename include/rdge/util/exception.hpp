@@ -186,7 +186,7 @@ private:
 
 } // namespace Util
 
-// Protmote to RDGE namespace
+// Promote to RDGE namespace
 using Util::Exception;
 using Util::SDLException;
 using Util::GLException;

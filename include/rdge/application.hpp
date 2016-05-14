@@ -1,8 +1,8 @@
 //! \headerfile <rdge/application.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.1
-//! \date 11/13/2015
-//! \bug
+//! \version 0.0.3
+//! \date 05/13/2016
+//!
 //! \details This project never would have made it off the ground had
 //!          it not been for the numerous resources available on the web.
 //!          RDGE was 100% written from scratch, but contains elements
@@ -27,6 +27,7 @@
 #pragma once
 
 #include <rdge/types.hpp>
+#include <rdge/util/logger.hpp>
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {
@@ -48,7 +49,7 @@ enum class MessageBoxType : RDGE::Int32
 //! \details It's required that this class be constructed before
 //!          any RDGE objects are instantiated or any SDL calls
 //!          are made, and should be the last RDGE object destroyed.
-class Application final
+class Application
 {
 public:
     //! \brief Application ctor
@@ -121,5 +122,35 @@ public:
                             SDL_Window*        window = nullptr
                            );
 };
+
+//! \brief Writes an entry to the RDGE log file
+//! \details An instance of the Application class must be created prior
+//!          to calling this.  If not, the call is a no-op.
+//! \param [in] log_level Logging severity
+//! \param [in] message Message to write to the log file
+//! \param [in] filename Name of the file of the caller (__FILE_NAME__)
+//! \param [in] line Line number of the caller (__LINE__)
+void
+WriteToLogFile (
+                RDGE::LogLevel     log_level,
+                const std::string& message,
+                const std::string& filename = "",
+                RDGE::UInt32       line     = 0
+               );
+
+//! \brief Writes an entry to the console
+//! \details An instance of the Application class must be created prior
+//!          to calling this.  If not, the call is a no-op.
+//! \param [in] log_level Logging severity
+//! \param [in] message Message to write to the log file
+//! \param [in] filename Name of the file of the caller (__FILE_NAME__)
+//! \param [in] line Line number of the caller (__LINE__)
+void
+WriteToConsole (
+                RDGE::LogLevel     log_level,
+                const std::string& message,
+                const std::string& filename = "",
+                RDGE::UInt32       line     = 0
+               );
 
 } // namespace RDGE

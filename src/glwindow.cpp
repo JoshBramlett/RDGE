@@ -1,6 +1,7 @@
 #include <rdge/glwindow.hpp>
 #include <rdge/util/timer.hpp>
 #include <rdge/internal/exception_macros.hpp>
+#include <rdge/internal/logger_macros.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
 
 #include <GL/glew.h>
@@ -106,6 +107,18 @@ GLWindow::GLWindow (
     , m_targetWidth(target_width)
     , m_targetHeight(target_height)
 {
+    ILOG("Initializing GLWindow...");
+
+    // Ensure video subsystem is created.  Events subsystem (which is required by the
+    // class) is initialized automatically by initializing video
+    if (SDL_WasInit(SDL_INIT_VIDEO) == 0)
+    {
+        if (UNLIKELY(SDL_InitSubSystem(SDL_INIT_VIDEO) != 0))
+        {
+            SDL_THROW("SDL failed to initialize video subsystem", "SDL_InitSubSystem");
+        }
+    }
+
     // Ensure the reuqested context version is not less than our supported version
     if (
         gl_version_major < MIN_GL_CONTEXT_MAJOR ||
@@ -188,7 +201,7 @@ GLWindow::GLWindow (
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     RDGE::Int32 interval = use_vsync ? 1 : 0;
-    if (SDL_GL_SetSwapInterval(interval) != 0)
+    if (UNLIKELY(SDL_GL_SetSwapInterval(interval) != 0))
     {
         auto msg = "SDL failed to set interval VSYNC=" + std::to_string(interval);
         SDL_THROW(msg, "SDL_GL_SetSwapInterval");
@@ -204,6 +217,8 @@ GLWindow::GLWindow (
 
 GLWindow::~GLWindow (void)
 {
+    ILOG("Destroying GLWindow...");
+
     SDL_DelEventWatch(&OnWindowEvent, this);
 
     if (m_context != nullptr)
@@ -348,12 +363,13 @@ GLWindow::ResetViewport (void)
         m_viewport.y = 0;
     }
 
-    std::cout << "draw_width=" << draw_width << std::endl
-              << "draw_height=" << draw_height << std::endl
-              << "viewport.x=" << m_viewport.x << std::endl
-              << "viewport.y=" << m_viewport.y << std::endl
-              << "viewport.w=" << m_viewport.w << std::endl
-              << "viewport.h=" << m_viewport.h << std::endl;
+    // TODO: Remove
+    //std::cout << "draw_width=" << draw_width << std::endl
+              //<< "draw_height=" << draw_height << std::endl
+              //<< "viewport.x=" << m_viewport.x << std::endl
+              //<< "viewport.y=" << m_viewport.y << std::endl
+              //<< "viewport.w=" << m_viewport.w << std::endl
+              //<< "viewport.h=" << m_viewport.h << std::endl;
 }
 
 //void

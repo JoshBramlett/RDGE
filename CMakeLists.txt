@@ -51,6 +51,7 @@ include_directories (${OPENGL_INCLUDE_DIR})
 # project includes
 include_directories (include)
 include_directories (internal)
+include_directories (lib)
 
 add_library (
              RDGE SHARED

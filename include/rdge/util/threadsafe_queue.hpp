@@ -14,23 +14,30 @@ template<typename T>
 class ThreadsafeQueue
 {
 public:
-    ThreadsafeQueue () { }
+    ThreadsafeQueue (void) { }
 
-    ThreadsafeQueue (const ThreadsafeQueue& rhs) noexcept
+    ThreadsafeQueue (const ThreadsafeQueue&) = delete;
+
+    ThreadsafeQueue (ThreadsafeQueue&& rhs) noexcept
     {
         std::lock_guard<std::mutex> lock(rhs.m_mtx);
-        m_data = rhs.m_data;
+        m_data = std::move(rhs.m_data);
     }
 
-    ThreadsafeQueue (ThreadsafeQueue&&) = delete;
+    ThreadsafeQueue& operator= (const ThreadsafeQueue&) = delete;
 
-    ThreadsafeQueue& operator= (const ThreadsafeQueue& rhs)
+    ThreadsafeQueue& operator= (ThreadsafeQueue&& rhs) noexcept
     {
-        std::lock_guard<std::mutex> lock(rhs.m_mtx);
-        m_data = rhs.m_data;
+        if (this != &rhs)
+        {
+            std::lock_guard<std::mutex> lock(rhs.m_mtx);
+            m_data = std::move(rhs.m_data);
+        }
+
+        return *this;
     }
 
-    ThreadsafeQueue& operator= (ThreadsafeQueue&&) = delete;
+    ~ThreadsafeQueue (void) = default;
 
     void Push (T&& item)
     {
@@ -66,26 +73,24 @@ public:
         return rt;
     }
 
-    bool Empty () const
+    bool Empty (void) const
     {
         std::lock_guard<std::mutex> lock(m_mtx);
         return m_data.empty();
     }
 
-    size_t Size() const
+    size_t Size(void) const
     {
         std::lock_guard<std::mutex> lock(m_mtx);
         return m_data.size();
     }
 
-    void Clear ()
+    void Clear (void)
     {
         std::queue<T> temp;
         std::lock_guard<std::mutex> lock(m_mtx);
         m_data.swap(temp);
     }
-
-    ~ThreadsafeQueue () = default;
 
 private:
     mutable std::mutex m_mtx;

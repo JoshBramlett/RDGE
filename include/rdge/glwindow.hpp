@@ -1,7 +1,7 @@
 //! \headerfile <rdge/glwindow.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.2
-//! \date 03/26/2016
+//! \version 0.0.3
+//! \date 05/13/2016
 
 #pragma once
 

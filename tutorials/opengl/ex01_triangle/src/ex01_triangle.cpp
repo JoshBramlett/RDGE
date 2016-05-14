@@ -22,6 +22,7 @@
 #include <rdge/util/io.hpp>
 #include <rdge/util/exception.hpp>
 #include <rdge/util/system_info.hpp>
+#include <rdge/util/logger.hpp>
 
 #include <SDL.h>
 #include <GL/glew.h>
@@ -82,15 +83,16 @@ JoshString (Josh josh)
 
 int main ()
 {
-    std::cout << JoshString(Josh::Harmie) << std::endl;
+    //std::cout << JoshString(Josh::Harmie) << std::endl;
 
     try
     {
-        std::cout << "Running ex01_triangle" << std::endl;
-
         // 1 - initialize SDL
         RDGE::Application app(SDL_INIT_EVERYTHING, 0, true);
-        std::cout << app.SDLVersion() << std::endl;
+        RDGE::Util::ScopeLogger scoper("MY_SCOPE", __FUNCTION_NAME__, __FILE_NAME__);
+
+        RDGE::WriteToLogFile(RDGE::LogLevel::Debug, "SDL v" + app.SDLVersion());
+        RDGE::WriteToConsole(RDGE::LogLevel::Debug, "Running ex01_triangle");
 
         // 2 - create window and OpenGL context
         RDGE::GLWindow window (

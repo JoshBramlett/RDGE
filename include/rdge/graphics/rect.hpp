@@ -77,7 +77,8 @@ public:
     //! \param [in] point Point structure
     //! \param [in] size Size structure
     constexpr Rect (const Point& point, const Size& size)
-        : SDL_Rect{point.x,
+        : SDL_Rect{
+                   point.x,
                    point.y,
                    static_cast<RDGE::Int32>(size.w),
                    static_cast<RDGE::Int32>(size.h)
