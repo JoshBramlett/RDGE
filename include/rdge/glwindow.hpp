@@ -1,13 +1,14 @@
 //! \headerfile <rdge/glwindow.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.3
-//! \date 05/13/2016
+//! \version 0.0.4
+//! \date 05/14/2016
 
 #pragma once
 
 #include <rdge/types.hpp>
 #include <rdge/color.hpp>
 #include <rdge/graphics/size.hpp>
+#include <rdge/math/vec4.hpp>
 #include <rdge/assets/surface.hpp>
 
 #include <SDL.h>
@@ -155,7 +156,7 @@ public:
     //! \brief Set the background color
     //! \details Color presented to the screen before any drawing takes place
     //! \param [in] color Color structure
-    void SetBackgroundColor (const RDGE::Color& color);
+    void SetClearColor (const RDGE::Color& color);
 
     //! \brief Calculates and sets the window's drawing viewport
     //! \details This should never be called directly.  It is used by the
@@ -197,8 +198,8 @@ private:
     SDL_Window*   m_window;
     SDL_GLContext m_context;
 
-    RDGE::viewport m_viewport;
-    RDGE::Color    m_backgroundColor;
+    RDGE::viewport   m_viewport;
+    RDGE::Math::vec4 m_clearColor;
 
     RDGE::UInt32         m_targetWidth;
     RDGE::UInt32         m_targetHeight;

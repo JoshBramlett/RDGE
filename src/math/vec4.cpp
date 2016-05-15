@@ -3,60 +3,46 @@
 namespace RDGE {
 namespace Math {
 
-vec4::vec4 (void)
-    : x(0.0f)
-    , y(0.0f)
-    , z(0.0f)
-    , w(0.0f)
-{ }
-
-vec4::vec4 (float x, float y, float z, float w)
-    : x(x)
-    , y(y)
-    , z(z)
-    , w(w)
-{ }
-
 vec4&
-vec4::add (const vec4& rhs)
+vec4::add (const vec4& value)
 {
-    x += rhs.x;
-    y += rhs.y;
-    z += rhs.z;
-    w += rhs.w;
+    x += value.x;
+    y += value.y;
+    z += value.z;
+    w += value.w;
 
     return *this;
 }
 
 vec4&
-vec4::subtract (const vec4& rhs)
+vec4::subtract (const vec4& value)
 {
-    x -= rhs.x;
-    y -= rhs.y;
-    z -= rhs.z;
-    w -= rhs.w;
+    x -= value.x;
+    y -= value.y;
+    z -= value.z;
+    w -= value.w;
 
     return *this;
 }
 
 vec4&
-vec4::multiply (const vec4& rhs)
+vec4::multiply (const vec4& value)
 {
-    x *= rhs.x;
-    y *= rhs.y;
-    z *= rhs.z;
-    w *= rhs.w;
+    x *= value.x;
+    y *= value.y;
+    z *= value.z;
+    w *= value.w;
 
     return *this;
 }
 
 vec4&
-vec4::divide (const vec4& rhs)
+vec4::divide (const vec4& value)
 {
-    x /= rhs.x;
-    y /= rhs.y;
-    z /= rhs.z;
-    w /= rhs.w;
+    x /= value.x;
+    y /= value.y;
+    z /= value.z;
+    w /= value.w;
 
     return *this;
 }

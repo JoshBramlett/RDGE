@@ -1,7 +1,7 @@
 //! \headerfile <rdge/color.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.1
-//! \date 12/29/2015
+//! \version 0.0.4
+//! \date 05/14/2016
 
 #pragma once
 
@@ -18,8 +18,8 @@ namespace RDGE {
 
 //! \class Color
 //! \brief Storage representing RGBA colors
-//! \details RGBA values are on an integer scale of 0-255, but helpers
-//!          exist to convert to other types
+//! \details RGBA values are on an integer scale of 0-255, with helpers
+//!          for conversion to other types.
 class Color final : public SDL_Color
 {
 public:
@@ -55,25 +55,29 @@ public:
     //! \returns Magenta color object
     static constexpr Color Magenta (void) { return {255, 0, 255, 255}; }
 
+    //! \brief Color ctor
+    //! \details Initialize Color to [0,0,0,0]
     constexpr Color (void)
         : SDL_Color{0, 0, 0, 0}
     { }
 
-    constexpr Color (const SDL_Color& color)
-        : SDL_Color{color.r, color.g, color.b, color.a}
-    { }
-
+    //! \brief Color ctor
+    //! \details Initialize Color from RGBA values
+    //! \param [in] r Red value
+    //! \param [in] g Green value
+    //! \param [in] b Blue value
+    //! \param [in] a Alpha value
     constexpr Color (RDGE::UInt8 r, RDGE::UInt8 g, RDGE::UInt8 b, RDGE::UInt8 a)
         : SDL_Color{r, g, b, a}
     { }
 
     //! \brief Color Copy ctor
     //! \details Default-copyable
-    Color (const Color&) noexcept = default;
+    constexpr Color (const Color&) noexcept = default;
 
     //! \brief Color Move ctor
     //! \details Default-movable
-    Color (Color&&) noexcept = default;
+    constexpr Color (Color&&) noexcept = default;
 
     //! \brief Color Copy Assignment Operator
     //! \details Default-copyable
@@ -95,16 +99,19 @@ public:
 #endif
     }
 
-    // TODO Implement once vectors are constexpr
-    //constexpr RDGE::Math::vec4 ToVec4 (void) const
-    //{
-        //return RDGE::Math::vec4(
-                                //static_cast<float>(r / 255.0f),
-                                //static_cast<float>(b / 255.0f),
-                                //static_cast<float>(g / 255.0f),
-                                //static_cast<float>(a / 255.0f)
-                               //);
-    //}
+    //! \brief Get the color formatted to a vector of floats
+    //! \details Often used by graphics libraries.  It's values are clamped
+    //!          between [0.0f,1.0f]
+    //! \returns vec4 of clamped floats
+    constexpr RDGE::Math::vec4 ToFloat (void) const
+    {
+        return RDGE::Math::vec4(
+                                static_cast<float>(r / 255.0f),
+                                static_cast<float>(b / 255.0f),
+                                static_cast<float>(g / 255.0f),
+                                static_cast<float>(a / 255.0f)
+                               );
+    }
 
     //! \brief Build color from RGB string
     //! \param [in] color Hex color string

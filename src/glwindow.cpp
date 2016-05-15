@@ -103,7 +103,7 @@ GLWindow::GLWindow (
                     RDGE::Int32        gl_version_major,
                     RDGE::Int32        gl_version_minor
                    )
-    : m_backgroundColor(RDGE::Color::Black())
+    : m_clearColor(RDGE::Math::vec4(0.0f, 0.0f, 0.0f, 0.0f))
     , m_targetWidth(target_width)
     , m_targetHeight(target_height)
 {
@@ -236,7 +236,7 @@ GLWindow::GLWindow (GLWindow&& rhs) noexcept
     : m_window(rhs.m_window)
     , m_context(rhs.m_context)
     , m_viewport(rhs.m_viewport)
-    , m_backgroundColor(rhs.m_backgroundColor)
+    , m_clearColor(rhs.m_clearColor)
     , m_targetAspectRatio(rhs.m_targetAspectRatio)
 {
     rhs.m_context = nullptr;
@@ -261,7 +261,7 @@ GLWindow::operator= (GLWindow&& rhs) noexcept
         m_context = rhs.m_context;
         m_window = rhs.m_window;
         m_viewport = rhs.m_viewport;
-        m_backgroundColor = rhs.m_backgroundColor;
+        m_clearColor = rhs.m_clearColor;
         m_targetAspectRatio = rhs.m_targetAspectRatio;
 
         rhs.m_context = nullptr;
@@ -326,9 +326,9 @@ GLWindow::SetSize (RDGE::UInt32 width, RDGE::UInt32 height)
 }
 
 void
-GLWindow::SetBackgroundColor (const RDGE::Color& color)
+GLWindow::SetClearColor (const RDGE::Color& color)
 {
-    m_backgroundColor = color;
+    m_clearColor = color.ToFloat();
 }
 
 void
@@ -393,7 +393,12 @@ GLWindow::Clear (void)
     RDGE::Graphics::OpenGL::SetViewport(m_viewport.x, m_viewport.y, m_viewport.w, m_viewport.h);
 
     // TODO: Values need to be set from the m_clearColor once fp is supported [00032]
-    RDGE::Graphics::OpenGL::SetClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    RDGE::Graphics::OpenGL::SetClearColor(
+                                          m_clearColor.x,
+                                          m_clearColor.y,
+                                          m_clearColor.z,
+                                          m_clearColor.w
+                                         );
     RDGE::Graphics::OpenGL::Clear(GL_COLOR_BUFFER_BIT);
 }
 

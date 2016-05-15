@@ -11,23 +11,23 @@
 
 #ifndef RDGE_THROW
     #define RDGE_THROW(msg) do { \
-        try { ELOG("RDGE::Exception!  what=" + std::string(msg)); } catch (...) { } \
+        ELOG("RDGE::Exception!  what=" + std::string(msg)); \
         throw RDGE::Exception(msg, __FILE__, __LINE__, __FUNCTION_NAME__); \
     } while (false)
 #endif
 
 #ifndef SDL_THROW
     #define SDL_THROW(msg, fn) do { \
-        try { ELOG("RDGE::SDLException!  what=" + std::string(msg) + \
-                   " fn=" + std::string(fn)); } catch (...) { } \
+        ELOG("RDGE::SDLException!  what=" + std::string(msg) + \
+             " fn=" + std::string(fn)); \
         throw RDGE::SDLException(msg, fn, __FILE__, __LINE__, __FUNCTION_NAME__); \
     } while (false)
 #endif
 
 #ifndef GL_THROW
     #define GL_THROW(msg, fn, code) do { \
-        try { ELOG("RDGE::GLException!  what=" + std::string(msg) + \
-                   " fn=" + std::string(fn) + " code=" + std::to_string(code)); } catch (...) { } \
+        ELOG("RDGE::GLException!  what=" + std::string(msg) + \
+             " fn=" + std::string(fn) + " code=" + std::to_string(code)); \
         throw RDGE::GLException(msg, fn, code, __FILE__, __LINE__, __FUNCTION_NAME__); \
     } while (false)
 #endif

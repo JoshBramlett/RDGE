@@ -51,16 +51,9 @@ public:
     { }
 
     //! \brief Rect ctor
-    //! \details Initialize rect from an SDL_Rect
-    //! \param [in] rect SDL_Rect structure
-    constexpr Rect (const SDL_Rect& rect)
-        : SDL_Rect{rect.x, rect.y, rect.w, rect.h}
-    { }
-
-    //! \brief Rect ctor
     //! \details Initialize rect from X, Y, W and H values
-    //! \param [in] x X Coordinate
-    //! \param [in] y Y Coordinate
+    //! \param [in] x X-Coordinate
+    //! \param [in] y Y-Coordinate
     //! \param [in] w Width
     //! \param [in] h Height
     constexpr Rect (
@@ -87,11 +80,11 @@ public:
 
     //! \brief Rect Copy ctor
     //! \details Default-copyable
-    Rect (const Rect&) noexcept = default;
+    constexpr Rect (const Rect&) noexcept = default;
 
     //! \brief Rect Move ctor
     //! \details Default-movable
-    Rect (Rect&&) noexcept = default;
+    constexpr Rect (Rect&&) noexcept = default;
 
     //! \brief Rect Copy Assignment Operator
     //! \details Default-copyable
