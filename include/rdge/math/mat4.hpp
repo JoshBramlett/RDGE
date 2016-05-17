@@ -1,8 +1,7 @@
 //! \headerfile <rdge/math/mat4.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.2
-//! \date 03/22/2016
-//! \bug
+//! \version 0.0.5
+//! \date 05/17/2016
 
 #pragma once
 
@@ -81,18 +80,19 @@ struct mat4
 
     //! \brief Create an identity matrix
     //! \details Initializes diagonal to 1.0f
-    //! \returns New identity matrix
+    //! \returns Identity matrix
     static mat4 identity (void);
 
     //! \brief Create an orthographic matrix
-    //! \details TODO Describe
+    //! \details Orthographic projection involves throwing away the coordinate
+    //!          which is perpendicular to the surface.
     //! \param [in] left Left clipping plane
     //! \param [in] right Right clipping plane
     //! \param [in] bottom Bottom clipping plane
     //! \param [in] top Top clipping plane
     //! \param [in] near Near clipping plane
     //! \param [in] far Far clipping plane
-    //! \returns New orthographic matrix
+    //! \returns Orthographic matrix
     static mat4 orthographic (
                               float left,
                               float right,
@@ -111,7 +111,7 @@ struct mat4
     //! \param [in] aspect_ratio Aspect ratio of the drawing screen
     //! \param [in] near Near clipping plane
     //! \param [in] far Far clipping plane
-    //! \returns New perspective matrix
+    //! \returns Perspective matrix
     static mat4 perspective (
                              float fov,
                              float aspect_ratio,
@@ -123,11 +123,17 @@ struct mat4
     //! \details Geometric transformation that moves every vertex in a model by
     //!          the same amount in the same direction.
     //! \param [in] translation Three dimensional vector
-    //! \returns New translation matrix
+    //! \returns Translation matrix
     //! \see https://en.wikipedia.org/wiki/Translation_(geometry)
     static mat4 translation (const vec3& translation);
 
-    static mat4 rotate (float angle, const vec3& axis);
+    //! \brief Create a rotation matrix
+    //! \details The rotation matrix is generated from the axis & angle representation.
+    //! \param [in] angle Magnitude of the rotation
+    //! \param [in] axis Unit vector indicating the direction of an axis of rotation
+    //! \returns Rotation matrix
+    //! \see https://en.wikipedia.org/wiki/Rotation_matrix#Axis_and_angle
+    static mat4 rotation (float angle, const vec3& axis);
 
     static mat4 scale (const vec3& scale);
 };

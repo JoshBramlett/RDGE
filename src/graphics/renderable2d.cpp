@@ -1,8 +1,11 @@
 #include <rdge/graphics/renderable2d.hpp>
+#include <rdge/math/mat4.hpp>
 #include <rdge/internal/exception_macros.hpp>
 
 namespace RDGE {
 namespace Graphics {
+
+using namespace RDGE::Math;
 
 Renderable2D::Renderable2D (Renderable2D&& rhs) noexcept
     : m_position(rhs.m_position)
@@ -70,13 +73,13 @@ Renderable2D::SetOpacity (RDGE::UInt8 opacity)
 void
 Renderable2D::SetZIndex (float zindex)
 {
-    m_position.z = RDGE::Math::clamp(zindex, 0.0f, 1.0f);
+    m_position.z = clamp(zindex, 0.0f, 1.0f);
 }
 
 void
 Renderable2D::Scale (float scaler)
 {
-    if (scaler <= 0)
+    if (scaler <= 0.0f)
     {
         RDGE_THROW("Scaler must be a positive value");
     }

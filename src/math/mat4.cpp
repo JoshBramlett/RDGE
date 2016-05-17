@@ -115,30 +115,34 @@ mat4::translation (const vec3& translation)
 }
 
 /* static */ mat4
-mat4::rotate (float angle, const vec3& axis)
+mat4::rotation (float angle, const vec3& axis)
 {
     mat4 result(1.0f);
 
-    float r = to_radians(angle);
-    float c = cos(r);
-    float s = sin(r);
-    float omc = 1.0f - c;
+    float theta = to_radians(angle);
+    float c = cos(theta);
+    float s = sin(theta);
+    float arccos = 1.0f - c;
 
     float x = axis.x;
     float y = axis.y;
     float z = axis.z;
 
-    result.elements[0 + 0 * 4] = x + omc + c;
-    result.elements[1 + 0 * 4] = y * x * omc + z * s;
-    result.elements[2 + 0 * 4] = x * z * omc - y * s;
+    // | xxC + c        xyC - zs        xzC + ys |
+    // | yxC + zs       yyC + c         yzC - xs |
+    // | zxC - ys       zyC + xs        zzC + c  |
 
-    result.elements[0 + 1 * 4] = x * y * omc - z * s;
-    result.elements[1 + 1 * 4] = y * omc + c;
-    result.elements[2 + 1 * 4] = y * z * omc + x * s;
+    result.elements[0 + 0 * 4] = (x * arccos) + c;
+    result.elements[1 + 0 * 4] = (y * x * arccos) + (z * s);
+    result.elements[2 + 0 * 4] = (z * x * arccos) - (y * s);
 
-    result.elements[0 + 2 * 4] = x * z * omc + y * s;
-    result.elements[1 + 2 * 4] = y * z * omc - x * s;
-    result.elements[2 + 2 * 4] = z * omc + c;
+    result.elements[0 + 1 * 4] = (x * y * arccos) - (z * s);
+    result.elements[1 + 1 * 4] = (y * arccos) + c;
+    result.elements[2 + 1 * 4] = (z * y * arccos) + (x * s);
+
+    result.elements[0 + 2 * 4] = (x * z * arccos) + (y * s);
+    result.elements[1 + 2 * 4] = (y * z * arccos) - (x * s);
+    result.elements[2 + 2 * 4] = (z * arccos) + c;
 
     return result;
 }

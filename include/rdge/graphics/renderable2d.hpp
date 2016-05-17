@@ -1,7 +1,7 @@
 //! \headerfile <rdge/graphics/renderable2d.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.2
-//! \date 04/02/2016
+//! \version 0.0.5
+//! \date 05/17/2016
 
 #pragma once
 
@@ -82,17 +82,17 @@ public:
 
     //! \brief Set the color of the renderable
     //! \param [in] color Color of the renderable
-    //! \param [in] ignore_alpha False will only set the RGB values
+    //! \param [in] ignore_alpha True will only set the RGB values
     virtual void SetColor (const RDGE::Color& color, bool ignore_alpha = true);
 
     //! \brief Set the opacity of the renderable
     //! \details Maps to the alpha value of the color
-    //! \param [in] opacity Renderable opacity
-    void SetOpacity (RDGE::UInt8 opacity);
+    //! \param [in] opacity Alpha channel value (0-255)
+    virtual void SetOpacity (RDGE::UInt8 opacity);
 
     //! \brief Set the Z-Index position value
     //! \param [in] zindex Z-Index value
-    void SetZIndex (float zindex);
+    virtual void SetZIndex (float zindex);
 
     //! \brief Scale the size by the provided multiplier
     //! \details Current size is a value of 1.0.

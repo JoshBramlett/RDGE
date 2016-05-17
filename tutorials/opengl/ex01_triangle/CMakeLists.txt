@@ -24,12 +24,12 @@ endif ()
 
 find_package (SDL2 REQUIRED)
 find_package (GLEW REQUIRED)
-find_package (OpenGL REQUIRED)
+#find_package (OpenGL REQUIRED)
 
 link_directories (${RDGE_BINARY_DIR}/lib)
 
 include_directories (${SDL2_INCLUDE_DIR})
-include_directories (${GLEW_INCLUDE_DIRS})
+#include_directories (${GLEW_INCLUDE_DIRS})
 include_directories (${OPENGL_INCLUDE_DIR})
 include_directories ("${RDGE_SOURCE_DIR}/include")
 
@@ -41,7 +41,7 @@ add_executable (
 target_link_libraries (
                        ex01_triangle
                        ${SDL2_LIBRARY}
-                       ${GLEW_LIBRARIES}
+                       #${GLEW_LIBRARIES}
                        ${OPENGL_LIBRARIES}
                        RDGE
                       )

@@ -390,16 +390,12 @@ GLWindow::ResetViewport (void)
 void
 GLWindow::Clear (void)
 {
-    RDGE::Graphics::OpenGL::SetViewport(m_viewport.x, m_viewport.y, m_viewport.w, m_viewport.h);
+    using namespace RDGE::Graphics;
 
-    // TODO: Values need to be set from the m_clearColor once fp is supported [00032]
-    RDGE::Graphics::OpenGL::SetClearColor(
-                                          m_clearColor.x,
-                                          m_clearColor.y,
-                                          m_clearColor.z,
-                                          m_clearColor.w
-                                         );
-    RDGE::Graphics::OpenGL::Clear(GL_COLOR_BUFFER_BIT);
+    OpenGL::SetViewport(m_viewport.x, m_viewport.y, m_viewport.w, m_viewport.h);
+
+    OpenGL::SetClearColor(m_clearColor.x, m_clearColor.y, m_clearColor.z, m_clearColor.w);
+    OpenGL::Clear(GL_COLOR_BUFFER_BIT);
 }
 
 void
