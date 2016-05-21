@@ -1,7 +1,7 @@
 //! \headerfile <rdge/application.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.3
-//! \date 05/13/2016
+//! \version 0.0.6
+//! \date 05/18/2016
 //!
 //! \details This project never would have made it off the ground had
 //!          it not been for the numerous resources available on the web.
@@ -27,6 +27,7 @@
 #pragma once
 
 #include <rdge/types.hpp>
+#include <rdge/config.hpp>
 #include <rdge/util/logger.hpp>
 
 //! \namespace RDGE Rainbow Drop Game Engine
@@ -55,19 +56,9 @@ public:
     //! \brief Application ctor
     //! \details Initializes SDL2 library, while optionally
     //!          initializing SDL2 extension libraries.
-    //! \param [in] flags Flags to pass to SDL_Init
-    //! \param [in] img_flags Flags for SDL_image library
-    //! \param [in] init_sdl_ttf Initialize SDL_ttf library
-    //! \param [in] init_sdl_mixer Initialize SDL_mixer library
-    //! \param [in] init_sdl_net Initialize SDL_net library
+    //! \param [in] settings Game settings
     //! \throws Initialization failed
-    explicit Application (
-                          RDGE::UInt32 flags,
-                          RDGE::UInt32 img_flags = 0,
-                          bool         init_sdl_ttf = false,
-                          bool         init_sdl_mixer = false,
-                          bool         init_sdl_net = false
-                         );
+    explicit Application (const game_settings& settings);
 
     //! \brief Application dtor
     //! \details Calls SDL_Quit

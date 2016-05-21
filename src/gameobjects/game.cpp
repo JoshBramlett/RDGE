@@ -106,6 +106,8 @@ Game::Run (void)
         ProcessRender(m_window);
         m_window.Present();
 
+        // TODO: Detect if vsync is enabled.  This code should execute if either vsync is off
+        //       or not enabled for that system
         if (m_settings.use_vsync == false)
         {
             RDGE::UInt32 frame_length = timer.Ticks() - frame_start;

@@ -3,16 +3,21 @@ project (RDGE)
 
 set (RDGE_VERSION_MAJOR 0)
 set (RDGE_VERSION_MINOR 0)
-set (RDGE_VERSION_PACKAGE 2)
+set (RDGE_VERSION_PACKAGE 6)
 
 set (CMAKE_MODULE_PATH ${RDGE_SOURCE_DIR}/cmake)
 set (LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
 # output
 message (STATUS "RDGE v${RDGE_VERSION_MAJOR}.${RDGE_VERSION_MINOR}.${RDGE_VERSION_PACKAGE}")
-message (STATUS "System:    ${CMAKE_SYSTEM_NAME}")
-message (STATUS "Processor: ${CMAKE_SYSTEM_PROCESSOR}")
-message (STATUS "Compiler:  ${CMAKE_CXX_COMPILER_ID}")
+message (STATUS "System:      ${CMAKE_SYSTEM_NAME}")
+message (STATUS "Processor:   ${CMAKE_SYSTEM_PROCESSOR}")
+message (STATUS "Compiler:    ${CMAKE_CXX_COMPILER_ID}")
+message (STATUS "Build type:  ${CMAKE_BUILD_TYPE}")
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_definitions("-DRDGE_DEBUG")
+endif()
 
 if (
     ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" OR
@@ -57,6 +62,7 @@ add_library (
              RDGE SHARED
              src/application.cpp
              src/color.cpp
+             src/config.cpp
              src/texture.cpp
              src/cursor.cpp
              src/window.cpp

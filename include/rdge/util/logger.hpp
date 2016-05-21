@@ -87,12 +87,12 @@ public:
     //! \param [in] message Message to write to stream
     //! \param [in] filename Name of file
     //! \param [in] line Line number
-    virtual void Write (
-                        RDGE::Util::LogLevel level,
-                        const std::string&   message,
-                        const std::string&   filename = "",
-                        RDGE::UInt32         line     = 0
-                       );
+    void Write (
+                RDGE::Util::LogLevel level,
+                const std::string&   message,
+                const std::string&   filename = "",
+                RDGE::UInt32         line     = 0
+               );
 
 private:
     LogLevel m_minLogLevel;

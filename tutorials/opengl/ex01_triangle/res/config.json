@@ -1,0 +1,14 @@
+{
+    "enable_jpg": true,
+    "enable_png": true,
+    "enable_tif": true,
+    "enable_fonts": true,
+    "window_title": "My window title",
+    "window_icon": "icon.ico",
+    "target_width": 541,
+    "target_height": 542,
+    "fullscreen": true,
+    "use_vsync": true,
+    "target_fps": 61,
+    "min_log_level": 0
+}

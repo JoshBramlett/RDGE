@@ -1,4 +1,5 @@
 #include <rdge/types.hpp>
+#include <rdge/config.hpp>
 #include <rdge/assets/surface.hpp>
 #include <rdge/application.hpp>
 #include <rdge/glwindow.hpp>
@@ -87,8 +88,22 @@ int main ()
 
     try
     {
+        auto config = RDGE::ReadConfigFile("config.json");
+        std::cout << "enable_jpg=" << config.enable_jpg << std::endl
+                  << "enable_png=" << config.enable_png << std::endl
+                  << "enable_tif=" << config.enable_tif << std::endl
+                  << "enable_fonts=" << config.enable_fonts << std::endl
+                  << "window_title=" << config.window_title << std::endl
+                  << "window_icon=" << config.window_icon << std::endl
+                  << "target_width=" << config.target_width << std::endl
+                  << "target_height=" << config.target_height << std::endl
+                  << "fullscreen=" << config.fullscreen << std::endl
+                  << "use_vsync=" << config.use_vsync << std::endl
+                  << "target_fps=" << config.target_fps << std::endl
+                  << "min_log_level=" << config.min_log_level << std::endl;
+
         // 1 - initialize SDL
-        RDGE::Application app(SDL_INIT_EVERYTHING, 0, true);
+        RDGE::Application app(config);
 
         RDGE::WriteToLogFile(RDGE::LogLevel::Debug, "SDL v" + app.SDLVersion());
         RDGE::WriteToConsole(RDGE::LogLevel::Debug, "Running ex01_triangle");

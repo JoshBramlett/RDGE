@@ -2,7 +2,6 @@
 //! \author Josh Bramlett
 //! \version 0.0.1
 //! \date 03/22/2016
-//! \bug
 
 #pragma once
 
@@ -30,6 +29,10 @@ inline std::string read_text_file (const char* filepath)
     //       implementation specific.
     // http://www.cplusplus.com/reference/cstdio/fopen/
     FILE* file = fopen(filepath, "rt");
+    if (!file)
+    {
+        return "";
+    }
 
     fseek(file, 0, SEEK_END);
     unsigned long length = ftell(file);

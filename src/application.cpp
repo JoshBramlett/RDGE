@@ -22,54 +22,78 @@ namespace {
 
 } // anonymous namespace
 
-Application::Application (
-                          RDGE::UInt32 flags,
-                          RDGE::UInt32 img_flags,
-                          bool         init_sdl_ttf,
-                          bool         init_sdl_mixer,
-                          bool         init_sdl_net
-                         )
+Application::Application (const game_settings& settings)
 {
-    // TODO: LogLevel should be from config file
-    s_fileLogger = new RDGE::Util::FileLogger(
-                                          "rdge.log",
-                                          RDGE::LogLevel::Debug,
-                                          true
-                                         );
+    /***********************************************
+     *          1.  Initialize Logging
+     **********************************************/
 
-    s_consoleLogger = new RDGE::Util::ConsoleLogger(
-                                          RDGE::LogLevel::Debug,
-                                          true
-                                         );
+    // Validate log level
+    auto log_level = static_cast<RDGE::LogLevel>(settings.min_log_level);
+    if (log_level < RDGE::LogLevel::Debug || log_level > RDGE::LogLevel::Fatal)
+    {
+        log_level = RDGE::LogLevel::Warning;
+    }
 
+    s_fileLogger = new RDGE::Util::FileLogger("rdge.log", log_level, true);
     s_fileLogger->Write(RDGE::LogLevel::Info, "Built with RDGE v" RDGE_VERSION);
 
-    if (UNLIKELY(SDL_Init(flags) != 0))
+#ifdef RDGE_DEBUG
+    s_consoleLogger = new RDGE::Util::ConsoleLogger(RDGE::LogLevel::Debug, true);
+#endif
+
+    std::cout << "app log_level=" << static_cast<RDGE::UInt32>(log_level) << std::endl;
+
+    /***********************************************
+     *             2.  Initialize SDL
+     **********************************************/
+
+    // Valid values include (can be OR'd together):
+    // SDL_INIT_TIMER
+    // SDL_INIT_AUDIO
+    // SDL_INIT_VIDEO
+    // SDL_INIT_JOYSTICK
+    // SDL_INIT_HAPTIC
+    // SDL_INIT_GAMECONTROLLER
+    // SDL_INIT_EVENTS
+    // SDL_INIT_EVERYTHING
+    //
+    // Currently the only subsystems used are SDL_INIT_VIDEO and SDL_INIT_EVENTS.
+    // This will need to be updated when more functionality is added.
+
+    // Setting to SDL_INIT_VIDEO as it implicitly initializes SDL_INIT_EVENTS as well
+    if (UNLIKELY(SDL_Init(SDL_INIT_VIDEO) != 0))
     {
         SDL_THROW("SDL Failed to initialize", "SDL_Init");
     }
 
-    if (UNLIKELY((IMG_Init(img_flags) & img_flags) != img_flags))
+    /***********************************************
+     *          3.  Initialize SDL_image
+     **********************************************/
+
+    RDGE::Int32 image_flags = 0;
+
+    image_flags |= (settings.enable_jpg) ? IMG_INIT_JPG : 0;
+    image_flags |= (settings.enable_png) ? IMG_INIT_PNG : 0;
+    image_flags |= (settings.enable_tif) ? IMG_INIT_TIF : 0;
+
+    if (UNLIKELY((IMG_Init(image_flags) & image_flags) != image_flags))
     {
         SDL_THROW("SDL_image failed to initialize", "IMG_Init");
     }
 
-    if (init_sdl_ttf)
+    std::cout << "app image_flags=" << image_flags << std::endl;
+
+    /***********************************************
+     *          4.  Initialize SDL_ttf
+     **********************************************/
+
+    if (settings.enable_fonts)
     {
         if (UNLIKELY(TTF_Init() != 0))
         {
             SDL_THROW("SDL_ttf failed to initialize", "TTF_Init");
         }
-    }
-
-    if (init_sdl_mixer)
-    {
-        // TODO Implement
-    }
-
-    if (init_sdl_net)
-    {
-        // TODO Implement
     }
 }
 
@@ -78,6 +102,11 @@ Application::~Application (void)
     if (!s_fileLogger)
     {
         delete s_fileLogger;
+    }
+
+    if (!s_consoleLogger)
+    {
+        delete s_consoleLogger;
     }
 
     if (TTF_WasInit())
@@ -178,9 +207,6 @@ WriteToLogFile (
 {
     if (!s_fileLogger)
     {
-        std::cerr << "ERROR:  Attempting to use file logger before the RDGE::Application "
-                  << "has been instantiated." << std::endl;
-
         return;
     }
 
@@ -197,9 +223,6 @@ WriteToConsole (
 {
     if (!s_consoleLogger)
     {
-        std::cerr << "ERROR:  Attempting to use console logger before the RDGE::Application "
-                  << "has been instantiated." << std::endl;
-
         return;
     }
 
