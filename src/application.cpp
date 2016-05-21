@@ -42,8 +42,6 @@ Application::Application (const game_settings& settings)
     s_consoleLogger = new RDGE::Util::ConsoleLogger(RDGE::LogLevel::Debug, true);
 #endif
 
-    std::cout << "app log_level=" << static_cast<RDGE::UInt32>(log_level) << std::endl;
-
     /***********************************************
      *             2.  Initialize SDL
      **********************************************/
@@ -81,8 +79,6 @@ Application::Application (const game_settings& settings)
     {
         SDL_THROW("SDL_image failed to initialize", "IMG_Init");
     }
-
-    std::cout << "app image_flags=" << image_flags << std::endl;
 
     /***********************************************
      *          4.  Initialize SDL_ttf
