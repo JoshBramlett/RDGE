@@ -10,9 +10,9 @@ Layer2D::Layer2D (
                   float                   zindex,
                   RDGE::UInt16            num_renderables
                  )
-    : m_zIndex(RDGE::Math::clamp(zindex, 0.0f, 1.0f))
-    , m_shader(std::move(shader))
-    , m_projectionMatrix(projection_matrix)
+    : Layer(std::move(shader), projection_matrix)
+    , m_renderer(num_renderables)
+    , m_zIndex(RDGE::Math::clamp(zindex, 0.0f, 1.0f))
 {
     // For initializing our sampler2D array
     std::vector<RDGE::Int32> texture_units(Shader::MaxFragmentShaderUnits());
@@ -31,8 +31,29 @@ Layer2D::Layer2D (
 Layer2D::~Layer2D (void)
 { }
 
+Layer2D::Layer2D (Layer2D&& rhs) noexcept
+    : Layer(std::move(rhs))
+    , m_renderer(std::move(rhs.m_renderer))
+    , m_renderables(std::move(rhs.m_renderables))
+    , m_zIndex(rhs.m_zIndex)
+{ }
+
+Layer2D&
+Layer2D::operator= (Layer2D&& rhs) noexcept
+{
+    if (this != &rhs)
+    {
+        Layer::operator=(std::move(rhs));
+        m_renderer = std::move(rhs.m_renderer);
+        m_renderables = std::move(rhs.m_renderables);
+        m_zIndex = rhs.m_zIndex;
+    }
+
+    return *this;
+}
+
 void
-Layer2D::AddRenderable (Renderable2D* renderable)
+Layer2D::AddRenderable (std::shared_ptr<Renderable2D> renderable)
 {
     auto texture = renderable->Texture();
     if (texture)

@@ -1,11 +1,12 @@
 //! \headerfile <rdge/graphics/layers/layer2d.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.2
-//! \date 04/02/2016
+//! \version 0.0.7
+//! \date 05/21/2016
 
 #pragma once
 
 #include <rdge/types.hpp>
+#include <rdge/graphics/layers/layer.hpp>
 #include <rdge/graphics/shader.hpp>
 #include <rdge/graphics/renderable2d.hpp>
 #include <rdge/graphics/renderer2d.hpp>
@@ -30,11 +31,11 @@ namespace Graphics {
 //             and the shader should no longer be a parameter in the ctor
 
 //! \class Layer2D
-//! \brief Layer of renderables
+//! \brief Layer of 2D renderables
 //! \details Layers have their own shader and renderer, and can therefore manage
 //!          the max textures supported by OpenGL.  The renderables are not
 //!          managed by the layer, and therefore should should outlive the layer.
-class Layer2D
+class Layer2D : public Layer
 {
 public:
     //! \brief Layer2D ctor
@@ -52,28 +53,37 @@ public:
     //! \brief Layer2D dtor
     virtual ~Layer2D (void);
 
-    // TODO: Add copy and move (note the impl of such in the renderer2d)
+    //! \brief Layer2D Copy ctor
+    //! \details Non-copyable
+    Layer2D (const Layer2D&) = delete;
+
+    //! \brief Layer2D Move ctor
+    //! \details Transfers ownership
+    Layer2D (Layer2D&&) noexcept;
+
+    //! \brief Layer2D Copy Assignment Operator
+    //! \details Non-copyable
+    Layer2D& operator= (const Layer2D&) = delete;
+
+    //! \brief Layer2D Move Assignment Operator
+    //! \details Transfers ownership
+    Layer2D& operator= (Layer2D&&) noexcept;
 
     //! \brief Cache a pointer to a renderable to be submitted to the renderer
-    //! \param [in] renderable Renderable object
-    virtual void AddRenderable (Renderable2D* renderable);
+    //! \param [in] renderable Renderable object shared pointer
+    virtual void AddRenderable (std::shared_ptr<Renderable2D> renderable);
 
     //! \brief Render all cached renderables
-    virtual void Render (void);
-
-    // TODO: Remove?
-    Shader* GetShader (void)
-    {
-        return m_shader.get();
-    }
+    //virtual void Render (void);
+    virtual void Render (void) override;
 
 private:
-    Renderer2D                 m_renderer;
-    std::vector<Renderable2D*> m_renderables;
-    float                      m_zIndex;
+    //! \typedef RenderableVector Container type for layer renderables
+    using RenderableVector = std::vector<std::shared_ptr<Renderable2D>>;
 
-    std::unique_ptr<Shader>    m_shader;
-    RDGE::Math::mat4           m_projectionMatrix;
+    Renderer2D       m_renderer;
+    RenderableVector m_renderables;
+    float            m_zIndex;
 };
 
 } // namespace Graphics

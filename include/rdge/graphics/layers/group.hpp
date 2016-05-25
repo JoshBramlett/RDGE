@@ -1,7 +1,7 @@
 //! \headerfile <rdge/graphics/layers/group.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.5
-//! \date 05/17/2016
+//! \version 0.0.7
+//! \date 05/21/2016
 
 #pragma once
 
@@ -10,6 +10,7 @@
 #include <rdge/graphics/renderable2d.hpp>
 #include <rdge/graphics/renderer2d.hpp>
 
+#include <memory>
 #include <vector>
 
 //! \namespace RDGE Rainbow Drop Game Engine
@@ -51,7 +52,7 @@ public:
 
     //! \brief Add renderable to the group
     //! \param [in] renderable Pointer to renderable object
-    void AddRenderable (Renderable2D* renderable);
+    void AddRenderable (std::shared_ptr<Renderable2D> renderable);
 
     //! \brief Set the relative transformation
     //! \param [in] transformation Transformation matrix
@@ -75,8 +76,11 @@ public:
     virtual void SetZIndex (float zindex) override;
 
 private:
-    std::vector<Renderable2D*> m_children;
-    RDGE::Math::mat4           m_transformation;
+    //! \typedef RenderableVector Container type for group child renderables
+    using RenderableVector = std::vector<std::shared_ptr<Renderable2D>>;
+
+    RenderableVector m_children;
+    RDGE::Math::mat4 m_transformation;
 };
 
 } // namespace Graphics

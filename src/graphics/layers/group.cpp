@@ -17,10 +17,8 @@ Group::Group (const RDGE::Math::mat4& transformation)
 
 Group::Group (Group&& rhs) noexcept
     : m_children(std::move(rhs.m_children))
-    , m_transformation(std::move(rhs.m_transformation))
-{
-    rhs.m_children.clear();
-}
+    , m_transformation(rhs.m_transformation)
+{ }
 
 Group&
 Group::operator= (Group&& rhs) noexcept
@@ -28,16 +26,14 @@ Group::operator= (Group&& rhs) noexcept
     if (this != &rhs)
     {
         m_children = std::move(rhs.m_children);
-        m_transformation = std::move(rhs.m_transformation);
-
-        rhs.m_children.clear();
+        m_transformation = rhs.m_transformation;
     }
 
     return *this;
 }
 
 void
-Group::AddRenderable (Renderable2D* renderable)
+Group::AddRenderable (std::shared_ptr<Renderable2D> renderable)
 {
     // Calculate the position and total size of all children
     auto pos = renderable->Position();

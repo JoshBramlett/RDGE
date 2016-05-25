@@ -15,8 +15,7 @@ namespace Util {
 
 using namespace std::chrono;
 
-namespace
-{
+namespace {
     // Select Graphic Rendition Codes (used for console formatting)
     // https://en.wikipedia.org/wiki/ANSI_escape_code
     enum class SGRCode : RDGE::UInt16

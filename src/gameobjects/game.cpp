@@ -7,25 +7,35 @@ namespace RDGE {
 namespace GameObjects {
 
 namespace {
-    constexpr RDGE::UInt32 MinimumFrameRate = 24;
+    constexpr RDGE::UInt32 MIN_FRAME_RATE = 30;
 }
 
-Game::Game (const GameSettings& settings)
+Game::Game (const game_settings& settings)
     : m_settings(settings)
+    , m_window(nullptr)
     , m_running(false)
     , m_currentScene(nullptr)
 {
-    if (m_settings.target_fps < MinimumFrameRate)
+    DLOG("Constructing Game object");
+
+    if (m_settings.target_fps < MIN_FRAME_RATE)
     {
-        m_settings.target_fps = MinimumFrameRate;
+        m_settings.target_fps = MIN_FRAME_RATE;
     }
 
-    m_window = RDGE::Window(
-                            settings.window_title,
-                            settings.target_width,
-                            settings.target_height,
-                            settings.use_vsync
-                           );
+    m_window = std::make_unique<RDGE::GLWindow>(
+                                                m_settings.window_title,
+                                                m_settings.target_width,
+                                                m_settings.target_height,
+                                                m_settings.fullscreen,
+                                                false, /* resizable */
+                                                m_settings.use_vsync
+                                               );
+}
+
+Game::~Game (void)
+{
+    DLOG("Destroying Game object");
 }
 
 std::shared_ptr<Scene>
@@ -96,15 +106,15 @@ Game::Run (void)
 
         while (SDL_PollEvent(&event))
         {
-            ProcessEvent(event);
+            ProcessEventPhase(event);
         }
 
         RDGE::UInt32 ticks = timer.TickDelta();
-        ProcessUpdate(ticks);
+        ProcessUpdatePhase(ticks);
 
-        m_window.Clear();
-        ProcessRender(m_window);
-        m_window.Present();
+        m_window->Clear();
+        ProcessRenderPhase();
+        m_window->Present();
 
         // TODO: Detect if vsync is enabled.  This code should execute if either vsync is off
         //       or not enabled for that system
@@ -120,21 +130,21 @@ Game::Run (void)
 }
 
 void
-Game::ProcessEvent (const SDL_Event& event)
+Game::ProcessEventPhase (const SDL_Event& event)
 {
-    m_currentScene->HandleEvents(event);
+    m_currentScene->ProcessEventPhase(event);
 }
 
 void
-Game::ProcessUpdate (RDGE::UInt32 ticks)
+Game::ProcessUpdatePhase (RDGE::UInt32 ticks)
 {
-    m_currentScene->Update(ticks);
+    m_currentScene->ProcessUpdatePhase(ticks);
 }
 
 void
-Game::ProcessRender (const RDGE::Window& window)
+Game::ProcessRenderPhase (void)
 {
-    m_currentScene->Render(window);
+    m_currentScene->ProcessRenderPhase();
 }
 
 } // namespace GameObjects

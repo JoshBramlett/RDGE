@@ -1,13 +1,13 @@
 //! \headerfile <rdge/gameobjects/game.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.1
-//! \date 01/30/2016
-//! \bug
+//! \version 0.0.7
+//! \date 05/21/2016
 
 #pragma once
 
 #include <rdge/types.hpp>
-#include <rdge/window.hpp>
+#include <rdge/config.hpp>
+#include <rdge/glwindow.hpp>
 #include <rdge/gameobjects/scene.hpp>
 
 #include <SDL.h>
@@ -19,22 +19,6 @@
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {
 namespace GameObjects {
-
-//! \struct GameSettings
-//! \brief Settings required for game bootstrap
-//! \details Settings are read during \ref Game instantiation and are
-//!          immutable.  Generally populated via config file.
-struct GameSettings
-{
-    std::string  name;
-    std::string  window_title;
-    RDGE::UInt32 target_fps;
-    bool         use_vsync;
-    std::string  icon;
-    RDGE::UInt32 target_width;
-    RDGE::UInt32 target_height;
-    bool         fullscreen;
-};
 
 //! \class Game
 //! \brief Base class for a game
@@ -50,10 +34,10 @@ public:
     //! \brief Game ctor
     //! \details Bootstrap game from immutable settings
     //! \param [in] settings Game settings for bootstrap
-    explicit Game (const GameSettings& settings);
+    explicit Game (const game_settings& settings);
 
     //! \brief Game dtor
-    virtual ~Game (void) { }
+    virtual ~Game (void);
 
     //! \brief Game Copy ctor
     //! \details Non-copyable
@@ -96,29 +80,28 @@ protected:
     virtual void PopScene (void) final;
 
     //! \brief Process event
-    //! \details Calls HandleEvents for the current scene.  Derived
+    //! \details Calls ProcessEventPhase for the current scene.  Derived
     //!          classes may override but should still call the base
     //!          method for scene processing.
     //! \param [in] event Polled SDL_Event
-    virtual void ProcessEvent (const SDL_Event& event);
+    virtual void ProcessEventPhase (const SDL_Event& event);
 
     //! \brief Process update
-    //! \details Calls Update for the current scene.  Derived classes
-    //!          may override but should still call the base method
-    //!          for scene processing.
+    //! \details Calls ProcessUpdatePhase for the current scene.  Derived
+    //!          classes may override but should still call the base
+    //!          method for scene processing.
     //! \param [in] ticks Tick delta from last loop iteration
-    virtual void ProcessUpdate (RDGE::UInt32 ticks);
+    virtual void ProcessUpdatePhase (RDGE::UInt32 ticks);
 
     //! \brief Process render
-    //! \details Calls Render for the current scene.  Derived classes
-    //!          may override but should still call the base method
-    //!          for scene processing.
-    //! \param [in] window Game window
-    virtual void ProcessRender (const RDGE::Window& window);
+    //! \details Calls ProcessRenderPhase for the current scene.
+    //!          Derived classes may override but should still call
+    //!          the base method for scene processing.
+    virtual void ProcessRenderPhase (void);
 
-    GameSettings m_settings;
-    RDGE::Window m_window;
-    bool         m_running;
+    game_settings                   m_settings;
+    std::unique_ptr<RDGE::GLWindow> m_window;
+    bool                            m_running;
 
 private:
     //! \typedef SceneStack

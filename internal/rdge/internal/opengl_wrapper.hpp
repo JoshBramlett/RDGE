@@ -677,6 +677,17 @@ GetIntegerValue (RDGE::UInt32 pname)
     return static_cast<RDGE::Int32>(value);
 }
 
+//! \brief Query OpenGL for the string value of a given parameter
+//! \param [in] name Parameter name
+//! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glGetString.xml
+inline std::string
+GetStringValue (RDGE::UInt32 name)
+{
+    const unsigned char* result;
+    GL_CHECK_ERROR(result = glGetString(name));
+    return reinterpret_cast<const char*>(result);
+}
+
 /******************************************************************
  *                     OpenGL Render Phase
  *****************************************************************/

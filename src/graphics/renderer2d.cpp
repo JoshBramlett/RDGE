@@ -8,6 +8,7 @@
 #include <GL/glew.h>
 
 #include <algorithm>
+#include <sstream>
 
 namespace RDGE {
 namespace Graphics {
@@ -26,26 +27,37 @@ namespace {
 } // anonymous namespace
 
 Renderer2D::Renderer2D (RDGE::UInt16 max_sprite_count)
-    : m_buffer(nullptr)
+    : m_vao(0)
+    , m_vbo(0)
+    , m_indexCount(0)
+    , m_buffer(nullptr)
+    , m_currentTransformation(nullptr)
     , m_submissionCount(0)
     , m_maxSubmissions(max_sprite_count)
 {
 #ifndef RDGE_DEBUG
-    // Avoids compiler warnings
+    // Avoids release build compiler warnings
     RDGE::Unused(m_maxSubmissions);
 #endif
 
-    if (max_sprite_count > MAX_SUPPORTED_SPRITE_COUNT)
+    if (UNLIKELY(max_sprite_count == 0 || max_sprite_count > MAX_SUPPORTED_SPRITE_COUNT))
     {
-        RDGE_THROW(
-                   "Max sprite count cannot exceed limit of " +
-                   std::to_string(MAX_SUPPORTED_SPRITE_COUNT)
-                  );
+        std::stringstream ss;
+        ss << "Invalid sprite count.  Allowed range is "
+           << "[1-" << MAX_SUPPORTED_SPRITE_COUNT << "]"
+           << "value=" << max_sprite_count;
+
+        RDGE_THROW(ss.str());
     }
 
     // define sizes used for buffer allocation
     RDGE::UInt32 buffer_size  = static_cast<RDGE::UInt32>(max_sprite_count) * SPRITE_SIZE;
     RDGE::UInt32 indices_size = static_cast<RDGE::UInt32>(max_sprite_count) * 6;
+
+    DLOG(
+         "Constructing Renderer2D max_sprites=" + std::to_string(max_sprite_count) +
+         " buffer_size=" + std::to_string(buffer_size)
+        );
 
     // push an identity matrix on the transformation stack so all submissions
     // wihtout a transformation will essentially be a no-op
@@ -137,6 +149,49 @@ Renderer2D::~Renderer2D (void)
 {
     glDeleteBuffers(1, &m_vbo);
     glDeleteVertexArrays(1, &m_vao);
+}
+
+Renderer2D::Renderer2D (Renderer2D&& rhs) noexcept
+    : m_ibo(std::move(rhs.m_ibo))
+    , m_indexCount(rhs.m_indexCount)
+    , m_buffer(rhs.m_buffer)
+    , m_textures(std::move(rhs.m_textures))
+    , m_transformationStack(std::move(rhs.m_transformationStack))
+    , m_currentTransformation(rhs.m_currentTransformation)
+    , m_submissionCount(rhs.m_submissionCount)
+    , m_maxSubmissions(rhs.m_maxSubmissions)
+{
+    // The destructor deletes the OpenGL buffers, therefore we swap the buffer
+    // ids so the moved-from object will destroy the buffer it's replacing
+    std::swap(m_vao, rhs.m_vao);
+    std::swap(m_vbo, rhs.m_vbo);
+
+    rhs.m_buffer = nullptr;
+    rhs.m_currentTransformation = nullptr;
+}
+
+Renderer2D&
+Renderer2D::operator= (Renderer2D&& rhs) noexcept
+{
+    if (this != &rhs)
+    {
+        m_ibo = std::move(rhs.m_ibo);
+        m_indexCount = rhs.m_indexCount;
+        m_buffer = rhs.m_buffer;
+        m_textures = std::move(rhs.m_textures);
+        m_transformationStack = std::move(rhs.m_transformationStack);
+        m_currentTransformation = rhs.m_currentTransformation;
+        m_submissionCount = rhs.m_submissionCount;
+        m_maxSubmissions = rhs.m_maxSubmissions;
+
+        std::swap(m_vao, rhs.m_vao);
+        std::swap(m_vbo, rhs.m_vbo);
+
+        rhs.m_buffer = nullptr;
+        rhs.m_currentTransformation = nullptr;
+    }
+
+    return *this;
 }
 
 void

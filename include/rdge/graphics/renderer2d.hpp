@@ -1,7 +1,7 @@
 //! \headerfile <rdge/graphics/renderer2D.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.2
-//! \date 04/06/2016
+//! \version 0.0.7
+//! \date 05/21/2016
 
 #pragma once
 
@@ -41,8 +41,7 @@ struct vertex_data
 //! \details 2D renderer that pre-allocates a large buffer for ultra fast batch
 //!          rendering.  When renderables are submitted they are written directly
 //!          to a mapped memory location provided by OpenGL.  The renderer
-//!          assumes all renderable are made up of 4 vertices.  Class cannot be
-//!          copied nor moved.
+//!          assumes all renderables are made up of 4 vertices.
 class Renderer2D
 {
 public:
@@ -54,7 +53,7 @@ public:
     //! \details Creates a vertex array with a vertex buffer whose size is
     //!          defined by the provided max sprite count.
     //! \param [in] max_sprite_count Max number of sprites that can be submitted
-    //! \throws RDGE::Exception If sprite count is greater than the max supported
+    //! \throws RDGE::Exception Invalid sprite count
     explicit Renderer2D (RDGE::UInt16 max_sprite_count = 5000);
 
     //! \brief Renderer2D dtor
@@ -66,16 +65,16 @@ public:
     Renderer2D (const Renderer2D&) = delete;
 
     //! \brief Renderer2D Move ctor
-    //! \details Non-movable
-    Renderer2D (Renderer2D&&) = delete;
+    //! \details Transfers ownership
+    Renderer2D (Renderer2D&&) noexcept;
 
     //! \brief Renderer2D Copy Assignment Operator
     //! \details Non-copyable
     Renderer2D& operator= (const Renderer2D&) = delete;
 
     //! \brief Renderer2D Move Assignment Operator
-    //! \details Non-movable
-    Renderer2D& operator= (Renderer2D&&) = delete;
+    //! \details Transfers ownership
+    Renderer2D& operator= (Renderer2D&&) noexcept;
 
     //! \brief Prepares the renderer for renderable submissions
     //! \details This is a required call before any renderables are submitted.

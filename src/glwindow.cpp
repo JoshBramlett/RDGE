@@ -18,6 +18,8 @@ namespace RDGE {
  * property to YES, otherwise you will not receive a High DPI OpenGL canvas."
  */
 
+using namespace RDGE::Graphics;
+
 namespace {
     GLWindow* s_currentWindow = nullptr;
 
@@ -107,7 +109,7 @@ GLWindow::GLWindow (
     , m_targetWidth(target_width)
     , m_targetHeight(target_height)
 {
-    ILOG("Initializing GLWindow...");
+    ILOG("Initializing GLWindow");
 
     // Ensure video subsystem is created.  Events subsystem (which is required by the
     // class) is initialized automatically by initializing video
@@ -173,6 +175,8 @@ GLWindow::GLWindow (
         SDL_THROW("SDL failed to create an OpenGL context", "SDL_GL_CreateContext");
     }
 
+    ILOG("Created OpenGL context v" + OpenGL::GetStringValue(GL_VERSION));
+
     // !!!  IMPORTANT  !!!
     // There are a couple issues with GLEW initialization (as far as 1.13).
     //     1) GLEW has a problem with OpenGL 3.2+ core contexts, and the only fix
@@ -217,7 +221,7 @@ GLWindow::GLWindow (
 
 GLWindow::~GLWindow (void)
 {
-    ILOG("Destroying GLWindow...");
+    ILOG("Destroying GLWindow");
 
     SDL_DelEventWatch(&OnWindowEvent, this);
 
@@ -316,12 +320,16 @@ GLWindow::Height (void) const
 void
 GLWindow::SetTitle (const std::string& title)
 {
+    DLOG("Setting window title to " + title);
+
     SDL_SetWindowTitle(m_window, title.c_str());
 }
 
 void
 GLWindow::SetSize (RDGE::UInt32 width, RDGE::UInt32 height)
 {
+    DLOG("Setting window size to [" + std::to_string(width) + "," + std::to_string(height) + "]");
+
     SDL_SetWindowSize(m_window, width, height);
 }
 
@@ -362,14 +370,6 @@ GLWindow::ResetViewport (void)
         m_viewport.x = static_cast<RDGE::Int32>((draw_width - m_viewport.w) / 2);
         m_viewport.y = 0;
     }
-
-    // TODO: Remove
-    //std::cout << "draw_width=" << draw_width << std::endl
-              //<< "draw_height=" << draw_height << std::endl
-              //<< "viewport.x=" << m_viewport.x << std::endl
-              //<< "viewport.y=" << m_viewport.y << std::endl
-              //<< "viewport.w=" << m_viewport.w << std::endl
-              //<< "viewport.h=" << m_viewport.h << std::endl;
 }
 
 //void
@@ -390,8 +390,6 @@ GLWindow::ResetViewport (void)
 void
 GLWindow::Clear (void)
 {
-    using namespace RDGE::Graphics;
-
     OpenGL::SetViewport(m_viewport.x, m_viewport.y, m_viewport.w, m_viewport.h);
 
     OpenGL::SetClearColor(m_clearColor.x, m_clearColor.y, m_clearColor.z, m_clearColor.w);

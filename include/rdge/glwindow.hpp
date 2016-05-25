@@ -56,9 +56,9 @@ public:
     //       below that version.
 
     //! \var MIN_GL_CONTEXT_MAJOR Minumum supported OpenGL context major version
-    static constexpr RDGE::Int32 MIN_GL_CONTEXT_MAJOR = 4;
+    static constexpr RDGE::Int32 MIN_GL_CONTEXT_MAJOR = 3;
     //! \var MIN_GL_CONTEXT_MINOR Minumum supported OpenGL context minor version
-    static constexpr RDGE::Int32 MIN_GL_CONTEXT_MINOR = 1;
+    static constexpr RDGE::Int32 MIN_GL_CONTEXT_MINOR = 3;
 
     //! \brief GLWindow ctor
     //! \details Initialize SDL window and renderer

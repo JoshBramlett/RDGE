@@ -122,18 +122,23 @@ int main ()
         auto shader = std::make_unique<Shader>(v, f);
 
         auto ortho = RDGE::Math::mat4::orthographic(0.0f, 16.0f, 0.0f, 9.0f, -1.0f, 1.0f);
-        Layer2D layer(std::move(shader), ortho);
+        Layer2D layer(std::move(shader), ortho, 1.0f, 5);
 
         auto rotation_angle = 0.0f;
         auto rotation_vector = vec3(0.0f, 0.0f, 1.0f);
 
         auto translation = mat4::translation(vec3(6.0f, 2.5f, 0.0f));
         translation *= mat4::rotation(rotation_angle, rotation_vector);
-        Group* spin_box = new Group(translation);
-        spin_box->AddRenderable(new Sprite(0.0f, 0.0f, 2.0f, 2.0f, RDGE::Color::Blue()));
-        spin_box->AddRenderable(new Sprite(2.0f, 0.0f, 2.0f, 2.0f, RDGE::Color::Red()));
-        spin_box->AddRenderable(new Sprite(2.0f, 2.0f, 2.0f, 2.0f, RDGE::Color::Green()));
-        spin_box->AddRenderable(new Sprite(0.0f, 2.0f, 2.0f, 2.0f, RDGE::Color::Yellow()));
+        //Group* spin_box = new Group(translation);
+        //spin_box->AddRenderable(new Sprite(0.0f, 0.0f, 2.0f, 2.0f, RDGE::Color::Blue()));
+        //spin_box->AddRenderable(new Sprite(2.0f, 0.0f, 2.0f, 2.0f, RDGE::Color::Red()));
+        //spin_box->AddRenderable(new Sprite(2.0f, 2.0f, 2.0f, 2.0f, RDGE::Color::Green()));
+        //spin_box->AddRenderable(new Sprite(0.0f, 2.0f, 2.0f, 2.0f, RDGE::Color::Yellow()));
+        auto spin_box = std::make_shared<Group>(translation);
+        spin_box->AddRenderable(std::make_shared<Sprite>(0.0f, 0.0f, 2.0f, 2.0f, RDGE::Color::Blue()));
+        spin_box->AddRenderable(std::make_shared<Sprite>(2.0f, 0.0f, 2.0f, 2.0f, RDGE::Color::Red()));
+        spin_box->AddRenderable(std::make_shared<Sprite>(2.0f, 2.0f, 2.0f, 2.0f, RDGE::Color::Green()));
+        spin_box->AddRenderable(std::make_shared<Sprite>(0.0f, 2.0f, 2.0f, 2.0f, RDGE::Color::Yellow()));
 
         //Group* spin_box = new Group(mat4::rotation(rotation_angle, rotation_vector));
         //spin_box->AddRenderable(new Sprite(6.0f, 2.5f, 2.0f, 2.0f, RDGE::Color::Blue()));
@@ -141,8 +146,8 @@ int main ()
         //spin_box->AddRenderable(new Sprite(8.0f, 4.5f, 2.0f, 2.0f, RDGE::Color::Green()));
         //spin_box->AddRenderable(new Sprite(6.0f, 4.5f, 2.0f, 2.0f, RDGE::Color::Yellow()));
 
-        auto rotating_sprite = new Sprite(2.0f, 2.5f, 2.0f, 2.0f, RDGE::Color::Blue());
-        layer.AddRenderable(rotating_sprite);
+        //auto rotating_sprite = std::make_shared<Sprite>(2.0f, 2.5f, 2.0f, 2.0f, RDGE::Color::Blue());
+        //layer.AddRenderable(rotating_sprite);
 
         layer.AddRenderable(spin_box);
 
@@ -268,13 +273,13 @@ int main ()
             //spin_box->SetTransformation(t2);
 
 
-            auto lp = vec2(
-                           static_cast<float>(x * 16.0f / 960.0f),
-                           static_cast<float>(9.0f - y * 9.0f / 540.0f)
-                          );
-            auto layer_shader = layer.GetShader();
-            layer_shader->Enable();
-            layer_shader->SetUniformValue("light_pos", lp);
+            //auto lp = vec2(
+                           //static_cast<float>(x * 16.0f / 960.0f),
+                           //static_cast<float>(9.0f - y * 9.0f / 540.0f)
+                          //);
+            //auto layer_shader = layer.GetShader();
+            //layer_shader->Enable();
+            //layer_shader->SetUniformValue("light_pos", lp);
 
             layer.Render();
 
