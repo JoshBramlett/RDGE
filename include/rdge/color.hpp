@@ -108,12 +108,7 @@ public:
     //! \returns Vector of clamped floats
     explicit constexpr operator RDGE::Math::vec4 (void) const
     {
-        return RDGE::Math::vec4(
-                                static_cast<float>(r / 255.0f),
-                                static_cast<float>(b / 255.0f),
-                                static_cast<float>(g / 255.0f),
-                                static_cast<float>(a / 255.0f)
-                               );
+        return RDGE::Math::vec4(r / 255.f, g / 255.f, b / 255.f, a / 255.f);
     }
 
     //! \brief Build color from RGB string
