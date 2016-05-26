@@ -87,8 +87,13 @@ public:
 
     //! \brief Set the opacity of the renderable
     //! \details Maps to the alpha value of the color
-    //! \param [in] opacity Alpha channel value (0-255)
+    //! \param [in] opacity Alpha channel value [0-255]
     virtual void SetOpacity (RDGE::UInt8 opacity);
+
+    //! \brief Set the opacity of the renderable
+    //! \details Maps to the alpha value of the color
+    //! \param [in] opacity Alpha channel value [0.0f-1.0f]
+    virtual void SetOpacity (float opacity);
 
     //! \brief Set the Z-Index position value
     //! \param [in] zindex Z-Index value

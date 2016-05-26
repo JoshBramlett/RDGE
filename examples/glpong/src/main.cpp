@@ -14,6 +14,7 @@ int main()
         //auto settings = RDGE::ReadConfigFile("config.json");
         RDGE::game_settings settings;
         settings.enable_fonts = true;
+        settings.use_vsync = true;
         RDGE::Application app { settings };
 
         glpong::GLPongGame game { settings };

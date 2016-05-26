@@ -54,13 +54,13 @@ Renderable2D::SetColor (const RDGE::Color& color, bool ignore_alpha)
 {
     if (ignore_alpha)
     {
-        m_color = color;
-    }
-    else
-    {
         m_color.r = color.r;
         m_color.g = color.g;
         m_color.b = color.b;
+    }
+    else
+    {
+        m_color = color;
     }
 }
 
@@ -68,6 +68,14 @@ void
 Renderable2D::SetOpacity (RDGE::UInt8 opacity)
 {
     m_color.a = opacity;
+}
+
+void
+Renderable2D::SetOpacity (float opacity)
+{
+    auto clamped = RDGE::Math::clamp(opacity, 0.0f, 1.0f);
+
+    m_color.a = static_cast<RDGE::UInt8>(clamped * 255);
 }
 
 void

@@ -14,7 +14,7 @@ namespace {
     // TODO: This is a stop-gap solution.  Text rendering differs from other renderable2ds
     //       in that the size is not known until it's built.  I also don't have the option
     //       of calling SampleSizeUTF8 to get the size and sending to the ctor, as setting
-    //       the text or color will cause the texture to be rebuilt and therefore resetting
+    //       the text will cause the texture to be rebuilt and therefore resetting
     //       the size.
     //
     //       In order to keep this modular, I must query the window to get the aspect ratio

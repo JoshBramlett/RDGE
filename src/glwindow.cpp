@@ -122,6 +122,11 @@ GLWindow::GLWindow (
     }
 
     // Ensure the reuqested context version is not less than our supported version
+    //
+    // TODO:  I don't think I need to request the OpenGL version to load.  I still
+    //        require a minimum version the engine requires for support, but requesting
+    //        a lower version than what the graphics card has will load the version
+    //        on the card, not the version I'm requesting.  Look into if this is correct.
     if (
         gl_version_major < MIN_GL_CONTEXT_MAJOR ||
         (gl_version_major == MIN_GL_CONTEXT_MAJOR && gl_version_minor < MIN_GL_CONTEXT_MINOR)
@@ -207,8 +212,15 @@ GLWindow::GLWindow (
     RDGE::Int32 interval = use_vsync ? 1 : 0;
     if (UNLIKELY(SDL_GL_SetSwapInterval(interval) != 0))
     {
+        // TODO: This should log a warning and default to not using vsync.  Fallback
+        //       must be implemented if vsync is unable to be loaded.
         auto msg = "SDL failed to set interval VSYNC=" + std::to_string(interval);
         SDL_THROW(msg, "SDL_GL_SetSwapInterval");
+    }
+
+    if (use_vsync)
+    {
+        ILOG("Swap interval set to use VSYNC");
     }
 
     ResetViewport();
@@ -336,7 +348,7 @@ GLWindow::SetSize (RDGE::UInt32 width, RDGE::UInt32 height)
 void
 GLWindow::SetClearColor (const RDGE::Color& color)
 {
-    m_clearColor = color.ToFloat();
+    m_clearColor = static_cast<RDGE::Math::vec4>(color);
 }
 
 void

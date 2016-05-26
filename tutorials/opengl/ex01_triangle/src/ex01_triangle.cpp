@@ -247,7 +247,7 @@ int main ()
                         //myText->SetText("Josh Two");
                         break;
                     case SDLK_k:
-                        spin_box->SetOpacity(100);
+                        spin_box->SetOpacity(0.5f);
                         //myText->SetColor(RDGE::Color::Red());
                         break;
                     //case SDLK_l:

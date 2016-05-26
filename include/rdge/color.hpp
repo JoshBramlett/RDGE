@@ -87,10 +87,12 @@ public:
     //! \details Default-movable
     Color& operator=(Color&&) noexcept = default;
 
-    //! \brief Get the 32-bit value of the color structure
-    //! \details Checks endianness to return appropriate format.
-    //! \returns Unsigned integer with the color data
-    constexpr RDGE::UInt32 ToInteger (void) const
+    //! \brief User-defined conversion to UInt32
+    //! \details Checks endianness to return appropriate format.  The
+    //!          conversion is marked explicit so it must be used with
+    //!          direct-initialization or explicit conversions.
+    //! \returns Unsigned integer of the color data
+    explicit constexpr operator RDGE::UInt32 (void) const
     {
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
         return r << 24 | g << 16 | b << 8 | a;
@@ -99,11 +101,12 @@ public:
 #endif
     }
 
-    //! \brief Get the color formatted to a vector of floats
-    //! \details Often used by graphics libraries.  It's values are clamped
-    //!          between [0.0f,1.0f]
-    //! \returns vec4 of clamped floats
-    constexpr RDGE::Math::vec4 ToFloat (void) const
+    //! \brief User-defined conversion to a vector of floats
+    //! \details The values will be in the range [0.0f-1.0f].  The
+    //!          conversion is marked explicit so it must be used with
+    //!          direct-initialization or explicit conversions.
+    //! \returns Vector of clamped floats
+    explicit constexpr operator RDGE::Math::vec4 (void) const
     {
         return RDGE::Math::vec4(
                                 static_cast<float>(r / 255.0f),

@@ -1,4 +1,5 @@
 #include <rdge/graphics/layers/group.hpp>
+#include <rdge/math/functions.hpp>
 #include <rdge/math/vec3.hpp>
 
 #include <memory>
@@ -87,6 +88,18 @@ Group::SetOpacity (RDGE::UInt8 opacity)
     for (auto child : m_children)
     {
         child->SetOpacity(opacity);
+    }
+}
+
+void
+Group::SetOpacity (float opacity)
+{
+    auto clamped = RDGE::Math::clamp(opacity, 0.0f, 1.0f);
+    auto value = static_cast<RDGE::UInt8>(clamped * 255);
+
+    for (auto child : m_children)
+    {
+        child->SetOpacity(value);
     }
 }
 

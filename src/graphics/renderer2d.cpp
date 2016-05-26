@@ -263,7 +263,7 @@ Renderer2D::Submit (const Renderable2D* renderable)
     auto size  = renderable->Size();
     auto uv    = renderable->UV();
     auto tid   = static_cast<float>(renderable->TextureUnitID());
-    auto color = renderable->Color().ToInteger();
+    auto color = static_cast<RDGE::UInt32>(renderable->Color());
 
     m_buffer->vertex = *m_currentTransformation * pos;
     m_buffer->uv = uv[0];

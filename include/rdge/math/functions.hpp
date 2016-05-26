@@ -2,7 +2,6 @@
 //! \author Josh Bramlett
 //! \version 0.0.2
 //! \date 03/23/2016
-//! \bug
 
 #pragma once
 

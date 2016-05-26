@@ -68,8 +68,12 @@ public:
     virtual void Submit (Renderer2D* renderer) const override;
 
     //! \brief Set opacity for all children
-    //! \param [in] opacity Alpha channel value (0-255)
+    //! \param [in] opacity Alpha channel value [0-255]
     virtual void SetOpacity (RDGE::UInt8 opacity) override;
+
+    //! \brief Set opacity for all children
+    //! \param [in] opacity Alpha channel value [0.0f-1.0f]
+    virtual void SetOpacity (float opacity) override;
 
     //! \brief Set the Z-Index position value for all children
     //! \param [in] zindex Z-Index value
