@@ -4,14 +4,36 @@
 namespace RDGE {
 namespace Controls {
 
-Control::Control (const std::string& id, const RDGE::Graphics::Rect& position)
-    : m_id(id)
-    , m_position(position)
-    , m_hasFocus(false)
+// TODO:  Thoughts:
+//
+// It'd be pretty cool to keep all the SDL types in play and be able to use
+// type conversions to modify them for OpenGL.  For example, Point could be
+// converted to a vec2.  With this I'd need to solidify storing the aspect
+// ratio as a global.
+//
+// Either a conversion function, or would a method called ToNDC() be more clear?
+// With a simple type conversion it may be unintuitive to infer it uses the
+// aspect ratio when converting.
+//
+// Also, make sure I initialize the default z-index to 0 everywhere
+
+Control::Control (const std::string& id, float x, float y, float width, float height)
+    , Group(mat4::translation(vec3(x, y, 0.0f)))
+    , m_id(id)
     , m_disabled(false)
-    , m_hasMouseEntered(false)
-    , m_hasMouseButtonDown(false)
-{ }
+    , m_hasFocus(false)
+    , m_isMouseOver(false)
+    , m_isLeftMouseButtonDown(false)
+    , m_isRightMouseButtonDown(false)
+{
+    // TODO: I need to do something with width and height.  Groups calculate these
+    //       by the added renderables.  I need the screen rect to determine mouse
+    //       events, so since those come as screen coordinates I should have a
+    //       pixel-perfect rect to compare to?
+    //
+    //       Maybe the ctor should take a Rect for the position and we convert
+    //       to normalized device coords for the Group base class?
+}
 
 void
 Control::HandleEvents (const SDL_Event& event)
@@ -84,6 +106,8 @@ Control::Disable (void)
     // reset state variables
     m_hasMouseEntered    = false;
     m_hasMouseButtonDown = false;
+
+    // TODO: Fire lost focus
 }
 
 bool

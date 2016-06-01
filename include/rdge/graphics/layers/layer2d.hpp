@@ -10,6 +10,7 @@
 #include <rdge/graphics/shader.hpp>
 #include <rdge/graphics/renderable2d.hpp>
 #include <rdge/graphics/renderer2d.hpp>
+#include <rdge/math/vec2.hpp>
 #include <rdge/math/mat4.hpp>
 
 #include <vector>
@@ -68,6 +69,12 @@ public:
     //! \brief Layer2D Move Assignment Operator
     //! \details Transfers ownership
     Layer2D& operator= (Layer2D&&) noexcept;
+
+    //! \brief Convert screen coordinates to viewport coordinates
+    //! \param [in] x X-coordinate
+    //! \param [in] y Y-coordinate
+    //! \returns vec2 of flaots representing the x and y coordinates
+    RDGE::Math::vec2 ConvertScreenCoordinatesToViewport (RDGE::UInt32 x, RDGE::UInt32 y);
 
     //! \brief Cache a pointer to a renderable to be submitted to the renderer
     //! \param [in] renderable Renderable object shared pointer

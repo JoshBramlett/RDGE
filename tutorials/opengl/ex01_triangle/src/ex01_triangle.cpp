@@ -22,7 +22,6 @@
 #include <rdge/math/mat4.hpp>
 #include <rdge/util/io.hpp>
 #include <rdge/util/exception.hpp>
-#include <rdge/util/system_info.hpp>
 #include <rdge/util/logger.hpp>
 
 #include <SDL.h>
@@ -121,36 +120,25 @@ int main ()
         auto f = RDGE::Util::read_text_file("basic.frag");
         auto shader = std::make_unique<Shader>(v, f);
 
-        auto ortho = RDGE::Math::mat4::orthographic(0.0f, 16.0f, 0.0f, 9.0f, -1.0f, 1.0f);
-        Layer2D layer(std::move(shader), ortho, 1.0f, 5);
+        auto ortho = RDGE::Math::mat4::orthographic(-16.0f, 16.0f, -9.0f, 9.0f, -1.0f, 1.0f);
+        Layer2D layer(std::move(shader), ortho, 1.0f, 500);
+
 
         auto rotation_angle = 0.0f;
         auto rotation_vector = vec3(0.0f, 0.0f, 1.0f);
 
         auto translation = mat4::translation(vec3(6.0f, 2.5f, 0.0f));
         translation *= mat4::rotation(rotation_angle, rotation_vector);
-        //Group* spin_box = new Group(translation);
-        //spin_box->AddRenderable(new Sprite(0.0f, 0.0f, 2.0f, 2.0f, RDGE::Color::Blue()));
-        //spin_box->AddRenderable(new Sprite(2.0f, 0.0f, 2.0f, 2.0f, RDGE::Color::Red()));
-        //spin_box->AddRenderable(new Sprite(2.0f, 2.0f, 2.0f, 2.0f, RDGE::Color::Green()));
-        //spin_box->AddRenderable(new Sprite(0.0f, 2.0f, 2.0f, 2.0f, RDGE::Color::Yellow()));
         auto spin_box = std::make_shared<Group>(translation);
         spin_box->AddRenderable(std::make_shared<Sprite>(0.0f, 0.0f, 2.0f, 2.0f, RDGE::Color::Blue()));
         spin_box->AddRenderable(std::make_shared<Sprite>(2.0f, 0.0f, 2.0f, 2.0f, RDGE::Color::Red()));
         spin_box->AddRenderable(std::make_shared<Sprite>(2.0f, 2.0f, 2.0f, 2.0f, RDGE::Color::Green()));
         spin_box->AddRenderable(std::make_shared<Sprite>(0.0f, 2.0f, 2.0f, 2.0f, RDGE::Color::Yellow()));
 
-        //Group* spin_box = new Group(mat4::rotation(rotation_angle, rotation_vector));
-        //spin_box->AddRenderable(new Sprite(6.0f, 2.5f, 2.0f, 2.0f, RDGE::Color::Blue()));
-        //spin_box->AddRenderable(new Sprite(8.0f, 2.5f, 2.0f, 2.0f, RDGE::Color::Red()));
-        //spin_box->AddRenderable(new Sprite(8.0f, 4.5f, 2.0f, 2.0f, RDGE::Color::Green()));
-        //spin_box->AddRenderable(new Sprite(6.0f, 4.5f, 2.0f, 2.0f, RDGE::Color::Yellow()));
-
-        //auto rotating_sprite = std::make_shared<Sprite>(2.0f, 2.5f, 2.0f, 2.0f, RDGE::Color::Blue());
-        //layer.AddRenderable(rotating_sprite);
+        auto rotating_sprite = std::make_shared<Sprite>(2.0f, 2.5f, 2.0f, 2.0f, RDGE::Color::Blue());
+        layer.AddRenderable(rotating_sprite);
 
         layer.AddRenderable(spin_box);
-
 /*
         auto font = std::make_shared<RDGE::Assets::Font>("OpenSansPX.ttf", 128);
 
@@ -172,36 +160,30 @@ int main ()
         //};
 
         Random rng;
-        for (float y = 0; y < 9.0f; y++)
+        for (float y = -9.0f; y < 9.0f; y += 2.0f)
         {
-            for (float x = 0; x < 16.0f; x++)
+            for (float x = -16.0f; x < 16.0f; x += 2.0f)
             {
                 auto random = rng.Next(2);
                 if (random == 0)
                 {
-                    layer.AddRenderable(new Sprite(x, y, 0.9f, 0.9f, RDGE::Color::Cyan()));
+                    layer.AddRenderable(std::make_shared<Sprite>(x, y, 1.95f, 1.95f, RDGE::Color::Cyan()));
                 }
                 else if (random == 1)
                 {
-                    layer.AddRenderable(new Sprite(x, y, 0.9f, 0.9f, texture));
-                    //layer.AddRenderable(new Sprite(x, y, 0.9f, 0.9f, texture, uv1));
+                    layer.AddRenderable(std::make_shared<Sprite>(x, y, 1.95f, 1.95f, texture));
+                    //layer.AddRenderable(new Sprite(x, y, 1.95f, 1.95f, texture, uv1));
                 }
                 else
                 {
-                    layer.AddRenderable(new Sprite(x, y, 0.9f, 0.9f, texture2));
-                    //layer.AddRenderable(new Sprite(x, y, 0.9f, 0.9f, texture, uv2));
+                    layer.AddRenderable(std::make_shared<Sprite>(x, y, 1.95f, 1.95f, texture2));
+                    //layer.AddRenderable(new Sprite(x, y, 1.95f, 1.95f, texture, uv2));
                 }
             }
         }
 
-        auto myText = new Text("Josh", 1.0f, 4.0f, font, RDGE::Color::White());
+        auto myText = std::make_shared<Text>("Josh", -14.0f, -1.0f, font, RDGE::Color::White());
         layer.AddRenderable(myText);
-
-        //Group* button = new Group(mat4::translation(vec3(1.0f, 0.0f, 0.0f)));
-        //button->AddRenderable(new Sprite(0, 0, 5.0f, 2.0f, RDGE::Color::Blue()));
-        //button->AddRenderable(new Sprite(0.5f, 0.5f, 3.0f, 1.0f, RDGE::Color::Red()));
-        //layer.AddRenderable(button);
-        RDGE::UInt8 opacity = 255;
 */
         bool running = true;
         SDL_Event event;
@@ -222,9 +204,18 @@ int main ()
                     case SDLK_ESCAPE:
                         running = false;
                         break;
-                    //case SDLK_q:
-                        //window.Viewport();
-                        //break;
+                    case SDLK_q:
+                        {
+                        SDL_GetMouseState(&x, &y);
+                        auto size = window.Size();
+                        auto dsize = window.DrawableSize();
+                        auto converted = layer.ConvertScreenCoordinatesToViewport(x, y);
+                        std::cout << "x=" << x << " y=" << y << std::endl
+                                  << "converted=" << converted << std::endl
+                                  << "size=" << size << std::endl
+                                  << "dsize=" << dsize << std::endl;
+                        }
+                        break;
                     case SDLK_a:
                         // aspect ratio: 4x3
                         window.SetSize(1024, 768);
@@ -240,23 +231,12 @@ int main ()
                     case SDLK_j:
                         rotation_angle += 1.0f;
                         spin_box->RotateOnCenter(1.0f);
-                        //if (rotation_angle > 360.0f)
-                        //{
-                            //rotation_angle = 0.0f;
-                        //}
                         //myText->SetText("Josh Two");
                         break;
                     case SDLK_k:
-                        spin_box->SetOpacity(0.5f);
+                        //spin_box->SetOpacity(0.5f);
                         //myText->SetColor(RDGE::Color::Red());
                         break;
-                    //case SDLK_l:
-                        //myText->Scale(0.5);
-                        //if (opacity <= 0)
-                            //opacity = 255;
-
-                        //myText->SetOpacity(opacity--);
-                        //break;
                     }
                 }
                 else if (event.type == SDL_MOUSEMOTION)

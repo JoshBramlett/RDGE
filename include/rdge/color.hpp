@@ -18,8 +18,8 @@ namespace RDGE {
 
 //! \class Color
 //! \brief Storage representing RGBA colors
-//! \details RGBA values are on an integer scale of 0-255, with helpers
-//!          for conversion to other types.
+//! \details RGBA values are on an integer scale of 0-255, with user
+//!          defined conversions to other relevant types.
 class Color final : public SDL_Color
 {
 public:
@@ -81,11 +81,11 @@ public:
 
     //! \brief Color Copy Assignment Operator
     //! \details Default-copyable
-    Color& operator=(const Color&) noexcept = default;
+    Color& operator= (const Color&) noexcept = default;
 
     //! \brief Color Move Assignment Operator
     //! \details Default-movable
-    Color& operator=(Color&&) noexcept = default;
+    Color& operator= (Color&&) noexcept = default;
 
     //! \brief User-defined conversion to UInt32
     //! \details Checks endianness to return appropriate format.  The
@@ -128,7 +128,7 @@ public:
 //! \param [in] a First color to compare
 //! \param [in] b Second color to compare
 //! \returns True iff colors are identical
-constexpr bool operator==(const Color& a, const Color& b)
+constexpr bool operator== (const Color& a, const Color& b)
 {
     return (a.r == b.r) && (a.g == b.g) && (a.b == b.b) && (a.a == b.a);
 }
@@ -137,7 +137,7 @@ constexpr bool operator==(const Color& a, const Color& b)
 //! \param [in] a First color to compare
 //! \param [in] b Second color to compare
 //! \returns True iff colors are not identical
-constexpr bool operator!=(const Color& a, const Color& b)
+constexpr bool operator!= (const Color& a, const Color& b)
 {
     return (a.r != b.r) || (a.g != b.g) || (a.b != b.b) || (a.a != b.a);
 }

@@ -1,7 +1,7 @@
 //! \headerfile <rdge/math/mat4.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.5
-//! \date 05/17/2016
+//! \version 0.0.7
+//! \date 05/25/2016
 
 #pragma once
 
@@ -78,6 +78,9 @@ struct mat4
     //! \returns Reference to current object
     mat4& multiply (const mat4& rhs);
 
+    // TODO: Re-implement.  This should also return a copy, not a reference
+    mat4& inverse (void);
+
     //! \brief Create an identity matrix
     //! \details Initializes diagonal to 1.0f
     //! \returns Identity matrix
@@ -112,17 +115,12 @@ struct mat4
     //! \param [in] near Near clipping plane
     //! \param [in] far Far clipping plane
     //! \returns Perspective matrix
-    static mat4 perspective (
-                             float fov,
-                             float aspect_ratio,
-                             float near,
-                             float far
-                            );
+    static mat4 perspective (float fov, float aspect_ratio, float near, float far);
 
     //! \brief Create a translation matrix
     //! \details Geometric transformation that moves every vertex in a model by
     //!          the same amount in the same direction.
-    //! \param [in] translation Three dimensional vector
+    //! \param [in] translation Vector of x, y, and z values to translate
     //! \returns Translation matrix
     //! \see https://en.wikipedia.org/wiki/Translation_(geometry)
     static mat4 translation (const vec3& translation);
@@ -135,6 +133,11 @@ struct mat4
     //! \see https://en.wikipedia.org/wiki/Rotation_matrix#Axis_and_angle
     static mat4 rotation (float angle, const vec3& axis);
 
+    //! \brief Create a scale matrix
+    //! \details Geometric transformation that multiplies every vertex by the x, y,
+    //!          and z values provided.
+    //! \param [in] scale Vector of x, y, and z values to scale
+    //! \returns Scale matrix
     static mat4 scale (const vec3& scale);
 };
 

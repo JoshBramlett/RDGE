@@ -58,6 +58,7 @@ protected:
     //! \details Transfers ownership
     Layer& operator= (Layer&&) noexcept;
 
+protected:
     std::unique_ptr<Shader> m_shader;
     RDGE::Math::mat4        m_projectionMatrix;
 };

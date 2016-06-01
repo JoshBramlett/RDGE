@@ -10,6 +10,7 @@
 
 #include <GL/glew.h>
 #include <cstddef>
+#include <vector>
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {
@@ -726,6 +727,18 @@ inline void
 SetViewport (RDGE::Int32 x, RDGE::Int32 y, RDGE::UInt32 width, RDGE::UInt32 height)
 {
     GL_CHECK_ERROR(glViewport(x, y, width, height));
+}
+
+//! \brief Get the current viewport
+//! \details Queries OpenGL using the glGet function using the GL_VIEWPORT name.
+//! \returns Vector of floats including x, y, width and height
+//! \see https://www.opengl.org/sdk/docs/man2/xhtml/glGet.xml
+inline std::vector<float>
+GetViewport (void)
+{
+    std::vector<float> viewport(4);
+    GL_CHECK_ERROR(glGetFloatv(GL_VIEWPORT, viewport.data()));
+    return viewport;
 }
 
 /******************************************************************

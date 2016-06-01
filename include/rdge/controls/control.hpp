@@ -1,21 +1,22 @@
 //! \headerfile <rdge/controls/control.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.1
-//! \date 02/08/2015
-//! \bug
+//! \version 0.0.7
+//! \date 05/25/2016
 
 #pragma once
+
+#include <rdge/types.hpp>
+#include <rdge/graphics/renderable2d.hpp>
+#include <rdge/graphics/point.hpp>
+#include <rdge/gameobjects/ientity.hpp>
+#include <rdge/math/vec3.hpp>
+#include <rdge/math/vec4.hpp>
+
+#include <SDL.h>
 
 #include <string>
 #include <functional>
 #include <unordered_map>
-
-#include <SDL.h>
-
-#include <rdge/types.hpp>
-#include <rdge/window.hpp>
-#include <rdge/graphics/rect.hpp>
-#include <rdge/gameobjects/ientity.hpp>
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {
@@ -54,41 +55,21 @@ enum class ControlEventType : RDGE::UInt8
 //! \brief Arguments sent with \ref ControlEventCallback
 struct ControlEventArgs
 {
-    std::string id;
+    std::string           id;
+    RDGE::Graphics::Point mouse_position;
+    MouseButton           mouse_button;
 };
-
-//TODO: Add object sender to ControlEventCallback
-class Control;
 
 //! \typedef ControlEventCallback
 //! \brief Callback subscriber for control events
-using ControlEventCallback = std::function<void(const ControlEventArgs&)>;
+using ControlEventCallback = std::function<void(void*, const ControlEventArgs&)>;
 
 //! \class Control
 //! \brief Base class for GUI controls
 //! \details Non-implementable class defining all control behavior
-class Control : public RDGE::GameObjects::IEntity
+class Control : public RDGE::Graphics::Renderable2D, public RDGE::GameObjects::IEntity
 {
 public:
-    //! \brief Control dtor
-    virtual ~Control (void) { }
-
-    //! \brief Control Copy ctor
-    //! \details Non-copyable
-    Control (const Control&) = delete;
-
-    //! \brief Control Move ctor
-    //! \details Default-movable
-    Control (Control&&) noexcept = default;
-
-    //! \brief Control Copy Assignment Operator
-    //! \details Non-copyable
-    Control& operator=(const Control&) = delete;
-
-    //! \brief Control Move Assignment Operator
-    //! \details Default-movable
-    Control& operator=(Control&&) noexcept = default;
-
     //! \brief IEntity HandleEvents
     //! \details Handle input events to map to control events
     //! \param [in] event SDL_Event struct
@@ -98,9 +79,12 @@ public:
     //! \details Implementation logic should be handled in derived class
     virtual void Update (RDGE::UInt32) { }
 
-    //! \brief IEntity Render
-    //! \details Implementation logic should be handled in derived class
-    virtual void Render (const RDGE::Window&) { }
+    //! \brief Get the ID of the control
+    //! \returns String identifier
+    virtual const std::string& ID (void) const final
+    {
+        return m_id;
+    }
 
     //! \brief Disable the control
     virtual void Disable (void);
@@ -145,8 +129,27 @@ public:
 protected:
     //! \brief Control ctor
     //! \param [in] id Unique ID of the control
-    //! \param [in] position Location of the control on the screen
+    //! \param [in] position Position of the control in screen coordinates
     explicit Control (const std::string& id, const RDGE::Graphics::Rect& position);
+
+    //! \brief Control dtor
+    virtual ~Control (void) { }
+
+    //! \brief Control Copy ctor
+    //! \details Non-copyable
+    Control (const Control&) = delete;
+
+    //! \brief Control Move ctor
+    //! \details Default-movable
+    Control (Control&&) noexcept = default;
+
+    //! \brief Control Copy Assignment Operator
+    //! \details Non-copyable
+    Control& operator=(const Control&) = delete;
+
+    //! \brief Control Move Assignment Operator
+    //! \details Default-movable
+    Control& operator=(Control&&) noexcept = default;
 
     //! \brief Control event occurred
     //! \details Inform subscriber of event
@@ -154,28 +157,17 @@ protected:
     //! \param [in] args Arguments to pass to the subscriber
     virtual void TriggerEvent (ControlEventType type, const ControlEventArgs& args);
 
-    //! \brief Is the mouse within the control bounds
-    //! \details Utility method for derived classes that allow the base
-    //!          to handle game loop events
-    virtual bool IsMouseHover (void) final;
+protected:
+    std::string m_id;
 
-    //! \brief Is the mouse within the control bounds & pressed
-    //! \details Utility method for derived classes that allow the base
-    //!          to handle game loop events
-    virtual bool IsMousePressed (void) final;
-
-    std::string          m_id;
-    RDGE::Graphics::Rect m_position;
-
-    bool m_hasFocus;
     bool m_disabled;
+    bool m_hasFocus;
+    bool m_isMouseOver;
+    bool m_isLeftMouseButtonDown;
+    bool m_isRightMouseButtonDown;
 
 private:
     std::unordered_map<ControlEventType, ControlEventCallback> m_subscriptions;
-
-    // Internal state information.
-    bool m_hasMouseEntered;
-    bool m_hasMouseButtonDown;
 };
 
 } // namespace Controls

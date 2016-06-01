@@ -150,6 +150,15 @@ GLWindow::GLWindow (
     SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
 
+    // TODO: This should be a config setting.  This value must be set before creating
+    //       the context, so you cannot query whether the amount exceeds the max.
+    //       One option would be to get the actual value via SDL_GL_GetAttribute, or
+    //       from OpenGL::GetIntegerValue(GL_SAMPLES) with GL_MAX_SAMPLES to get the
+    //       value max allowed and log that to a file.  OpenGL requires this value be
+    //       a minimum of 4.
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
+
     RDGE::UInt32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI;
     if (fullscreen)
     {
@@ -383,21 +392,6 @@ GLWindow::ResetViewport (void)
         m_viewport.y = 0;
     }
 }
-
-//void
-//GLWindow::PrintViewport (void)
-//{
-    // TODO: Leaving this here as a reminder to update the glGetIntegerv wrappers
-    //RDGE::Int32 testa[2];
-    //RDGE::Int32 testb[4];
-
-    //glGetIntegerv(GL_MAX_VIEWPORT_DIMS, testa);
-    //glGetIntegerv(GL_VIEWPORT, testb);
-
-    //std::cout << "dims a=" << testa[0] << " b=" << testa[1] << std::endl;
-    //std::cout << "vp a=" << testb[0] << " b=" << testb[1]
-              //<< " c=" << testb[2] << " d=" << testb[3] << std::endl;
-//}
 
 void
 GLWindow::Clear (void)
