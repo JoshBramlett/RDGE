@@ -28,9 +28,11 @@
 //#include <GL/glew.h>
 
 #include <iostream>
+#include <atomic>
 #include <vector>
 #include <memory>
 #include <typeinfo>
+#include <stdlib.h>
 
 using namespace RDGE::Graphics;
 using namespace RDGE::Math;

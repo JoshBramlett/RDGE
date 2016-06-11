@@ -1,7 +1,7 @@
 //! \headerfile <rdge/graphics/gltexture.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.2
-//! \date 04/14/2016
+//! \version 0.0.8
+//! \date 06/07/2016
 
 #pragma once
 
@@ -25,10 +25,15 @@ class GLTexture : public std::enable_shared_from_this<GLTexture>
 {
 public:
     //! \brief GLTexture ctor
+    //! \details Default ctor.
+    GLTexture (void);
+
+    //! \brief GLTexture ctor
     //! \details Loads the image asset directly and the underlying asset will be
     //!          destroyed after initialization (safe once the pixel data is
     //!          copied to OpenGL).
     //! \param [in] file File of the underlying asset to the texture
+    //! \throws RDGE::Exception surface cannot be loaded
     explicit GLTexture (const std::string& file);
 
     //! \brief GLTexture ctor
@@ -39,7 +44,7 @@ public:
 
     //! \brief GLTexture dtor
     //! \details Deletes the texture object from OpenGL
-    ~GLTexture (void);
+    virtual ~GLTexture (void);
 
     //! \brief Safely retrieve additional shared_ptr instance
     //! \returns Shared pointer of the current object
@@ -82,7 +87,7 @@ public:
     //! \param [in] surface Shared pointer to the underlying asset
     void ResetData (std::shared_ptr<RDGE::Assets::Surface>& surface);
 
-private:
+protected:
     RDGE::UInt32 m_textureId;
     RDGE::Int32  m_textureUnitId;
 

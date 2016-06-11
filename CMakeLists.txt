@@ -3,7 +3,7 @@ project (RDGE)
 
 set (RDGE_VERSION_MAJOR 0)
 set (RDGE_VERSION_MINOR 0)
-set (RDGE_VERSION_PACKAGE 7)
+set (RDGE_VERSION_PACKAGE 8)
 
 set (CMAKE_MODULE_PATH ${RDGE_SOURCE_DIR}/cmake)
 set (LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
@@ -80,6 +80,7 @@ add_library (
              src/graphics/sprite.cpp
              src/graphics/text.cpp
              src/graphics/gltexture.cpp
+             src/graphics/spritesheet.cpp
              src/graphics/renderable2d.cpp
              src/graphics/layers/layer.cpp
              src/graphics/layers/layer2d.cpp

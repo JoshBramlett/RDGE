@@ -1,7 +1,7 @@
 //! \headerfile <rdge/graphics/renderable2d.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.5
-//! \date 05/17/2016
+//! \version 0.0.8
+//! \date 06/07/2016
 
 #pragma once
 
@@ -17,19 +17,21 @@
 
 #include <memory>
 #include <vector>
+#include <ostream>
+#include <sstream>
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {
 namespace Graphics {
+
+//! \typedef UVCoordinates Collection of UV coordinates
+using UVCoordinates = std::vector<RDGE::Math::vec2>;
 
 //! \class Renderable2D
 //! \brief Base class for a 2D object to be rendered to the screen
 class Renderable2D
 {
 public:
-    //! \typedef UVCoordinates Collection of UV coordinates
-    using UVCoordinates = std::vector<RDGE::Math::vec2>;
-
     //! \brief Renderable2D default empty ctor
     Renderable2D (void)
         : m_texture(nullptr)
@@ -84,6 +86,10 @@ public:
     //! \param [in] color Color of the renderable
     //! \param [in] ignore_alpha True will only set the RGB values
     virtual void SetColor (const RDGE::Color& color, bool ignore_alpha = true);
+
+    //! \brief Set the texture UV coordinates of the renderable
+    //! \param [in] uv UVCoordinates object
+    virtual void SetUV (const UVCoordinates& uv);
 
     //! \brief Set the opacity of the renderable
     //! \details Maps to the alpha value of the color
@@ -170,6 +176,27 @@ protected:
     std::shared_ptr<GLTexture>    m_texture;
     std::vector<RDGE::Math::vec2> m_uv;
 };
+
+//! \brief UVCoordinates stream output operator
+//! \param [in] os Output stream
+//! \param [in] uv UV Coordinate vector
+//! \returns Output stream
+inline std::ostream& operator<< (std::ostream& os, const UVCoordinates& uv)
+{
+    if (uv.size() != 4)
+    {
+        return os << "Invalid UVCoordinates";
+    }
+
+    std::stringstream ss;
+    ss << "[ " << std::fixed << std::setprecision(5)
+       << uv[0] << ", "
+       << uv[1] << ", "
+       << uv[2] << ", "
+       << uv[3] << " ]";
+
+    return os << ss.str();
+}
 
 } // namespace Graphics
 } // namespace RDGE

@@ -24,10 +24,7 @@ namespace Graphics {
 //         1)  The reason for the GetShader() method was to allow an external
 //             source to update the shader uniform values.  Either this needs to
 //             be a helper method or removed completely.
-//         2)  The renderable objects are not managed.  I don't think the layer
-//             should own them, and if not to make it truly safe I'd have to use
-//             weak pointers
-//         3)  This and the renderer are so intertwined with the shader code
+//         2)  This and the renderer are so intertwined with the shader code
 //             that the shader code really should be moved internal to the layer
 //             and the shader should no longer be a parameter in the ctor
 

@@ -38,6 +38,7 @@ add_executable (
                 src/main.cpp
                 src/glpong.cpp
                 src/scenes/introscene.cpp
+                src/scenes/chronoscene.cpp
                )
 
 target_link_libraries (

@@ -8,15 +8,23 @@
 namespace RDGE {
 namespace Graphics {
 
+GLTexture::GLTexture (void)
+    : m_textureId(0)
+    , m_textureUnitId(-1)
+    , m_width(0)
+    , m_height(0)
+{ }
+
 GLTexture::GLTexture (const std::string& file)
     : m_textureId(0)
     , m_textureUnitId(-1)
     , m_width(0)
     , m_height(0)
 {
-    m_textureId = OpenGL::CreateTexture();
-
+    // Allow surface exception to bubble up if unavailable
     auto surface = std::make_shared<RDGE::Assets::Surface>(file);
+
+    m_textureId = OpenGL::CreateTexture();
     ResetData(surface);
 }
 
@@ -27,7 +35,6 @@ GLTexture::GLTexture (std::shared_ptr<RDGE::Assets::Surface>& surface)
     , m_height(0)
 {
     m_textureId = OpenGL::CreateTexture();
-
     ResetData(surface);
 }
 

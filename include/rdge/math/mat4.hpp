@@ -201,8 +201,7 @@ inline vec3 operator* (const mat4& lhs, const vec3& rhs)
 inline std::ostream& operator<< (std::ostream& os, const mat4& matrix)
 {
     std::stringstream ss;
-    ss << "mat4: ["
-       << std::fixed << std::setprecision(5);
+    ss << "[" << std::fixed << std::setprecision(5);
 
     for (RDGE::UInt32 i = 0; i < 4; ++i)
     {

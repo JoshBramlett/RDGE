@@ -65,6 +65,12 @@ Renderable2D::SetColor (const RDGE::Color& color, bool ignore_alpha)
 }
 
 void
+Renderable2D::SetUV (const UVCoordinates& uv)
+{
+    m_uv = uv;
+}
+
+void
 Renderable2D::SetOpacity (RDGE::UInt8 opacity)
 {
     m_color.a = opacity;

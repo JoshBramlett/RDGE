@@ -9,6 +9,7 @@
 #include <SDL.h>
 
 #include "scenes/introscene.hpp"
+#include "scenes/chronoscene.hpp"
 
 namespace glpong {
 
@@ -33,6 +34,7 @@ private:
     bool                                m_showFPS;
 
     std::shared_ptr<IntroScene>    m_introScene;
+    std::shared_ptr<ChronoScene>   m_chronoScene;
     //std::shared_ptr<MenuScene>     m_menuScene;
     //std::shared_ptr<SettingsScene> m_settingsScene;
     //std::shared_ptr<PongScene>     m_pongScene;

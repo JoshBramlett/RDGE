@@ -9,6 +9,7 @@
 #include <rdge/math/functions.hpp>
 
 #include <ostream>
+#include <sstream>
 #include <iomanip>
 
 //! \namespace RDGE Rainbow Drop Game Engine
@@ -86,19 +87,13 @@ inline vec3 operator/ (const vec3& lhs, const vec3& rhs)
 
 inline std::ostream& operator<< (std::ostream& os, const vec3& vec)
 {
-    auto f = os.flags();
-    auto p = os.precision();
-
-    os << "vec3: ["
-       << std::fixed << std::setprecision(5)
+    std::stringstream ss;
+    ss << "[" << std::fixed << std::setprecision(5)
        << vec.x << ","
        << vec.y << ","
        << vec.z << "]";
 
-    os.precision(p);
-    os.flags(f);
-
-    return os;
+    return os << ss.str();
 }
 
 } // namespace Math

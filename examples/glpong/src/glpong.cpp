@@ -25,6 +25,7 @@ GLPongGame::GLPongGame (const RDGE::game_settings& settings)
 
     // create scene instances
     m_introScene = std::make_shared<IntroScene>(m_window.get());
+    m_chronoScene = std::make_shared<ChronoScene>(m_window.get());
     //m_menuScene = std::make_shared<MenuScene>(m_window);
     //m_settingsScene = std::make_shared<SettingsScene>(m_window);
     //m_pongScene = std::make_shared<PongScene>(m_window);
@@ -38,7 +39,8 @@ GLPongGame::GLPongGame (const RDGE::game_settings& settings)
     //m_settingsScene->RegisterEventHandler(SceneEventType::RequestingPop, fn_term);
     //m_pongScene->RegisterEventHandler(SceneEventType::RequestingPush, fn_push);
 
-    PushScene(m_introScene);
+    //PushScene(m_introScene);
+    PushScene(m_chronoScene);
 }
 
 void
@@ -67,14 +69,16 @@ GLPongGame::ProcessRenderPhase (void)
     Game::ProcessRenderPhase();
 
     // make FPS topmost - render after all game objects
-    //if (m_showFPS)
-    //{
+    if (m_showFPS)
+    {
+        //std::cout << "FPS:" << m_window->FrameRate() << std::endl;
+
         //auto fps = "FPS:  " + std::to_string(static_cast<RDGE::UInt32>(window.FrameRate()));
         //auto surface = m_font->RenderUTF8(fps, RDGE::Color::White());
 
         //RDGE::Texture texture { window.Renderer(), surface.RawPtr() };
         //window.Draw(texture, RDGE::Graphics::Point(20, 20));
-    //}
+    }
 }
 
 void
