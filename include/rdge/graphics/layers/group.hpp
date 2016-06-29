@@ -79,6 +79,10 @@ public:
     //! \param [in] zindex Z-Index value
     virtual void SetZIndex (float zindex) override;
 
+    // TODO: This is a hack to get textures to work with groups.  This needs
+    //       to be refactored to a more elegant solution.
+    void RegisterTextures (Renderer2D* renderer) const;
+
 private:
     //! \typedef RenderableVector Container type for group child renderables
     using RenderableVector = std::vector<std::shared_ptr<Renderable2D>>;

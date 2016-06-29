@@ -355,6 +355,12 @@ GLWindow::SetSize (RDGE::UInt32 width, RDGE::UInt32 height)
 }
 
 void
+GLWindow::SetCursorLocation (const RDGE::Graphics::Point& location)
+{
+    SDL_WarpMouseInWindow(m_window, location.x, location.y);
+}
+
+void
 GLWindow::SetClearColor (const RDGE::Color& color)
 {
     m_clearColor = static_cast<RDGE::Math::vec4>(color);
@@ -397,8 +403,14 @@ void
 GLWindow::Clear (void)
 {
     OpenGL::SetViewport(m_viewport.x, m_viewport.y, m_viewport.w, m_viewport.h);
-
+#ifdef RDGE_DEBUG
+    // Set clear color to gray during debug to help determine if OpenGL is rendering
+    // correctly.  Note, this will make SetClearColor appear to not work.
+    OpenGL::SetClearColor(0.2f, 0.2f, 0.2f, 1.0f);;
+#else
     OpenGL::SetClearColor(m_clearColor.x, m_clearColor.y, m_clearColor.z, m_clearColor.w);
+#endif
+
     OpenGL::Clear(GL_COLOR_BUFFER_BIT);
 }
 

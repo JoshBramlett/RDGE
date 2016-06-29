@@ -55,11 +55,17 @@ Scene::operator= (Scene&& rhs) noexcept
 }
 
 void
-Scene::ProcessEventPhase (const SDL_Event& event)
+Scene::ProcessEventPhase (RDGE::Event& event)
 {
     for (auto const& iter : m_entities)
     {
         iter.second->HandleEvents(event);
+    }
+
+    // TODO: Remove after refactor
+    for (auto const& iter : m_layers)
+    {
+        iter.second->ProcessEventPhase(event);
     }
 }
 

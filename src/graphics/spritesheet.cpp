@@ -49,7 +49,7 @@ SpriteSheet::SpriteSheet (const std::string& config)
                 std::stringstream ss;
                 ss << "Invalid uv value. element=" << uv_element;
 
-                throw ss.str();
+                throw std::invalid_argument(ss.str());
             }
 
             sheet_element se;
@@ -62,7 +62,7 @@ SpriteSheet::SpriteSheet (const std::string& config)
                     std::stringstream ss;
                     ss << "Invalid uv value. element=" << uv_element;
 
-                    throw ss.str();
+                    throw std::invalid_argument(ss.str());
                 }
 
                 se.uv.push_back(vec2(static_cast<float>(v[0]), static_cast<float>(v[1])));

@@ -39,7 +39,7 @@ public:
 
     //! \brief Point ctor
     //! \details Initialize point to [0,0]
-    constexpr Point ()
+    constexpr Point (void)
         : SDL_Point{0, 0}
     { }
 

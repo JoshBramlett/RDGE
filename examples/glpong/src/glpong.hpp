@@ -2,6 +2,7 @@
 
 #include <rdge/types.hpp>
 #include <rdge/config.hpp>
+#include <rdge/events/event.hpp>
 #include <rdge/assets/font.hpp>
 #include <rdge/gameobjects/game.hpp>
 #include <rdge/gameobjects/scene.hpp>
@@ -21,7 +22,7 @@ public:
     virtual ~GLPongGame (void) { }
 
 protected:
-    virtual void ProcessEventPhase (const SDL_Event& e) override;
+    virtual void ProcessEventPhase (RDGE::Event& e) override;
 
     virtual void ProcessRenderPhase (void) override;
 

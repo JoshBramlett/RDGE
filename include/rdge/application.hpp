@@ -36,7 +36,7 @@ namespace RDGE {
 //! \enum MessageBoxType
 //! \brief Dialog type for the message box
 //! \details Direct mapping to SDL_MessageBoxFlag, provided for
-//!          ease of discovery
+//!          abstraction and ease of discovery.
 enum class MessageBoxType : RDGE::Int32
 {
     Info    = SDL_MESSAGEBOX_INFORMATION,

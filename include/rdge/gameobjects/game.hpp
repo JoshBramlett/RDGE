@@ -1,13 +1,14 @@
 //! \headerfile <rdge/gameobjects/game.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.7
-//! \date 05/21/2016
+//! \version 0.0.9
+//! \date 06/14/2016
 
 #pragma once
 
 #include <rdge/types.hpp>
 #include <rdge/config.hpp>
 #include <rdge/glwindow.hpp>
+#include <rdge/events/event.hpp>
 #include <rdge/gameobjects/scene.hpp>
 
 #include <SDL.h>
@@ -84,7 +85,7 @@ protected:
     //!          classes may override but should still call the base
     //!          method for scene processing.
     //! \param [in] event Polled SDL_Event
-    virtual void ProcessEventPhase (const SDL_Event& event);
+    virtual void ProcessEventPhase (RDGE::Event& event);
 
     //! \brief Process update
     //! \details Calls ProcessUpdatePhase for the current scene.  Derived

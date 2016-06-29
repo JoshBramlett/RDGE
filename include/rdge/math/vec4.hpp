@@ -18,7 +18,6 @@ namespace Math {
 
 //! \struct vec4
 //! \brief Four dimensional vector of floating point values
-//! \details Values should be clamped to [0.0f, 1.0f]
 struct vec4
 {
     //! \var x X-coordinate
@@ -62,11 +61,11 @@ struct vec4
 
     //! \brief vec4 Copy Assignment Operator
     //! \details Default-copyable
-    vec4& operator=(const vec4&) noexcept = default;
+    vec4& operator= (const vec4&) noexcept = default;
 
     //! \brief vec4 Move Assignment Operator
     //! \details Default-movable
-    vec4& operator=(vec4&&) noexcept = default;
+    vec4& operator= (vec4&&) noexcept = default;
 
     //! \brief Add vec4
     //! \param [in] value Value to add
@@ -173,8 +172,7 @@ constexpr vec4 operator/ (const vec4& lhs, const vec4& rhs)
 inline std::ostream& operator<< (std::ostream& os, const vec4& vec)
 {
     std::stringstream ss;
-    ss << "vec4: ["
-       << std::fixed << std::setprecision(5)
+    ss << "[" << std::fixed << std::setprecision(5)
        << vec.x << ","
        << vec.y << ","
        << vec.z << ","

@@ -1,6 +1,7 @@
 #include "glpong.hpp"
 
 #include <rdge/application.hpp>
+#include <rdge/events/event.hpp>
 #include <rdge/graphics/rect.hpp>
 #include <rdge/util/logger.hpp>
 
@@ -20,20 +21,25 @@ GLPongGame::GLPongGame (const RDGE::game_settings& settings)
 {
     using namespace std::placeholders;
 
+    RDGE::SetEventState(RDGE::EventType::FingerDown, false);
+    RDGE::SetEventState(RDGE::EventType::FingerUp, false);
+    RDGE::SetEventState(RDGE::EventType::FingerMotion, false);
+    RDGE::SetEventState(RDGE::EventType::MultiGesture, false);
+
     //auto font_path = RDGE::Application::BasePath() + "res/fonts/OpenSansPX.ttf";
     //m_font = std::make_shared<RDGE::Font>(font_path, 18);
 
     // create scene instances
-    m_introScene = std::make_shared<IntroScene>(m_window.get());
+    //m_introScene = std::make_shared<IntroScene>(m_window.get());
     m_chronoScene = std::make_shared<ChronoScene>(m_window.get());
     //m_menuScene = std::make_shared<MenuScene>(m_window);
     //m_settingsScene = std::make_shared<SettingsScene>(m_window);
     //m_pongScene = std::make_shared<PongScene>(m_window);
 
     // setup event handlers
-    auto fn_term = std::bind(&GLPongGame::OnSceneRequestPop, this, _1, _2);
+    //auto fn_term = std::bind(&GLPongGame::OnSceneRequestPop, this, _1, _2);
     //auto fn_push = std::bind(&PongGame::OnSceneRequestPush, this, _1, _2);
-    m_introScene->RegisterEventHandler(SceneEventType::RequestingPop, fn_term);
+    //m_introScene->RegisterEventHandler(SceneEventType::RequestingPop, fn_term);
     //m_menuScene->RegisterEventHandler(SceneEventType::RequestingPop, fn_term);
     //m_menuScene->RegisterEventHandler(SceneEventType::RequestingPush, fn_push);
     //m_settingsScene->RegisterEventHandler(SceneEventType::RequestingPop, fn_term);
@@ -44,18 +50,21 @@ GLPongGame::GLPongGame (const RDGE::game_settings& settings)
 }
 
 void
-GLPongGame::ProcessEventPhase (const SDL_Event& event)
+GLPongGame::ProcessEventPhase (RDGE::Event& event)
 {
-    if (event.type == SDL_QUIT)
+    if (event.IsQuitEvent())
     {
         m_running = false;
     }
-    else if (event.type == SDL_KEYDOWN)
+    else if (event.Type() == RDGE::EventType::KeyDown)
     {
-        switch (event.key.keysym.sym)
+        auto args = event.GetKeyboardEventArgs();
+        switch (args.Key())
         {
-            case SDLK_f:
+            case RDGE::KeyCode::F:
                 m_showFPS = !m_showFPS;
+                break;
+            default:
                 break;
         }
     }

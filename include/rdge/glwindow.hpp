@@ -1,13 +1,14 @@
 //! \headerfile <rdge/glwindow.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.4
-//! \date 05/14/2016
+//! \version 0.0.9
+//! \date 06/14/2016
 
 #pragma once
 
 #include <rdge/types.hpp>
 #include <rdge/color.hpp>
 #include <rdge/graphics/size.hpp>
+#include <rdge/graphics/point.hpp>
 #include <rdge/math/vec4.hpp>
 #include <rdge/assets/surface.hpp>
 
@@ -152,6 +153,10 @@ public:
     //! \param [in] width Width in pixels
     //! \param [in] height Height in pixels
     void SetSize (RDGE::UInt32 width, RDGE::UInt32 height);
+
+    //! \brief Set the cursor location
+    //! \param [in] location Point containing the x and y coordinates
+    void SetCursorLocation (const RDGE::Graphics::Point& location);
 
     //! \brief Set the background color
     //! \details Color presented to the screen before any drawing takes place

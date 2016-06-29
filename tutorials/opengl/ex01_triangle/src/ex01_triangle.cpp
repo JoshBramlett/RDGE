@@ -23,7 +23,9 @@
 #include <rdge/util/io.hpp>
 #include <rdge/util/exception.hpp>
 #include <rdge/util/logger.hpp>
+#include <rdge/events/event.hpp>
 
+#include <xmmintrin.h>
 #include <SDL.h>
 //#include <GL/glew.h>
 
@@ -63,30 +65,8 @@ std::string PrintWindowEvent (SDL_WindowEvent* event)
                     }
 }
 
-enum class Josh
-{
-    Harmie,
-    Calder
-};
-
-//const char*
-std::string
-JoshString (Josh josh)
-{
-    switch (josh) {
-#define CASE(X) case X: return #X;
-    CASE(Josh::Harmie)
-    CASE(Josh::Calder)
-#undef CASE
-        default:
-        return "Unknown";
-    }
-}
-
 int main ()
 {
-    //std::cout << JoshString(Josh::Harmie) << std::endl;
-
     try
     {
         auto config = RDGE::ReadConfigFile("config.json");
@@ -187,63 +167,107 @@ int main ()
         auto myText = std::make_shared<Text>("Josh", -14.0f, -1.0f, font, RDGE::Color::White());
         layer.AddRenderable(myText);
 */
+        RDGE::SetEventState(RDGE::EventType::FingerDown, false);
+        RDGE::SetEventState(RDGE::EventType::FingerUp, false);
+        RDGE::SetEventState(RDGE::EventType::FingerMotion, false);
+        RDGE::SetEventState(RDGE::EventType::MultiGesture, false);
+
         bool running = true;
-        SDL_Event event;
+        RDGE::Event event;
         while (running)
         {
-            int x, y;
-            while (SDL_PollEvent(&event))
+            //int x, y;
+            while (RDGE::PollEvent(&event))
             {
-                if (event.type == SDL_QUIT)
+                //std::cout << event.Type() << std::endl;
+
+                if (event.IsQuitEvent())
                 {
                     running = false;
                     break;
                 }
-                else if (event.type == SDL_KEYDOWN)
+                else if (event.IsKeyboardEvent())
                 {
-                    switch (event.key.keysym.sym)
+                    auto kbe = event.GetKeyboardEventArgs();
+
+                    if (kbe.IsKeyPressed())
                     {
-                    case SDLK_ESCAPE:
+                        continue;
+                    }
+
+                    switch (kbe.Key())
+                    {
+                    case RDGE::KeyCode::Escape:
                         running = false;
                         break;
-                    case SDLK_q:
+                    case RDGE::KeyCode::Q:
                         {
-                        SDL_GetMouseState(&x, &y);
-                        auto size = window.Size();
-                        auto dsize = window.DrawableSize();
-                        auto converted = layer.ConvertScreenCoordinatesToViewport(x, y);
-                        std::cout << "x=" << x << " y=" << y << std::endl
-                                  << "converted=" << converted << std::endl
-                                  << "size=" << size << std::endl
-                                  << "dsize=" << dsize << std::endl;
+                        //SDL_GetMouseState(&x, &y);
+                        //auto size = window.Size();
+                        //auto dsize = window.DrawableSize();
+                        //auto converted = layer.ConvertScreenCoordinatesToViewport(x, y);
+                        //std::cout << "x=" << x << " y=" << y << std::endl
+                                  //<< "converted=" << converted << std::endl
+                                  //<< "size=" << size << std::endl
+                                  //<< "dsize=" << dsize << std::endl;
                         }
                         break;
-                    case SDLK_a:
+                    case RDGE::KeyCode::A:
                         // aspect ratio: 4x3
                         window.SetSize(1024, 768);
                         break;
-                    case SDLK_s:
+                    case RDGE::KeyCode::S:
                         // aspect ratio: 16x10
                         window.SetSize(1280, 800);
                         break;
-                    case SDLK_d:
+                    case RDGE::KeyCode::D:
                         // aspect ratio: 16x9
                         window.SetSize(960, 540);
                         break;
-                    case SDLK_j:
+                    case RDGE::KeyCode::J:
                         rotation_angle += 1.0f;
                         spin_box->RotateOnCenter(1.0f);
                         //myText->SetText("Josh Two");
                         break;
-                    case SDLK_k:
+                    case RDGE::KeyCode::K:
                         //spin_box->SetOpacity(0.5f);
                         //myText->SetColor(RDGE::Color::Red());
                         break;
+                        std::cout << kbe.Key() << std::endl;
+                    default:
+                        break;
                     }
+
+                    //std::cout << "key=" << SDL_GetKeyName(kbe.Key()) << std::endl;
+                    //std::cout << "repeating=" << kbe.IsRepeating() << std::endl;
+                    //std::cout << "pressed=" << kbe.IsKeyPressed() << std::endl;
                 }
-                else if (event.type == SDL_MOUSEMOTION)
+                else if (event.IsMouseButtonEvent())
                 {
-                    SDL_GetMouseState(&x, &y);
+                    //auto mbe = event.GetMouseButtonEventArgs();
+
+                    //if (event.Type() == RDGE::EventType::MouseButtonDown)
+                    //{
+                        //std::cout << mbe.Button() << std::endl;
+                        //std::cout << mbe.CursorLocation() << std::endl;
+                        //std::cout << mbe.IsTouchDevice() << std::endl;
+                        //std::cout << "device=" << mbe.DeviceID() << " tdevice=" << SDL_TOUCH_MOUSEID << std::endl;
+                    //}
+                }
+                else if (event.IsMouseMotionEvent())
+                {
+                    //auto mme = event.GetMouseMotionEventArgs();
+
+                    //std::cout << mme.IsButtonPressed(RDGE::MouseButton::Left) << std::endl;
+                    //std::cout << mme.RelativeMotion() << std::endl;
+                }
+                else if (event.IsMouseWheelEvent())
+                {
+                    //auto mwe = event.GetMouseWheelEventArgs();
+
+                    //std::cout << mwe.HorizontalScroll() << std::endl;
+                    //std::cout << mwe.VerticalScroll() << std::endl;
+                    //std::cout << mwe.IsWheelFlipped() << std::endl;
                 }
             }
 

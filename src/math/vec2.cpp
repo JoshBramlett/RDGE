@@ -1,17 +1,10 @@
 #include <rdge/math/vec2.hpp>
 
+#include <sstream>
+#include <iomanip>
+
 namespace RDGE {
 namespace Math {
-
-vec2::vec2 (void)
-    : x(0.0f)
-    , y(0.0f)
-{ }
-
-vec2::vec2 (float x, float y)
-    : x(x)
-    , y(y)
-{ }
 
 vec2&
 vec2::add (const vec2& rhs)
@@ -86,6 +79,16 @@ vec2&
 vec2::operator/= (const vec2& rhs)
 {
     return divide(rhs);
+}
+
+std::ostream& operator<< (std::ostream& os, const vec2& vec)
+{
+    std::stringstream ss;
+    ss << "[" << std::fixed << std::setprecision(5)
+       << vec.x << ","
+       << vec.y << "]";
+
+    return os << ss.str();
 }
 
 } // namespace Math

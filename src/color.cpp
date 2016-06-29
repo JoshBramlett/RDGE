@@ -58,7 +58,7 @@ Color::FromRGBA (const std::string& color)
 std::ostream& operator<< (std::ostream& os, const Color& color)
 {
     // without static cast output will display the char values
-    std::stringstream ss("#");
+    std::stringstream ss;
     ss << "#"
        << std::hex << std::uppercase << std::setfill('0')
        << std::setw(2) << static_cast<RDGE::UInt32>(color.r)

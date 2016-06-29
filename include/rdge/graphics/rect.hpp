@@ -56,12 +56,7 @@ public:
     //! \param [in] y Y-Coordinate
     //! \param [in] w Width
     //! \param [in] h Height
-    constexpr Rect (
-                    RDGE::Int32 x,
-                    RDGE::Int32 y,
-                    RDGE::Int32 w,
-                    RDGE::Int32 h
-                   )
+    constexpr Rect (RDGE::Int32 x, RDGE::Int32 y, RDGE::Int32 w, RDGE::Int32 h)
         : SDL_Rect{x, y, w, h}
     { }
 
@@ -219,7 +214,7 @@ public:
 //! \param [in] a First rect to compare
 //! \param [in] b Second rect to compare
 //! \returns True iff rects are identical
-constexpr bool operator==(const Rect& a, const Rect& b)
+constexpr bool operator== (const Rect& a, const Rect& b)
 {
     return (a.x == b.x) &&
            (a.y == b.y) &&
@@ -231,7 +226,7 @@ constexpr bool operator==(const Rect& a, const Rect& b)
 //! \param [in] a First rect to compare
 //! \param [in] b Second rect to compare
 //! \returns True iff rects are not identical
-constexpr bool operator!=(const Rect& a, const Rect& b)
+constexpr bool operator!= (const Rect& a, const Rect& b)
 {
     return (a.x != b.x) ||
            (a.y != b.y) ||

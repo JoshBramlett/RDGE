@@ -1,51 +1,44 @@
 #include <rdge/controls/button.hpp>
 #include <rdge/internal/exception_macros.hpp>
+#include <rdge/color.hpp>
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {
 namespace Controls {
 
-Button::Button (
-                const std::string&             id,
-                const RDGE::Graphics::Rect&    position,
-                std::shared_ptr<RDGE::Texture> texture,
-                const RDGE::Graphics::Rect&    clip,
-                const RDGE::Graphics::Rect&    clip_pressed,
-                const RDGE::Graphics::Rect&    clip_focus,
-                const RDGE::Graphics::Rect&    clip_hover,
-                const RDGE::Graphics::Rect&    clip_disabled
-               )
-    : Control(id, position)
-    , m_texture(std::move(texture))
-{
-    if (UNLIKELY(m_texture == nullptr))
-    {
-        RDGE_THROW("Button[" + id + "] texture parameter set to NULL");
-    }
+using namespace RDGE::Graphics;
 
-    m_clips = {
-        {ButtonStyle::Normal,   clip},
-        {ButtonStyle::Pressed,  clip_pressed},
-        {ButtonStyle::Focus,    clip_focus},
-        {ButtonStyle::Hover,    clip_hover},
-        {ButtonStyle::Disabled, clip_disabled}
-    };
+Button::Button (
+                std::string        id,
+                const std::string& sprite_sheet,
+                float              x,
+                float              y,
+                float              width,
+                float              height
+               )
+    : Control(std::move(id), 0, 0)
+{
+    m_spriteSheet = std::make_shared<SpriteSheet>(sprite_sheet);
+    auto uv =  m_spriteSheet->LookupUV(static_cast<RDGE::UInt8>(ButtonState::Normal));
+
+    m_sprite = std::make_shared<Sprite>(x, y, width, height, m_spriteSheet, uv);
+    AddRenderable(m_sprite);
 }
 
 Button::Button (Button&& rhs) noexcept
     : Control(std::move(rhs))
-{
-    m_texture = std::move(rhs.m_texture);
-    m_clips.swap(rhs.m_clips);
-}
+    , m_spriteSheet(std::move(rhs.m_spriteSheet))
+    , m_sprite(std::move(rhs.m_sprite))
+{ }
 
 Button&
 Button::operator= (Button&& rhs) noexcept
 {
     if (this != &rhs)
     {
-        m_texture = std::move(rhs.m_texture);
-        m_clips.swap(rhs.m_clips);
+        Control::operator=(std::move(rhs));
+        m_spriteSheet = std::move(rhs.m_spriteSheet);
+        m_sprite = std::move(rhs.m_sprite);
     }
 
     return *this;
@@ -67,43 +60,36 @@ Button::TriggerEvent (ControlEventType type, const ControlEventArgs& args)
 }
 
 void
-Button::Render (const RDGE::Window& window)
+Button::HandleEvents (const RDGE::Event& event)
 {
-    auto clip = m_clips[ButtonStyle::Normal];
-    if (IsDisabled())
-    {
-        auto temp = m_clips[ButtonStyle::Disabled];
-        if (temp.IsEmpty() == false)
-        {
-            clip = temp;
-        }
-    }
-    else if (IsMousePressed())
-    {
-        auto temp = m_clips[ButtonStyle::Pressed];
-        if (temp.IsEmpty() == false)
-        {
-            clip = temp;
-        }
-    }
-    else if (IsMouseHover())
-    {
-        auto temp = m_clips[ButtonStyle::Hover];
-        if (temp.IsEmpty() == false)
-        {
-            clip = temp;
-        }
-    }
-    else if (HasFocus())
-    {
-        auto temp = m_clips[ButtonStyle::Focus];
-        if (temp.IsEmpty() == false)
-        {
-            clip = temp;
-        }
-    }
+    Control::HandleEvents(event);
 
-    window.Draw(*m_texture.get(), m_position, clip);
+    // TODO dirty state so we don't have to update this logic every frame?
+    if (m_disabled)
+    {
+        auto uv =  m_spriteSheet->LookupUV(static_cast<RDGE::UInt8>(ButtonState::Disabled));
+        m_sprite->SetUV(uv);
+    }
+    else if (m_isLeftMouseButtonDown)
+    {
+        auto uv =  m_spriteSheet->LookupUV(static_cast<RDGE::UInt8>(ButtonState::Pressed));
+        m_sprite->SetUV(uv);
+    }
+    else if (m_isMouseOver)
+    {
+        auto uv =  m_spriteSheet->LookupUV(static_cast<RDGE::UInt8>(ButtonState::Hover));
+        m_sprite->SetUV(uv);
+    }
+    else if (m_hasFocus)
+    {
+        auto uv =  m_spriteSheet->LookupUV(static_cast<RDGE::UInt8>(ButtonState::Focus));
+        m_sprite->SetUV(uv);
+    }
+    else
+    {
+        auto uv =  m_spriteSheet->LookupUV(static_cast<RDGE::UInt8>(ButtonState::Normal));
+        m_sprite->SetUV(uv);
+    }
 }
 
 } // namespace Controls

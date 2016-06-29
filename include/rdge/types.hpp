@@ -1,6 +1,6 @@
 //! \headerfile <rdge/types.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.8
+//! \version 0.0.9
 //! \date 06/07/2016
 
 #pragma once
@@ -14,7 +14,7 @@
 
 #include <iostream>
 
-#define RDGE_VERSION "0.0.8"
+#define RDGE_VERSION "0.0.9"
 
 /***********************************
 /    Compiler specific defines

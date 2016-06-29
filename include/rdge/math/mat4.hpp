@@ -1,7 +1,7 @@
 //! \headerfile <rdge/math/mat4.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.7
-//! \date 05/25/2016
+//! \version 0.0.9
+//! \date 06/14/2016
 
 #pragma once
 
@@ -11,8 +11,6 @@
 #include <rdge/math/vec4.hpp>
 
 #include <ostream>
-#include <sstream>
-#include <iomanip>
 
 /* TODO
  *
@@ -78,8 +76,10 @@ struct mat4
     //! \returns Reference to current object
     mat4& multiply (const mat4& rhs);
 
-    // TODO: Re-implement.  This should also return a copy, not a reference
-    mat4& inverse (void);
+    //! \brief Create an inverse of the matrix
+    //! \returns mat4 containing the inverse of the parent
+    //! \see http://www.euclideanspace.com/maths/algebra/matrix/functions/inverse/fourD/index.htm
+    mat4 inverse (void);
 
     //! \brief Create an identity matrix
     //! \details Initializes diagonal to 1.0f
@@ -198,22 +198,7 @@ inline vec3 operator* (const mat4& lhs, const vec3& rhs)
 //! \param [in] os Output stream
 //! \param [in] matrix mat4 to write to the stream
 //! \returns Output stream
-inline std::ostream& operator<< (std::ostream& os, const mat4& matrix)
-{
-    std::stringstream ss;
-    ss << "[" << std::fixed << std::setprecision(5);
-
-    for (RDGE::UInt32 i = 0; i < 4; ++i)
-    {
-        ss << "[" << matrix.columns[i].x << ","
-           << matrix.columns[i].y << ","
-           << matrix.columns[i].z << ","
-           << matrix.columns[i].w << "]"
-           << ((i == 3) ? "]" : ", ");
-    }
-
-    return os << ss.str();
-}
+std::ostream& operator<< (std::ostream& os, const mat4& matrix);
 
 } // namespace Math
 } // namespace RDGE

@@ -6,6 +6,7 @@
 #pragma once
 
 #include <rdge/types.hpp>
+#include <rdge/events/event.hpp>
 #include <rdge/graphics/shader.hpp>
 #include <rdge/math/mat4.hpp>
 
@@ -29,6 +30,10 @@ public:
     //                  either as a virtual or pure virtual using the base
     //                  class as the parameter.  Consider changing Render
     //                  to simply a virtual.
+
+    virtual void ProcessEventPhase (RDGE::Event& event) = 0;
+
+    virtual void ProcessUpdatePhase (RDGE::UInt32 ticks) = 0;
 
     //! \brief Render all cached renderables
     virtual void Render (void) = 0;

@@ -11,6 +11,7 @@
 #include <rdge/util/io.hpp>
 #include <rdge/util/logger.hpp>
 #include <rdge/graphics/renderable2d.hpp>
+#include <rdge/controls/button.hpp>
 
 
 namespace glpong {
@@ -40,21 +41,21 @@ ChronoScene::ChronoScene (RDGE::GLWindow* window)
     auto ortho = mat4::orthographic(0.0f, aspect_ratio.w, 0.0f, aspect_ratio.h, -1.0f, 1.0f);
 
     // 3)  Create our rendering layer
-    m_layer = std::make_shared<Layer2D>(std::move(shader), ortho, 1.0f, 1);
+    m_layer = std::make_shared<Layer2D>(std::move(shader), ortho, 1.0f, 10);
 
     // 4)  Create chrono
 
     auto uv_config = RDGE::Util::read_text_file("textures/chrono.json");
     m_spriteSheet = std::make_shared<SpriteSheet>(uv_config);
-    std::cout << "use_count=" << m_spriteSheet.use_count() << std::endl;
+    //std::cout << "use_count=" << m_spriteSheet.use_count() << std::endl;
     auto ss2 = m_spriteSheet->GetSharedPtr();
-    std::cout << "use_count=" << m_spriteSheet.use_count() << std::endl;
+    //std::cout << "use_count=" << m_spriteSheet.use_count() << std::endl;
     auto uv1 = m_spriteSheet->LookupUV(0);
     auto uv2 = m_spriteSheet->LookupUV(1);
     auto uv3 = m_spriteSheet->LookupUV(2);
     auto uv4 = ss2->LookupUV("UV_STAND_FRONT_1");
 
-    std::cout << uv1 << std::endl << uv2 << std::endl << uv3 << std::endl;
+    //std::cout << uv1 << std::endl << uv2 << std::endl << uv3 << std::endl;
 
     m_uvs.push_back(uv1);
     m_uvs.push_back(uv2);
@@ -64,6 +65,8 @@ ChronoScene::ChronoScene (RDGE::GLWindow* window)
     m_chrono = std::make_shared<Sprite>(2, 2, .95f, 1.95f, m_spriteSheet, uv4);
 
 
+    auto btn = std::make_shared<RDGE::Controls::Button>("btnTest", uv_config, 1, 1, 2, 1);
+    m_layer->AddRenderable(btn);
 
 /*
     m_spriteSheet = std::make_shared<GLTexture>("textures/chrono.png");
@@ -84,38 +87,73 @@ ChronoScene::ChronoScene (RDGE::GLWindow* window)
     m_chrono = std::make_shared<Sprite>(2, 2, .95f, 1.95f, m_spriteSheet, m_uvs[0]);
 */
     // 6)  Add our renderables to the layer, and add the layer to the scene
-    m_layer->AddRenderable(m_chrono);
+    //m_layer->AddRenderable(m_chrono);
     AddLayer("logo", m_layer);
 }
 
 void
-ChronoScene::ProcessEventPhase (const SDL_Event& event)
+ChronoScene::ProcessEventPhase (RDGE::Event& event)
 {
     // chrono should be an entity, but he's not
 
-    if (event.type == SDL_KEYDOWN)
+    if (event.Type() == RDGE::EventType::MouseButtonUp)
     {
-        switch (event.key.keysym.sym)
+        auto args = event.GetMouseButtonEventArgs();
+
+        //auto window = RDGE::GLWindow::GetCurrentWindow();
+        //auto window_size = window->Size();
+
+        //auto coords = args.CursorLocation();
+        //float x = (2.0f * coords.x) / window_size.w - 1.0f;
+        //float y = 1.0f - (2.0f * coords.y) / window_size.h;
+        //auto ndc = vec3(x, y, 1.0f);
+        auto ndc = args.CursorLocationInNDC();
+        auto clip_coords = vec4(ndc.x, ndc.y, -1.0f, 1.0f);
+
+
+        auto ortho = mat4::orthographic(-16.0f, 16.0f, -9.0f, 9.0f, -1.0f, 1.0f);
+        auto inverse = ortho.inverse();
+        //inverse.inverse();
+
+
+        vec4 ray_eye = inverse * clip_coords;
+        ray_eye.z = -1.0f;
+        ray_eye.w = 1.0f;
+
+
+        //std::cout << ortho << std::endl;
+        //std::cout << inverse << std::endl;
+        std::cout << args.CursorLocation() << std::endl;
+        std::cout << ray_eye << std::endl;
+        std::cout << "=============" << std::endl;
+    }
+
+    if (event.Type() == RDGE::EventType::KeyDown)
+    {
+        auto args = event.GetKeyboardEventArgs();
+        switch (args.Key())
         {
-            case SDLK_w:
+            case RDGE::KeyCode::W:
                 m_blinkCounter = 0;
                 m_chronoDirection = ChronoDirection::Up;
 
                 break;
-            case SDLK_a:
+            case RDGE::KeyCode::A:
                 m_blinkCounter = 0;
                 m_chronoDirection = ChronoDirection::Left;
 
                 break;
-            case SDLK_s:
+            case RDGE::KeyCode::S:
                 m_blinkCounter = 0;
                 m_chronoDirection = ChronoDirection::Down;
 
                 break;
-            case SDLK_d:
+            case RDGE::KeyCode::D:
                 m_blinkCounter = 0;
                 m_chronoDirection = ChronoDirection::Right;
 
+                break;
+            default:
                 break;
         }
     }

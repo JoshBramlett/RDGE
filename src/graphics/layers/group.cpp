@@ -45,12 +45,33 @@ Group::AddRenderable (std::shared_ptr<Renderable2D> renderable)
     auto right = pos.x + size.x;
     auto bottom = pos.y + size.y;
 
+    // TODO: This confused me (and took a bit of debugging to figure out)
+    //       but m_size represents the right and bottom, rather than the
+    //       size.  This should be changed.
+
+    //std::cout << "left=" << left << std::endl
+              //<< "right=" << right << std::endl
+              //<< "top=" << top << std::endl
+              //<< "bottom=" << bottom << std::endl;
+
     m_position.x = std::min(m_position.x, left);
     m_position.y = std::min(m_position.y, top);
     m_size.x = std::max(m_size.x, right);
     m_size.y = std::max(m_size.y, bottom);
 
+    //std::cout << "left=" << m_position.x << std::endl
+              //<< "right=" << m_size.x << std::endl
+              //<< "top=" << m_position.y << std::endl
+              //<< "bottom=" << m_size.y << std::endl;
+
     m_children.push_back(renderable);
+
+    // TODO:
+    //
+    // Fuck.  I don't know what the final coordinates will be for a group
+    // because only the position is cached, and the transformation has not
+    // yet been done.  I guess I could calculate the transformation every
+    // handle events call, but that seems crazy inefficient.
 }
 
 void
@@ -109,6 +130,19 @@ Group::SetZIndex (float zindex)
     for (auto child : m_children)
     {
         child->SetZIndex(zindex);
+    }
+}
+
+void
+Group::RegisterTextures (Renderer2D* renderer) const
+{
+    for (auto child : m_children)
+    {
+        auto texture = child->Texture();
+        if (texture)
+        {
+            renderer->RegisterTexture(texture);
+        }
     }
 }
 

@@ -87,7 +87,7 @@ Game::PopScene (void)
 void
 Game::Run (void)
 {
-    SDL_Event event;
+    RDGE::Event event;
     RDGE::Util::Timer timer;
 
     RDGE::UInt32 frame_cap = 1000 / m_settings.target_fps;
@@ -104,7 +104,7 @@ Game::Run (void)
             break;
         }
 
-        while (SDL_PollEvent(&event))
+        while (RDGE::PollEvent(&event))
         {
             ProcessEventPhase(event);
         }
@@ -130,7 +130,7 @@ Game::Run (void)
 }
 
 void
-Game::ProcessEventPhase (const SDL_Event& event)
+Game::ProcessEventPhase (RDGE::Event& event)
 {
     m_currentScene->ProcessEventPhase(event);
 }

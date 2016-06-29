@@ -1,11 +1,12 @@
 //! \headerfile <rdge/gameobjects/scene.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.7
-//! \date 05/21/2016
+//! \version 0.0.9
+//! \date 06/14/2016
 
 #pragma once
 
 #include <rdge/types.hpp>
+#include <rdge/events/event.hpp>
 #include <rdge/graphics/layers/layer.hpp>
 #include <rdge/gameobjects/ientity.hpp>
 
@@ -58,7 +59,7 @@ public:
     //! \details Scenes are responsible for sending notifications to each
     //!          stored entity for them to process input events.
     //! \param [in] event Polled SDL_Event
-    virtual void ProcessEventPhase (const SDL_Event& event);
+    virtual void ProcessEventPhase (RDGE::Event& event);
 
     //! \brief Called within the update phase of the game loop
     //! \details Scenes are responsible for sending notifications to each

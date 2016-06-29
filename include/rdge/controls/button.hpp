@@ -1,39 +1,37 @@
 //! \headerfile <rdge/controls/button.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.1
-//! \date 02/08/2015
+//! \version 0.0.9
+//! \date 06/14/2015
 //! \bug
 
 #pragma once
 
-#include <rdge/cursor.hpp>
-#include <rdge/texture.hpp>
 #include <rdge/types.hpp>
-#include <rdge/window.hpp>
+#include <rdge/cursor.hpp>
 #include <rdge/controls/control.hpp>
-#include <rdge/graphics/rect.hpp>
+#include <rdge/graphics/spritesheet.hpp>
+#include <rdge/graphics/sprite.hpp>
 
 #include <memory>
-#include <unordered_map>
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {
 namespace Controls {
 
-//! \enum ButtonStyle
+//! \enum ButtonState
 //! \brief Supported button style states
 //! \details Determines how to render the button
-enum class ButtonStyle : RDGE::UInt32
+enum class ButtonState : RDGE::UInt32
 {
-    //! \brief Normal style
+    //! \brief Default
     Normal = 1,
-    //! \brief Style when button is pressed
+    //! \brief Button is pressed
     Pressed,
-    //! \brief Style when button has focus
+    //! \brief Button has focus
     Focus,
-    //! \brief Style when button has mouse hovering over it
+    //! \brief Button has mouse hovering over it
     Hover,
-    //! \brief Style when disabled
+    //! \brief Button is disabled
     Disabled
 };
 
@@ -52,14 +50,12 @@ public:
     //! \param [in] clip_hover Texture clip for hover style
     //! \param [in] clip_disabled Texture clip for disabled style
     explicit Button (
-                     const std::string&             id,
-                     const RDGE::Graphics::Rect&    position,
-                     std::shared_ptr<RDGE::Texture> texture,
-                     const RDGE::Graphics::Rect& clip          = RDGE::Graphics::Rect::Empty(),
-                     const RDGE::Graphics::Rect& clip_pressed  = RDGE::Graphics::Rect::Empty(),
-                     const RDGE::Graphics::Rect& clip_focus    = RDGE::Graphics::Rect::Empty(),
-                     const RDGE::Graphics::Rect& clip_hover    = RDGE::Graphics::Rect::Empty(),
-                     const RDGE::Graphics::Rect& clip_disabled = RDGE::Graphics::Rect::Empty()
+                     std::string        id,
+                     const std::string& sprite_sheet,
+                     float              x,
+                     float              y,
+                     float              width,
+                     float              height
                     );
 
     //! \brief Button dtor
@@ -81,28 +77,19 @@ public:
     //! \details Default-movable
     Button& operator=(Button&&) noexcept;
 
-    //! \brief Entity Render
-    //! \details Renders button based on style
-    //! \param [in] window Window to render to
-    virtual void Render (const RDGE::Window& window);
-
-    //! \brief Entity Tag
-    //! \returns Tag to signify entity group
-    virtual std::string Tag (void) const
-    {
-        return "Button";
-    }
+    virtual void HandleEvents (const RDGE::Event& event) override;
 
 protected:
 
     //! \brief Inherited TriggerEvent from Control
     //! \detailis Used to intercept events from the base class to
     //!           the subscribers
-    virtual void TriggerEvent (ControlEventType type, const ControlEventArgs& args);
+    virtual void TriggerEvent (ControlEventType type, const ControlEventArgs& args) override;
 
 private:
-    std::shared_ptr<RDGE::Texture> m_texture;
-    std::unordered_map<ButtonStyle, RDGE::Graphics::Rect> m_clips;
+    std::shared_ptr<RDGE::Graphics::SpriteSheet> m_spriteSheet;
+    std::shared_ptr<RDGE::Graphics::Sprite>      m_sprite;
+
     RDGE::Cursor m_cursor;
 };
 

@@ -2,6 +2,7 @@
 
 #include <rdge/types.hpp>
 #include <rdge/glwindow.hpp>
+#include <rdge/events/event.hpp>
 #include <rdge/gameobjects/scene.hpp>
 #include <rdge/graphics/gltexture.hpp>
 #include <rdge/graphics/spritesheet.hpp>
@@ -35,7 +36,7 @@ public:
 
     virtual ~ChronoScene (void) { }
 
-    virtual void ProcessEventPhase (const SDL_Event& event) override;
+    virtual void ProcessEventPhase (RDGE::Event& event) override;
 
     virtual void ProcessUpdatePhase (RDGE::UInt32 ticks) override;
 

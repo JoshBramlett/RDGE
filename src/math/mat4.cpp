@@ -1,7 +1,10 @@
 #include <rdge/math/mat4.hpp>
 #include <rdge/math/functions.hpp>
+#include <rdge/internal/logger_macros.hpp>
 
 #include <cmath>
+#include <sstream>
+#include <iomanip>
 
 namespace RDGE {
 namespace Math {
@@ -27,130 +30,140 @@ mat4::operator*= (const mat4& rhs)
     return multiply(rhs);
 }
 
-mat4&
+mat4
 mat4::inverse (void)
 {
-        double temp[16];
+    mat4 result;
 
-        temp[0] = elements[5] * elements[10] * elements[15] -
-            elements[5] * elements[11] * elements[14] -
-            elements[9] * elements[6] * elements[15] +
-            elements[9] * elements[7] * elements[14] +
-            elements[13] * elements[6] * elements[11] -
-            elements[13] * elements[7] * elements[10];
+    result.elements[0]  = elements[5]  * elements[10] * elements[15] -
+                          elements[5]  * elements[11] * elements[14] -
+                          elements[9]  * elements[6]  * elements[15] +
+                          elements[9]  * elements[7]  * elements[14] +
+                          elements[13] * elements[6]  * elements[11] -
+                          elements[13] * elements[7]  * elements[10];
 
-        temp[4] = -elements[4] * elements[10] * elements[15] +
-            elements[4] * elements[11] * elements[14] +
-            elements[8] * elements[6] * elements[15] -
-            elements[8] * elements[7] * elements[14] -
-            elements[12] * elements[6] * elements[11] +
-            elements[12] * elements[7] * elements[10];
+    result.elements[4]  = elements[12] * elements[10] * elements[7]  -
+                          elements[8]  * elements[14] * elements[7]  -
+                          elements[12] * elements[6]  * elements[11] +
+                          elements[4]  * elements[14] * elements[11] +
+                          elements[8]  * elements[6]  * elements[15] -
+                          elements[4]  * elements[10] * elements[15];
 
-        temp[8] = elements[4] * elements[9] * elements[15] -
-            elements[4] * elements[11] * elements[13] -
-            elements[8] * elements[5] * elements[15] +
-            elements[8] * elements[7] * elements[13] +
-            elements[12] * elements[5] * elements[11] -
-            elements[12] * elements[7] * elements[9];
+    result.elements[8]  = elements[4]  * elements[9]  * elements[15] -
+                          elements[4]  * elements[11] * elements[13] -
+                          elements[8]  * elements[5]  * elements[15] +
+                          elements[8]  * elements[7]  * elements[13] +
+                          elements[12] * elements[5]  * elements[11] -
+                          elements[12] * elements[7]  * elements[9];
 
-        temp[12] = -elements[4] * elements[9] * elements[14] +
-            elements[4] * elements[10] * elements[13] +
-            elements[8] * elements[5] * elements[14] -
-            elements[8] * elements[6] * elements[13] -
-            elements[12] * elements[5] * elements[10] +
-            elements[12] * elements[6] * elements[9];
+    result.elements[12] = elements[12] * elements[9]  * elements[6]  -
+                          elements[8]  * elements[13] * elements[6]  -
+                          elements[12] * elements[5]  * elements[10] +
+                          elements[4]  * elements[13] * elements[10] +
+                          elements[8]  * elements[5]  * elements[14] -
+                          elements[4]  * elements[9]  * elements[14];
 
-        temp[1] = -elements[1] * elements[10] * elements[15] +
-            elements[1] * elements[11] * elements[14] +
-            elements[9] * elements[2] * elements[15] -
-            elements[9] * elements[3] * elements[14] -
-            elements[13] * elements[2] * elements[11] +
-            elements[13] * elements[3] * elements[10];
+    result.elements[1]  = elements[13] * elements[10] * elements[3]  -
+                          elements[9]  * elements[14] * elements[3]  -
+                          elements[13] * elements[2]  * elements[11] +
+                          elements[1]  * elements[14] * elements[11] +
+                          elements[9]  * elements[2]  * elements[15] -
+                          elements[1]  * elements[10] * elements[15];
 
-        temp[5] = elements[0] * elements[10] * elements[15] -
-            elements[0] * elements[11] * elements[14] -
-            elements[8] * elements[2] * elements[15] +
-            elements[8] * elements[3] * elements[14] +
-            elements[12] * elements[2] * elements[11] -
-            elements[12] * elements[3] * elements[10];
+    result.elements[5]  = elements[0]  * elements[10] * elements[15] -
+                          elements[0]  * elements[11] * elements[14] -
+                          elements[8]  * elements[2]  * elements[15] +
+                          elements[8]  * elements[3]  * elements[14] +
+                          elements[12] * elements[2]  * elements[11] -
+                          elements[12] * elements[3]  * elements[10];
 
-        temp[9] = -elements[0] * elements[9] * elements[15] +
-            elements[0] * elements[11] * elements[13] +
-            elements[8] * elements[1] * elements[15] -
-            elements[8] * elements[3] * elements[13] -
-            elements[12] * elements[1] * elements[11] +
-            elements[12] * elements[3] * elements[9];
+    result.elements[9]  = elements[12] * elements[3]  * elements[9]  -
+                          elements[8]  * elements[13] * elements[3]  -
+                          elements[12] * elements[1]  * elements[11] +
+                          elements[0]  * elements[13] * elements[11] +
+                          elements[8]  * elements[1]  * elements[15] -
+                          elements[0]  * elements[9]  * elements[15];
 
-        temp[13] = elements[0] * elements[9] * elements[14] -
-            elements[0] * elements[10] * elements[13] -
-            elements[8] * elements[1] * elements[14] +
-            elements[8] * elements[2] * elements[13] +
-            elements[12] * elements[1] * elements[10] -
-            elements[12] * elements[2] * elements[9];
+    result.elements[13] = elements[0]  * elements[9]  * elements[14] -
+                          elements[0]  * elements[10] * elements[13] -
+                          elements[8]  * elements[1]  * elements[14] +
+                          elements[8]  * elements[2]  * elements[13] +
+                          elements[12] * elements[1]  * elements[10] -
+                          elements[12] * elements[2]  * elements[9];
 
-        temp[2] = elements[1] * elements[6] * elements[15] -
-            elements[1] * elements[7] * elements[14] -
-            elements[5] * elements[2] * elements[15] +
-            elements[5] * elements[3] * elements[14] +
-            elements[13] * elements[2] * elements[7] -
-            elements[13] * elements[3] * elements[6];
+    result.elements[2]  = elements[1]  * elements[6]  * elements[15] -
+                          elements[1]  * elements[7]  * elements[14] -
+                          elements[5]  * elements[2]  * elements[15] +
+                          elements[5]  * elements[3]  * elements[14] +
+                          elements[13] * elements[2]  * elements[7]  -
+                          elements[13] * elements[3]  * elements[6];
 
-        temp[6] = -elements[0] * elements[6] * elements[15] +
-            elements[0] * elements[7] * elements[14] +
-            elements[4] * elements[2] * elements[15] -
-            elements[4] * elements[3] * elements[14] -
-            elements[12] * elements[2] * elements[7] +
-            elements[12] * elements[3] * elements[6];
+    result.elements[6]  = elements[12] * elements[6]  * elements[3]  -
+                          elements[4]  * elements[14] * elements[3]  -
+                          elements[12] * elements[2]  * elements[7]  +
+                          elements[0]  * elements[14] * elements[7]  +
+                          elements[4]  * elements[2]  * elements[15] -
+                          elements[0]  * elements[6]  * elements[15];
 
-        temp[10] = elements[0] * elements[5] * elements[15] -
-            elements[0] * elements[7] * elements[13] -
-            elements[4] * elements[1] * elements[15] +
-            elements[4] * elements[3] * elements[13] +
-            elements[12] * elements[1] * elements[7] -
-            elements[12] * elements[3] * elements[5];
+    result.elements[10] = elements[0]  * elements[5]  * elements[15] -
+                          elements[0]  * elements[7]  * elements[13] -
+                          elements[4]  * elements[1]  * elements[15] +
+                          elements[4]  * elements[3]  * elements[13] +
+                          elements[12] * elements[1]  * elements[7]  -
+                          elements[12] * elements[3]  * elements[5];
 
-        temp[14] = -elements[0] * elements[5] * elements[14] +
-            elements[0] * elements[6] * elements[13] +
-            elements[4] * elements[1] * elements[14] -
-            elements[4] * elements[2] * elements[13] -
-            elements[12] * elements[1] * elements[6] +
-            elements[12] * elements[2] * elements[5];
+    result.elements[14] = elements[12] * elements[5]  * elements[2]  -
+                          elements[4]  * elements[13] * elements[2]  -
+                          elements[12] * elements[1]  * elements[6]  +
+                          elements[0]  * elements[13] * elements[6]  +
+                          elements[4]  * elements[1]  * elements[14] -
+                          elements[0]  * elements[5]  * elements[14];
 
-        temp[3] = -elements[1] * elements[6] * elements[11] +
-            elements[1] * elements[7] * elements[10] +
-            elements[5] * elements[2] * elements[11] -
-            elements[5] * elements[3] * elements[10] -
-            elements[9] * elements[2] * elements[7] +
-            elements[9] * elements[3] * elements[6];
+    result.elements[3]  = elements[9]  * elements[6]  * elements[3]  -
+                          elements[5]  * elements[10] * elements[3]  -
+                          elements[9]  * elements[2]  * elements[7]  +
+                          elements[1]  * elements[10] * elements[7]  +
+                          elements[5]  * elements[2]  * elements[11] -
+                          elements[1]  * elements[6]  * elements[11];
 
-        temp[7] = elements[0] * elements[6] * elements[11] -
-            elements[0] * elements[7] * elements[10] -
-            elements[4] * elements[2] * elements[11] +
-            elements[4] * elements[3] * elements[10] +
-            elements[8] * elements[2] * elements[7] -
-            elements[8] * elements[3] * elements[6];
+    result.elements[7] =  elements[0]  * elements[6]  * elements[11] -
+                          elements[0]  * elements[7]  * elements[10] -
+                          elements[4]  * elements[2]  * elements[11] +
+                          elements[4]  * elements[3]  * elements[10] +
+                          elements[8]  * elements[2]  * elements[7]  -
+                          elements[8]  * elements[3]  * elements[6];
 
-        temp[11] = -elements[0] * elements[5] * elements[11] +
-            elements[0] * elements[7] * elements[9] +
-            elements[4] * elements[1] * elements[11] -
-            elements[4] * elements[3] * elements[9] -
-            elements[8] * elements[1] * elements[7] +
-            elements[8] * elements[3] * elements[5];
+    result.elements[11] = elements[8]  * elements[5]  * elements[3]  -
+                          elements[4]  * elements[9]  * elements[3]  -
+                          elements[8]  * elements[1]  * elements[7]  +
+                          elements[0]  * elements[9]  * elements[7]  +
+                          elements[4]  * elements[1]  * elements[11] -
+                          elements[0]  * elements[5]  * elements[11];
 
-        temp[15] = elements[0] * elements[5] * elements[10] -
-            elements[0] * elements[6] * elements[9] -
-            elements[4] * elements[1] * elements[10] +
-            elements[4] * elements[2] * elements[9] +
-            elements[8] * elements[1] * elements[6] -
-            elements[8] * elements[2] * elements[5];
+    result.elements[15] = elements[0]  * elements[5]  * elements[10] -
+                          elements[0]  * elements[6]  * elements[9]  -
+                          elements[4]  * elements[1]  * elements[10] +
+                          elements[4]  * elements[2]  * elements[9]  +
+                          elements[8]  * elements[1]  * elements[6]  -
+                          elements[8]  * elements[2]  * elements[5];
 
-        double determinant = elements[0] * temp[0] + elements[1] * temp[4] + elements[2] * temp[8] + elements[3] * temp[12];
-        determinant = 1.0 / determinant;
+    float determinant = elements[0] * result.elements[0] +
+                        elements[1] * result.elements[4] +
+                        elements[2] * result.elements[8] +
+                        elements[3] * result.elements[12];
+    if (UNLIKELY(fp_eq(determinant, 0.0f)))
+    {
+        WLOG("Unable to create inverse matrix.  Determinant is zero.");
+        return mat4();
+    }
 
-        for (int i = 0; i < 4 * 4; i++)
-            elements[i] = temp[i] * determinant;
+    float inv_determinant = 1.0 / determinant;
+    for (int i = 0; i < 16; i++)
+    {
+        result.elements[i] *= inv_determinant;
+    }
 
-        return *this;
+    return result;
 }
 
 mat4&
@@ -283,6 +296,23 @@ mat4::scale (const vec3& scale)
     result.elements[2 + 2 * 4] = scale.z;
 
     return result;
+}
+
+std::ostream& operator<< (std::ostream& os, const mat4& matrix)
+{
+    std::stringstream ss;
+    ss << "[" << std::fixed << std::setprecision(5);
+
+    for (RDGE::UInt32 i = 0; i < 4; ++i)
+    {
+        ss << "[" << matrix.columns[i].x << ","
+           << matrix.columns[i].y << ","
+           << matrix.columns[i].z << ","
+           << matrix.columns[i].w << "]"
+           << ((i == 3) ? "]" : ", ");
+    }
+
+    return os << ss.str();
 }
 
 } // namespace Math

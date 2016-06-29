@@ -13,6 +13,10 @@
 #include <rdge/math/vec2.hpp>
 #include <rdge/math/mat4.hpp>
 
+// TODO: Remove when refactoring
+#include <rdge/graphics/layers/group.hpp>
+#include <rdge/controls/control.hpp>
+
 #include <vector>
 #include <memory>
 
@@ -77,6 +81,13 @@ public:
     //! \param [in] renderable Renderable object shared pointer
     virtual void AddRenderable (std::shared_ptr<Renderable2D> renderable);
 
+    // TODO: This is for testing controls, and should be refactored
+    virtual void AddGroup (std::shared_ptr<RDGE::Controls::Control> group);
+
+    virtual void ProcessEventPhase (RDGE::Event& event) override;
+
+    virtual void ProcessUpdatePhase (RDGE::UInt32 ticks) override;
+
     //! \brief Render all cached renderables
     //virtual void Render (void);
     virtual void Render (void) override;
@@ -88,6 +99,9 @@ private:
     Renderer2D       m_renderer;
     RenderableVector m_renderables;
     float            m_zIndex;
+
+    // TODO: Remove upon refactoring
+    std::shared_ptr<RDGE::Controls::Control> m_control;
 };
 
 } // namespace Graphics

@@ -1,15 +1,14 @@
 //! \headerfile <rdge/gameobjects/ientity.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.1
-//! \date 12/29/2015
+//! \version 0.0.9
+//! \date 06/14/2016
 //! \bug
 
 #pragma once
 
-#include <SDL.h>
-
 #include <rdge/types.hpp>
 #include <rdge/window.hpp>
+#include <rdge/events/event.hpp>
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {
@@ -26,7 +25,7 @@ public:
     //! \brief Called within the event polling phase of the game loop
     //! \details Each entity is responsible for reacting to update events
     //! \param [in] event Polled SDL_Event
-    virtual void HandleEvents (const SDL_Event& event) = 0;
+    virtual void HandleEvents (const RDGE::Event& event) = 0;
 
     //! \brief Called within the update phase of the game loop
     //! \details Each entity is responsible for updating their state logic

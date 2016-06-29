@@ -3,7 +3,7 @@ project (RDGE)
 
 set (RDGE_VERSION_MAJOR 0)
 set (RDGE_VERSION_MINOR 0)
-set (RDGE_VERSION_PACKAGE 8)
+set (RDGE_VERSION_PACKAGE 9)
 
 set (CMAKE_MODULE_PATH ${RDGE_SOURCE_DIR}/cmake)
 set (LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
@@ -69,8 +69,9 @@ add_library (
              src/glwindow.cpp
              src/assets/font.cpp
              src/assets/surface.cpp
-             #src/controls/control.cpp
-             #src/controls/button.cpp
+             src/controls/control.cpp
+             src/controls/button.cpp
+             src/events/event.cpp
              src/gameobjects/icollidable.cpp
              src/gameobjects/ientity.cpp
              src/gameobjects/scene.cpp
@@ -109,6 +110,7 @@ target_link_libraries (
 
 add_subdirectory (tutorials/opengl/ex01_triangle)
 add_subdirectory (examples/glpong)
+add_subdirectory (examples/gui)
 
 #add_subdirectory (examples/pong)
 

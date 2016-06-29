@@ -1,18 +1,14 @@
 //! \headerfile <rdge/controls/control.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.7
-//! \date 05/25/2016
+//! \version 0.0.9
+//! \date 06/14/2016
 
 #pragma once
 
 #include <rdge/types.hpp>
-#include <rdge/graphics/renderable2d.hpp>
-#include <rdge/graphics/point.hpp>
+#include <rdge/events/event.hpp>
+#include <rdge/graphics/layers/group.hpp>
 #include <rdge/gameobjects/ientity.hpp>
-#include <rdge/math/vec3.hpp>
-#include <rdge/math/vec4.hpp>
-
-#include <SDL.h>
 
 #include <string>
 #include <functional>
@@ -56,28 +52,30 @@ enum class ControlEventType : RDGE::UInt8
 struct ControlEventArgs
 {
     std::string           id;
-    RDGE::Graphics::Point mouse_position;
-    MouseButton           mouse_button;
+    //RDGE::Graphics::Point mouse_position;
+    //MouseButton           mouse_button;
 };
 
 //! \typedef ControlEventCallback
 //! \brief Callback subscriber for control events
-using ControlEventCallback = std::function<void(void*, const ControlEventArgs&)>;
+using ControlEventCallback = std::function<void(const ControlEventArgs&)>;
 
 //! \class Control
 //! \brief Base class for GUI controls
 //! \details Non-implementable class defining all control behavior
-class Control : public RDGE::Graphics::Renderable2D, public RDGE::GameObjects::IEntity
+class Control : public RDGE::Graphics::Group, public RDGE::GameObjects::IEntity
 {
 public:
     //! \brief IEntity HandleEvents
     //! \details Handle input events to map to control events
-    //! \param [in] event SDL_Event struct
-    virtual void HandleEvents (const SDL_Event& event);
+    //! \param [in] event Event arguments
+    virtual void HandleEvents (const RDGE::Event& event) override;
+    virtual void OnMouseMotion (const RDGE::MouseMotionEventArgs& args);
+    virtual void OnMouseButton (const RDGE::MouseButtonEventArgs& args);
 
     //! \brief IEntity Update
     //! \details Implementation logic should be handled in derived class
-    virtual void Update (RDGE::UInt32) { }
+    virtual void Update (RDGE::UInt32) override { }
 
     //! \brief Get the ID of the control
     //! \returns String identifier
@@ -129,8 +127,9 @@ public:
 protected:
     //! \brief Control ctor
     //! \param [in] id Unique ID of the control
-    //! \param [in] position Position of the control in screen coordinates
-    explicit Control (const std::string& id, const RDGE::Graphics::Rect& position);
+    //! \param [in] x x-coordinate
+    //! \param [in] y y-coordinate
+    explicit Control (std::string id, float x, float y);
 
     //! \brief Control dtor
     virtual ~Control (void) { }
@@ -141,15 +140,15 @@ protected:
 
     //! \brief Control Move ctor
     //! \details Default-movable
-    Control (Control&&) noexcept = default;
+    Control (Control&&) noexcept;
 
     //! \brief Control Copy Assignment Operator
     //! \details Non-copyable
-    Control& operator=(const Control&) = delete;
+    Control& operator= (const Control&) = delete;
 
     //! \brief Control Move Assignment Operator
     //! \details Default-movable
-    Control& operator=(Control&&) noexcept = default;
+    Control& operator= (Control&&) noexcept;
 
     //! \brief Control event occurred
     //! \details Inform subscriber of event
