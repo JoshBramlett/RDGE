@@ -9,8 +9,6 @@
 #include <rdge/math/functions.hpp>
 
 #include <ostream>
-#include <sstream>
-#include <iomanip>
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {
@@ -32,10 +30,7 @@ struct vec4
     //! \brief vec4 ctor
     //! \details Initialize vec4 to [0.0f,0.0f,0.0f,0.0f]
     constexpr vec4 (void)
-        : x (0.0f)
-        , y (0.0f)
-        , z (0.0f)
-        , w (0.0f)
+        : x(0.0f), y(0.0f), z(0.0f), w(0.0f)
     { }
 
     //! \brief vec4 ctor
@@ -45,10 +40,7 @@ struct vec4
     //! \param [in] z Z-Coordinate
     //! \param [in] w W-Coordinate
     constexpr vec4 (float x, float y, float z, float w)
-        : x (x)
-        , y (y)
-        , z (z)
-        , w (w)
+        : x(x), y(y), z(z), w(w)
     { }
 
     //! \brief vec4 Copy ctor
@@ -133,7 +125,7 @@ constexpr bool operator!= (const vec4& lhs, const vec4& rhs)
 //! \param [in] lhs Left side vec4 to add
 //! \param [in] rhs Right side vec4 to add
 //! \returns vec4 of added values
-constexpr vec4 operator+ (const vec4& lhs, const vec4& rhs)
+constexpr const vec4 operator+ (const vec4& lhs, const vec4& rhs)
 {
     return vec4(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z, lhs.w + rhs.w);
 }
@@ -142,7 +134,7 @@ constexpr vec4 operator+ (const vec4& lhs, const vec4& rhs)
 //! \param [in] lhs Left side vec4 to subtract from
 //! \param [in] rhs Right side vec4
 //! \returns vec4 of subtracted values
-constexpr vec4 operator- (const vec4& lhs, const vec4& rhs)
+constexpr const vec4 operator- (const vec4& lhs, const vec4& rhs)
 {
     return vec4(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z, lhs.w - rhs.w);
 }
@@ -151,7 +143,7 @@ constexpr vec4 operator- (const vec4& lhs, const vec4& rhs)
 //! \param [in] lhs Left side vec4 to multiply
 //! \param [in] rhs Right side vec4 to multiply
 //! \returns vec4 of multiplied values
-constexpr vec4 operator* (const vec4& lhs, const vec4& rhs)
+constexpr const vec4 operator* (const vec4& lhs, const vec4& rhs)
 {
     return vec4(lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z, lhs.w * rhs.w);
 }
@@ -160,7 +152,7 @@ constexpr vec4 operator* (const vec4& lhs, const vec4& rhs)
 //! \param [in] lhs Left side vec4 numerator
 //! \param [in] rhs Right side vec4 denominator
 //! \returns vec4 of divided values
-constexpr vec4 operator/ (const vec4& lhs, const vec4& rhs)
+constexpr const vec4 operator/ (const vec4& lhs, const vec4& rhs)
 {
     return vec4(lhs.x / rhs.x, lhs.y / rhs.y, lhs.z / rhs.z, lhs.w / rhs.w);
 }
@@ -169,17 +161,7 @@ constexpr vec4 operator/ (const vec4& lhs, const vec4& rhs)
 //! \param [in] os Output stream
 //! \param [in] vec vec4 to write to the stream
 //! \returns Output stream
-inline std::ostream& operator<< (std::ostream& os, const vec4& vec)
-{
-    std::stringstream ss;
-    ss << "[" << std::fixed << std::setprecision(5)
-       << vec.x << ","
-       << vec.y << ","
-       << vec.z << ","
-       << vec.w << "]";
-
-    return os << ss.str();
-}
+std::ostream& operator<< (std::ostream& os, const vec4& vec);
 
 } // namespace Math
 } // namespace RDGE

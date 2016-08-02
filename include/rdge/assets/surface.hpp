@@ -6,7 +6,7 @@
 #pragma once
 
 #include <rdge/types.hpp>
-#include <rdge/graphics/size.hpp>
+#include <rdge/graphics/point.hpp>
 
 #include <SDL.h>
 

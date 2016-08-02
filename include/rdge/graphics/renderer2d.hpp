@@ -32,7 +32,7 @@ struct vertex_data
     //! \var uv Texture coordinates
     RDGE::Math::vec2 uv;
     //! \var tid Texture unit ID
-    float            tid;
+    RDGE::Int32      tid;
     //! \var color Vertex color
     RDGE::UInt32     color;
 };

@@ -33,6 +33,13 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
     endif ()
 endif ()
 
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
+    # suppress warnings:
+    #     anonymous structs are a GNU extension [-Wgnu-anonymous-struct]
+    #     anonymous types declared in an anonymous union are an extension [-Wnested-anon-types]
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-gnu-anonymous-struct -Wno-nested-anon-types")
+endif ()
+
 # google test framework
 enable_testing ()
 find_package (GTest REQUIRED)
@@ -77,7 +84,7 @@ add_library (
              src/gameobjects/scene.cpp
              src/gameobjects/game.cpp
              src/graphics/renderer2d.cpp
-             src/graphics/shader.cpp
+             src/graphics/shaders/shader.cpp
              src/graphics/sprite.cpp
              src/graphics/text.cpp
              src/graphics/gltexture.cpp

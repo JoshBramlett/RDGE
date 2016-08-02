@@ -7,7 +7,7 @@
 #include <rdge/graphics/buffers/vertex_array.hpp>
 #include <rdge/graphics/buffers/vertex_buffer.hpp>
 #include <rdge/graphics/buffers/index_buffer.hpp>
-#include <rdge/graphics/shader.hpp>
+#include <rdge/graphics/shaders/shader.hpp>
 #include <rdge/graphics/renderer2d.hpp>
 #include <rdge/graphics/renderable2d.hpp>
 #include <rdge/graphics/sprite.hpp>
@@ -15,6 +15,8 @@
 #include <rdge/graphics/layers/layer2d.hpp>
 #include <rdge/graphics/layers/group.hpp>
 #include <rdge/graphics/gltexture.hpp>
+#include <rdge/graphics/rect.hpp>
+#include <rdge/graphics/point.hpp>
 #include <rdge/math/random.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/math/vec3.hpp>
@@ -64,24 +66,143 @@ std::string PrintWindowEvent (SDL_WindowEvent* event)
                             return "Unknown";
                     }
 }
+/*
+#include <atomic>
+#include <future>
+#include <chrono>
+
+static constexpr unsigned int Timeout = 5;
+
+class AsyncTest
+{
+public:
+
+
+    AsyncTest (void)
+        : m_pending(true)
+    { }
+
+    void OnEventReceived (void)
+    {
+        std::cout << "callback received" << std::endl;
+        m_pending = false;
+    }
+
+    void Run (void)
+    {
+        auto future_receive = std::async(std::launch::async, [this] {
+            std::cout << "future start" << std::endl;
+            m_pending = false;
+            while (m_pending)
+            {
+                std::this_thread::yield();
+            }
+
+            std::cout << "future done" << std::endl;
+        });
+
+        std::future_status status;
+        do {
+            status = future_receive.wait_for(std::chrono::seconds(Timeout));
+            if (status == std::future_status::deferred)
+            {
+                std::cout << "deferred\n";
+            }
+            else if (status == std::future_status::ready)
+            {
+                std::cout << "ready!\n";
+            }
+            else if (status == std::future_status::timeout)
+            {
+                std::cout << "timeout fired" << std::endl;
+                m_pending = false;
+            }
+        } while (status != std::future_status::ready);
+
+    }
+
+private:
+    std::atomic_bool m_pending;
+};
+*/
+
+//template<class T, class Enable = void>
+//template<class T,
+    //typename = std::enable_if_t<std::is_integral<T>::value> >
+//void destroy(T t)
+//{
+    //std::cout << "integral destroy " << t << std::endl;
+//}
+
+//template<class T,
+    //typename std::enable_if<std::is_floating_point<T>::value>::type>
+    ////typename std::enable_if_t<std::is_floating_point<T>::value> >
+//void destroy(T* t) // note, function signature is unmodified
+//{
+    //std::cout << "destroy" << std::endl;
+//}
+
+template<class T>
+void destroy(T t,
+             typename std::enable_if<std::is_integral<T>::value>::type* = 0)
+//template<class T,
+             //typename std::enable_if<std::is_integral<T>::value>::type = 0>
+//void destroy(T t)
+{
+    std::cout << "integral destroy " << t << std::endl;
+}
+template<class T>
+void destroy(T t,
+             typename std::enable_if<std::is_floating_point<T>::value>::type* = 0)
+//template<class T,
+             //typename = std::enable_if<std::is_floating_point<T>::value>::type>
+//void destroy(T t)
+{
+    std::cout << "float destroy " << t << std::endl;
+}
 
 int main ()
 {
+    //AsyncTest async_test;
+    //std::thread t([&async_test]() {
+        //async_test.Run();
+    //});
+    //t.detach();
+
+    float d = 0.f;
+    destroy(d);
+
+    int x = 0;
+    destroy(x);
+
+    //RDGE::Graphics::rect_t<unsigned int> urect;
+    //RDGE::Graphics::point_t<unsigned int> upoint(1, 3);
+    //RDGE::Graphics::point_t<float> fpoint(1.0, 3.0);
+
+    //std::cout << urect.is_empty() << std::endl;
+
+
+    //auto p = upoint * 2u;
+    //p *= 3;
+    //std::cout << p << std::endl;
+    //std::cout << fpoint << std::endl;
+    //std::cout << urect << std::endl;
+
     try
     {
         auto config = RDGE::ReadConfigFile("config.json");
-        std::cout << "enable_jpg=" << config.enable_jpg << std::endl
-                  << "enable_png=" << config.enable_png << std::endl
-                  << "enable_tif=" << config.enable_tif << std::endl
-                  << "enable_fonts=" << config.enable_fonts << std::endl
-                  << "window_title=" << config.window_title << std::endl
-                  << "window_icon=" << config.window_icon << std::endl
-                  << "target_width=" << config.target_width << std::endl
-                  << "target_height=" << config.target_height << std::endl
-                  << "fullscreen=" << config.fullscreen << std::endl
-                  << "use_vsync=" << config.use_vsync << std::endl
-                  << "target_fps=" << config.target_fps << std::endl
-                  << "min_log_level=" << config.min_log_level << std::endl;
+        //std::cout << "enable_jpg=" << config.enable_jpg << std::endl
+                  //<< "enable_png=" << config.enable_png << std::endl
+                  //<< "enable_tif=" << config.enable_tif << std::endl
+                  //<< "enable_fonts=" << config.enable_fonts << std::endl
+                  //<< "window_title=" << config.window_title << std::endl
+                  //<< "window_icon=" << config.window_icon << std::endl
+                  //<< "target_width=" << config.target_width << std::endl
+                  //<< "target_height=" << config.target_height << std::endl
+                  //<< "fullscreen=" << config.fullscreen << std::endl
+                  //<< "use_vsync=" << config.use_vsync << std::endl
+                  //<< "target_fps=" << config.target_fps << std::endl
+                  //<< "min_log_level=" << config.min_log_level << std::endl;
 
         // 1 - initialize SDL
         RDGE::Application app(config);
@@ -98,12 +219,14 @@ int main ()
                                true  // vsync
                               );
 
-        auto v = RDGE::Util::read_text_file("basic.vert");
-        auto f = RDGE::Util::read_text_file("basic.frag");
-        auto shader = std::make_unique<Shader>(v, f);
+        //auto v = RDGE::Util::read_text_file("basic.vert");
+        //auto f = RDGE::Util::read_text_file("basic.frag");
+        //auto shader = std::make_unique<Shader>(v, f);
+        //auto shader = Shader::SpriteBatch();
 
         auto ortho = RDGE::Math::mat4::orthographic(-16.0f, 16.0f, -9.0f, 9.0f, -1.0f, 1.0f);
-        Layer2D layer(std::move(shader), ortho, 1.0f, 500);
+        //Layer2D layer(std::move(shader), ortho, 1.0f, 500);
+        Layer2D layer(Shader::SpriteBatch(), ortho, 1.0f, 500);
 
 
         auto rotation_angle = 0.0f;
@@ -202,6 +325,7 @@ int main ()
                         break;
                     case RDGE::KeyCode::Q:
                         {
+                            //async_test.OnEventReceived();
                         //SDL_GetMouseState(&x, &y);
                         //auto size = window.Size();
                         //auto dsize = window.DrawableSize();

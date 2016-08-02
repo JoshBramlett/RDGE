@@ -137,10 +137,12 @@ GLWindow::GLWindow (
 
     // Ensure a supported aspect ratio can be determined from the target width/height
     m_targetAspectRatio = CalculateAspectRatio(target_width, target_height);
-    if (m_targetAspectRatio.IsEmpty())
-    {
-        RDGE_THROW("Supported aspect ratio cannot be determined from the width/height");
-    }
+    // TODO: I don't like IsEmpty (check if zero) for the point/size type since it's valid
+    //       figure out a better way to implement this
+    //if (m_targetAspectRatio.IsEmpty())
+    //{
+        //RDGE_THROW("Supported aspect ratio cannot be determined from the width/height");
+    //}
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, gl_version_major);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, gl_version_minor);

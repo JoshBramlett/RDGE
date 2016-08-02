@@ -1,7 +1,9 @@
-#include <rdge/graphics/shader.hpp>
+#include <rdge/graphics/shaders/shader.hpp>
 #include <rdge/util/io.hpp>
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
+
+#include "spritebatch.shader.hpp"
 
 #include <GL/glew.h>
 
@@ -18,24 +20,6 @@ namespace {
     // cache value for multiple lookups
     RDGE::Int32 s_maxFragmentShaderUnits = -1;
 
-    std::string
-    ShaderTypeString (RDGE::UInt32 shader_type)
-    {
-        switch (shader_type)
-        {
-        case GL_VERTEX_SHADER:
-            return "vertex";
-        case GL_FRAGMENT_SHADER:
-            return "fragment";
-        case GL_GEOMETRY_SHADER:
-            return "geometry";
-        default:
-            break;
-        }
-
-        return "unknown";
-    }
-
 } // anonymous namespace
 
 Shader::Shader (void)
@@ -47,8 +31,8 @@ Shader::Shader (const std::string& vert_source, const std::string& frag_source)
 {
     std::vector<RDGE::UInt32> shaders;
 
-    shaders.emplace_back(Compile(GL_VERTEX_SHADER, vert_source));
-    shaders.emplace_back(Compile(GL_FRAGMENT_SHADER, frag_source));
+    shaders.emplace_back(Compile(ShaderType::Vertex, vert_source));
+    shaders.emplace_back(Compile(ShaderType::Fragment, frag_source));
 
     m_programId = Link(shaders);
 }
@@ -147,6 +131,15 @@ Shader::FromFile (const char* restrict vert_path, const char* restrict frag_path
     return Shader(v, f);
 }
 
+/* static */ std::unique_ptr<Shader>
+Shader::SpriteBatch (void)
+{
+    return std::make_unique<Shader>(
+                                    SpriteBatchVertexShaderSource(),
+                                    SpriteBatchFragmentShaderSource()
+                                   );
+}
+
 /* static */ RDGE::Int32
 Shader::MaxFragmentShaderUnits (void)
 {
@@ -165,11 +158,11 @@ Shader::PreProcess (void)
 }
 
 RDGE::UInt32
-Shader::Compile (RDGE::UInt32 shader_type, const std::string& source)
+Shader::Compile (ShaderType shader_type, const std::string& source)
 {
     const char* src = source.c_str();
 
-    RDGE::UInt32 shader = OpenGL::CreateShader(shader_type);
+    RDGE::UInt32 shader = OpenGL::CreateShader(static_cast<RDGE::UInt32>(shader_type));
 
     OpenGL::SetShaderSource(shader, &src);
     OpenGL::CompileShader(shader);
@@ -187,7 +180,7 @@ Shader::Compile (RDGE::UInt32 shader_type, const std::string& source)
 
         std::stringstream ss;
         ss << "Shader compilation failed. "
-           << "type=" << ShaderTypeString(shader_type)
+           << "type=" << shader_type
            << "info=" << error.data();
 
         GL_THROW(ss.str(), "", 0);
@@ -250,6 +243,23 @@ Shader::GetUniformLocation (const std::string& name)
     }
 
     return location;
+}
+
+std::ostream& operator<< (std::ostream& os, ShaderType shader_type)
+{
+    switch (shader_type)
+    {
+    case ShaderType::Vertex:
+        return os << "Vertex";
+    case ShaderType::Fragment:
+        return os << "Fragment";
+    case ShaderType::Geometry:
+        return os << "Geometry";
+    default:
+        break;
+    }
+
+    return os << "Unknown";
 }
 
 } // namespace Graphics

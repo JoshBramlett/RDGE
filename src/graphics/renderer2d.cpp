@@ -1,6 +1,6 @@
 #include <rdge/graphics/renderer2d.hpp>
 #include <rdge/graphics/renderable2d.hpp>
-#include <rdge/graphics/shader.hpp>
+#include <rdge/graphics/shaders/shader.hpp>
 #include <rdge/color.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
 #include <rdge/internal/exception_macros.hpp>
@@ -98,7 +98,7 @@ Renderer2D::Renderer2D (RDGE::UInt16 max_sprite_count)
     OpenGL::SetVertexAttributePointer(
                                       VATTR_TID_INDEX,
                                       1,
-                                      GL_FLOAT,
+                                      GL_INT,
                                       false,
                                       VERTEX_SIZE,
                                       reinterpret_cast<void*>(offsetof(vertex_data, tid))
@@ -262,7 +262,7 @@ Renderer2D::Submit (const Renderable2D* renderable)
     auto pos   = renderable->Position();
     auto size  = renderable->Size();
     auto uv    = renderable->UV();
-    auto tid   = static_cast<float>(renderable->TextureUnitID());
+    auto tid   = static_cast<RDGE::Int32>(renderable->TextureUnitID());
     auto color = static_cast<RDGE::UInt32>(renderable->Color());
 
     m_buffer->vertex = *m_currentTransformation * pos;

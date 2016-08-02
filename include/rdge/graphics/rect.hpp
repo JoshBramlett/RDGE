@@ -22,7 +22,8 @@
 
 #include <rdge/types.hpp>
 #include <rdge/graphics/point.hpp>
-#include <rdge/graphics/size.hpp>
+#include <rdge/math/vec2.hpp>
+#include <rdge/math/vec4.hpp>
 
 #include <SDL2/SDL_rect.h>
 
@@ -32,189 +33,264 @@
 namespace RDGE {
 namespace Graphics {
 
-//! \class Rect
-//! \brief Represents the location and size of a rectangle
-//! \details Derived from SDL_Rect and provides helper methods
-//!          for rectangle manipulation
-//! \see http://wiki.libsdl.org/SDL_Rect
-class Rect final : public SDL_Rect
-{
-public:
-    //! \brief Empty
-    //! \returns An empty Rect object
-    static constexpr Rect Empty (void) { return {0, 0, 0, 0}; };
+//! \struct rect_t
+//! \brief Base templated type representing a rectangle
 
-    //! \brief Rect ctor
+
+// 1) Works, but all non-arithmetic types compile, but have no functionality
+//template <typename T, typename Enable = void>
+//class rect_t { };
+
+//template <typename T>
+//class rect_t<T, typename std::enable_if<std::is_arithmetic<T>::value, bool>::type>
+
+
+
+
+// 2)  Doesn't work, not sure why
+//template <typename T>
+//using EnableRectPolicy = typename std::enable_if<std::is_arithmetic<T>::value>::type;
+
+//template <typename T>
+//class rect_t<T, EnableRectPolicy<T>>
+
+
+
+// 3) Works, and all non-arithmetic types fail to compile
+template <typename T, typename = typename std::enable_if_t<std::is_arithmetic<T>::value>>
+struct rect_t;
+
+template <typename T>
+struct rect_t<T>
+{
+    //! \var x X-coordinate
+    T x;
+    //! \var y Y-coordinate
+    T y;
+    //! \var w Width
+    T w;
+    //! \var h Height
+    T h;
+
+    //! \brief rect_t ctor
     //! \details Initialize rect to [0,0,0,0]
-    constexpr Rect (void)
-        : SDL_Rect{0, 0, 0, 0}
+    constexpr rect_t (void)
+        : x(0), y(0), w(0), h(0)
     { }
 
-    //! \brief Rect ctor
+    //! \brief rect_t ctor
     //! \details Initialize rect from X, Y, W and H values
-    //! \param [in] x X-Coordinate
-    //! \param [in] y Y-Coordinate
+    //! \param [in] x x-coordinate
+    //! \param [in] y y-coordinate
     //! \param [in] w Width
     //! \param [in] h Height
-    constexpr Rect (RDGE::Int32 x, RDGE::Int32 y, RDGE::Int32 w, RDGE::Int32 h)
-        : SDL_Rect{x, y, w, h}
+    constexpr rect_t (T x, T y, T w, T h)
+        : x(x), y(y), w(w), h(h)
     { }
 
-    //! \brief Rect ctor
+    //! \brief rect_t ctor
+    //! \details Initialize rect from vec4
+    //! \param [in] vec vec4 structure
+    explicit constexpr rect_t (const RDGE::Math::vec4& vec)
+        : x(vec.x)
+        , y(vec.y)
+        , w(vec.z)
+        , h(vec.w)
+    { }
+
+    //! \brief rect_t ctor
     //! \details Initialize rect from point and size
     //! \param [in] point Point structure
     //! \param [in] size Size structure
-    constexpr Rect (const Point& point, const Size& size)
-        : SDL_Rect{
-                   point.x,
-                   point.y,
-                   static_cast<RDGE::Int32>(size.w),
-                   static_cast<RDGE::Int32>(size.h)
-                  }
+    explicit constexpr rect_t (const Point& point, const Size& size)
+        : x(point.x)
+        , y(point.y)
+        , w(static_cast<RDGE::Int32>(size.w))
+        , h(static_cast<RDGE::Int32>(size.h))
     { }
 
-    //! \brief Rect Copy ctor
+    //! \brief rect_t ctor
+    //! \details Initialize rect from two vec2s representing point and size
+    //! \param [in] point vec2 structure representing the location
+    //! \param [in] size vec2 structure representing the size
+    explicit constexpr rect_t (const RDGE::Math::vec2& point, const RDGE::Math::vec2& size)
+        : x(point.x)
+        , y(point.y)
+        , w(size.x)
+        , h(size.y)
+    { }
+
+    //! \brief rect_t Copy ctor
     //! \details Default-copyable
-    constexpr Rect (const Rect&) noexcept = default;
+    constexpr rect_t (const rect_t&) noexcept = default;
 
-    //! \brief Rect Move ctor
+    //! \brief rect_t Move ctor
     //! \details Default-movable
-    constexpr Rect (Rect&&) noexcept = default;
+    constexpr rect_t (rect_t&&) noexcept = default;
 
-    //! \brief Rect Copy Assignment Operator
+    //! \brief rect_t Copy Assignment Operator
     //! \details Default-copyable
-    Rect& operator=(const Rect&) noexcept = default;
+    rect_t& operator= (const rect_t&) noexcept = default;
 
-    //! \brief Rect Move Assignment Operator
+    //! \brief rect_t Move Assignment Operator
     //! \details Default-movable
-    Rect& operator=(Rect&&) noexcept = default;
+    rect_t& operator= (rect_t&&) noexcept = default;
+
+    //! \brief User-defined conversion to vec4
+    //! \details Casts values to float during conversion.
+    //! \returns vec4 containing the rectangle data
+    explicit constexpr operator RDGE::Math::vec4 (void) const
+    {
+        return RDGE::Math::vec4(
+                                static_cast<float>(x),
+                                static_cast<float>(y),
+                                static_cast<float>(w),
+                                static_cast<float>(h)
+                               );
+    }
+
+    //! \brief User-defined conversion to native SDL_Rect
+    //! \details Casts values to signed integers during conversion.
+    //! \returns SDL_Rect containing the rectangle data
+    //! \see http://wiki.libsdl.org/SDL_Rect
+    explicit constexpr operator SDL_Rect (void) const
+    {
+        return SDL_Rect {
+                         static_cast<RDGE::Int32>(x),
+                         static_cast<RDGE::Int32>(y),
+                         static_cast<RDGE::Int32>(w),
+                         static_cast<RDGE::Int32>(h)
+                        };
+    }
 
     //! \brief Size of the rectangle
     //! \returns Size structure representing width and height
-    constexpr RDGE::Graphics::Size Size (void) const
-    {
-        return RDGE::Graphics::Size(w, h);
-    }
+    //constexpr typename std::enable_if<std::numeric_limits<T>::is_integer, bool>::type
+    //RDGE::Graphics::Size Size (void) const
+    //{
+        //return RDGE::Graphics::Size(w, h);
+    //}
 
     //! \brief Gets the y coordinate of the top edge
-    //! \returns Int32 representing the top edge y coordinate
-    constexpr RDGE::Int32 Top (void) const { return y; }
+    //! \returns Top edge of the rectangle
+    constexpr T top (void) const { return y; }
 
     //! \brief Gets the x coordinate of the left edge
-    //! \returns Int32 representing the left edge x coordinate
-    constexpr RDGE::Int32 Left (void) const { return x; }
+    //! \returns Left edge of the rectangle
+    constexpr T left (void) const { return x; }
 
     //! \brief Gets the y coordinate of the bottom edge
     //! \details Calculated by the sum of the y and h values
-    //! \returns Int32 representing the bottom edge y coordinate
-    constexpr RDGE::Int32 Bottom (void) const { return y + h; }
+    //! \returns Bottom edge of the rectangle
+    constexpr T bottom (void) const { return y + h; }
 
     //! \brief Gets the x coordinate of the right edge
     //! \details Calculated by the sum of the x and w values
-    //! \returns Int32 representing the right edge x coordinate
-    constexpr RDGE::Int32 Right (void) const { return x + w; }
+    //! \returns Right edge of the rectangle
+    constexpr T right (void) const { return x + w; }
 
     //! \brief Get the top left corner of the rectangle
-    //! \returns Point structure
-    constexpr Point TopLeft (void) const
+    //! \returns point_t structure
+    constexpr point_t<T> top_left (void) const
     {
-        return Point(x, y);
+        return point_t<T>(x, y);
     }
 
     //! \brief Get the top right corner of the rectangle
-    //! \returns Point structure
-    constexpr Point TopRight (void) const
+    //! \returns point_t structure
+    constexpr point_t<T> top_right (void) const
     {
-        return Point(Right(), y);
+        return point_t<T>(right(), y);
     }
 
     //! \brief Get the bottom left corner of the rectangle
-    //! \returns Point structure
-    constexpr Point BottomLeft (void) const
+    //! \returns point_t structure
+    constexpr point_t<T> bottom_left (void) const
     {
-        return Point(x, Bottom());
+        return point_t<T>(x, bottom());
     }
 
     //! \brief Get the bottom right corner of the rectangle
-    //! \returns Point structure
-    constexpr Point BottomRight (void) const
+    //! \returns point_t structure
+    constexpr point_t<T> bottom_right (void) const
     {
-        return Point(Right(), Bottom());
+        return point_t<T>(right(), bottom());
     }
 
     //! \brief Get the calculated center of the rectangle
-    //! \returns Point structure
-    constexpr Point Centroid (void) const
+    //! \returns point_t structure
+    constexpr point_t<T> centroid (void) const
     {
-        return Point(x + (w / 2), y + (h / 2));
+        return point_t<T>(x + (w / 2), y + (h / 2));
     }
 
     //! \brief Check if a point resides within the Rect
     //! \param [in] point Point structure
     //! \returns True if point is within the rect, false otherwise
-    constexpr bool Contains (const Point& point) const
+    constexpr bool contains (const point_t<T>& point) const
     {
         return point.x >= x && point.y >= y &&
-               point.x <= Right() && point.y <= Bottom();
+               point.x <= right() && point.y <= bottom();
     }
 
     //! \brief Check if a point resides within the Rect
     //! \param [in] px x coordinate
     //! \param [in] py y coordinate
     //! \returns True if point is within the rect, false otherwise
-    constexpr bool Contains (RDGE::Int32 px, RDGE::Int32 py) const
+    constexpr bool contains (T px, T py) const
     {
         return px >= x && py >= y &&
-               px <= Right() && py <= Bottom();
+               px <= right() && py <= bottom();
     }
 
     //! \brief Check if an entire rectangular region resides within the Rect
     //! \param [in] rect Rect structure
     //! \returns True if rect is within the Rect, false otherwise
-    constexpr bool Contains (const Rect& rect) const
+    constexpr bool contains (const rect_t<T>& rect) const
     {
         return rect.x >= x && rect.y >= y &&
-               rect.Right() <= Right() && rect.Bottom() <= Bottom();
+               rect.right() <= right() && rect.bottom() <= bottom();
     }
 
     //! \brief Check if any part of a rectangle instersects with Rect
     //! \param [in] rect Rect structure
     //! \returns True if rect intersects with the Rect, false otherwise
-    constexpr bool IntersectsWith (const Rect& rect) const
+    constexpr bool intersects_with (const rect_t<T>& rect) const
     {
-        return (rect.x < Right()) &&
-               (x < rect.Right()) &&
-               (rect.y < Bottom()) &&
-               (y < rect.Bottom());
+        return (rect.x < right()) &&
+               (x < rect.right()) &&
+               (rect.y < bottom()) &&
+               (y < rect.bottom());
     }
 
-    //! \brief Check if structure is empty
-    //! \returns True if all values are zero, otherwise false
-    bool IsEmpty (void) const
+    //! \brief Check if rectangle is empty
+    //! \returns True if width/height is lte zero, otherwise false
+    constexpr bool is_empty (void) const
     {
-        return (x == 0) && (y == 0) && (w == 0) && (h == 0);
+        return (w <= 0) || (h <= 0);
     }
 
     //! \brief Construct a Rect from a center point, width and height
     //! \param [in] center Coordinates of the center of the rectangle
     //! \param [in] size Dimensions of the rectangle
     //! \returns Rectangle structure
-    static constexpr Rect FromCenter (const Point& center, const class Size& size)
-    {
-        return Rect(
-                    center.x - (size.w / 2),
-                    center.y - (size.h / 2),
-                    size.w,
-                    size.h
-                   );
-    }
+    //static constexpr rect_t<T> from_center (const Point& center, const class Size& size)
+    //{
+        //return Rect(
+                    //center.x - (size.w / 2),
+                    //center.y - (size.h / 2),
+                    //size.w,
+                    //size.h
+                   //);
+    //}
 };
 
-//! \brief Rect equality operator
+//! \brief rect_t equality operator
 //! \param [in] a First rect to compare
 //! \param [in] b Second rect to compare
 //! \returns True iff rects are identical
-constexpr bool operator== (const Rect& a, const Rect& b)
+template <typename T>
+constexpr bool operator== (const rect_t<T>& a, const rect_t<T>& b)
 {
     return (a.x == b.x) &&
            (a.y == b.y) &&
@@ -222,11 +298,12 @@ constexpr bool operator== (const Rect& a, const Rect& b)
            (a.h == b.h);
 }
 
-//! \brief Rect inequality operator
+//! \brief rect_t inequality operator
 //! \param [in] a First rect to compare
 //! \param [in] b Second rect to compare
 //! \returns True iff rects are not identical
-constexpr bool operator!= (const Rect& a, const Rect& b)
+template <typename T>
+constexpr bool operator!= (const rect_t<T>& a, const rect_t<T>& b)
 {
     return (a.x != b.x) ||
            (a.y != b.y) ||
@@ -234,16 +311,27 @@ constexpr bool operator!= (const Rect& a, const Rect& b)
            (a.h != b.h);
 }
 
-//! \brief Rect stream output operator
+//! \brief rect_t stream output operator
 //! \param [in] os Output stream
-//! \param [in] rect Rect to write to the stream
+//! \param [in] rect rect_t to write to the stream
 //! \returns Output stream
-inline std::ostream& operator<< (std::ostream& os, const Rect& rect)
+template <typename T>
+inline std::ostream& operator<< (std::ostream& os, const rect_t<T>& rect)
 {
-    return os << "top left: [" << rect.x << "," << rect.y << "]"
-              << " width: " << rect.w
-              << " height: " << rect.h;
+    return os << "[ x:" << rect.x
+              << ", y:" << rect.y
+              << ", w:" << rect.w
+              << ", h:" << rect.h << " ]";
 }
+
+//! \typedef Rect Signed integer rect_t structure
+using Rect = rect_t<RDGE::Int32>;
+//! \typedef RectF Float rect_t structure
+using RectF = rect_t<float>;
+
+//using RectFail = rect_t<std::string>;
+
+
 
 } // namespace Graphics
 } // namespace RDGE

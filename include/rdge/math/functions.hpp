@@ -8,6 +8,7 @@
 //#define _USE_MATH_DEFINES
 #include <cmath>
 #include <algorithm>
+#include <type_traits>
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {
@@ -15,16 +16,15 @@ namespace Math {
 
 //! \brief Floating point comparison
 //! \details Uses the machine epsilon scaled to the magnitue of the values
-//!          used, multiplied by the desired precision in ULPs (units in
-//!          last place).  NaN and Infinity checking is performed.  Template
-//!          ensures a non-integer numeric type.
+//!          used.  NaN and Infinity checking is performed.
 //! \param [in] x First value to compare
 //! \param [in] y Second value to compare
-//! \param [in] ulp Precision to check for
 //! \returns True if equal, false if not.
+//! \note Template enabled via return type which ensures only floating point
+//!       types are supported.
 //! \see http://en.cppreference.com/w/cpp/types/numeric_limits/epsilon
 template <typename T>
-constexpr typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
+constexpr typename std::enable_if_t<std::is_floating_point<T>::value, bool>
 fp_eq (T x, T y) noexcept
 {
     return (std::isnan(x) && std::isnan(y)) ||

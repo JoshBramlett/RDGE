@@ -7,7 +7,7 @@
 
 #include <rdge/types.hpp>
 #include <rdge/events/event.hpp>
-#include <rdge/graphics/shader.hpp>
+#include <rdge/graphics/shaders/shader.hpp>
 #include <rdge/math/mat4.hpp>
 
 #include <memory>

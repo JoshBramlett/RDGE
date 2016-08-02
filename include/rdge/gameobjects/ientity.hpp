@@ -7,7 +7,6 @@
 #pragma once
 
 #include <rdge/types.hpp>
-#include <rdge/window.hpp>
 #include <rdge/events/event.hpp>
 
 //! \namespace RDGE Rainbow Drop Game Engine

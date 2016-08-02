@@ -68,9 +68,11 @@ namespace {
             return os << "[FATAL]";
         case LogLevel::Custom:
             return os << "[CUSTOM]";
+        default:
+            break;
         }
 
-        return os;
+        return os << "[UNKNOWN]";
     }
 
     struct log_timestamp

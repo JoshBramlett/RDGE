@@ -1,5 +1,8 @@
 #include <rdge/math/vec4.hpp>
 
+#include <sstream>
+#include <iomanip>
+
 namespace RDGE {
 namespace Math {
 
@@ -69,6 +72,18 @@ vec4&
 vec4::operator/= (const vec4& rhs)
 {
     return divide(rhs);
+}
+
+std::ostream& operator<< (std::ostream& os, const vec4& vec)
+{
+    std::ostringstream ss;
+    ss << "[" << std::fixed << std::setprecision(5)
+       << vec.x << ","
+       << vec.y << ","
+       << vec.z << ","
+       << vec.w << "]";
+
+    return os << ss.str();
 }
 
 } // namespace Math

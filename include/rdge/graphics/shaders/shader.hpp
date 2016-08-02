@@ -1,4 +1,4 @@
-//! \headerfile <rdge/graphics/shader.hpp>
+//! \headerfile <rdge/graphics/shaders/shader.hpp>
 //! \author Josh Bramlett
 //! \version 0.0.2
 //! \date 03/22/2016
@@ -11,6 +11,8 @@
 #include <rdge/math/vec4.hpp>
 #include <rdge/math/mat4.hpp>
 
+#include <GL/glew.h>
+
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -18,6 +20,13 @@
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {
 namespace Graphics {
+
+enum class ShaderType : RDGE::UInt32
+{
+    Vertex   = GL_VERTEX_SHADER,
+    Fragment = GL_FRAGMENT_SHADER,
+    Geometry = GL_GEOMETRY_SHADER
+};
 
 class Shader
 {
@@ -109,6 +118,12 @@ public:
     //! \throws RDGE::GLException Shader could not be built
     static Shader FromFile (const char* restrict vert_path, const char* restrict frag_path);
 
+    //! \brief Create a program pre-defined for the SpriteBatch renderer
+    //! \details Performs all setup as defined in the constructor.
+    //! \returns Initialized Shader object
+    //! \throws RDGE::GLException Shader could not be built
+    static std::unique_ptr<Shader> SpriteBatch (void);
+
     //! \brief Number of textures supported in the fragment shader
     //! \details Queries OpenGL for the maximum amount of texture image units the
     //!          sampler in the fragment shader can access.  The minimum required
@@ -129,7 +144,7 @@ private:
     //! \param [in] source GLSL source code of the shader
     //! \returns Unique shader handle
     //! \throws RDGE::GLException Shader could not be compiled
-    RDGE::UInt32 Compile (RDGE::UInt32 shader_type, const std::string& source);
+    RDGE::UInt32 Compile (ShaderType shader_type, const std::string& source);
 
     //! \brief Create and link program object
     //! \details Creates a program, attaches the provided shaders and links
@@ -152,6 +167,12 @@ private:
 
     std::unordered_map<std::string, RDGE::Int32> m_uniforms;
 };
+
+//! \brief ShaderType stream output operator
+//! \param [in] os Output stream
+//! \param [in] point ShaderType to write to the stream
+//! \returns Output stream
+std::ostream& operator<< (std::ostream& os, ShaderType shader_type);
 
 } // namespace Graphics
 } // namespace RDGE

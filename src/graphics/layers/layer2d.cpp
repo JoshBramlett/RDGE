@@ -56,66 +56,6 @@ Layer2D::operator= (Layer2D&& rhs) noexcept
     return *this;
 }
 
-RDGE::Math::vec2
-Layer2D::ConvertScreenCoordinatesToViewport (RDGE::UInt32 x, RDGE::UInt32 y)
-{
-    // TODO  !!!  IMPORTANT  !!!
-    //
-    // This is a stop-gap incomplete solution.  For 3D this is done through ray casting,
-    // but this solution works for 2D with the assumption the layer uses an orthographic
-    // projection matrix and the view and model matrices are indentity matrices.  Also,
-    // the viewport must match the entire window.
-    //
-    //
-    // A somewhat convoluated calculation requres explanation
-    //
-    // With an orthographic projection, the world coordinates are between [-1, 1], however
-    // this is generally scaled to the aspect ratio, so for a 16x9 target you'd have
-    // world coordinates be [-16, 16] on the x-axis and [-9, 9] on the y-axis.
-    //
-    // Each whole number in that range is refered to as a "point".  The calculation "ppp"
-    // represents the number of screen pixels per point.
-    //
-    // The [0,0] element in an orthographic matrix is the inverse of (#points / 2).  So
-    // for example [-16, 16] would yield (1 / 16) ==> 0.0625.  [1,1] is the element in
-    // the matrix for the y-axis.
-    //
-    // 1) "ppp" - We mulitply the inverse value from the matrix with the viewport
-    //            width/height to get the pixels per point.
-    //
-    // 2) "points" - The viewport width/height divided by the ppp value will yield the
-    //               number of points.
-    //
-    // 3) "ratio" - The ratio is the viewport width/height divided by the total
-    //              drawable width/height.
-
-    // An incomplete solution which addresses letterboxes is to multiply the points
-    // by the inverse of the ratio of the viewport to the drawable size.  This does
-    // not however work when the viewport is only a subsection of the screen.  The
-    // "points" will increase past the viewable range, so the viewport edges will
-    // retain the correct points.
-    //
-    //auto drawable_size = window->DrawableSize();
-    //auto ratiox = viewport[2] / drawable_size.w;
-    //auto ratioy = viewport[3] / drawable_size.h;
-    //pointsx *= (1.f / ratiox);
-    //pointsy *= (1.f / ratioy);
-
-    auto window  = RDGE::GLWindow::GetCurrentWindow();
-    auto window_size = window->Size();
-    auto viewport = OpenGL::GetViewport();
-
-    auto pppx = viewport[2] * m_projectionMatrix.elements[0];
-    auto pointsx = viewport[2] / pppx;
-    auto wx = pointsx * (1.f - (x / (window_size.w / 2.f)));
-
-    auto pppy = viewport[3] * m_projectionMatrix.elements[5];
-    auto pointsy = viewport[3] / pppy;
-    auto wy = pointsy * (1.f - (y / (window_size.h / 2.f)));
-
-    return RDGE::Math::vec2((wx * -1.f), wy);
-}
-
 void
 Layer2D::AddRenderable (std::shared_ptr<Renderable2D> renderable)
 {

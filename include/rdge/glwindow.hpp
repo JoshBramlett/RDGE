@@ -7,7 +7,6 @@
 
 #include <rdge/types.hpp>
 #include <rdge/color.hpp>
-#include <rdge/graphics/size.hpp>
 #include <rdge/graphics/point.hpp>
 #include <rdge/math/vec4.hpp>
 #include <rdge/assets/surface.hpp>
