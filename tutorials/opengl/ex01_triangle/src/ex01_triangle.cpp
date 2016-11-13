@@ -37,6 +37,7 @@
 #include <memory>
 #include <typeinfo>
 #include <stdlib.h>
+#include <uuid/uuid.h>
 
 using namespace RDGE::Graphics;
 using namespace RDGE::Math;
@@ -66,127 +67,53 @@ std::string PrintWindowEvent (SDL_WindowEvent* event)
                             return "Unknown";
                     }
 }
-/*
-#include <atomic>
-#include <future>
-#include <chrono>
 
-static constexpr unsigned int Timeout = 5;
-
-class AsyncTest
+struct size_test
 {
-public:
-
-
-    AsyncTest (void)
-        : m_pending(true)
-    { }
-
-    void OnEventReceived (void)
+    size_test ()
     {
-        std::cout << "callback received" << std::endl;
-        m_pending = false;
+        a = 0;
     }
 
-    void Run (void)
+    unsigned long long a;
+    unsigned long long b = {0};
+    unsigned long long c;
+    unsigned long long d;
+    unsigned long long e;
+    unsigned long long f;
+    unsigned long long g;
+    unsigned char set0;
+    char padding[7];
+
+    char message1[63];
+    unsigned char set1;
+
+    char message2[63];
+    unsigned char set2;
+
+    unsigned char getset0()
     {
-        auto future_receive = std::async(std::launch::async, [this] {
-            std::cout << "future start" << std::endl;
-            m_pending = false;
-            while (m_pending)
-            {
-                std::this_thread::yield();
-            }
-
-            std::cout << "future done" << std::endl;
-        });
-
-        std::future_status status;
-        do {
-            status = future_receive.wait_for(std::chrono::seconds(Timeout));
-            if (status == std::future_status::deferred)
-            {
-                std::cout << "deferred\n";
-            }
-            else if (status == std::future_status::ready)
-            {
-                std::cout << "ready!\n";
-            }
-            else if (status == std::future_status::timeout)
-            {
-                std::cout << "timeout fired" << std::endl;
-                m_pending = false;
-            }
-        } while (status != std::future_status::ready);
-
+        return set0;
     }
 
-private:
-    std::atomic_bool m_pending;
+    std::string s;
 };
-*/
 
-//template<class T, class Enable = void>
-//template<class T,
-    //typename = std::enable_if_t<std::is_integral<T>::value> >
-//void destroy(T t)
-//{
-    //std::cout << "integral destroy " << t << std::endl;
-//}
-
-//template<class T,
-    //typename std::enable_if<std::is_floating_point<T>::value>::type>
-    ////typename std::enable_if_t<std::is_floating_point<T>::value> >
-//void destroy(T* t) // note, function signature is unmodified
-//{
-    //std::cout << "destroy" << std::endl;
-//}
-
-template<class T>
-void destroy(T t,
-             typename std::enable_if<std::is_integral<T>::value>::type* = 0)
-//template<class T,
-             //typename std::enable_if<std::is_integral<T>::value>::type = 0>
-//void destroy(T t)
-{
-    std::cout << "integral destroy " << t << std::endl;
-}
-template<class T>
-void destroy(T t,
-             typename std::enable_if<std::is_floating_point<T>::value>::type* = 0)
-//template<class T,
-             //typename = std::enable_if<std::is_floating_point<T>::value>::type>
-//void destroy(T t)
-{
-    std::cout << "float destroy " << t << std::endl;
-}
 
 int main ()
 {
-    //AsyncTest async_test;
-    //std::thread t([&async_test]() {
-        //async_test.Run();
-    //});
-    //t.detach();
+    auto c = RDGE::Color::FromRGB("FFFFFF");
+    auto d = RDGE::Color::FromRGB("FFGFFF");
+    //std::cout << "atomic: " << sizeof(std::atomic<int64_t>) << std::endl;
+    //std::cout << "non-atomic: " << sizeof(int64_t) << std::endl;
 
-    float d = 0.f;
-    destroy(d);
+    //auto up = std::make_unique<size_test>();
+    //auto sp = std::make_shared<size_test>();
 
-    int x = 0;
-    destroy(x);
-
-    //RDGE::Graphics::rect_t<unsigned int> urect;
-    //RDGE::Graphics::point_t<unsigned int> upoint(1, 3);
-    //RDGE::Graphics::point_t<float> fpoint(1.0, 3.0);
-
-    //std::cout << urect.is_empty() << std::endl;
-
-
-    //auto p = upoint * 2u;
-    //p *= 3;
-    //std::cout << p << std::endl;
-    //std::cout << fpoint << std::endl;
-    //std::cout << urect << std::endl;
+    //std::cout << sizeof(size_test) << std::endl;
+    //std::cout << sizeof(up) << std::endl;
+    //std::cout << sizeof(sp) << std::endl;
+    //return 0;
 
     try
     {

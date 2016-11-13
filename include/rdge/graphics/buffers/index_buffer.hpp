@@ -41,7 +41,7 @@ public:
     //!          is aquired by the object.
     //! \param [in] data Unique pointer storing the data
     //! \param [in] count Number of elements in the array
-    explicit IndexBuffer (IndexBufferData data, RDGE::UInt32 count);
+    explicit IndexBuffer (IndexBufferData&& data, RDGE::UInt32 count);
 
     //! \brief IndexBuffer dtor
     ~IndexBuffer (void);

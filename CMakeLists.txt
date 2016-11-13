@@ -42,18 +42,16 @@ endif ()
 
 # google test framework
 enable_testing ()
-find_package (GTest REQUIRED)
-include_directories (${GTEST_INCLUDE_DIRS})
-add_executable (rdge_test tests/rdge_math.cpp)
-target_link_libraries (rdge_test ${GTEST_BOTH_LIBRARIES})
-#add_test(RDGE_UtilTest rdge_test)
+include(CTest)
 
+find_package (GTest REQUIRED)
 find_package (SDL2 REQUIRED)
 find_package (SDL2_image REQUIRED)
 find_package (SDL2_ttf REQUIRED)
 find_package (GLEW REQUIRED)
 find_package (OpenGL REQUIRED)
 
+include_directories (${GTEST_INCLUDE_DIRS})
 include_directories (${SDL2_INCLUDE_DIR})
 include_directories (${SDL2_IMAGE_INCLUDE_DIR})
 include_directories (${SDL2_TTF_INCLUDE_DIR})
@@ -106,20 +104,28 @@ add_library (
              src/util/timer.cpp
             )
 
-target_link_libraries (
-                       RDGE
+target_link_libraries (RDGE
                        ${SDL2_LIBRARY}
                        ${SDL2_IMAGE_LIBRARY}
                        ${SDL2_TTF_LIBRARY}
                        ${GLEW_LIBRARIES}
-                       ${OPENGL_LIBRARIES}
-                      )
+                       ${OPENGL_LIBRARIES})
 
 add_subdirectory (tutorials/opengl/ex01_triangle)
 add_subdirectory (examples/glpong)
 add_subdirectory (examples/gui)
-
 #add_subdirectory (examples/pong)
+
+add_executable (rdge_test
+                tests/main.cpp
+                tests/color.cpp
+                tests/math/functions.cpp)
+target_link_libraries (rdge_test
+                       RDGE
+                       ${GTEST_BOTH_LIBRARIES})
+add_test(RDGE_UtilTest rdge_test)
+
+
 
 
 

@@ -21,6 +21,17 @@ namespace {
 RDGE::Math::vec2
 ConvertWindowCoordsToNDC (RDGE::UInt32 windowID, RDGE::Int32 x, RDGE::Int32 y)
 {
+    // TODO:  This should be removed.  Mouse events should return their
+    //        absolute coords, and there should be a helper to convert to NDC
+    //
+    //        Might have to think about this more though.  The window Id is
+    //        provided by the event, which is used to get the width/height to
+    //        perform this calculation.  Maybe include the window Id with the
+    //        wrapped event args and let the consumer figure it out?
+    //
+    //        One last thought:  There is no equivalent of SDL_GetWindowFromID
+    //        in RDGE, although it definitely does have some utility.  Consider
+    //        wrapping this function and returning an RDGE window.
     auto window = SDL_GetWindowFromID(windowID);
     if (UNLIKELY(!window))
     {
@@ -148,6 +159,7 @@ QueueCustomEvent (RDGE::UInt32 type, RDGE::Int32 code, void* data1, void* data2)
     }
 }
 
+// TODO: Add substr before sending to stream to get rid of the enum name
 std::ostream& operator<< (std::ostream& os, EventType type)
 {
     switch (type)
@@ -229,6 +241,7 @@ std::ostream& operator<< (std::ostream& os, EventType type)
     return os;
 }
 
+// TODO: Add substr before sending to stream to get rid of the enum name
 std::ostream& operator<< (std::ostream& os, KeyCode key)
 {
     switch (key)
@@ -317,6 +330,7 @@ std::ostream& operator<< (std::ostream& os, KeyCode key)
     return os;
 }
 
+// TODO: Add substr before sending to stream to get rid of the enum name
 std::ostream& operator<< (std::ostream& os, MouseButton button)
 {
     switch (button)

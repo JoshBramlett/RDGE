@@ -25,39 +25,39 @@ class Color final : public SDL_Color
 public:
     //! \brief Pre-defined Black color
     //! \returns Black color object
-    static constexpr Color Black (void) { return {0, 0, 0, 255}; }
+    static constexpr Color Black (void) { return {0, 0, 0}; }
 
     //! \brief Pre-defined White color
     //! \returns White color object
-    static constexpr Color White (void) { return {255, 255, 255, 255}; }
+    static constexpr Color White (void) { return {255, 255, 255}; }
 
     //! \brief Pre-defined Red color
     //! \returns Red color object
-    static constexpr Color Red (void) { return {255, 0, 0, 255}; }
+    static constexpr Color Red (void) { return {255, 0, 0}; }
 
     //! \brief Pre-defined Green color
     //! \returns Green color object
-    static constexpr Color Green (void) { return {0, 255, 0, 255}; }
+    static constexpr Color Green (void) { return {0, 255, 0}; }
 
     //! \brief Pre-defined Blue color
     //! \returns Blue color object
-    static constexpr Color Blue (void) { return {0, 0, 255, 255}; }
+    static constexpr Color Blue (void) { return {0, 0, 255}; }
 
     //! \brief Pre-defined Yellow color
     //! \returns Yellow color object
-    static constexpr Color Yellow (void) { return {255, 255, 0, 255}; }
+    static constexpr Color Yellow (void) { return {255, 255, 0}; }
 
     //! \brief Pre-defined Cyan color
     //! \returns Cyan color object
-    static constexpr Color Cyan (void) { return {0, 255, 255, 255}; }
+    static constexpr Color Cyan (void) { return {0, 255, 255}; }
 
     //! \brief Pre-defined Magenta color
     //! \returns Magenta color object
-    static constexpr Color Magenta (void) { return {255, 0, 255, 255}; }
+    static constexpr Color Magenta (void) { return {255, 0, 255}; }
 
     //! \brief Color ctor
     //! \details Initialize Color to [0,0,0,0]
-    constexpr Color (void)
+    constexpr Color (void) noexcept
         : SDL_Color{0, 0, 0, 0}
     { }
 
@@ -66,8 +66,8 @@ public:
     //! \param [in] r Red value
     //! \param [in] g Green value
     //! \param [in] b Blue value
-    //! \param [in] a Alpha value
-    constexpr Color (RDGE::UInt8 r, RDGE::UInt8 g, RDGE::UInt8 b, RDGE::UInt8 a)
+    //! \param [in] a Alpha value (defaults to 255)
+    constexpr Color (UInt8 r, UInt8 g, UInt8 b, UInt8 a = 255) noexcept
         : SDL_Color{r, g, b, a}
     { }
 
@@ -92,7 +92,7 @@ public:
     //!          conversion is marked explicit so it must be used with
     //!          direct-initialization or explicit conversions.
     //! \returns Unsigned integer of the color data
-    explicit constexpr operator RDGE::UInt32 (void) const
+    explicit constexpr operator RDGE::UInt32 (void) const noexcept
     {
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
         return r << 24 | g << 16 | b << 8 | a;
@@ -106,21 +106,25 @@ public:
     //!          conversion is marked explicit so it must be used with
     //!          direct-initialization or explicit conversions.
     //! \returns Vector of clamped floats
-    explicit constexpr operator RDGE::Math::vec4 (void) const
+    explicit constexpr operator RDGE::Math::vec4 (void) const noexcept
     {
         return RDGE::Math::vec4(r / 255.f, g / 255.f, b / 255.f, a / 255.f);
     }
 
-    //! \brief Build color from RGB string
+    //! \brief Build color from a case insensitive RGB string
+    //! \details A valid format is a six digit hex string (optionally seven
+    //!          with a preceding '#')  e.g. "FF00CC" or "#ff00cc".
     //! \param [in] color Hex color string
     //! \returns Color structure
-    //! \throws Unable to parse string
+    //! \throws std::runtime_error Unable to parse string
     static Color FromRGB (const std::string& color);
 
-    //! \brief Build color from RGBA string
+    //! \brief Build color from a case insensitive RGBA string
+    //! \details A valid format is an eight digit hex string (optionally nine
+    //!          with a preceding '#')  e.g. "FF00CCAA" or "#ff00ccaa".
     //! \param [in] color Hex color string
     //! \returns Color structure
-    //! \throws Unable to parse string
+    //! \throws std::runtime_error Unable to parse string
     static Color FromRGBA (const std::string& color);
 };
 
@@ -144,8 +148,13 @@ constexpr bool operator!= (const Color& a, const Color& b)
 
 //! \brief Color stream output operator
 //! \param [in] os Output stream
-//! \param [in] point Color to write to the stream
+//! \param [in] color Color to write to the stream
 //! \returns Output stream
 std::ostream& operator<< (std::ostream& os, const Color& color);
 
-} // namespace RDGE
+//! \brief Color conversion to string
+//! \param [in] color Color to convert
+//! \returns std::string representation
+std::string to_string (const Color& color);
+
+} // namespace rdge

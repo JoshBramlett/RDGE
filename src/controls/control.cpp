@@ -79,6 +79,9 @@ Control::OnMouseMotion (const RDGE::MouseMotionEventArgs& args)
     auto top = m_position.y;
     auto bottom = m_size.y;
 
+    // TODO: This only works for AABBs.  Determining if a point exists within a
+    //       box should be moved to the vec4 class, which should support any rectangle,
+    //       not just those parallel with the x and y axis
     bool inside = left < location.x &&
                   right > location.x &&
                   top < location.y &&

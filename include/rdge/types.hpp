@@ -5,14 +5,12 @@
 
 #pragma once
 
-#include <SDL.h>
-#include <SDL_ttf.h>
-
-#include <stdint.h>
-#include <memory>
+#include <cstdint>
 #include <string>
 
+#ifdef RDGE_DEBUG
 #include <iostream>
+#endif
 
 #define RDGE_VERSION "0.0.9"
 
@@ -93,22 +91,17 @@ void Unused (T&&...) { }
 /       OS Abstraction Types
 ***********************************/
 
-typedef signed   char Int8;
-typedef unsigned char UInt8;
+using Int8  = std::int8_t;
+using UInt8 = std::uint8_t;
 
-typedef signed   short Int16;
-typedef unsigned short UInt16;
+using Int16  = std::int16_t;
+using UInt16 = std::uint16_t;
 
-typedef signed   int Int32;
-typedef unsigned int UInt32;
+using Int32  = std::int32_t;
+using UInt32 = std::uint32_t;
 
-#ifdef _MSC_VER
-typedef signed   __int64 Int64;
-typedef unsigned __int64 UInt64;
-#else
-typedef int64_t  Int64;
-typedef uint64_t UInt64;
-#endif
+using Int64  = std::int64_t;
+using UInt64 = std::uint64_t;
 
 #ifdef _WIN32
 const char PathSeparator = '\\';
@@ -117,3 +110,5 @@ const char PathSeparator = '/';
 #endif
 
 } // namespace RDGE
+
+namespace rdge = RDGE;

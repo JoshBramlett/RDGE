@@ -30,6 +30,8 @@
 #include <rdge/config.hpp>
 #include <rdge/util/logger.hpp>
 
+#include <SDL.h>
+
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {
 

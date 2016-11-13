@@ -61,7 +61,7 @@ enum class SystemCursor : RDGE::Int32
 //!          the less objects which can manipulate the cursor the better.
 //!          A common use case would be both the scene and controls within
 //!          that scene will all have their own cursor.
-class Cursor final
+class Cursor
 {
 public:
     //! \brief Cursor ctor

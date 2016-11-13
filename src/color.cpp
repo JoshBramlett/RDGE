@@ -1,28 +1,39 @@
 #include <rdge/color.hpp>
 #include <rdge/internal/exception_macros.hpp>
 
+#include <regex>
 #include <iomanip>
 #include <sstream>
 
-namespace RDGE {
+using namespace rdge;
 
-/* static */ RDGE::Color
+/* static */ Color
 Color::FromRGB (const std::string& color)
 {
-    std::string c = (color.front() == '#')
-                        ? color.substr(1)
-                        : color;
+    // Preceding '#' is supported.  If there, remove it
+    const std::string c = (color.front() == '#')
+                            ? color.substr(1)
+                            : color;
 
-    if (c.size() == 6)
+    // Regex test is required b/c std::stoi has some loose behavior on the
+    // strings it accepts.  With std::stoi you can ensure that all characters
+    // have been parsed by matching the index (second parameter) to the string
+    // length.  However, std::stoi will also accept '+', '-', and "0x" (for hex)
+    // which would leave the incorrect behavior.
+    //
+    // Expression matches 2 character hex values, that appear 3 times
+    // (e.g. FF 00 CC)
+    std::regex exp("^([0-9a-fA-F]{2}){3}$");
+    if (std::regex_match(c, exp))
     {
         try
         {
-            RDGE::UInt32 numeric = std::stoi(c, nullptr, 16);
-            RDGE::UInt8 r = (numeric >> 16) & 0xFF;
-            RDGE::UInt8 g = (numeric >> 8) & 0xFF;
-            RDGE::UInt8 b = numeric & 0xFF;
+            UInt32 numeric = std::stoi(c, nullptr, 16);
+            UInt8 r = (numeric >> 16) & 0xFF;
+            UInt8 g = (numeric >> 8) & 0xFF;
+            UInt8 b = numeric & 0xFF;
 
-            return Color(r, g, b, 0);
+            return Color(r, g, b);
         }
         catch (...) { }
     }
@@ -30,22 +41,27 @@ Color::FromRGB (const std::string& color)
     RDGE_THROW("Color parameter could not be parsed");
 }
 
-/* static */ RDGE::Color
+/* static */ Color
 Color::FromRGBA (const std::string& color)
 {
-    std::string c = (color.front() == '#')
-                        ? color.substr(1)
-                        : color;
+    // Preceding '#' is supported.  If there, remove it
+    const std::string c = (color.front() == '#')
+                            ? color.substr(1)
+                            : color;
 
-    if (c.size() == 8)
+    // Expression matches 2 character hex values, that appear 4 times
+    // (e.g. FF 00 CC AA)
+    // Note:  See FromRGB for comments on why regex is required
+    std::regex exp("^([0-9a-fA-F]{2}){4}$");
+    if (std::regex_match(c, exp))
     {
         try
         {
-            RDGE::UInt64 numeric = std::stoul(c, nullptr, 16);
-            RDGE::UInt8 r = (numeric >> 24) & 0xFF;
-            RDGE::UInt8 g = (numeric >> 16) & 0xFF;
-            RDGE::UInt8 b = (numeric >> 8) & 0xFF;
-            RDGE::UInt8 a = numeric & 0xFF;
+            UInt64 numeric = std::stoul(c, nullptr, 16);
+            UInt8 r = (numeric >> 24) & 0xFF;
+            UInt8 g = (numeric >> 16) & 0xFF;
+            UInt8 b = (numeric >> 8) & 0xFF;
+            UInt8 a = numeric & 0xFF;
 
             return Color(r, g, b, a);
         }
@@ -57,16 +73,20 @@ Color::FromRGBA (const std::string& color)
 
 std::ostream& operator<< (std::ostream& os, const Color& color)
 {
-    // without static cast output will display the char values
-    std::stringstream ss;
-    ss << "#"
-       << std::hex << std::uppercase << std::setfill('0')
-       << std::setw(2) << static_cast<RDGE::UInt32>(color.r)
-       << std::setw(2) << static_cast<RDGE::UInt32>(color.g)
-       << std::setw(2) << static_cast<RDGE::UInt32>(color.b)
-       << std::setw(2) << static_cast<RDGE::UInt32>(color.a);
-
-    return os << ss.str();
+    return os << rdge::to_string(color);
 }
 
-} // namespace RDGE
+std::string
+rdge::to_string (const Color& color)
+{
+    // without static cast output will display the char values
+    std::ostringstream ss;
+    ss << "#"
+       << std::hex << std::uppercase << std::setfill('0')
+       << std::setw(2) << static_cast<int>(color.r)
+       << std::setw(2) << static_cast<int>(color.g)
+       << std::setw(2) << static_cast<int>(color.b)
+       << std::setw(2) << static_cast<int>(color.a);
+
+    return ss.str();
+}

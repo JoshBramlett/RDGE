@@ -6,6 +6,8 @@
 #include <limits>
 #include <algorithm>
 
+using namespace RDGE::Math;
+
 namespace RDGE {
 namespace Graphics {
 
@@ -72,6 +74,12 @@ Group::AddRenderable (std::shared_ptr<Renderable2D> renderable)
     // because only the position is cached, and the transformation has not
     // yet been done.  I guess I could calculate the transformation every
     // handle events call, but that seems crazy inefficient.
+    //
+    // TODO:
+    // It only makes sense that renderables calculate their transformations
+    // themselves rather than it being done by the renderer.  They also should
+    // be cached in order to properly ray cast.  Renderable should have another
+    // method called GetDrawingPosition().
 }
 
 void
@@ -83,7 +91,7 @@ Group::SetTransformation (const RDGE::Math::mat4& transformation)
 void
 Group::RotateOnCenter (float angle)
 {
-    using namespace RDGE::Math;
+    // TODO: Good candidate for a helper method.  No need to make this group specific
 
     m_transformation *= mat4::translation(vec3(m_size.x / 2.0f, m_size.y / 2.0f, 0.0f));
     m_transformation *= mat4::rotation(angle, vec3(0.0f, 0.0f, 1.0f));
@@ -95,7 +103,7 @@ Group::Submit (Renderer2D* renderer) const
 {
     renderer->PushTransformation(m_transformation);
 
-    for (auto child : m_children)
+    for (auto& child : m_children)
     {
         child->Submit(renderer);
     }
@@ -106,7 +114,7 @@ Group::Submit (Renderer2D* renderer) const
 void
 Group::SetOpacity (RDGE::UInt8 opacity)
 {
-    for (auto child : m_children)
+    for (auto& child : m_children)
     {
         child->SetOpacity(opacity);
     }

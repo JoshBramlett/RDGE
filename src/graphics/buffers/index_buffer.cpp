@@ -29,7 +29,7 @@ IndexBuffer::IndexBuffer (RDGE::UInt32* data, RDGE::UInt32 count)
     OpenGL::UnbindBuffers(GL_ELEMENT_ARRAY_BUFFER);
 }
 
-IndexBuffer::IndexBuffer (IndexBufferData data, RDGE::UInt32 count)
+IndexBuffer::IndexBuffer (IndexBufferData&& data, RDGE::UInt32 count)
     : m_count(count)
     , m_data(std::move(data))
 {

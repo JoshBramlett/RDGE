@@ -105,7 +105,7 @@ public:
     //!          matrix and the matrix on top of the stack.
     //! \param [in] matrix Transformation matrix
     //! \param [in] override When true, transformation will not accumulate
-    void PushTransformation (RDGE::Math::mat4 matrix, bool override = false);
+    void PushTransformation (const RDGE::Math::mat4& matrix, bool override = false);
 
     //! \brief Pop the top-most transformation off the stack
     void PopTransformation (void);

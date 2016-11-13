@@ -20,7 +20,7 @@ Layer2D::Layer2D (
 {
     // For initializing our sampler2D array
     std::vector<RDGE::Int32> texture_units(Shader::MaxFragmentShaderUnits());
-    RDGE::Int32 n = {0};
+    RDGE::Int32 n = 0;
     std::generate(texture_units.begin(), texture_units.end(), [&n]{ return n++; });
 
     // Reserve memory for our vector of renderables (does nothing if less than current capacity)

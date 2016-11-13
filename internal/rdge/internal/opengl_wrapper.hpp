@@ -11,11 +11,25 @@
 #include <GL/glew.h>
 #include <cstddef>
 #include <vector>
+#include <type_traits>
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace RDGE {
 namespace Graphics {
 namespace OpenGL {
+
+// Verify OpenGL / RDGE type compatibility
+static_assert(std::is_same<GLubyte,  RDGE::UInt8>::value,  "GLubyte != RDGE::UInt8");
+static_assert(std::is_same<GLbyte,   RDGE::Int8>::value,   "GLbyte != RDGE::Int8");
+static_assert(std::is_same<GLushort, RDGE::UInt16>::value, "GLushort != RDGE::UInt16");
+static_assert(std::is_same<GLshort,  RDGE::Int16>::value,  "GLshort != RDGE::Int16");
+static_assert(std::is_same<GLuint,   RDGE::UInt32>::value, "GLuint != RDGE::UInt32");
+static_assert(std::is_same<GLint,    RDGE::Int32>::value,  "GLint != RDGE::Int32");
+static_assert(std::is_same<GLsizei,  RDGE::Int32>::value,  "GLsizei != RDGE::Int32");
+
+static_assert(std::is_same<GLfloat, float>::value, "GLfloat != float");
+static_assert(GL_FALSE == false, "GL_FALSE != false");
+static_assert(GL_TRUE == true, "GL_TRUE != true");
 
 //! \brief Throw exception if OpenGL error flag is set
 //! \param [in] func OpenGL function name

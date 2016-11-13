@@ -30,6 +30,8 @@ namespace Math {
 //! \brief Represents a 4x4 matrix, ordered by column major
 struct mat4
 {
+    // TODO: Consider using std::variant when it comes out.  Also, if changed update
+    //       the CMakeLists to remove the unnamed union flags
     union
     {
         //! \var elements Data container array

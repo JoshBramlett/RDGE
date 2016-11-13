@@ -42,7 +42,7 @@ Renderer2D::Renderer2D (RDGE::UInt16 max_sprite_count)
 
     if (UNLIKELY(max_sprite_count == 0 || max_sprite_count > MAX_SUPPORTED_SPRITE_COUNT))
     {
-        std::stringstream ss;
+        std::ostringstream ss;
         ss << "Invalid sprite count.  Allowed range is "
            << "[1-" << MAX_SUPPORTED_SPRITE_COUNT << "]"
            << "value=" << max_sprite_count;
@@ -125,6 +125,10 @@ Renderer2D::Renderer2D (RDGE::UInt16 max_sprite_count)
 
     OpenGL::UnbindBuffers(GL_ARRAY_BUFFER);
 
+    // TODO: I like the idea of creating a helper function for this.
+    //       Not sure where to put it, but it could be something like
+    //       Sprite::GetIBO(sprite_count).  Also, this is a good
+    //       candidate for SIMD
     IndexBufferData ibo_data(new RDGE::UInt32[indices_size]);
     RDGE::UInt32 offset = 0;
     for (RDGE::UInt32 i = 0; i < indices_size; i += 6)
@@ -295,6 +299,8 @@ Renderer2D::Submit (const Renderable2D* renderable)
 void
 Renderer2D::EndSubmit (void)
 {
+    // TODO: I don't see why this is necessary.  'PrepSubmit' could be renamed, and this could
+    //       be moved to the flush phase
     OpenGL::ReleaseBufferPointer(GL_ARRAY_BUFFER);
     OpenGL::UnbindBuffers(GL_ARRAY_BUFFER);
 }
@@ -302,7 +308,7 @@ Renderer2D::EndSubmit (void)
 void
 Renderer2D::Flush (void)
 {
-    for (auto texture : m_textures)
+    for (auto& texture : m_textures)
     {
         texture->Activate();
     }
@@ -319,7 +325,7 @@ Renderer2D::Flush (void)
 }
 
 void
-Renderer2D::PushTransformation (RDGE::Math::mat4 matrix, bool override)
+Renderer2D::PushTransformation (const RDGE::Math::mat4& matrix, bool override)
 {
     if (override)
     {

@@ -33,18 +33,14 @@ include_directories (${SDL2_INCLUDE_DIR})
 include_directories (${OPENGL_INCLUDE_DIR})
 include_directories ("${RDGE_SOURCE_DIR}/include")
 
-add_executable (
-                ex01_triangle
-                src/ex01_triangle.cpp
-               )
+add_executable (ex01_triangle
+                src/ex01_triangle.cpp)
 
-target_link_libraries (
-                       ex01_triangle
+target_link_libraries (ex01_triangle
                        ${SDL2_LIBRARY}
                        #${GLEW_LIBRARIES}
                        ${OPENGL_LIBRARIES}
-                       RDGE
-                      )
+                       RDGE)
 
 add_custom_command(TARGET ex01_triangle PRE_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
