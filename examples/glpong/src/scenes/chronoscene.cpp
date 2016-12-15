@@ -45,6 +45,14 @@ ChronoScene::ChronoScene (RDGE::GLWindow* window)
 
     // 4)  Create chrono
 
+    // TODO refactor should be something like
+    // try {
+    //     auto ss = rdge::graphics::SpriteSheet("textures/chrono.json");
+    //     m_chrono = std::make_shared<Sprite>(x, y, w, h, ss, ss["UV_STAND_FRONT_1"]);
+    // catch (const std::runtime_error& e) {
+    //
+    // }
+
     auto uv_config = RDGE::Util::read_text_file("textures/chrono.json");
     m_spriteSheet = std::make_shared<SpriteSheet>(uv_config);
     //std::cout << "use_count=" << m_spriteSheet.use_count() << std::endl;

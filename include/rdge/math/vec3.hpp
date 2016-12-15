@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <rdge/types.hpp>
+#include <rdge/core.hpp>
 #include <rdge/math/functions.hpp>
 
 #include <ostream>
@@ -13,8 +13,8 @@
 #include <iomanip>
 
 //! \namespace RDGE Rainbow Drop Game Engine
-namespace RDGE {
-namespace Math {
+namespace rdge {
+namespace math {
 
 //! \struct vec3
 //! \brief Three dimensional floating point vector
@@ -87,7 +87,7 @@ inline vec3 operator/ (const vec3& lhs, const vec3& rhs)
 
 inline std::ostream& operator<< (std::ostream& os, const vec3& vec)
 {
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << "[" << std::fixed << std::setprecision(5)
        << vec.x << ","
        << vec.y << ","
@@ -96,5 +96,5 @@ inline std::ostream& operator<< (std::ostream& os, const vec3& vec)
     return os << ss.str();
 }
 
-} // namespace Math
-} // namespace RDGE
+} // namespace math
+} // namespace rdge

@@ -1,13 +1,15 @@
 #include <gtest/gtest.h>
 
+#include <rdge/core.hpp>
 #include <rdge/math/functions.hpp>
 #include <cmath>
 
-using namespace RDGE::Math;
+using namespace rdge;
+using namespace rdge::math;
 
 TEST(FloatingPointEqualTest, HandlesIrrational)
 {
-    EXPECT_TRUE(fp_eq(NAN, NAN));
+    EXPECT_TRUE(fp_eq(qnan32, qnan32));
     EXPECT_TRUE(fp_eq(INFINITY, -INFINITY));
 }
 

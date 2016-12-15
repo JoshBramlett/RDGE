@@ -5,14 +5,14 @@
 
 #pragma once
 
-#include <rdge/types.hpp>
+#include <rdge/core.hpp>
 #include <rdge/math/functions.hpp>
 
 #include <ostream>
 
 //! \namespace RDGE Rainbow Drop Game Engine
-namespace RDGE {
-namespace Math {
+namespace rdge {
+namespace math {
 
 //! \struct vec4
 //! \brief Four dimensional vector of floating point values
@@ -163,5 +163,5 @@ constexpr const vec4 operator/ (const vec4& lhs, const vec4& rhs)
 //! \returns Output stream
 std::ostream& operator<< (std::ostream& os, const vec4& vec);
 
-} // namespace Math
-} // namespace RDGE
+} // namespace math
+} // namespace rdge

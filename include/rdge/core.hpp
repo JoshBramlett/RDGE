@@ -1,0 +1,94 @@
+//! \headerfile <rdge/core.hpp>
+//! \author Josh Bramlett
+//! \version 0.0.10
+//! \date 11/17/2016
+
+#pragma once
+
+#include <cstdint>
+#include <limits>
+#include <string>
+
+#ifdef RDGE_DEBUG
+#include <iostream>
+#endif
+
+#define RDGE_VERSION "0.0.10"
+
+/***********************************
+/    Compiler specific defines
+***********************************/
+
+#if defined(COMPILER_GCC) || defined(__clang__)
+    #define NOINLINE __attribute__((noinline))
+#elif defined(COMPILER_MSVC)
+    #define NOINLINE __declspec(noinline)
+#else
+    #define NOINLINE
+#endif
+
+#ifndef restrict
+    #if defined(COMPILER_MSVC)
+        #define restrict __declspec(restrict)
+    #elif defined(COMPILER_GCC) || defined(__clang__)
+        #define restrict __restrict__
+    #endif
+#endif
+
+#ifndef FUNCTION_NAME
+    #ifdef _MSC_VER
+        #define FUNCTION_NAME __FUNCTION__
+    #else
+        #define FUNCTION_NAME __func__
+    #endif
+#endif
+
+#ifndef FILE_NAME
+    #define FILE_NAME (strrchr(__FILE__, '/')                \
+                          ? strrchr(__FILE__, '/') + 1       \
+                          : strrchr(__FILE__, '\\')          \
+                              ? strrchr(__FILE__, '\\') + 1  \
+                              : __FILE__)
+#endif
+
+//! \namespace RDGE Rainbow Drop Game Engine
+namespace rdge {
+
+/***********************************
+/  Ignore unused variable warnings
+***********************************/
+
+// TODO Move to internal
+template<class... T>
+void Unused (T&&...) { }
+
+/***********************************
+/       OS Abstraction Types
+***********************************/
+
+using int8  = std::int8_t;
+using uint8 = std::uint8_t;
+
+using int16  = std::int16_t;
+using uint16 = std::uint16_t;
+
+using int32  = std::int32_t;
+using uint32 = std::uint32_t;
+
+using int64  = std::int64_t;
+using uint64 = std::uint64_t;
+
+// TODO Make sure float is 4 bytes.  Is there a cross platform type?
+using float32 = float;
+using float64 = double;
+
+constexpr float32 qnan32 = std::numeric_limits<float32>::quiet_NaN();
+constexpr float64 qnan64 = std::numeric_limits<float64>::quiet_NaN();
+
+#ifdef _WIN32
+const char PathSeparator = '\\';
+#else
+const char PathSeparator = '/';
+#endif
+
+} // namespace rdge

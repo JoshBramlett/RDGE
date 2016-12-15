@@ -7,8 +7,8 @@
 #include <mutex>
 #include <utility>
 
-namespace RDGE {
-namespace Util {
+namespace rdge {
+namespace util {
 
 template<typename T>
 class ThreadsafeQueue
@@ -98,5 +98,5 @@ private:
     std::condition_variable m_condition;
 };
 
-} // namespace Util
-} // namespace RDGE
+} // namespace util
+} // namespace rdge

@@ -1,17 +1,17 @@
 #include <rdge/gameobjects/scene.hpp>
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/logger_macros.hpp>
+#include <rdge/internal/hints.hpp>
 
 #include <utility>
 #include <ostream>
 #include <sstream>
 
-//! \namespace RDGE Rainbow Drop Game Engine
-namespace RDGE {
-namespace GameObjects {
-
+using namespace rdge;
+using namespace rdge::gameobjects;
+/*
 namespace {
-    std::ostream& operator<< (std::ostream& os, SceneEventType type)
+    std::ostream& operator<< (std::ostream& os, rdge::gameobjects::SceneEventType type)
     {
         switch (type)
         {
@@ -26,7 +26,7 @@ namespace {
         return os;
     }
 } // anonymous namespace
-
+*/
 Scene::Scene (void)
 {
     DLOG("Constructing Scene object");
@@ -55,7 +55,7 @@ Scene::operator= (Scene&& rhs) noexcept
 }
 
 void
-Scene::ProcessEventPhase (RDGE::Event& event)
+Scene::ProcessEventPhase (rdge::Event& event)
 {
     for (auto const& iter : m_entities)
     {
@@ -70,7 +70,7 @@ Scene::ProcessEventPhase (RDGE::Event& event)
 }
 
 void
-Scene::ProcessUpdatePhase (RDGE::UInt32 ticks)
+Scene::ProcessUpdatePhase (rdge::uint32 ticks)
 {
     for (auto const& iter : m_entities)
     {
@@ -90,9 +90,10 @@ Scene::ProcessRenderPhase (void)
 void
 Scene::RegisterEventHandler (SceneEventType type, SceneEventCallback handler)
 {
-    std::stringstream ss;
-    ss << "Registering Scene EventHandler type=" << type;
-    DLOG(ss.str());
+    // does not work since explict namespace removal
+    //std::ostringstream ss;
+    //ss << "Registering Scene EventHandler type=" << type;
+    //DLOG(ss.str());
 
     m_subscriptions[type] = handler;
 }
@@ -110,7 +111,7 @@ Scene::AddEntity (const std::string& id, const std::shared_ptr<IEntity>& entity)
 }
 
 void
-Scene::AddLayer (const std::string& id, const std::shared_ptr<RDGE::Graphics::Layer>& layer)
+Scene::AddLayer (const std::string& id, const std::shared_ptr<rdge::gfx::Layer>& layer)
 {
     DLOG("Adding layer to scene.  id=" + id);
 
@@ -133,7 +134,7 @@ Scene::GetEntity (const std::string& id) const
     return iter->second;
 }
 
-std::shared_ptr<RDGE::Graphics::Layer>
+std::shared_ptr<rdge::gfx::Layer>
 Scene::GetLayer (const std::string& id) const
 {
     auto iter = m_layers.find(id);
@@ -154,6 +155,3 @@ Scene::TriggerEvent (SceneEventType type, const SceneEventArgs& args)
         iter->second(this, args);
     }
 }
-
-} // namespace GameObjects
-} // namespace RDGE

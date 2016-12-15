@@ -2,18 +2,18 @@
 //! \author Josh Bramlett
 //! \version 0.0.1
 //! \date 12/30/2015
-//! \bug
 
 #pragma once
+// TODO remove file?
 
-#include <rdge/types.hpp>
+#include <rdge/core.hpp>
 
 //! \namespace RDGE: Rainbow Drop Game Engine
-namespace RDGE {
-namespace GameObjects {
+namespace rdge {
+namespace gameobjects {
 
 //! \enum Basic direction values
-enum class Direction : RDGE::UInt8
+enum class Direction : rdge::uint8
 {
     None = 0,
     Up,
@@ -22,5 +22,5 @@ enum class Direction : RDGE::UInt8
     Left
 };
 
-} // GameObjects
-} // RDGE
+} // gameobjects
+} // rdge

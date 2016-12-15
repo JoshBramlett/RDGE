@@ -8,36 +8,35 @@ set (RDGE_VERSION_PACKAGE 9)
 set (CMAKE_MODULE_PATH ${RDGE_SOURCE_DIR}/cmake)
 set (LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
-# output
+# Add CMake vars used in child projects
+# Eventually these should be defined in a module lookup, like SDL, GLEW, or OpenGL
+set (RDGE_INCLUDE_DIR ${RDGE_SOURCE_DIR}/include)
+#set (RDGE_LINK_DIR ${RDGE_SOURCE_DIR}/lib)
+
+# Echo build information
 message (STATUS "RDGE v${RDGE_VERSION_MAJOR}.${RDGE_VERSION_MINOR}.${RDGE_VERSION_PACKAGE}")
-message (STATUS "System:      ${CMAKE_SYSTEM_NAME}")
+message (STATUS "System:      ${CMAKE_SYSTEM_NAME} v${CMAKE_SYSTEM_VERSION}")
 message (STATUS "Processor:   ${CMAKE_SYSTEM_PROCESSOR}")
 message (STATUS "Compiler:    ${CMAKE_CXX_COMPILER_ID}")
 message (STATUS "Build type:  ${CMAKE_BUILD_TYPE}")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions("-DRDGE_DEBUG")
-endif()
+endif ()
 
-if (
-    ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" OR
-    ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR
-    ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang"
-   )
+# Set compiler flags
+if (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang") # Matches for "Clang" and "AppleClang"
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -std=c++14")
+
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -std=c++14")
+
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
-    if (CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
+    if (${CMAKE_CXX_FLAGS} MATCHES "/W[0-4]")
         string (REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     else ()
         set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
     endif ()
-endif ()
-
-if (${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
-    # suppress warnings:
-    #     anonymous structs are a GNU extension [-Wgnu-anonymous-struct]
-    #     anonymous types declared in an anonymous union are an extension [-Wnested-anon-types]
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-gnu-anonymous-struct -Wno-nested-anon-types")
 endif ()
 
 # google test framework
@@ -63,42 +62,39 @@ include_directories (include)
 include_directories (internal)
 include_directories (lib)
 
+# Consider adding headers into the project so they are included in IDEs
+# http://stackoverflow.com/questions/13703647/how-to-properly-add-include-directories-with-cmake
 add_library (
              RDGE SHARED
              src/application.cpp
-             src/color.cpp
-             src/config.cpp
-             #src/texture.cpp
-             src/cursor.cpp
-             #src/window.cpp
-             src/glwindow.cpp
              src/assets/font.cpp
+             src/assets/spritesheet.cpp
              src/assets/surface.cpp
-             src/controls/control.cpp
-             src/controls/button.cpp
              src/events/event.cpp
-             src/gameobjects/icollidable.cpp
-             src/gameobjects/ientity.cpp
              src/gameobjects/scene.cpp
              src/gameobjects/game.cpp
+             src/gfx/color.cpp
+             #src/gfx/renderer2d.cpp
              src/graphics/renderer2d.cpp
-             src/graphics/shaders/shader.cpp
-             src/graphics/sprite.cpp
-             src/graphics/text.cpp
-             src/graphics/gltexture.cpp
-             src/graphics/spritesheet.cpp
-             src/graphics/renderable2d.cpp
-             src/graphics/layers/layer.cpp
-             src/graphics/layers/layer2d.cpp
-             src/graphics/layers/group.cpp
-             src/graphics/buffers/vertex_array.cpp
-             src/graphics/buffers/vertex_buffer.cpp
-             src/graphics/buffers/index_buffer.cpp
+             src/gfx/shaders/shader.cpp
+             src/gfx/sprite.cpp
+             src/gfx/text.cpp
+             src/graphics/texture.cpp
+             src/gfx/renderable2d.cpp
+             src/gfx/buffers/vertex_array.cpp
+             src/gfx/buffers/vertex_buffer.cpp
+             src/gfx/buffers/index_buffer.cpp
+             src/gfx/layers/layer.cpp
+             src/gfx/layers/layer2d.cpp
+             src/gfx/layers/group.cpp
+             #src/controls/control.cpp --> src/gfx/ui/widget.cpp
+             #src/controls/button.cpp  --> src/gfx/ui/button.cpp
              src/math/random.cpp
              src/math/mat4.cpp
-             src/math/vec2.cpp
              src/math/vec3.cpp
              src/math/vec4.cpp
+             src/system/cursor.cpp
+             src/system/window.cpp
              src/util/exception.cpp
              src/util/logger.cpp
              src/util/timer.cpp
@@ -112,18 +108,20 @@ target_link_libraries (RDGE
                        ${OPENGL_LIBRARIES})
 
 add_subdirectory (tutorials/opengl/ex01_triangle)
-add_subdirectory (examples/glpong)
-add_subdirectory (examples/gui)
+#add_subdirectory (examples/glpong)
+#add_subdirectory (examples/gui)
+
+# deprecated
 #add_subdirectory (examples/pong)
 
 add_executable (rdge_test
                 tests/main.cpp
-                tests/color.cpp
+                tests/gfx/color.cpp
                 tests/math/functions.cpp)
 target_link_libraries (rdge_test
                        RDGE
                        ${GTEST_BOTH_LIBRARIES})
-add_test(RDGE_UtilTest rdge_test)
+#add_test(RDGE_UtilTest rdge_test)
 
 
 

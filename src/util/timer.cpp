@@ -2,9 +2,7 @@
 
 #include <SDL.h>
 
-//! \namespace RDGE: Rainbow Drop Game Engine
-namespace RDGE {
-namespace Util {
+using namespace rdge::util;
 
 void
 Timer::Start (void)
@@ -48,7 +46,7 @@ Timer::Unpause (void)
     }
 }
 
-RDGE::UInt32
+rdge::uint32
 Timer::Restart (void)
 {
     auto ticks = Ticks();
@@ -56,7 +54,7 @@ Timer::Restart (void)
     return ticks;
 }
 
-RDGE::UInt32
+rdge::uint32
 Timer::Ticks (void) const
 {
     if (m_isRunning)
@@ -72,7 +70,7 @@ Timer::Ticks (void) const
     return 0;
 }
 
-RDGE::UInt32
+rdge::uint32
 Timer::TickDelta (void)
 {
     if (m_isRunning && !m_isPaused)
@@ -86,7 +84,7 @@ Timer::TickDelta (void)
     return 0;
 }
 
-RDGE::UInt32
+rdge::uint32
 Timer::PollTickDelta (void)
 {
     if (m_isRunning && !m_isPaused)
@@ -96,6 +94,3 @@ Timer::PollTickDelta (void)
 
     return 0;
 }
-
-} // namespace Util
-} // namespace RDGE

@@ -1,7 +1,6 @@
 #include <rdge/math/vec3.hpp>
 
-namespace RDGE {
-namespace Math {
+using namespace rdge::math;
 
 vec3::vec3 (void)
     : x(0.0f)
@@ -78,6 +77,3 @@ vec3::operator/= (const vec3& rhs)
 {
     return divide(rhs);
 }
-
-} // namespace Math
-} // namespace RDGE

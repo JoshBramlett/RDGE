@@ -5,11 +5,11 @@
 
 #pragma once
 
-#include <rdge/types.hpp>
+#include <rdge/core.hpp>
 
 //! \namespace RDGE Rainbow Drop Game Engine
-namespace RDGE {
-namespace Math {
+namespace rdge {
+namespace math {
 
 //! \class Random
 //! \brief Simple class used for random number generation.
@@ -48,14 +48,14 @@ public:
     //! \details Each random number has a uniform probability of occurring
     //!          and is inclusive of the range provided
     //! \returns Random integer
-    RDGE::UInt32 Next (void) const;
+    rdge::uint32 Next (void) const;
 
     //! \brief Generates a random integer within [0, max]
     //! \details Each random number has a uniform probability of occurring
     //!          and is inclusive of the range provided
     //! \param [in] max Maximum inclusive value
     //! \returns Random integer
-    RDGE::UInt32 Next (RDGE::UInt32 max) const;
+    rdge::uint32 Next (rdge::uint32 max) const;
 
     //! \brief Generates a random integer within [low, high]
     //! \details Each random number has a uniform probability of occurring
@@ -63,7 +63,7 @@ public:
     //! \param [in] low Low end inclusive range
     //! \param [in] high High end inclusive range
     //! \returns Random integer
-    RDGE::UInt32 Next (RDGE::UInt32 low, RDGE::UInt32 high) const;
+    rdge::uint32 Next (rdge::uint32 low, rdge::uint32 high) const;
 
     //! \brief Generates a random double within [0, 1)
     //! \details Each random number has a uniform probability of occurring
@@ -72,5 +72,5 @@ public:
     double Sample (void) const;
 };
 
-} // namespace Math
-} // namespace RDGE
+} // namespace math
+} // namespace rdge

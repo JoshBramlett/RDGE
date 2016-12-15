@@ -1,27 +1,26 @@
 //! \headerfile <rdge/math/functions.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.2
-//! \date 03/23/2016
+//! \version 0.0.10
+//! \date 11/23/2016
 
 #pragma once
 
 //#define _USE_MATH_DEFINES
 #include <cmath>
 #include <algorithm>
+#include <limits>
 #include <type_traits>
 
 //! \namespace RDGE Rainbow Drop Game Engine
-namespace RDGE {
-namespace Math {
+namespace rdge {
+namespace math {
 
-//! \brief Floating point comparison
-//! \details Uses the machine epsilon scaled to the magnitue of the values
-//!          used.  NaN and Infinity checking is performed.
+//! \brief Floating point equality
+//! \details Uses machine epsilon scaled to the magnitue of the values used.
 //! \param [in] x First value to compare
 //! \param [in] y Second value to compare
 //! \returns True if equal, false if not.
-//! \note Template enabled via return type which ensures only floating point
-//!       types are supported.
+//! \note Matching NaN and Infinity types compare equal
 //! \see http://en.cppreference.com/w/cpp/types/numeric_limits/epsilon
 template <typename T>
 constexpr typename std::enable_if_t<std::is_floating_point<T>::value, bool>
@@ -73,5 +72,5 @@ constexpr float to_degrees (float radians) noexcept
     return static_cast<float>(radians * (180.0f / M_PI));
 }
 
-} // namespace Math
-} // namespace RDGE
+} // namespace math
+} // namespace rdge

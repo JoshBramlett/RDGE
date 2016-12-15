@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <rdge/types.hpp>
-#include <rdge/graphics/point.hpp>
+#include <rdge/core.hpp>
+#include <rdge/gfx/point.hpp>
 #include <rdge/math/vec2.hpp>
 
 #include <SDL.h>
@@ -15,13 +15,13 @@
 #include <ostream>
 
 //! \namespace RDGE Rainbow Drop Game Engine
-namespace RDGE {
+namespace rdge {
 
 //! \enum EventType
 //! \brief Type of event triggered
 //! \details Direct mapping to SDL_EventType, provided for abstraction and
 //!          ease of discovery.
-enum class EventType : RDGE::UInt32
+enum class EventType : rdge::uint32
 {
     // IMPORTANT - If enum is updated, update ostream operator<< as well
 
@@ -195,7 +195,7 @@ enum class EventType : RDGE::UInt32
 //! \brief SDL defined virtual key representation
 //! \details Direct mapping to SDL_Keycode, provided for abstraction and
 //!          ease of discovery.
-enum class KeyCode : RDGE::UInt32
+enum class KeyCode : rdge::uint32
 {
     // IMPORTANT - If enum is updated, update ostream operator<< as well
 
@@ -281,7 +281,7 @@ enum class KeyCode : RDGE::UInt32
 
 //! \enum MouseButton
 //! \brief Represents the different mouse buttons as defined by SDL
-enum class MouseButton : RDGE::UInt8
+enum class MouseButton : rdge::uint8
 {
     // IMPORTANT - If enum is updated, update ostream operator<< as well
 
@@ -405,20 +405,20 @@ public:
 
     //! \brief Cursor location in window coordinates
     //! \returns Point containing the window coordinates
-    constexpr RDGE::Graphics::Point CursorLocation (void) const
+    constexpr rdge::gfx::point CursorLocation (void) const
     {
-        return RDGE::Graphics::Point(x, y);
+        return rdge::gfx::point(x, y);
     }
 
     //! \brief Cursor location in normalized device coordinates
     //! \returns vec2 containing the NDC
     //! \note If the call to get the window (which is used in the calculation)
     //!       fails, the value returned will be {0.0f, 0.0f}
-    RDGE::Math::vec2 CursorLocationInNDC (void) const;
+    rdge::math::vec2 CursorLocationInNDC (void) const;
 
     //! \brief Device identifier of the mouse
     //! \returns Device identifier as stored in SDL
-    constexpr RDGE::UInt32 DeviceID (void) const
+    constexpr rdge::uint32 DeviceID (void) const
     {
         return which;
     }
@@ -433,20 +433,20 @@ public:
     //! \brief Cursor location in homogeneous coordinates
     //! \details Value must be explicitly set before querying.
     //! \returns vec2 object containing the homogeneous coordinates
-    constexpr const RDGE::Math::vec2& HomogeneousCursorLocation (void) const
+    constexpr const rdge::math::vec2& HomogeneousCursorLocation (void) const
     {
         return m_homogeneousCursorLocation;
     }
 
     //! \brief Set the cursor location in homogeneous coordinates
     //! \param [in] cursor 2D vector containing the homogeneous coordinates
-    void SetHomogeneousCursorLocation (const RDGE::Math::vec2& cursor)
+    void SetHomogeneousCursorLocation (const rdge::math::vec2& cursor)
     {
         m_homogeneousCursorLocation = cursor;
     }
 
 private:
-    RDGE::Math::vec2 m_homogeneousCursorLocation;
+    rdge::math::vec2 m_homogeneousCursorLocation;
 };
 
 //! \class MouseMotionEventArgs
@@ -473,32 +473,32 @@ public:
     //! \returns True if pressed, false otherwise
     constexpr bool IsButtonPressed (MouseButton button) const
     {
-        return static_cast<bool>(state & SDL_BUTTON(static_cast<RDGE::UInt32>(button)));
+        return static_cast<bool>(state & SDL_BUTTON(static_cast<rdge::uint32>(button)));
     }
 
     //! \brief Cursor location in window coordinates
     //! \returns Point object containing the window coordinates
-    constexpr RDGE::Graphics::Point CursorLocation (void) const
+    constexpr rdge::gfx::point CursorLocation (void) const
     {
-        return RDGE::Graphics::Point(x, y);
+        return rdge::gfx::point(x, y);
     }
 
     //! \brief Cursor location in normalized device coordinates
     //! \returns vec2 containing the NDC
     //! \note If the call to get the window (which is used in the calculation)
     //!       fails, the value returned will be {0.0f, 0.0f}
-    RDGE::Math::vec2 CursorLocationInNDC (void) const;
+    rdge::math::vec2 CursorLocationInNDC (void) const;
 
     //! \brief Motion relative to the last event call
     //! \returns Point object containing the relative x and y values
-    constexpr RDGE::Graphics::Point RelativeMotion (void) const
+    constexpr rdge::gfx::point RelativeMotion (void) const
     {
-        return RDGE::Graphics::Point(xrel, yrel);
+        return rdge::gfx::point(xrel, yrel);
     }
 
     //! \brief Device identifier of the mouse
     //! \returns Device identifier as stored in SDL
-    constexpr RDGE::UInt32 DeviceID (void) const
+    constexpr rdge::uint32 DeviceID (void) const
     {
         return which;
     }
@@ -513,20 +513,20 @@ public:
     //! \brief Cursor location in homogeneous coordinates
     //! \details Value must be explicitly set before querying.
     //! \returns vec2 object containing the homogeneous coordinates
-    constexpr const RDGE::Math::vec2& HomogeneousCursorLocation (void) const
+    constexpr const rdge::math::vec2& HomogeneousCursorLocation (void) const
     {
         return m_homogeneousCursorLocation;
     }
 
     //! \brief Set the cursor location in homogeneous coordinates
     //! \param [in] cursor 2D vector containing the homogeneous coordinates
-    void SetHomogeneousCursorLocation (const RDGE::Math::vec2& cursor)
+    void SetHomogeneousCursorLocation (const rdge::math::vec2& cursor)
     {
         m_homogeneousCursorLocation = cursor;
     }
 
 private:
-    RDGE::Math::vec2 m_homogeneousCursorLocation;
+    rdge::math::vec2 m_homogeneousCursorLocation;
 };
 
 //! \class MouseWheelEventArgs
@@ -552,7 +552,7 @@ public:
     //! \brief The amount scrolled horizontally
     //! \details Negative to the left, positive to the right
     //! \returns Horizontal scroll amount
-    constexpr RDGE::Int32 HorizontalScroll (void)
+    constexpr rdge::int32 HorizontalScroll (void)
     {
         return x;
     }
@@ -560,7 +560,7 @@ public:
     //! \brief The amount scrolled vertically
     //! \details Negative towards the user, positive away from the user
     //! \returns Vertical scroll amount
-    constexpr RDGE::Int32 VerticalScroll (void)
+    constexpr rdge::int32 VerticalScroll (void)
     {
         return y;
     }
@@ -583,7 +583,7 @@ public:
 
     //! \brief Device identifier of the mouse
     //! \returns Device identifier as stored in SDL
-    constexpr RDGE::UInt32 DeviceID (void) const
+    constexpr rdge::uint32 DeviceID (void) const
     {
         return which;
     }
@@ -611,14 +611,14 @@ public:
     //! \brief Event type triggering the event
     //! \details The type is provided by the user when queueing.
     //! \returns Event type that triggered the event
-    RDGE::UInt32 Type (void) const
+    rdge::uint32 Type (void) const
     {
         return type;
     }
 
     //! \brief The user defined event code
     //! \returns User defined code
-    constexpr RDGE::Int32 Code (void)
+    constexpr rdge::int32 Code (void)
     {
         return code;
     }
@@ -779,7 +779,7 @@ bool SetEventState (EventType type, bool enable);
 //!          the custom event on the queue.
 //! \returns Unique identifier for a custom event
 //! \throws RDGE::Exception Custom event pool is exhausted
-RDGE::UInt32 RegisterCustomEvent (void);
+rdge::uint32 RegisterCustomEvent (void);
 
 //! \brief Add a custom event on the queue
 //! \param [in] type Registered event type id
@@ -788,28 +788,28 @@ RDGE::UInt32 RegisterCustomEvent (void);
 //! \param [in] data2 User defined data pointer
 //! \throws RDGE::SDLException Error occured while pushing event on the queue
 void QueueCustomEvent (
-                       RDGE::UInt32 type,
-                       RDGE::Int32  code,
+                       rdge::uint32 type,
+                       rdge::int32  code,
                        void*        data1 = nullptr,
                        void*        data2 = nullptr
                       );
+
+} // namespace rdge
 
 //! \brief EventType stream output operator
 //! \param [in] os Output stream
 //! \param [in] type EventType enum
 //! \returns Output stream
-std::ostream& operator<< (std::ostream& os, EventType type);
+std::ostream& operator<< (std::ostream& os, rdge::EventType type);
 
 //! \brief KeyCode stream output operator
 //! \param [in] os Output stream
 //! \param [in] key KeyCode enum
 //! \returns Output stream
-std::ostream& operator<< (std::ostream& os, KeyCode key);
+std::ostream& operator<< (std::ostream& os, rdge::KeyCode key);
 
 //! \brief MouseButton stream output operator
 //! \param [in] os Output stream
 //! \param [in] button MouseButton enum
 //! \returns Output stream
-std::ostream& operator<< (std::ostream& os, MouseButton button);
-
-} // namespace RDGE
+std::ostream& operator<< (std::ostream& os, rdge::MouseButton button);

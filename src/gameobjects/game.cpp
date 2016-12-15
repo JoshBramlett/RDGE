@@ -2,12 +2,10 @@
 #include <rdge/util/timer.hpp>
 #include <rdge/internal/exception_macros.hpp>
 
-//! \namespace RDGE Rainbow Drop Game Engine
-namespace RDGE {
-namespace GameObjects {
+using namespace rdge::gameobjects;
 
 namespace {
-    constexpr RDGE::UInt32 MIN_FRAME_RATE = 30;
+    constexpr rdge::uint32 MIN_FRAME_RATE = 30;
 }
 
 Game::Game (const game_settings& settings)
@@ -23,7 +21,7 @@ Game::Game (const game_settings& settings)
         m_settings.target_fps = MIN_FRAME_RATE;
     }
 
-    m_window = std::make_unique<RDGE::GLWindow>(
+    m_window = std::make_unique<rdge::Window>(
                                                 m_settings.window_title,
                                                 m_settings.target_width,
                                                 m_settings.target_height,
@@ -87,16 +85,16 @@ Game::PopScene (void)
 void
 Game::Run (void)
 {
-    RDGE::Event event;
-    RDGE::Util::Timer timer;
+    rdge::Event event;
+    rdge::util::Timer timer;
 
-    RDGE::UInt32 frame_cap = 1000 / m_settings.target_fps;
+    rdge::uint32 frame_cap = 1000 / m_settings.target_fps;
 
     m_running = true;
     timer.Start();
     while (m_running)
     {
-        RDGE::UInt32 frame_start = timer.Ticks();
+        rdge::uint32 frame_start = timer.Ticks();
         m_currentScene = CurrentScene();
         if (!m_currentScene)
         {
@@ -104,12 +102,12 @@ Game::Run (void)
             break;
         }
 
-        while (RDGE::PollEvent(&event))
+        while (rdge::PollEvent(&event))
         {
             ProcessEventPhase(event);
         }
 
-        RDGE::UInt32 ticks = timer.TickDelta();
+        rdge::uint32 ticks = timer.TickDelta();
         ProcessUpdatePhase(ticks);
 
         m_window->Clear();
@@ -120,7 +118,7 @@ Game::Run (void)
         //       or not enabled for that system
         if (m_settings.use_vsync == false)
         {
-            RDGE::UInt32 frame_length = timer.Ticks() - frame_start;
+            rdge::uint32 frame_length = timer.Ticks() - frame_start;
             if (frame_length < frame_cap)
             {
                 SDL_Delay(frame_cap - frame_length);
@@ -130,13 +128,13 @@ Game::Run (void)
 }
 
 void
-Game::ProcessEventPhase (RDGE::Event& event)
+Game::ProcessEventPhase (rdge::Event& event)
 {
     m_currentScene->ProcessEventPhase(event);
 }
 
 void
-Game::ProcessUpdatePhase (RDGE::UInt32 ticks)
+Game::ProcessUpdatePhase (rdge::uint32 ticks)
 {
     m_currentScene->ProcessUpdatePhase(ticks);
 }
@@ -146,6 +144,3 @@ Game::ProcessRenderPhase (void)
 {
     m_currentScene->ProcessRenderPhase();
 }
-
-} // namespace GameObjects
-} // namespace RDGE
