@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include <rdge/types.hpp>
-#include <rdge/config.hpp>
-#include <rdge/glwindow.hpp>
+#include <rdge/core.hpp>
+#include <rdge/assets/game_settings.hpp>
+#include <rdge/system/window.hpp>
 #include <rdge/events/event.hpp>
 #include <rdge/gameobjects/scene.hpp>
 
@@ -18,8 +18,8 @@
 #include <vector>
 
 //! \namespace RDGE Rainbow Drop Game Engine
-namespace RDGE {
-namespace GameObjects {
+namespace rdge {
+namespace gameobjects {
 
 //! \class Game
 //! \brief Base class for a game
@@ -85,14 +85,14 @@ protected:
     //!          classes may override but should still call the base
     //!          method for scene processing.
     //! \param [in] event Polled SDL_Event
-    virtual void ProcessEventPhase (RDGE::Event& event);
+    virtual void ProcessEventPhase (rdge::Event& event);
 
     //! \brief Process update
     //! \details Calls ProcessUpdatePhase for the current scene.  Derived
     //!          classes may override but should still call the base
     //!          method for scene processing.
     //! \param [in] ticks Tick delta from last loop iteration
-    virtual void ProcessUpdatePhase (RDGE::UInt32 ticks);
+    virtual void ProcessUpdatePhase (rdge::uint32 ticks);
 
     //! \brief Process render
     //! \details Calls ProcessRenderPhase for the current scene.
@@ -100,9 +100,9 @@ protected:
     //!          the base method for scene processing.
     virtual void ProcessRenderPhase (void);
 
-    game_settings                   m_settings;
-    std::unique_ptr<RDGE::GLWindow> m_window;
-    bool                            m_running;
+    game_settings                 m_settings;
+    std::unique_ptr<rdge::Window> m_window;
+    bool                          m_running;
 
 private:
     //! \typedef SceneStack
@@ -113,5 +113,5 @@ private:
     std::shared_ptr<Scene> m_currentScene;
 };
 
-} // namespace GameObjects
-} // namespace RDGE
+} // namespace gameobjects
+} // namespace rdge

@@ -10,15 +10,13 @@
 #include <cerrno>
 #include <utility>
 
-namespace RDGE {
-namespace Util {
-
+using namespace rdge::util;
 using namespace std::chrono;
 
 namespace {
     // Select Graphic Rendition Codes (used for console formatting)
     // https://en.wikipedia.org/wiki/ANSI_escape_code
-    enum class SGRCode : RDGE::UInt16
+    enum class SGRCode : rdge::uint16
     {
         Reset             = 0,
         Bold              = 1,
@@ -49,24 +47,24 @@ namespace {
 
     std::ostream& operator<< (std::ostream& os, SGRCode code)
     {
-        return os << "\033[" << static_cast<RDGE::UInt16>(code) << "m";
+        return os << "\033[" << static_cast<rdge::uint16>(code) << "m";
     }
 
     std::ostream& operator<< (std::ostream& os, LogLevel level)
     {
         switch (level)
         {
-        case LogLevel::Debug:
+        case LogLevel::DEBUG:
             return os << "[DEBUG]";
-        case LogLevel::Info:
+        case LogLevel::INFO:
             return os << "[INFO]";
-        case LogLevel::Warning:
+        case LogLevel::WARNING:
             return os << "[WARN]";
-        case LogLevel::Error:
+        case LogLevel::ERROR:
             return os << "[ERROR]";
-        case LogLevel::Fatal:
+        case LogLevel::FATAL:
             return os << "[FATAL]";
-        case LogLevel::Custom:
+        case LogLevel::CUSTOM:
             return os << "[CUSTOM]";
         default:
             break;
@@ -123,15 +121,15 @@ ConsoleLogger::ConsoleLogger (
 
 void
 ConsoleLogger::Write (
-                      RDGE::Util::LogLevel level,
+                      rdge::util::LogLevel level,
                       const std::string&   message,
                       const std::string&   filename,
-                      RDGE::UInt32         line
+                      rdge::uint32         line
                      )
 {
     if (level >= m_minLogLevel)
     {
-        auto out = (level >= LogLevel::Error) ? &std::cerr : &std::cout;
+        auto out = (level >= LogLevel::ERROR) ? &std::cerr : &std::cout;
 
         log_timestamp ts { m_includeMilliseconds, m_useGMT };
         std::stringstream location;
@@ -142,42 +140,42 @@ ConsoleLogger::Write (
 
         switch (level)
         {
-        case LogLevel::Debug:
+        case LogLevel::DEBUG:
             *out << SGRCode::WhiteText << ts << " "
                  << SGRCode::CyanText << level << " "
                  << SGRCode::YellowText << location.str()
                  << SGRCode::Reset << message
                  << std::endl;
             break;
-        case LogLevel::Info:
+        case LogLevel::INFO:
             *out << SGRCode::WhiteText << ts << " "
                  << SGRCode::BlueText << level << " "
                  << SGRCode::YellowText << location.str()
                  << SGRCode::Reset << message
                  << std::endl;
             break;
-        case LogLevel::Warning:
+        case LogLevel::WARNING:
             *out << SGRCode::WhiteText << ts << " "
                  << SGRCode::MagentaText << level << " "
                  << SGRCode::YellowText << location.str()
                  << SGRCode::Reset << message
                  << std::endl;
             break;
-        case LogLevel::Error:
+        case LogLevel::ERROR:
             *out << SGRCode::WhiteText << ts << " "
                  << SGRCode::Bold << SGRCode::RedText << level << SGRCode::BoldOff << " "
                  << SGRCode::YellowText << location.str()
                  << SGRCode::Reset << message
                  << std::endl;
             break;
-        case LogLevel::Fatal:
+        case LogLevel::FATAL:
             *out << SGRCode::WhiteText << ts << " "
                  << SGRCode::Bold << SGRCode::RedBackground << level << SGRCode::Reset << " "
                  << SGRCode::YellowText << location.str()
                  << SGRCode::Reset << message
                  << std::endl;
             break;
-        case LogLevel::Custom:
+        case LogLevel::CUSTOM:
             *out << SGRCode::WhiteText << ts << " "
                  << SGRCode::Bold << SGRCode::GreenBackground << level << SGRCode::Reset << " "
                  << SGRCode::YellowText << location.str()
@@ -318,10 +316,10 @@ FileLogger::SetActive (bool active)
 
 void
 FileLogger::Write (
-                   RDGE::Util::LogLevel level,
+                   rdge::util::LogLevel level,
                    const std::string&   message,
                    const std::string&   filename,
-                   RDGE::UInt32         line
+                   rdge::uint32         line
                   )
 {
     m_queue.Push(std::make_unique<LogInfo>(LogInfo { level, message, filename, line }));
@@ -338,7 +336,7 @@ ScopeLogger::ScopeLogger (
                          )
     : m_identifier(std::move(identifier))
 {
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << "ScopeLogger[" << m_identifier << "] START";
 
     if (!function_name.empty())
@@ -351,7 +349,7 @@ ScopeLogger::ScopeLogger (
         ss << " filename=" << filename;
     }
 
-    RDGE::WriteToConsole(LogLevel::Custom, ss.str());
+    rdge::WriteToConsole(LogLevel::CUSTOM, ss.str());
 
     // for more accurate results, the last thing must be to get the timestamp
     m_startPoint = time_point_cast<Duration>(HiResClock::now());
@@ -365,8 +363,5 @@ ScopeLogger::~ScopeLogger (void)
     std::stringstream ss;
     ss << "ScopeLogger[" << m_identifier << "] STOP delta=" << delta << "μs";
 
-    RDGE::WriteToConsole(LogLevel::Custom, ss.str());
+    rdge::WriteToConsole(LogLevel::CUSTOM, ss.str());
 }
-
-} // namespace Util
-} // namespace RDGE

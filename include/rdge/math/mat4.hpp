@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <rdge/types.hpp>
+#include <rdge/core.hpp>
 #include <rdge/math/functions.hpp>
 #include <rdge/math/vec3.hpp>
 #include <rdge/math/vec4.hpp>
@@ -23,8 +23,8 @@
  */
 
 //! \namespace RDGE Rainbow Drop Game Engine
-namespace RDGE {
-namespace Math {
+namespace rdge {
+namespace math {
 
 //! \struct mat4
 //! \brief Represents a 4x4 matrix, ordered by column major
@@ -98,14 +98,12 @@ struct mat4
     //! \param [in] near Near clipping plane
     //! \param [in] far Far clipping plane
     //! \returns Orthographic matrix
-    static mat4 orthographic (
-                              float left,
+    static mat4 orthographic (float left,
                               float right,
                               float bottom,
                               float top,
                               float near,
-                              float far
-                             );
+                              float far);
 
     //! \brief Create a perspective matrix
     //! \details Transformation between the camaera space and the normal device
@@ -202,5 +200,5 @@ inline vec3 operator* (const mat4& lhs, const vec3& rhs)
 //! \returns Output stream
 std::ostream& operator<< (std::ostream& os, const mat4& matrix);
 
-} // namespace Math
-} // namespace RDGE
+} // namespace math
+} // namespace rdge

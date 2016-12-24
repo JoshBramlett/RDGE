@@ -5,24 +5,23 @@
 
 #pragma once
 
-#include <rdge/types.hpp>
+#include <rdge/core.hpp>
 #include <rdge/graphics/layers/layer.hpp>
-#include <rdge/graphics/shaders/shader.hpp>
+#include <rdge/graphics/shader.hpp>
 #include <rdge/graphics/renderable2d.hpp>
-#include <rdge/graphics/renderer2d.hpp>
+#include <rdge/graphics/sprite_batch.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/math/mat4.hpp>
 
 // TODO: Remove when refactoring
-#include <rdge/graphics/layers/group.hpp>
-#include <rdge/controls/control.hpp>
+//#include <rdge/graphics/layers/group.hpp>
+//#include <rdge/controls/control.hpp>
 
 #include <vector>
 #include <memory>
 
 //! \namespace RDGE Rainbow Drop Game Engine
-namespace RDGE {
-namespace Graphics {
+namespace rdge {
 
 // TODO: A couple issues with this class:
 //         1)  The reason for the GetShader() method was to allow an external
@@ -47,9 +46,9 @@ public:
     //! \param [in] num_renderables Used to pre-allocate the renderables vector
     explicit Layer2D (
                       std::unique_ptr<Shader> shader,
-                      RDGE::Math::mat4        projection_matrix,
+                      rdge::math::mat4        projection_matrix,
                       float                   zindex          = 1.0f,
-                      RDGE::UInt16            num_renderables = 0
+                      rdge::uint16            num_renderables = 0
                      );
 
     //! \brief Layer2D dtor
@@ -76,11 +75,11 @@ public:
     virtual void AddRenderable (std::shared_ptr<Renderable2D> renderable);
 
     // TODO: This is for testing controls, and should be refactored
-    virtual void AddGroup (std::shared_ptr<RDGE::Controls::Control> group);
+    //virtual void AddGroup (std::shared_ptr<RDGE::Controls::Control> group);
 
-    virtual void ProcessEventPhase (RDGE::Event& event) override;
+    virtual void ProcessEventPhase (rdge::Event& event) override;
 
-    virtual void ProcessUpdatePhase (RDGE::UInt32 ticks) override;
+    virtual void ProcessUpdatePhase (rdge::uint32 ticks) override;
 
     //! \brief Render all cached renderables
     //virtual void Render (void);
@@ -90,13 +89,12 @@ private:
     //! \typedef RenderableVector Container type for layer renderables
     using RenderableVector = std::vector<std::shared_ptr<Renderable2D>>;
 
-    Renderer2D       m_renderer;
+    SpriteBatch      m_renderer;
     RenderableVector m_renderables;
     float            m_zIndex;
 
     // TODO: Remove upon refactoring
-    std::shared_ptr<RDGE::Controls::Control> m_control;
+    //std::shared_ptr<RDGE::Controls::Control> m_control;
 };
 
-} // namespace Graphics
-} // namespace RDGE
+} // namespace rdge

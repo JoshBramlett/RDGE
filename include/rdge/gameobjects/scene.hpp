@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <rdge/types.hpp>
+#include <rdge/core.hpp>
 #include <rdge/events/event.hpp>
 #include <rdge/graphics/layers/layer.hpp>
 #include <rdge/gameobjects/ientity.hpp>
@@ -17,12 +17,12 @@
 #include <functional>
 
 //! \namespace RDGE Rainbow Drop Game Engine
-namespace RDGE {
-namespace GameObjects {
+namespace rdge {
+namespace gameobjects {
 
 //! \enum SceneEventType
 //! \brief Supported event types
-enum class SceneEventType : RDGE::UInt8
+enum class SceneEventType : rdge::uint8
 {
     //! \brief Scene is requesting to be terminated
     RequestingPop = 1,
@@ -59,13 +59,13 @@ public:
     //! \details Scenes are responsible for sending notifications to each
     //!          stored entity for them to process input events.
     //! \param [in] event Polled SDL_Event
-    virtual void ProcessEventPhase (RDGE::Event& event);
+    virtual void ProcessEventPhase (rdge::Event& event);
 
     //! \brief Called within the update phase of the game loop
     //! \details Scenes are responsible for sending notifications to each
     //!          stored entity for them to update state logic.
     //! \param [in] ticks Number of ticks that have occurred since the last update
-    virtual void ProcessUpdatePhase (RDGE::UInt32 ticks);
+    virtual void ProcessUpdatePhase (rdge::uint32 ticks);
 
     //! \brief Called within the drawing phase of the game loop
     //! \details Scenes are responsible for sending notifications to each
@@ -149,7 +149,7 @@ protected:
     //! \throws RDGE::Exception Layer could not be added to the collection
     virtual void AddLayer (
                            const std::string& id,
-                           const std::shared_ptr<RDGE::Graphics::Layer>& layer
+                           const std::shared_ptr<rdge::Layer>& layer
                           ) final;
 
     //! \brief Get a game entity from the internal collection
@@ -166,7 +166,7 @@ protected:
     //! \param [in] id Layer unique identifier
     //! \returns Shared pointer of the layer
     //! \throws RDGE::Exception Requested layer is not in the collection
-    virtual std::shared_ptr<RDGE::Graphics::Layer> GetLayer (const std::string& id) const final;
+    virtual std::shared_ptr<rdge::Layer> GetLayer (const std::string& id) const final;
 
     //! \brief Inform the subscriber the scene triggered an event
     //! \details Fires an event to the subscriber based on which event is
@@ -182,7 +182,7 @@ private:
     //! \typedef SubscriberMap Container type for all scene event subscribers
     using SubscriberMap = std::unordered_map<SceneEventType, SceneEventCallback>;
     //! \typedef LayerMap Container type for scene layers
-    using LayerMap = std::unordered_map<std::string, std::shared_ptr<RDGE::Graphics::Layer>>;
+    using LayerMap = std::unordered_map<std::string, std::shared_ptr<rdge::Layer>>;
 
     EntityMap     m_entities;
     SubscriberMap m_subscriptions;

@@ -5,8 +5,7 @@
 
 #include <memory>
 
-namespace RDGE {
-namespace Util {
+using namespace rdge::util;
 
 namespace {
     // returns the text after the last slash, or the full text if
@@ -26,7 +25,7 @@ namespace {
 Exception::Exception (
                       const std::string& message,
                       std::string        file,
-                      RDGE::UInt32       line,
+                      rdge::uint32       line,
                       std::string        fn_name
                      )
     : std::runtime_error(message)
@@ -45,7 +44,7 @@ SDLException::SDLException (
                             const std::string& message,
                             std::string        sdl_fn_name,
                             std::string        file,
-                            RDGE::UInt32       line,
+                            rdge::uint32       line,
                             std::string        parent_fn_name
                            )
     : Exception(message, file, line, parent_fn_name)
@@ -56,9 +55,9 @@ SDLException::SDLException (
 GLException::GLException (
                           const std::string& message,
                           std::string        gl_fn_name,
-                          RDGE::UInt32       gl_error_code,
+                          rdge::uint32       gl_error_code,
                           std::string        file,
-                          RDGE::UInt32       line,
+                          rdge::uint32       line,
                           std::string        parent_fn_name
                          )
     : Exception(message, file, line, parent_fn_name)
@@ -98,6 +97,3 @@ GLException::GLErrorCodeString (void) const
 
     return "Unknown Error (" + std::to_string(m_GLErrorCode) + ")";
 }
-
-} // namespace Util
-} // namespace RDGE

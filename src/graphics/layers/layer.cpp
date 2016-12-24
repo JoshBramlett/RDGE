@@ -1,9 +1,8 @@
 #include <rdge/graphics/layers/layer.hpp>
 
-namespace RDGE {
-namespace Graphics {
+using namespace rdge;
 
-Layer::Layer (std::unique_ptr<Shader> shader, RDGE::Math::mat4 projection_matrix)
+Layer::Layer (std::unique_ptr<Shader> shader, rdge::math::mat4 projection_matrix)
     : m_shader(std::move(shader))
     , m_projectionMatrix(projection_matrix)
 { }
@@ -27,6 +26,3 @@ Layer::operator= (Layer&& rhs) noexcept
 
     return *this;
 }
-
-} // namespace Graphics
-} // namespace RDGE

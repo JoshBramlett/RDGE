@@ -1,7 +1,9 @@
 //! \headerfile <rdge/graphics/rect.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.1
-//! \date 12/23/2015
+//! \version 0.0.10
+//! \date 11/22/2016
+
+// TODO Detemplatize !!!
 
 /* TODO - Methods/functionality missing from libSDL2pp
  *
@@ -20,8 +22,9 @@
 
 #pragma once
 
-#include <rdge/types.hpp>
+#include <rdge/core.hpp>
 #include <rdge/graphics/point.hpp>
+#include <rdge/graphics/size.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/math/vec4.hpp>
 
@@ -29,37 +32,14 @@
 
 #include <ostream>
 
-//! \namespace RDGE Rainbow Drop Game Engine
-namespace RDGE {
-namespace Graphics {
+//! \namespace rdge Rainbow Drop Game Engine
+namespace rdge {
 
-//! \struct rect_t
-//! \brief Base templated type representing a rectangle
-
-
-// 1) Works, but all non-arithmetic types compile, but have no functionality
-//template <typename T, typename Enable = void>
-//class rect_t { };
-
-//template <typename T>
-//class rect_t<T, typename std::enable_if<std::is_arithmetic<T>::value, bool>::type>
-
-
-
-
-// 2)  Doesn't work, not sure why
-//template <typename T>
-//using EnableRectPolicy = typename std::enable_if<std::is_arithmetic<T>::value>::type;
-
-//template <typename T>
-//class rect_t<T, EnableRectPolicy<T>>
-
-
-
-// 3) Works, and all non-arithmetic types fail to compile
 template <typename T, typename = typename std::enable_if_t<std::is_arithmetic<T>::value>>
 struct rect_t;
 
+//! \struct rect_t
+//! \brief Base templated type representing a rectangle
 template <typename T>
 struct rect_t<T>
 {
@@ -91,7 +71,7 @@ struct rect_t<T>
     //! \brief rect_t ctor
     //! \details Initialize rect from vec4
     //! \param [in] vec vec4 structure
-    explicit constexpr rect_t (const RDGE::Math::vec4& vec)
+    explicit constexpr rect_t (const rdge::math::vec4& vec)
         : x(vec.x)
         , y(vec.y)
         , w(vec.z)
@@ -102,18 +82,18 @@ struct rect_t<T>
     //! \details Initialize rect from point and size
     //! \param [in] point Point structure
     //! \param [in] size Size structure
-    explicit constexpr rect_t (const Point& point, const Size& size)
+    explicit constexpr rect_t (const point& point, const size& size)
         : x(point.x)
         , y(point.y)
-        , w(static_cast<RDGE::Int32>(size.w))
-        , h(static_cast<RDGE::Int32>(size.h))
+        , w(static_cast<rdge::int32>(size.w))
+        , h(static_cast<rdge::int32>(size.h))
     { }
 
     //! \brief rect_t ctor
     //! \details Initialize rect from two vec2s representing point and size
     //! \param [in] point vec2 structure representing the location
     //! \param [in] size vec2 structure representing the size
-    explicit constexpr rect_t (const RDGE::Math::vec2& point, const RDGE::Math::vec2& size)
+    explicit constexpr rect_t (const rdge::math::vec2& point, const rdge::math::vec2& size)
         : x(point.x)
         , y(point.y)
         , w(size.x)
@@ -139,9 +119,9 @@ struct rect_t<T>
     //! \brief User-defined conversion to vec4
     //! \details Casts values to float during conversion.
     //! \returns vec4 containing the rectangle data
-    explicit constexpr operator RDGE::Math::vec4 (void) const
+    explicit constexpr operator rdge::math::vec4 (void) const
     {
-        return RDGE::Math::vec4(
+        return rdge::math::vec4(
                                 static_cast<float>(x),
                                 static_cast<float>(y),
                                 static_cast<float>(w),
@@ -156,10 +136,10 @@ struct rect_t<T>
     explicit constexpr operator SDL_Rect (void) const
     {
         return SDL_Rect {
-                         static_cast<RDGE::Int32>(x),
-                         static_cast<RDGE::Int32>(y),
-                         static_cast<RDGE::Int32>(w),
-                         static_cast<RDGE::Int32>(h)
+                         static_cast<rdge::int32>(x),
+                         static_cast<rdge::int32>(y),
+                         static_cast<rdge::int32>(w),
+                         static_cast<rdge::int32>(h)
                         };
     }
 
@@ -191,46 +171,46 @@ struct rect_t<T>
 
     //! \brief Get the top left corner of the rectangle
     //! \returns point_t structure
-    constexpr point_t<T> top_left (void) const
-    {
-        return point_t<T>(x, y);
-    }
+    //constexpr point_t<T> top_left (void) const
+    //{
+        //return point_t<T>(x, y);
+    //}
 
     //! \brief Get the top right corner of the rectangle
     //! \returns point_t structure
-    constexpr point_t<T> top_right (void) const
-    {
-        return point_t<T>(right(), y);
-    }
+    //constexpr point_t<T> top_right (void) const
+    //{
+        //return point_t<T>(right(), y);
+    //}
 
     //! \brief Get the bottom left corner of the rectangle
     //! \returns point_t structure
-    constexpr point_t<T> bottom_left (void) const
-    {
-        return point_t<T>(x, bottom());
-    }
+    //constexpr point_t<T> bottom_left (void) const
+    //{
+        //return point_t<T>(x, bottom());
+    //}
 
     //! \brief Get the bottom right corner of the rectangle
     //! \returns point_t structure
-    constexpr point_t<T> bottom_right (void) const
-    {
-        return point_t<T>(right(), bottom());
-    }
+    //constexpr point_t<T> bottom_right (void) const
+    //{
+        //return point_t<T>(right(), bottom());
+    //}
 
     //! \brief Get the calculated center of the rectangle
     //! \returns point_t structure
-    constexpr point_t<T> centroid (void) const
-    {
-        return point_t<T>(x + (w / 2), y + (h / 2));
-    }
+    //constexpr point_t<T> centroid (void) const
+    //{
+        //return point_t<T>(x + (w / 2), y + (h / 2));
+    //}
 
     //! \brief Check if a point resides within the Rect
     //! \param [in] point Point structure
     //! \returns True if point is within the rect, false otherwise
-    constexpr bool contains (const point_t<T>& point) const
+    constexpr bool contains (const point& p) const
     {
-        return point.x >= x && point.y >= y &&
-               point.x <= right() && point.y <= bottom();
+        return p.x >= x && p.y >= y &&
+               p.x <= right() && p.y <= bottom();
     }
 
     //! \brief Check if a point resides within the Rect
@@ -325,7 +305,7 @@ inline std::ostream& operator<< (std::ostream& os, const rect_t<T>& rect)
 }
 
 //! \typedef Rect Signed integer rect_t structure
-using Rect = rect_t<RDGE::Int32>;
+using rect = rect_t<rdge::int32>;
 //! \typedef RectF Float rect_t structure
 using RectF = rect_t<float>;
 
@@ -333,5 +313,4 @@ using RectF = rect_t<float>;
 
 
 
-} // namespace Graphics
-} // namespace RDGE
+} // namespace rdge

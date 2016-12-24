@@ -2,18 +2,17 @@
 //! \author Josh Bramlett
 //! \version 0.0.1
 //! \date 10/25/2015
-//! \bug
 
 #pragma once
 
-#include <rdge/types.hpp>
+#include <rdge/core.hpp>
 
 #include <string>
 #include <exception>
 
 //! \namespace RDGE Rainbow Drop Game Engine
-namespace RDGE {
-namespace Util {
+namespace rdge {
+namespace util {
 
 //! \class Exception
 //! \brief Generic runtime error exception
@@ -30,7 +29,7 @@ public:
     explicit Exception (
                         const std::string& message,
                         std::string        file     = "",
-                        RDGE::UInt32       line     = 0,
+                        rdge::uint32       line     = 0,
                         std::string        fn_name  = ""
                        );
 
@@ -62,7 +61,7 @@ public:
 
     //! \brief Line number where the exception was thrown
     //! \return Line number
-    virtual RDGE::UInt32 Line (void) const final
+    virtual rdge::uint32 Line (void) const final
     {
         return m_line;
     }
@@ -81,7 +80,7 @@ public:
 
 private:
     std::string  m_file;
-    RDGE::UInt32 m_line;
+    rdge::uint32 m_line;
     std::string  m_function;
 };
 
@@ -108,7 +107,7 @@ public:
                            const std::string& message,
                            std::string        sdl_fn_name,
                            std::string        file           = "",
-                           RDGE::UInt32       line           = 0,
+                           rdge::uint32       line           = 0,
                            std::string        parent_fn_name = ""
                           );
 
@@ -152,9 +151,9 @@ public:
     explicit GLException (
                           const std::string& message,
                           std::string        gl_fn_name,
-                          RDGE::UInt32       gl_error_code  = 0,
+                          rdge::uint32       gl_error_code  = 0,
                           std::string        file           = "",
-                          RDGE::UInt32       line           = 0,
+                          rdge::uint32       line           = 0,
                           std::string        parent_fn_name = ""
                          );
 
@@ -170,7 +169,7 @@ public:
 
     //! \brief Get the OpenGL error code
     //! \return OpenGL error code
-    RDGE::UInt32 GLErrorCode (void) const
+    rdge::uint32 GLErrorCode (void) const
     {
         return m_GLErrorCode;
     }
@@ -181,14 +180,14 @@ public:
 
 private:
     std::string  m_GLFunction;
-    RDGE::UInt32 m_GLErrorCode;
+    rdge::uint32 m_GLErrorCode;
 };
 
-} // namespace Util
+} // namespace util
 
-// Promote to RDGE namespace
-using Util::Exception;
-using Util::SDLException;
-using Util::GLException;
+// Promote to rdge namespace
+using util::Exception;
+using util::SDLException;
+using util::GLException;
 
-} // namespace RDGE
+} // namespace rdge

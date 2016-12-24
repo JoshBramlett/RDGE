@@ -1,13 +1,14 @@
 #include <rdge/events/event.hpp>
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/logger_macros.hpp>
+#include <rdge/internal/hints.hpp>
 
 #include <vector>
 #include <sstream>
 #include <iostream>
 #include <algorithm>
 
-namespace RDGE {
+using namespace rdge;
 
 namespace {
 
@@ -18,8 +19,8 @@ namespace {
  *   2) MultiGesture event is delivered in addition to mouse wheel
  */
 
-RDGE::Math::vec2
-ConvertWindowCoordsToNDC (RDGE::UInt32 windowID, RDGE::Int32 x, RDGE::Int32 y)
+rdge::math::vec2
+ConvertWindowCoordsToNDC (rdge::uint32 windowID, rdge::int32 x, rdge::int32 y)
 {
     // TODO:  This should be removed.  Mouse events should return their
     //        absolute coords, and there should be a helper to convert to NDC
@@ -35,13 +36,13 @@ ConvertWindowCoordsToNDC (RDGE::UInt32 windowID, RDGE::Int32 x, RDGE::Int32 y)
     auto window = SDL_GetWindowFromID(windowID);
     if (UNLIKELY(!window))
     {
-        return {0.0f, 0.0f};
+        return rdge::math::vec2();
     }
 
-    RDGE::Int32 width, height;
+    rdge::int32 width, height;
     SDL_GetWindowSize(window, &width, &height);
 
-    return RDGE::Math::vec2((2.0f * x) / width - 1.0f, 1.0f - (2.0f * y) / height);
+    return rdge::math::vec2((2.0f * x) / width - 1.0f, 1.0f - (2.0f * y) / height);
 }
 
 #ifdef RDGE_DEBUG
@@ -60,20 +61,20 @@ ConvertWindowCoordsToNDC (RDGE::UInt32 windowID, RDGE::Int32 x, RDGE::Int32 y)
 
 }
 
-RDGE::Math::vec2
+rdge::math::vec2
 MouseButtonEventArgs::CursorLocationInNDC (void) const
 {
     return ConvertWindowCoordsToNDC(windowID, x, y);
 }
 
-RDGE::Math::vec2
+rdge::math::vec2
 MouseMotionEventArgs::CursorLocationInNDC (void) const
 {
     return ConvertWindowCoordsToNDC(windowID, x, y);
 }
 
 bool
-PollEvent (Event* event)
+rdge::PollEvent (Event* event)
 {
     while (SDL_PollEvent(&event->sdl_event))
     {
@@ -92,7 +93,7 @@ PollEvent (Event* event)
                                );
         if (result == s_supportedEventTypes.end())
         {
-            std::stringstream ss;
+            std::ostringstream ss;
             ss << "Unsupported EventType! type="
                << static_cast<EventType>(event->sdl_event.type);
 
@@ -106,17 +107,17 @@ PollEvent (Event* event)
 }
 
 bool
-IsEventEnabled (EventType type)
+rdge::IsEventEnabled (EventType type)
 {
-    return SDL_EventState(static_cast<UInt32>(type), SDL_QUERY);
+    return SDL_EventState(static_cast<uint32>(type), SDL_QUERY);
 }
 
 bool
-SetEventState (EventType type, bool enabled)
+rdge::SetEventState (EventType type, bool enabled)
 {
-    bool result = SDL_EventState(static_cast<UInt32>(type), enabled ? SDL_ENABLE : SDL_DISABLE);
+    bool result = SDL_EventState(static_cast<uint32>(type), enabled ? SDL_ENABLE : SDL_DISABLE);
 
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << "Setting Event State"
        << " type=" << type
        << " previous=" << result
@@ -127,11 +128,11 @@ SetEventState (EventType type, bool enabled)
     return result;
 }
 
-RDGE::UInt32
-RegisterCustomEvent (void)
+rdge::uint32
+rdge::RegisterCustomEvent (void)
 {
     auto result = SDL_RegisterEvents(1);
-    if (result == ((Uint32)-1))
+    if (result == ((uint32)-1)) // TODO <-- wtf?
     {
         RDGE_THROW("Cannot create custom event.  Pool is exhausted.");
     }
@@ -140,7 +141,7 @@ RegisterCustomEvent (void)
 }
 
 void
-QueueCustomEvent (RDGE::UInt32 type, RDGE::Int32 code, void* data1, void* data2)
+rdge::QueueCustomEvent (rdge::uint32 type, rdge::int32 code, void* data1, void* data2)
 {
     // TODO: If/when event filtering is implemented, The result of SDL_PushEvent
     //       will be zero if the event is to be filtered.  We could change the
@@ -160,7 +161,7 @@ QueueCustomEvent (RDGE::UInt32 type, RDGE::Int32 code, void* data1, void* data2)
 }
 
 // TODO: Add substr before sending to stream to get rid of the enum name
-std::ostream& operator<< (std::ostream& os, EventType type)
+std::ostream& operator<< (std::ostream& os, rdge::EventType type)
 {
     switch (type)
     {
@@ -223,8 +224,8 @@ std::ostream& operator<< (std::ostream& os, EventType type)
 #undef CASE
         default:
         {
-            auto value = static_cast<RDGE::UInt32>(type);
-            std::stringstream ss;
+            auto value = static_cast<rdge::uint32>(type);
+            std::ostringstream ss;
             ss << std::hex << std::uppercase << value;
 
             if (value >= SDL_USEREVENT && value < SDL_LASTEVENT)
@@ -242,7 +243,7 @@ std::ostream& operator<< (std::ostream& os, EventType type)
 }
 
 // TODO: Add substr before sending to stream to get rid of the enum name
-std::ostream& operator<< (std::ostream& os, KeyCode key)
+std::ostream& operator<< (std::ostream& os, rdge::KeyCode key)
 {
     switch (key)
     {
@@ -324,14 +325,14 @@ std::ostream& operator<< (std::ostream& os, KeyCode key)
         CASE(KeyCode::RightGUI)
 #undef CASE
         default:
-            os << "NOT_FOUND[" << static_cast<RDGE::UInt32>(key) << "]";
+            os << "NOT_FOUND[" << static_cast<rdge::uint32>(key) << "]";
     }
 
     return os;
 }
 
 // TODO: Add substr before sending to stream to get rid of the enum name
-std::ostream& operator<< (std::ostream& os, MouseButton button)
+std::ostream& operator<< (std::ostream& os, rdge::MouseButton button)
 {
     switch (button)
     {
@@ -344,10 +345,8 @@ std::ostream& operator<< (std::ostream& os, MouseButton button)
         CASE(MouseButton::X2)
 #undef CASE
         default:
-            os << "NOT_FOUND[" << static_cast<RDGE::UInt32>(button) << "]";
+            os << "NOT_FOUND[" << static_cast<rdge::uint32>(button) << "]";
     }
 
     return os;
 }
-
-} // namespace RDGE

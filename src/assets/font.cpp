@@ -1,23 +1,22 @@
 #include <rdge/assets/font.hpp>
 #include <rdge/internal/exception_macros.hpp>
+#include <rdge/internal/hints.hpp>
 
-namespace RDGE {
-namespace Assets {
+namespace rdge {
 
 Font::Font (TTF_Font* font)
     : m_font(font)
 { }
 
-Font::Font (
-            const std::string& file,
-            RDGE::UInt32       point_size,
-            RDGE::Int64        index
-           )
-    : m_font(nullptr)
+Font::Font (const std::string& file, uint32 point_size, int64 index)
 {
     if (TTF_WasInit() == 0)
     {
-        RDGE_THROW("SDL_ttf has not yet been initialized");
+        // perform lazy loading if not already initialized through the application
+        if (UNLIKELY(TTF_Init() != 0))
+        {
+            SDL_THROW("SDL_ttf failed to initialize", "TTF_Init");
+        }
     }
 
     m_font = TTF_OpenFontIndex(file.c_str(), point_size, index);
@@ -27,18 +26,18 @@ Font::Font (
     }
 }
 
-Font::~Font (void)
+Font::~Font (void) noexcept
 {
-    if (m_font != nullptr)
+    if (m_font)
     {
         TTF_CloseFont(m_font);
+        m_font = nullptr;
     }
 }
 
 Font::Font (Font&& rhs) noexcept
-    : m_font(rhs.m_font)
 {
-    rhs.m_font = nullptr;
+    std::swap(m_font, rhs.m_font);
 }
 
 Font&
@@ -46,57 +45,46 @@ Font::operator= (Font&& rhs) noexcept
 {
     if (this != &rhs)
     {
-        if (m_font != nullptr)
-        {
-            TTF_CloseFont(m_font);
-        }
-
-        m_font = rhs.m_font;
-        rhs.m_font = nullptr;
+        std::swap(m_font, rhs.m_font);
     }
 
     return *this;
 }
 
-RDGE::UInt32
-Font::Styles (void) const
+Font::Style
+Font::GetStyles (void) const
 {
     if (UNLIKELY(!m_font))
     {
         RDGE_THROW("Trying to get the style of a null font object");
     }
 
-    return TTF_GetFontStyle(m_font);
+    return static_cast<Font::Style>(TTF_GetFontStyle(m_font));
 }
 
 bool
-Font::HasStyle (enum Style style) const
+Font::HasStyle (Font::Style flags) const
 {
-    // Styles() will perform the null check for us
-    RDGE::UInt32 styles = Styles();
-
-    return styles & static_cast<RDGE::UInt32>(style);
+    auto styles = GetStyles();
+    return static_cast<bool>(styles & flags);
 }
 
 void
-Font::AddStyle (enum Style style)
+Font::AddStyle (Font::Style flags)
 {
-    // Styles() will perform the null check for us
-    RDGE::UInt32 styles = Styles();
-    styles |= static_cast<RDGE::UInt32>(style);
-
-    SetStyles(styles);
+    auto styles = GetStyles();
+    SetStyle(styles | flags);
 }
 
 void
-Font::SetStyles (RDGE::UInt32 style_flags)
+Font::SetStyle (Font::Style flags)
 {
     if (UNLIKELY(!m_font))
     {
         RDGE_THROW("Trying to set the style of a null font object");
     }
 
-    TTF_SetFontStyle(m_font, style_flags);
+    TTF_SetFontStyle(m_font, static_cast<uint32>(flags));
 }
 
 bool
@@ -110,7 +98,7 @@ Font::IsMonospaced (void) const
     return TTF_FontFaceIsFixedWidth(m_font);
 }
 
-RDGE::Graphics::Size
+rdge::size
 Font::SampleSizeUTF8 (const std::string& text)
 {
     if (UNLIKELY(!m_font))
@@ -118,22 +106,20 @@ Font::SampleSizeUTF8 (const std::string& text)
         RDGE_THROW("Trying to sample the size using a null font object");
     }
 
-    RDGE::Int32 w, h;
+    int32 w, h;
     if (UNLIKELY(TTF_SizeUTF8(m_font, text.c_str(), &w, &h) != 0))
     {
         SDL_THROW("Failed to sample surface size", "TTF_SizeUTF8");
     }
 
-    return RDGE::Graphics::Size(w, h);
+    return rdge::size(w, h);
 }
 
 std::shared_ptr<Surface>
-Font::RenderUTF8 (
-                  const std::string& text,
-                  const RDGE::Color& color,
-                  RenderMode         mode,
-                  const RDGE::Color& background
-                 )
+Font::RenderUTF8 (const std::string& text,
+                  const rdge::color& color,
+                  Font::RenderMode   mode,
+                  const rdge::color& background)
 {
     if (UNLIKELY(!m_font))
     {
@@ -141,41 +127,27 @@ Font::RenderUTF8 (
     }
 
     SDL_Surface* surface = nullptr;
-    if (mode == RenderMode::Solid)
+    switch (mode)
     {
+    case RenderMode::SOLID:
         surface = TTF_RenderUTF8_Solid(m_font, text.c_str(), color);
-    }
-    else if (mode == RenderMode::Shaded)
-    {
+        break;
+    case RenderMode::SHADED:
         surface = TTF_RenderUTF8_Shaded(m_font, text.c_str(), color, background);
-    }
-    else if (mode == RenderMode::Blended)
-    {
+        break;
+    case RenderMode::BLENDED:
         surface = TTF_RenderUTF8_Blended(m_font, text.c_str(), color);
+        break;
+    default:
+        RDGE_THROW("Invalid RenderMode. mode=" + std::to_string(static_cast<int>(mode)));
     }
 
     if (UNLIKELY(!surface))
     {
-        // When other encodings are supported this should be re-implemented
-        std::string fn_name = "TTF_RenderUTF8_";
-        switch (mode)
-        {
-        case RenderMode::Solid:
-            fn_name += "Solid";
-            break;
-        case RenderMode::Shaded:
-            fn_name += "Shaded";
-            break;
-        case RenderMode::Blended:
-            fn_name += "Blended";
-            break;
-        }
-
-        SDL_THROW("Render text failed", fn_name);
+        SDL_THROW("Render text failed", "TTF_RenderUTF8_XXX");
     }
 
     return std::make_shared<Surface>(surface);
 }
 
-} // namespace Assets
-} // namespace RDGE
+} // namespace rdge

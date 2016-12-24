@@ -1,13 +1,13 @@
 #include <rdge/math/mat4.hpp>
 #include <rdge/math/functions.hpp>
 #include <rdge/internal/logger_macros.hpp>
+#include <rdge/internal/hints.hpp>
 
 #include <cmath>
 #include <sstream>
 #include <iomanip>
 
-namespace RDGE {
-namespace Math {
+using namespace rdge::math;
 
 mat4::mat4 (void)
 {
@@ -300,10 +300,10 @@ mat4::scale (const vec3& scale)
 
 std::ostream& operator<< (std::ostream& os, const mat4& matrix)
 {
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << "[" << std::fixed << std::setprecision(5);
 
-    for (RDGE::UInt32 i = 0; i < 4; ++i)
+    for (int i = 0; i < 4; ++i)
     {
         ss << "[" << matrix.columns[i].x << ","
            << matrix.columns[i].y << ","
@@ -314,6 +314,3 @@ std::ostream& operator<< (std::ostream& os, const mat4& matrix)
 
     return os << ss.str();
 }
-
-} // namespace Math
-} // namespace RDGE

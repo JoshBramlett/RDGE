@@ -3,8 +3,7 @@
 #include <sstream>
 #include <iomanip>
 
-namespace RDGE {
-namespace Math {
+using namespace rdge::math;
 
 vec4&
 vec4::add (const vec4& value)
@@ -85,6 +84,3 @@ std::ostream& operator<< (std::ostream& os, const vec4& vec)
 
     return os << ss.str();
 }
-
-} // namespace Math
-} // namespace RDGE

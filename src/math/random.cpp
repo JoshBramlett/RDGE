@@ -4,8 +4,8 @@
 #include <random>
 
 //! \namespace RDGE Rainbow Drop Game Engine
-namespace RDGE {
-namespace Math {
+namespace rdge {
+namespace math {
 
 namespace {
     std::random_device s_rd;
@@ -16,22 +16,22 @@ Random::Random (void) { }
 
 Random::~Random (void) { }
 
-RDGE::UInt32
+rdge::uint32
 Random::Next (void) const
 {
-    return Next(0, std::numeric_limits<RDGE::UInt32>::max());
+    return Next(0, std::numeric_limits<rdge::uint32>::max());
 }
 
-RDGE::UInt32
-Random::Next (RDGE::UInt32 max) const
+rdge::uint32
+Random::Next (rdge::uint32 max) const
 {
     return Next(0, max);
 }
 
-RDGE::UInt32
-Random::Next (RDGE::UInt32 low, RDGE::UInt32 high) const
+rdge::uint32
+Random::Next (rdge::uint32 low, rdge::uint32 high) const
 {
-    std::uniform_int_distribution<RDGE::UInt32> dist(low, high);
+    std::uniform_int_distribution<rdge::uint32> dist(low, high);
     return dist(s_mt);
 }
 
@@ -42,5 +42,5 @@ Random::Sample (void) const
     return dist(s_mt);
 }
 
-} // namespace Math
-} // namespace RDGE
+} // namespace math
+} // namespace rdge

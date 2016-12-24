@@ -5,17 +5,16 @@
 
 #pragma once
 
-#include <rdge/types.hpp>
+#include <rdge/core.hpp>
 #include <rdge/math/mat4.hpp>
 #include <rdge/graphics/renderable2d.hpp>
-#include <rdge/graphics/renderer2d.hpp>
+#include <rdge/graphics/sprite_batch.hpp>
 
 #include <memory>
 #include <vector>
 
 //! \namespace RDGE Rainbow Drop Game Engine
-namespace RDGE {
-namespace Graphics {
+namespace rdge {
 
 //! \class Group
 //! \brief Represents a group of renderable objects
@@ -29,7 +28,7 @@ public:
     //! \details The transformation is defaulted to an indentity matrix to
     //!          allow for logical ordering without processing a transformation.
     //! \param [in] transformation Transformation to apply
-    explicit Group (const RDGE::Math::mat4& transformation = RDGE::Math::mat4::identity());
+    explicit Group (const rdge::math::mat4& transformation = rdge::math::mat4::identity());
 
     //! \brief Group dtor
     virtual ~Group (void) { }
@@ -56,7 +55,7 @@ public:
 
     //! \brief Set the relative transformation
     //! \param [in] transformation Transformation matrix
-    void SetTransformation (const RDGE::Math::mat4& transformation);
+    void SetTransformation (const rdge::math::mat4& transformation);
 
     //! \brief Rotates the group around the centroid
     //! \details Modifies the underlying transformation matrix
@@ -65,11 +64,11 @@ public:
 
     //! \brief Submit all children to the renderer
     //! \param [in] renderer Renderer children will be drawn to
-    virtual void Submit (Renderer2D* renderer) const override;
+    virtual void Submit (SpriteBatch* renderer) const override;
 
     //! \brief Set opacity for all children
     //! \param [in] opacity Alpha channel value [0-255]
-    virtual void SetOpacity (RDGE::UInt8 opacity) override;
+    virtual void SetOpacity (rdge::uint8 opacity) override;
 
     //! \brief Set opacity for all children
     //! \param [in] opacity Alpha channel value [0.0f-1.0f]
@@ -81,15 +80,14 @@ public:
 
     // TODO: This is a hack to get textures to work with groups.  This needs
     //       to be refactored to a more elegant solution.
-    void RegisterTextures (Renderer2D* renderer) const;
+    void RegisterTextures (SpriteBatch* renderer) const;
 
 private:
     //! \typedef RenderableVector Container type for group child renderables
     using RenderableVector = std::vector<std::shared_ptr<Renderable2D>>;
 
     RenderableVector m_children;
-    RDGE::Math::mat4 m_transformation;
+    rdge::math::mat4 m_transformation;
 };
 
-} // namespace Graphics
-} // namespace RDGE
+} // namespace rdge

@@ -1,36 +1,34 @@
 //! \headerfile <rdge/internal/logger_macros.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.3
-//! \date 05/13/2016
+//! \version 0.0.10
+//! \date 11/16/2016
 
 #pragma once
 
-#include <rdge/types.hpp>
+#include <rdge/core.hpp>
 #include <rdge/application.hpp>
 #include <rdge/util/logger.hpp>
 
 #ifndef DLOG
     #ifdef RDGE_DEBUG
         #define DLOG(msg) do { \
-            RDGE::WriteToLogFile(RDGE::LogLevel::Debug, msg, __FILE_NAME__, __LINE__); \
-            RDGE::WriteToConsole(RDGE::LogLevel::Debug, msg, __FILE_NAME__, __LINE__); \
+            rdge::WriteToLogFile(rdge::LogLevel::DEBUG, msg, FILE_NAME, __LINE__); \
+            rdge::WriteToConsole(rdge::LogLevel::DEBUG, msg, FILE_NAME, __LINE__); \
         } while (false)
     #else
-        #define DLOG(msg) do { \
-            RDGE::WriteToLogFile(RDGE::LogLevel::Debug, msg); \
-        } while (false)
+        #define DLOG(x) do { (void) sizeof ((x)); } while (0)
     #endif
 #endif
 
 #ifndef ILOG
     #ifdef RDGE_DEBUG
         #define ILOG(msg) do { \
-            RDGE::WriteToLogFile(RDGE::LogLevel::Info, msg, __FILE_NAME__, __LINE__); \
-            RDGE::WriteToConsole(RDGE::LogLevel::Info, msg, __FILE_NAME__, __LINE__); \
+            rdge::WriteToLogFile(rdge::LogLevel::INFO, msg, FILE_NAME, __LINE__); \
+            rdge::WriteToConsole(rdge::LogLevel::INFO, msg, FILE_NAME, __LINE__); \
         } while (false)
     #else
         #define ILOG(msg) do { \
-            RDGE::WriteToLogFile(RDGE::LogLevel::Info, msg); \
+            rdge::WriteToLogFile(rdge::LogLevel::INFO, msg); \
         } while (false)
     #endif
 #endif
@@ -38,12 +36,12 @@
 #ifndef WLOG
     #ifdef RDGE_DEBUG
         #define WLOG(msg) do { \
-            RDGE::WriteToLogFile(RDGE::LogLevel::Warning, msg, __FILE_NAME__, __LINE__); \
-            RDGE::WriteToConsole(RDGE::LogLevel::Warning, msg, __FILE_NAME__, __LINE__); \
+            rdge::WriteToLogFile(rdge::LogLevel::WARNING, msg, FILE_NAME, __LINE__); \
+            rdge::WriteToConsole(rdge::LogLevel::WARNING, msg, FILE_NAME, __LINE__); \
         } while (false)
     #else
         #define WLOG(msg) do { \
-            RDGE::WriteToLogFile(RDGE::LogLevel::Warning, msg); \
+            rdge::WriteToLogFile(rdge::LogLevel::WARNING, msg); \
         } while (false)
     #endif
 #endif
@@ -51,12 +49,12 @@
 #ifndef ELOG
     #ifdef RDGE_DEBUG
         #define ELOG(msg) do { \
-            RDGE::WriteToLogFile(RDGE::LogLevel::Error, msg, __FILE_NAME__, __LINE__); \
-            RDGE::WriteToConsole(RDGE::LogLevel::Error, msg, __FILE_NAME__, __LINE__); \
+            rdge::WriteToLogFile(rdge::LogLevel::ERROR, msg, FILE_NAME, __LINE__); \
+            rdge::WriteToConsole(rdge::LogLevel::ERROR, msg, FILE_NAME, __LINE__); \
         } while (false)
     #else
         #define ELOG(msg) do { \
-            RDGE::WriteToLogFile(RDGE::LogLevel::Error, msg); \
+            rdge::WriteToLogFile(rdge::LogLevel::ERROR, msg); \
         } while (false)
     #endif
 #endif
@@ -64,12 +62,12 @@
 #ifndef FLOG
     #ifdef RDGE_DEBUG
         #define FLOG(msg) do { \
-            RDGE::WriteToLogFile(RDGE::LogLevel::Fatal, msg, __FILE_NAME__, __LINE__); \
-            RDGE::WriteToConsole(RDGE::LogLevel::Fatal, msg, __FILE_NAME__, __LINE__); \
+            rdge::WriteToLogFile(rdge::LogLevel::FATAL, msg, FILE_NAME, __LINE__); \
+            rdge::WriteToConsole(rdge::LogLevel::FATAL, msg, FILE_NAME, __LINE__); \
         } while (false)
     #else
         #define FLOG(msg) do { \
-            RDGE::WriteToLogFile(RDGE::LogLevel::Fatal, msg); \
+            rdge::WriteToLogFile(rdge::LogLevel::FATAL, msg); \
         } while (false)
     #endif
 #endif

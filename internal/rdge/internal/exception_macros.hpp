@@ -1,33 +1,35 @@
 //! \headerfile <rdge/internal/exception_macros.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.3
-//! \date 05/13/2016
+//! \version 0.0.10
+//! \date 11/16/2016
 
 #pragma once
 
-#include <rdge/types.hpp>
+#include <rdge/core.hpp>
 #include <rdge/util/exception.hpp>
 #include <rdge/internal/logger_macros.hpp>
 
+#include <string>
+
 #ifndef RDGE_THROW
     #define RDGE_THROW(msg) do { \
-        ELOG("RDGE::Exception!  what=" + std::string(msg)); \
-        throw RDGE::Exception(msg, __FILE__, __LINE__, __FUNCTION_NAME__); \
+        ELOG("rdge::Exception!  what=" + std::string(msg)); \
+        throw rdge::Exception(msg, __FILE__, __LINE__, FUNCTION_NAME); \
     } while (false)
 #endif
 
 #ifndef SDL_THROW
     #define SDL_THROW(msg, fn) do { \
-        ELOG("RDGE::SDLException!  what=" + std::string(msg) + \
+        ELOG("rdge::SDLException!  what=" + std::string(msg) + \
              " fn=" + std::string(fn)); \
-        throw RDGE::SDLException(msg, fn, __FILE__, __LINE__, __FUNCTION_NAME__); \
+        throw rdge::SDLException(msg, fn, __FILE__, __LINE__, FUNCTION_NAME); \
     } while (false)
 #endif
 
 #ifndef GL_THROW
     #define GL_THROW(msg, fn, code) do { \
-        ELOG("RDGE::GLException!  what=" + std::string(msg) + \
+        ELOG("rdge::GLException!  what=" + std::string(msg) + \
              " fn=" + std::string(fn) + " code=" + std::to_string(code)); \
-        throw RDGE::GLException(msg, fn, code, __FILE__, __LINE__, __FUNCTION_NAME__); \
+        throw rdge::GLException(msg, fn, code, __FILE__, __LINE__, FUNCTION_NAME); \
     } while (false)
 #endif

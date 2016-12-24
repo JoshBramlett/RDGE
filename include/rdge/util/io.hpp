@@ -5,13 +5,13 @@
 
 #pragma once
 
-#include <rdge/types.hpp>
+#include <rdge/core.hpp>
 
 #include <string>
 
 //! \namespace RDGE Rainbow Drop Game Engine
-namespace RDGE {
-namespace Util {
+namespace rdge {
+namespace util {
 
 //! \brief Read and return contents of a text file
 //! \param [in] filepath Full path of the file to read
@@ -49,5 +49,5 @@ inline std::string read_text_file (const char* filepath)
     return result;
 }
 
-} // namespace Util
-} // namespace RDGE
+} // namespace util
+} // namespace rdge

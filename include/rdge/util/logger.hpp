@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <rdge/types.hpp>
+#include <rdge/core.hpp>
 #include <rdge/util/threadsafe_queue.hpp>
 #include <rdge/util/worker_thread.hpp>
 
@@ -16,19 +16,19 @@
 #include <chrono>
 
 //! \namespace RDGE: Rainbow Drop Game Engine
-namespace RDGE {
-namespace Util {
+namespace rdge {
+namespace util {
 
 //! \enum LogLevel
 //! \brief Log Level Severity
-enum class LogLevel : RDGE::UInt8
+enum class LogLevel : rdge::uint8
 {
-    Debug = 0,
-    Info,
-    Warning,
-    Error,
-    Fatal,
-    Custom
+    DEBUG = 0,
+    INFO,
+    WARNING,
+    ERROR,
+    FATAL,
+    CUSTOM
 };
 
 //! \struct LogInfo
@@ -36,10 +36,10 @@ enum class LogLevel : RDGE::UInt8
 //! \details Used for passing to logging worker threads.
 struct LogInfo
 {
-    RDGE::Util::LogLevel level;
+    rdge::util::LogLevel level;
     std::string          message;
     std::string          filename;
-    RDGE::UInt32         line;
+    rdge::uint32         line;
 };
 
 //! \class ConsoleLogger
@@ -56,7 +56,7 @@ public:
     //! \param [in] include_ms Include milliseconds in the timestamp
     //! \param [in] use_gmt Timestamps in GMT (false is local time)
     explicit ConsoleLogger (
-                            LogLevel min_level  = LogLevel::Warning,
+                            LogLevel min_level  = LogLevel::WARNING,
                             bool     include_ms = false,
                             bool     use_gmt    = false
                            );
@@ -88,10 +88,10 @@ public:
     //! \param [in] filename Name of file
     //! \param [in] line Line number
     void Write (
-                RDGE::Util::LogLevel level,
+                rdge::util::LogLevel level,
                 const std::string&   message,
                 const std::string&   filename = "",
-                RDGE::UInt32         line     = 0
+                rdge::uint32         line     = 0
                );
 
 private:
@@ -124,7 +124,7 @@ public:
     //! \param [in] use_gmt Timestamps in GMT (false is local time)
     explicit FileLogger (
                          std::string file,
-                         LogLevel    min_level  = LogLevel::Warning,
+                         LogLevel    min_level  = LogLevel::WARNING,
                          bool        overwrite  = true,
                          bool        include_ms = false,
                          bool        use_gmt    = false
@@ -172,7 +172,7 @@ public:
                 LogLevel           level,
                 const std::string& message,
                 const std::string& filename = "",
-                RDGE::UInt32       line     = 0
+                rdge::uint32       line     = 0
                );
 
 private:
@@ -235,10 +235,10 @@ private:
 };
 
 
-} // namespace Util
+} // namespace util
 
-// Promote to RDGE namespace
-using Util::FileLogger;
-using Util::LogLevel;
+// Promote to rdge namespace
+using util::FileLogger;
+using util::LogLevel;
 
-} // namespace RDGE
+} // namespace rdge

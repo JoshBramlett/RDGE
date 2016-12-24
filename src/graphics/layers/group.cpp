@@ -6,12 +6,10 @@
 #include <limits>
 #include <algorithm>
 
-using namespace RDGE::Math;
+using namespace rdge;
+using namespace rdge::math;
 
-namespace RDGE {
-namespace Graphics {
-
-Group::Group (const RDGE::Math::mat4& transformation)
+Group::Group (const rdge::math::mat4& transformation)
     : m_transformation(transformation)
 {
     m_position.x = std::numeric_limits<float>::max();
@@ -83,7 +81,7 @@ Group::AddRenderable (std::shared_ptr<Renderable2D> renderable)
 }
 
 void
-Group::SetTransformation (const RDGE::Math::mat4& transformation)
+Group::SetTransformation (const rdge::math::mat4& transformation)
 {
     m_transformation = transformation;
 }
@@ -99,7 +97,7 @@ Group::RotateOnCenter (float angle)
 }
 
 void
-Group::Submit (Renderer2D* renderer) const
+Group::Submit (SpriteBatch* renderer) const
 {
     renderer->PushTransformation(m_transformation);
 
@@ -112,7 +110,7 @@ Group::Submit (Renderer2D* renderer) const
 }
 
 void
-Group::SetOpacity (RDGE::UInt8 opacity)
+Group::SetOpacity (rdge::uint8 opacity)
 {
     for (auto& child : m_children)
     {
@@ -123,8 +121,8 @@ Group::SetOpacity (RDGE::UInt8 opacity)
 void
 Group::SetOpacity (float opacity)
 {
-    auto clamped = RDGE::Math::clamp(opacity, 0.0f, 1.0f);
-    auto value = static_cast<RDGE::UInt8>(clamped * 255);
+    auto clamped = rdge::math::clamp(opacity, 0.0f, 1.0f);
+    auto value = static_cast<rdge::uint8>(clamped * 255);
 
     for (auto child : m_children)
     {
@@ -142,7 +140,7 @@ Group::SetZIndex (float zindex)
 }
 
 void
-Group::RegisterTextures (Renderer2D* renderer) const
+Group::RegisterTextures (SpriteBatch* renderer) const
 {
     for (auto child : m_children)
     {
@@ -153,6 +151,3 @@ Group::RegisterTextures (Renderer2D* renderer) const
         }
     }
 }
-
-} // namespace Graphics
-} // namespace RDGE

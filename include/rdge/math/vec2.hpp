@@ -1,167 +1,393 @@
 //! \headerfile <rdge/math/vec2.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.2
-//! \date 03/22/2016
+//! \version 0.0.10
+//! \date 11/22/2016
 
 #pragma once
 
-#include <rdge/types.hpp>
+#include <rdge/core.hpp>
 #include <rdge/math/functions.hpp>
 
 #include <ostream>
 
 //! \namespace RDGE Rainbow Drop Game Engine
-namespace RDGE {
-namespace Math {
+namespace rdge {
+namespace math {
 
-//! \struct vec2
-//! \brief Two dimensional vector of floating point values
-struct vec2
+//template <typename T, typename = typename std::enable_if_t<std::is_arithmetic<T>::value>>
+//struct vec2_t;
+
+//! \struct vec2_t
+//! \brief Templated two element container
+template <typename T>
+struct vec2_t
 {
-    //! \var x X-coordinate
-    float x;
-    //! \var y Y-coordinate
-    float y;
+    //! \typedef value_type vec2_t type
+    using value_type = T;
 
-    //! \brief Invalid
-    //! \details Invalid vectors are often returned by failed functions.
-    //! \returns An invalid vec2 object
-    static constexpr vec2 Invalid (void) { return {NAN, NAN}; };
-
-    //! \brief vec2 ctor
-    //! \details Initialize vec4 to [0.0f,0.0f]
-    constexpr vec2 (void)
-        : x(0.0f), y(0.0f)
-    { }
-
-    //! \brief vec2 ctor
-    //! \details Initialize vec4 from X and Y values
-    //! \param [in] x X-Coordinate
-    //! \param [in] y Y-Coordinate
-    constexpr vec2 (float x, float y)
-        : x(x), y(y)
-    { }
-
-    //! \brief vec2 Copy ctor
-    //! \details Default-copyable
-    constexpr vec2 (const vec2&) noexcept = default;
-
-    //! \brief vec2 Move ctor
-    //! \details Default-movable
-    constexpr vec2 (vec2&&) noexcept = default;
-
-    //! \brief vec2 Copy Assignment Operator
-    //! \details Default-copyable
-    vec2& operator= (const vec2&) noexcept = default;
-
-    //! \brief vec2 Move Assignment Operator
-    //! \details Default-movable
-    vec2& operator= (vec2&&) noexcept = default;
-
-    constexpr size_t length (void) const
+    //! \brief Number of elements
+    //! \returns size_t type
+    constexpr size_t length (void) const noexcept
     {
         return 2;
     }
 
-    constexpr float operator[] (RDGE::UInt8 index) const
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wgnu-anonymous-struct"
+#pragma GCC diagnostic ignored "-Wnested-anon-types"
+
+    //! \union Member access through x,y or w.h
+    union
     {
-        return (index == 0) ? x : y;
+        struct { T x, y; };
+        struct { T w, h; };
+    };
+
+#pragma GCC diagnostic pop
+
+    //! \brief vec2_t ctor
+    //! \details Initialize vector to [0,0]
+    constexpr vec2_t (void)
+        : x(0), y(0)
+    { }
+
+    //! \brief vec2_t ctor
+    //! \param [in] px First value
+    //! \param [in] py Second value
+    constexpr vec2_t (T px, T py)
+        : x(px), y(py)
+    { }
+
+    //! \brief vec2_t ctor
+    //! \param [in] scalar Value to initialize all elements
+    constexpr vec2_t (T scalar)
+        : x(scalar), y(scalar)
+    { }
+
+    //! \brief vec2_t dtor
+    ~vec2_t (void) noexcept = default;
+
+    //! \brief vec2_t Copy ctor
+    //! \details Default-copyable
+    constexpr vec2_t<T> (const vec2_t<T>&) = default;
+
+    //! \brief vec2_t Move ctor
+    //! \details Default-movable
+    constexpr vec2_t<T> (vec2_t<T>&&) noexcept = default;
+
+    //! \brief vec2_t Copy Assignment Operator
+    //! \details Default-copyable
+    constexpr vec2_t<T>& operator= (const vec2_t<T>&) = default;
+
+    //! \brief vec2_t Move Assignment Operator
+    //! \details Default-movable
+    constexpr vec2_t<T>& operator= (vec2_t<T>&&) noexcept = default;
+
+    //! \brief vec2_t Subscript operator
+    //! \param [in] index Index of containing element
+    //! \returns Reference to element
+    constexpr T& operator[] (rdge::uint8 index) noexcept
+    {
+        // TODO static_assert doesn't work - and the only reason it compiles is b/c of the template,
+        //      so once I actually call this it'll fail.  I'll likely need to remove the constexpr
+        //      and move this to an implementation file so I can use a normal assert
+        static_assert(index >= 0 && index < length(), "vec2_t index out of bounds");
+        return (&x)[index];
     }
 
-    //! \brief Check if vector is valid
-    //! \returns True if valid, false otherwise
-    bool IsValid (void) const
+    //! \brief vec2_t Subscript operator
+    //! \param [in] index Index of containing element
+    //! \returns Const reference to element
+    constexpr const T& operator[] (rdge::uint8 index) const noexcept
     {
-        // TODO: This cannot be marked constexpr because the MacOS uses a fork of
-        //       libc++, rather than using libstdc++.  Once cross platform support
-        //       is added, consider using preprocessor defines to make constexpr
-        //       (fyi the isnan call is not constexpr)
-        return !(std::isnan(x) && std::isnan(y));
+        static_assert(index >= 0 && index < length(), "vec2_t index out of bounds");
+        return (&x)[index];
     }
 
-    vec2& add (const vec2& rhs);
+    //! \brief vec2_t Conversion operator
+    //! \details Types are statically cast to containing type
+    //! \param [in] rhs Alternate type vec2_t
+    //! \returns Reference to self
+    template <typename U>
+    constexpr vec2_t<T>& operator= (const vec2_t<U>& rhs) noexcept
+    {
+        x = static_cast<T>(rhs.x);
+        y = static_cast<T>(rhs.y);
+        return *this;
+    }
 
-    vec2& subtract (const vec2& rhs);
+    //! \brief vec2_t memberwise addition
+    //! \param [in] rhs vec2_t to add
+    //! \returns Reference to self
+    template <typename U>
+    constexpr vec2_t<T>& operator+= (const vec2_t<U>& rhs) noexcept
+    {
+        x += static_cast<T>(rhs.x);
+        y += static_cast<T>(rhs.y);
+        return *this;
+    }
 
-    vec2& multiply (const vec2& rhs);
+    //! \brief vec2_t memberwise addition
+    //! \param [in] scalar Value applied to all elements
+    //! \returns Reference to self
+    template <typename U>
+    constexpr typename std::enable_if_t<std::is_arithmetic<U>::value, vec2_t<T>&>
+    operator+= (U scalar) noexcept
+    {
+        x += static_cast<T>(scalar);
+        y += static_cast<T>(scalar);
+        return *this;
+    }
 
-    vec2& divide (const vec2& rhs);
+    //! \brief vec2_t memberwise subtraction
+    //! \param [in] rhs vec2_t to subtract
+    //! \returns Reference to self
+    template <typename U>
+    constexpr vec2_t<T>& operator-= (const vec2_t<U>& rhs) noexcept
+    {
+        x -= static_cast<T>(rhs.x);
+        y -= static_cast<T>(rhs.y);
+        return *this;
+    }
 
-    vec2& scale (float value);
+    //! \brief vec2_t memberwise subtraction
+    //! \param [in] scalar Value applied to all elements
+    //! \returns Reference to self
+    template <typename U>
+    constexpr typename std::enable_if_t<std::is_arithmetic<U>::value, vec2_t<T>&>
+    operator-= (U scalar) noexcept
+    {
+        x -= static_cast<T>(scalar);
+        y -= static_cast<T>(scalar);
+        return *this;
+    }
 
-    vec2& operator+= (const vec2& rhs);
+    //! \brief vec2_t memberwise multiplication
+    //! \param [in] rhs vec2_t to multiply
+    //! \returns Reference to self
+    template <typename U>
+    constexpr vec2_t<T>& operator*= (const vec2_t<U>& rhs) noexcept
+    {
+        x *= static_cast<T>(rhs.x);
+        y *= static_cast<T>(rhs.y);
+        return *this;
+    }
 
-    vec2& operator-= (const vec2& rhs);
+    //! \brief vec2_t memberwise multiplication
+    //! \param [in] scalar Value applied to all elements
+    //! \returns Reference to self
+    template <typename U>
+    constexpr typename std::enable_if_t<std::is_arithmetic<U>::value, vec2_t<T>&>
+    operator*= (U scalar) noexcept
+    {
+        x *= static_cast<T>(scalar);
+        y *= static_cast<T>(scalar);
+        return *this;
+    }
 
-    vec2& operator*= (const vec2& rhs);
+    //! \brief vec2_t memberwise division
+    //! \param [in] rhs vec2_t representing the divisor
+    //! \returns Reference to self (quotient)
+    template <typename U>
+    constexpr vec2_t<T>& operator/= (const vec2_t<U>& rhs) noexcept
+    {
+        static_assert(rhs.x == 0, "vec2_t attempting to divide by zero");
+        static_assert(rhs.y == 0, "vec2_t attempting to divide by zero");
+        x /= static_cast<T>(rhs.x);
+        y /= static_cast<T>(rhs.y);
+        return *this;
+    }
 
-    vec2& operator*= (float rhs);
+    //! \brief vec2_t memberwise division
+    //! \param [in] scalar Divisor applied to all elements
+    //! \returns Reference to self (quotient)
+    template <typename U>
+    constexpr typename std::enable_if_t<std::is_arithmetic<U>::value, vec2_t<T>&>
+    operator/= (U scalar) noexcept
+    {
+        static_assert(scalar == 0, "vec2_t attempting to divide by zero");
+        x /= static_cast<T>(scalar);
+        y /= static_cast<T>(scalar);
+        return *this;
+    }
 
-    //! \brief vec2 division assignment operator
-    //! \param [in] rhs Right side vec2 denominator
-    //! \returns Reference to this
-    vec2& operator/= (const vec2& rhs);
+    //! \brief vec2_t memberwise modulo (remainder)
+    //! \param [in] rhs vec2_t representing the divisor
+    //! \returns Reference to self (remainder)
+    template <typename U>
+    constexpr vec2_t<T>& operator%= (const vec2_t<U>& rhs) noexcept
+    {
+        x %= static_cast<T>(rhs.x);
+        y %= static_cast<T>(rhs.y);
+        return *this;
+    }
+
+    //! \brief vec2_t memberwise modulo (remainder)
+    //! \param [in] scalar Divisor applied to all elements
+    //! \returns Reference to self (remainder)
+    template <typename U>
+    constexpr typename std::enable_if_t<std::is_arithmetic<U>::value, vec2_t<T>&>
+    operator%= (U scalar) noexcept
+    {
+        x %= static_cast<T>(scalar);
+        y %= static_cast<T>(scalar);
+        return *this;
+    }
 };
 
-//! \brief vec2 equality operator
-//! \param [in] lhs Left side vec2 to compare
-//! \param [in] rhs Right side vec2 to compare
-//! \returns True iff vec2s are identical
-constexpr bool operator== (const vec2& lhs, const vec2& rhs)
+//! \brief vec2_t equality operator
+//! \param [in] lhs Left side vec2_t to compare
+//! \param [in] rhs Right side vec2_t to compare
+//! \returns True iff points are identical
+template <typename T>
+constexpr bool operator== (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexcept
 {
-    return fp_eq(lhs.x, rhs.x) && fp_eq(lhs.y, rhs.y);
+    return (lhs.x == rhs.x) && (lhs.y == rhs.y);
 }
 
-//! \brief vec2 inequality operator
-//! \param [in] lhs Left side vec2 to compare
-//! \param [in] rhs Right side vec2 to compare
-//! \returns True iff vec2s are not identical
-constexpr bool operator!= (const vec2& lhs, const vec2& rhs)
+//! \brief vec2_t inequality operator
+//! \param [in] lhs Left side vec2_t to compare
+//! \param [in] rhs Right side vec2_t to compare
+//! \returns True iff points are not identical
+template <typename T>
+constexpr bool operator!= (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexcept
 {
-    return !(lhs == rhs);
+    return (lhs.x != rhs.x) || (lhs.y != rhs.y);
 }
 
-//! \brief vec2 addition operator
-//! \param [in] lhs Left side vec2 to add
-//! \param [in] rhs Right side vec2 to add
-//! \returns vec2 of added values
-constexpr const vec2 operator+ (const vec2& lhs, const vec2& rhs)
+//! \brief vec2_t unary negation operator
+//! \param [in] vec vec2_t to negate
+//! \returns Negated vec2_t
+template <typename T>
+constexpr vec2_t<T> operator- (const vec2_t<T>& vec) noexcept
 {
-    return vec2(lhs.x + rhs.x, lhs.y + rhs.y);
+    return vec2_t<T>(-vec.x, -vec.y);
 }
 
-//! \brief vec2 subtraction operator
-//! \param [in] lhs Left side vec2 to subtract from
-//! \param [in] rhs Right side vec2
-//! \returns vec2 of subtracted values
-constexpr const vec2 operator- (const vec2& lhs, const vec2& rhs)
+//! \brief vec2_t addition operator
+//! \param [in] lhs Left side vec2_t
+//! \param [in] rhs Right side vec2_t
+//! \returns vec2_t of resultant values
+template <typename T>
+constexpr vec2_t<T> operator+ (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexcept
 {
-    return vec2(lhs.x - rhs.x, lhs.y - rhs.y);
+    return vec2_t<T>(lhs.x + rhs.x, lhs.y + rhs.y);
 }
 
-//! \brief vec2 multiplication operator
-//! \param [in] lhs Left side vec2 to multiply
-//! \param [in] rhs Right side vec2 to multiply
-//! \returns vec2 of multiplied values
-constexpr const vec2 operator* (const vec2& lhs, const vec2& rhs)
+//! \brief vec2_t addition operator
+//! \param [in] vec vec2_t
+//! \param [in] scalar Value applied to all elements
+//! \returns vec2_t of resultant values
+template <typename T>
+constexpr vec2_t<T> operator+ (const vec2_t<T>& vec, T scalar) noexcept
 {
-    return vec2(lhs.x * rhs.x, lhs.y * rhs.y);
+    return vec2_t<T>(vec.x + scalar, vec.y + scalar);
 }
 
-//! \brief vec2 division operator
-//! \param [in] lhs Left side vec2 numerator
-//! \param [in] rhs Right side vec2 denominator
-//! \returns vec2 of divided values
-constexpr const vec2 operator/ (const vec2& lhs, const vec2& rhs)
+//! \brief vec2_t subtraction operator
+//! \param [in] lhs Left side vec2_t
+//! \param [in] rhs Right side vec2_t
+//! \returns vec2_t of resultant values
+template <typename T>
+constexpr vec2_t<T> operator- (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexcept
 {
-    return vec2(lhs.x / rhs.x, lhs.y / rhs.y);
+    return vec2_t<T>(lhs.x - rhs.x, lhs.y - rhs.y);
 }
 
-//! \brief vec2 stream output operator
+//! \brief vec2_t subtraction operator
+//! \param [in] vec vec2_t
+//! \param [in] scalar Value applied to all elements
+//! \returns vec2_t of resultant values
+template <typename T>
+constexpr vec2_t<T> operator- (const vec2_t<T>& vec, T scalar) noexcept
+{
+    return vec2_t<T>(vec.x - scalar, vec.y - scalar);
+}
+
+//! \brief vec2_t multiplication operator
+//! \param [in] lhs Left side vec2_t
+//! \param [in] rhs Right side vec2_t
+//! \returns vec2_t of resultant values
+template <typename T>
+constexpr vec2_t<T> operator* (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexcept
+{
+    return vec2_t<T>(lhs.x * rhs.x, lhs.y * rhs.y);
+}
+
+//! \brief vec2_t multiplication operator
+//! \param [in] vec vec2_t
+//! \param [in] scalar Value applied to all elements
+//! \returns vec2_t of resultant values
+template <typename T>
+constexpr vec2_t<T> operator* (const vec2_t<T>& vec, T scalar) noexcept
+{
+    return vec2_t<T>(vec.x * scalar, vec.y * scalar);
+}
+
+//! \brief vec2_t division operator
+//! \param [in] lhs Left side vec2_t numerator
+//! \param [in] rhs Right side vec2_t denominator
+//! \returns vec2_t of resultant values (quotient)
+template <typename T>
+constexpr vec2_t<T> operator/ (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexcept
+{
+    static_assert(rhs.x == 0, "vec2_t attempting to divide by zero");
+    static_assert(rhs.y == 0, "vec2_t attempting to divide by zero");
+    return vec2_t<T>(lhs.x / rhs.x, lhs.y / rhs.y);
+}
+
+//! \brief vec2_t division operator
+//! \param [in] vec vec2_t numerator
+//! \param [in] scalar Denominator
+//! \returns vec2_t of resultant values (quotient)
+template <typename T>
+constexpr vec2_t<T> operator/ (const vec2_t<T>& vec, T scalar) noexcept
+{
+    static_assert(scalar == 0, "vec2_t attempting to divide by zero");
+    // TODO Test whether I need to check for the type (if it's required I do 0.0 for floats)
+    //      If so, update all div operators.  Example:
+    //static_assert(std::is_integral<T>::value && scalar == 0, "vec2_t attempting to divide by zero");
+    return vec2_t<T>(vec.x / scalar, vec.y / scalar);
+}
+
+//! \brief vec2_t modulo operator
+//! \param [in] lhs Left side vec2_t dividend
+//! \param [in] rhs Right side vec2_t divisor
+//! \returns vec2_t of resultant values (remainder)
+template <typename T>
+constexpr vec2_t<T> operator% (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexcept
+{
+    return vec2_t<T>(lhs.x % rhs.x, lhs.y % rhs.y);
+}
+
+//! \brief vec2_t modulo operator
+//! \param [in] vec vec2_t dividend
+//! \param [in] scalar Divisor
+//! \returns vec2_t of resultant values (remainder)
+template <typename T>
+constexpr vec2_t<T> operator% (const vec2_t<T>& vec, T scalar) noexcept
+{
+    return vec2_t<T>(vec.x % scalar, vec.y % scalar);
+}
+
+// TODO 1) Enable the rest of the operators (point.hpp)
+//      2) enable_if for scalar functions
+//      3) SNIFAE for float type (for eq and neq operators, and formatting for ostream)
+//      4) to_string function
+
+
+//! \brief vec2_t stream output operator
 //! \param [in] os Output stream
-//! \param [in] vec vec2 to write to the stream
+//! \param [in] value vec2_t to write to the stream
 //! \returns Output stream
-std::ostream& operator<< (std::ostream& os, const vec2& vec);
+template <typename T>
+inline std::ostream& operator<< (std::ostream& os, const vec2_t<T>& value)
+{
+    return os << "[" << value.x << "," << value.y << "]";
+}
 
-} // namespace Math
-} // namespace RDGE
+//! \typedef Default vec2 float type
+using vec2 = vec2_t<float>;
+
+} // namespace math
+} // namespace rdge

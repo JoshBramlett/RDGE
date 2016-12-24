@@ -5,16 +5,15 @@
 
 #pragma once
 
-#include <rdge/types.hpp>
+#include <rdge/core.hpp>
 #include <rdge/events/event.hpp>
-#include <rdge/graphics/shaders/shader.hpp>
+#include <rdge/graphics/shader.hpp>
 #include <rdge/math/mat4.hpp>
 
 #include <memory>
 
 //! \namespace RDGE Rainbow Drop Game Engine
-namespace RDGE {
-namespace Graphics {
+namespace rdge {
 
 //! \class Layer
 //! \brief Base class for a layer of renderable objects
@@ -31,9 +30,9 @@ public:
     //                  class as the parameter.  Consider changing Render
     //                  to simply a virtual.
 
-    virtual void ProcessEventPhase (RDGE::Event& event) = 0;
+    virtual void ProcessEventPhase (rdge::Event& event) = 0;
 
-    virtual void ProcessUpdatePhase (RDGE::UInt32 ticks) = 0;
+    virtual void ProcessUpdatePhase (rdge::uint32 ticks) = 0;
 
     //! \brief Render all cached renderables
     virtual void Render (void) = 0;
@@ -42,7 +41,7 @@ protected:
     //! \brief Layer ctor
     //! \param [in] shader Shader the layer will take ownership of
     //! \param [in] projection_matrix Projection matrix
-    explicit Layer (std::unique_ptr<Shader> shader, RDGE::Math::mat4 projection_matrix);
+    explicit Layer (std::unique_ptr<Shader> shader, rdge::math::mat4 projection_matrix);
 
     //! \brief Layer dtor
     virtual ~Layer (void);
@@ -65,8 +64,7 @@ protected:
 
 protected:
     std::unique_ptr<Shader> m_shader;
-    RDGE::Math::mat4        m_projectionMatrix;
+    rdge::math::mat4        m_projectionMatrix;
 };
 
-} // namespace Graphics
-} // namespace RDGE
+} // namespace rdge

@@ -1,44 +1,64 @@
 //! \headerfile <rdge/graphics/text.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.2
-//! \date 04/19/2016
+//! \version 0.0.10
+//! \date 12/23/2016
 
 #pragma once
 
-#include <rdge/types.hpp>
-#include <rdge/graphics/renderable2d.hpp>
+#include <rdge/core.hpp>
+#include <rdge/graphics/isprite.hpp>
+#include <rdge/graphics/sprite_batch.hpp>
+#include <rdge/graphics/texture.hpp>
+#include <rdge/graphics/color.hpp>
 #include <rdge/assets/font.hpp>
-#include <rdge/color.hpp>
+#include <rdge/math/vec3.hpp>
 
 #include <string>
 #include <memory>
 
-//! \namespace RDGE Rainbow Drop Game Engine
-namespace RDGE {
-namespace Graphics {
+//! \namespace rdge Rainbow Drop Game Engine
+namespace rdge {
 
 //! \class Text
-//! \brief Renderable text
-class Text : public Renderable2D
+//! \brief Renderable text (label)
+class Text : public ISprite
 {
 public:
-    //! \brief Text ctor
-    //! \param [in] text Text to render
-    //! \param [in] x x-coordinate location
-    //! \param [in] y y-coordinate location
-    //! \param [in] font Font to render text
-    //! \param [in] color Color of all vertices
-    //! \param [in] mode Font render mode
-    explicit Text (
-                   std::string                         text,
-                   float                               x,
-                   float                               y,
-                   std::shared_ptr<RDGE::Assets::Font> font,
-                   const RDGE::Color&                  color,
-                   RDGE::Assets::Font::RenderMode mode = RDGE::Assets::Font::RenderMode::Solid
-                  );
+    SpriteVertices vertices; //!< Array of vertex attribute data
 
-    // TODO: Add copy, move, and destructor
+    //! \brief Text ctor
+    //! \details Creates a texture based upon the provided values which can be used
+    //!          to send to a render target.
+    //! \param [in] text Text to render
+    //! \param [in] pos Position of the text
+    //! \param [in] font Text font
+    //! \param [in] color Text color
+    //! \param [in] mode Font render mode
+    explicit Text (std::string           text,
+                   const math::vec3&     pos,
+                   std::shared_ptr<Font> font,
+                   const color&          color,
+                   Font::RenderMode      mode = Font::RenderMode::SOLID);
+
+    //! \brief Text dtor
+    ~Text (void) noexcept = default;
+
+    //!@{
+    //! \brief Copy and move enabled
+    Text (const Text&) = delete;
+    Text& operator= (const Text&) = delete;
+    Text (Text&&) noexcept;
+    Text& operator= (Text&&) noexcept;
+    //!@}
+
+    //! \brief Draw the sprite using the provided renderer
+    //! \param [in] renderer Render target
+    void Draw (SpriteBatch& renderer) override;
+
+    //! \brief Register the texture with the render target
+    //! \details This step must be performed prior to making a draw call.
+    //! \param [in] renderer Render target
+    void SetRenderTarget (SpriteBatch& renderer);
 
     //! \brief Set the text
     //! \param [in] text Text to render
@@ -47,21 +67,22 @@ public:
 
     //! \brief Set the color of the text
     //! \param [in] color Color to render the text
-    //! \param [in] ignore_alpha False will only set the RGB values
     //! \note Texutre and size data will be reset
-    virtual void SetColor (const RDGE::Color& color, bool ignore_alpha = true) override;
+    void SetColor (const color& color);
 
 private:
 
-    //! \brief Rebuild the label
+    //! \brief Rebuild the text label
     //! \details Creates a surface image based on the cached members and
-    //!          converts it to a renderable object.
+    //!          converts it to a renderable object.  Members are cached because
+    //!          if any changes a new texture needs to be generated.
     void Rebuild (void);
 
-    std::string                         m_text;
-    std::shared_ptr<RDGE::Assets::Font> m_font;
-    RDGE::Assets::Font::RenderMode      m_renderMode;
+    std::string              m_text;       //!< Cached text string
+    color                    m_color;      //!< Cached text color
+    Font::RenderMode         m_renderMode; //!< Cached render mode
+    std::shared_ptr<Font>    m_font;       //!< Font used to render text
+    std::shared_ptr<Texture> m_texture;    //!< Texture dynamically generated
 };
 
-} // namespace Graphics
-} // namespace RDGE
+} // namespace rdge

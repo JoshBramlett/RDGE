@@ -1,16 +1,13 @@
 #include <rdge/graphics/text.hpp>
-#include <rdge/graphics/gltexture.hpp>
-#include <rdge/glwindow.hpp>
+#include <rdge/graphics/vops.hpp>
 #include <rdge/math/vec2.hpp>
-#include <rdge/math/vec3.hpp>
-
-namespace RDGE {
-namespace Graphics {
-
-using namespace RDGE::Math;
-using namespace RDGE::Assets;
+#include <rdge/system/window.hpp>
 
 namespace {
+
+    using namespace rdge;
+    using namespace rdge::math;
+
     // TODO: This is a stop-gap solution.  Text rendering differs from other renderable2ds
     //       in that the size is not known until it's built.  I also don't have the option
     //       of calling SampleSizeUTF8 to get the size and sending to the ctor, as setting
@@ -26,9 +23,9 @@ namespace {
     //       width and height are used in the calculation instead of the drawable pixels.
     //
     //       THIS WILL FAIL WHEN MULTIPLE DISPLAYS ARE SUPPORTED
-    vec2 ConvertSizeToCameraSpace (RDGE::UInt32 width, RDGE::UInt32 height)
+    vec2 ConvertSizeToCameraSpace (uint32 width, uint32 height)
     {
-        auto window = RDGE::GLWindow::GetCurrentWindow();
+        auto window = Window::GetCurrentWindow();
         if (!window)
         {
             return vec2(0.0f, 0.0f);
@@ -40,26 +37,43 @@ namespace {
                     aspect_ratio.h * (height / static_cast<float>(window->TargetHeight()))
                    );
     }
+
+} // anonymous namespace
+
+namespace rdge {
+
+Text::Text (std::string           text,
+            const math::vec3&     pos,
+            std::shared_ptr<Font> font,
+            const color&          color,
+            Font::RenderMode      mode)
+    : m_text(std::move(text))
+    , m_color(color)
+    , m_renderMode(mode)
+    , m_font(std::move(font))
+{
+    auto surface = m_font->RenderUTF8(m_text, m_color, m_renderMode);
+    m_texture = std::make_shared<Texture>(*surface);
+    auto size = ConvertSizeToCameraSpace(m_texture->width, m_texture->height);
+
+    vops::SetPosition(this->vertices, pos, size);
+    vops::SetTexCoords(this->vertices);
+    // TODO Does color need to be set?  I think it can just be white
+    vops::SetColor(this->vertices, m_color);
 }
 
-Text::Text (
-            std::string           text,
-            float                 x,
-            float                 y,
-            std::shared_ptr<Font> font,
-            const RDGE::Color&    color,
-            Font::RenderMode      mode
-           )
-    : Renderable2D(vec3(x, y, 0), vec2(0, 0))
-    , m_text(std::move(text))
-    , m_font(std::move(font))
-    , m_renderMode(mode)
+void
+Text::Draw (SpriteBatch& renderer)
 {
-    m_color = color;
+    renderer.Submit(this->vertices);
+}
 
-    auto surface = m_font->RenderUTF8(m_text, m_color, m_renderMode);
-    m_texture = std::make_shared<GLTexture>(surface);
-    m_size = ConvertSizeToCameraSpace(m_texture->Width(), m_texture->Height());
+void
+Text::SetRenderTarget (SpriteBatch& renderer)
+{
+    renderer.RegisterTexture(m_texture);
+
+    vops::SetTextureUnitID(this->vertices, m_texture->unit_id);
 }
 
 void
@@ -71,9 +85,11 @@ Text::SetText (const std::string& text)
 }
 
 void
-Text::SetColor (const RDGE::Color& color, bool ignore_alpha)
+Text::SetColor (const color& color)
 {
-    Renderable2D::SetColor(color, ignore_alpha);
+    m_color = color;
+    // TODO Does color need to be set?  I think it can just be white
+    vops::SetColor(this->vertices, color);
 
     Rebuild();
 }
@@ -82,9 +98,10 @@ void
 Text::Rebuild (void)
 {
     auto surface = m_font->RenderUTF8(m_text, m_color, m_renderMode);
-    m_texture->ResetData(surface);
-    m_size = ConvertSizeToCameraSpace(m_texture->Width(), m_texture->Height());
+    m_texture->Reload(*surface);
+
+    auto size = ConvertSizeToCameraSpace(m_texture->width, m_texture->height);
+    vops::UpdateSize(this->vertices, size);
 }
 
-} // namespace Graphics
-} // namespace RDGE
+} // namespace rdge

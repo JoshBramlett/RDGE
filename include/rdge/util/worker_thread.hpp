@@ -3,8 +3,8 @@
 #include <thread>
 #include <functional>
 
-namespace RDGE {
-namespace Util {
+namespace rdge {
+namespace util {
 
 class WorkerThread
 {
@@ -64,5 +64,5 @@ protected:
 };
 
 
-} // namespace Util
-} // namespace RDGE
+} // namespace util
+} // namespace rdge

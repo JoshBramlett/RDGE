@@ -1,95 +1,150 @@
 #include <rdge/assets/surface.hpp>
 #include <rdge/internal/exception_macros.hpp>
+#include <rdge/internal/hints.hpp>
 
 #include <SDL_image.h>
 
-namespace RDGE {
-namespace Assets {
+/* Saving the default masks (which were in the header file) in case I revert
+ * the ctors back to being simple wrappers for SDL_CreateRGBSurface and
+ * SDL_CreateRGBSurfaceFrom
+
+//!@{
+//! \brief Default byte order determined from machine endianess
+//! \details Pixels are interpreted as a 32 bit integer, where each byte is a
+//!          color (or alpha).  For example, on a machine with a high byte
+//!          order (big endian), red is stored in the most significant byte.
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+    static constexpr rdge::uint32 DEFAULT_RMASK = 0xff000000;
+    static constexpr rdge::uint32 DEFAULT_GMASK = 0x00ff0000;
+    static constexpr rdge::uint32 DEFAULT_BMASK = 0x0000ff00;
+    static constexpr rdge::uint32 DEFAULT_AMASK = 0x000000ff;
+#else
+    static constexpr rdge::uint32 DEFAULT_RMASK = 0x000000ff;
+    static constexpr rdge::uint32 DEFAULT_GMASK = 0x0000ff00;
+    static constexpr rdge::uint32 DEFAULT_BMASK = 0x00ff0000;
+    static constexpr rdge::uint32 DEFAULT_AMASK = 0xff000000;
+#endif
+//!@}
+*/
+
+namespace {
+
+using namespace rdge;
+
+struct byte_order_masks
+{
+    uint32 r_mask;
+    uint32 g_mask;
+    uint32 b_mask;
+    uint32 a_mask;
+};
+
+byte_order_masks
+GetMasksFromDepth (PixelDepth depth)
+{
+    // 24bpp depth represents an RGB image, so the byte order is shifted
+    // by one byte to remove the alpha channel
+    byte_order_masks masks;
+
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+    int shift = (depth == PixelDepth::BPP_24) ? 8 : 0;
+    masks.r_mask = 0xff000000 >> shift;
+    masks.g_mask = 0x00ff0000 >> shift;
+    masks.b_mask = 0x0000ff00 >> shift;
+    masks.a_mask = 0x000000ff >> shift;
+#else
+    masks.r_mask = 0x000000ff;
+    masks.g_mask = 0x0000ff00;
+    masks.b_mask = 0x00ff0000;
+    masks.a_mask = (depth == PixelDepth::BPP_24) ? 0 : 0x000000ff;
+#endif
+
+    return masks;
+}
+
+} // anonymous namespace
+
+namespace rdge {
 
 Surface::Surface (SDL_Surface* surface)
     : m_surface(surface)
-    , m_pixelData(nullptr)
 { }
 
-Surface::Surface (const std::string& file)
-    : m_pixelData(nullptr)
+Surface::Surface (const std::string& path)
 {
-    m_surface = IMG_Load(file.c_str());
+    m_surface = IMG_Load(path.c_str());
     if (UNLIKELY(!m_surface))
     {
-        SDL_THROW("Failed to load surface. file=" + file, "IMG_Load");
+        SDL_THROW("Failed to load surface. file=" + path, "IMG_Load");
     }
 }
 
-Surface::Surface (
-                  RDGE::Int32  width,
-                  RDGE::Int32  height,
-                  RDGE::Int32  depth,
-                  RDGE::UInt32 r_mask,
-                  RDGE::UInt32 g_mask,
-                  RDGE::UInt32 b_mask,
-                  RDGE::UInt32 a_mask
-                 )
-    : m_pixelData(nullptr)
+Surface::Surface (const rdge::size& size, PixelDepth depth)
 {
-    m_surface = SDL_CreateRGBSurface(
-                                     0, // flags (SDL docs say param is unused)
-                                     width,
-                                     height,
-                                     depth,
-                                     r_mask,
-                                     g_mask,
-                                     b_mask,
-                                     a_mask
-                                    );
+    auto masks = GetMasksFromDepth(depth);
+    m_surface = SDL_CreateRGBSurface(0, // flags (SDL docs say param is unused)
+                                     static_cast<int32>(size.w),
+                                     static_cast<int32>(size.h),
+                                     static_cast<int32>(depth),
+                                     masks.r_mask,
+                                     masks.g_mask,
+                                     masks.b_mask,
+                                     masks.a_mask);
     if (UNLIKELY(!m_surface))
     {
         SDL_THROW("Failed to create blank surface", "SDL_CreateRGBSurface");
     }
 }
 
-Surface::Surface (
-                  std::unique_ptr<unsigned char[]> pixels,
-                  RDGE::Int32                      width,
-                  RDGE::Int32                      height,
-                  RDGE::Int32                      depth,
-                  RDGE::Int32                      pitch,
-                  RDGE::UInt32                     r_mask,
-                  RDGE::UInt32                     g_mask,
-                  RDGE::UInt32                     b_mask,
-                  RDGE::UInt32                     a_mask
-                 )
+Surface::Surface (std::unique_ptr<uint8[]> pixels,
+                  const rdge::size&        size,
+                  PixelDepth               depth)
     : m_pixelData(std::move(pixels))
 {
-    m_surface = SDL_CreateRGBSurfaceFrom(
-                                         pixels.get(),
-                                         width,
-                                         height,
-                                         depth,
-                                         pitch,
-                                         r_mask,
-                                         g_mask,
-                                         b_mask,
-                                         a_mask
-                                        );
+    if (UNLIKELY(!m_pixelData))
+    {
+        RDGE_THROW("Pixel data is null");
+    }
+
+    auto masks = GetMasksFromDepth(depth);
+    auto pitch = static_cast<int32>(size.w * ((depth == PixelDepth::BPP_24) ? 3 : 4));
+    m_surface = SDL_CreateRGBSurfaceFrom(reinterpret_cast<void*>(m_pixelData.get()),
+                                         static_cast<int32>(size.w),
+                                         static_cast<int32>(size.h),
+                                         static_cast<int32>(depth),
+                                         pitch, // length of a row of pixels in bytes
+                                         masks.r_mask,
+                                         masks.g_mask,
+                                         masks.b_mask,
+                                         masks.a_mask);
     if (UNLIKELY(!m_surface))
     {
         SDL_THROW("Failed to create surface from pixels", "SDL_CreateRGBSurfaceFrom");
     }
 }
 
-Surface::~Surface (void)
+Surface::~Surface (void) noexcept
 {
-    if (m_surface != nullptr)
+    // SDL documentation states the underlying pixel data is unmanaged and must
+    // be freed after the surface.  The pixel data is wrapped in a unique_ptr, but
+    // leaving this note here so I don't do anything crazy in the future.
+    // See remarks - https://wiki.libsdl.org/SDL_CreateRGBSurfaceFrom
+
+    if (m_surface)
     {
         SDL_FreeSurface(m_surface);
     }
 }
 
 Surface::Surface (Surface&& rhs) noexcept
-    : m_surface(rhs.m_surface)
-    , m_pixelData(std::move(rhs.m_pixelData))
 {
+    if (m_surface)
+    {
+        SDL_FreeSurface(m_surface);
+    }
+
+    m_pixelData.swap(rhs.m_pixelData);
+    m_surface = rhs.m_surface;
     rhs.m_surface = nullptr;
 }
 
@@ -98,56 +153,56 @@ Surface::operator= (Surface&& rhs) noexcept
 {
     if (this != &rhs)
     {
-        if (m_surface != nullptr)
+        if (m_surface)
         {
             SDL_FreeSurface(m_surface);
         }
 
+        m_pixelData.swap(rhs.m_pixelData);
         m_surface = rhs.m_surface;
-        m_pixelData = std::move(rhs.m_pixelData);
         rhs.m_surface = nullptr;
     }
 
     return *this;
 }
 
-RDGE::UInt32
+uint32
 Surface::Width (void) const noexcept
 {
-    if (!m_surface)
+    if (UNLIKELY(!m_surface))
     {
         return 0;
     }
 
-    return static_cast<RDGE::UInt32>(m_surface->w);
+    return static_cast<uint32>(m_surface->w);
 }
 
-RDGE::UInt32
+uint32
 Surface::Height (void) const noexcept
 {
-    if (!m_surface)
+    if (UNLIKELY(!m_surface))
     {
         return 0;
     }
 
-    return static_cast<RDGE::UInt32>(m_surface->h);
+    return static_cast<uint32>(m_surface->h);
 }
 
-RDGE::Graphics::Size
+rdge::size
 Surface::Size (void) const noexcept
 {
-    if (!m_surface)
+    if (UNLIKELY(!m_surface))
     {
-        return RDGE::Graphics::Size(0, 0);
+        return rdge::size(0, 0);
     }
 
-    return RDGE::Graphics::Size(m_surface->w, m_surface->h);
+    return rdge::size(m_surface->w, m_surface->h);
 }
 
-RDGE::UInt32
+uint32
 Surface::PixelFormat (void) const noexcept
 {
-    if (!m_surface)
+    if (UNLIKELY(!m_surface))
     {
         return SDL_PIXELFORMAT_UNKNOWN;
     }
@@ -156,9 +211,9 @@ Surface::PixelFormat (void) const noexcept
 }
 
 void
-Surface::ChangePixelFormat (RDGE::UInt32 pixel_format)
+Surface::ChangePixelFormat (uint32 pixel_format)
 {
-    if (!m_surface)
+    if (UNLIKELY(!m_surface))
     {
         RDGE_THROW("Attempting to change pixel format on a NULL surface");
     }
@@ -186,5 +241,4 @@ Surface::ChangePixelFormat (RDGE::UInt32 pixel_format)
     m_surface = new_surface;
 }
 
-} // namespace Assets
-} // namespace RDGE
+} // namespace rdge
