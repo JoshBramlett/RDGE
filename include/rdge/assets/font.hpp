@@ -23,7 +23,7 @@
 #include <string>
 #include <memory>
 
-//! \namespace RDGE Rainbow Drop Game Engine
+//! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
 //! \typedef SDLFontUniquePtr
@@ -33,7 +33,7 @@ using SDLFontUniquePtr = std::unique_ptr<TTF_Font, decltype(TTF_CloseFont)*>;
 //! \brief Create SDL TTF_Font unique_ptr with a proper deleter
 //! \param [in] font Pre-allocated TTF_Font
 //! \returns unique_ptr of provided TTF_Font
-inline auto CreateSDLFontUniquePtr (TTF_Font* font) -> SDLFontUniquePtr
+inline auto CreateManagedSDLFont (TTF_Font* font) -> SDLFontUniquePtr
 {
     return SDLFontUniquePtr(font, TTF_CloseFont);
 }

@@ -8,7 +8,7 @@
 #include <rdge/core.hpp>
 #include <rdge/math/vec2.hpp>
 
-//! \namespace RDGE Rainbow Drop Game Engine
+//! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
 //! \typedef size Unsigned integer vec2_t structure

@@ -11,7 +11,7 @@
 #include <string>
 #include <limits>
 
-//! \namespace RDGE Rainbow Drop Game Engine
+//! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
 //! \class Texture

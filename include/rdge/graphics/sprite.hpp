@@ -15,7 +15,7 @@
 
 #include <memory>
 
-//! \namespace RDGE Rainbow Drop Game Engine
+//! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
 //! \class Sprite

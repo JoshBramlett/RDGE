@@ -17,7 +17,7 @@
 #include <vector>
 #include <unordered_map>
 
-//! \namespace RDGE Rainbow Drop Game Engine
+//! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
 enum class ShaderType : uint32

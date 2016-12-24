@@ -14,188 +14,118 @@
 #include <string>
 #include <ostream>
 
-//! \namespace RDGE Rainbow Drop Game Engine
+//! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
 //! \enum EventType
 //! \brief Type of event triggered
 //! \details Direct mapping to SDL_EventType, provided for abstraction and
 //!          ease of discovery.
-enum class EventType : rdge::uint32
+enum class EventType : uint32
 {
     // IMPORTANT - If enum is updated, update ostream operator<< as well
 
-    /* Application Events */
+    //!@{
+    //! \brief Application Events
+    Quit = SDL_QUIT, //!< User requested quit
+    //!@}
 
-    //! \var Quit
-    //! \brief User requested quit
-    Quit                    = SDL_QUIT,
+    //!@{
+    //! \brief Application Events - Android, iOS and WinRT
+    AppTerminating         = SDL_APP_TERMINATING,         //!< OS is terminating the application
+    AppLowMemory           = SDL_APP_LOWMEMORY,           //!< OS is low on memory (attempt to free)
+    AppWillEnterBackground = SDL_APP_WILLENTERBACKGROUND, //!< Application is entering background
+    AppDidEnterBackground  = SDL_APP_DIDENTERBACKGROUND,  //!< Application entered background
+    AppWillEnterForeground = SDL_APP_WILLENTERFOREGROUND, //!< Application is entering foreground
+    AppDidEnterForeground  = SDL_APP_DIDENTERFOREGROUND,  //!< Application entered foreground
+    //!@}
 
-    /* Application Events - Android, iOS and WinRT */
+    //!@{
+    //! \brief Window Events
+    Window                 = SDL_WINDOWEVENT, //!< Window state change
+    SystemWindowManagement = SDL_SYSWMEVENT,  //!< Video driver dependent system event
+    //!@}
 
-    //! \var AppTerminating
-    //! \brief OS is terminating the application
-    AppTerminating          = SDL_APP_TERMINATING,
-    //! \var AppLowMemory
-    //! \brief OS is low on memory (attempt to free)
-    AppLowMemory            = SDL_APP_LOWMEMORY,
-    //! \var AppWillEnterBackground
-    //! \brief Application is entering background
-    AppWillEnterBackground  = SDL_APP_WILLENTERBACKGROUND,
-    //! \var AppDidEnterBackground
-    //! \brief Application entered background
-    AppDidEnterBackground   = SDL_APP_DIDENTERBACKGROUND,
-    //! \var AppWillEnterForeground
-    //! \brief Application is entering foreground
-    AppWillEnterForeground  = SDL_APP_WILLENTERFOREGROUND,
-    //! \var AppDidEnterForeground
-    //! \brief Application entered foreground
-    AppDidEnterForeground   = SDL_APP_DIDENTERFOREGROUND,
+    //!@{
+    //! \brief Keyboard Events
+    KeyDown       = SDL_KEYDOWN,       //!< Key pressed
+    KeyUp         = SDL_KEYUP,         //!< Key released
+    TextEditing   = SDL_TEXTEDITING,   //!< Keyboard text editing (composition)
+    TextInput     = SDL_TEXTINPUT,     //!< Keyboard text input
+    KeyMapChanged = SDL_KEYMAPCHANGED, //!< System event (language or keyboard layout change)
+    //!@}
 
-    /* Window Events */
+    //!@{
+    //! \brief Mouse Events
+    MouseMotion     = SDL_MOUSEMOTION,     //!< Mouse moved
+    MouseButtonDown = SDL_MOUSEBUTTONDOWN, //!< Mouse button pressed
+    MouseButtonUp   = SDL_MOUSEBUTTONUP,   //!< Mouse button released
+    MouseWheel      = SDL_MOUSEWHEEL,      //!< Mouse wheel motion
+    //!@}
 
-    //! \var Window
-    //! \brief Window state change
-    Window                  = SDL_WINDOWEVENT,
-    //! \var SystemWindowManagement
-    //! \brief Video driver dependent system event
-    SystemWindowManagement  = SDL_SYSWMEVENT,
+    //!@{
+    //! \brief Joystick Events
+    JoystickAxisMotion    = SDL_JOYAXISMOTION,    //!< Joystick axis motion
+    JoystickBallMotion    = SDL_JOYBALLMOTION,    //!< Joystick trackball motion
+    JoystickHatMotion     = SDL_JOYHATMOTION,     //!< Joystick hat position change
+    JoystickButtonDown    = SDL_JOYBUTTONDOWN,    //!< Joystick button pressed
+    JoystickButtonUp      = SDL_JOYBUTTONUP,      //!< Joystick button released
+    JoystickDeviceAdded   = SDL_JOYDEVICEADDED,   //!< Joystick connected
+    JoystickDeviceRemoved = SDL_JOYDEVICEREMOVED, //!< Joystick disconnected
+    //!@}
 
-    /* Keyboard Events */
+    //!@{
+    //! \brief Controller Events
+    ControllerAxisMotion    = SDL_CONTROLLERAXISMOTION,     //!< Controller axis motion
+    ControllerButtonDown    = SDL_CONTROLLERBUTTONDOWN,     //!< Controller button pressed
+    ControllerButtonUp      = SDL_CONTROLLERBUTTONUP,       //!< Controller button released
+    ControllerDeviceAdded   = SDL_CONTROLLERDEVICEADDED,    //!< Controller connected
+    ControllerDeviceRemoved = SDL_CONTROLLERDEVICEREMOVED,  //!< Controller disconnected
+    ControllerDeviceMapped  = SDL_CONTROLLERDEVICEREMAPPED, //!< Controller mapping updated
+    //!@}
 
-    //! \var KeyDown
-    //! \brief Key pressed
-    KeyDown                 = SDL_KEYDOWN,
-    //! \var KeyUp
-    //! \brief Key released
-    KeyUp                   = SDL_KEYUP,
-    //! \var TextEditing
-    //! \brief Keyboard text editing (composition)
-    TextEditing             = SDL_TEXTEDITING,
-    //! \var TextInput
-    //! \brief Keyboard text input
-    TextInput               = SDL_TEXTINPUT,
-    //! \var KeyMapChanged
-    //! \brief Mapping changed due to system event (language or keyboard layout change)
-    KeyMapChanged           = SDL_KEYMAPCHANGED,
+    //!@{
+    //! \brief Touch Events
+    FingerDown   = SDL_FINGERDOWN,   //!< Trackpad touched
+    FingerUp     = SDL_FINGERUP,     //!< Trackpad no longer touched
+    FingerMotion = SDL_FINGERMOTION, //!< Touch drag on trackpad
+    //!@}
 
-    /* Mouse Events */
+    //!@{
+    //! \brief Gesture Events
+    DollarGesture = SDL_DOLLARGESTURE,
+    DollarRecord  = SDL_DOLLARRECORD,
+    MultiGesture  = SDL_MULTIGESTURE,
+    //!@}
 
-    //! \var MouseMotion
-    //! \brief Mouse moved
-    MouseMotion             = SDL_MOUSEMOTION,
-    //! \var MouseButtonDown
-    //! \brief Mouse button pressed
-    MouseButtonDown         = SDL_MOUSEBUTTONDOWN,
-    //! \var MouseButtonUp
-    //! \brief Mouse button released
-    MouseButtonUp           = SDL_MOUSEBUTTONUP,
-    //! \var MouseWheel
-    //! \brief Mouse wheel motion
-    MouseWheel              = SDL_MOUSEWHEEL,
+    //!@{
+    //! \brief Clipboard Events
+    ClipboardUpdate = SDL_CLIPBOARDUPDATE, //!< System clipboard changed
+    //!@}
 
-    /* Joystick Events */
+    //!@{
+    //! \brief Drag and Drop Events
+    DropFile = SDL_DROPFILE, //!< System requests a file open
+    //!@}
 
-    //! \var JoystickAxisMotion
-    //! \brief Joystick axis motion
-    JoystickAxisMotion      = SDL_JOYAXISMOTION,
-    //! \var JoystickBallMotion
-    //! \brief Joystick trackball motion
-    JoystickBallMotion      = SDL_JOYBALLMOTION,
-    //! \var JoystickHatMotion
-    //! \brief Joystick hat position change
-    JoystickHatMotion       = SDL_JOYHATMOTION,
-    //! \var JoystickButtonDown
-    //! \brief Joystick button pressed
-    JoystickButtonDown      = SDL_JOYBUTTONDOWN,
-    //! \var JoystickButtonUp
-    //! \brief Joystick button released
-    JoystickButtonUp        = SDL_JOYBUTTONUP,
-    //! \var JoystickDeviceAdded
-    //! \brief Joystick connected
-    JoystickDeviceAdded     = SDL_JOYDEVICEADDED,
-    //! \var JoystickDeviceRemoved
-    //! \brief Joystick disconnected
-    JoystickDeviceRemoved   = SDL_JOYDEVICEREMOVED,
+    //!@{
+    //! \brief Audio Hotplug Events
+    AudioDeviceAdded   = SDL_AUDIODEVICEADDED,   //!< New audio device available
+    AudioDeviceRemoved = SDL_AUDIODEVICEREMOVED, //!< Audio device has been disconnected
+    //!@}
 
-    /* Controller Events */
-
-    //! \var ControllerAxisMotion
-    //! \brief Controller axis motion
-    ControllerAxisMotion    = SDL_CONTROLLERAXISMOTION,
-    //! \var ControllerButtonDown
-    //! \brief Controller button pressed
-    ControllerButtonDown    = SDL_CONTROLLERBUTTONDOWN,
-    //! \var ControllerButtonUp
-    //! \brief Controller button released
-    ControllerButtonUp      = SDL_CONTROLLERBUTTONUP,
-    //! \var ControllerDeviceAdded
-    //! \brief Controller connected
-    ControllerDeviceAdded   = SDL_CONTROLLERDEVICEADDED,
-    //! \var ControllerDeviceRemoved
-    //! \brief Controller disconnected
-    ControllerDeviceRemoved = SDL_CONTROLLERDEVICEREMOVED,
-    //! \var ControllerDeviceMapped
-    //! \brief Controller mapping updated
-    ControllerDeviceMapped  = SDL_CONTROLLERDEVICEREMAPPED,
-
-    /* Touch Events */
-
-    //! \var FingerDown
-    //! \brief Trackpad touched
-    FingerDown              = SDL_FINGERDOWN,
-    //! \var FingerUp
-    //! \brief Trackpad no longer touched
-    FingerUp                = SDL_FINGERUP,
-    //! \var FingerMotion
-    //! \brief Touch drag on trackpad
-    FingerMotion            = SDL_FINGERMOTION,
-
-    /* Gesture Events */
-
-    //! \var DollarGesture
-    DollarGesture           = SDL_DOLLARGESTURE,
-    //! \var DollarRecord
-    DollarRecord            = SDL_DOLLARRECORD,
-    //! \var MultiGesture
-    MultiGesture            = SDL_MULTIGESTURE,
-
-    /* Clipboard Events */
-
-    //! \var ClipboardUpdate
-    //! \brief System clipboard changed
-    ClipboardUpdate         = SDL_CLIPBOARDUPDATE,
-
-    /* Drag and Drop Events */
-
-    //! \var DropFile
-    //! \brief System requests a file open
-    DropFile                = SDL_DROPFILE,
-
-    /* Audio Hotplug Events */
-
-    //! \var AudioDeviceAdded
-    //! \brief New audio device available
-    AudioDeviceAdded        = SDL_AUDIODEVICEADDED,
-    //! \var AudioDeviceRemoved
-    //! \brief Audio device has been disconnected
-    AudioDeviceRemoved      = SDL_AUDIODEVICEREMOVED,
-
-    /* Render Events */
-
-    //! \var RenderTargetsReset
-    //! \brief Render targets reset - their contents must be updated
-    RenderTargetsReset      = SDL_RENDER_TARGETS_RESET,
-    //! \var RenderDeviceReset
-    //! \brief Render device reset - all textures must be recreated
-    RenderDeviceReset       = SDL_RENDER_DEVICE_RESET
+    //!@{
+    //! \brief Render Events
+    RenderTargetsReset = SDL_RENDER_TARGETS_RESET, //!< Render target contents must be updated
+    RenderDeviceReset  = SDL_RENDER_DEVICE_RESET   //!< Device reset, all textures must be recreated
+    //!@}
 };
 
 //! \enum KeyCode
 //! \brief SDL defined virtual key representation
 //! \details Direct mapping to SDL_Keycode, provided for abstraction and
 //!          ease of discovery.
-enum class KeyCode : rdge::uint32
+enum class KeyCode : uint32
 {
     // IMPORTANT - If enum is updated, update ostream operator<< as well
 
@@ -281,7 +211,7 @@ enum class KeyCode : rdge::uint32
 
 //! \enum MouseButton
 //! \brief Represents the different mouse buttons as defined by SDL
-enum class MouseButton : rdge::uint8
+enum class MouseButton : uint8
 {
     // IMPORTANT - If enum is updated, update ostream operator<< as well
 
@@ -779,7 +709,7 @@ bool SetEventState (EventType type, bool enable);
 //!          the custom event on the queue.
 //! \returns Unique identifier for a custom event
 //! \throws RDGE::Exception Custom event pool is exhausted
-rdge::uint32 RegisterCustomEvent (void);
+uint32 RegisterCustomEvent (void);
 
 //! \brief Add a custom event on the queue
 //! \param [in] type Registered event type id
@@ -787,12 +717,10 @@ rdge::uint32 RegisterCustomEvent (void);
 //! \param [in] data1 User defined data pointer
 //! \param [in] data2 User defined data pointer
 //! \throws RDGE::SDLException Error occured while pushing event on the queue
-void QueueCustomEvent (
-                       rdge::uint32 type,
-                       rdge::int32  code,
-                       void*        data1 = nullptr,
-                       void*        data2 = nullptr
-                      );
+void QueueCustomEvent (uint32 type,
+                       int32  code,
+                       void*  data1 = nullptr,
+                       void*  data2 = nullptr);
 
 } // namespace rdge
 

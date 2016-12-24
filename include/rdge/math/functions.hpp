@@ -11,7 +11,7 @@
 #include <limits>
 #include <type_traits>
 
-//! \namespace RDGE Rainbow Drop Game Engine
+//! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 namespace math {
 

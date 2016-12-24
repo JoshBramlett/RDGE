@@ -51,7 +51,7 @@
                               : __FILE__)
 #endif
 
-//! \namespace RDGE Rainbow Drop Game Engine
+//! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
 /***********************************
@@ -66,15 +66,12 @@ void Unused (T&&...) { }
 /       OS Abstraction Types
 ***********************************/
 
-using int8  = std::int8_t;
-using uint8 = std::uint8_t;
-
+using int8   = std::int8_t;
+using uint8  = std::uint8_t;
 using int16  = std::int16_t;
 using uint16 = std::uint16_t;
-
 using int32  = std::int32_t;
 using uint32 = std::uint32_t;
-
 using int64  = std::int64_t;
 using uint64 = std::uint64_t;
 
@@ -84,11 +81,5 @@ using float64 = double;
 
 constexpr float32 qnan32 = std::numeric_limits<float32>::quiet_NaN();
 constexpr float64 qnan64 = std::numeric_limits<float64>::quiet_NaN();
-
-#ifdef _WIN32
-const char PathSeparator = '\\';
-#else
-const char PathSeparator = '/';
-#endif
 
 } // namespace rdge

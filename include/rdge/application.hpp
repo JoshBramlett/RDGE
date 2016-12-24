@@ -33,7 +33,7 @@
 
 #include <string>
 
-//! \namespace RDGE Rainbow Drop Game Engine
+//! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
 //! \struct app_settings
