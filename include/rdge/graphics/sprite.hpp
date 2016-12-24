@@ -1,92 +1,113 @@
-//! \headerfile <rdge/graphics/irenderable2d.hpp>
+//! \headerfile <rdge/graphics/sprite.hpp>
 //! \author Josh Bramlett
 //! \version 0.0.10
-//! \date 12/08/2016
+//! \date 12/23/2016
 
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/graphics/irenderable2d.hpp>
-#include <rdge/gfx/color.hpp>
+#include <rdge/graphics/isprite.hpp>
+#include <rdge/graphics/sprite_batch.hpp>
+#include <rdge/graphics/texture.hpp>
+#include <rdge/graphics/color.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/math/vec3.hpp>
 
 #include <memory>
-#include <vector>
 
-class Srite : IRenderable2D
+//! \namespace RDGE Rainbow Drop Game Engine
+namespace rdge {
+
+//! \class Sprite
+//! \brief Represents a 2D renderable sprite
+class Sprite : public ISprite
 {
 public:
-    math::vec3 position;
-    math::vec2 size;
-    rdge::gfx::color color;
-    std::shared_ptr<rdge::Texture> texture;
-    std::vector<math::vec2> uv;
+    SpriteVertices vertices; //!< Array of vertex attribute data
 
-    std::array<vertex_attribute, 4> Vertices (void)
-    {
-        m_vertices[0].pos = /* xform */ this->position;
-        m_vertices[0].uv = this->uv[0];
-        m_vertices[0].tid = this->texture->UnitID();
-        m_vertices[0].color = static_cast<uint32>(this->color);
+    //! \brief Sprite ctor
+    //! \details Creates a sprite rendered with the provided color.
+    //! \param [in] pos Sprite position
+    //! \param [in] size Sprite size
+    //! \param [in] color Color of all vertices
+    explicit Sprite (const math::vec3& pos, const math::vec2& size, const color& color);
 
-        m_vertices[1].pos = /* xform */ math::vec3(this->position.x,
-                                                   this->position.y + this->size.y,
-                                                   this->position.z);
-        m_vertices[1].uv = this->uv[1];
-        m_vertices[1].tid = this->texture->UnitID();
-        m_vertices[1].color = static_cast<uint32>(this->color);
+    //! \brief Sprite ctor
+    //! \details Creates a sprite rendered using the provided texture.  If no texture
+    //!          coordinates are provided it will be set to span the entire texture.
+    //! \param [in] pos Sprite position
+    //! \param [in] size Sprite size
+    //! \param [in] texture Texture the sprite will use
+    //! \param [in] uv Texture (uv) coordinates
+    explicit Sprite (const math::vec3&        pos,
+                     const math::vec2&        size,
+                     std::shared_ptr<Texture> texture,
+                     const tex_coords&        coords = tex_coords());
 
-        m_vertices[2].pos = /* xform */ math::vec3(this->position.x + this->size.x,
-                                                   this->position.y + this->size.y,
-                                                   this->position.z);
+    //! \brief Sprite dtor
+    ~Sprite (void) noexcept = default;
 
-        m_vertices[2].uv = this->uv[2];
-        m_vertices[2].tid = this->texture->UnitID();
-        m_vertices[2].color = static_cast<uint32>(this->color);
+    //!@{
+    //! \brief Copy and move enabled
+    Sprite (const Sprite&) noexcept = default;
+    Sprite& operator= (const Sprite&) noexcept = default;
+    Sprite (Sprite&&) noexcept;
+    Sprite& operator= (Sprite&&) noexcept;
+    //!@}
 
-        m_vertices[3].pos = /* xform */ math::vec3(this->position.x + this->size.x,
-                                                   this->position.y,
-                                                   this->position.z);
-        m_vertices[3].uv = this->uv[3];
-        m_vertices[3].tid = this->texture->UnitID();
-        m_vertices[3].color = static_cast<uint32>(this->color);
+    //! \brief Draw the sprite using the provided renderer
+    //! \param [in] renderer Render target
+    void Draw (SpriteBatch& renderer) override;
 
-        return m_vertices;
-    }
+/* TODO From Renderer2D - will implement on an as-needed basis
+ *
+ * After some thought (and going through text.cpp), instead of the OO model
+ * so I wouldn't have to reinvent the wheel for common functions, really the
+ * only thing in common is the SpriteVertices.  So why not have helpers
+ * that work only on that object?  So, I don't need to implement as needed,
+ * but instead create a function that will work on these.  This adds the benefit
+ * that if I need batching/simd, it'll be significantly easier.
+
+    //! \brief Set the position of the renderable
+    //! \param [in] position vec3 representing the position
+    void SetPosition (const rdge::math::vec3& position);
+
+    //! \brief Set the size of the renderable
+    //! \param [in] size vec2 representing the size
+    void SetSize (const rdge::math::vec2& size);
+
+    //! \brief Set the color of the renderable
+    //! \param [in] color Color of the renderable
+    //! \param [in] ignore_alpha True will only set the RGB values
+    void SetColor (const rdge::color& color, bool ignore_alpha = true);
+
+    //! \brief Set the texture UV coordinates of the renderable
+    //! \param [in] uv UVCoordinates object
+    void SetUV (const UVCoordinates& uv);
+
+    //! \brief Set the opacity of the renderable
+    //! \details Maps to the alpha value of the color
+    //! \param [in] opacity Alpha channel value [0-255]
+    void SetOpacity (rdge::uint8 opacity);
+
+    //! \brief Set the opacity of the renderable
+    //! \details Maps to the alpha value of the color
+    //! \param [in] opacity Alpha channel value [0.0f-1.0f]
+    void SetOpacity (float opacity);
+
+    //! \brief Set the Z-Index position value
+    //! \param [in] zindex Z-Index value
+    void SetZIndex (float zindex);
+
+    //! \brief Scale the size by the provided multiplier
+    //! \details Current size is a value of 1.0.
+    //! \param [in] scaler Scale value
+    //! \throws RDGE::Exception Scaler is not a positive value
+    void Scale (float scaler);
+*/
 
 private:
-    std::array<vertex_attributes, 4> m_vertices;
+    std::shared_ptr<Texture> m_texture; //!< Texture associated with the sprite
 };
 
-
-
-
-// Scene
-//  --> Layer
-//       --> SpriteBatch
-//            --> Shader
-//  --> Layer
-//       --> SpriteBatch
-//  --> Layer
-//       --> SpriteBatch
-//
-// 1)  Layers and SpriteBatch needs to be decoupled.  A layer should be able to use an
-//     existing SpriteBatch.
-// 2)  Layer in it's new form really only has a single responsibility, which is to
-//     keep the appropriate z-index of the sprites it manages.  I could extend a layer
-//     to have behavior, like ParallaxLayer, which would manage the movement of the
-//     sprite it manages.
-// 3)  If multiple layers reference the same SpriteBatch, it'll need to be known when
-//     the SpriteBatch is created the appropriate size.
-//
-// Object pools
-// 1)  drawable_attributes?  Should a sprite be created from the SpriteBatch, which
-//     assigns a cursor from a pool of drawable attributes?  The benefit could be
-//     that rendering would be faster b/c it could iterate through the pool which
-//     means contiguous memeory.  The sprites themselves must be able to be referenced
-//     outside, (to update position, etc).  Also, I'm thinking a sprite be the main
-//     container for game entities.  Meaning the player should be a sprite, but of course
-//     be referenced even outside the scene.  If chrono enters a cave, and a new scene is
-//     pushed on the stack, his values should persist.
-
+} // namespace rdge

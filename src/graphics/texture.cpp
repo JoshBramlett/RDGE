@@ -1,5 +1,5 @@
 #include <rdge/graphics/texture.hpp>
-#include <rdge/gfx/shaders/shader.hpp>
+#include <rdge/graphics/shader.hpp>
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
 
@@ -7,9 +7,6 @@
 #include <GL/glew.h>
 
 namespace rdge {
-
-// TODO Remove
-using namespace rdge::gfx;
 
 Texture::Texture (void)
 { }

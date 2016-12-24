@@ -1,4 +1,4 @@
-//! \headerfile <rdge/gfx/layers/group.hpp>
+//! \headerfile <rdge/graphics/layers/group.hpp>
 //! \author Josh Bramlett
 //! \version 0.0.7
 //! \date 05/21/2016
@@ -7,15 +7,14 @@
 
 #include <rdge/core.hpp>
 #include <rdge/math/mat4.hpp>
-#include <rdge/gfx/renderable2d.hpp>
-#include <rdge/gfx/renderer2d.hpp>
+#include <rdge/graphics/renderable2d.hpp>
+#include <rdge/graphics/sprite_batch.hpp>
 
 #include <memory>
 #include <vector>
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace rdge {
-namespace gfx {
 
 //! \class Group
 //! \brief Represents a group of renderable objects
@@ -65,7 +64,7 @@ public:
 
     //! \brief Submit all children to the renderer
     //! \param [in] renderer Renderer children will be drawn to
-    virtual void Submit (Renderer2D* renderer) const override;
+    virtual void Submit (SpriteBatch* renderer) const override;
 
     //! \brief Set opacity for all children
     //! \param [in] opacity Alpha channel value [0-255]
@@ -81,7 +80,7 @@ public:
 
     // TODO: This is a hack to get textures to work with groups.  This needs
     //       to be refactored to a more elegant solution.
-    void RegisterTextures (Renderer2D* renderer) const;
+    void RegisterTextures (SpriteBatch* renderer) const;
 
 private:
     //! \typedef RenderableVector Container type for group child renderables
@@ -91,5 +90,4 @@ private:
     rdge::math::mat4 m_transformation;
 };
 
-} // namespace gfx
 } // namespace rdge

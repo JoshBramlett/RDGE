@@ -113,7 +113,7 @@ public:
     //!          sampler in the fragment shader can access.  The minimum required
     //!          as defined by OpenGL is 16.
     //! \returns Number of supported textures in the fragment shader
-    static int32 MaxFragmentShaderUnits (void);
+    static uint32 MaxFragmentShaderUnits (void);
 
 private:
     //! \brief Get the uniform location by name

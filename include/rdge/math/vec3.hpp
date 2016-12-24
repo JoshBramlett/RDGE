@@ -31,7 +31,9 @@ struct vec3
         //, z(0.0f)
     //{ }
 
-    explicit vec3 (float x, float y, float z);
+    // TODO create ctor with two values and default the third to zero
+    //      this is good for defaulting the z when creating a position
+    vec3 (float x, float y, float z);
     //constexpr vec3 (float x, float y, float z)
         //: x(x)
         //, y(y)

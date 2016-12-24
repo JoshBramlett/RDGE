@@ -1,7 +1,6 @@
-#include <rdge/gfx/layers/layer.hpp>
+#include <rdge/graphics/layers/layer.hpp>
 
 using namespace rdge;
-using namespace rdge::gfx;
 
 Layer::Layer (std::unique_ptr<Shader> shader, rdge::math::mat4 projection_matrix)
     : m_shader(std::move(shader))

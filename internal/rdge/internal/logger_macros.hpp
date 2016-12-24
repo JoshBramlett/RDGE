@@ -15,6 +15,8 @@
             rdge::WriteToLogFile(rdge::LogLevel::DEBUG, msg, FILE_NAME, __LINE__); \
             rdge::WriteToConsole(rdge::LogLevel::DEBUG, msg, FILE_NAME, __LINE__); \
         } while (false)
+    #else
+        #define DLOG(x) do { (void) sizeof ((x)); } while (0)
     #endif
 #endif
 

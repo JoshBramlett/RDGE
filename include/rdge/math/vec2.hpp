@@ -54,13 +54,13 @@ struct vec2_t
     //! \brief vec2_t ctor
     //! \param [in] px First value
     //! \param [in] py Second value
-    explicit constexpr vec2_t (T px, T py)
+    constexpr vec2_t (T px, T py)
         : x(px), y(py)
     { }
 
     //! \brief vec2_t ctor
     //! \param [in] scalar Value to initialize all elements
-    explicit constexpr vec2_t (T scalar)
+    constexpr vec2_t (T scalar)
         : x(scalar), y(scalar)
     { }
 
@@ -88,6 +88,9 @@ struct vec2_t
     //! \returns Reference to element
     constexpr T& operator[] (rdge::uint8 index) noexcept
     {
+        // TODO static_assert doesn't work - and the only reason it compiles is b/c of the template,
+        //      so once I actually call this it'll fail.  I'll likely need to remove the constexpr
+        //      and move this to an implementation file so I can use a normal assert
         static_assert(index >= 0 && index < length(), "vec2_t index out of bounds");
         return (&x)[index];
     }

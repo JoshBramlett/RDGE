@@ -1,4 +1,4 @@
-//! \headerfile <rdge/gfx/rect.hpp>
+//! \headerfile <rdge/graphics/rect.hpp>
 //! \author Josh Bramlett
 //! \version 0.0.10
 //! \date 11/22/2016
@@ -23,8 +23,8 @@
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/gfx/point.hpp>
-#include <rdge/gfx/size.hpp>
+#include <rdge/graphics/point.hpp>
+#include <rdge/graphics/size.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/math/vec4.hpp>
 
@@ -32,9 +32,8 @@
 
 #include <ostream>
 
-//! \namespace RDGE Rainbow Drop Game Engine
+//! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
-namespace gfx {
 
 template <typename T, typename = typename std::enable_if_t<std::is_arithmetic<T>::value>>
 struct rect_t;
@@ -314,5 +313,4 @@ using RectF = rect_t<float>;
 
 
 
-} // namespace gfx
 } // namespace rdge

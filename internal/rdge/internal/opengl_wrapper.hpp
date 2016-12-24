@@ -15,17 +15,18 @@
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace rdge {
-namespace gfx {
 namespace opengl {
 
 // Verify OpenGL / RDGE type compatibility
-static_assert(std::is_same<GLubyte,  rdge::uint8>::value,  "GLubyte != rdge::uint8");
-static_assert(std::is_same<GLbyte,   rdge::int8>::value,   "GLbyte != rdge::int8");
-static_assert(std::is_same<GLushort, rdge::uint16>::value, "GLushort != rdge::uint16");
-static_assert(std::is_same<GLshort,  rdge::int16>::value,  "GLshort != rdge::int16");
-static_assert(std::is_same<GLuint,   rdge::uint32>::value, "GLuint != rdge::uint32");
-static_assert(std::is_same<GLint,    rdge::int32>::value,  "GLint != rdge::int32");
-static_assert(std::is_same<GLsizei,  rdge::int32>::value,  "GLsizei != rdge::int32");
+// TODO Move to cpp file, so it'll get built
+static_assert(std::is_same<GLubyte,   rdge::uint8>::value,  "GLubyte != rdge::uint8");
+static_assert(std::is_same<GLbyte,    rdge::int8>::value,   "GLbyte != rdge::int8");
+static_assert(std::is_same<GLushort,  rdge::uint16>::value, "GLushort != rdge::uint16");
+static_assert(std::is_same<GLshort,   rdge::int16>::value,  "GLshort != rdge::int16");
+static_assert(std::is_same<GLuint,    rdge::uint32>::value, "GLuint != rdge::uint32");
+static_assert(std::is_same<GLint,     rdge::int32>::value,  "GLint != rdge::int32");
+static_assert(std::is_same<GLsizei,   rdge::int32>::value,  "GLsizei != rdge::int32");
+static_assert(std::is_same<GLboolean, rdge::uint8>::value,  "GLboolean != rdge::uint8");
 
 static_assert(std::is_same<GLfloat, float>::value, "GLfloat != float");
 static_assert(GL_FALSE == false, "GL_FALSE != false");
@@ -44,6 +45,9 @@ gl_throw_on_error (const char* func)
     }
 }
 
+constexpr GLboolean
+to_glbool (bool value) { return value ? GL_TRUE : GL_FALSE; }
+
 #ifdef RDGE_DEBUG
 #define GL_CHECK_ERROR(x) \
 do { \
@@ -53,6 +57,57 @@ do { \
 #else
 #define GL_CHECK_ERROR(x) x
 #endif
+
+/******************************************************************
+ *                      OpenGL Get Values
+ *****************************************************************/
+
+// TODO: glGet* takes arrays as params, so this may need refactoring
+//       depending on use
+
+//! \brief Query OpenGL for the boolean value of a given parameter
+//! \param [in] pname Parameter name
+//! \see https://www.opengl.org/sdk/docs/man2/xhtml/glGet.xml
+inline bool
+GetBooleanValue (rdge::uint32 pname)
+{
+    GLboolean value;
+    GL_CHECK_ERROR(glGetBooleanv(pname, &value));
+    return (value == GL_TRUE);
+}
+
+//! \brief Query OpenGL for the float value of a given parameter
+//! \param [in] pname Parameter name
+//! \see https://www.opengl.org/sdk/docs/man2/xhtml/glGet.xml
+inline float
+GetFloatValue (rdge::uint32 pname)
+{
+    GLfloat value;
+    GL_CHECK_ERROR(glGetFloatv(pname, &value));
+    return value;
+}
+
+//! \brief Query OpenGL for the integer value of a given parameter
+//! \param [in] pname Parameter name
+//! \see https://www.opengl.org/sdk/docs/man2/xhtml/glGet.xml
+inline rdge::int32
+GetIntegerValue (rdge::uint32 pname)
+{
+    GLint value;
+    GL_CHECK_ERROR(glGetIntegerv(pname, &value));
+    return static_cast<rdge::int32>(value);
+}
+
+//! \brief Query OpenGL for the string value of a given parameter
+//! \param [in] name Parameter name
+//! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glGetString.xml
+inline std::string
+GetStringValue (rdge::uint32 name)
+{
+    const unsigned char* result;
+    GL_CHECK_ERROR(result = glGetString(name));
+    return reinterpret_cast<const char*>(result);
+}
 
 /******************************************************************
  *                          Shaders
@@ -350,21 +405,27 @@ inline void DisableVertexAttribute(rdge::uint32 index)
 //! \param [in] offset Offset of the first component of the first attribute
 //! \see https://www.opengl.org/sdk/docs/man/html/glVertexAttribPointer.xhtml
 inline void
-SetVertexAttributePointer (
-                           rdge::uint32 index,
-                           rdge::int32  size,
-                           rdge::uint32 type,
-                           bool         normalized,
-                           rdge::uint32 stride,
-                           void*        offset
-                          )
+VertexAttribPointer (uint32 index,
+                     int32  size,
+                     uint32 type,
+                     bool   normalized,
+                     uint32 stride,
+                     void*  offset)
 {
-    GL_CHECK_ERROR(glVertexAttribPointer(
-                                         index, size, type,
-                                         static_cast<rdge::uint32>(normalized),
-                                         stride, offset
-                                        ));
+    GL_CHECK_ERROR(glVertexAttribPointer(index, size, type, to_glbool(normalized), stride, offset));
 }
+
+inline void
+VertexAttribIPointer (uint32 index,
+                      int32  size,
+                      uint32 type,
+                      uint32 stride,
+                      void*  offset)
+{
+    GL_CHECK_ERROR(glVertexAttribIPointer(index, size, type, stride, offset));
+}
+
+// TODO glVertexAttribLPointer missing - used for doubles
 
 //! \brief Direct map to glDrawElements
 //! \details Renders primitives from array data.
@@ -454,7 +515,7 @@ DeleteBuffers (rdge::uint32 n, rdge::uint32* buffers)
 //! \param [in] usage Expected usage pattern (e.g. Read, Write, etc.)
 //! \see https://www.opengl.org/sdk/docs/man/html/glBufferData.xhtml
 inline void
-SetBufferData (rdge::uint32 target, std::ptrdiff_t size, const void* data, rdge::uint32 usage)
+SetBufferData (uint32 target, std::ptrdiff_t size, const void* data, uint32 usage)
 {
     GL_CHECK_ERROR(glBufferData(target, size, data, usage));
 }
@@ -467,7 +528,7 @@ SetBufferData (rdge::uint32 target, std::ptrdiff_t size, const void* data, rdge:
 //! \returns Pointer to the data store
 //! \see https://www.opengl.org/sdk/docs/man2/xhtml/glMapBuffer.xml
 inline void*
-GetBufferPointer (rdge::uint32 target, rdge::uint32 access)
+GetBufferPointer (uint32 target, uint32 access)
 {
     void* result = nullptr;
     GL_CHECK_ERROR(result = glMapBuffer(target, access));
@@ -480,12 +541,14 @@ GetBufferPointer (rdge::uint32 target, rdge::uint32 access)
 //! \param [in] target The target buffer object being unmapped
 //! \see https://www.opengl.org/sdk/docs/man2/xhtml/glMapBuffer.xml
 inline bool
-ReleaseBufferPointer (rdge::uint32 target)
+ReleaseBufferPointer (uint32 target)
 {
-    rdge::uint32 result;
+    uint32 result;
     GL_CHECK_ERROR(result = glUnmapBuffer(target));
     return result == GL_TRUE;
 }
+
+
 
 /******************************************************************
  *                         Frame Buffers
@@ -655,56 +718,6 @@ inline void DeleteTextures(rdge::uint32 size, rdge::uint32* textures)
 }
 
 /******************************************************************
- *                      OpenGL Get Values
- *****************************************************************/
-
-// TODO: These take arrays as params, so this will need refactoring
-
-//! \brief Query OpenGL for the boolean value of a given parameter
-//! \param [in] pname Parameter name
-//! \see https://www.opengl.org/sdk/docs/man2/xhtml/glGet.xml
-inline bool
-GetBooleanValue (rdge::uint32 pname)
-{
-    GLboolean value;
-    GL_CHECK_ERROR(glGetBooleanv(pname, &value));
-    return (value == GL_TRUE);
-}
-
-//! \brief Query OpenGL for the float value of a given parameter
-//! \param [in] pname Parameter name
-//! \see https://www.opengl.org/sdk/docs/man2/xhtml/glGet.xml
-inline float
-GetFloatValue (rdge::uint32 pname)
-{
-    GLfloat value;
-    GL_CHECK_ERROR(glGetFloatv(pname, &value));
-    return value;
-}
-
-//! \brief Query OpenGL for the integer value of a given parameter
-//! \param [in] pname Parameter name
-//! \see https://www.opengl.org/sdk/docs/man2/xhtml/glGet.xml
-inline rdge::int32
-GetIntegerValue (rdge::uint32 pname)
-{
-    GLint value;
-    GL_CHECK_ERROR(glGetIntegerv(pname, &value));
-    return static_cast<rdge::int32>(value);
-}
-
-//! \brief Query OpenGL for the string value of a given parameter
-//! \param [in] name Parameter name
-//! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glGetString.xml
-inline std::string
-GetStringValue (rdge::uint32 name)
-{
-    const unsigned char* result;
-    GL_CHECK_ERROR(result = glGetString(name));
-    return reinterpret_cast<const char*>(result);
-}
-
-/******************************************************************
  *                     OpenGL Render Phase
  *****************************************************************/
 
@@ -788,5 +801,4 @@ inline void RenderbufferStorage(rdge::uint32 target, rdge::uint32 format, rdge::
 }
 
 } // namespace opengl
-} // namespace gfx
 } // namespace rdge

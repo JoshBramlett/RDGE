@@ -1,12 +1,20 @@
-#include <rdge/gfx/color.hpp>
+#include <rdge/graphics/color.hpp>
 #include <rdge/internal/exception_macros.hpp>
 
 #include <regex>
 #include <iomanip>
 #include <sstream>
 
-using namespace rdge;
-using namespace rdge::gfx;
+namespace rdge {
+
+const color color::BLACK (0, 0, 0);
+const color color::WHITE (255, 255, 255);
+const color color::RED (255, 0, 0);
+const color color::GREEN (0, 255, 0);
+const color color::BLUE (0, 0, 255);
+const color color::YELLOW (255, 255, 0);
+const color color::CYAN (0, 255, 255);
+const color color::MAGENTA (255, 0, 255);
 
 /* static */ color
 color::FromRGB (const std::string& value)
@@ -71,15 +79,14 @@ color::FromRGBA (const std::string& value)
 
     RDGE_THROW("Color parameter could not be parsed");
 }
-namespace rdge { namespace gfx {
-    // TODO namespaces need to be re-added - getting linker errors without it
-std::ostream& operator<< (std::ostream& os, const rdge::gfx::color& value)
+
+std::ostream& operator<< (std::ostream& os, const color& value)
 {
-    return os << rdge::to_string(value);
+    return os << to_string(value);
 }
-}}
+
 std::string
-rdge::to_string (const color& value)
+to_string (const color& value)
 {
     // without static cast output will display the char values
     std::ostringstream ss;
@@ -92,3 +99,5 @@ rdge::to_string (const color& value)
 
     return ss.str();
 }
+
+} // namespace rdge

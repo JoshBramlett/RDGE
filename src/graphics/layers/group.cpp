@@ -1,4 +1,4 @@
-#include <rdge/gfx/layers/group.hpp>
+#include <rdge/graphics/layers/group.hpp>
 #include <rdge/math/functions.hpp>
 #include <rdge/math/vec3.hpp>
 
@@ -7,7 +7,6 @@
 #include <algorithm>
 
 using namespace rdge;
-using namespace rdge::gfx;
 using namespace rdge::math;
 
 Group::Group (const rdge::math::mat4& transformation)
@@ -98,7 +97,7 @@ Group::RotateOnCenter (float angle)
 }
 
 void
-Group::Submit (Renderer2D* renderer) const
+Group::Submit (SpriteBatch* renderer) const
 {
     renderer->PushTransformation(m_transformation);
 
@@ -141,7 +140,7 @@ Group::SetZIndex (float zindex)
 }
 
 void
-Group::RegisterTextures (Renderer2D* renderer) const
+Group::RegisterTextures (SpriteBatch* renderer) const
 {
     for (auto child : m_children)
     {

@@ -6,7 +6,7 @@
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/gfx/size.hpp>
+#include <rdge/graphics/size.hpp>
 
 #include <SDL.h>
 
@@ -64,7 +64,7 @@ public:
     //! \param [in] depth Pixel depth (bits per pixel)
     //! \throws rdge::SDLException Image initialization failed
     //! \note A depth of 24bpp creates an RGB surface, 32bpp creates an RGBA surface
-    explicit Surface (const rdge::gfx::size& size, PixelDepth depth = PixelDepth::BPP_32);
+    explicit Surface (const rdge::size& size, PixelDepth depth = PixelDepth::BPP_32);
 
     //! \brief Surface ctor
     //! \details Create a surface from pixel data.  The object will take ownership
@@ -76,7 +76,7 @@ public:
     //! \throws rdge::SDLException Image initialization failed
     //! \note A depth of 24bpp creates an RGB surface, 32bpp creates an RGBA surface
     explicit Surface (std::unique_ptr<uint8[]> pixels,
-                      const rdge::gfx::size&   size,
+                      const rdge::size&        size,
                       PixelDepth               depth = PixelDepth::BPP_32);
 
     //! \brief Surface dtor
@@ -92,7 +92,7 @@ public:
 
     //! \brief User defined conversion to a raw SDL_Surface pointer
     //! \warning Be careful not to dereference the pointer after the
-    //!          parent Font object falls out of scope
+    //!          parent Surface object falls out of scope
     //! \returns const pointer to a native SDL_Surface
     explicit operator const SDL_Surface* (void) const noexcept
     {
@@ -109,7 +109,7 @@ public:
 
     //! \brief Get the size (width and height) of the surface
     //! \return Size structure
-    rdge::gfx::size Size (void) const noexcept;
+    rdge::size Size (void) const noexcept;
 
     //! \brief Get the internal pixel format of the surface
     //! \details Value represents the SDL_PixelFormatEnum value

@@ -111,7 +111,7 @@ SpriteSheet::SpriteSheet (const std::string& path)
                 throw std::invalid_argument(ss.str());
             }
 
-            rdge::gfx::sprite_uv result;
+            rdge::tex_coords result;
             result.top_left     = rdge::math::vec2(to_uv(x, surface_size.w),
                                                    to_uv(y, surface_size.h));
             result.top_right    = rdge::math::vec2(to_uv(x + w, surface_size.w),
@@ -157,7 +157,7 @@ SpriteSheet::SpriteSheet (const std::string& path)
     }
 }
 
-rdge::gfx::sprite_uv
+rdge::tex_coords
 SpriteSheet::operator[] (const std::string& name)
 {
     // TODO stopgap

@@ -8,19 +8,15 @@
 
 #include <rdge/system/window.hpp>
 
-#include <rdge/gfx/buffers/vertex_array.hpp>
-#include <rdge/gfx/buffers/vertex_buffer.hpp>
-#include <rdge/gfx/buffers/index_buffer.hpp>
 #include <rdge/gfx/layers/layer2d.hpp>
 #include <rdge/gfx/layers/group.hpp>
-#include <rdge/gfx/shaders/shader.hpp>
-#include <rdge/gfx/renderer2d.hpp>
 #include <rdge/gfx/renderable2d.hpp>
 #include <rdge/gfx/sprite.hpp>
 #include <rdge/gfx/text.hpp>
-#include <rdge/graphics/texture.hpp>
 #include <rdge/gfx/rect.hpp>
 #include <rdge/gfx/point.hpp>
+#include <rdge/graphics/shader.hpp>
+#include <rdge/graphics/texture.hpp>
 
 #include <rdge/math/random.hpp>
 #include <rdge/math/vec2.hpp>
@@ -47,7 +43,7 @@
 #include <nlohmann/json.hpp>
 #include <array>
 
-using namespace rdge::gfx;
+using namespace rdge;
 using namespace rdge::math;
 using json = nlohmann::json;
 
@@ -80,11 +76,6 @@ int main ()
 {
     try
     {
-        rdge::app_settings s;
-        std::cout << s.window_title << std::endl;
-
-
-        //auto config = rdge::LoadAppSettings("/Users/jbramlett/Documents/Projects/RDGE/debug/tutorials/opengl/ex01_triangle/config.json");
         auto config = rdge::LoadAppSettings("config.json");
         std::cout << "enable_jpg=" << config.enable_jpg << std::endl
                   << "enable_png=" << config.enable_png << std::endl
@@ -102,13 +93,13 @@ int main ()
         // 1 - initialize SDL
         rdge::Application app(config);
 
-        rdge::SetEventState(rdge::EventType::FingerDown, false);
-        rdge::SetEventState(rdge::EventType::FingerUp, false);
-        rdge::SetEventState(rdge::EventType::FingerMotion, false);
-        rdge::SetEventState(rdge::EventType::MultiGesture, false);
+        SetEventState(EventType::FingerDown, false);
+        SetEventState(EventType::FingerUp, false);
+        SetEventState(EventType::FingerMotion, false);
+        SetEventState(EventType::MultiGesture, false);
 
-        rdge::WriteToLogFile(rdge::LogLevel::DEBUG, "SDL v" + app.SDLVersion());
-        rdge::WriteToConsole(rdge::LogLevel::DEBUG, "Running ex01_triangle");
+        WriteToLogFile(LogLevel::DEBUG, "SDL v" + app.SDLVersion());
+        WriteToConsole(LogLevel::DEBUG, "Running ex01_triangle");
 
         // 2 - create window and OpenGL context
         rdge::Window window (
@@ -120,14 +111,14 @@ int main ()
                              true  // vsync
                             );
 
-        //auto v = RDGE::Util::read_text_file("basic.vert");
-        //auto f = RDGE::Util::read_text_file("basic.frag");
-        //auto shader = std::make_unique<Shader>(v, f);
+        auto v = rdge::util::read_text_file("basic.vert");
+        auto f = rdge::util::read_text_file("basic.frag");
+        auto shader = std::make_unique<Shader>(v, f);
         //auto shader = Shader::SpriteBatch();
 
         auto ortho = mat4::orthographic(-16.0f, 16.0f, -9.0f, 9.0f, -1.0f, 1.0f);
-        //Layer2D layer(std::move(shader), ortho, 1.0f, 500);
-        Layer2D layer(Shader::SpriteBatch(), ortho, 1.0f, 500);
+        Layer2D layer(std::move(shader), ortho, 1.0f, 500);
+        //Layer2D layer(Shader::SpriteBatch(), ortho, 1.0f, 500);
 
 /*
         auto rotation_angle = 0.0f;
@@ -173,7 +164,7 @@ int main ()
                 auto random = rng.Next(2);
                 if (random == 0)
                 {
-                    layer.AddRenderable(std::make_shared<Sprite>(x, y, 1.95f, 1.95f, rdge::gfx::color::CYAN()));
+                    layer.AddRenderable(std::make_shared<Sprite>(x, y, 1.95f, 1.95f, rdge::color::CYAN()));
                 }
                 else if (random == 1)
                 {
@@ -188,7 +179,7 @@ int main ()
             }
         }
 
-        auto myText = std::make_shared<Text>("Josh", -14.0f, -1.0f, font, rdge::gfx::color::BLACK());
+        auto myText = std::make_shared<Text>("Josh", -14.0f, -1.0f, font, rdge::color::BLACK());
         layer.AddRenderable(myText);
 
         bool running = true;

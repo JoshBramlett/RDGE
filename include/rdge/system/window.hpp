@@ -6,8 +6,9 @@
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/gfx/color.hpp>
-#include <rdge/gfx/point.hpp>
+#include <rdge/application.hpp>
+#include <rdge/graphics/color.hpp>
+#include <rdge/graphics/point.hpp>
 #include <rdge/math/vec4.hpp>
 #include <rdge/assets/surface.hpp>
 
@@ -77,6 +78,9 @@ public:
     //! \var MIN_GL_CONTEXT_MINOR Minumum supported OpenGL context minor version
     static constexpr rdge::int32 MIN_GL_CONTEXT_MINOR = 3;
 
+    // TODO document
+    explicit Window (const app_settings& settings);
+
     //! \brief Window ctor
     //! \details Initialize SDL window and renderer
     //! \param [in] title Window title
@@ -126,13 +130,13 @@ public:
 
     //! \brief Get the window size
     //! \return Size structure
-    rdge::gfx::size Size (void) const;
+    rdge::size Size (void) const;
 
     //! \brief Get the window's drawable size
     //! \details The drawable size can differ from the window size for platforms
     //!          which have high DPI support.
     //! \return Size structure
-    rdge::gfx::size DrawableSize (void) const;
+    rdge::size DrawableSize (void) const;
 
     //! \brief Get the window width
     //! \return Width of the window
@@ -153,7 +157,7 @@ public:
     //! \brief Get the window's target aspect ratio
     //! \return Size representing the aspect ratio
     //TODO Return ivec2 when available
-    const rdge::gfx::size& TargetAspectRatio (void) const { return m_targetAspectRatio; }
+    const rdge::size& TargetAspectRatio (void) const { return m_targetAspectRatio; }
 
     //! \brief Return the SDL_Window pointer
     //! \details Raw pointer is returned so caller must ensure
@@ -172,12 +176,12 @@ public:
 
     //! \brief Set the cursor location
     //! \param [in] location Point containing the x and y coordinates
-    void SetCursorLocation (const rdge::gfx::point& location);
+    void SetCursorLocation (const rdge::point& location);
 
     //! \brief Set the background color
     //! \details Color presented to the screen before any drawing takes place
     //! \param [in] color Color structure
-    void SetClearColor (const rdge::gfx::color& color);
+    void SetClearColor (const rdge::color& color);
 
     //! \brief Calculates and sets the window's drawing viewport
     //! \details This should never be called directly.  It is used by the
@@ -224,7 +228,7 @@ private:
 
     rdge::uint32    m_targetWidth;
     rdge::uint32    m_targetHeight;
-    rdge::gfx::size m_targetAspectRatio;
+    rdge::size m_targetAspectRatio;
 };
 
 } // namespace rdge

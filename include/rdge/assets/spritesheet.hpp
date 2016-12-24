@@ -7,7 +7,7 @@
 
 #include <rdge/core.hpp>
 #include <rdge/assets/surface.hpp>
-#include <rdge/gfx/sprite.hpp>
+#include <rdge/graphics/isprite.hpp>
 
 #include <memory>
 #include <string>
@@ -67,9 +67,9 @@ public:
     //! \brief SpriteSheet Subscript Operator
     //! \details Retrieves the sprite uv data by name
     //! \param [in] name Name of the element
-    //! \returns Associated sprite_uv
+    //! \returns Associated tex_coords
     //! \throws rdge::Exception Element is not located
-    rdge::gfx::sprite_uv operator[] (const std::string& name);
+    rdge::tex_coords operator[] (const std::string& name);
 
     //! \brief Get the surface specified in the config
     //! \returns Shared pointer to the loaded surface
@@ -77,7 +77,7 @@ public:
 
 private:
     std::shared_ptr<rdge::Surface> m_surface;
-    std::unordered_map<std::string, rdge::gfx::sprite_uv> m_elements;
+    std::unordered_map<std::string, rdge::tex_coords> m_elements;
 };
 
 } // namespace assets

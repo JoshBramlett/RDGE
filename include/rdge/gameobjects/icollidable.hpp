@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <rdge/gfx/rect.hpp>
+#include <rdge/graphics/rect.hpp>
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace rdge {
@@ -23,7 +23,7 @@ public:
     //! \details The AABB (Axis aligned bounding box) that has parallel edges
     //!          to both the x and y axis
     //! \returns AABB Rect object
-    virtual rdge::gfx::rect CollisionAABB (void) const = 0;
+    virtual rdge::rect CollisionAABB (void) const = 0;
 };
 
 } // namespace gameobjects

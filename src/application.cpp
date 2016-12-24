@@ -265,6 +265,11 @@ rdge::LoadAppSettings (const std::string& path)
             settings.fullscreen = j["fullscreen"];
         }
 
+        if (j["resizable"].is_boolean())
+        {
+            settings.resizable = j["resizable"];
+        }
+
         if (j["use_vsync"].is_boolean())
         {
             settings.use_vsync = j["use_vsync"];

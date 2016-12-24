@@ -13,8 +13,10 @@
 
 namespace {
 
+using namespace rdge;
+
 uint32
-Shader::Compile (ShaderType shader_type, const std::string& source)
+Compile (ShaderType shader_type, const std::string& source)
 {
     uint32 shader = opengl::CreateShader(static_cast<uint32>(shader_type));
 
@@ -34,9 +36,9 @@ Shader::Compile (ShaderType shader_type, const std::string& source)
         glDeleteShader(shader);
 
         std::ostringstream ss;
-        ss << "Shader compilation failed. "
-           << "type=" << shader_type
-           << "info=" << error.data();
+        ss << "Shader compilation failed."
+           << " type=" << shader_type
+           << " info=" << error.data();
 
         GL_THROW(ss.str(), "", 0);
     }
@@ -45,7 +47,7 @@ Shader::Compile (ShaderType shader_type, const std::string& source)
 }
 
 uint32
-Shader::Link (const std::vector<uint32>& shaders)
+Link (const std::vector<uint32>& shaders)
 {
     uint32 program = opengl::CreateProgram();
 
@@ -67,8 +69,8 @@ Shader::Link (const std::vector<uint32>& shaders)
         glGetProgramInfoLog(program, length, &length, &error[0]);
 
         std::ostringstream ss;
-        ss << "Program linking failed. "
-           << "info=" << error.data();
+        ss << "Program linking failed."
+           << " info=" << error.data();
 
         GL_THROW(ss.str(), "", 0);
     }
@@ -125,7 +127,8 @@ Shader::operator= (Shader&& rhs) noexcept
 void
 Shader::Enable (void) const
 {
-    // TODO Add assert
+    SDL_assert(m_programId != 0);
+
     opengl::UseProgram(m_programId);
 }
 
@@ -192,12 +195,12 @@ Shader::FromFile (const char* restrict vert_path, const char* restrict frag_path
     return Shader(v, f);
 }
 
-/* static */ int32
+/* static */ uint32
 Shader::MaxFragmentShaderUnits (void)
 {
-    static int32 max_units = -1;
+    static uint32 max_units = 0;
 
-    if (max_units < 0)
+    if (max_units == 0)
     {
         max_units = opengl::GetIntegerValue(GL_MAX_TEXTURE_IMAGE_UNITS);
     }
@@ -205,7 +208,7 @@ Shader::MaxFragmentShaderUnits (void)
     return max_units;
 }
 
-rdge::int32
+int32
 Shader::GetUniformLocation (const std::string& name)
 {
     auto it = m_uniforms.find(name);

@@ -52,8 +52,9 @@ struct app_settings
     uint32      target_width  = 960;    //!< Target drawing size width
     uint32      target_height = 540;    //!< Target drawing size height
     bool        fullscreen    = false;  //!< Load the window in full screen mode
+    bool        resizable     = false;  //!< Allow window to be resized
     bool        use_vsync     = false;  //!< Enable vsync (if available)
-    uint32      target_fps    = 60;     //!< Target frames per second
+    uint32      target_fps    = 60;     //!< Target frames per second (ignored if use_vsync enabled)
 
     uint32 min_log_level  = 2; //!< Minimum log level
 };

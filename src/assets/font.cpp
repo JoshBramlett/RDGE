@@ -2,15 +2,13 @@
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/hints.hpp>
 
-using namespace rdge;
-using namespace rdge::assets;
+namespace rdge {
 
 Font::Font (TTF_Font* font)
     : m_font(font)
 { }
 
 Font::Font (const std::string& file, uint32 point_size, int64 index)
-    : m_font(nullptr)
 {
     if (TTF_WasInit() == 0)
     {
@@ -38,9 +36,8 @@ Font::~Font (void) noexcept
 }
 
 Font::Font (Font&& rhs) noexcept
-    : m_font(rhs.m_font)
 {
-    rhs.m_font = nullptr;
+    std::swap(m_font, rhs.m_font);
 }
 
 Font&
@@ -48,13 +45,7 @@ Font::operator= (Font&& rhs) noexcept
 {
     if (this != &rhs)
     {
-        if (m_font != nullptr)
-        {
-            TTF_CloseFont(m_font);
-        }
-
-        m_font = rhs.m_font;
-        rhs.m_font = nullptr;
+        std::swap(m_font, rhs.m_font);
     }
 
     return *this;
@@ -107,7 +98,7 @@ Font::IsMonospaced (void) const
     return TTF_FontFaceIsFixedWidth(m_font);
 }
 
-rdge::gfx::size
+rdge::size
 Font::SampleSizeUTF8 (const std::string& text)
 {
     if (UNLIKELY(!m_font))
@@ -121,14 +112,14 @@ Font::SampleSizeUTF8 (const std::string& text)
         SDL_THROW("Failed to sample surface size", "TTF_SizeUTF8");
     }
 
-    return rdge::gfx::size(w, h);
+    return rdge::size(w, h);
 }
 
 std::shared_ptr<Surface>
-Font::RenderUTF8 (const std::string&      text,
-                  const rdge::gfx::color& color,
-                  Font::RenderMode        mode,
-                  const rdge::gfx::color& background)
+Font::RenderUTF8 (const std::string& text,
+                  const rdge::color& color,
+                  Font::RenderMode   mode,
+                  const rdge::color& background)
 {
     if (UNLIKELY(!m_font))
     {
@@ -158,3 +149,5 @@ Font::RenderUTF8 (const std::string&      text,
 
     return std::make_shared<Surface>(surface);
 }
+
+} // namespace rdge

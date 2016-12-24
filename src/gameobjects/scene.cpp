@@ -111,7 +111,7 @@ Scene::AddEntity (const std::string& id, const std::shared_ptr<IEntity>& entity)
 }
 
 void
-Scene::AddLayer (const std::string& id, const std::shared_ptr<rdge::gfx::Layer>& layer)
+Scene::AddLayer (const std::string& id, const std::shared_ptr<rdge::Layer>& layer)
 {
     DLOG("Adding layer to scene.  id=" + id);
 
@@ -134,7 +134,7 @@ Scene::GetEntity (const std::string& id) const
     return iter->second;
 }
 
-std::shared_ptr<rdge::gfx::Layer>
+std::shared_ptr<rdge::Layer>
 Scene::GetLayer (const std::string& id) const
 {
     auto iter = m_layers.find(id);

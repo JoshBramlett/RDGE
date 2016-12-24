@@ -1,13 +1,11 @@
 #include <gtest/gtest.h>
 #include <gtest/gtest-death-test.h>
 
-#include <rdge/gfx/color.hpp>
-//#include <rdge/util/exception.hpp>
+#include <rdge/graphics/color.hpp>
 
 #include <exception>
 
 using namespace rdge;
-using namespace rdge::gfx;
 
 TEST(ColorTest, HandlesFromRGBException)
 {
@@ -27,16 +25,16 @@ TEST(ColorTest, HandlesFromRGBException)
 TEST(ColorTest, HandlesFromRGBSuccess)
 {
     auto test_a = color::FromRGB("#FFFFFF");
-    EXPECT_TRUE(test_a == color::WHITE());
+    EXPECT_TRUE(test_a == color::WHITE);
 
     auto test_b = color::FromRGB("FFFFFF");
-    EXPECT_TRUE(test_b == color::WHITE());
+    EXPECT_TRUE(test_b == color::WHITE);
 
     auto test_c = color::FromRGB("ff00ff");
-    EXPECT_TRUE(test_c == color::MAGENTA());
+    EXPECT_TRUE(test_c == color::MAGENTA);
 
     auto test_d = color::FromRGB("000000");
-    EXPECT_TRUE(test_d == color::BLACK());
+    EXPECT_TRUE(test_d == color::BLACK);
 }
 
 TEST(ColorTest, HandlesFromRGBAException)
@@ -57,16 +55,16 @@ TEST(ColorTest, HandlesFromRGBAException)
 TEST(ColorTest, HandlesFromRGBASuccess)
 {
     auto test_a = color::FromRGBA("#FFFFFFFF");
-    EXPECT_TRUE(test_a == color::WHITE());
+    EXPECT_TRUE(test_a == color::WHITE);
 
     auto test_b = color::FromRGBA("FFFFFFFF");
-    EXPECT_TRUE(test_b == color::WHITE());
+    EXPECT_TRUE(test_b == color::WHITE);
 
     auto test_c = color::FromRGBA("ff00ffff");
-    EXPECT_TRUE(test_c == color::MAGENTA());
+    EXPECT_TRUE(test_c == color::MAGENTA);
 
     auto test_d = color::FromRGBA("000000FF");
-    EXPECT_TRUE(test_d == color::BLACK());
+    EXPECT_TRUE(test_d == color::BLACK);
 
     auto test_e = color::FromRGBA("070d1564");
     EXPECT_TRUE(test_e == color(7, 13, 21, 100));

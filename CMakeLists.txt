@@ -13,6 +13,7 @@ set (LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 set (RDGE_INCLUDE_DIR ${RDGE_SOURCE_DIR}/include)
 #set (RDGE_LINK_DIR ${RDGE_SOURCE_DIR}/lib)
 
+
 # Echo build information
 message (STATUS "RDGE v${RDGE_VERSION_MAJOR}.${RDGE_VERSION_MINOR}.${RDGE_VERSION_PACKAGE}")
 message (STATUS "System:      ${CMAKE_SYSTEM_NAME} v${CMAKE_SYSTEM_VERSION}")
@@ -71,24 +72,23 @@ add_library (
              src/assets/spritesheet.cpp
              src/assets/surface.cpp
              src/events/event.cpp
-             src/gameobjects/scene.cpp
-             src/gameobjects/game.cpp
-             src/gfx/color.cpp
-             #src/gfx/renderer2d.cpp
-             src/graphics/renderer2d.cpp
-             src/gfx/shaders/shader.cpp
-             src/gfx/sprite.cpp
-             src/gfx/text.cpp
+
+             #src/gameobjects/scene.cpp
+             #src/gameobjects/game.cpp
+
+             src/graphics/color.cpp
+             src/graphics/isprite.cpp
+             src/graphics/sprite_batch.cpp
+             src/graphics/shader.cpp
+             src/graphics/sprite.cpp
+             src/graphics/text.cpp
              src/graphics/texture.cpp
-             src/gfx/renderable2d.cpp
-             src/gfx/buffers/vertex_array.cpp
-             src/gfx/buffers/vertex_buffer.cpp
-             src/gfx/buffers/index_buffer.cpp
-             src/gfx/layers/layer.cpp
-             src/gfx/layers/layer2d.cpp
-             src/gfx/layers/group.cpp
-             #src/controls/control.cpp --> src/gfx/ui/widget.cpp
-             #src/controls/button.cpp  --> src/gfx/ui/button.cpp
+             #src/graphics/layers/layer.cpp
+             #src/graphics/layers/layer2d.cpp
+             #src/graphics/layers/group.cpp
+             #src/controls/control.cpp --> src/graphics/ui/widget.cpp
+             #src/controls/button.cpp  --> src/graphics/ui/button.cpp
+
              src/math/random.cpp
              src/math/mat4.cpp
              src/math/vec3.cpp
@@ -107,16 +107,17 @@ target_link_libraries (RDGE
                        ${GLEW_LIBRARIES}
                        ${OPENGL_LIBRARIES})
 
-add_subdirectory (tutorials/opengl/ex01_triangle)
+add_subdirectory (tutorials/01_hello_rect)
+
+# deprecated
+#add_subdirectory (tutorials/opengl/ex01_triangle)
+#add_subdirectory (examples/pong)
 #add_subdirectory (examples/glpong)
 #add_subdirectory (examples/gui)
 
-# deprecated
-#add_subdirectory (examples/pong)
-
 add_executable (rdge_test
                 tests/main.cpp
-                tests/gfx/color.cpp
+                tests/graphics/color.cpp
                 tests/math/functions.cpp)
 target_link_libraries (rdge_test
                        RDGE

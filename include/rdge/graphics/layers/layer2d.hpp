@@ -1,4 +1,4 @@
-//! \headerfile <rdge/gfx/layers/layer2d.hpp>
+//! \headerfile <rdge/graphics/layers/layer2d.hpp>
 //! \author Josh Bramlett
 //! \version 0.0.7
 //! \date 05/21/2016
@@ -6,15 +6,15 @@
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/gfx/layers/layer.hpp>
-#include <rdge/gfx/shaders/shader.hpp>
-#include <rdge/gfx/renderable2d.hpp>
-#include <rdge/gfx/renderer2d.hpp>
+#include <rdge/graphics/layers/layer.hpp>
+#include <rdge/graphics/shader.hpp>
+#include <rdge/graphics/renderable2d.hpp>
+#include <rdge/graphics/sprite_batch.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/math/mat4.hpp>
 
 // TODO: Remove when refactoring
-//#include <rdge/gfx/layers/group.hpp>
+//#include <rdge/graphics/layers/group.hpp>
 //#include <rdge/controls/control.hpp>
 
 #include <vector>
@@ -22,7 +22,6 @@
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace rdge {
-namespace gfx {
 
 // TODO: A couple issues with this class:
 //         1)  The reason for the GetShader() method was to allow an external
@@ -90,7 +89,7 @@ private:
     //! \typedef RenderableVector Container type for layer renderables
     using RenderableVector = std::vector<std::shared_ptr<Renderable2D>>;
 
-    Renderer2D       m_renderer;
+    SpriteBatch      m_renderer;
     RenderableVector m_renderables;
     float            m_zIndex;
 
@@ -98,5 +97,4 @@ private:
     //std::shared_ptr<RDGE::Controls::Control> m_control;
 };
 
-} // namespace gfx
 } // namespace rdge

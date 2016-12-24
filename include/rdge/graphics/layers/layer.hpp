@@ -1,4 +1,4 @@
-//! \headerfile <rdge/gfx/layers/layer.hpp>
+//! \headerfile <rdge/graphics/layers/layer.hpp>
 //! \author Josh Bramlett
 //! \version 0.0.7
 //! \date 05/21/2016
@@ -7,14 +7,13 @@
 
 #include <rdge/core.hpp>
 #include <rdge/events/event.hpp>
-#include <rdge/gfx/shaders/shader.hpp>
+#include <rdge/graphics/shader.hpp>
 #include <rdge/math/mat4.hpp>
 
 #include <memory>
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace rdge {
-namespace gfx {
 
 //! \class Layer
 //! \brief Base class for a layer of renderable objects
@@ -68,5 +67,4 @@ protected:
     rdge::math::mat4        m_projectionMatrix;
 };
 
-} // namespace gfx
 } // namespace rdge

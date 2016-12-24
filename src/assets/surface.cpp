@@ -79,7 +79,7 @@ Surface::Surface (const std::string& path)
     }
 }
 
-Surface::Surface (const rdge::gfx::size& size, PixelDepth depth)
+Surface::Surface (const rdge::size& size, PixelDepth depth)
 {
     auto masks = GetMasksFromDepth(depth);
     m_surface = SDL_CreateRGBSurface(0, // flags (SDL docs say param is unused)
@@ -97,7 +97,7 @@ Surface::Surface (const rdge::gfx::size& size, PixelDepth depth)
 }
 
 Surface::Surface (std::unique_ptr<uint8[]> pixels,
-                  const rdge::gfx::size&   size,
+                  const rdge::size&        size,
                   PixelDepth               depth)
     : m_pixelData(std::move(pixels))
 {
@@ -188,15 +188,15 @@ Surface::Height (void) const noexcept
     return static_cast<uint32>(m_surface->h);
 }
 
-rdge::gfx::size
+rdge::size
 Surface::Size (void) const noexcept
 {
     if (UNLIKELY(!m_surface))
     {
-        return rdge::gfx::size(0, 0);
+        return rdge::size(0, 0);
     }
 
-    return rdge::gfx::size(m_surface->w, m_surface->h);
+    return rdge::size(m_surface->w, m_surface->h);
 }
 
 uint32

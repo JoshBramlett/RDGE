@@ -6,7 +6,7 @@
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/gfx/point.hpp>
+#include <rdge/graphics/point.hpp>
 #include <rdge/math/vec2.hpp>
 
 #include <SDL.h>
@@ -405,9 +405,9 @@ public:
 
     //! \brief Cursor location in window coordinates
     //! \returns Point containing the window coordinates
-    constexpr rdge::gfx::point CursorLocation (void) const
+    constexpr rdge::point CursorLocation (void) const
     {
-        return rdge::gfx::point(x, y);
+        return rdge::point(x, y);
     }
 
     //! \brief Cursor location in normalized device coordinates
@@ -478,9 +478,9 @@ public:
 
     //! \brief Cursor location in window coordinates
     //! \returns Point object containing the window coordinates
-    constexpr rdge::gfx::point CursorLocation (void) const
+    constexpr rdge::point CursorLocation (void) const
     {
-        return rdge::gfx::point(x, y);
+        return rdge::point(x, y);
     }
 
     //! \brief Cursor location in normalized device coordinates
@@ -491,9 +491,9 @@ public:
 
     //! \brief Motion relative to the last event call
     //! \returns Point object containing the relative x and y values
-    constexpr rdge::gfx::point RelativeMotion (void) const
+    constexpr rdge::point RelativeMotion (void) const
     {
-        return rdge::gfx::point(xrel, yrel);
+        return rdge::point(xrel, yrel);
     }
 
     //! \brief Device identifier of the mouse

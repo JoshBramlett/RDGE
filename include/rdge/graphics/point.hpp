@@ -1,4 +1,4 @@
-//! \headerfile <rdge/gfx/point.hpp>
+//! \headerfile <rdge/graphics/point.hpp>
 //! \author Josh Bramlett
 //! \version 0.0.10
 //! \date 11/22/2016
@@ -10,10 +10,8 @@
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace rdge {
-namespace gfx {
 
 //! \typedef point Signed integer vec2_t structure
-using point = rdge::math::vec2_t<rdge::int32>;
+using point = math::vec2_t<int32>;
 
-} // namespace gfx
 } // namespace rdge

@@ -10,7 +10,6 @@
 #include <algorithm>
 
 using namespace rdge;
-using namespace rdge::gfx;
 
 /* TODO: Take this as note:
  *
@@ -43,7 +42,7 @@ namespace {
 
     // Returns a supported aspect ratio if detected, otherwise it'll return an
     // empty size.  Allows for approximation up to one-tenth of a decimal place.
-    rdge::gfx::size
+    rdge::size
     CalculateAspectRatio (rdge::uint32 width, rdge::uint32 height)
     {
         double epsilon      = 0.01;
@@ -52,25 +51,25 @@ namespace {
         // 5 / 4 == 1.25
         if ((aspect_ratio - 1.25) < epsilon)
         {
-            return rdge::gfx::size(5, 4);
+            return rdge::size(5, 4);
         }
         // 4 / 3 == 1.33
         else if ((aspect_ratio - 1.33) < epsilon)
         {
-            return rdge::gfx::size(4, 3);
+            return rdge::size(4, 3);
         }
         // 16 / 10 == 1.60
         else if ((aspect_ratio - 1.60) < epsilon)
         {
-            return rdge::gfx::size(16, 10);
+            return rdge::size(16, 10);
         }
         // 16 / 9 == 1.78
         else if ((aspect_ratio - 1.78) < epsilon)
         {
-            return rdge::gfx::size(16, 9);
+            return rdge::size(16, 9);
         }
 
-        return rdge::gfx::size();
+        return rdge::size();
     }
 
     /*
@@ -96,6 +95,15 @@ namespace {
     }
 
 } // anonymouse namespace
+
+Window::Window (const app_settings& settings)
+    : Window(settings.window_title,
+             settings.target_width,
+             settings.target_height,
+             settings.fullscreen,
+             settings.resizable,
+             settings.use_vsync)
+{ }
 
 Window::Window (
                     const std::string& title,
@@ -306,22 +314,22 @@ Window::Title (void) const
     return SDL_GetWindowTitle(m_window);
 }
 
-rdge::gfx::size
+rdge::size
 Window::Size (void) const
 {
     rdge::int32 width, height;
     SDL_GetWindowSize(m_window, &width, &height);
 
-    return rdge::gfx::size(width, height);
+    return rdge::size(width, height);
 }
 
-rdge::gfx::size
+rdge::size
 Window::DrawableSize (void) const
 {
     rdge::int32 width, height;
     SDL_GL_GetDrawableSize(m_window, &width, &height);
 
-    return rdge::gfx::size(width, height);
+    return rdge::size(width, height);
 }
 
 rdge::uint32
@@ -359,13 +367,13 @@ Window::SetSize (rdge::uint32 width, rdge::uint32 height)
 }
 
 void
-Window::SetCursorLocation (const rdge::gfx::point& location)
+Window::SetCursorLocation (const rdge::point& location)
 {
     SDL_WarpMouseInWindow(m_window, location.x, location.y);
 }
 
 void
-Window::SetClearColor (const rdge::gfx::color& color)
+Window::SetClearColor (const rdge::color& color)
 {
     m_clearColor = static_cast<rdge::math::vec4>(color);
 }
