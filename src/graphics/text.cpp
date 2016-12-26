@@ -52,13 +52,19 @@ Text::Text (std::string           text,
     , m_renderMode(mode)
     , m_font(std::move(font))
 {
-    auto surface = m_font->RenderUTF8(m_text, m_color, m_renderMode);
+    // NOTE Color of text (set via SDL) vs. color of vertex:
+    //      Creating the surface with the SDL_ttf library allows the text to be rendered
+    //      a specific color, but since we're using shaders we set the texture color to
+    //      white and let the shader do the math to get our desired color.  The benefit
+    //      is that we don't need to create a new texture any time we want to change
+    //      the text color.
+
+    auto surface = m_font->RenderUTF8(m_text, color::WHITE, m_renderMode);
     m_texture = std::make_shared<Texture>(*surface);
     auto size = ConvertSizeToCameraSpace(m_texture->width, m_texture->height);
 
     vops::SetPosition(this->vertices, pos, size);
     vops::SetTexCoords(this->vertices);
-    // TODO Does color need to be set?  I think it can just be white
     vops::SetColor(this->vertices, m_color);
 }
 
@@ -72,7 +78,6 @@ void
 Text::SetRenderTarget (SpriteBatch& renderer)
 {
     renderer.RegisterTexture(m_texture);
-
     vops::SetTextureUnitID(this->vertices, m_texture->unit_id);
 }
 
@@ -80,7 +85,6 @@ void
 Text::SetText (const std::string& text)
 {
     m_text = text;
-
     Rebuild();
 }
 
@@ -88,16 +92,16 @@ void
 Text::SetColor (const color& color)
 {
     m_color = color;
-    // TODO Does color need to be set?  I think it can just be white
-    vops::SetColor(this->vertices, color);
+    vops::SetColor(this->vertices, m_color);
 
-    Rebuild();
+    // Shader will handle the color change - no need to rebuild
+    //Rebuild();
 }
 
 void
 Text::Rebuild (void)
 {
-    auto surface = m_font->RenderUTF8(m_text, m_color, m_renderMode);
+    auto surface = m_font->RenderUTF8(m_text, color::WHITE, m_renderMode);
     m_texture->Reload(*surface);
 
     auto size = ConvertSizeToCameraSpace(m_texture->width, m_texture->height);

@@ -108,6 +108,7 @@ target_link_libraries (RDGE
                        ${OPENGL_LIBRARIES})
 
 add_subdirectory (tutorials/01_hello_rect)
+add_subdirectory (tutorials/02_textures)
 
 # deprecated
 #add_subdirectory (tutorials/opengl/ex01_triangle)

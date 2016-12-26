@@ -58,7 +58,7 @@ public:
     //! \brief Register the texture with the render target
     //! \details This step must be performed prior to making a draw call.
     //! \param [in] renderer Render target
-    void SetRenderTarget (SpriteBatch& renderer);
+    void SetRenderTarget (SpriteBatch& renderer) override;
 
     //! \brief Set the text
     //! \param [in] text Text to render

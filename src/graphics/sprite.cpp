@@ -20,6 +20,7 @@ Sprite::Sprite (const math::vec3&        pos,
 {
     vops::SetPosition(this->vertices, pos, size);
     vops::SetTexCoords(this->vertices, coords);
+    vops::SetTextureUnitID(this->vertices, m_texture->unit_id);
 }
 
 Sprite::Sprite (Sprite&& rhs) noexcept
@@ -43,7 +44,25 @@ Sprite::operator= (Sprite&& rhs) noexcept
 void
 Sprite::Draw (SpriteBatch& renderer)
 {
+    // TODO The texture must be registered with the renderer prior to constructing
+    //      the sprite.  If not the unit_id will not be updated with the vertex
+    //      data, so when we draw it'll use the invalid ID.  The following assert
+    //      makes sure the texture ids match.
+    SDL_assert(!m_texture || this->vertices[0].tid == m_texture->unit_id);
+
     renderer.Submit(this->vertices);
+}
+
+void
+Sprite::SetRenderTarget (SpriteBatch& renderer)
+{
+    if (!m_texture)
+    {
+        return;
+    }
+
+    renderer.RegisterTexture(m_texture);
+    vops::SetTextureUnitID(this->vertices, m_texture->unit_id);
 }
 
 } // namespace rdge

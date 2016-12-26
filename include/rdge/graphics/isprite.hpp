@@ -60,6 +60,8 @@ public:
     virtual ~ISprite (void) noexcept = default;
 
     virtual void Draw (SpriteBatch& renderer) = 0;
+
+    virtual void SetRenderTarget (SpriteBatch& renderer) = 0;
 };
 
 } // namespace rdge
