@@ -1,44 +1,8 @@
 #include <rdge/graphics/text.hpp>
+#include <rdge/graphics/size.hpp>
 #include <rdge/graphics/vops.hpp>
 #include <rdge/math/vec2.hpp>
-#include <rdge/system/window.hpp>
-
-namespace {
-
-    using namespace rdge;
-    using namespace rdge::math;
-
-    // TODO: This is a stop-gap solution.  Text rendering differs from other renderable2ds
-    //       in that the size is not known until it's built.  I also don't have the option
-    //       of calling SampleSizeUTF8 to get the size and sending to the ctor, as setting
-    //       the text will cause the texture to be rebuilt and therefore resetting
-    //       the size.
-    //
-    //       In order to keep this modular, I must query the window to get the aspect ratio
-    //       and target width/height to convert the size (in screen coords) to the
-    //       projection.
-    //
-    //       As of this writing the size of the surface created by SDL_ttf is the same
-    //       regardless of whether the display supports high DPI.  Therefor the target
-    //       width and height are used in the calculation instead of the drawable pixels.
-    //
-    //       THIS WILL FAIL WHEN MULTIPLE DISPLAYS ARE SUPPORTED
-    vec2 ConvertSizeToCameraSpace (uint32 width, uint32 height)
-    {
-        auto window = Window::GetCurrentWindow();
-        if (!window)
-        {
-            return vec2(0.0f, 0.0f);
-        }
-
-        auto aspect_ratio = window->TargetAspectRatio();
-        return vec2(
-                    aspect_ratio.w * (width / static_cast<float>(window->TargetWidth())),
-                    aspect_ratio.h * (height / static_cast<float>(window->TargetHeight()))
-                   );
-    }
-
-} // anonymous namespace
+#include <rdge/internal/opengl_wrapper.hpp>
 
 namespace rdge {
 
@@ -61,9 +25,8 @@ Text::Text (std::string           text,
 
     auto surface = m_font->RenderUTF8(m_text, color::WHITE, m_renderMode);
     m_texture = std::make_shared<Texture>(*surface);
-    auto size = ConvertSizeToCameraSpace(m_texture->width, m_texture->height);
 
-    vops::SetPosition(this->vertices, pos, size);
+    vops::SetPosition(this->vertices, pos, to_ndc({ m_texture->width, m_texture->height }));
     vops::SetTexCoords(this->vertices);
     vops::SetColor(this->vertices, m_color);
 }
@@ -104,8 +67,7 @@ Text::Rebuild (void)
     auto surface = m_font->RenderUTF8(m_text, color::WHITE, m_renderMode);
     m_texture->Reload(*surface);
 
-    auto size = ConvertSizeToCameraSpace(m_texture->width, m_texture->height);
-    vops::UpdateSize(this->vertices, size);
+    vops::UpdateSize(this->vertices, to_ndc({ m_texture->width, m_texture->height }));
 }
 
 } // namespace rdge

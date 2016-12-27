@@ -14,4 +14,7 @@ namespace rdge {
 //! \typedef size Unsigned integer vec2_t structure
 using size = math::vec2_t<uint32>;
 
+math::vec2
+to_ndc (const size& size);
+
 } // namespace rdge

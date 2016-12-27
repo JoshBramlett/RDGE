@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.4)
-project (01_hello_rect)
+project (01_textures)
 
 message (STATUS "== Configuring tutorial: ${PROJECT_NAME} ==")
 message (STATUS "RDGE lib dir: ${RDGE_BINARY_DIR}/lib")
@@ -25,11 +25,15 @@ endif ()
 link_directories (${RDGE_BINARY_DIR}/lib)
 include_directories (${RDGE_INCLUDE_DIR})
 
-add_executable (01_hello_rect
+add_executable (01_textures
                 src/main.cpp)
 
-target_link_libraries (01_hello_rect
+target_link_libraries (01_textures
                        RDGE)
+
+add_custom_command(TARGET 01_textures PRE_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory
+                   ${PROJECT_SOURCE_DIR}/res $<TARGET_FILE_DIR:01_textures>/res)
 
 # TODO : Implement install
 #install(TARGETS ex01_triangle RUNTIME DESTINATION ${BIN_DIR})

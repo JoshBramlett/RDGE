@@ -121,10 +121,12 @@ SpriteBatch::SpriteBatch (uint16 num_sprites, std::shared_ptr<Shader> shader)
     int32 n = 0;
     std::generate(texture_units.begin(), texture_units.end(), [&n]{ return n++; });
 
-    // TODO Projection is hard-coded until I figure out how to implement it
-    //      correctly.  Currently we're setting the NDC using the aspect ratio,
-    //      but other engines have been setting it to the viewport.
-    m_projection = math::mat4::orthographic(-16.0f, 16.0f, -9.0f, 9.0f, -1.0f, 1.0f);
+    // The projection maintains the width and height of the viewport by setting the
+    // the origin to the center and spanning half on each direction
+    auto viewport = opengl::GetViewport();
+    auto width  = viewport[2] / 2.f;
+    auto height = viewport[3] / 2.f;
+    m_projection = math::mat4::orthographic(-width, width, -height, height, -1.f, 1.f);
 
     m_shader->Enable();
     m_shader->SetUniformValue(UNI_PROJ_MATRIX, m_projection);

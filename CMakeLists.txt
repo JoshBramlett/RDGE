@@ -80,6 +80,7 @@ add_library (
              src/graphics/isprite.cpp
              src/graphics/sprite_batch.cpp
              src/graphics/shader.cpp
+             src/graphics/size.cpp
              src/graphics/sprite.cpp
              src/graphics/text.cpp
              src/graphics/texture.cpp
@@ -107,8 +108,7 @@ target_link_libraries (RDGE
                        ${GLEW_LIBRARIES}
                        ${OPENGL_LIBRARIES})
 
-add_subdirectory (tutorials/01_hello_rect)
-add_subdirectory (tutorials/02_textures)
+add_subdirectory (tutorials/01_textures)
 
 # deprecated
 #add_subdirectory (tutorials/opengl/ex01_triangle)
