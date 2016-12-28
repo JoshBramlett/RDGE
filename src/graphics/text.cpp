@@ -45,6 +45,13 @@ Text::SetRenderTarget (SpriteBatch& renderer)
 }
 
 void
+Text::AmendDepthMask (float32 mask)
+{
+    float32 combined = mask + DepthMask::convert(this->z_index);
+    vops::UpdateDepth(this->vertices, combined);
+}
+
+void
 Text::SetText (const std::string& text)
 {
     m_text = text;

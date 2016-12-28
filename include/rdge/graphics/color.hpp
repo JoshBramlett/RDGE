@@ -39,6 +39,12 @@ public:
     { }
 
     //! \brief color ctor
+    //! \details Initialize from SDL_Color
+    constexpr color (const SDL_Color& sdl_color)
+        : SDL_Color{sdl_color}
+    { }
+
+    //! \brief color ctor
     //! \details Initialize color from RGBA values
     //! \param [in] r Red value
     //! \param [in] g Green value

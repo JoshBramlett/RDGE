@@ -3,11 +3,12 @@
 #include <rdge/assets/font.hpp>
 #include <rdge/events/event.hpp>
 #include <rdge/graphics/color.hpp>
-#include <rdge/graphics/sprite_batch.hpp>
 #include <rdge/graphics/sprite.hpp>
 #include <rdge/graphics/text.hpp>
 #include <rdge/graphics/texture.hpp>
+#include <rdge/graphics/layers/sprite_layer.hpp>
 #include <rdge/system/window.hpp>
+#include <rdge/math/vec3.hpp>
 
 #include <memory>
 
@@ -23,7 +24,7 @@ using namespace rdge;
 int main ()
 {
     app_settings settings;
-    settings.window_title = "01_textures";
+    settings.window_title = "02_layers";
     settings.enable_png   = true;
     settings.enable_fonts = true;
 
@@ -38,20 +39,23 @@ int main ()
     auto texture = std::make_shared<Texture>("res/duck.png");
 
     // 4) Create renderable graphics
-    Sprite duck({ -64.f, -64.f, 0.f }, { 128.f, 128.f }, texture);
-    Text attrib("Thanks kenney.nl", { -220.f, -150.f, 0.f }, font, color::GREEN);
+    auto duck = std::make_shared<Sprite>(math::vec3(-64.f, -64.f, 0.f), texture);
+    auto attrib = std::make_shared<Text>("Thanks kenney.nl",
+                                         math::vec3(-220.f, -150.f, 0.f),
+                                         font,
+                                         color::GREEN);
 
-    // 3) Create render target & register renderables
-    SpriteBatch renderer;
-    duck.SetRenderTarget(renderer);
-    attrib.SetRenderTarget(renderer);
+    // 5) Add sprites to the layer
+    SpriteLayer layer;
+    layer.AddSprite(duck);
+    layer.AddSprite(attrib);
 
-    // 4) Create game loop
+    // 6) Create game loop
     bool running = true;
     Event event;
     while (running)
     {
-        // 5) Poll for user input
+        // 7) Poll for user input
         while (PollEvent(&event))
         {
             if (event.IsQuitEvent())
@@ -70,13 +74,10 @@ int main ()
             }
         }
 
-        // 6) Render to the screen
+        // 8) Render to the screen using the layer
         window.Clear();
 
-        renderer.PrepSubmit();
-        duck.Draw(renderer);
-        attrib.Draw(renderer);
-        renderer.Flush();
+        layer.Draw();
 
         window.Present();
     }

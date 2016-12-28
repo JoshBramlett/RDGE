@@ -12,12 +12,25 @@ Sprite::Sprite (const math::vec3& pos, const math::vec2& size, const color& colo
     vops::SetColor(this->vertices, color);
 }
 
+Sprite::Sprite (const math::vec3& pos, std::shared_ptr<Texture> texture)
+    : m_texture(texture)
+{
+    SDL_assert(m_texture != nullptr);
+
+    math::vec2 size(static_cast<float>(texture->width), static_cast<float>(texture->height));
+    vops::SetPosition(this->vertices, pos, size);
+    vops::SetTexCoords(this->vertices);
+    vops::SetTextureUnitID(this->vertices, m_texture->unit_id);
+}
+
 Sprite::Sprite (const math::vec3&        pos,
                 const math::vec2&        size,
                 std::shared_ptr<Texture> texture,
                 const tex_coords&        coords)
     : m_texture(texture)
 {
+    SDL_assert(m_texture != nullptr);
+
     vops::SetPosition(this->vertices, pos, size);
     vops::SetTexCoords(this->vertices, coords);
     vops::SetTextureUnitID(this->vertices, m_texture->unit_id);
@@ -44,10 +57,10 @@ Sprite::operator= (Sprite&& rhs) noexcept
 void
 Sprite::Draw (SpriteBatch& renderer)
 {
-    // TODO The texture must be registered with the renderer prior to constructing
-    //      the sprite.  If not the unit_id will not be updated with the vertex
-    //      data, so when we draw it'll use the invalid ID.  The following assert
-    //      makes sure the texture ids match.
+    // The texture must be registered with the renderer prior to constructing
+    // the sprite.  If not the unit_id will not be updated with the vertex
+    // data, so when we draw it'll use the invalid ID.  The following assert
+    // makes sure the texture ids match.
     SDL_assert(!m_texture || this->vertices[0].tid == m_texture->unit_id);
 
     renderer.Submit(this->vertices);
@@ -63,6 +76,13 @@ Sprite::SetRenderTarget (SpriteBatch& renderer)
 
     renderer.RegisterTexture(m_texture);
     vops::SetTextureUnitID(this->vertices, m_texture->unit_id);
+}
+
+void
+Sprite::AmendDepthMask (float32 mask)
+{
+    float32 combined = mask + DepthMask::convert(this->z_index);
+    vops::UpdateDepth(this->vertices, combined);
 }
 
 } // namespace rdge

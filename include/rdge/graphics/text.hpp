@@ -24,8 +24,6 @@ namespace rdge {
 class Text : public ISprite
 {
 public:
-    SpriteVertices vertices; //!< Array of vertex attribute data
-
     //! \brief Text ctor
     //! \details Creates a texture based upon the provided values which can be used
     //!          to send to a render target.
@@ -60,6 +58,12 @@ public:
     //! \param [in] renderer Render target
     void SetRenderTarget (SpriteBatch& renderer) override;
 
+    //! \brief Requests the sprite to add the provided mask to it's own
+    //! \details The mask represents two digits of a floating point mantissa.
+    //! \param [in] mask Depth mask
+    //! \see smart_zindex
+    void AmendDepthMask (float32 mask) override;
+
     //! \brief Set the text
     //! \param [in] text Text to render
     //! \note Texutre and size data will be reset
@@ -69,6 +73,10 @@ public:
     //! \param [in] color Color to render the text
     //! \note Texutre and size data will be reset
     void SetColor (const color& color);
+
+public:
+    SpriteVertices vertices;    //!< Array of vertex attribute data
+    uint32         z_index = 0; //!< Orthographic projection depth
 
 private:
 

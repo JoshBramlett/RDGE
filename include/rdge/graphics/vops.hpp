@@ -71,11 +71,19 @@ inline void
 UpdatePosition (SpriteVertices& vertices, const math::vec3& pos)
 {
     auto size = GetSize(vertices);
-
     vertices[1].pos = pos;
     vertices[2].pos = { pos.x, pos.y + size.y, pos.z };
     vertices[2].pos = { pos.x + size.x, pos.y + size.y, pos.z };
     vertices[3].pos = { pos.x + size.x, pos.y, pos.z };
+}
+
+inline void
+UpdateDepth (SpriteVertices& vertices, float32 depth)
+{
+    vertices[0].pos.z = depth;
+    vertices[1].pos.z = depth;
+    vertices[2].pos.z = depth;
+    vertices[3].pos.z = depth;
 }
 
 inline void

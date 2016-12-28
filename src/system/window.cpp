@@ -19,8 +19,17 @@ using namespace rdge;
  * property to YES, otherwise you will not receive a High DPI OpenGL canvas."
  */
 
+    // TODO Got a bit of work to do with understanding how to properly set up SDL and OpenGL.
+    //      Seems to be a good reference:
+    //      https://github.com/FNA-XNA/FNA/blob/master/src/FNAPlatform/SDL2_FNAPlatform.cs
 
 namespace {
+
+// Minimum OpenGL context required
+constexpr int32 MIN_GL_CONTEXT_MAJOR = 3;
+constexpr int32 MIN_GL_CONTEXT_MINOR = 3;
+
+
     Window* s_currentWindow = nullptr;
 
     /*
@@ -35,42 +44,6 @@ namespace {
     rdge::uint32      s_tickIndex;
     rdge::uint32      s_tickSum;
     rdge::uint32      s_tickSamples[FRAME_SAMPLES];
-
-    /*
-     * Aspect ratio
-     */
-
-    // Returns a supported aspect ratio if detected, otherwise it'll return an
-    // empty size.  Allows for approximation up to one-tenth of a decimal place.
-    rdge::size
-    CalculateAspectRatio (rdge::uint32 width, rdge::uint32 height)
-    {
-        double epsilon      = 0.01;
-        double aspect_ratio = static_cast<double>(width) / static_cast<double>(height);
-
-        // 5 / 4 == 1.25
-        if ((aspect_ratio - 1.25) < epsilon)
-        {
-            return rdge::size(5, 4);
-        }
-        // 4 / 3 == 1.33
-        else if ((aspect_ratio - 1.33) < epsilon)
-        {
-            return rdge::size(4, 3);
-        }
-        // 16 / 10 == 1.60
-        else if ((aspect_ratio - 1.60) < epsilon)
-        {
-            return rdge::size(16, 10);
-        }
-        // 16 / 9 == 1.78
-        else if ((aspect_ratio - 1.78) < epsilon)
-        {
-            return rdge::size(16, 9);
-        }
-
-        return rdge::size();
-    }
 
     /*
      * Event Listener
@@ -111,11 +84,9 @@ Window::Window (
                     rdge::uint32       target_height,
                     bool               fullscreen,
                     bool               resizable,
-                    bool               use_vsync,
-                    rdge::int32        gl_version_major,
-                    rdge::int32        gl_version_minor
+                    bool               use_vsync
                    )
-    : m_clearColor(rdge::math::vec4(0.0f, 0.0f, 0.0f, 0.0f))
+    : m_clearColor(math::vec4(0.0f, 0.0f, 0.0f, 0.0f))
     , m_targetWidth(target_width)
     , m_targetHeight(target_height)
 {
@@ -131,47 +102,68 @@ Window::Window (
         }
     }
 
-    // Ensure the reuqested context version is not less than our supported version
-    //
-    // TODO:  I don't think I need to request the OpenGL version to load.  I still
-    //        require a minimum version the engine requires for support, but requesting
-    //        a lower version than what the graphics card has will load the version
-    //        on the card, not the version I'm requesting.  Look into if this is correct.
-    if (
-        gl_version_major < MIN_GL_CONTEXT_MAJOR ||
-        (gl_version_major == MIN_GL_CONTEXT_MAJOR && gl_version_minor < MIN_GL_CONTEXT_MINOR)
-       )
-    {
-        RDGE_THROW("Requesting unsupported OpenGL version");
-    }
+    // TODO GL context version check was temporarily removed to refactor the interface.
+    //      Chould be re-added using the application settings
 
-    // Ensure a supported aspect ratio can be determined from the target width/height
-    m_targetAspectRatio = CalculateAspectRatio(target_width, target_height);
-    // TODO: I don't like IsEmpty (check if zero) for the point/size type since it's valid
-    //       figure out a better way to implement this
-    //if (m_targetAspectRatio.IsEmpty())
+    // Ensure the reuqested context version is not less than our supported version
+    //if (gl_version_major < MIN_GL_CONTEXT_MAJOR ||
+        //(gl_version_major == MIN_GL_CONTEXT_MAJOR && gl_version_minor < MIN_GL_CONTEXT_MINOR))
     //{
-        //RDGE_THROW("Supported aspect ratio cannot be determined from the width/height");
+        //RDGE_THROW("Requesting unsupported OpenGL version");
     //}
 
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, gl_version_major);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, gl_version_minor);
+    // ****************** SDL OpenGL Attributes ******************
+    // All SDL_GLattr values must be set prior to the window and context creation.
+    // In most cases the values set are merely hints to OpenGL, so the actual values
+    // may differ than the request.  You can query the values after context creation
+    // for review.
+    //
+    // TODO These should be configurable based on the target, but the problem is
+    //      the values must be set prior to context creation so there is no way to
+    //      query for the values.  Either the values need to be configured for
+    //      OpenGL guaranteed minimums, or I need to figure out a way to query
+    //      for the values.
+
+    // Context version will be equal to or higher than the requested value, or fail
+    // the request cannot be met.  The profile mask accepts core, compatibility, or
+    // GLES.  SDL docs say that passing zero will let SDL choose, but testing on
+    // OSX fails to create anything but the core profile.
+    // https://wiki.libsdl.org/SDL_GLprofile
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, MIN_GL_CONTEXT_MAJOR);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, MIN_GL_CONTEXT_MINOR);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+
+    // Frame buffer
+    SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 32);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+
+    // Color buffer
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
 
-    // TODO: This should be a config setting.  This value must be set before creating
-    //       the context, so you cannot query whether the amount exceeds the max.
-    //       One option would be to get the actual value via SDL_GL_GetAttribute, or
-    //       from OpenGL::GetIntegerValue(GL_SAMPLES) with GL_MAX_SAMPLES to get the
-    //       value max allowed and log that to a file.  OpenGL requires this value be
-    //       a minimum of 4.
+    // Set to 1 to require hardware acceleration, and 0 to force software rendering.
+    // Omitting the call allows either.
+    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+
+    // The forward compatible flag means that no deprecated functionality will be supported.
+    // Can result in a performance gain, and is only for GL 3.0 and later contexts.  Flag is
+    // implementation defined, so it seems to do nothing on os x.
+    // https://wiki.libsdl.org/SDL_GLcontextFlag
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
+
+    // Enable multisampling, which is a type of anti-aliasing.  We create a buffer and set the
+    // number of samples per pixel.  Basically the fragment shader is run with vertex data
+    // interpolated to the center of the pixel, which stores the color as a sub-sample.  These
+    // are averaged in order to determine the final color.
+    // http://www.learnopengl.com/#!Advanced-OpenGL/Anti-aliasing
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
-    rdge::uint32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI;
+    uint32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI;
     if (fullscreen)
     {
         flags |= SDL_WINDOW_FULLSCREEN;
@@ -182,14 +174,12 @@ Window::Window (
         flags |= SDL_WINDOW_RESIZABLE;
     }
 
-    m_window = SDL_CreateWindow(
-                                title.c_str(),
+    m_window = SDL_CreateWindow(title.c_str(),
                                 SDL_WINDOWPOS_CENTERED,
                                 SDL_WINDOWPOS_CENTERED,
                                 target_width,
                                 target_height,
-                                flags
-                               );
+                                flags);
     if (UNLIKELY(!m_window))
     {
         SDL_THROW("SDL failed to create a Window", "SDL_CreateWindow");
@@ -226,11 +216,19 @@ Window::Window (
     // Query for the OpenGL error to clear the value for later lookup
     glGetError();
 
+    glEnable(GL_MULTISAMPLE);
+
+    //glEnable(GL_DEPTH_TEST);
+    //glDepthFunc(GL_LEQUAL);
+
+    //glEnable(GL_ALPHA_TEST);
+    //glAlphaFunc(GL_LEQUAL, 0);
+
     // TODO:  This enables alpha blending.  Look into it further when I have time.
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    rdge::int32 interval = use_vsync ? 1 : 0;
+    int32 interval = use_vsync ? 1 : 0;
     if (UNLIKELY(SDL_GL_SetSwapInterval(interval) != 0))
     {
         // TODO: This should log a warning and default to not using vsync.  Fallback
@@ -274,7 +272,6 @@ Window::Window (Window&& rhs) noexcept
     , m_context(rhs.m_context)
     , m_viewport(rhs.m_viewport)
     , m_clearColor(rhs.m_clearColor)
-    , m_targetAspectRatio(rhs.m_targetAspectRatio)
 {
     rhs.m_context = nullptr;
     rhs.m_window = nullptr;
@@ -299,7 +296,6 @@ Window::operator= (Window&& rhs) noexcept
         m_window = rhs.m_window;
         m_viewport = rhs.m_viewport;
         m_clearColor = rhs.m_clearColor;
-        m_targetAspectRatio = rhs.m_targetAspectRatio;
 
         rhs.m_context = nullptr;
         rhs.m_window = nullptr;
@@ -428,7 +424,7 @@ Window::Clear (void)
     opengl::SetClearColor(m_clearColor.x, m_clearColor.y, m_clearColor.z, m_clearColor.w);
 #endif
 
-    opengl::Clear(GL_COLOR_BUFFER_BIT);
+    opengl::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void

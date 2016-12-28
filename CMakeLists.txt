@@ -84,8 +84,8 @@ add_library (
              src/graphics/sprite.cpp
              src/graphics/text.cpp
              src/graphics/texture.cpp
-             #src/graphics/layers/layer.cpp
-             #src/graphics/layers/layer2d.cpp
+             src/graphics/layers/sprite_layer.cpp
+
              #src/graphics/layers/group.cpp
              #src/controls/control.cpp --> src/graphics/ui/widget.cpp
              #src/controls/button.cpp  --> src/graphics/ui/button.cpp
@@ -109,6 +109,7 @@ target_link_libraries (RDGE
                        ${OPENGL_LIBRARIES})
 
 add_subdirectory (tutorials/01_textures)
+add_subdirectory (tutorials/02_layers)
 
 # deprecated
 #add_subdirectory (tutorials/opengl/ex01_triangle)
@@ -119,6 +120,7 @@ add_subdirectory (tutorials/01_textures)
 add_executable (rdge_test
                 tests/main.cpp
                 tests/graphics/color.cpp
+                tests/graphics/sprite.cpp
                 tests/math/functions.cpp)
 target_link_libraries (rdge_test
                        RDGE

@@ -23,14 +23,19 @@ namespace rdge {
 class Sprite : public ISprite
 {
 public:
-    SpriteVertices vertices; //!< Array of vertex attribute data
-
     //! \brief Sprite ctor
     //! \details Creates a sprite rendered with the provided color.
     //! \param [in] pos Sprite position
     //! \param [in] size Sprite size
     //! \param [in] color Color of all vertices
     explicit Sprite (const math::vec3& pos, const math::vec2& size, const color& color);
+
+    //! \brief Sprite ctor
+    //! \details Creates a sprite rendered using the provided texture.  The size is
+    //!          derived from the texture so the sprite must consume the entire texture.
+    //! \param [in] pos Sprite position
+    //! \param [in] texture Texture the sprite will use
+    explicit Sprite (const math::vec3& pos, std::shared_ptr<Texture> texture);
 
     //! \brief Sprite ctor
     //! \details Creates a sprite rendered using the provided texture.  If no texture
@@ -63,6 +68,16 @@ public:
     //! \details This step must be performed prior to making a draw call.
     //! \param [in] renderer Render target
     void SetRenderTarget (SpriteBatch& renderer) override;
+
+    //! \brief Requests the sprite to add the provided mask to it's own
+    //! \details The mask represents two digits of a floating point mantissa.
+    //! \param [in] mask Depth mask
+    //! \see smart_zindex
+    void AmendDepthMask (float32 mask) override;
+
+public:
+    SpriteVertices vertices;    //!< Array of vertex attribute data
+    uint32         z_index = 0; //!< Orthographic projection depth
 
 private:
     std::shared_ptr<Texture> m_texture; //!< Texture associated with the sprite

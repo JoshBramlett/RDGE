@@ -63,7 +63,7 @@ struct app_settings
 //! \brief Dialog type for the message box
 //! \details Direct mapping to SDL_MessageBoxFlag, provided for
 //!          abstraction and ease of discovery.
-enum class MessageBoxType : rdge::int32
+enum class MessageBoxType : int32
 {
     INFO    = SDL_MESSAGEBOX_INFORMATION,
     WARNING = SDL_MESSAGEBOX_WARNING,

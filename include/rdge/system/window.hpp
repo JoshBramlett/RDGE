@@ -16,7 +16,7 @@
 
 #include <string>
 
-//! \namespace RDGE Rainbow Drop Game Engine
+//! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
 struct aspect_ratio
@@ -67,17 +67,6 @@ struct viewport
 class Window
 {
 public:
-    // TODO: The OpenGL context version (params below) will load the highest
-    //       compatible version with the requested version.  So requesting
-    //       version 3.3 could still load 4.1.  I need to determine the lowest
-    //       version supported within the RDGE library, and disallow any request
-    //       below that version.
-
-    //! \var MIN_GL_CONTEXT_MAJOR Minumum supported OpenGL context major version
-    static constexpr rdge::int32 MIN_GL_CONTEXT_MAJOR = 3;
-    //! \var MIN_GL_CONTEXT_MINOR Minumum supported OpenGL context minor version
-    static constexpr rdge::int32 MIN_GL_CONTEXT_MINOR = 3;
-
     // TODO document
     explicit Window (const app_settings& settings);
 
@@ -99,9 +88,7 @@ public:
                        rdge::uint32       target_height,
                        bool               fullscreen       = false,
                        bool               resizable        = false,
-                       bool               use_vsync        = false,
-                       rdge::int32        gl_version_major = MIN_GL_CONTEXT_MAJOR,
-                       rdge::int32        gl_version_minor = MIN_GL_CONTEXT_MINOR
+                       bool               use_vsync        = false
                       );
 
     //! \brief Window dtor
@@ -153,11 +140,6 @@ public:
     //! \brief Get the target window height
     //! \return Target drawing height
     rdge::uint32 TargetHeight (void) const { return m_targetHeight; }
-
-    //! \brief Get the window's target aspect ratio
-    //! \return Size representing the aspect ratio
-    //TODO Return ivec2 when available
-    const rdge::size& TargetAspectRatio (void) const { return m_targetAspectRatio; }
 
     //! \brief Return the SDL_Window pointer
     //! \details Raw pointer is returned so caller must ensure
@@ -228,7 +210,6 @@ private:
 
     rdge::uint32    m_targetWidth;
     rdge::uint32    m_targetHeight;
-    rdge::size m_targetAspectRatio;
 };
 
 } // namespace rdge

@@ -57,8 +57,7 @@ public:
     //      should be treated differently.  e.g. Create a FATAL macro which could
     //      write out and flush the log buffer, maybe suspending the calling thread
     //      until the flush is done?
-    explicit SpriteBatch (uint16 num_sprites = 1000,
-                          std::shared_ptr<Shader> shader = nullptr);
+    explicit SpriteBatch (uint16 num_sprites = 1000, std::shared_ptr<Shader> shader = nullptr);
 
     //! \brief SpriteBatch dtor
     ~SpriteBatch (void) noexcept;
