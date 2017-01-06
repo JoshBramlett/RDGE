@@ -110,6 +110,7 @@ target_link_libraries (RDGE
 
 add_subdirectory (tutorials/01_textures)
 add_subdirectory (tutorials/02_layers)
+add_subdirectory (tutorials/03_spritesheet)
 
 # deprecated
 #add_subdirectory (tutorials/opengl/ex01_triangle)
@@ -119,6 +120,7 @@ add_subdirectory (tutorials/02_layers)
 
 add_executable (rdge_test
                 tests/main.cpp
+                tests/assets/spritesheet.cpp
                 tests/graphics/color.cpp
                 tests/graphics/sprite.cpp
                 tests/math/functions.cpp)

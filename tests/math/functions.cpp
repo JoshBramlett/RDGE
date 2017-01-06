@@ -42,3 +42,16 @@ TEST(FloatingPointEqualTest, HandlesLongDouble)
     EXPECT_TRUE(fp_eq(ld_a, ld_true));
     EXPECT_FALSE(fp_eq(ld_a, ld_false));
 }
+
+TEST(PowerOfTwoTest, HandlesAll)
+{
+    // 1) Success
+    EXPECT_TRUE(is_pot(128));
+
+    // 2) Zero should fail
+    EXPECT_FALSE(is_pot(0));
+    // 3) Test multiple of two
+    EXPECT_FALSE(is_pot(10));
+    // 4) Test odd value
+    EXPECT_FALSE(is_pot(11));
+}

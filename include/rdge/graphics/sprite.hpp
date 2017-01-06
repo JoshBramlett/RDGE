@@ -56,8 +56,8 @@ public:
     //! \brief Copy and move enabled
     Sprite (const Sprite&) noexcept = default;
     Sprite& operator= (const Sprite&) noexcept = default;
-    Sprite (Sprite&&) noexcept;
-    Sprite& operator= (Sprite&&) noexcept;
+    Sprite (Sprite&&) noexcept = default;
+    Sprite& operator= (Sprite&&) noexcept = default;
     //!@}
 
     //! \brief Draw the sprite using the provided renderer

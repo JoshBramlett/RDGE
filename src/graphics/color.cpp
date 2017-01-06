@@ -58,7 +58,7 @@ color::FromRGBA (const std::string& value)
                             ? value.substr(1)
                             : value;
 
-    // Expression matches 2 character hex values, that appear 4 times
+    // Expression matches 2 character hex values that appear 4 times
     // (e.g. FF 00 CC AA)
     // Note:  See FromRGB for comments on why regex is required
     std::regex exp("^([0-9a-fA-F]{2}){4}$");

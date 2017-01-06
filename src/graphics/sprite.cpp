@@ -36,24 +36,6 @@ Sprite::Sprite (const math::vec3&        pos,
     vops::SetTextureUnitID(this->vertices, m_texture->unit_id);
 }
 
-Sprite::Sprite (Sprite&& rhs) noexcept
-    : m_texture(std::move(rhs.m_texture))
-{
-    std::swap(this->vertices, rhs.vertices);
-}
-
-Sprite&
-Sprite::operator= (Sprite&& rhs) noexcept
-{
-    if (this != &rhs)
-    {
-        m_texture = std::move(rhs.m_texture);
-        std::swap(this->vertices, rhs.vertices);
-    }
-
-    return *this;
-}
-
 void
 Sprite::Draw (SpriteBatch& renderer)
 {

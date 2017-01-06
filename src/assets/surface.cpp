@@ -1,8 +1,12 @@
 #include <rdge/assets/surface.hpp>
+#include <rdge/math/functions.hpp>
 #include <rdge/internal/exception_macros.hpp>
+#include <rdge/internal/logger_macros.hpp>
 #include <rdge/internal/hints.hpp>
 
 #include <SDL_image.h>
+
+#include <sstream>
 
 /* Saving the default masks (which were in the header file) in case I revert
  * the ctors back to being simple wrappers for SDL_CreateRGBSurface and
@@ -76,6 +80,17 @@ Surface::Surface (const std::string& path)
     if (UNLIKELY(!m_surface))
     {
         SDL_THROW("Failed to load surface. file=" + path, "IMG_Load");
+    }
+
+    if (!math::is_pot(m_surface->w) || !math::is_pot(m_surface->h))
+    {
+        std::ostringstream ss;
+        ss << "Surface loaded has NPOT dimensions."
+           << " w=" << m_surface->w
+           << " h=" << m_surface->h
+           << " path=" << path;
+
+        WLOG(ss.str());
     }
 }
 

@@ -1,0 +1,12 @@
+{
+    "texture_parts": [
+        {
+            "name": "uv_1",
+            "x": 0,
+            "y": 0,
+            "width": 64,
+            "height": 64
+        }
+    ],
+    "image_path": "nofile.png"
+}

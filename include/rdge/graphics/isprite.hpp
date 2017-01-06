@@ -33,7 +33,6 @@ struct sprite_vertex
 //! \typedef Array of sprite vertex attributes
 using SpriteVertices = std::array<sprite_vertex, 4>;
 
-
 //! \struct tex_coords
 //! \brief Texture coordinate (UV) data for a sprite
 //! \details Default values are set to fill the entire texture.

@@ -40,6 +40,10 @@ struct vec3
         //, z(z)
     //{ }
 
+    vec3 (float scalar)
+        : x(scalar), y(scalar), z(scalar)
+    { }
+
     vec3& add (const vec3& rhs);
 
     vec3& subtract (const vec3& rhs);

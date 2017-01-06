@@ -65,10 +65,10 @@ public:
     color& operator= (color&&) noexcept = default;
     //!@}
 
-    //! \brief User-defined conversion to UInt32
-    //! \details Checks endianness to return appropriate format.  The
-    //!          conversion is marked explicit so it must be used with
-    //!          direct-initialization or explicit conversions.
+    //! \brief User-defined conversion to uint32
+    //! \details Endianness check performed to return appropriate format.
+    //! \note The conversion is explicit so it must be used with direct
+    //!       initialization or explicit conversions.
     //! \returns Unsigned integer of the color data
     explicit constexpr operator uint32 (void) const noexcept
     {
@@ -80,9 +80,9 @@ public:
     }
 
     //! \brief User-defined conversion to a vector of floats
-    //! \details The values will be in the range [0.0f-1.0f].  The
-    //!          conversion is marked explicit so it must be used with
-    //!          direct-initialization or explicit conversions.
+    //! \details The values will be normalized to [0.f, 1.f].
+    //! \note The conversion is explicit so it must be used with direct
+    //!       initialization or explicit conversions.
     //! \returns Vector of clamped floats
     explicit constexpr operator math::vec4 (void) const noexcept
     {

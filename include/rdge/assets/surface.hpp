@@ -13,7 +13,7 @@
 #include <string>
 #include <memory>
 
-//! \namespace RDGE Rainbow Drop Game Engine
+//! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
 //! \typedef SDLSurfaceUniquePtr

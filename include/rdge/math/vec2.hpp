@@ -14,13 +14,13 @@
 namespace rdge {
 namespace math {
 
-//template <typename T, typename = typename std::enable_if_t<std::is_arithmetic<T>::value>>
-//struct vec2_t;
+template <typename T, typename = void>
+struct vec2_t;
 
 //! \struct vec2_t
-//! \brief Templated two element container
+//! \brief SFINAE specialized two element container
 template <typename T>
-struct vec2_t
+struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
 {
     //! \typedef value_type vec2_t type
     using value_type = T;
@@ -67,21 +67,23 @@ struct vec2_t
     //! \brief vec2_t dtor
     ~vec2_t (void) noexcept = default;
 
-    //! \brief vec2_t Copy ctor
-    //! \details Default-copyable
+    //!@{
+    //! \brief Copy and move enabled
     constexpr vec2_t<T> (const vec2_t<T>&) = default;
-
-    //! \brief vec2_t Move ctor
-    //! \details Default-movable
-    constexpr vec2_t<T> (vec2_t<T>&&) noexcept = default;
-
-    //! \brief vec2_t Copy Assignment Operator
-    //! \details Default-copyable
     constexpr vec2_t<T>& operator= (const vec2_t<T>&) = default;
-
-    //! \brief vec2_t Move Assignment Operator
-    //! \details Default-movable
+    constexpr vec2_t<T> (vec2_t<T>&&) noexcept = default;
     constexpr vec2_t<T>& operator= (vec2_t<T>&&) noexcept = default;
+    //!@}
+
+    //! \brief vec2_t User-defined underlying type conversion
+    //! \note The conversion is explicit so it must be used with direct
+    //!       initialization or explicit conversions.
+    //! \returns Copy with casted underlying types
+    template <typename U>
+    explicit constexpr operator vec2_t<U> (void) const noexcept
+    {
+        return vec2_t<U>(static_cast<U>(x), static_cast<U>(y));
+    }
 
     //! \brief vec2_t Subscript operator
     //! \param [in] index Index of containing element
@@ -102,18 +104,6 @@ struct vec2_t
     {
         static_assert(index >= 0 && index < length(), "vec2_t index out of bounds");
         return (&x)[index];
-    }
-
-    //! \brief vec2_t Conversion operator
-    //! \details Types are statically cast to containing type
-    //! \param [in] rhs Alternate type vec2_t
-    //! \returns Reference to self
-    template <typename U>
-    constexpr vec2_t<T>& operator= (const vec2_t<U>& rhs) noexcept
-    {
-        x = static_cast<T>(rhs.x);
-        y = static_cast<T>(rhs.y);
-        return *this;
     }
 
     //! \brief vec2_t memberwise addition
@@ -278,10 +268,11 @@ constexpr vec2_t<T> operator+ (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexc
 //! \param [in] vec vec2_t
 //! \param [in] scalar Value applied to all elements
 //! \returns vec2_t of resultant values
-template <typename T>
-constexpr vec2_t<T> operator+ (const vec2_t<T>& vec, T scalar) noexcept
+template <typename T, typename U>
+constexpr typename std::enable_if_t<std::is_arithmetic<U>::value, vec2_t<T>>
+operator+ (const vec2_t<T>& vec, U scalar) noexcept
 {
-    return vec2_t<T>(vec.x + scalar, vec.y + scalar);
+    return vec2_t<T>(vec.x + static_cast<T>(scalar), vec.y + static_cast<T>(scalar));
 }
 
 //! \brief vec2_t subtraction operator
@@ -298,10 +289,11 @@ constexpr vec2_t<T> operator- (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexc
 //! \param [in] vec vec2_t
 //! \param [in] scalar Value applied to all elements
 //! \returns vec2_t of resultant values
-template <typename T>
-constexpr vec2_t<T> operator- (const vec2_t<T>& vec, T scalar) noexcept
+template <typename T, typename U>
+constexpr typename std::enable_if_t<std::is_arithmetic<U>::value, vec2_t<T>>
+operator- (const vec2_t<T>& vec, U scalar) noexcept
 {
-    return vec2_t<T>(vec.x - scalar, vec.y - scalar);
+    return vec2_t<T>(vec.x - static_cast<T>(scalar), vec.y - static_cast<T>(scalar));
 }
 
 //! \brief vec2_t multiplication operator
@@ -318,10 +310,11 @@ constexpr vec2_t<T> operator* (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexc
 //! \param [in] vec vec2_t
 //! \param [in] scalar Value applied to all elements
 //! \returns vec2_t of resultant values
-template <typename T>
-constexpr vec2_t<T> operator* (const vec2_t<T>& vec, T scalar) noexcept
+template <typename T, typename U>
+constexpr typename std::enable_if_t<std::is_arithmetic<U>::value, vec2_t<T>>
+operator* (const vec2_t<T>& vec, U scalar) noexcept
 {
-    return vec2_t<T>(vec.x * scalar, vec.y * scalar);
+    return vec2_t<T>(vec.x * static_cast<T>(scalar), vec.y * static_cast<T>(scalar));
 }
 
 //! \brief vec2_t division operator
@@ -387,7 +380,8 @@ inline std::ostream& operator<< (std::ostream& os, const vec2_t<T>& value)
 }
 
 //! \typedef Default vec2 float type
-using vec2 = vec2_t<float>;
+using vec2   = vec2_t<float>;
+using uivec2 = vec2_t<uint32>;
 
 } // namespace math
 } // namespace rdge

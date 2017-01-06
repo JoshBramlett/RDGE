@@ -78,6 +78,7 @@ Texture::Reload (Surface& surface)
     //       To check whether 24 or 32bpp, BytesPerPixel should be 3 or 4.
 
     // Change pixel format to what OpenGL understands
+    // TODO: This should be set to whatever the window uses - SDL_GetWindowPixelFormat(m_window);
     surface.ChangePixelFormat(SDL_PIXELFORMAT_ABGR8888);
 
     opengl::BindTexture(GL_TEXTURE_2D, m_handle);
@@ -90,6 +91,9 @@ Texture::Reload (Surface& surface)
     // see http://www.opengl-tutorial.org/beginners-tutorials/tutorial-5-a-textured-cube/
     opengl::SetTextureParameter(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     opengl::SetTextureParameter(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    //opengl::SetTextureParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    //opengl::SetTextureParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 
     // TODO The second param is the image precision, so when I do 24bpp support take
     //      into consideration:

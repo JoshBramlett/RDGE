@@ -40,7 +40,8 @@ fp_eq (T x, T y) noexcept
 //! \param [in] ubound Upper bound
 //! \returns Clamped value
 template <typename T>
-constexpr T clamp (T val, T lbound, T ubound) noexcept
+constexpr typename std::enable_if_t<std::is_arithmetic<T>::value, T>
+clamp (T val, T lbound, T ubound) noexcept
 {
     return std::max(lbound, std::min(val, ubound));
 }
@@ -51,25 +52,38 @@ constexpr T clamp (T val, T lbound, T ubound) noexcept
 //! \param [in] val Value to check
 //! \returns Integer representing the sign
 template <typename T>
-constexpr int sign (T val) noexcept
+constexpr typename std::enable_if_t<std::is_arithmetic<T>::value, int32>
+sign (T val) noexcept
 {
     return (T(0) < val) - (val < T(0));
+}
+
+//! \brief Check if value is a power of two
+//! \param [in] val Value to check
+//! \returns True if value is a power of two, false otherwise
+constexpr bool is_pot (uint64 val) noexcept
+{
+    return (val != 0) && ((val & (val - 1)) == 0);
 }
 
 //! \brief Convert degrees to radians
 //! \param [in] degrees Degrees to convert
 //! \returns Value in radians
-constexpr float to_radians (float degrees) noexcept
+template <typename T>
+constexpr typename std::enable_if_t<std::is_floating_point<T>::value, T>
+to_radians (T degrees) noexcept
 {
-    return static_cast<float>(degrees * (M_PI / 180.0f));
+    return static_cast<T>(degrees * (M_PI / 180.f));
 }
 
 //! \brief Convert radians to degrees
 //! \param [in] radians Radians to convert
 //! \returns Value in degrees
-constexpr float to_degrees (float radians) noexcept
+template <typename T>
+constexpr typename std::enable_if_t<std::is_floating_point<T>::value, T>
+to_degrees (T radians) noexcept
 {
-    return static_cast<float>(radians * (180.0f / M_PI));
+    return static_cast<T>(radians * (180.f / M_PI));
 }
 
 } // namespace math

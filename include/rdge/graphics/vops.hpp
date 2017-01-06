@@ -98,5 +98,19 @@ UpdateSize (SpriteVertices& vertices, const math::vec2& size)
     vertices[3].pos.x = x2;
 }
 
+inline void
+FlipHorizontal (SpriteVertices& vertices)
+{
+    std::swap(vertices[0].uv, vertices[3].uv);
+    std::swap(vertices[1].uv, vertices[2].uv);
+}
+
+inline void
+FlipVertical (SpriteVertices& vertices)
+{
+    std::swap(vertices[0].uv, vertices[1].uv);
+    std::swap(vertices[2].uv, vertices[3].uv);
+}
+
 } // namespace vops
 } // namespace rdge

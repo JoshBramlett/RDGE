@@ -141,8 +141,7 @@ SpriteBatch::SpriteBatch (uint16 num_sprites, std::shared_ptr<Shader> shader)
     // Non-uniform flow control has a major negative performance impact.
     // https://www.opengl.org/wiki/Sampler_(GLSL)#Non-uniform_flow_control
     uint32 pixel = 0xFFFFFFFF;
-    auto dummy = SDL_CreateRGBSurfaceFrom(static_cast<void*>(&pixel),
-                                          1, 1, 32, 4, 0, 0, 0, 0);
+    auto dummy = SDL_CreateRGBSurfaceFrom(static_cast<void*>(&pixel), 1, 1, 32, 4, 0, 0, 0, 0);
     RegisterTexture(std::make_shared<Texture>(Surface(dummy))); // Surface temp will free 'dummy'
 
     // An identity matrix is placed at the base of the transform stack and used
@@ -247,8 +246,7 @@ SpriteBatch::PrepSubmit (void)
 {
     m_shader->Enable();
     opengl::BindBuffer(GL_ARRAY_BUFFER, m_vbo);
-    m_cursor = reinterpret_cast<sprite_vertex*>(opengl::GetBufferPointer(GL_ARRAY_BUFFER,
-                                                                             GL_WRITE_ONLY));
+    m_cursor = static_cast<sprite_vertex*>(opengl::GetBufferPointer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
 
     m_submissions = 0;
 }
@@ -256,8 +254,8 @@ SpriteBatch::PrepSubmit (void)
 void
 SpriteBatch::Submit (const SpriteVertices& vertices)
 {
-    SDL_assert(m_submissions <= m_maxSubmissions);
     SDL_assert(m_vbo == static_cast<uint32>(opengl::GetIntegerValue(GL_ARRAY_BUFFER_BINDING)));
+    SDL_assert(m_submissions <= m_maxSubmissions);
 
     for (const auto& vertex : vertices)
     {

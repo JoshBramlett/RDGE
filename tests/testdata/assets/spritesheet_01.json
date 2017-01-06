@@ -1,0 +1,19 @@
+{
+    "texture_parts": [
+        {
+            "name": "uv_1",
+            "x": 0,
+            "y": 0,
+            "width": 64,
+            "height": 64
+        },
+        {
+            "name": "uv_2",
+            "x": 128,
+            "y": 128,
+            "width": 128,
+            "height": 128
+        }
+    ],
+    "image_path": "../tests/testdata/assets/spritesheet.png"
+}

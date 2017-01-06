@@ -4,6 +4,7 @@
 #include <rdge/internal/logger_macros.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
 #include <rdge/internal/hints.hpp>
+#include <rdge/debug/sdl_dumper.hpp>
 
 #include <GL/glew.h>
 
@@ -123,6 +124,9 @@ Window::Window (
     //      query for the values.  Either the values need to be configured for
     //      OpenGL guaranteed minimums, or I need to figure out a way to query
     //      for the values.
+    //
+    //      *Update* Handmade creates a dummy window to query for the values, then
+    //      destroys it and creates the real window.
 
     // Context version will be equal to or higher than the requested value, or fail
     // the request cannot be met.  The profile mask accepts core, compatibility, or
@@ -132,6 +136,11 @@ Window::Window (
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, MIN_GL_CONTEXT_MAJOR);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, MIN_GL_CONTEXT_MINOR);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+
+    // TODO Handmade goes through srgb, what it is and why it's used.  Make sure to
+    //      look it up to understand what it is.  Also, the SDL port to handmade
+    //      attempts to create a window with it, and if it fails creates one without it.
+    SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
 
     // Frame buffer
     SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 32);
@@ -218,8 +227,8 @@ Window::Window (
 
     glEnable(GL_MULTISAMPLE);
 
-    //glEnable(GL_DEPTH_TEST);
-    //glDepthFunc(GL_LEQUAL);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
 
     //glEnable(GL_ALPHA_TEST);
     //glAlphaFunc(GL_LEQUAL, 0);
@@ -227,6 +236,7 @@ Window::Window (
     // TODO:  This enables alpha blending.  Look into it further when I have time.
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //glBlendEquation(GL_FUNC_ADD);
 
     int32 interval = use_vsync ? 1 : 0;
     if (UNLIKELY(SDL_GL_SetSwapInterval(interval) != 0))

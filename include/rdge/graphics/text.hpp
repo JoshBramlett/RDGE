@@ -42,11 +42,11 @@ public:
     ~Text (void) noexcept = default;
 
     //!@{
-    //! \brief Copy and move enabled
+    //! \brief Non-copyable and move enabled
     Text (const Text&) = delete;
     Text& operator= (const Text&) = delete;
-    Text (Text&&) noexcept;
-    Text& operator= (Text&&) noexcept;
+    Text (Text&&) noexcept = default;
+    Text& operator= (Text&&) noexcept = default;
     //!@}
 
     //! \brief Draw the sprite using the provided renderer
