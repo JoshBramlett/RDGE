@@ -9,6 +9,7 @@
 #include <rdge/application.hpp>
 #include <rdge/graphics/color.hpp>
 #include <rdge/graphics/point.hpp>
+#include <rdge/math/vec2.hpp>
 #include <rdge/math/vec4.hpp>
 #include <rdge/assets/surface.hpp>
 
@@ -117,29 +118,29 @@ public:
 
     //! \brief Get the window size
     //! \return Size structure
-    rdge::size Size (void) const;
+    math::uivec2 Size (void) const;
 
     //! \brief Get the window's drawable size
     //! \details The drawable size can differ from the window size for platforms
     //!          which have high DPI support.
     //! \return Size structure
-    rdge::size DrawableSize (void) const;
+    math::uivec2 DrawableSize (void) const;
 
     //! \brief Get the window width
     //! \return Width of the window
-    rdge::uint32 Width (void) const;
+    uint32 Width (void) const;
 
     //! \brief Get the window height
     //! \return Height of the window
-    rdge::uint32 Height (void) const;
+    uint32 Height (void) const;
 
     //! \brief Get the target window width
     //! \return Target drawing width
-    rdge::uint32 TargetWidth (void) const { return m_targetWidth; }
+    uint32 TargetWidth (void) const { return m_targetWidth; }
 
     //! \brief Get the target window height
     //! \return Target drawing height
-    rdge::uint32 TargetHeight (void) const { return m_targetHeight; }
+    uint32 TargetHeight (void) const { return m_targetHeight; }
 
     //! \brief Return the SDL_Window pointer
     //! \details Raw pointer is returned so caller must ensure
@@ -154,11 +155,11 @@ public:
     //! \brief Set the window size
     //! \param [in] width Width in pixels
     //! \param [in] height Height in pixels
-    void SetSize (rdge::uint32 width, rdge::uint32 height);
+    void SetSize (uint32 width, uint32 height);
 
     //! \brief Set the cursor location
     //! \param [in] location Point containing the x and y coordinates
-    void SetCursorLocation (const rdge::point& location);
+    void SetCursorLocation (const point& location);
 
     //! \brief Set the background color
     //! \details Color presented to the screen before any drawing takes place

@@ -6,7 +6,7 @@
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/graphics/size.hpp>
+#include <rdge/math/vec2.hpp>
 
 #include <SDL.h>
 
@@ -64,7 +64,7 @@ public:
     //! \param [in] depth Pixel depth (bits per pixel)
     //! \throws rdge::SDLException Image initialization failed
     //! \note A depth of 24bpp creates an RGB surface, 32bpp creates an RGBA surface
-    explicit Surface (const rdge::size& size, PixelDepth depth = PixelDepth::BPP_32);
+    explicit Surface (const math::uivec2& size, PixelDepth depth = PixelDepth::BPP_32);
 
     //! \brief Surface ctor
     //! \details Create a surface from pixel data.  The object will take ownership
@@ -76,7 +76,7 @@ public:
     //! \throws rdge::SDLException Image initialization failed
     //! \note A depth of 24bpp creates an RGB surface, 32bpp creates an RGBA surface
     explicit Surface (std::unique_ptr<uint8[]> pixels,
-                      const rdge::size&        size,
+                      const math::uivec2&      size,
                       PixelDepth               depth = PixelDepth::BPP_32);
 
     //! \brief Surface dtor
@@ -109,7 +109,7 @@ public:
 
     //! \brief Get the size (width and height) of the surface
     //! \return Size structure
-    rdge::size Size (void) const noexcept;
+    math::uivec2 Size (void) const noexcept;
 
     //! \brief Get the internal pixel format of the surface
     //! \details Value represents the SDL_PixelFormatEnum value

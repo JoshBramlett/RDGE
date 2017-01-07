@@ -320,40 +320,40 @@ Window::Title (void) const
     return SDL_GetWindowTitle(m_window);
 }
 
-rdge::size
+math::uivec2
 Window::Size (void) const
 {
-    rdge::int32 width, height;
+    int32 width, height;
     SDL_GetWindowSize(m_window, &width, &height);
 
-    return rdge::size(width, height);
+    return { static_cast<uint32>(width), static_cast<uint32>(height) };
 }
 
-rdge::size
+math::uivec2
 Window::DrawableSize (void) const
 {
-    rdge::int32 width, height;
+    int32 width, height;
     SDL_GL_GetDrawableSize(m_window, &width, &height);
 
-    return rdge::size(width, height);
+    return { static_cast<uint32>(width), static_cast<uint32>(height) };
 }
 
-rdge::uint32
+uint32
 Window::Width (void) const
 {
-    rdge::int32 width;
+    int32 width;
     SDL_GetWindowSize(m_window, &width, nullptr);
 
     return static_cast<rdge::uint32>(width);
 }
 
-rdge::uint32
+uint32
 Window::Height (void) const
 {
-    rdge::int32 height;
+    int32 height;
     SDL_GetWindowSize(m_window, nullptr, &height);
 
-    return static_cast<rdge::uint32>(height);
+    return static_cast<uint32>(height);
 }
 
 void
@@ -365,7 +365,7 @@ Window::SetTitle (const std::string& title)
 }
 
 void
-Window::SetSize (rdge::uint32 width, rdge::uint32 height)
+Window::SetSize (uint32 width, uint32 height)
 {
     DLOG("Setting window size to [" + std::to_string(width) + "," + std::to_string(height) + "]");
 
@@ -392,7 +392,7 @@ Window::ResetViewport (void)
     //      of that could be left to the implementation.  For example, instead of a
     //      letterbox the background could be extended (but the main game stays within
     //      the bounds of the aspect ratio)
-    rdge::int32 draw_width, draw_height;
+    int32 draw_width, draw_height;
     SDL_GL_GetDrawableSize(m_window, &draw_width, &draw_height);
 
     auto target_ratio = m_targetWidth / static_cast<float>(m_targetHeight);

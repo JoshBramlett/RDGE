@@ -16,6 +16,7 @@
 #include <rdge/type_traits.hpp>
 #include <rdge/assets/surface.hpp>
 #include <rdge/graphics/color.hpp>
+#include <rdge/math/vec2.hpp>
 
 #include <SDL.h>
 #include <SDL_ttf.h>
@@ -67,17 +68,12 @@ public:
 
     //! \enum RenderMode
     //! \brief SDL_ttf supported modes for text rendering
-    //! \details SDL_ttf provides the following rendering modes:
-    //!            - [Solid] Fast, low quality.  Use when quickly updating
-    //!            - [Shaded] Slower, better quality.  Background color is
-    //!                         visible creating a box around the text.
-    //!            - [Blended] Very slow, high quality.  Use for static text.
     //! \see https://www.libsdl.org/projects/SDL_ttf/docs/SDL_ttf.html#SEC42
     enum class RenderMode : uint8
     {
-        SOLID,  //!< Fast, low quality rendering
-        SHADED, //!< Slow, and renders anti-aliased text with a background color
-        BLENDED //!< Slow, high quality anti-aliased 32-bit ARGB surface
+        SOLID,  //!< 8-bit palettized - Fast creation, low quality
+        SHADED, //!< Anti-aliased 8-bit palettized onto a solid background color
+        BLENDED //!< Anti-aliased 32-bit ARGB surface
     };
 
     //! \brief Font ctor
@@ -151,7 +147,7 @@ public:
     //! \param [in] text UTF8 text to be rendered
     //! \returns Size of surface
     //! \throws rdge::Exception Font member is null
-    size SampleSizeUTF8 (const std::string& text);
+    math::uivec2 SampleSizeUTF8 (const std::string& text);
 
     //! \brief Render UTF8 text to a Surface
     //! \details Rendering defaults to Solid mode, which is the fastest

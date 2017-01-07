@@ -1,79 +1,33 @@
 #include <rdge/math/vec3.hpp>
 
-using namespace rdge::math;
+#include <sstream>
+#include <iomanip>
 
-vec3::vec3 (void)
-    : x(0.0f)
-    , y(0.0f)
-    , z(0.0f)
-{ }
+namespace rdge {
+namespace math {
 
-vec3::vec3 (float x, float y, float z)
-    : x(x)
-    , y(y)
-    , z(z)
-{ }
-
-vec3&
-vec3::add (const vec3& rhs)
+std::ostream& operator<< (std::ostream& os, const vec3& value)
 {
-    x += rhs.x;
-    y += rhs.y;
-    z += rhs.z;
-
-    return *this;
+    return os << rdge::to_string(value);
 }
 
-vec3&
-vec3::subtract (const vec3& rhs)
-{
-    x -= rhs.x;
-    y -= rhs.y;
-    z -= rhs.z;
+} // namespace math
+} // namespace rdge
 
-    return *this;
+namespace rdge {
+
+std::string
+to_string (const math::vec3& value)
+{
+    std::ostringstream ss;
+    ss << "["
+       << std::fixed << std::setprecision(6)
+       << value.x << ", "
+       << value.y << ", "
+       << value.z
+       << "]";
+
+    return ss.str();
 }
 
-vec3&
-vec3::multiply (const vec3& rhs)
-{
-    x *= rhs.x;
-    y *= rhs.y;
-    z *= rhs.z;
-
-    return *this;
-}
-
-vec3&
-vec3::divide (const vec3& rhs)
-{
-    x /= rhs.x;
-    y /= rhs.y;
-    z /= rhs.z;
-
-    return *this;
-}
-
-vec3&
-vec3::operator+= (const vec3& rhs)
-{
-    return add(rhs);
-}
-
-vec3&
-vec3::operator-= (const vec3& rhs)
-{
-    return subtract(rhs);
-}
-
-vec3&
-vec3::operator*= (const vec3& rhs)
-{
-    return multiply(rhs);
-}
-
-vec3&
-vec3::operator/= (const vec3& rhs)
-{
-    return divide(rhs);
-}
+} // namespace rdge

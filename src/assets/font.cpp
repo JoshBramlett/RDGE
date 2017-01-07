@@ -98,7 +98,7 @@ Font::IsMonospaced (void) const
     return TTF_FontFaceIsFixedWidth(m_font);
 }
 
-rdge::size
+math::uivec2
 Font::SampleSizeUTF8 (const std::string& text)
 {
     if (UNLIKELY(!m_font))
@@ -112,7 +112,7 @@ Font::SampleSizeUTF8 (const std::string& text)
         SDL_THROW("Failed to sample surface size", "TTF_SizeUTF8");
     }
 
-    return rdge::size(w, h);
+    return { static_cast<uint32>(w), static_cast<uint32>(h) };
 }
 
 std::shared_ptr<Surface>

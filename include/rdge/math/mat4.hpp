@@ -22,7 +22,7 @@
  * Also, I need to finish documentation.
  */
 
-//! \namespace RDGE Rainbow Drop Game Engine
+//! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 namespace math {
 
@@ -34,10 +34,8 @@ struct mat4
     //       the CMakeLists to remove the unnamed union flags
     union
     {
-        //! \var elements Data container array
-        float elements[16];
-        //! \var column Data container by column
-        vec4 columns[4];
+        float elements[16]; //!< Container by element
+        vec4 columns[4];    //!< Container by column
     };
 
     //! \brief mat4 ctor
@@ -50,24 +48,16 @@ struct mat4
     //! \param [in] diagonal Value to set in the identity matrix
     explicit mat4 (float diagonal);
 
-    //! \brief mat4 dtor
-    ~mat4 (void) { }
+    //! \brief vec2_t dtor
+    ~mat4 (void) noexcept = default;
 
-    //! \brief mat4 Copy ctor
-    //! \details Default-copyable
-    mat4 (const mat4&) noexcept = default;
-
-    //! \brief mat4 Move ctor
-    //! \details Default-movable
+    //!@{
+    //! \brief Copy and move enabled
+    mat4 (const mat4&) = default;
+    mat4& operator= (const mat4&) = default;
     mat4 (mat4&&) noexcept = default;
-
-    //! \brief mat4 Copy Assignment Operator
-    //! \details Default-copyable
-    mat4& operator= (const mat4&) noexcept = default;
-
-    //! \brief mat4 Move Assignment Operator
-    //! \details Default-movable
     mat4& operator= (mat4&&) noexcept = default;
+    //!@}
 
     //! \brief Multiplication assignment operator
     //! \details Multiplies by another mat4 matrix

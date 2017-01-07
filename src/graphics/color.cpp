@@ -82,7 +82,7 @@ color::FromRGBA (const std::string& value)
 
 std::ostream& operator<< (std::ostream& os, const color& value)
 {
-    return os << to_string(value);
+    return os << rdge::to_string(value);
 }
 
 std::string

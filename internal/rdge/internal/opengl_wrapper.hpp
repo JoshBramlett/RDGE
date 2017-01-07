@@ -19,14 +19,14 @@ namespace opengl {
 
 // Verify OpenGL / RDGE type compatibility
 // TODO Move to cpp file, so it'll get built
-static_assert(std::is_same<GLubyte,   rdge::uint8>::value,  "GLubyte != rdge::uint8");
-static_assert(std::is_same<GLbyte,    rdge::int8>::value,   "GLbyte != rdge::int8");
-static_assert(std::is_same<GLushort,  rdge::uint16>::value, "GLushort != rdge::uint16");
-static_assert(std::is_same<GLshort,   rdge::int16>::value,  "GLshort != rdge::int16");
-static_assert(std::is_same<GLuint,    rdge::uint32>::value, "GLuint != rdge::uint32");
-static_assert(std::is_same<GLint,     rdge::int32>::value,  "GLint != rdge::int32");
-static_assert(std::is_same<GLsizei,   rdge::int32>::value,  "GLsizei != rdge::int32");
-static_assert(std::is_same<GLboolean, rdge::uint8>::value,  "GLboolean != rdge::uint8");
+static_assert(std::is_same<GLubyte,   uint8>::value,  "GLubyte != uint8");
+static_assert(std::is_same<GLbyte,    int8>::value,   "GLbyte != int8");
+static_assert(std::is_same<GLushort,  uint16>::value, "GLushort != uint16");
+static_assert(std::is_same<GLshort,   int16>::value,  "GLshort != int16");
+static_assert(std::is_same<GLuint,    uint32>::value, "GLuint != uint32");
+static_assert(std::is_same<GLint,     int32>::value,  "GLint != int32");
+static_assert(std::is_same<GLsizei,   int32>::value,  "GLsizei != int32");
+static_assert(std::is_same<GLboolean, uint8>::value,  "GLboolean != uint8");
 
 static_assert(std::is_same<GLfloat, float>::value, "GLfloat != float");
 static_assert(GL_FALSE == false, "GL_FALSE != false");

@@ -46,14 +46,14 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
 #pragma GCC diagnostic pop
 
     //! \brief vec2_t ctor
-    //! \details Initialize vector to [0,0]
+    //! \details Zero initialization
     constexpr vec2_t (void)
         : x(0), y(0)
     { }
 
     //! \brief vec2_t ctor
-    //! \param [in] px First value
-    //! \param [in] py Second value
+    //! \param [in] px First element
+    //! \param [in] py Second element
     constexpr vec2_t (T px, T py)
         : x(px), y(py)
     { }
@@ -63,17 +63,6 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     constexpr vec2_t (T scalar)
         : x(scalar), y(scalar)
     { }
-
-    //! \brief vec2_t dtor
-    ~vec2_t (void) noexcept = default;
-
-    //!@{
-    //! \brief Copy and move enabled
-    constexpr vec2_t<T> (const vec2_t<T>&) = default;
-    constexpr vec2_t<T>& operator= (const vec2_t<T>&) = default;
-    constexpr vec2_t<T> (vec2_t<T>&&) noexcept = default;
-    constexpr vec2_t<T>& operator= (vec2_t<T>&&) noexcept = default;
-    //!@}
 
     //! \brief vec2_t User-defined underlying type conversion
     //! \note The conversion is explicit so it must be used with direct
@@ -228,17 +217,18 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
 //! \brief vec2_t equality operator
 //! \param [in] lhs Left side vec2_t to compare
 //! \param [in] rhs Right side vec2_t to compare
-//! \returns True iff points are identical
+//! \returns True iff vectors are identical
 template <typename T>
 constexpr bool operator== (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexcept
 {
+    // TODO floating point values need their own equality/inequality using fp_eq
     return (lhs.x == rhs.x) && (lhs.y == rhs.y);
 }
 
 //! \brief vec2_t inequality operator
 //! \param [in] lhs Left side vec2_t to compare
 //! \param [in] rhs Right side vec2_t to compare
-//! \returns True iff points are not identical
+//! \returns True iff vectors are not identical
 template <typename T>
 constexpr bool operator!= (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexcept
 {
@@ -246,12 +236,12 @@ constexpr bool operator!= (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexcept
 }
 
 //! \brief vec2_t unary negation operator
-//! \param [in] vec vec2_t to negate
+//! \param [in] value vec2_t to negate
 //! \returns Negated vec2_t
 template <typename T>
-constexpr vec2_t<T> operator- (const vec2_t<T>& vec) noexcept
+constexpr vec2_t<T> operator- (const vec2_t<T>& value) noexcept
 {
-    return vec2_t<T>(-vec.x, -vec.y);
+    return vec2_t<T>(-value.x, -value.y);
 }
 
 //! \brief vec2_t addition operator
@@ -363,12 +353,6 @@ constexpr vec2_t<T> operator% (const vec2_t<T>& vec, T scalar) noexcept
     return vec2_t<T>(vec.x % scalar, vec.y % scalar);
 }
 
-// TODO 1) Enable the rest of the operators (point.hpp)
-//      2) enable_if for scalar functions
-//      3) SNIFAE for float type (for eq and neq operators, and formatting for ostream)
-//      4) to_string function
-
-
 //! \brief vec2_t stream output operator
 //! \param [in] os Output stream
 //! \param [in] value vec2_t to write to the stream
@@ -376,12 +360,14 @@ constexpr vec2_t<T> operator% (const vec2_t<T>& vec, T scalar) noexcept
 template <typename T>
 inline std::ostream& operator<< (std::ostream& os, const vec2_t<T>& value)
 {
-    return os << "[" << value.x << "," << value.y << "]";
+    return os << "[" << value.x << ", " << value.y << "]";
 }
 
 //! \typedef Default vec2 float type
 using vec2   = vec2_t<float>;
 using uivec2 = vec2_t<uint32>;
+
+// TODO Add to_string function
 
 } // namespace math
 } // namespace rdge

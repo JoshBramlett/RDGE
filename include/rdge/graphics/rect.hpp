@@ -24,7 +24,6 @@
 
 #include <rdge/core.hpp>
 #include <rdge/graphics/point.hpp>
-#include <rdge/graphics/size.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/math/vec4.hpp>
 
@@ -82,7 +81,7 @@ struct rect_t<T>
     //! \details Initialize rect from point and size
     //! \param [in] point Point structure
     //! \param [in] size Size structure
-    explicit constexpr rect_t (const point& point, const size& size)
+    explicit constexpr rect_t (const point& point, const math::uivec2& size)
         : x(point.x)
         , y(point.y)
         , w(static_cast<rdge::int32>(size.w))
@@ -93,7 +92,7 @@ struct rect_t<T>
     //! \details Initialize rect from two vec2s representing point and size
     //! \param [in] point vec2 structure representing the location
     //! \param [in] size vec2 structure representing the size
-    explicit constexpr rect_t (const rdge::math::vec2& point, const rdge::math::vec2& size)
+    explicit constexpr rect_t (const math::vec2& point, const math::vec2& size)
         : x(point.x)
         , y(point.y)
         , w(size.x)

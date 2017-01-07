@@ -94,7 +94,7 @@ Surface::Surface (const std::string& path)
     }
 }
 
-Surface::Surface (const rdge::size& size, PixelDepth depth)
+Surface::Surface (const math::uivec2& size, PixelDepth depth)
 {
     auto masks = GetMasksFromDepth(depth);
     m_surface = SDL_CreateRGBSurface(0, // flags (SDL docs say param is unused)
@@ -112,7 +112,7 @@ Surface::Surface (const rdge::size& size, PixelDepth depth)
 }
 
 Surface::Surface (std::unique_ptr<uint8[]> pixels,
-                  const rdge::size&        size,
+                  const math::uivec2&      size,
                   PixelDepth               depth)
     : m_pixelData(std::move(pixels))
 {
@@ -203,15 +203,15 @@ Surface::Height (void) const noexcept
     return static_cast<uint32>(m_surface->h);
 }
 
-rdge::size
+math::uivec2
 Surface::Size (void) const noexcept
 {
     if (UNLIKELY(!m_surface))
     {
-        return rdge::size(0, 0);
+        return math::uivec2();
     }
 
-    return rdge::size(m_surface->w, m_surface->h);
+    return { static_cast<uint32>(m_surface->w), static_cast<uint32>(m_surface->h) };
 }
 
 uint32

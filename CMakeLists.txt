@@ -80,7 +80,6 @@ add_library (
              src/graphics/isprite.cpp
              src/graphics/sprite_batch.cpp
              src/graphics/shader.cpp
-             src/graphics/size.cpp
              src/graphics/sprite.cpp
              src/graphics/text.cpp
              src/graphics/texture.cpp

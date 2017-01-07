@@ -1,8 +1,22 @@
 #include <rdge/graphics/text.hpp>
-#include <rdge/graphics/size.hpp>
 #include <rdge/graphics/vops.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
+
+namespace {
+
+using namespace rdge;
+
+// TODO needs to be moved to appropriate class
+math::vec2
+to_ndc (const math::uivec2& size)
+{
+    auto viewport = opengl::GetViewport();
+    return { viewport[2] * (size.w / viewport[2]),
+             viewport[3] * (size.h / viewport[3]) };
+}
+
+} // anonymous namespace
 
 namespace rdge {
 
