@@ -27,7 +27,7 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
 
     //! \brief Number of elements
     //! \returns size_t type
-    constexpr size_t length (void) const noexcept
+    constexpr size_t size (void) const noexcept
     {
         return 2;
     }
@@ -74,24 +74,24 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
         return vec2_t<U>(static_cast<U>(x), static_cast<U>(y));
     }
 
-    //! \brief vec2_t Subscript operator
+    //! \brief vec2_t subscript operator
     //! \param [in] index Index of containing element
     //! \returns Reference to element
-    constexpr T& operator[] (rdge::uint8 index) noexcept
+    constexpr T& operator[] (uint8 index) noexcept
     {
         // TODO static_assert doesn't work - and the only reason it compiles is b/c of the template,
         //      so once I actually call this it'll fail.  I'll likely need to remove the constexpr
         //      and move this to an implementation file so I can use a normal assert
-        static_assert(index >= 0 && index < length(), "vec2_t index out of bounds");
+        //static_assert(index >= 0 && index < size(), "vec2_t index out of bounds");
         return (&x)[index];
     }
 
-    //! \brief vec2_t Subscript operator
+    //! \brief vec2_t subscript operator
     //! \param [in] index Index of containing element
     //! \returns Const reference to element
-    constexpr const T& operator[] (rdge::uint8 index) const noexcept
+    constexpr const T& operator[] (uint8 index) const noexcept
     {
-        static_assert(index >= 0 && index < length(), "vec2_t index out of bounds");
+        //static_assert(index >= 0 && index < size(), "vec2_t index out of bounds");
         return (&x)[index];
     }
 
@@ -232,7 +232,7 @@ constexpr bool operator== (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexcept
 template <typename T>
 constexpr bool operator!= (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexcept
 {
-    return (lhs.x != rhs.x) || (lhs.y != rhs.y);
+    return !(lhs == rhs);
 }
 
 //! \brief vec2_t unary negation operator

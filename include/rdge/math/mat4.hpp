@@ -30,43 +30,37 @@ namespace math {
 //! \brief Represents a 4x4 matrix, ordered by column major
 struct mat4
 {
-    // TODO: Consider using std::variant when it comes out.  Also, if changed update
-    //       the CMakeLists to remove the unnamed union flags
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wgnu-anonymous-struct"
+#pragma GCC diagnostic ignored "-Wnested-anon-types"
+
     union
     {
         float elements[16]; //!< Container by element
         vec4 columns[4];    //!< Container by column
     };
 
+#pragma GCC diagnostic pop
+
     //! \brief mat4 ctor
-    //! \details Initializes all elements to zero
+    //! \details Zero initialization
     mat4 (void);
 
-    //! \brief mat4 ctor
-    //! \details Initializes all elements to zero, and generates an indentity
-    //!          matrix from the provided diagonal
-    //! \param [in] diagonal Value to set in the identity matrix
-    explicit mat4 (float diagonal);
+    //! \brief mat4 subscript operator
+    //! \param [in] index Index of column
+    //! \returns Reference to vec4 column
+    vec4& operator[] (uint8 index) noexcept;
 
-    //! \brief vec2_t dtor
-    ~mat4 (void) noexcept = default;
+    //! \brief mat4 subscript operator
+    //! \param [in] index Index of column
+    //! \returns Const reference to vec4 column
+    const vec4& operator[] (uint8 index) const noexcept;
 
-    //!@{
-    //! \brief Copy and move enabled
-    mat4 (const mat4&) = default;
-    mat4& operator= (const mat4&) = default;
-    mat4 (mat4&&) noexcept = default;
-    mat4& operator= (mat4&&) noexcept = default;
-    //!@}
-
-    //! \brief Multiplication assignment operator
-    //! \details Multiplies by another mat4 matrix
+    //! \brief mat4 memberwise multiplication
+    //! \param [in] rhs mat4 to multiply
+    //! \returns Reference to self
     mat4& operator*= (const mat4& rhs);
-
-    //! \brief Multiply object by another mat4 matrix
-    //! \param [in] other Matrix to multiply
-    //! \returns Reference to current object
-    mat4& multiply (const mat4& rhs);
 
     //! \brief Create an inverse of the matrix
     //! \returns mat4 containing the inverse of the parent
@@ -129,6 +123,17 @@ struct mat4
     //! \param [in] scale Vector of x, y, and z values to scale
     //! \returns Scale matrix
     static mat4 scale (const vec3& scale);
+
+    //! \brief Create a LookAt view matrix
+    //! \details View matrix which emulates the behavior of the gluLookAt function,
+    //!          which rotates the world around the camera.  After the matrix is
+    //!          applied the camera will be set to [0,0] and will point at the
+    //!          provided vertex.
+    //! \param [in] eye Position of the camera
+    //! \param [in] center Position camera will "look at"
+    //! \param [in] up Upwards direction of the world coordinates
+    //! \returns View matrix
+    static mat4 look_at (const vec3& eye, const vec3& center, const vec3& up);
 };
 
 //! \brief mat4 multiplication operator
@@ -157,30 +162,29 @@ inline mat4 operator* (const mat4& lhs, const mat4& rhs)
 //! \param [in] lhs mat4 to multiply
 //! \param [in] rhs vec4 to multiply
 //! \returns Multiplied vec4 result
-inline vec4 operator* (const mat4& lhs, const vec4& rhs)
+inline vec4 operator* (const mat4& mat, const vec4& vec)
 {
-    auto col = lhs.columns;
     return vec4
     {
-        col[0].x * rhs.x + col[1].x * rhs.y + col[2].x * rhs.z + col[3].x * rhs.w,
-        col[0].y * rhs.x + col[1].y * rhs.y + col[2].y * rhs.z + col[3].y * rhs.w,
-        col[0].z * rhs.x + col[1].z * rhs.y + col[2].z * rhs.z + col[3].z * rhs.w,
-        col[0].w * rhs.x + col[1].w * rhs.y + col[2].w * rhs.z + col[3].w * rhs.w
+        (mat[0].x * vec.x) + (mat[1].x * vec.y) + (mat[2].x * vec.z) + (mat[3].x * vec.w),
+        (mat[0].y * vec.x) + (mat[1].y * vec.y) + (mat[2].y * vec.z) + (mat[3].y * vec.w),
+        (mat[0].z * vec.x) + (mat[1].z * vec.y) + (mat[2].z * vec.z) + (mat[3].z * vec.w),
+        (mat[0].w * vec.x) + (mat[1].w * vec.y) + (mat[2].w * vec.z) + (mat[3].w * vec.w)
     };
 }
 
 //! \brief mat4-vec3 multiplication operator
+//! \details Assumes the w component of the vec3 is set to 1.
 //! \param [in] lhs mat4 to multiply
 //! \param [in] rhs vec3 to multiply
 //! \returns Multiplied vec3 result
-inline vec3 operator* (const mat4& lhs, const vec3& rhs)
+inline vec3 operator* (const mat4& mat, const vec3& vec)
 {
-    auto col = lhs.columns;
     return vec3
     {
-        col[0].x * rhs.x + col[1].x * rhs.y + col[2].x * rhs.z + col[3].x,
-        col[0].y * rhs.x + col[1].y * rhs.y + col[2].y * rhs.z + col[3].y,
-        col[0].z * rhs.x + col[1].z * rhs.y + col[2].z * rhs.z + col[3].z
+        (mat[0].x * vec.x) + (mat[1].x * vec.y) + (mat[2].x * vec.z) + mat[3].x,
+        (mat[0].y * vec.x) + (mat[1].y * vec.y) + (mat[2].y * vec.z) + mat[3].y,
+        (mat[0].z * vec.x) + (mat[1].z * vec.y) + (mat[2].z * vec.z) + mat[3].z
     };
 }
 

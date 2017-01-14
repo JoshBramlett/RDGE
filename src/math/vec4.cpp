@@ -1,86 +1,35 @@
 #include <rdge/math/vec4.hpp>
 
+#include <SDL_assert.h>
+
 #include <sstream>
 #include <iomanip>
 
-using namespace rdge::math;
+namespace rdge {
+namespace math {
 
-vec4&
-vec4::add (const vec4& value)
+float&
+vec4::operator[] (uint8 index) noexcept
 {
-    x += value.x;
-    y += value.y;
-    z += value.z;
-    w += value.w;
-
-    return *this;
+    SDL_assert(index < 4);
+    return (&this->x)[index];
 }
 
-vec4&
-vec4::subtract (const vec4& value)
+const float&
+vec4::operator[] (uint8 index) const noexcept
 {
-    x -= value.x;
-    y -= value.y;
-    z -= value.z;
-    w -= value.w;
-
-    return *this;
-}
-
-vec4&
-vec4::multiply (const vec4& value)
-{
-    x *= value.x;
-    y *= value.y;
-    z *= value.z;
-    w *= value.w;
-
-    return *this;
-}
-
-vec4&
-vec4::divide (const vec4& value)
-{
-    x /= value.x;
-    y /= value.y;
-    z /= value.z;
-    w /= value.w;
-
-    return *this;
-}
-
-vec4&
-vec4::operator+= (const vec4& rhs)
-{
-    return add(rhs);
-}
-
-vec4&
-vec4::operator-= (const vec4& rhs)
-{
-    return subtract(rhs);
-}
-
-vec4&
-vec4::operator*= (const vec4& rhs)
-{
-    return multiply(rhs);
-}
-
-vec4&
-vec4::operator/= (const vec4& rhs)
-{
-    return divide(rhs);
+    SDL_assert(index < 4);
+    return (&this->x)[index];
 }
 
 std::ostream& operator<< (std::ostream& os, const vec4& vec)
 {
     std::ostringstream ss;
-    ss << "[" << std::fixed << std::setprecision(5)
-       << vec.x << ","
-       << vec.y << ","
-       << vec.z << ","
-       << vec.w << "]";
+    ss << std::fixed << std::setprecision(6)
+       << "[" << vec.x << ", " << vec.y << ", " << vec.z << ", " << vec.w << "]";
 
     return os << ss.str();
 }
+
+} // namespace math
+} // namespace rdge

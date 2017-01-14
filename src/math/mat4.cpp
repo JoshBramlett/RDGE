@@ -3,31 +3,54 @@
 #include <rdge/internal/logger_macros.hpp>
 #include <rdge/internal/hints.hpp>
 
+#include <SDL_assert.h>
+
 #include <cmath>
 #include <sstream>
 #include <iomanip>
 
-using namespace rdge::math;
+namespace rdge {
+namespace math {
 
 mat4::mat4 (void)
 {
-    memset(elements, 0, sizeof(elements));
+    memset(this->elements, 0, sizeof(this->elements));
 }
 
-mat4::mat4 (float diagonal)
+vec4&
+mat4::operator[] (uint8 index) noexcept
 {
-    memset(elements, 0, sizeof(elements));
+    SDL_assert(index < 4);
+    return this->columns[index];
+}
 
-    elements[0]  = diagonal;    // | I 0 0 0 |
-    elements[5]  = diagonal;    // | 0 I 0 0 |
-    elements[10] = diagonal;    // | 0 0 I 0 |
-    elements[15] = diagonal;    // | 0 0 0 I |
+const vec4&
+mat4::operator[] (uint8 index) const noexcept
+{
+    SDL_assert(index < 4);
+    return this->columns[index];
 }
 
 mat4&
 mat4::operator*= (const mat4& rhs)
 {
-    return multiply(rhs);
+    float data[16];
+    for (int y = 0; y < 4; y++)
+    {
+        for (int x = 0; x < 4; x++)
+        {
+            float sum = 0.0f;
+            for (int e = 0; e < 4; e++)
+            {
+                sum += elements[x + e * 4] * rhs.elements[e + y * 4];
+            }
+
+            data[x + y * 4] = sum;
+        }
+    }
+
+    memcpy(elements, data, 4 * 4 * sizeof(float));
+    return *this;
 }
 
 mat4
@@ -166,77 +189,46 @@ mat4::inverse (void)
     return result;
 }
 
-mat4&
-mat4::multiply (const mat4& rhs)
-{
-    float data[16];
-    for (int y = 0; y < 4; y++)
-    {
-        for (int x = 0; x < 4; x++)
-        {
-            float sum = 0.0f;
-            for (int e = 0; e < 4; e++)
-            {
-                sum += elements[x + e * 4] * rhs.elements[e + y * 4];
-            }
-
-            data[x + y * 4] = sum;
-        }
-    }
-
-    memcpy(elements, data, 4 * 4 * sizeof(float));
-    return *this;
-}
-
 /* static */ mat4
 mat4::identity (void)
 {
-    return mat4(1.0f);
-}
-
-/* static */ mat4
-mat4::orthographic (
-                    float left,
-                    float right,
-                    float bottom,
-                    float top,
-                    float near,
-                    float far
-                   )
-{
-    mat4 result(1.0f);
-
-    result.elements[0 + 0 * 4] = 2.0f / (right - left);
-    result.elements[1 + 1 * 4] = 2.0f / (top - bottom);
-    result.elements[2 + 2 * 4] = 2.0f / (near - far);
-
-    result.elements[0 + 3 * 4] = (left + right) / (left - right);
-    result.elements[1 + 3 * 4] = (bottom + top) / (bottom - top);
-    result.elements[2 + 3 * 4] = (far + near) / (far - near);
+    mat4 result;
+    result[0][0] = 1.f;    // | I 0 0 0 |
+    result[1][1] = 1.f;    // | 0 I 0 0 |
+    result[2][2] = 1.f;    // | 0 0 I 0 |
+    result[3][3] = 1.f;    // | 0 0 0 I |
 
     return result;
 }
 
 /* static */ mat4
-mat4::perspective (
-                   float field_of_view,
-                   float aspect_ratio,
-                   float near,
-                   float far
-                  )
+mat4::orthographic (float left, float right, float bottom, float top, float near, float far)
 {
-    mat4 result(1.0f);
+    auto result = mat4::identity();
+    result[0][0] = 2.0f / (right - left);
+    result[1][1] = 2.0f / (top - bottom);
+    result[2][2] = 2.0f / (near - far);
+    result[3][0] = (left + right) / (left - right);
+    result[3][1] = (bottom + top) / (bottom - top);
+    result[3][2] = (far + near) / (far - near);
 
+    return result;
+}
+
+/* static */ mat4
+mat4::perspective (float field_of_view, float aspect_ratio, float near, float far)
+{
     float q = 1.0f / tan(to_radians(0.5f * field_of_view));
     float a = q / aspect_ratio;
     float b = (near + far) / (near - far);
     float c = (2.0f * near * far) / (near - far);
 
-    result.elements[0 + 0 * 4] = a;         // | a  0  0  0 |
-    result.elements[1 + 1 * 4] = q;         // | 0  q  0  0 |
-    result.elements[2 + 2 * 4] = b;         // | 0  0  b  c |
-    result.elements[3 + 2 * 4] = -1.0f;     // | 0  0  -1 1 |
-    result.elements[2 + 3 * 4] = c;
+    auto result = mat4::identity();
+    result[0][0] = a;         // | a  0  0  0 |
+    result[1][1] = q;         // | 0  q  0  0 |
+    result[2][2] = b;         // | 0  0  b  c |
+    result[2][3] = -1.0f;     // | 0  0  -1 1 |
+    result[3][2] = c;
 
     return result;
 }
@@ -244,20 +236,17 @@ mat4::perspective (
 /* static */ mat4
 mat4::translation (const vec3& translation)
 {
-    mat4 result(1.0f);
-
-    result.elements[12] = translation.x;     // | 1 0 0 Vx |
-    result.elements[13] = translation.y;     // | 0 1 0 Vy |
-    result.elements[14] = translation.z;     // | 0 0 1 Vz |
-                                             // | 0 0 0 1  |
+    auto result = mat4::identity();
+    result[3][0] = translation.x;     // | 1 0 0 Vx |
+    result[3][1] = translation.y;     // | 0 1 0 Vy |
+    result[3][2] = translation.z;     // | 0 0 1 Vz |
+                                      // | 0 0 0 1  |
     return result;
 }
 
 /* static */ mat4
 mat4::rotation (float angle, const vec3& axis)
 {
-    mat4 result(1.0f);
-
     float theta = to_radians(angle);
     float c = cos(theta);
     float s = sin(theta);
@@ -267,21 +256,22 @@ mat4::rotation (float angle, const vec3& axis)
     float y = axis.y;
     float z = axis.z;
 
-    // | xxC + c        xyC - zs        xzC + ys |
-    // | yxC + zs       yyC + c         yzC - xs |
-    // | zxC - ys       zyC + xs        zzC + c  |
+    // | xxC + c     xyC - zs    xzC + ys |
+    // | yxC + zs    yyC + c     yzC - xs |
+    // | zxC - ys    zyC + xs    zzC + c  |
 
-    result.elements[0 + 0 * 4] = (x * arccos) + c;
-    result.elements[1 + 0 * 4] = (y * x * arccos) + (z * s);
-    result.elements[2 + 0 * 4] = (z * x * arccos) - (y * s);
+    auto result = mat4::identity();
+    result[0][0] = (x * x * arccos) + c;
+    result[0][1] = (y * x * arccos) + (z * s);
+    result[0][2] = (z * x * arccos) - (y * s);
 
-    result.elements[0 + 1 * 4] = (x * y * arccos) - (z * s);
-    result.elements[1 + 1 * 4] = (y * arccos) + c;
-    result.elements[2 + 1 * 4] = (z * y * arccos) + (x * s);
+    result[1][0] = (x * y * arccos) - (z * s);
+    result[1][1] = (y * y * arccos) + c;
+    result[1][2] = (z * y * arccos) + (x * s);
 
-    result.elements[0 + 2 * 4] = (x * z * arccos) + (y * s);
-    result.elements[1 + 2 * 4] = (y * z * arccos) - (x * s);
-    result.elements[2 + 2 * 4] = (z * arccos) + c;
+    result[2][0] = (x * z * arccos) + (y * s);
+    result[2][1] = (y * z * arccos) - (x * s);
+    result[2][2] = (z * z * arccos) + c;
 
     return result;
 }
@@ -289,11 +279,39 @@ mat4::rotation (float angle, const vec3& axis)
 /* static */ mat4
 mat4::scale (const vec3& scale)
 {
-    mat4 result(1.0f);
+    auto result = mat4::identity();
+    result[0][0] = scale.x;
+    result[1][1] = scale.y;
+    result[2][2] = scale.z;
 
-    result.elements[0 + 0 * 4] = scale.x;
-    result.elements[1 + 1 * 4] = scale.y;
-    result.elements[2 + 2 * 4] = scale.z;
+    return result;
+}
+
+/* static */ mat4
+mat4::look_at (const vec3& eye, const vec3& center, const vec3& up)
+{
+    vec3 f = (center - eye).normalize(); // forward vector
+    vec3 s = f.cross(up).normalize();    // side vector
+    vec3 u = s.cross(f);                 // real up vector
+
+    auto result = mat4::identity();
+    result[0][0] = s.x;
+    result[1][0] = s.y;
+    result[2][0] = s.z;
+    result[0][1] = u.x;             // | s.x   u.x   -f.x   -s.dot(eye) |
+    result[1][1] = u.y;             // | s.y   u.y   -f.y   -u.dot(eye) |
+    result[2][1] = u.z;             // | s.z   u.z   -f.z    f.dot(eye) |
+    result[0][2] = -f.x;
+    result[1][2] = -f.y;
+    result[2][2] = -f.z;
+    result[3][0] = -s.dot(eye);
+    result[3][1] = -u.dot(eye);
+    result[3][2] = f.dot(eye);
+
+    // dot products above are the inverted eye coordinates, which alternatively
+    // are set by multiplying an inverted eye transformation matrix
+    //mat4 inverted_eye = mat4::translation(-eye);
+    //return result * inverted_eye;
 
     return result;
 }
@@ -301,16 +319,10 @@ mat4::scale (const vec3& scale)
 std::ostream& operator<< (std::ostream& os, const mat4& matrix)
 {
     std::ostringstream ss;
-    ss << "[" << std::fixed << std::setprecision(5);
-
-    for (int i = 0; i < 4; ++i)
-    {
-        ss << "[" << matrix.columns[i].x << ","
-           << matrix.columns[i].y << ","
-           << matrix.columns[i].z << ","
-           << matrix.columns[i].w << "]"
-           << ((i == 3) ? "]" : ", ");
-    }
+    ss << "[" << matrix[0] << ", " << matrix[1] << ", " << matrix[2] << ", " << matrix[3] << "]";
 
     return os << ss.str();
 }
+
+} // namespace math
+} // namespace rdge

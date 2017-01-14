@@ -22,6 +22,11 @@ struct vec3
     float y = 0.f; //!< y-coordinate
     float z = 0.f; //!< z-coordinate
 
+    static const vec3 ZERO; //!< vec3 defined to { 0.f, 0.f, 0.f }
+    static const vec3 X;    //!< vec3 defined to { 1.f, 0.f, 0.f }
+    static const vec3 Y;    //!< vec3 defined to { 0.f, 1.f, 0.f }
+    static const vec3 Z;    //!< vec3 defined to { 0.f, 0.f, 1.f }
+
     //! \brief vec3 ctor
     //! \details Zero initialization via default member initialization
     constexpr vec3 (void) = default;
@@ -41,6 +46,16 @@ struct vec3
     constexpr vec3 (float scalar)
         : x(scalar), y(scalar), z(scalar)
     { }
+
+    //! \brief vec3 subscript operator
+    //! \param [in] index Index of containing element
+    //! \returns Reference to element
+    float& operator[] (uint8 index) noexcept;
+
+    //! \brief vec3 subscript operator
+    //! \param [in] index Index of containing element
+    //! \returns Const reference to element
+    const float& operator[] (uint8 index) const noexcept;
 
     //! \brief vec3 memberwise addition
     //! \param [in] rhs vec3 to add
@@ -74,6 +89,45 @@ struct vec3
         z *= rhs.z;
         return *this;
     }
+
+    //! \brief Vector length (magnitude)
+    //! \returns Length of the vector
+    float length (void) const noexcept
+    {
+        return std::sqrt((x * x) + (y * y) + (z * z));
+    }
+
+    //! \brief Normalize vector components to [0,1]
+    //! \returns Normalized vector
+    vec3 normalize (void) const noexcept
+    {
+        float len = length();
+
+        return (fp_eq(len, 0.f)) ? vec3::ZERO : vec3((x / len), (y / len), (z / len));
+    }
+
+    //! \brief Cross product
+    //! \details Defined only in three dimensional space, the cross product produces a
+    //!          vector that is perpendicular to both vectors used to calculate it.
+    //!          For example, vectors with magnitude on the x and y planes produce
+    //!          a vector on the z axis.
+    //! \param [in] other Other vec3 used in the calculation
+    //! \returns vec3 containing the cross product
+    constexpr vec3 cross (const vec3& other) const noexcept
+    {
+        return vec3((y * other.z) - (z * other.y),
+                    (z * other.x) - (x * other.z),
+                    (x * other.y) - (y * other.x));
+    }
+
+    //! \brief Dot product
+    //! \details Sum of the corresponding products within the containers.
+    //! \param [in] other Other vec3 used in the calculation
+    //! \returns Dot product of the vectors
+    constexpr float dot (const vec3& other) const noexcept
+    {
+        return (x * other.x) + (y * other.y) + (z * other.z);
+    }
 };
 
 //! \brief vec3 equality operator
@@ -91,7 +145,7 @@ constexpr bool operator== (const vec3& lhs, const vec3& rhs) noexcept
 //! \returns True iff vectors are not identical
 constexpr bool operator!= (const vec3& lhs, const vec3& rhs) noexcept
 {
-    return !fp_eq(lhs.x, rhs.x) || !fp_eq(lhs.y, rhs.y) || !fp_eq(lhs.z, rhs.z);
+    return !(lhs == rhs);
 }
 
 //! \brief vec3 unary negation operator
@@ -136,10 +190,4 @@ constexpr vec3 operator* (const vec3& lhs, const vec3& rhs) noexcept
 std::ostream& operator<< (std::ostream& os, const vec3& value);
 
 } // namespace math
-
-//! \brief vec3 conversion to string
-//! \param [in] value vec3 to convert
-//! \returns std::string representation
-std::string to_string (const math::vec3& value);
-
 } // namespace rdge

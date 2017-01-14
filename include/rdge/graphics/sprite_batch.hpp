@@ -16,7 +16,7 @@
 #include <array>
 #include <utility> // std::pair
 
-//! \namespace RDGE Rainbow Drop Game Engine
+//! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
 //! \class SpriteBatch
@@ -99,6 +99,10 @@ public:
     //! \details Should be called every frame after all submissions.
     void Flush (void);
 
+    //! \brief Set the shader uniform projection
+    //! \param [in] projection Projection matrix
+    void SetProjection (const math::mat4& projection);
+
     //! \brief Push a transformation on the stack
     //! \details Applies the transformation to all submitted renderables until
     //!          popped off the stack.  Transformations will accumulate, meaning
@@ -114,9 +118,6 @@ public:
     //! \brief Default shader source
     //! \returns Pair containing the vertex and fragment shader source
     std::pair<std::string, std::string> DefaultShaderSource (void) const;
-
-    // TODO - Projection
-    //void SetProjection (const math::mat4& projection);
 
     // TODO - Transform
     // We perform the transform, libgdx passes the calculation to the shader via

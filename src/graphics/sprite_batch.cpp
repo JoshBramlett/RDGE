@@ -141,6 +141,7 @@ SpriteBatch::SpriteBatch (uint16 num_sprites, std::shared_ptr<Shader> shader)
     // Non-uniform flow control has a major negative performance impact.
     // https://www.opengl.org/wiki/Sampler_(GLSL)#Non-uniform_flow_control
     uint32 pixel = 0xFFFFFFFF;
+    // TODO SDL 2.0.5 has a way to supply the pixel format
     auto dummy = SDL_CreateRGBSurfaceFrom(static_cast<void*>(&pixel), 1, 1, 32, 4, 0, 0, 0, 0);
     RegisterTexture(std::make_shared<Texture>(Surface(dummy))); // Surface temp will free 'dummy'
 
@@ -292,6 +293,16 @@ SpriteBatch::Flush (void)
 
     opengl::UnbindBuffers(GL_ELEMENT_ARRAY_BUFFER);
     opengl::UnbindVertexArrays();
+}
+
+void
+SpriteBatch::SetProjection (const math::mat4& projection)
+{
+    m_projection = projection;
+
+    m_shader->Enable();
+    m_shader->SetUniformValue(UNI_PROJ_MATRIX, m_projection);
+    m_shader->Disable();
 }
 
 void
