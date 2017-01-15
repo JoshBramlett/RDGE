@@ -6,6 +6,9 @@
 #pragma once
 
 #include <rdge/core.hpp>
+#include <rdge/math/vec2.hpp>
+#include <rdge/math/vec3.hpp>
+#include <rdge/math/mat4.hpp>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
@@ -15,41 +18,31 @@ namespace rdge {
 class OrthographicCamera
 {
 public:
-    OrthographicCamera (void) = default;
+    OrthographicCamera (void);
 
-    explicit OrthographicCamera (float width, float height)
-        : viewport_width(width)
-        , viewport_height(height)
-    {
+    explicit OrthographicCamera (float width, float height);
 
-    }
+    void Update (void);
 
-    void Update (void)
-    {
-        this->projection = math::math4::orthographic(zoom * (-viewport_width / 2),
-                                                     zoom * (viewport_width / 2),
-                                                     zoom * (-viewport_height / 2),
-                                                     zoom * (viewport_height / 2),
-                                                     near,
-                                                     far);
-    }
+    void Translate (const math::vec2& displacement);
+
+    void Rotate (float angle);
 
 public:
-    math::vec3 position  = { 0.f };
-    math::vec3 direction = { 0.f, 0.f, -1.f };
-    math::vec3 up        = { 0.f, 1.f, 0.f };
+    math::vec3 position  = math::vec3::ZERO; //!< Camera position
+    math::vec3 direction = -math::vec3::Z;   //!< Unit vector camera direction
+    math::vec3 up        = math::vec3::Y;    //!< Unit vector world "up"
 
-    math::mat4 projection;
-    math::mat4 view;
-    math::mat4 combined;
-    math::mat4 inverse_combined;
+    math::mat4 projection;       //!< Projection matrix
+    math::mat4 view;             //!< View matrix
+    math::mat4 combined;         //!< Combined view/projection matrix
+    math::mat4 inverse_combined; //!< Inverse of the combined matrix
 
-    float near = 0.f;
-    float far  = 100.f;
-    float zoom = 1.f; // <-- only in libgdx orthographic camera
+    float near = 0.f;   //!< Near clipping plane
+    float far  = 100.f; //!< Far clipping plane
+    float zoom = 1.f;   //!< Projection zoom level
 
-    float viewport_width  = 0.f;
-    float viewport_height = 0.f;
+    math::vec2 viewport_size; //!< Cached viewport size
 };
 
 } // namespace rdge

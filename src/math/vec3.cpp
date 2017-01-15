@@ -1,4 +1,5 @@
 #include <rdge/math/vec3.hpp>
+#include <rdge/math/mat4.hpp>
 
 #include <SDL_assert.h>
 
@@ -25,6 +26,19 @@ vec3::operator[] (uint8 index) const noexcept
 {
     SDL_assert(index < 3);
     return (&this->x)[index];
+}
+
+vec3&
+vec3::affine_transform (const mat4& mat)
+{
+    float xx = (mat[0].x * this->x) + (mat[1].x * this->y) + (mat[2].x * this->z) + mat[3].x;
+    float xy = (mat[0].y * this->x) + (mat[1].y * this->y) + (mat[2].y * this->z) + mat[3].y;
+    float xz = (mat[0].z * this->x) + (mat[1].z * this->y) + (mat[2].z * this->z) + mat[3].z;
+
+    this->x = xx;
+    this->y = xy;
+    this->z = xz;
+    return *this;
 }
 
 std::ostream& operator<< (std::ostream& os, const vec3& value)

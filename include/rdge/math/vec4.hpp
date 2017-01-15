@@ -30,10 +30,10 @@ struct vec4
 
     //! \brief vec4 ctor
     //! \details Initialize vec4 from X, Y, Z and W values
-    //! \param [in] x X-Coordinate
-    //! \param [in] y Y-Coordinate
-    //! \param [in] z Z-Coordinate
-    //! \param [in] w W-Coordinate
+    //! \param [in] px X-Coordinate
+    //! \param [in] py Y-Coordinate
+    //! \param [in] pz Z-Coordinate
+    //! \param [in] pw W-Coordinate
     constexpr vec4 (float px, float py, float pz, float pw)
         : x(px), y(py), z(pz), w(pw)
     { }
@@ -47,7 +47,7 @@ struct vec4
     //! \brief vec4 ctor
     //! \details Initialize vec4 from vec3 and W values.
     //! \param [in] v vec3 containing the x, y, and z coordinates
-    //! \param [in] w W-Coordinate
+    //! \param [in] pw W-Coordinate
     constexpr vec4 (const vec3& v, float pw)
         : x(v.x), y(v.y), z(v.z), w(pw)
     { }

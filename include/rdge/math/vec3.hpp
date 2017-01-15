@@ -7,12 +7,16 @@
 
 #include <rdge/core.hpp>
 #include <rdge/math/functions.hpp>
+#include <rdge/math/vec2.hpp>
 
 #include <ostream>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 namespace math {
+
+// Forward declaration
+struct mat4;
 
 //! \struct vec3
 //! \brief Three dimensional floating point vector
@@ -34,9 +38,9 @@ struct vec3
     //! \brief vec3 ctor
     //! \details The optional z-coordinate if omitted will default to a value of 0.f,
     //!          which can be useful for 2D rendering where depth is not a concern.
-    //! \param [in] px First element
-    //! \param [in] py Second element
-    //! \param [in] pz Third element
+    //! \param [in] px X-Coordinate
+    //! \param [in] py Y-Coordinate
+    //! \param [in] pz Z-Coordinate
     constexpr vec3 (float px, float py, float pz = 0.f)
         : x(px), y(py), z(pz)
     { }
@@ -45,6 +49,14 @@ struct vec3
     //! \param [in] scalar Value to initialize all elements
     constexpr vec3 (float scalar)
         : x(scalar), y(scalar), z(scalar)
+    { }
+
+    //! \brief vec3 ctor
+    //! \details Initialize vec3 from vec2 and Z values.
+    //! \param [in] v vec2 containing the x and y coordinates
+    //! \param [in] pz Z-Coordinate
+    constexpr vec3 (const vec2& v, float pz)
+        : x(v.x), y(v.y), z(pz)
     { }
 
     //! \brief vec3 subscript operator
@@ -89,6 +101,13 @@ struct vec3
         z *= rhs.z;
         return *this;
     }
+
+    //! \brief Apply a linear transformation to the vector
+    //! \details Only linear transforms should be supplied (e.g. translation,
+    //!          rotation, etc.).
+    //! \param [in] transformation Linear transformation
+    //! \returns Reference to self
+    vec3& affine_transform (const mat4& transformation);
 
     //! \brief Vector length (magnitude)
     //! \returns Length of the vector

@@ -84,6 +84,7 @@ add_library (
              src/graphics/text.cpp
              src/graphics/texture.cpp
              src/graphics/layers/sprite_layer.cpp
+             src/graphics/orthographic_camera.cpp
 
              #src/graphics/layers/group.cpp
              #src/controls/control.cpp --> src/graphics/ui/widget.cpp
