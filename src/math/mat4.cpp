@@ -218,17 +218,13 @@ mat4::orthographic (float left, float right, float bottom, float top, float near
 /* static */ mat4
 mat4::perspective (float field_of_view, float aspect_ratio, float near, float far)
 {
-    float q = 1.0f / tan(to_radians(0.5f * field_of_view));
-    float a = q / aspect_ratio;
-    float b = (near + far) / (near - far);
-    float c = (2.0f * near * far) / (near - far);
-
-    auto result = mat4::identity();
-    result[0][0] = a;         // | a  0  0  0 |
-    result[1][1] = q;         // | 0  q  0  0 |
-    result[2][2] = b;         // | 0  0  b  c |
-    result[2][3] = -1.0f;     // | 0  0  -1 1 |
-    result[3][2] = c;
+    auto result = mat4();
+    float tan_half_fov = tan(to_radians(0.5f * field_of_view));
+    result[0][0] = 1.f / (tan_half_fov * aspect_ratio);  // | a  0  0  0 |
+    result[1][1] = 1.f / tan_half_fov;                   // | 0  q  0  0 |
+    result[2][2] = -(far + near) / (far - near);         // | 0  0  b  c |
+    result[2][3] = -1.f;                                 // | 0  0  -1 0 |
+    result[3][2] = -(2.f * far * near) / (far - near);
 
     return result;
 }
