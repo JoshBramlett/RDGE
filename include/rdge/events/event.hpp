@@ -702,6 +702,14 @@ bool IsEventEnabled (EventType type);
 //! \returns Event state prior to change
 bool SetEventState (EventType type, bool enable);
 
+//! \brief Enable event type
+//! \param [in] type EventType to enable
+void EnableEvent (EventType type);
+
+//! \brief Disable event type
+//! \param [in] type EventType to disable
+void DisableEvent (EventType type);
+
 //! \brief Request a unique identifier for a custom event
 //! \details Registering an event pulls a unique id from the available pool.
 //!          This id represents the event type (which for system events is

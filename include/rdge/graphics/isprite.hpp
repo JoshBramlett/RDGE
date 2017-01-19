@@ -48,6 +48,15 @@ struct tex_coords
     math::vec2& operator[] (uint32 index) noexcept;
     const math::vec2& operator[] (uint32 index) const noexcept;
     //!@}
+
+    //!@{
+    //! \brief Basic tex_coords transforms
+    //! \returns Reference to self
+    tex_coords& flip_horizontal (void) noexcept;
+    tex_coords& flip_vertical (void) noexcept;
+    tex_coords& rotate_left (void) noexcept;
+    tex_coords& rotate_right (void) noexcept;
+    //!@}
 };
 
 using SpriteDepthOffset = std::integral_constant<uint32, 10'000>;

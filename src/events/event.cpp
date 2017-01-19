@@ -128,6 +128,18 @@ rdge::SetEventState (EventType type, bool enabled)
     return result;
 }
 
+void
+rdge::EnableEvent (EventType type)
+{
+    rdge::SetEventState(type, true);
+}
+
+void
+rdge::DisableEvent (EventType type)
+{
+    rdge::SetEventState(type, false);
+}
+
 rdge::uint32
 rdge::RegisterCustomEvent (void)
 {

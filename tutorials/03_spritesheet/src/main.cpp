@@ -1,6 +1,5 @@
 #include <rdge/core.hpp>
 #include <rdge/application.hpp>
-#include <rdge/assets/font.hpp>
 #include <rdge/assets/spritesheet.hpp>
 #include <rdge/events/event.hpp>
 #include <rdge/graphics/color.hpp>
@@ -10,14 +9,13 @@
 #include <rdge/graphics/layers/sprite_layer.hpp>
 #include <rdge/graphics/vops.hpp>
 #include <rdge/system/window.hpp>
+#include <rdge/math/vec2.hpp>
 #include <rdge/math/vec3.hpp>
 
 #include <memory>
 
 // *** Resource shoutouts ***
 //
-// Font provided by /u/teryror
-//  - https://www.reddit.com/r/gamedev/comments/3clk56
 // Images provided by kenney.nl
 //  - http://kenney.nl/assets/shooting-gallery
 
@@ -33,96 +31,229 @@ int main ()
     // 1) Initialize SDL
     Application app(settings);
 
-    // TODO remove
-    SetEventState(EventType::FingerDown, false);
-    SetEventState(EventType::FingerUp, false);
-    SetEventState(EventType::FingerMotion, false);
-    SetEventState(EventType::MultiGesture, false);
+    // (Optional) Disable unprocessed events
+    DisableEvent(EventType::FingerDown);
+    DisableEvent(EventType::FingerUp);
+    DisableEvent(EventType::FingerMotion);
+    DisableEvent(EventType::MultiGesture);
 
     // 2) Create window
     Window window(settings);
 
     // 3) Load assets
-    auto font = std::make_shared<Font>("res/OpenSansPX.ttf", 64);
-
     SpriteSheet stall_sheet("res/spritesheet_stall.json");
+    auto counter = std::make_shared<Texture>("res/counter.png");
+
+    // NOTE: All vertex position placement is based on the pretense that we're rendering to
+    //       the default viewport size of 960x540, and outputting to a high res display which
+    //       will double the viewport size (drawable size of 1920x1080).
+
     SpriteLayer stall_layer;
-
-    // TODO
-    // 1) Curtain top sprites need to be created
-    // 2) Move the stall_layer and sprite creation to a separate class
-    // 3) Options for drawing the top curtain were to either string an array of sprites or
-    //    bring that image outside the spritesheet, set the UV data to a larger multiple, and
-    //    use OpenGL's texture wrapping.  Making changes in the shader to accommodate are not
-    //    really a viable option.  Because the former was chosen calculating the scale wouldn't work
-    //    because the vertices were set to sub-pixel, it had to be changed to a whole number.
-    // 4) More thought needs to be put into the depth buffer
-    // 5) Consider adding a helper class (or methods) for positioning that makes sense to the
-    //    programmer.  e.g. Set the origin to a vertex and adding padding.
-    // 6) The only reason my position numbers work is b/c I'm in high-res mode which has 2x the
-    //    pixels of a traditional display, and the calculation for the ortho projection is the
-    //    origin is at the center of the screen with the left and right edges set to negative
-    //    and positive viewport.width/2.  Same for height.  I need a solution for getting these
-    //    values.  Hoping implementing a camera will resolve it.
-
-    float32 SCALE = 2.f;
-
-    // 960 x 540
-    //curtain.png
-    //curtain_rope.png
-    //curtain_straight.png
-    //curtain_top.png
+    float SCALE = 2.f; //< Constant multiplier to scale all images
+    float DEPTH = 0.f; //< Vertex depth (z-index)
 
     // 4) Create renderable graphics
-    const auto& curtain_part = stall_sheet["curtain.png"];
-    auto size = static_cast<math::vec2>(curtain_part.size) * SCALE;
-
-    auto left_curtain = std::make_shared<Sprite>(math::vec3(-970.f, (420.f - size.h), 0.009f),
-                                                 size,
-                                                 stall_sheet.texture,
-                                                 curtain_part.coords);
-    auto right_curtain = std::make_shared<Sprite>(math::vec3((970.f - size.w), (420.f - size.h), 0.009f),
-                                                  size,
-                                                  stall_sheet.texture,
-                                                  curtain_part.coords);
-    vops::FlipHorizontal(right_curtain->vertices);
-    stall_layer.AddSprite(left_curtain);
-    stall_layer.AddSprite(right_curtain);
-
-    const auto& curtain_rope = stall_sheet["curtain_rope.png"];
-    size = static_cast<math::vec2>(curtain_rope.size) * SCALE;
-    auto left_rope = std::make_shared<Sprite>(math::vec3(-980.f, -35.f, 0.009f),
-                                              size,
-                                              stall_sheet.texture,
-                                              curtain_rope.coords);
-    auto right_rope = std::make_shared<Sprite>(math::vec3(980.f - size.w, -35.f, 0.009f),
-                                               size,
-                                               stall_sheet.texture,
-                                               curtain_rope.coords);
-    stall_layer.AddSprite(left_rope);
-    stall_layer.AddSprite(right_rope);
-
-    auto curtain_straight_part = stall_sheet["curtain_straight.png"];
-    size = static_cast<math::vec2>(curtain_straight_part.size) * SCALE;
-
-    int32 num = static_cast<int32>(1920.f / size.w) + 1;
-    float32 x = -960.f;
-    for (int32 i = 0; i < num; ++i)
     {
-        stall_layer.AddSprite(std::make_shared<Sprite>(math::vec3(x, (540.f - size.h), 1.f),
-                                                       size,
-                                                       stall_sheet.texture,
-                                                       curtain_straight_part.coords));
+        auto part = stall_sheet["bg_wood.png"];
+        auto size = static_cast<math::vec2>(part.size) * SCALE;
 
-        x += size.w;
+        // NOTE: This is a contiguous batch of sprites giving the appearance of a single sprite.
+        //       We're unable to use OpenGL texture wrapping because that requires we use the
+        //       entire texture and modify the tex_coords to define the wrapping.
+        //       Another thing to note is the width/height of the sprites cannot be sub-pixel
+        //       or you'll get gaps between the sprites.
+
+        int32 num = static_cast<int32>(1920.f / size.w) + 1;
+        float x = -960.f;
+        float y = -140.f;
+        for (int32 i = 0; i < num; ++i)
+        {
+            stall_layer.AddSprite(std::make_shared<Sprite>(math::vec3(x, y, DEPTH),
+                                                           size,
+                                                           stall_sheet.texture,
+                                                           part.coords));
+
+            x += size.w;
+        }
     }
 
-    // 6) Create game loop
+    {
+        const auto& part = stall_sheet["cloud1.png"];
+        auto size = static_cast<math::vec2>(part.size) * SCALE;
+
+        stall_layer.AddSprite(std::make_shared<Sprite>(math::vec3(350.f, 240.f, DEPTH),
+                                                       size,
+                                                       stall_sheet.texture,
+                                                       part.coords));
+    }
+
+    {
+        const auto& part = stall_sheet["tree_oak.png"];
+        auto size = static_cast<math::vec2>(part.size) * SCALE;
+
+        stall_layer.AddSprite(std::make_shared<Sprite>(math::vec3(-960.f, -40.f, DEPTH),
+                                                       size,
+                                                       stall_sheet.texture,
+                                                       part.coords));
+    }
+
+    {
+        auto part1 = stall_sheet["grass1.png"];
+        auto part2 = stall_sheet["grass2.png"];
+        auto size1 = static_cast<math::vec2>(part1.size) * SCALE;
+        auto size2 = static_cast<math::vec2>(part2.size) * SCALE;
+
+        int32 num = static_cast<int32>(1920.f / size1.w) + 1; // Width is the same for both
+        float x = -960.f;
+        float y = -380.f;
+        for (int32 i = 0; i < num; ++i)
+        {
+            stall_layer.AddSprite(std::make_shared<Sprite>(math::vec3(x, y, DEPTH),
+                                                           ((i % 2)==0) ? size1 : size2,
+                                                           stall_sheet.texture,
+                                                           ((i % 2)==0) ? part1.coords : part2.coords));
+
+            x += size1.w;
+        }
+    }
+
+    {
+        const auto& part = stall_sheet["tree_pine.png"];
+        auto size = static_cast<math::vec2>(part.size) * SCALE;
+
+        stall_layer.AddSprite(std::make_shared<Sprite>(math::vec3(915.f - size.w, -185.f, DEPTH),
+                                                       size,
+                                                       stall_sheet.texture,
+                                                       part.coords));
+    }
+
+    {
+        auto part = stall_sheet["water2.png"];
+        auto size = static_cast<math::vec2>(part.size) * SCALE;
+
+        int32 num = static_cast<int32>(1920.f / size.w) + 1;
+        float x = -960.f;
+        float y = -80.f - size.h;
+        for (int32 i = 0; i < num; ++i)
+        {
+            stall_layer.AddSprite(std::make_shared<Sprite>(math::vec3(x, y, DEPTH),
+                                                           size,
+                                                           stall_sheet.texture,
+                                                           part.coords));
+
+            x += size.w;
+        }
+
+        num++;
+        x = -960.f - (size.w / 2.f);
+        y -= 60.f;
+        for (int32 i = 0; i < num; ++i)
+        {
+            stall_layer.AddSprite(std::make_shared<Sprite>(math::vec3(x, y, DEPTH),
+                                                           size,
+                                                           stall_sheet.texture,
+                                                           part.coords));
+
+            x += size.w;
+        }
+    }
+
+    {
+        float ratio = 1920.f / static_cast<float>(counter->width);
+        math::vec2 size(1920.f, static_cast<float>(counter->height) * ratio);
+
+        stall_layer.AddSprite(std::make_shared<Sprite>(math::vec3(-960.f, -540.f, DEPTH),
+                                                       size,
+                                                       counter));
+    }
+
+    {
+        const auto& part = stall_sheet["curtain_top.png"];
+        auto size = static_cast<math::vec2>(part.size) * SCALE;
+
+        float x_offset = size.w * .8f;
+        float y_offset = 10.f;
+        math::vec2 center = math::vec2(-(size.w / 2.f), 300.f);
+        math::vec2 left   = math::vec2(center.x - x_offset, center.y + y_offset);
+        math::vec2 left2  = math::vec2(left.x - x_offset, left.y + y_offset);
+        math::vec2 right  = math::vec2(center.x + x_offset, center.y + y_offset);
+        math::vec2 right2 = math::vec2(right.x + x_offset, right.y + y_offset);
+
+        stall_layer.AddSprite(std::make_shared<Sprite>(math::vec3(left2, DEPTH),
+                                                       size,
+                                                       stall_sheet.texture,
+                                                       part.coords));
+        stall_layer.AddSprite(std::make_shared<Sprite>(math::vec3(right2, DEPTH),
+                                                       size,
+                                                       stall_sheet.texture,
+                                                       part.coords));
+        stall_layer.AddSprite(std::make_shared<Sprite>(math::vec3(left, DEPTH),
+                                                       size,
+                                                       stall_sheet.texture,
+                                                       part.coords));
+        stall_layer.AddSprite(std::make_shared<Sprite>(math::vec3(right, DEPTH),
+                                                       size,
+                                                       stall_sheet.texture,
+                                                       part.coords));
+        stall_layer.AddSprite(std::make_shared<Sprite>(math::vec3(center, DEPTH),
+                                                       size,
+                                                       stall_sheet.texture,
+                                                       part.coords));
+    }
+
+    {
+        const auto& part = stall_sheet["curtain.png"];
+        auto size = static_cast<math::vec2>(part.size) * SCALE;
+
+        stall_layer.AddSprite(std::make_shared<Sprite>(math::vec3(-970.f, -430.f, DEPTH),
+                                                       size,
+                                                       stall_sheet.texture,
+                                                       part.coords));
+        tex_coords flipped = part.coords;
+        stall_layer.AddSprite(std::make_shared<Sprite>(math::vec3(970.f - size.w, -430.f, DEPTH),
+                                                       size,
+                                                       stall_sheet.texture,
+                                                       flipped.flip_horizontal()));
+    }
+
+    {
+        const auto& part = stall_sheet["curtain_rope.png"];
+        auto size = static_cast<math::vec2>(part.size) * SCALE;
+
+        stall_layer.AddSprite(std::make_shared<Sprite>(math::vec3(-980.f, -35.f, DEPTH),
+                                                       size,
+                                                       stall_sheet.texture,
+                                                       part.coords));
+        stall_layer.AddSprite(std::make_shared<Sprite>(math::vec3(980.f - size.w, -35.f, DEPTH),
+                                                       size,
+                                                       stall_sheet.texture,
+                                                       part.coords));
+    }
+
+    {
+        auto part = stall_sheet["curtain_straight.png"];
+        auto size = static_cast<math::vec2>(part.size) * SCALE;
+
+        int32 num = static_cast<int32>(1920.f / size.w) + 1;
+        float x = -960.f;
+        float y = 540.f - size.h;
+        for (int32 i = 0; i < num; ++i)
+        {
+            stall_layer.AddSprite(std::make_shared<Sprite>(math::vec3(x, y, DEPTH),
+                                                           size,
+                                                           stall_sheet.texture,
+                                                           part.coords));
+
+            x += size.w;
+        }
+    }
+
+    // 5) Create game loop
     bool running = true;
     Event event;
     while (running)
     {
-        // 7) Poll for user input
+        // 6) Poll for user input
         while (PollEvent(&event))
         {
             if (event.IsQuitEvent())
@@ -141,7 +272,7 @@ int main ()
             }
         }
 
-        // 8) Render to the screen using the layer
+        // 7) Render to the screen using the layer
         window.Clear();
 
         stall_layer.Draw();
