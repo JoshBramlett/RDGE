@@ -49,20 +49,18 @@ public:
     Text& operator= (Text&&) noexcept = default;
     //!@}
 
-    //! \brief Draw the sprite using the provided renderer
-    //! \param [in] renderer Render target
-    void Draw (SpriteBatch& renderer) override;
-
     //! \brief Register the texture with the render target
     //! \details This step must be performed prior to making a draw call.
     //! \param [in] renderer Render target
     void SetRenderTarget (SpriteBatch& renderer) override;
 
-    //! \brief Requests the sprite to add the provided mask to it's own
-    //! \details The mask represents two digits of a floating point mantissa.
-    //! \param [in] mask Depth mask
-    //! \see smart_zindex
-    void AmendDepthMask (float32 mask) override;
+    //! \brief Draw the sprite using the provided renderer
+    //! \param [in] renderer Render target
+    void Draw (SpriteBatch& renderer) override;
+
+    //! \brief Set the sprites depth value
+    //! \param [in] depth Depth (z-index) value
+    void SetDepth (float depth) override;
 
     //! \brief Set the text
     //! \param [in] text Text to render
@@ -75,8 +73,7 @@ public:
     void SetColor (const color& color);
 
 public:
-    SpriteVertices vertices;    //!< Array of vertex attribute data
-    uint32         z_index = 0; //!< Orthographic projection depth
+    SpriteVertices vertices; //!< Array of vertex attribute data
 
 private:
 

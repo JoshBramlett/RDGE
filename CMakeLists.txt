@@ -78,15 +78,15 @@ add_library (
 
              src/graphics/color.cpp
              src/graphics/isprite.cpp
+             src/graphics/orthographic_camera.cpp
              src/graphics/sprite_batch.cpp
+             src/graphics/sprite_group.cpp
              src/graphics/shader.cpp
              src/graphics/sprite.cpp
              src/graphics/text.cpp
              src/graphics/texture.cpp
              src/graphics/layers/sprite_layer.cpp
-             src/graphics/orthographic_camera.cpp
 
-             #src/graphics/layers/group.cpp
              #src/controls/control.cpp --> src/graphics/ui/widget.cpp
              #src/controls/button.cpp  --> src/graphics/ui/button.cpp
 
@@ -122,7 +122,6 @@ add_executable (rdge_test
                 tests/main.cpp
                 tests/assets/spritesheet.cpp
                 tests/graphics/color.cpp
-                tests/graphics/sprite.cpp
                 tests/math/functions.cpp)
 target_link_libraries (rdge_test
                        RDGE

@@ -20,16 +20,13 @@ namespace rdge {
 //! \class SpriteLayer
 //! \brief Layer of ISprite objects
 //! \details A layer represents a logical group of sprites that will be drawn
-//!          with the same render target.  Facilitates the interface between the
-//!          sprite and the render target including providing batch drawing.
-//!          Setting a z-index for the layer will assign the z position component
-//!          to all maintained renderables that occupies the two most significant
-//!          digits of the mantissa.
+//!          together using the same render target.  A uniform depth value can be set
+//!          for all cached sprites in order to mimic the behavior of a photoshop
+//!          layer.  Facilitates the interface between the sprite and the render
+//!          target for batch drawing.
 class SpriteLayer
 {
 public:
-    using DepthMask = smart_zindex<LayerDepthOffset::value>; //!< Depth mask conversion
-
     //! \brief SpriteLayer ctor
     //! \details Provided values will be forwarded to the render target
     //! \param [in] num_sprites Max number of sprites that can be submitted
@@ -43,21 +40,24 @@ public:
     //! \brief Non-copyable, move enabled
     SpriteLayer (const SpriteLayer&) = delete;
     SpriteLayer& operator= (const SpriteLayer&) = delete;
-    SpriteLayer (SpriteLayer&&) noexcept;
-    SpriteLayer& operator= (SpriteLayer&&) noexcept;
+    SpriteLayer (SpriteLayer&&) noexcept = default;
+    SpriteLayer& operator= (SpriteLayer&&) noexcept = default;
     //!@}
 
     //! \brief Add sprite to the cache
     //! \param [in] sprite Shared ISprite object
-    //! \param [in] generate_sprite_depth Assign sprite a z-index
     void AddSprite (std::shared_ptr<ISprite> sprite);
 
     //! \brief Draw all cached sprites
     void Draw (void);
 
+    //! \brief Give all cached sprites a uniform depth
+    //! \param [in] depth Depth (z-index) value
+    void OverrideSpriteDepth (float depth);
+
 public:
+    //TODO Consider making renderer a shared_ptr so layers can share a common renderer
     SpriteBatch renderer;                          //!< Render target
-    uint32      z_index = 0;                       //!< Orthographic projection depth
     std::vector<std::shared_ptr<ISprite>> sprites; //!< Collection of sprites
 };
 

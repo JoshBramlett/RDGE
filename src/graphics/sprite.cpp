@@ -37,18 +37,6 @@ Sprite::Sprite (const math::vec3&        pos,
 }
 
 void
-Sprite::Draw (SpriteBatch& renderer)
-{
-    // The texture must be registered with the renderer prior to constructing
-    // the sprite.  If not the unit_id will not be updated with the vertex
-    // data, so when we draw it'll use the invalid ID.  The following assert
-    // makes sure the texture ids match.
-    SDL_assert(!m_texture || this->vertices[0].tid == m_texture->unit_id);
-
-    renderer.Submit(this->vertices);
-}
-
-void
 Sprite::SetRenderTarget (SpriteBatch& renderer)
 {
     if (!m_texture)
@@ -61,10 +49,21 @@ Sprite::SetRenderTarget (SpriteBatch& renderer)
 }
 
 void
-Sprite::AmendDepthMask (float32 mask)
+Sprite::Draw (SpriteBatch& renderer)
 {
-    float32 combined = mask + DepthMask::convert(this->z_index);
-    vops::UpdateDepth(this->vertices, combined);
+    // The texture must be registered with the renderer prior to constructing
+    // the sprite.  If not the unit_id will not be updated with the vertex
+    // data, so when we draw it'll use the invalid ID.  The following assert
+    // makes sure the texture ids match.
+    SDL_assert(!m_texture || this->vertices[0].tid == m_texture->unit_id);
+
+    renderer.Submit(this->vertices);
+}
+
+void
+Sprite::SetDepth (float depth)
+{
+    vops::UpdateDepth(this->vertices, depth);
 }
 
 } // namespace rdge

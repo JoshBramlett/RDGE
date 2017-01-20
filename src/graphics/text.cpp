@@ -46,12 +46,6 @@ Text::Text (std::string           text,
 }
 
 void
-Text::Draw (SpriteBatch& renderer)
-{
-    renderer.Submit(this->vertices);
-}
-
-void
 Text::SetRenderTarget (SpriteBatch& renderer)
 {
     renderer.RegisterTexture(m_texture);
@@ -59,10 +53,15 @@ Text::SetRenderTarget (SpriteBatch& renderer)
 }
 
 void
-Text::AmendDepthMask (float32 mask)
+Text::Draw (SpriteBatch& renderer)
 {
-    float32 combined = mask + DepthMask::convert(this->z_index);
-    vops::UpdateDepth(this->vertices, combined);
+    renderer.Submit(this->vertices);
+}
+
+void
+Text::SetDepth (float depth)
+{
+    vops::UpdateDepth(this->vertices, depth);
 }
 
 void

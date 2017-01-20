@@ -16,8 +16,7 @@ namespace rdge {
 //! \namespace vops Vertex operations
 namespace vops {
 
-// TODO change after vec3 is declared constexpr:  constexpr math::vec3
-inline math::vec3
+constexpr math::vec3
 GetPosition (const SpriteVertices& vertices)
 {
     return vertices[0].pos;
