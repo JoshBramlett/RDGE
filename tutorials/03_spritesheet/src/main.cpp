@@ -1,16 +1,11 @@
 #include <rdge/core.hpp>
 #include <rdge/application.hpp>
-#include <rdge/assets/spritesheet.hpp>
 #include <rdge/events/event.hpp>
-#include <rdge/graphics/color.hpp>
-#include <rdge/graphics/sprite.hpp>
-#include <rdge/graphics/text.hpp>
-#include <rdge/graphics/texture.hpp>
-#include <rdge/graphics/layers/sprite_layer.hpp>
-#include <rdge/graphics/vops.hpp>
 #include <rdge/system/window.hpp>
-#include <rdge/math/vec2.hpp>
-#include <rdge/math/vec3.hpp>
+
+#include <rdge/assets.hpp>
+#include <rdge/graphics.hpp>
+#include <rdge/math.hpp>
 
 #include <memory>
 
@@ -26,7 +21,6 @@ int main ()
     app_settings settings;
     settings.window_title = "03_spritesheet";
     settings.enable_png   = true;
-    settings.enable_fonts = true;
 
     // 1) Initialize SDL
     Application app(settings);
@@ -44,9 +38,9 @@ int main ()
     SpriteSheet stall_sheet("res/spritesheet_stall.json");
     auto counter = std::make_shared<Texture>("res/counter.png");
 
-    // NOTE: All vertex position placement is based on the pretense that we're rendering to
-    //       the default viewport size of 960x540, and outputting to a high res display which
-    //       will double the viewport size (drawable size of 1920x1080).
+    // NOTE: All vertex position placement is based on the pretense that we're rendering
+    //       to the default viewport size of 960x540, and outputting to a high res display
+    //       which will double the viewport size (drawable size of 1920x1080).
 
     SpriteLayer stall_layer;
     float SCALE = 2.f; //< Constant multiplier to scale all images

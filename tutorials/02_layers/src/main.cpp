@@ -1,14 +1,11 @@
 #include <rdge/core.hpp>
 #include <rdge/application.hpp>
-#include <rdge/assets/font.hpp>
 #include <rdge/events/event.hpp>
-#include <rdge/graphics/color.hpp>
-#include <rdge/graphics/sprite.hpp>
-#include <rdge/graphics/text.hpp>
-#include <rdge/graphics/texture.hpp>
-#include <rdge/graphics/layers/sprite_layer.hpp>
 #include <rdge/system/window.hpp>
-#include <rdge/math/vec3.hpp>
+
+#include <rdge/assets.hpp>
+#include <rdge/graphics.hpp>
+#include <rdge/math.hpp>
 
 #include <memory>
 
@@ -30,6 +27,12 @@ int main ()
 
     // 1) Initialize SDL
     Application app(settings);
+
+    // (Optional) Disable unprocessed events
+    DisableEvent(EventType::FingerDown);
+    DisableEvent(EventType::FingerUp);
+    DisableEvent(EventType::FingerMotion);
+    DisableEvent(EventType::MultiGesture);
 
     // 2) Create window
     Window window(settings);
