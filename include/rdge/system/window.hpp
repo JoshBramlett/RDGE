@@ -142,6 +142,10 @@ public:
     //! \return Target drawing height
     uint32 TargetHeight (void) const { return m_targetHeight; }
 
+    //! \brief Check if vsync is enabled
+    //! \return True if updates are synchronized with the vertical retrace, false otherwise
+    bool IsUsingVSYNC (void) const noexcept;
+
     //! \brief Return the SDL_Window pointer
     //! \details Raw pointer is returned so caller must ensure
     //!          Window object will not fall out of scope

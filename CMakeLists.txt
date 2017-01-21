@@ -68,13 +68,14 @@ include_directories (lib)
 add_library (
              RDGE SHARED
              src/application.cpp
+
              src/assets/font.cpp
              src/assets/spritesheet.cpp
              src/assets/surface.cpp
+
              src/events/event.cpp
 
-             #src/gameobjects/scene.cpp
-             #src/gameobjects/game.cpp
+             src/gameobjects/game.cpp
 
              src/graphics/color.cpp
              src/graphics/isprite.cpp
@@ -94,8 +95,10 @@ add_library (
              src/math/mat4.cpp
              src/math/vec3.cpp
              src/math/vec4.cpp
+
              src/system/cursor.cpp
              src/system/window.cpp
+
              src/util/exception.cpp
              src/util/logger.cpp
              src/util/timer.cpp

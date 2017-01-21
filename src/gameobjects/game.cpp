@@ -1,124 +1,130 @@
 #include <rdge/gameobjects/game.hpp>
 #include <rdge/util/timer.hpp>
-#include <rdge/internal/exception_macros.hpp>
+#include <rdge/internal/logger_macros.hpp>
 
-using namespace rdge::gameobjects;
+#include <SDL_assert.h>
 
-namespace {
-    constexpr rdge::uint32 MIN_FRAME_RATE = 30;
-}
+namespace rdge {
 
-Game::Game (const game_settings& settings)
-    : m_settings(settings)
-    , m_window(nullptr)
-    , m_running(false)
-    , m_currentScene(nullptr)
+Game::Game (const app_settings& s)
+    : settings(s)
 {
-    DLOG("Constructing Game object");
+    SDL_assert(this->settings.target_fps >= 30);
 
-    if (m_settings.target_fps < MIN_FRAME_RATE)
-    {
-        m_settings.target_fps = MIN_FRAME_RATE;
-    }
-
-    m_window = std::make_unique<rdge::Window>(
-                                                m_settings.window_title,
-                                                m_settings.target_width,
-                                                m_settings.target_height,
-                                                m_settings.fullscreen,
-                                                false, /* resizable */
-                                                m_settings.use_vsync
-                                               );
+    ILOG("Constructing Game object");
+    this->window = std::make_unique<Window>(this->settings);
 }
 
-Game::~Game (void)
+Game::~Game (void) noexcept
 {
     DLOG("Destroying Game object");
 }
 
-std::shared_ptr<Scene>
-Game::CurrentScene (void) const noexcept
-{
-    if (m_sceneStack.empty() == false)
-    {
-        return m_sceneStack.back();
-    }
-
-    return nullptr;
-}
+// The game object provides a guarantee to the scenes that game loop events
+// will not be sent after the request to terminate or while it's in a period of
+// hibernation.  In order to facilitate this request calls to Hibernate and
+// Terminate are deferred to the end of the game loop.  This prevents a
+// potential scenario where the scene would be sent a game loop event after it
+// has already processed it's cleanup code.
 
 void
-Game::PushScene (std::shared_ptr<Scene> scene)
+Game::PushScene (std::shared_ptr<IScene> scene)
 {
-    if (m_sceneStack.empty() == false)
+    SDL_assert(!m_pushDeferred && !m_popDeferred);
+
+    if (!m_running)
     {
-        auto current_scene = m_sceneStack.back();
-        current_scene->Pause();
+        if (!m_sceneStack.empty())
+        {
+            auto& current_scene = m_sceneStack.back();
+            current_scene->Hibernate();
+        }
+    }
+    else
+    {
+        // Defer current_scene hibernation till end of game loop
+        m_pushDeferred = true;
+        m_sceneStack.push_back(scene);
     }
 
     scene->Initialize();
-    m_sceneStack.emplace_back(scene);
+    m_sceneStack.push_back(scene);
 }
 
 void
 Game::PopScene (void)
 {
-    if (m_sceneStack.empty())
-    {
-        RDGE_THROW("Called PopScene with an empty stack");
-    }
-    else
-    {
-        auto current_scene = m_sceneStack.back();
-        current_scene->Terminate();
-    }
+    SDL_assert(m_running);
+    SDL_assert(!m_sceneStack.empty());
+    SDL_assert(!m_pushDeferred && !m_popDeferred);
 
+    // Defer current_scene termination till end of game loop
+    m_popDeferred = true;
     m_sceneStack.pop_back();
 
-    if (m_sceneStack.empty() == false)
+    if (!m_sceneStack.empty())
     {
-        auto current_scene = m_sceneStack.back();
-        current_scene->Resume();
+        auto& new_current_scene = m_sceneStack.back();
+        new_current_scene->Activate();
     }
 }
 
 void
 Game::Run (void)
 {
-    rdge::Event event;
-    rdge::util::Timer timer;
+    Event event;
+    util::Timer timer;
 
-    rdge::uint32 frame_cap = 1000 / m_settings.target_fps;
+    bool using_vsync = this->window->IsUsingVSYNC();
+    uint32 frame_cap = 1000 / this->settings.target_fps;
 
     m_running = true;
     timer.Start();
     while (m_running)
     {
-        rdge::uint32 frame_start = timer.Ticks();
-        m_currentScene = CurrentScene();
-        if (!m_currentScene)
+        uint32 frame_start = timer.Ticks();
+        if (m_sceneStack.empty())
         {
             m_running = false;
             break;
         }
 
-        while (rdge::PollEvent(&event))
+        // ref count must be increased b/c scene could be removed from the collection
+        // during the loop execution
+        auto current_scene = m_sceneStack.back();
+        while (PollEvent(&event))
         {
-            ProcessEventPhase(event);
+            if (!(this->on_event_hook && this->on_event_hook(event)))
+            {
+                current_scene->OnEvent(event);
+            }
         }
 
-        rdge::uint32 ticks = timer.TickDelta();
-        ProcessUpdatePhase(ticks);
-
-        m_window->Clear();
-        ProcessRenderPhase();
-        m_window->Present();
-
-        // TODO: Detect if vsync is enabled.  This code should execute if either vsync is off
-        //       or not enabled for that system
-        if (m_settings.use_vsync == false)
+        uint32 ticks = timer.TickDelta();
+        if (!(this->on_update_hook && this->on_update_hook(ticks)))
         {
-            rdge::uint32 frame_length = timer.Ticks() - frame_start;
+            current_scene->OnUpdate(ticks);
+        }
+
+        this->window->Clear();
+        if (!(this->on_render_hook && this->on_render_hook()))
+        {
+            current_scene->OnRender();
+        }
+        this->window->Present();
+
+        if (m_pushDeferred)
+        {
+            current_scene->Hibernate();
+        }
+        else if (m_popDeferred)
+        {
+            current_scene->Terminate();
+        }
+
+        if (!using_vsync)
+        {
+            uint32 frame_length = timer.Ticks() - frame_start;
             if (frame_length < frame_cap)
             {
                 SDL_Delay(frame_cap - frame_length);
@@ -128,19 +134,9 @@ Game::Run (void)
 }
 
 void
-Game::ProcessEventPhase (rdge::Event& event)
+Game::Stop (void)
 {
-    m_currentScene->ProcessEventPhase(event);
+    m_running = false;
 }
 
-void
-Game::ProcessUpdatePhase (rdge::uint32 ticks)
-{
-    m_currentScene->ProcessUpdatePhase(ticks);
-}
-
-void
-Game::ProcessRenderPhase (void)
-{
-    m_currentScene->ProcessRenderPhase();
-}
+} // namespace rdge

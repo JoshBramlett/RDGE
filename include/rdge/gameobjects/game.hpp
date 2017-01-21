@@ -1,117 +1,91 @@
 //! \headerfile <rdge/gameobjects/game.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.9
-//! \date 06/14/2016
+//! \version 0.0.10
+//! \date 01/20/2017
 
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/assets/game_settings.hpp>
+#include <rdge/application.hpp>
 #include <rdge/system/window.hpp>
 #include <rdge/events/event.hpp>
-#include <rdge/gameobjects/scene.hpp>
+#include <rdge/gameobjects/iscene.hpp>
 
-#include <SDL.h>
-
-#include <string>
+#include <functional>
 #include <memory>
 #include <vector>
 
-//! \namespace RDGE Rainbow Drop Game Engine
+//! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
-namespace gameobjects {
 
 //! \class Game
-//! \brief Base class for a game
-//! \details Base class provides a scene stack.  The game loop implementation
-//!          is available for use, but functionality for scene manipulation
-//!          means it can be moved elsewhere.  Copy and move semantics are
-//!          deleted as the intention is to have a single instance, therefore
-//!          the Game object should not (and cannot) be derived from IEntity,
-//!          although similar methods exist to hook into the game loop.
+//! \brief Game loop and scene stack
+//! \details The Game will create a window and run a game loop in accordance with
+//!          the provided \ref game_settings.  Maintains a stack of \ref Scene
+//!          objects with the topmost being the current scene that will receive
+//!          the game loop events.
 class Game
 {
 public:
+    //!@{
+    //! \brief Game loop event hooking callbacks
+    //! \details The result of each hook signifies whether the game loop will
+    //!          suppress (true) or forward (false) the event to the current scene.
+    using OnEventCallback  = std::function<bool(const Event&)>;
+    using OnUpdateCallback = std::function<bool(uint32 ticks)>;
+    using OnRenderCallback = std::function<bool(void)>;
+    //!@}
+
     //! \brief Game ctor
-    //! \details Bootstrap game from immutable settings
-    //! \param [in] settings Game settings for bootstrap
-    explicit Game (const game_settings& settings);
+    //! \details Bootstrap game from settings
+    //! \param [in] settings App settings
+    explicit Game (const app_settings& settings);
 
     //! \brief Game dtor
-    virtual ~Game (void);
+    ~Game (void) noexcept;
 
-    //! \brief Game Copy ctor
-    //! \details Non-copyable
+    //!@{
+    //! \brief Copy and move disabled
     Game (const Game&) = delete;
-
-    //! \brief Game Move ctor
-    //! \details Non-moveable
     Game (Game&&) = delete;
-
-    //! \brief Game Copy Assignment Operator
-    //! \details Non-copyable
     Game& operator= (const Game) = delete;
-
-    //! \brief Game Move Assignment Operator
-    //! \details Non-moveable
     Game& operator= (Game&&) = delete;
+    //!@}
 
-    //! \brief Get the current scene to execute in the game loop
-    //! \details As the scene can potentially change within the
-    //!          game loop, this should be called at the start of
-    //!          the loop and stored within a local variable.
-    //! \returns Shared pointer of the current scene
-    std::shared_ptr<Scene> CurrentScene (void) const noexcept;
-
-    //! \brief Run the game loop
-    //! \details Processes the three phases of the game loop
-    //!          (poll events, update, and render).  A local timer
-    //!          passes the delta ticks to perform updates and
-    //!          if configured will pass control to the OS on each
-    //!          loop iteration to cap the frame rate.  The loop
-    //!          can be terminated by setting m_running to false.
-    void Run (void);
-
-protected:
     //! \brief Push a new scene on the stack
     //! \param [in] scene Shared pointer of the new scene
-    virtual void PushScene (std::shared_ptr<Scene> scene) final;
+    void PushScene (std::shared_ptr<IScene> scene);
 
     //! \brief Pop the current scene of the stack
-    virtual void PopScene (void) final;
+    void PopScene (void);
 
-    //! \brief Process event
-    //! \details Calls ProcessEventPhase for the current scene.  Derived
-    //!          classes may override but should still call the base
-    //!          method for scene processing.
-    //! \param [in] event Polled SDL_Event
-    virtual void ProcessEventPhase (rdge::Event& event);
+    //! \brief Run the game loop
+    //! \details Game loop is broken down to three phases which includes event
+    //!          polling, time delta updating, and rendering.  The events are
+    //!          invoked on the current scene for further processing.  If vsync
+    //!          is not defined or not available, the loop will yield to the OS
+    //!          for any time remaining in the loop to accomodate the target FPS.
+    //!          The loop will terminate when instructed to or there is no scene
+    //!          available on the stack.
+    void Run (void);
 
-    //! \brief Process update
-    //! \details Calls ProcessUpdatePhase for the current scene.  Derived
-    //!          classes may override but should still call the base
-    //!          method for scene processing.
-    //! \param [in] ticks Tick delta from last loop iteration
-    virtual void ProcessUpdatePhase (rdge::uint32 ticks);
+    //! \brief Stop the game loop
+    void Stop (void);
 
-    //! \brief Process render
-    //! \details Calls ProcessRenderPhase for the current scene.
-    //!          Derived classes may override but should still call
-    //!          the base method for scene processing.
-    virtual void ProcessRenderPhase (void);
+public:
+    app_settings            settings; //!< Game settings
+    std::unique_ptr<Window> window;   //!< Game window
 
-    game_settings                 m_settings;
-    std::unique_ptr<rdge::Window> m_window;
-    bool                          m_running;
+    OnEventCallback  on_event_hook;  //!< OnEvent hook function pointer
+    OnUpdateCallback on_update_hook; //!< OnUpdate hook function pointer
+    OnRenderCallback on_render_hook; //!< OnRender hook function pointer
 
 private:
-    //! \typedef SceneStack
-    //! \brief Container type for all scenes
-    using SceneStack = std::vector<std::shared_ptr<Scene>>;
+    std::vector<std::shared_ptr<IScene>> m_sceneStack; //!< Scene stack
 
-    SceneStack             m_sceneStack;
-    std::shared_ptr<Scene> m_currentScene;
+    bool m_running      = false; //!< Flag for running the game loop
+    bool m_pushDeferred = false; //!< Scene push deferred until loop iteration completes
+    bool m_popDeferred  = false; //!< Scene pop deferred until loop iteration completes
 };
 
-} // namespace gameobjects
 } // namespace rdge

@@ -238,18 +238,27 @@ Window::Window (
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     //glBlendEquation(GL_FUNC_ADD);
 
-    int32 interval = use_vsync ? 1 : 0;
-    if (UNLIKELY(SDL_GL_SetSwapInterval(interval) != 0))
-    {
-        // TODO: This should log a warning and default to not using vsync.  Fallback
-        //       must be implemented if vsync is unable to be loaded.
-        auto msg = "SDL failed to set interval VSYNC=" + std::to_string(interval);
-        SDL_THROW(msg, "SDL_GL_SetSwapInterval");
-    }
-
     if (use_vsync)
     {
-        ILOG("Swap interval set to use VSYNC");
+        // TODO SDL docs say the interval can be set to 1 for vsync, and -1 for late
+        //      swap tearing, which is only implemented on some drivers.  Docs suggest
+        //      passing in -1, then passing 1 if the first fails.
+        //      https://wiki.libsdl.org/SDL_GL_SetSwapInterval
+
+        int32 interval = 1;
+        if (UNLIKELY(SDL_GL_SetSwapInterval(interval) != 0))
+        {
+            std::ostringstream ss;
+            ss << "SDL failed to set swap interval "
+               << " interval=" << interval
+               << " error=" << SDL_GetError();
+
+            WLOG(ss.str());
+        }
+        else
+        {
+            ILOG("Swap interval set to use VSYNC");
+        }
     }
 
     ResetViewport();
@@ -354,6 +363,12 @@ Window::Height (void) const
     SDL_GetWindowSize(m_window, nullptr, &height);
 
     return static_cast<uint32>(height);
+}
+
+bool
+Window::IsUsingVSYNC (void) const noexcept
+{
+    return (SDL_GL_GetSwapInterval() != 0);
 }
 
 void
