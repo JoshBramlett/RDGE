@@ -5,6 +5,8 @@
 #include <rdge/gameobjects/iscene.hpp>
 #include <rdge/graphics.hpp>
 
+#include <memory>
+
 class ShootingGalleryScene : public rdge::IScene
 {
 public:
@@ -20,7 +22,16 @@ public:
     void OnUpdate (rdge::uint32 ticks) override;
     void OnRender (void) override;
 
-    rdge::SpriteLayer stall_layer;
+public:
+    rdge::OrthographicCamera camera;
+
+    std::shared_ptr<rdge::SpriteBatch> render_target;
+    rdge::SpriteLayer bg_layer;
+    rdge::SpriteLayer p3_layer;
+    rdge::SpriteLayer p2_layer;
+    rdge::SpriteLayer p1_layer;
+    rdge::SpriteLayer curtain_layer;
+
     std::shared_ptr<rdge::SpriteGroup> water_front;
     std::shared_ptr<rdge::SpriteGroup> water_back;
 };

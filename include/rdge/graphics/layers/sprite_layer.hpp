@@ -28,10 +28,18 @@ class SpriteLayer
 {
 public:
     //! \brief SpriteLayer ctor
-    //! \details Provided values will be forwarded to the render target
+    //! \details Creates a new instance of the render target.
     //! \param [in] num_sprites Max number of sprites that can be submitted
     //! \param [in] shader Shader to pass to the render target
     explicit SpriteLayer (uint16 num_sprites = 1000, std::shared_ptr<Shader> shader = nullptr);
+
+    //! \brief SpriteLayer ctor
+    //! \details Uses an existing render target.
+    //! \param [in] render_target Shared render target
+    // TODO If multiple layers share a renderer each still does it own prep and flush.
+    //      I could easily avoid this by setting a flag on the draw call.  Make sure
+    //      to profile the impact.
+    explicit SpriteLayer (std::shared_ptr<SpriteBatch> render_target);
 
     //! \brief SpriteLayer dtor
     ~SpriteLayer (void) noexcept = default;
@@ -56,9 +64,8 @@ public:
     void OverrideSpriteDepth (float depth);
 
 public:
-    //TODO Consider making renderer a shared_ptr so layers can share a common renderer
-    SpriteBatch renderer;                          //!< Render target
-    std::vector<std::shared_ptr<ISprite>> sprites; //!< Collection of sprites
+    std::shared_ptr<SpriteBatch>          renderer; //!< Render target
+    std::vector<std::shared_ptr<ISprite>> sprites;  //!< Collection of sprites
 };
 
 } // namespace rdge

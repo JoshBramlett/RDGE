@@ -53,7 +53,7 @@ SpriteGroup::AddSprite (std::shared_ptr<ISprite> sprite)
     //      collision detection.
 
     SDL_assert(sprite != nullptr);
-    this->sprites.push_back(sprite);
+    this->sprites.emplace_back(std::move(sprite));
 }
 
 // TODO Leaving this here because I don't want to forget about it.  When I find

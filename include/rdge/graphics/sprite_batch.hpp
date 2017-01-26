@@ -119,6 +119,10 @@ public:
     //! \returns Pair containing the vertex and fragment shader source
     std::pair<std::string, std::string> DefaultShaderSource (void) const;
 
+    //! \brief SpriteBatch capacity (aka maximum submission count)
+    //! \returns Capacity
+    uint16 Capacity (void) const noexcept;
+
     // TODO - Transform
     // We perform the transform, libgdx passes the calculation to the shader via
     // uniform.  I'll need to reevaluate the pros/cons once I have a valid use case
@@ -143,9 +147,9 @@ private:
     uint32 m_vbo = 0; //!< Vertex buffer handle
     uint32 m_ibo = 0; //!< Index buffer handle
 
-    sprite_vertex* m_cursor = nullptr;   //!< Cursor for current submission
-    uint32         m_submissions = 0;    //!< Submissions count between draw calls
-    uint32         m_maxSubmissions = 0; //!< Max number of submissions per draw
+    sprite_vertex* m_cursor = nullptr; //!< Cursor for current submission
+    uint32         m_submissions = 0;  //!< Submissions count between draw calls
+    uint32         m_capacity = 0;     //!< Max number of submissions per draw
 
     std::unique_ptr<uint32[]> m_iboData;    //!< Data storage for the index buffer
     std::shared_ptr<Shader>   m_shader;     //!< Shader program

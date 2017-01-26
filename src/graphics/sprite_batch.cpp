@@ -22,11 +22,11 @@ constexpr uint32 SPRITE_SIZE = VERTEX_SIZE * 4;
 
 namespace rdge {
 
-SpriteBatch::SpriteBatch (uint16 num_sprites, std::shared_ptr<Shader> shader)
-    : m_maxSubmissions(num_sprites)
+SpriteBatch::SpriteBatch (uint16 capacity, std::shared_ptr<Shader> shader)
+    : m_capacity(capacity)
     , m_shader(shader)
 {
-    SDL_assert(num_sprites != 0);
+    SDL_assert(capacity != 0);
 
     if (!shader)
     {
@@ -47,7 +47,7 @@ SpriteBatch::SpriteBatch (uint16 num_sprites, std::shared_ptr<Shader> shader)
     m_vbo = opengl::CreateBuffer();
     opengl::BindBuffer(GL_ARRAY_BUFFER, m_vbo);
 
-    uint32 vbo_size  = static_cast<uint32>(m_maxSubmissions) * SPRITE_SIZE;
+    uint32 vbo_size  = static_cast<uint32>(m_capacity) * SPRITE_SIZE;
     opengl::SetBufferData(GL_ARRAY_BUFFER, vbo_size, nullptr, GL_DYNAMIC_DRAW);
 
     opengl::EnableVertexAttribute(VATTR_POS_INDEX);
@@ -84,7 +84,7 @@ SpriteBatch::SpriteBatch (uint16 num_sprites, std::shared_ptr<Shader> shader)
     opengl::UnbindBuffers(GL_ARRAY_BUFFER);
 
     // IBO
-    uint32 ibo_count = static_cast<uint32>(m_maxSubmissions) * 6;
+    uint32 ibo_count = static_cast<uint32>(m_capacity) * 6;
     uint32 ibo_size  = ibo_count * sizeof(uint32);
 
     m_ibo = opengl::CreateBuffer();
@@ -97,7 +97,7 @@ SpriteBatch::SpriteBatch (uint16 num_sprites, std::shared_ptr<Shader> shader)
     }
 
     for (uint32 i = 0, idx = 0, offset = 0;
-         i < m_maxSubmissions;
+         i < m_capacity;
          i++, idx = i * 6, offset = i * 4)
     {
         m_iboData[idx]     = offset;
@@ -155,7 +155,7 @@ SpriteBatch::SpriteBatch (uint16 num_sprites, std::shared_ptr<Shader> shader)
 
     std::ostringstream ss;
     ss << "SpriteBatch[" << this << "] constructed:"
-       << " sprite_count=" << m_maxSubmissions
+       << " capacity=" << m_capacity
        << " vbo_size=" << vbo_size
        << " ibo_size=" << ibo_size;
     DLOG(ss.str());
@@ -171,7 +171,7 @@ SpriteBatch::~SpriteBatch (void) noexcept
 SpriteBatch::SpriteBatch (SpriteBatch&& rhs) noexcept
     : m_cursor(rhs.m_cursor)
     , m_submissions(rhs.m_submissions)
-    , m_maxSubmissions(rhs.m_maxSubmissions)
+    , m_capacity(rhs.m_capacity)
     , m_iboData(std::move(rhs.m_iboData))
     , m_shader(std::move(rhs.m_shader))
     , m_projection(rhs.m_projection)
@@ -186,7 +186,7 @@ SpriteBatch::SpriteBatch (SpriteBatch&& rhs) noexcept
 
     rhs.m_cursor = nullptr;
     rhs.m_submissions = 0;
-    rhs.m_maxSubmissions = 0;
+    rhs.m_capacity = 0;
     rhs.m_transform = nullptr;
 }
 
@@ -197,7 +197,7 @@ SpriteBatch::operator= (SpriteBatch&& rhs) noexcept
     {
         m_cursor = rhs.m_cursor;
         m_submissions = rhs.m_submissions;
-        m_maxSubmissions = rhs.m_maxSubmissions;
+        m_capacity = rhs.m_capacity;
         m_iboData = std::move(rhs.m_iboData);
         m_shader = std::move(rhs.m_shader);
         m_projection = rhs.m_projection;
@@ -211,11 +211,17 @@ SpriteBatch::operator= (SpriteBatch&& rhs) noexcept
 
         rhs.m_cursor = nullptr;
         rhs.m_submissions = 0;
-        rhs.m_maxSubmissions = 0;
+        rhs.m_capacity = 0;
         rhs.m_transform = nullptr;
     }
 
     return *this;
+}
+
+uint16
+SpriteBatch::Capacity (void) const noexcept
+{
+    return static_cast<uint16>(m_capacity);
 }
 
 void
@@ -260,7 +266,7 @@ void
 SpriteBatch::Submit (const SpriteVertices& vertices)
 {
     SDL_assert(m_vbo == static_cast<uint32>(opengl::GetIntegerValue(GL_ARRAY_BUFFER_BINDING)));
-    SDL_assert(m_submissions <= m_maxSubmissions);
+    SDL_assert(m_submissions <= m_capacity);
 
     for (const auto& vertex : vertices)
     {
