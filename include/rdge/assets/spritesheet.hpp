@@ -9,6 +9,7 @@
 #include <rdge/assets/surface.hpp>
 #include <rdge/graphics/isprite.hpp>
 #include <rdge/graphics/sprite.hpp>
+#include <rdge/graphics/sprite_group.hpp>
 
 #include <memory>
 #include <string>
@@ -56,10 +57,14 @@ public:
     SpriteSheet (void) = default;
 
     //! \brief SpriteSheet ctor
-    //! \details Loads and parses the config file.
+    //! \details Loads and parses the config file.  If the sprite sheet was designed
+    //!          for use with a standard display and ran using (and configured for)
+    //!          a hi-res display, setting the scale_for_hires flag to true will scale
+    //!          the texture_part.size value by a multiple of 2.
     //! \param [in] path Path to the config file
+    //! \param [in] scale_for_hires Scale original image size for hi-resolution display
     //! \throws rdge::Exception Unable to parse config
-    explicit SpriteSheet (const std::string& path);
+    explicit SpriteSheet (const std::string& path, bool scale_for_hires = false);
 
     //! \brief SpriteSheet dtor
     ~SpriteSheet (void) noexcept = default;
@@ -84,10 +89,25 @@ public:
     //!          uv data from the name lookup to construct a sprite.
     //! \param [in] name Name of the element
     //! \param [in] pos Sprite position
-    //! \param [in] size Sprite size
-    //! \returns Sprite object
+    //! \returns Sprite unique pointer
     //! \throws rdge::Exception Lookup failed
     std::unique_ptr<Sprite> CreateSprite (const std::string& name, const math::vec3& pos) const;
+
+    //! \brief Create a chain of sprites from the sub-texture element
+    //! \details Similar to \ref CreateSprite, but will create a \ref SpriteGroup
+    //!          by chaining together the same sprite.  The intended purpose is to
+    //!          overcome the limitation imposed by OpenGL where texture wrapping
+    //!          cannot be done when specifying sub-texture uv coordinates.
+    //! \note If only a single dimension of the intended final size is known a
+    //!       value of zero can be passed for the other dimension.
+    //! \param [in] name Name of the element
+    //! \param [in] pos Sprite position
+    //! \param [in] to_fill The intended final size
+    //! \returns SpriteGroup unique pointer
+    //! \throws rdge::Exception Lookup failed
+    std::unique_ptr<SpriteGroup> CreateSpriteChain (const std::string& name,
+                                                    const math::vec3&  pos,
+                                                    const math::vec2&  to_fill) const;
 
 public:
     std::shared_ptr<Surface> surface; //!< Surface created from image

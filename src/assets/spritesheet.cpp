@@ -24,7 +24,7 @@ constexpr float32 normalize (uint64 point, uint64 dimension)
 
 namespace rdge {
 
-SpriteSheet::SpriteSheet (const std::string& path)
+SpriteSheet::SpriteSheet (const std::string& path, bool scale_for_hires)
 {
     try
     {
@@ -63,9 +63,10 @@ SpriteSheet::SpriteSheet (const std::string& path)
                 throw std::invalid_argument("Part has invalid dimensions");
             }
 
+            uint32 scale = scale_for_hires ? 2 : 1;
             texture_part result;
             result.name = name;
-            result.size = { w, h };
+            result.size = { w * scale, h * scale };
             result.coords.bottom_left  = math::vec2(normalize(x, surface_size.w),
                                                     normalize(y, surface_size.h));
             result.coords.bottom_right = math::vec2(normalize(x + w, surface_size.w),
@@ -118,11 +119,45 @@ SpriteSheet::CreateSprite (const std::string& name, const math::vec3& pos) const
     SDL_assert(this->texture != nullptr);
 
     const auto& part = (*this)[name]; // Can throw if lookup fails
-
     return std::make_unique<Sprite>(pos,
                             static_cast<math::vec2>(part.size),
                             this->texture,
                             part.coords);
+}
+
+std::unique_ptr<SpriteGroup>
+SpriteSheet::CreateSpriteChain (const std::string& name,
+                                const math::vec3&  pos,
+                                const math::vec2&  to_fill) const
+{
+    SDL_assert(this->texture != nullptr);
+
+    const auto& part = (*this)[name]; // Can throw if lookup fails
+    auto size = static_cast<math::vec2>(part.size);
+    auto group = std::make_unique<SpriteGroup>();
+
+    uint32 rows = (to_fill.h > size.h) ? static_cast<uint32>(to_fill.h / size.h) + 1 : 1;
+    uint32 cols = (to_fill.w > size.w) ? static_cast<uint32>(to_fill.w / size.w) + 1 : 1;
+
+    float x = pos.x;
+    float y = pos.y;
+    for (uint32 ri = 0; ri < rows; ++ri)
+    {
+        for (uint32 ci = 0; ci < cols; ++ci)
+        {
+            group->AddSprite(std::make_shared<Sprite>(math::vec3(x, y, pos.z),
+                                                      size,
+                                                      this->texture,
+                                                      part.coords));
+
+            x += size.w;
+        }
+
+        x = pos.x;
+        y += size.y;
+    }
+
+    return group;
 }
 
 } // namespace rdge

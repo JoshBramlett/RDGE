@@ -126,7 +126,11 @@ SpriteBatch::SpriteBatch (uint16 num_sprites, std::shared_ptr<Shader> shader)
     auto viewport = opengl::GetViewport();
     auto width  = viewport[2] / 2.f;
     auto height = viewport[3] / 2.f;
-    m_projection = math::mat4::orthographic(-width, width, -height, height, -1.f, 1.f);
+    // TODO Figure out how depth is generally defined for an orthographic projection.  In
+    //      the OrthographicCamera (taken from libgdx, near=0 and far=100).  LUL (and
+    //      maybe some other sources) were setting it to NDC values (near=-1 and far=1)
+    //m_projection = math::mat4::orthographic(-width, width, -height, height, -1.f, 1.f);
+    m_projection = math::mat4::orthographic(-width, width, -height, height, 0.f, 100.f);
 
     m_shader->Enable();
     m_shader->SetUniformValue(UNI_PROJ_MATRIX, m_projection);

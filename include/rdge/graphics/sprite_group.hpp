@@ -34,6 +34,11 @@ public:
 
     //!@{
     //! \brief Copy and move enabled
+    // TODO I need to re-think copy operations for this.  Currently if I copy it'll
+    //      simply increase the ref counts for the cached sprites, which is not the
+    //      intended behavior.  If I want to support copies it'll have to create
+    //      new sprites, but what if I want individual access?  Then I'd need a
+    //      solution for how to get the individual sprites.
     SpriteGroup (const SpriteGroup&) = default;
     SpriteGroup& operator= (const SpriteGroup&) = default;
     SpriteGroup (SpriteGroup&&) noexcept = default;
@@ -57,7 +62,9 @@ public:
     //! \param [in] sprite Shared ISprite object
     void AddSprite (std::shared_ptr<ISprite> sprite);
 
+public:
     std::vector<std::shared_ptr<ISprite>> sprites; //!< Collection of sprites
+
     math::mat4 transformation; //!< Affine transform applied to all sprites before drawing
 };
 
