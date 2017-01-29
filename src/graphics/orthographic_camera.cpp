@@ -22,9 +22,9 @@ OrthographicCamera::OrthographicCamera (float width, float height)
 void
 OrthographicCamera::Update (void)
 {
-    this->projection = mat4::orthographic(zoom * (-viewport_size.w / 2.f),
+    this->projection = mat4::orthographic(zoom * -(viewport_size.w / 2.f),
                                           zoom * (viewport_size.w / 2.f),
-                                          zoom * (-viewport_size.h / 2.f),
+                                          zoom * -(viewport_size.h / 2.f),
                                           zoom * (viewport_size.h / 2.f),
                                           near,
                                           far);

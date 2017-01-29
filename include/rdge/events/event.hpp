@@ -699,8 +699,7 @@ bool IsEventEnabled (EventType type);
 //! \brief Set whether event type will be included in the event queue
 //! \param [in] type EventType to set
 //! \param [in] enable True to enable, false to disable
-//! \returns Event state prior to change
-bool SetEventState (EventType type, bool enable);
+void SetEventState (EventType type, bool enable);
 
 //! \brief Enable event type
 //! \param [in] type EventType to enable

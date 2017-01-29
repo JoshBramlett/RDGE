@@ -36,6 +36,7 @@ int main ()
     DisableEvent(EventType::FingerUp);
     DisableEvent(EventType::FingerMotion);
     DisableEvent(EventType::MultiGesture);
+    DisableEvent(EventType::TextInput);
 
     // 2) Create game object
     Game game(settings);

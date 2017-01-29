@@ -109,23 +109,40 @@ rdge::PollEvent (Event* event)
 bool
 rdge::IsEventEnabled (EventType type)
 {
+    if (type == EventType::TextInput || type == EventType::TextEditing)
+    {
+        return (SDL_IsTextInputActive() == SDL_TRUE);
+    }
+
     return SDL_EventState(static_cast<uint32>(type), SDL_QUERY);
 }
 
-bool
-rdge::SetEventState (EventType type, bool enabled)
+void
+rdge::SetEventState (EventType type, bool enable)
 {
-    bool result = SDL_EventState(static_cast<uint32>(type), enabled ? SDL_ENABLE : SDL_DISABLE);
+    if (type == EventType::TextInput || type == EventType::TextEditing)
+    {
+        bool active = (SDL_IsTextInputActive() == SDL_TRUE);
+        if (active && !enable)
+        {
+            SDL_StopTextInput();
+        }
+        else if (!active && enable)
+        {
+            SDL_StartTextInput();
+        }
+    }
+    else
+    {
+        SDL_EventState(static_cast<uint32>(type), enable ? SDL_ENABLE : SDL_DISABLE);
+    }
 
     std::ostringstream ss;
     ss << "Setting Event State"
        << " type=" << type
-       << " previous=" << result
-       << " current=" << enabled;
+       << " state=" << (enable ? "enabled" : "disabled");
 
     ILOG(ss.str());
-
-    return result;
 }
 
 void
