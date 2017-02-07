@@ -77,6 +77,7 @@ add_library (
 
              src/gameobjects/game.cpp
 
+             src/graphics/blend.cpp
              src/graphics/color.cpp
              src/graphics/isprite.cpp
              src/graphics/orthographic_camera.cpp

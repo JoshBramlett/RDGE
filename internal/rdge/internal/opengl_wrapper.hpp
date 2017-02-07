@@ -27,6 +27,7 @@ static_assert(std::is_same<GLuint,    uint32>::value, "GLuint != uint32");
 static_assert(std::is_same<GLint,     int32>::value,  "GLint != int32");
 static_assert(std::is_same<GLsizei,   int32>::value,  "GLsizei != int32");
 static_assert(std::is_same<GLboolean, uint8>::value,  "GLboolean != uint8");
+static_assert(std::is_same<GLenum,    uint32>::value, "GLenum != uint32");
 
 static_assert(std::is_same<GLfloat, float>::value, "GLfloat != float");
 static_assert(GL_FALSE == false, "GL_FALSE != false");
@@ -107,6 +108,70 @@ GetStringValue (rdge::uint32 name)
     const unsigned char* result;
     GL_CHECK_ERROR(result = glGetString(name));
     return reinterpret_cast<const char*>(result);
+}
+
+/******************************************************************
+ *                       Enable/Disable
+ *****************************************************************/
+
+//! \brief Enable OpenGL capability
+//! \param [in] cap Capability
+//! \see https://www.opengl.org/sdk/docs/man4/docbook4/xhtml/glEnable.xml
+inline void
+Enable (uint32 cap)
+{
+    GL_CHECK_ERROR(glEnable(cap));
+}
+
+inline void
+Disable (uint32 cap)
+{
+    GL_CHECK_ERROR(glDisable(cap));
+}
+
+/******************************************************************
+ *                          Blending
+ *****************************************************************/
+
+//! \brief Set blending functions
+//! \param [in] src Source factor
+//! \param [in] dst Destinaction factor
+//! \see https://www.opengl.org/sdk/docs/man4/html/glBlendFunc.xhtml
+inline void
+SetBlendFunction (uint32 src, uint32 dst)
+{
+    GL_CHECK_ERROR(glBlendFunc(src, dst));
+}
+
+//! \brief Set separate blending functions for RGB and alpha components
+//! \param [in] src_rgb Source RGB factor
+//! \param [in] dst_rgb Destinaction RGB factor
+//! \param [in] src_alpha Source alpha factor
+//! \param [in] dst_alpha Destinaction alpha factor
+//! \see https://www.opengl.org/sdk/docs/man4/html/glBlendFuncSeparate.xhtml
+inline void
+SetBlendFunction (uint32 src_rgb, uint32 dst_rgb, uint32 src_alpha, uint32 dst_alpha)
+{
+    GL_CHECK_ERROR(glBlendFuncSeparate(src_rgb, dst_rgb, src_alpha, dst_alpha));
+}
+
+//! \brief Set blending equation
+//! \param [in] mode How source and destination colors are combined
+//! \see https://www.opengl.org/sdk/docs/man4/html/glBlendEquation.xhtml
+inline void
+SetBlendEquation (uint32 mode)
+{
+    GL_CHECK_ERROR(glBlendEquation(mode));
+}
+
+//! \brief Set separate blending equations for RGB and alpha components
+//! \param [in] mode_rgb RGB blend equation
+//! \param [in] mode_alpha Alpha blend equation
+//! \see https://www.khronos.org/registry/OpenGL-Refpages/es2.0/xhtml/glBlendEquationSeparate.xml
+inline void
+SetBlendEquation (uint32 mode_rgb, uint32 mode_alpha)
+{
+    GL_CHECK_ERROR(glBlendEquationSeparate(mode_rgb, mode_alpha));
 }
 
 /******************************************************************

@@ -233,11 +233,6 @@ Window::Window (
     //glEnable(GL_ALPHA_TEST);
     //glAlphaFunc(GL_LEQUAL, 0);
 
-    // TODO:  This enables alpha blending.  Look into it further when I have time.
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    //glBlendEquation(GL_FUNC_ADD);
-
     if (use_vsync)
     {
         // TODO SDL docs say the interval can be set to 1 for vsync, and -1 for late

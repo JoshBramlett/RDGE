@@ -40,6 +40,7 @@ public:
 
     //! \brief color ctor
     //! \details Initialize from SDL_Color
+    //! \param [in] sdl_color SDL_Color struct
     constexpr color (const SDL_Color& sdl_color)
         : SDL_Color{sdl_color}
     { }
@@ -110,18 +111,18 @@ public:
 //! \param [in] a First color to compare
 //! \param [in] b Second color to compare
 //! \returns True iff colors are identical
-constexpr bool operator== (const color& a, const color& b) noexcept
+constexpr bool operator== (const color& lhs, const color& rhs) noexcept
 {
-    return (a.r == b.r) && (a.g == b.g) && (a.b == b.b) && (a.a == b.a);
+    return (lhs.r == rhs.r) && (lhs.g == rhs.g) && (lhs.b == rhs.b) && (lhs.a == rhs.a);
 }
 
 //! \brief color inequality operator
 //! \param [in] a First color to compare
 //! \param [in] b Second color to compare
 //! \returns True iff colors are not identical
-constexpr bool operator!= (const color& a, const color& b) noexcept
+constexpr bool operator!= (const color& lhs, const color& rhs) noexcept
 {
-    return (a.r != b.r) || (a.g != b.g) || (a.b != b.b) || (a.a != b.a);
+    return !(lhs == rhs);
 }
 
 //! \brief color stream output operator

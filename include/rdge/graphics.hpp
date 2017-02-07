@@ -1,5 +1,6 @@
 #pragma once
 
+#include <rdge/graphics/blend.hpp>
 #include <rdge/graphics/color.hpp>
 #include <rdge/graphics/isprite.hpp>
 #include <rdge/graphics/layers/sprite_layer.hpp>

@@ -6,6 +6,7 @@
 #pragma once
 
 #include <rdge/core.hpp>
+#include <rdge/graphics/blend.hpp>
 #include <rdge/graphics/isprite.hpp>
 #include <rdge/graphics/texture.hpp>
 #include <rdge/graphics/shader.hpp>
@@ -47,8 +48,9 @@ public:
     //!          shader is provided a default shader will be used.  The projection
     //!          matrix is an orthographic projection based on the aspect ratio
     //!          of the OpenGL viewport.
-    //! \param [in] num_sprites Max number of sprites that can be submitted
+    //! \param [in] capacity Max number of sprites that can be submitted
     //! \param [in] shader Compatable shader
+    //! \param [in] enable_blending Enable blending
     //! \throws rdge::Exception Initialization failure
     //! \warning Shader source must follow the required fields/values specification
     // TODO Might need to update last statement in the details depending on how
@@ -57,7 +59,9 @@ public:
     //      should be treated differently.  e.g. Create a FATAL macro which could
     //      write out and flush the log buffer, maybe suspending the calling thread
     //      until the flush is done?
-    explicit SpriteBatch (uint16 num_sprites = 1000, std::shared_ptr<Shader> shader = nullptr);
+    explicit SpriteBatch (uint16                  capacity        = 1000,
+                          std::shared_ptr<Shader> shader          = nullptr,
+                          bool                    enable_blending = true);
 
     //! \brief SpriteBatch dtor
     ~SpriteBatch (void) noexcept;
@@ -134,13 +138,8 @@ public:
     // a uniform to multiply.
     //void SetColor (const color& color);
 
-    // TODO - Blending
-    // Currently hacked by setting it in the window, so it should be moved.
-    // https://github.com/SFML/SFML/blob/master/include/SFML/Graphics/BlendMode.hpp
-    // libgdx::SpriteBatch setBlendFunction
-    //void DisableBlending (void);
-    //void EnableBlending (void);
-    //void SetBlendingFunction (...)
+public:
+    Blend blend = Blend::LerpSourceAlpha; //!< Blend function (set every draw call)
 
 private:
     uint32 m_vao = 0; //!< Vertex array handle

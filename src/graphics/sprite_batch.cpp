@@ -22,7 +22,7 @@ constexpr uint32 SPRITE_SIZE = VERTEX_SIZE * 4;
 
 namespace rdge {
 
-SpriteBatch::SpriteBatch (uint16 capacity, std::shared_ptr<Shader> shader)
+SpriteBatch::SpriteBatch (uint16 capacity, std::shared_ptr<Shader> shader, bool enable_blending)
     : m_capacity(capacity)
     , m_shader(shader)
 {
@@ -33,6 +33,8 @@ SpriteBatch::SpriteBatch (uint16 capacity, std::shared_ptr<Shader> shader)
         auto source = DefaultShaderSource();
         m_shader = std::make_unique<Shader>(source.first, source.second);
     }
+
+    this->blend.enabled = enable_blending;
 
     // SpriteBatch implements it's buffer object streaming using the orphaning
     // technique, which means for every frame we ask OpenGL to give us a new buffer.
@@ -291,10 +293,18 @@ SpriteBatch::Flush (void)
     opengl::ReleaseBufferPointer(GL_ARRAY_BUFFER);
     opengl::UnbindBuffers(GL_ARRAY_BUFFER);
 
+    // TODO Textures don't have to be activated for every draw call unless they have
+    //      changed.  One alternative could be to create a container that manages
+    //      all textures across all render targets.  I need to profile to determine
+    //      how much of a cost enabling and activating a texture has.
+    //      Keep in mind a limiting factor is that all textures must be assigned a
+    //      unit id prior to activating.
     for (auto& texture : m_textures)
     {
         texture->Activate();
     }
+
+    this->blend.Apply();
 
     opengl::BindVertexArray(m_vao);
     opengl::BindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
