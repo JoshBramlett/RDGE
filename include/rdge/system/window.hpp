@@ -146,6 +146,10 @@ public:
     //! \return True if updates are synchronized with the vertical retrace, false otherwise
     bool IsUsingVSYNC (void) const noexcept;
 
+    //! \brief Check if window was created in high-DPI mode
+    //! \return True iff window uses high-DPI, false otherwise
+    bool IsHighDPI (void) const noexcept;
+
     //! \brief Return the SDL_Window pointer
     //! \details Raw pointer is returned so caller must ensure
     //!          Window object will not fall out of scope
@@ -201,10 +205,9 @@ public:
     //! \returns Frame rate
     double FrameRate (void) const;
 
-    //! \brief Get a pointer to the current window
-    //! \details The current window is that which is in focus.
-    //! \returns Pointer to window (or nullptr if not available)
-    static const Window* GetCurrentWindow (void);
+    //! \brief Get the current window with focus
+    //! \returns const reference to the current window
+    static const Window& Current (void);
 
 private:
     SDL_Window*   m_window;

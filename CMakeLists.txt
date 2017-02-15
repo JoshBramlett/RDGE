@@ -112,13 +112,13 @@ target_link_libraries (RDGE
                        ${GLEW_LIBRARIES}
                        ${OPENGL_LIBRARIES})
 
+add_subdirectory (tutorials/sandbox)
 add_subdirectory (tutorials/01_textures)
 add_subdirectory (tutorials/02_layers)
 add_subdirectory (tutorials/03_spritesheet)
 add_subdirectory (tutorials/04_scenes)
 
 # deprecated
-#add_subdirectory (tutorials/opengl/ex01_triangle)
 #add_subdirectory (examples/pong)
 #add_subdirectory (examples/glpong)
 #add_subdirectory (examples/gui)

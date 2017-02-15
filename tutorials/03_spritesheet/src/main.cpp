@@ -35,27 +35,22 @@ int main ()
     Window window(settings);
 
     // 3) Load assets
-    SpriteSheet stall_sheet("res/spritesheet_stall.json");
+    SpriteSheet stall_sheet("res/spritesheet_stall.json", window.IsHighDPI());
     auto counter = std::make_shared<Texture>("res/counter.png");
 
-    // NOTE: All vertex position placement is based on the pretense that we're rendering
-    //       to the default viewport size of 960x540, and outputting to a high res display
-    //       which will double the viewport size (drawable size of 1920x1080).
-
     SpriteLayer stall_layer;
-    float SCALE = 2.f; //< Constant multiplier to scale all images
     float DEPTH = 0.f; //< Vertex depth (z-index)
 
     // 4) Create renderable graphics
     {
         auto part = stall_sheet["bg_wood.png"];
-        auto size = static_cast<math::vec2>(part.size) * SCALE;
+        auto size = static_cast<math::vec2>(part.size);
 
         // NOTE: This is a contiguous batch of sprites giving the appearance of a single sprite.
         //       We're unable to use OpenGL texture wrapping because that requires we use the
-        //       entire texture and modify the tex_coords to define the wrapping.
-        //       Another thing to note is the width/height of the sprites cannot be sub-pixel
-        //       or you'll get gaps between the sprites.
+        //       entire texture and modify the tex_coords to define the wrapping.  Another
+        //       thing worth noting is if the width/height of the sprites is sub-pixel you run
+        //       the risk of gaps appearing between the sprites.
 
         int32 num = static_cast<int32>(1920.f / size.w) + 1;
         float x = -960.f;
@@ -73,7 +68,7 @@ int main ()
 
     {
         const auto& part = stall_sheet["cloud1.png"];
-        auto size = static_cast<math::vec2>(part.size) * SCALE;
+        auto size = static_cast<math::vec2>(part.size);
 
         stall_layer.AddSprite(std::make_shared<Sprite>(math::vec3(350.f, 240.f, DEPTH),
                                                        size,
@@ -83,7 +78,7 @@ int main ()
 
     {
         const auto& part = stall_sheet["tree_oak.png"];
-        auto size = static_cast<math::vec2>(part.size) * SCALE;
+        auto size = static_cast<math::vec2>(part.size);
 
         stall_layer.AddSprite(std::make_shared<Sprite>(math::vec3(-960.f, -40.f, DEPTH),
                                                        size,
@@ -94,8 +89,8 @@ int main ()
     {
         auto part1 = stall_sheet["grass1.png"];
         auto part2 = stall_sheet["grass2.png"];
-        auto size1 = static_cast<math::vec2>(part1.size) * SCALE;
-        auto size2 = static_cast<math::vec2>(part2.size) * SCALE;
+        auto size1 = static_cast<math::vec2>(part1.size);
+        auto size2 = static_cast<math::vec2>(part2.size);
 
         int32 num = static_cast<int32>(1920.f / size1.w) + 1; // Width is the same for both
         float x = -960.f;
@@ -113,7 +108,7 @@ int main ()
 
     {
         const auto& part = stall_sheet["tree_pine.png"];
-        auto size = static_cast<math::vec2>(part.size) * SCALE;
+        auto size = static_cast<math::vec2>(part.size);
 
         stall_layer.AddSprite(std::make_shared<Sprite>(math::vec3(915.f - size.w, -185.f, DEPTH),
                                                        size,
@@ -123,7 +118,7 @@ int main ()
 
     {
         auto part = stall_sheet["water2.png"];
-        auto size = static_cast<math::vec2>(part.size) * SCALE;
+        auto size = static_cast<math::vec2>(part.size);
 
         int32 num = static_cast<int32>(1920.f / size.w) + 1;
         float x = -960.f;
@@ -163,7 +158,7 @@ int main ()
 
     {
         const auto& part = stall_sheet["curtain_top.png"];
-        auto size = static_cast<math::vec2>(part.size) * SCALE;
+        auto size = static_cast<math::vec2>(part.size);
 
         float x_offset = size.w * .8f;
         float y_offset = 10.f;
@@ -197,7 +192,7 @@ int main ()
 
     {
         const auto& part = stall_sheet["curtain.png"];
-        auto size = static_cast<math::vec2>(part.size) * SCALE;
+        auto size = static_cast<math::vec2>(part.size);
 
         stall_layer.AddSprite(std::make_shared<Sprite>(math::vec3(-970.f, -430.f, DEPTH),
                                                        size,
@@ -212,7 +207,7 @@ int main ()
 
     {
         const auto& part = stall_sheet["curtain_rope.png"];
-        auto size = static_cast<math::vec2>(part.size) * SCALE;
+        auto size = static_cast<math::vec2>(part.size);
 
         stall_layer.AddSprite(std::make_shared<Sprite>(math::vec3(-980.f, -35.f, DEPTH),
                                                        size,
@@ -226,7 +221,7 @@ int main ()
 
     {
         auto part = stall_sheet["curtain_straight.png"];
-        auto size = static_cast<math::vec2>(part.size) * SCALE;
+        auto size = static_cast<math::vec2>(part.size);
 
         int32 num = static_cast<int32>(1920.f / size.w) + 1;
         float x = -960.f;

@@ -34,13 +34,17 @@ struct texture_part
 //!          make up the parts.  Coordinates are required to be zero index
 //!          pixel perfect unsigned integers with the origin being set to
 //!          the top left corner and will be normalized to inverted floating
-//!          point texture coordinates.
+//!          point texture coordinates.  The image_scale is an optional
+//!          parameter which is a scale multiplier applied to all texture
+//!          parts.  This is useful for small pixel art.  If the image_scale
+//!          is a NPOT value it will be discarded.
 //! \note No checking is done to ensure parts are unique or do not overlap.
 //! \warning No type conversions are performed, so numeric values wrapped in
 //!          quotes are treated as strings and the parsing will fail.
 //! \code{.json}
 //! {
 //!     "image_path": "textures/image.png",
+//!     "image_scale": 4,
 //!     "texture_parts": [ {
 //!         "name": "part_name",
 //!         "x": 0,
@@ -62,9 +66,9 @@ public:
     //!          a hi-res display, setting the scale_for_hires flag to true will scale
     //!          the texture_part.size value by a multiple of 2.
     //! \param [in] path Path to the config file
-    //! \param [in] scale_for_hires Scale original image size for hi-resolution display
+    //! \param [in] scale_for_hidpi Scale original image size for hi-resolution display
     //! \throws rdge::Exception Unable to parse config
-    explicit SpriteSheet (const std::string& path, bool scale_for_hires = false);
+    explicit SpriteSheet (const std::string& path, bool scale_for_hidpi = false);
 
     //! \brief SpriteSheet dtor
     ~SpriteSheet (void) noexcept = default;
@@ -110,6 +114,9 @@ public:
                                                     const math::vec2&  to_fill) const;
 
 public:
+    std::string image_path;      //!< Image path specified in the config
+    uint32      image_scale = 1; //!< Image scale specified in the config
+
     std::shared_ptr<Surface> surface; //!< Surface created from image
     std::shared_ptr<Texture> texture; //!< Texture generated from the surface
 

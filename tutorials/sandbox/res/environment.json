@@ -1,0 +1,27 @@
+{
+  "texture_parts": [
+    {
+      "name": "dirt",
+      "x": 0,
+      "y": 0,
+      "width": 16,
+      "height": 16
+    },
+    {
+      "name": "weed1",
+      "x": 16,
+      "y": 0,
+      "width": 16,
+      "height": 16
+    },
+    {
+      "name": "rock1",
+      "x": 32,
+      "y": 0,
+      "width": 16,
+      "height": 16
+    }
+  ],
+  "image_path": "res/environment.png",
+  "image_scale": 4
+}

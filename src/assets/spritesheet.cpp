@@ -1,7 +1,9 @@
 #include <rdge/assets/spritesheet.hpp>
 #include <rdge/math/vec2.hpp>
+#include <rdge/math/functions.hpp>
 #include <rdge/util/io.hpp>
 #include <rdge/internal/exception_macros.hpp>
+#include <rdge/internal/logger_macros.hpp>
 
 #include <nlohmann/json.hpp>
 
@@ -15,16 +17,16 @@ namespace {
 using namespace rdge;
 
 // Normalize the point to a float clamped to [0, 1]
-constexpr float32 normalize (uint64 point, uint64 dimension)
+constexpr float normalize (uint64 point, uint64 dimension)
 {
-    return static_cast<float32>(point) / static_cast<float32>(dimension);
+    return static_cast<float>(point) / static_cast<float>(dimension);
 }
 
 } // anonymous namespace
 
 namespace rdge {
 
-SpriteSheet::SpriteSheet (const std::string& path, bool scale_for_hires)
+SpriteSheet::SpriteSheet (const std::string& path, bool scale_for_hidpi)
 {
     try
     {
@@ -35,9 +37,24 @@ SpriteSheet::SpriteSheet (const std::string& path, bool scale_for_hires)
         }
 
         auto j = json::parse(config);
-        auto image_path = j["image_path"].get<std::string>();
+        this->image_path = j["image_path"].get<std::string>();
 
-        this->surface = std::make_shared<Surface>(image_path);  // Will throw if failed
+        uint32 scale = scale_for_hidpi ? 2 : 1;
+        if (j["image_scale"].is_number_unsigned())
+        {
+            this->image_scale = j["image_scale"].get<uint32>();
+            if (math::is_pot(this->image_scale))
+            {
+                scale *= this->image_scale;
+            }
+            else
+            {
+                this->image_scale = 1;
+                WLOG("image_scale is NPOT, discarding");
+            }
+        }
+
+        this->surface = std::make_shared<Surface>(this->image_path);  // Will throw if failed
         this->texture = std::make_shared<Texture>(*this->surface);
         auto surface_size = this->surface->Size();
 
@@ -63,7 +80,6 @@ SpriteSheet::SpriteSheet (const std::string& path, bool scale_for_hires)
                 throw std::invalid_argument("Part has invalid dimensions");
             }
 
-            uint32 scale = scale_for_hires ? 2 : 1;
             texture_part result;
             result.name = name;
             result.size = { w * scale, h * scale };

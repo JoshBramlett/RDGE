@@ -366,6 +366,13 @@ Window::IsUsingVSYNC (void) const noexcept
     return (SDL_GL_GetSwapInterval() != 0);
 }
 
+bool
+Window::IsHighDPI (void) const noexcept
+{
+    uint32 flags = SDL_GetWindowFlags(m_window);
+    return flags&SDL_WINDOW_ALLOW_HIGHDPI;
+}
+
 void
 Window::SetTitle (const std::string& title)
 {
@@ -493,8 +500,8 @@ Window::FrameRate (void) const
     return 1000.0f / (static_cast<double>(s_tickSum) / static_cast<double>(FRAME_SAMPLES));
 }
 
-/* static */ const Window*
-Window::GetCurrentWindow (void)
+/* static */ const Window&
+Window::Current (void)
 {
-    return s_currentWindow;
+    return *s_currentWindow;
 }
