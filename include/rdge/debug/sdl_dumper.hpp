@@ -20,6 +20,34 @@ namespace rdge {
 namespace debug {
 
 inline std::string
+WindowEventString (const SDL_WindowEvent& event)
+{
+    switch (event.event)
+    {
+#define CASE(X) case X: return #X;
+    CASE(SDL_WINDOWEVENT_SHOWN)
+    CASE(SDL_WINDOWEVENT_HIDDEN)
+    CASE(SDL_WINDOWEVENT_EXPOSED)
+    CASE(SDL_WINDOWEVENT_MOVED)
+    CASE(SDL_WINDOWEVENT_RESIZED)
+    CASE(SDL_WINDOWEVENT_SIZE_CHANGED)
+    CASE(SDL_WINDOWEVENT_MINIMIZED)
+    CASE(SDL_WINDOWEVENT_MAXIMIZED)
+    CASE(SDL_WINDOWEVENT_RESTORED)
+    CASE(SDL_WINDOWEVENT_ENTER)
+    CASE(SDL_WINDOWEVENT_LEAVE)
+    CASE(SDL_WINDOWEVENT_FOCUS_GAINED)
+    CASE(SDL_WINDOWEVENT_FOCUS_LOST)
+    CASE(SDL_WINDOWEVENT_CLOSE)
+#undef CASE
+    default:
+        break;
+    }
+
+    return "Unknown";
+}
+
+inline std::string
 DumpPixelFormatEnum (uint32 format)
 {
     std::ostringstream ss;
