@@ -12,8 +12,11 @@
             "x": 128,
             "y": 128,
             "width": 128,
-            "height": 128
+            "height": 128,
+            "hotspot_x": 64,
+            "hotspot_y": 64
         }
     ],
-    "image_path": "../tests/testdata/assets/spritesheet.png"
+    "image_path": "../tests/testdata/assets/spritesheet.png",
+    "image_scale": 2
 }

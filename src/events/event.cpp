@@ -8,9 +8,10 @@
 #include <iostream>
 #include <algorithm>
 
-using namespace rdge;
 
 namespace {
+
+using namespace rdge;
 
 /* IMPORTANT - Observed event functionality
  *
@@ -19,8 +20,8 @@ namespace {
  *   2) MultiGesture event is delivered in addition to mouse wheel
  */
 
-rdge::math::vec2
-ConvertWindowCoordsToNDC (rdge::uint32 windowID, rdge::int32 x, rdge::int32 y)
+math::vec2
+ConvertWindowCoordsToNDC (uint32 windowID, int32 x, int32 y)
 {
     // TODO:  This should be removed.  Mouse events should return their
     //        absolute coords, and there should be a helper to convert to NDC
@@ -36,13 +37,13 @@ ConvertWindowCoordsToNDC (rdge::uint32 windowID, rdge::int32 x, rdge::int32 y)
     auto window = SDL_GetWindowFromID(windowID);
     if (UNLIKELY(!window))
     {
-        return rdge::math::vec2();
+        return math::vec2();
     }
 
-    rdge::int32 width, height;
+    int32 width, height;
     SDL_GetWindowSize(window, &width, &height);
 
-    return rdge::math::vec2((2.0f * x) / width - 1.0f, 1.0f - (2.0f * y) / height);
+    return math::vec2((2.0f * x) / width - 1.0f, 1.0f - (2.0f * y) / height);
 }
 
 #ifdef RDGE_DEBUG
@@ -59,22 +60,24 @@ ConvertWindowCoordsToNDC (rdge::uint32 windowID, rdge::int32 x, rdge::int32 y)
     };
 #endif
 
-}
+} // anonymous namespace
 
-rdge::math::vec2
+namespace rdge {
+
+math::vec2
 MouseButtonEventArgs::CursorLocationInNDC (void) const
 {
     return ConvertWindowCoordsToNDC(windowID, x, y);
 }
 
-rdge::math::vec2
+math::vec2
 MouseMotionEventArgs::CursorLocationInNDC (void) const
 {
     return ConvertWindowCoordsToNDC(windowID, x, y);
 }
 
 bool
-rdge::PollEvent (Event* event)
+PollEvent (Event* event)
 {
     while (SDL_PollEvent(&event->sdl_event))
     {
@@ -86,11 +89,9 @@ rdge::PollEvent (Event* event)
             return true;
         }
 
-        auto result = std::find(
-                                s_supportedEventTypes.begin(),
+        auto result = std::find(s_supportedEventTypes.begin(),
                                 s_supportedEventTypes.end(),
-                                static_cast<EventType>(event->sdl_event.type)
-                               );
+                                static_cast<EventType>(event->sdl_event.type));
         if (result == s_supportedEventTypes.end())
         {
             std::ostringstream ss;
@@ -107,7 +108,7 @@ rdge::PollEvent (Event* event)
 }
 
 bool
-rdge::IsEventEnabled (EventType type)
+IsEventEnabled (EventType type)
 {
     if (type == EventType::TextInput || type == EventType::TextEditing)
     {
@@ -118,7 +119,7 @@ rdge::IsEventEnabled (EventType type)
 }
 
 void
-rdge::SetEventState (EventType type, bool enable)
+SetEventState (EventType type, bool enable)
 {
     if (type == EventType::TextInput || type == EventType::TextEditing)
     {
@@ -146,19 +147,19 @@ rdge::SetEventState (EventType type, bool enable)
 }
 
 void
-rdge::EnableEvent (EventType type)
+EnableEvent (EventType type)
 {
-    rdge::SetEventState(type, true);
+    SetEventState(type, true);
 }
 
 void
-rdge::DisableEvent (EventType type)
+DisableEvent (EventType type)
 {
-    rdge::SetEventState(type, false);
+    SetEventState(type, false);
 }
 
-rdge::uint32
-rdge::RegisterCustomEvent (void)
+uint32
+RegisterCustomEvent (void)
 {
     auto result = SDL_RegisterEvents(1);
     if (result == ((uint32)-1)) // TODO <-- wtf?
@@ -170,7 +171,7 @@ rdge::RegisterCustomEvent (void)
 }
 
 void
-rdge::QueueCustomEvent (rdge::uint32 type, rdge::int32 code, void* data1, void* data2)
+QueueCustomEvent (uint32 type, int32 code, void* data1, void* data2)
 {
     // TODO: If/when event filtering is implemented, The result of SDL_PushEvent
     //       will be zero if the event is to be filtered.  We could change the
@@ -190,7 +191,7 @@ rdge::QueueCustomEvent (rdge::uint32 type, rdge::int32 code, void* data1, void* 
 }
 
 // TODO: Add substr before sending to stream to get rid of the enum name
-std::ostream& operator<< (std::ostream& os, rdge::EventType type)
+std::ostream& operator<< (std::ostream& os, EventType type)
 {
     switch (type)
     {
@@ -253,7 +254,7 @@ std::ostream& operator<< (std::ostream& os, rdge::EventType type)
 #undef CASE
         default:
         {
-            auto value = static_cast<rdge::uint32>(type);
+            auto value = static_cast<uint32>(type);
             std::ostringstream ss;
             ss << std::hex << std::uppercase << value;
 
@@ -272,96 +273,7 @@ std::ostream& operator<< (std::ostream& os, rdge::EventType type)
 }
 
 // TODO: Add substr before sending to stream to get rid of the enum name
-std::ostream& operator<< (std::ostream& os, rdge::KeyCode key)
-{
-    switch (key)
-    {
-#define CASE(X) case X: os << #X; break;
-        CASE(KeyCode::Unknown)
-        CASE(KeyCode::Backspace)
-        CASE(KeyCode::Tab)
-        CASE(KeyCode::Return)
-        CASE(KeyCode::Escape)
-        CASE(KeyCode::Space)
-        CASE(KeyCode::Quote)
-        CASE(KeyCode::Comma)
-        CASE(KeyCode::Minus)
-        CASE(KeyCode::Period)
-        CASE(KeyCode::Slash)
-        CASE(KeyCode::Zero)
-        CASE(KeyCode::One)
-        CASE(KeyCode::Two)
-        CASE(KeyCode::Three)
-        CASE(KeyCode::Four)
-        CASE(KeyCode::Five)
-        CASE(KeyCode::Six)
-        CASE(KeyCode::Seven)
-        CASE(KeyCode::Eight)
-        CASE(KeyCode::Nine)
-        CASE(KeyCode::Semicolon)
-        CASE(KeyCode::Equals)
-        CASE(KeyCode::BackQuote)
-        CASE(KeyCode::A)
-        CASE(KeyCode::B)
-        CASE(KeyCode::C)
-        CASE(KeyCode::D)
-        CASE(KeyCode::E)
-        CASE(KeyCode::F)
-        CASE(KeyCode::G)
-        CASE(KeyCode::H)
-        CASE(KeyCode::I)
-        CASE(KeyCode::J)
-        CASE(KeyCode::K)
-        CASE(KeyCode::L)
-        CASE(KeyCode::M)
-        CASE(KeyCode::N)
-        CASE(KeyCode::O)
-        CASE(KeyCode::P)
-        CASE(KeyCode::Q)
-        CASE(KeyCode::R)
-        CASE(KeyCode::S)
-        CASE(KeyCode::T)
-        CASE(KeyCode::U)
-        CASE(KeyCode::V)
-        CASE(KeyCode::W)
-        CASE(KeyCode::X)
-        CASE(KeyCode::Y)
-        CASE(KeyCode::Z)
-        CASE(KeyCode::CapsLock)
-        CASE(KeyCode::F1)
-        CASE(KeyCode::F2)
-        CASE(KeyCode::F3)
-        CASE(KeyCode::F4)
-        CASE(KeyCode::F5)
-        CASE(KeyCode::F6)
-        CASE(KeyCode::F7)
-        CASE(KeyCode::F8)
-        CASE(KeyCode::F9)
-        CASE(KeyCode::F10)
-        CASE(KeyCode::F11)
-        CASE(KeyCode::F12)
-        CASE(KeyCode::Right)
-        CASE(KeyCode::Left)
-        CASE(KeyCode::Down)
-        CASE(KeyCode::Up)
-        CASE(KeyCode::LeftCtrl)
-        CASE(KeyCode::LeftShift)
-        CASE(KeyCode::LeftAlt)
-        CASE(KeyCode::LeftGUI)
-        CASE(KeyCode::RightCtrl)
-        CASE(KeyCode::RightShift)
-        CASE(KeyCode::RightAlt)
-        CASE(KeyCode::RightGUI)
-#undef CASE
-        default:
-            os << "NOT_FOUND[" << static_cast<rdge::uint32>(key) << "]";
-    }
-
-    return os;
-}
-
-// TODO: Add substr before sending to stream to get rid of the enum name
-std::ostream& operator<< (std::ostream& os, rdge::MouseButton button)
+std::ostream& operator<< (std::ostream& os, MouseButton button)
 {
     switch (button)
     {
@@ -374,8 +286,10 @@ std::ostream& operator<< (std::ostream& os, rdge::MouseButton button)
         CASE(MouseButton::X2)
 #undef CASE
         default:
-            os << "NOT_FOUND[" << static_cast<rdge::uint32>(button) << "]";
+            os << "NOT_FOUND[" << static_cast<uint32>(button) << "]";
     }
 
     return os;
 }
+
+} // namespace rdge

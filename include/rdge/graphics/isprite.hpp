@@ -57,6 +57,15 @@ struct tex_coords
     tex_coords& rotate_left (void) noexcept;
     tex_coords& rotate_right (void) noexcept;
     //!@}
+
+    //!@{
+    //! \brief Basic const tex_coords transforms
+    //! \returns Value after transform
+    tex_coords flip_horizontal (void) const noexcept;
+    tex_coords flip_vertical (void) const noexcept;
+    tex_coords rotate_left (void) const noexcept;
+    tex_coords rotate_right (void) const noexcept;
+    //!@}
 };
 
 //! \class ISprite
@@ -79,5 +88,11 @@ public:
     //! \param [in] depth Depth (z-index) value
     virtual void SetDepth (float depth) = 0;
 };
+
+//! \brief tex_coords stream output operator
+//! \param [in] os Output stream
+//! \param [in] value tex_coords to write to the stream
+//! \returns Output stream
+std::ostream& operator<< (std::ostream& os, const tex_coords& value);
 
 } // namespace rdge

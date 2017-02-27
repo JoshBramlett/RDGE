@@ -8,6 +8,7 @@
 #include <rdge/core.hpp>
 #include <rdge/graphics/point.hpp>
 #include <rdge/math/vec2.hpp>
+#include <rdge/system/keyboard.hpp>
 
 #include <SDL.h>
 
@@ -119,94 +120,6 @@ enum class EventType : uint32
     RenderTargetsReset = SDL_RENDER_TARGETS_RESET, //!< Render target contents must be updated
     RenderDeviceReset  = SDL_RENDER_DEVICE_RESET   //!< Device reset, all textures must be recreated
     //!@}
-};
-
-//! \enum KeyCode
-//! \brief SDL defined virtual key representation
-//! \details Direct mapping to SDL_Keycode, provided for abstraction and
-//!          ease of discovery.
-enum class KeyCode : uint32
-{
-    // IMPORTANT - If enum is updated, update ostream operator<< as well
-
-    // TODO: The only KeyCode values supported are those on my Mac.  When I move to
-    //       full cross platform support I need to add the remainder from here:
-    //       https://wiki.libsdl.org/SDLKeycodeLookup
-    Unknown    = SDLK_UNKNOWN,
-    Backspace  = SDLK_BACKSPACE,
-    Tab        = SDLK_TAB,
-    Return     = SDLK_RETURN,
-    Escape     = SDLK_ESCAPE,
-    Space      = SDLK_SPACE,
-    Quote      = SDLK_QUOTE,
-    Comma      = SDLK_COMMA,
-    Minus      = SDLK_MINUS,
-    Period     = SDLK_PERIOD,
-    Slash      = SDLK_SLASH,
-    Zero       = SDLK_0,
-    One        = SDLK_1,
-    Two        = SDLK_2,
-    Three      = SDLK_3,
-    Four       = SDLK_4,
-    Five       = SDLK_5,
-    Six        = SDLK_6,
-    Seven      = SDLK_7,
-    Eight      = SDLK_8,
-    Nine       = SDLK_9,
-    Semicolon  = SDLK_SEMICOLON,
-    Equals     = SDLK_EQUALS,
-    BackQuote  = SDLK_BACKQUOTE,
-    A          = SDLK_a,
-    B          = SDLK_b,
-    C          = SDLK_c,
-    D          = SDLK_d,
-    E          = SDLK_e,
-    F          = SDLK_f,
-    G          = SDLK_g,
-    H          = SDLK_h,
-    I          = SDLK_i,
-    J          = SDLK_j,
-    K          = SDLK_k,
-    L          = SDLK_l,
-    M          = SDLK_m,
-    N          = SDLK_n,
-    O          = SDLK_o,
-    P          = SDLK_p,
-    Q          = SDLK_q,
-    R          = SDLK_r,
-    S          = SDLK_s,
-    T          = SDLK_t,
-    U          = SDLK_u,
-    V          = SDLK_v,
-    W          = SDLK_w,
-    X          = SDLK_x,
-    Y          = SDLK_y,
-    Z          = SDLK_z,
-    CapsLock   = SDLK_CAPSLOCK,
-    F1         = SDLK_F1,
-    F2         = SDLK_F2,
-    F3         = SDLK_F3,
-    F4         = SDLK_F4,
-    F5         = SDLK_F5,
-    F6         = SDLK_F6,
-    F7         = SDLK_F7,
-    F8         = SDLK_F8,
-    F9         = SDLK_F9,
-    F10        = SDLK_F10,
-    F11        = SDLK_F11,
-    F12        = SDLK_F12,
-    Right      = SDLK_RIGHT,
-    Left       = SDLK_LEFT,
-    Down       = SDLK_DOWN,
-    Up         = SDLK_UP,
-    LeftCtrl   = SDLK_LCTRL,
-    LeftShift  = SDLK_LSHIFT,
-    LeftAlt    = SDLK_LALT,
-    LeftGUI    = SDLK_LGUI,
-    RightCtrl  = SDLK_RCTRL,
-    RightShift = SDLK_RSHIFT,
-    RightAlt   = SDLK_RALT,
-    RightGUI   = SDLK_RGUI
 };
 
 //! \enum MouseButton
@@ -729,22 +642,16 @@ void QueueCustomEvent (uint32 type,
                        void*  data1 = nullptr,
                        void*  data2 = nullptr);
 
-} // namespace rdge
-
 //! \brief EventType stream output operator
 //! \param [in] os Output stream
 //! \param [in] type EventType enum
 //! \returns Output stream
 std::ostream& operator<< (std::ostream& os, rdge::EventType type);
 
-//! \brief KeyCode stream output operator
-//! \param [in] os Output stream
-//! \param [in] key KeyCode enum
-//! \returns Output stream
-std::ostream& operator<< (std::ostream& os, rdge::KeyCode key);
-
 //! \brief MouseButton stream output operator
 //! \param [in] os Output stream
 //! \param [in] button MouseButton enum
 //! \returns Output stream
 std::ostream& operator<< (std::ostream& os, rdge::MouseButton button);
+
+} // namespace rdge

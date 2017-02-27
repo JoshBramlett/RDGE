@@ -69,7 +69,7 @@ int main ()
             else if (event.IsKeyboardEvent())
             {
                 auto e = event.GetKeyboardEventArgs();
-                if (e.Key() == KeyCode::Escape)
+                if (e.Key() == KeyCode::ESCAPE)
                 {
                     running = false;
                     break;

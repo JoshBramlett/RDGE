@@ -77,6 +77,7 @@ add_library (
 
              src/gameobjects/game.cpp
 
+             src/graphics/animation.cpp
              src/graphics/blend.cpp
              src/graphics/color.cpp
              src/graphics/isprite.cpp
@@ -98,6 +99,7 @@ add_library (
              src/math/vec4.cpp
 
              src/system/cursor.cpp
+             src/system/keyboard.cpp
              src/system/window.cpp
 
              src/util/exception.cpp

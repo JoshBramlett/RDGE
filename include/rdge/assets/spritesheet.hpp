@@ -20,24 +20,47 @@ namespace rdge {
 
 //! \class texture_part
 //! \brief Represents an individual section of the \ref SpriteSheet
+//! \details Container includes the data the client can use for rendering and
+//!          commonly represents a sprite texture or alternatively a single
+//!          animation frame.  The hotspot is an optional field in the config
+//!          intended to be used to align animation frames which may have a
+//!          different size.
+//! \note The size and hotspot values may be modified from the config to
+//!       accommodate the scale multiplication.
 struct texture_part
 {
-    std::string  name;   //!< Unique name
-    math::uivec2 size;   //!< Original size in pixels
-    tex_coords   coords; //!< Normalized texture coordinates
+    std::string  name;    //!< Unique name
+    math::uivec2 size;    //!< Original size in pixels
+    math::uivec2 hotspot; //!< Origin used for drawing offsets
+    tex_coords   coords;  //!< Normalized texture coordinates
+
+    //!@{
+    //! \brief Basic tex_coords transforms
+    //! \returns Reference to self
+    texture_part& flip_horizontal (void) noexcept;
+    texture_part& flip_vertical (void) noexcept;
+    //!@}
+
+    //!@{
+    //! \brief Basic tex_coords transforms
+    //! \returns Value after transform
+    texture_part flip_horizontal (void) const noexcept;
+    texture_part flip_vertical (void) const noexcept;
+    //!@}
 };
 
 //! \class SpriteSheet
 //! \brief Load sprite sheet from a json formatted config file
 //! \details Config file contains the make up for the sprite sheet, which
-//!          includes the image path to load and the coordinates that will
-//!          make up the parts.  Coordinates are required to be zero index
-//!          pixel perfect unsigned integers with the origin being set to
-//!          the top left corner and will be normalized to inverted floating
-//!          point texture coordinates.  The image_scale is an optional
-//!          parameter which is a scale multiplier applied to all texture
-//!          parts.  This is useful for small pixel art.  If the image_scale
-//!          is a NPOT value it will be discarded.
+//!          includes the image path to load and the coordinates that will make
+//!          up the parts.  Coordinates are required to be zero index pixel
+//!          perfect unsigned integers with the origin being set to the top
+//!          left corner and will be normalized to inverted floating point
+//!          texture coordinates.  The image_scale is an optional parameter
+//!          which is a scale multiplier applied to all texture parts.  This
+//!          is useful for small pixel art.  Specifying a hotspot is optional
+//!          whose coordinates should be set relative to the texture_part,
+//!          not the spritesheet.
 //! \note No checking is done to ensure parts are unique or do not overlap.
 //! \warning No type conversions are performed, so numeric values wrapped in
 //!          quotes are treated as strings and the parsing will fail.
@@ -50,7 +73,9 @@ struct texture_part
 //!         "x": 0,
 //!         "y": 0,
 //!         "width": 32,
-//!         "height": 32
+//!         "height": 32,
+//!         "hotspot_x": 0,
+//!         "hotspot_y": 0
 //!     } ]
 //! }
 //! \endcode
