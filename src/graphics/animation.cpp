@@ -1,4 +1,5 @@
 #include <rdge/graphics/animation.hpp>
+#include <rdge/util/strings.hpp>
 
 #include <SDL_assert.h>
 
@@ -80,6 +81,60 @@ bool
 Animation::IsFinished (void) const noexcept
 {
     return this->elapsed > Duration();
+}
+
+std::ostream& operator<< (std::ostream& os, Animation::PlayMode mode)
+{
+    switch (mode)
+    {
+#define CASE(X) case X: os << (strrchr(#X, ':') + 1); break;
+        CASE(Animation::PlayMode::Normal)
+        CASE(Animation::PlayMode::Reverse)
+        CASE(Animation::PlayMode::Loop)
+        CASE(Animation::PlayMode::LoopReverse)
+        CASE(Animation::PlayMode::LoopPingPong)
+#undef CASE
+        default:
+            os << "NOT_FOUND[" << static_cast<uint32>(mode) << "]";
+    }
+
+    return os;
+}
+
+bool from_string (const std::string& value, Animation::PlayMode& mode)
+{
+    std::string lc = to_lower(value);
+    if (lc == "normal")
+    {
+        mode = Animation::PlayMode::Normal;
+        return true;
+    }
+
+    if (lc == "reverse")
+    {
+        mode = Animation::PlayMode::Reverse;
+        return true;
+    }
+
+    if (lc == "loop")
+    {
+        mode = Animation::PlayMode::Loop;
+        return true;
+    }
+
+    if (lc == "loopreverse")
+    {
+        mode = Animation::PlayMode::LoopReverse;
+        return true;
+    }
+
+    if (lc == "looppingpong")
+    {
+        mode = Animation::PlayMode::LoopPingPong;
+        return true;
+    }
+
+    return false;
 }
 
 } // namespace rdge

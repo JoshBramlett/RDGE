@@ -272,12 +272,11 @@ std::ostream& operator<< (std::ostream& os, EventType type)
     return os;
 }
 
-// TODO: Add substr before sending to stream to get rid of the enum name
 std::ostream& operator<< (std::ostream& os, MouseButton button)
 {
     switch (button)
     {
-#define CASE(X) case X: os << #X; break;
+#define CASE(X) case X: os << (strrchr(#X, ':') + 1); break;
         CASE(MouseButton::Unknown)
         CASE(MouseButton::Left)
         CASE(MouseButton::Middle)

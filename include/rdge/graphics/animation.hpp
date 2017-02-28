@@ -9,9 +9,15 @@
 #include <rdge/assets/spritesheet.hpp>
 
 #include <vector>
+#include <string>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
+
+//!@{
+//! \brief Forward declarations
+struct texture_part;
+//!@}
 
 //! \class Animation
 //! \brief Storage and logic to represent an animated sequence
@@ -71,5 +77,17 @@ public:
 
     std::vector<texture_part> frames; //!< Collection of the frames
 };
+
+//! \brief Animation::PlayMode stream output operator
+//! \param [in] os Output stream
+//! \param [in] mode Play mode
+//! \returns Output stream
+std::ostream& operator<< (std::ostream& os, Animation::PlayMode mode);
+
+//! \brief Convert string to Animation::PlayMode
+//! \param [in] value String to evaluate
+//! \param [out] mode Play mode to set
+//! \returns Whether the conversion was successful
+bool from_string (const std::string& value, Animation::PlayMode& mode);
 
 } // namespace rdge

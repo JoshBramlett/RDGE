@@ -7,6 +7,7 @@
 
 #include <rdge/core.hpp>
 #include <rdge/assets/surface.hpp>
+#include <rdge/graphics/animation.hpp>
 #include <rdge/graphics/isprite.hpp>
 #include <rdge/graphics/sprite.hpp>
 #include <rdge/graphics/sprite_group.hpp>
@@ -14,9 +15,15 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
+
+//!@{
+//! \brief Forward declarations
+class Animation;
+//!@}
 
 //! \class texture_part
 //! \brief Represents an individual section of the \ref SpriteSheet
@@ -61,6 +68,9 @@ struct texture_part
 //!          is useful for small pixel art.  Specifying a hotspot is optional
 //!          whose coordinates should be set relative to the texture_part,
 //!          not the spritesheet.
+//!          Animations are optional and will create an \ref Animation object
+//!          with the frames made up of the texture_part definitions in the
+//!          same file.
 //! \note No checking is done to ensure parts are unique or do not overlap.
 //! \warning No type conversions are performed, so numeric values wrapped in
 //!          quotes are treated as strings and the parsing will fail.
@@ -76,6 +86,15 @@ struct texture_part
 //!         "height": 32,
 //!         "hotspot_x": 0,
 //!         "hotspot_y": 0
+//!     } ],
+//!     "animations": [ {
+//!         "name": "animation_name",
+//!         "mode": "normal",
+//!         "interval": 100,
+//!         "frames": [ {
+//!             "name": "part_name",
+//!             "flip": "horizontal"
+//!         } ]
 //!     } ]
 //! }
 //! \endcode
@@ -113,6 +132,12 @@ public:
     //! \throws rdge::Exception Lookup failed
     const texture_part& operator[] (const std::string& name) const;
 
+    //! \brief Retrive an animation by name
+    //! \param [in] name Name of the animation
+    //! \returns Associated \ref Animation
+    //! \throws rdge::Exception Lookup failed
+    const Animation& GetAnimation (const std::string& name) const;
+
     //! \brief Create a sprite from the sub-texture element
     //! \details Uses the provided position and size along with the associated
     //!          uv data from the name lookup to construct a sprite.
@@ -146,7 +171,8 @@ public:
     std::shared_ptr<Texture> texture; //!< Texture generated from the surface
 
 private:
-    std::unordered_map<std::string, texture_part> m_parts; //!< Collection of texture parts
+    std::unordered_map<std::string, texture_part> m_parts;   //!< Collection of texture parts
+    std::unordered_map<std::string, Animation> m_animations; //!< Collection of animations
 };
 
 } // namespace rdge

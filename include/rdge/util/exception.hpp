@@ -10,7 +10,7 @@
 #include <string>
 #include <exception>
 
-//! \namespace RDGE Rainbow Drop Game Engine
+//! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 namespace util {
 

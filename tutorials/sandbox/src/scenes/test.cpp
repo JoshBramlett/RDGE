@@ -15,143 +15,36 @@ Player::Player (void)
     //////////////////
     // idle animation
     //////////////////
-    {
     this->states.emplace_back(std::make_unique<idle_state>());
     auto& idle = this->states.back();
 
-    Animation front(25);
-    front.frames.push_back(sheet["idle_front_1"]);
-    front.frames.push_back(sheet["idle_front_2"]);
-    front.frames.push_back(sheet["idle_front_3"]);
-    front.frames.push_back(sheet["idle_front_3"]);
-    front.frames.push_back(sheet["idle_front_2"]);
-    front.frames.push_back(sheet["idle_front_1"]);
+    idle->animations.emplace_back(sheet.GetAnimation("idle_front"));
+    idle->animations.emplace_back(sheet.GetAnimation("idle_right"));
+    idle->animations.emplace_back(sheet.GetAnimation("idle_back"));
+    idle->animations.emplace_back(sheet.GetAnimation("idle_left"));
 
-    Animation back(25);
-    back.frames.push_back(sheet["idle_back"]);
-
-    const texture_part side1 = sheet["idle_side_1"];
-    const texture_part side2 = sheet["idle_side_2"];
-    const texture_part side3 = sheet["idle_side_3"];
-
-    Animation right(25);
-    right.frames.push_back(side1);
-    right.frames.push_back(side2);
-    right.frames.push_back(side3);
-
-    Animation left(25);
-    left.frames.push_back(side1.flip_horizontal());
-    left.frames.push_back(side2.flip_horizontal());
-    left.frames.push_back(side3.flip_horizontal());
-
-    idle->animations.push_back(front);
-    idle->animations.push_back(right);
-    idle->animations.push_back(back);
-    idle->animations.push_back(left);
-    }
     //////////////////
     // walking animation
     //////////////////
-    {
     this->states.emplace_back(std::make_unique<walking_state>());
     auto& walking = this->states.back();
 
-    Animation front(Animation::PlayMode::Loop, 175);
-    front.frames.push_back(sheet["walk_front_1"]);
-    front.frames.push_back(sheet["walk_front_2"]);
-    front.frames.push_back(sheet["walk_front_3"]);
-    front.frames.push_back(sheet["walk_front_4"]);
-    front.frames.push_back(sheet["walk_front_5"]);
-    front.frames.push_back(sheet["walk_front_6"]);
-
-    Animation back(Animation::PlayMode::Loop, 175);
-    back.frames.push_back(sheet["walk_back_1"]);
-    back.frames.push_back(sheet["walk_back_2"]);
-    back.frames.push_back(sheet["walk_back_3"]);
-    back.frames.push_back(sheet["walk_back_4"]);
-    back.frames.push_back(sheet["walk_back_5"]);
-    back.frames.push_back(sheet["walk_back_6"]);
-
-    const texture_part side1 = sheet["walk_side_1"];
-    const texture_part side2 = sheet["walk_side_2"];
-    const texture_part side3 = sheet["walk_side_3"];
-    const texture_part side4 = sheet["walk_side_4"];
-    const texture_part side5 = sheet["walk_side_5"];
-    const texture_part side6 = sheet["walk_side_6"];
-
-    Animation right(Animation::PlayMode::Loop, 175);
-    right.frames.push_back(side1);
-    right.frames.push_back(side2);
-    right.frames.push_back(side3);
-    right.frames.push_back(side4);
-    right.frames.push_back(side5);
-    right.frames.push_back(side6);
-
-    Animation left(Animation::PlayMode::Loop, 175);
-    left.frames.push_back(side1.flip_horizontal());
-    left.frames.push_back(side2.flip_horizontal());
-    left.frames.push_back(side3.flip_horizontal());
-    left.frames.push_back(side4.flip_horizontal());
-    left.frames.push_back(side5.flip_horizontal());
-    left.frames.push_back(side6.flip_horizontal());
-
-    walking->animations.push_back(front);
-    walking->animations.push_back(right);
-    walking->animations.push_back(back);
-    walking->animations.push_back(left);
-    }
+    walking->animations.emplace_back(sheet.GetAnimation("walk_front"));
+    walking->animations.emplace_back(sheet.GetAnimation("walk_right"));
+    walking->animations.emplace_back(sheet.GetAnimation("walk_back"));
+    walking->animations.emplace_back(sheet.GetAnimation("walk_left"));
 
     //////////////////
     // running animation
     //////////////////
-    {
     this->states.emplace_back(std::make_unique<running_state>());
     auto& running = this->states.back();
 
-    Animation front(Animation::PlayMode::Loop, 100);
-    front.frames.push_back(sheet["run_front_2"]);
-    front.frames.push_back(sheet["walk_front_2"]);
-    front.frames.push_back(sheet["walk_front_3"]);
-    front.frames.push_back(sheet["run_front_1"]);
-    front.frames.push_back(sheet["walk_front_5"]);
-    front.frames.push_back(sheet["walk_front_6"]);
+    running->animations.emplace_back(sheet.GetAnimation("run_front"));
+    running->animations.emplace_back(sheet.GetAnimation("run_right"));
+    running->animations.emplace_back(sheet.GetAnimation("run_back"));
+    running->animations.emplace_back(sheet.GetAnimation("run_left"));
 
-    Animation back(Animation::PlayMode::Loop, 100);
-    back.frames.push_back(sheet["run_back_2"]);
-    back.frames.push_back(sheet["walk_back_2"]);
-    back.frames.push_back(sheet["walk_back_3"]);
-    back.frames.push_back(sheet["run_back_1"]);
-    back.frames.push_back(sheet["walk_back_5"]);
-    back.frames.push_back(sheet["walk_back_6"]);
-
-    const texture_part side1 = sheet["run_side_2"];
-    const texture_part side2 = sheet["walk_side_2"];
-    const texture_part side3 = sheet["walk_side_3"];
-    const texture_part side4 = sheet["run_side_1"];
-    const texture_part side5 = sheet["walk_side_5"];
-    const texture_part side6 = sheet["walk_side_6"];
-
-    Animation right(Animation::PlayMode::Loop, 100);
-    right.frames.push_back(side1);
-    right.frames.push_back(side2);
-    right.frames.push_back(side3);
-    right.frames.push_back(side4);
-    right.frames.push_back(side5);
-    right.frames.push_back(side6);
-
-    Animation left(Animation::PlayMode::Loop, 100);
-    left.frames.push_back(side1.flip_horizontal());
-    left.frames.push_back(side2.flip_horizontal());
-    left.frames.push_back(side3.flip_horizontal());
-    left.frames.push_back(side4.flip_horizontal());
-    left.frames.push_back(side5.flip_horizontal());
-    left.frames.push_back(side6.flip_horizontal());
-
-    running->animations.push_back(front);
-    running->animations.push_back(right);
-    running->animations.push_back(back);
-    running->animations.push_back(left);
-    }
 
     this->sprite = sheet.CreateSprite("idle_front_1", vec3(0.f, 0.f, 0.f));
     this->current_state = this->states[static_cast<uint32>(PlayerStateType::Idle)].get();

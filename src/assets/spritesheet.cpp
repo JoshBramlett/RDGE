@@ -2,6 +2,7 @@
 #include <rdge/math/vec2.hpp>
 #include <rdge/math/functions.hpp>
 #include <rdge/util/io.hpp>
+#include <rdge/util/strings.hpp>
 #include <rdge/internal/exception_macros.hpp>
 
 #include <SDL_assert.h>
@@ -33,7 +34,7 @@ ProcessTexturePart (const json& part, const math::uivec2& surface_size, uint32 s
     if (!part["x"].is_number_unsigned() || !part["y"].is_number_unsigned() ||
         !part["width"].is_number_unsigned() || !part["height"].is_number_unsigned())
     {
-        throw std::invalid_argument("texture_part \"" + name + "\" expects unsigned integers");
+        throw std::invalid_argument("texture_part \"" + name + "\" expects unsigned");
     }
 
     auto x    = part["x"].get<uint32>();
@@ -156,6 +157,72 @@ SpriteSheet::SpriteSheet (const std::string& path, bool scale_for_hidpi)
                 throw std::invalid_argument(ss.str());
             }
         }
+
+        // TODO This could be moved to it's own method
+        // TODO Add test cases
+        if (j.count("animations") > 0)
+        {
+            const auto& animations = j["animations"];
+            for (const auto& animation : animations)
+            {
+                auto name = animation["name"].get<std::string>();
+
+                // Validate for unsigned to prevent overflow issues
+                if (!animation["interval"].is_number_unsigned())
+                {
+                    throw std::invalid_argument("animation \"" + name + "\" expects unsigned");
+                }
+
+                Animation::PlayMode mode;
+                if (!from_string(animation["mode"].get<std::string>(), mode))
+                {
+                    throw std::invalid_argument("animation \"" + name + "\" mode invalid");
+                }
+
+                Animation value(mode, animation["interval"].get<uint32>());
+
+                const auto& frames = animation["frames"];
+                for (const auto& frame : frames)
+                {
+                    auto frame_name = frame["name"].get<std::string>();
+                    auto search = m_parts.find(frame_name);
+                    if (search == m_parts.end())
+                    {
+                        std::ostringstream ss;
+                        ss << "animation \"" << name << "\" cannot find "
+                           << "frame \"" << frame_name << "\" in texture_part list";
+                        throw std::invalid_argument(ss.str());
+                    }
+
+                    const auto& frame_part = search->second;
+                    if (frame.count("flip") > 0 && frame["flip"].is_string())
+                    {
+                        auto flip = to_lower(frame["flip"].get<std::string>());
+                        if (flip == "horizontal")
+                        {
+                            value.frames.emplace_back(frame_part.flip_horizontal());
+                        }
+                        else if (flip == "vertical")
+                        {
+                            value.frames.emplace_back(frame_part.flip_vertical());
+                        }
+                        else
+                        {
+                            std::ostringstream ss;
+                            ss << "animation \"" << name << "\" at "
+                               << "frame \"" << frame_name << "\" has invalid flip value";
+                            throw std::invalid_argument(ss.str());
+                        }
+                    }
+                    else
+                    {
+                        value.frames.emplace_back(frame_part);
+                    }
+                }
+
+                m_animations.emplace(name, value);
+            }
+        }
     }
     catch (const std::logic_error& ex)
     {
@@ -177,6 +244,22 @@ SpriteSheet::operator[] (const std::string& name) const
     {
         std::ostringstream ss;
         ss << "SpriteSheet lookup failed. key=" << name;
+
+        RDGE_THROW(ss.str());
+    }
+}
+
+const Animation&
+SpriteSheet::GetAnimation (const std::string& name) const
+{
+    try
+    {
+        return m_animations.at(name);
+    }
+    catch (const std::out_of_range& ex)
+    {
+        std::ostringstream ss;
+        ss << "SpriteSheet animation lookup failed. key=" << name;
 
         RDGE_THROW(ss.str());
     }
