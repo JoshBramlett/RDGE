@@ -5,6 +5,8 @@
 #include <rdge/system.hpp>
 #include <rdge/util.hpp>
 
+#include <SDL_assert.h>
+
 using namespace rdge;
 using namespace rdge::math;
 
@@ -98,7 +100,8 @@ Player::OnUpdate (uint32 ticks)
         }
     }
 
-    this->displacement.calculate();
+    this->displacement.calculate(ticks);
+    //this->displacement.calculate_with_acceleration(ticks);
     vops::UpdatePosition(this->sprite->vertices, this->displacement.uvec);
 
     vops::SetTexCoords(this->sprite->vertices,

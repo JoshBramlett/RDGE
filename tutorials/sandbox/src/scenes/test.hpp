@@ -76,6 +76,18 @@ struct running_state : public player_state
 //
 // TODO Rename this - maybe need to make it more universal (or even add parts
 //      of it to the engine)
+//
+// FIXME bugs
+//     - Redo facing logic.  Fails saving the correct state when more than two
+//       keys are pressed and released.  Also, a single key press release will
+//       revert to the previous direction.  e.g. facing left - right pressed and
+//       released.  The correct direction should be right, but it reverts to the
+//       previous (left).
+//     - Very strange bug where he goes off in a direction after all keys are
+//       released.  Have not been able to replicate.  I believe the direction
+//       has been up, but that may be a coincidence.  Could be that SDL gave me
+//       a keyup event and when I queried whether it was pressed it returned
+//       true.  If that's the case I'll have to log the events to verify.
 struct input_handler
 {
     // TODO: Potentially a stop-gap solution:
@@ -113,6 +125,7 @@ struct input_handler
     bool is_dirty = false;
 
     rdge::math::vec2 uvec; // Coordinates of a unit circle to offset the position
+    rdge::math::vec2 velocity;
 
     PlayerFacing facing = PlayerFacing::Front;
 
@@ -126,9 +139,6 @@ struct input_handler
         //     - Is a key is released:
         //         - Matches the last direction, set to previous
         //         - Doesn't match last direction, do nothing, but reset previous
-        //
-        // FIXME This works for most cases, but fails if more than two directions
-        //       are pressed at the same time.
         static PlayerFacing previous = PlayerFacing::Front;
 
         if (new_direction)
@@ -199,7 +209,7 @@ struct input_handler
         return is_moving() && run_pressed;
     }
 
-    void calculate (void)
+    void calculate (rdge::uint32 ticks)
     {
         if (!is_dirty)
         {
@@ -225,7 +235,39 @@ struct input_handler
             uvec *= DIAGONAL_DISPLACEMENT;
         }
 
-        uvec *= is_running() ? RUN_VELOCITY : WALK_VELOCITY;
+        uvec *= is_running() ? RUN_VELOCITY : WALK_VELOCITY; // base velocity (m/s)
+        uvec *= 64.f;                                        // unit distance (meters)
+        uvec *= static_cast<float>(ticks) / 1000.0f;         // timestep (seconds)
+
+        is_dirty = false;
+    }
+
+    // TODO Friction is not accounted for, so the player will go on forever
+    //      HMH talks of ordinary differential equations
+    void calculate_with_acceleration (rdge::uint32 ticks)
+    {
+        rdge::math::vec2 acceleration = { 0.f, 0.f };
+
+        acceleration.x += walk_left_pressed ? -1.f : 0.f;
+        acceleration.x += walk_right_pressed ? 1.f : 0.f;
+        acceleration.y += walk_up_pressed ? 1.f : 0.f;
+        acceleration.y += walk_down_pressed ? -1.f : 0.f;
+
+        if (acceleration.x != 0.f && acceleration.y != 0.f)
+        {
+            acceleration *= DIAGONAL_DISPLACEMENT;
+        }
+
+        acceleration *= is_running() ? RUN_VELOCITY : WALK_VELOCITY;
+        acceleration *= 64.f;
+
+        // emulates friction - but acceleration constant would need to be jacked up
+        //acceleration += velocity * -5.5f;
+
+        float dt = static_cast<float>(ticks) / 1000.0f;
+        uvec = ((.5f * acceleration) * (dt * dt)) +
+               (velocity * dt);
+        velocity = (acceleration * dt) + velocity;
 
         is_dirty = false;
     }

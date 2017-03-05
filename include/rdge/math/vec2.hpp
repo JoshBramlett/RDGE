@@ -296,6 +296,7 @@ constexpr vec2_t<T> operator* (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexc
     return vec2_t<T>(lhs.x * rhs.x, lhs.y * rhs.y);
 }
 
+//!@{
 //! \brief vec2_t multiplication operator
 //! \param [in] vec vec2_t
 //! \param [in] scalar Value applied to all elements
@@ -306,6 +307,14 @@ operator* (const vec2_t<T>& vec, U scalar) noexcept
 {
     return vec2_t<T>(vec.x * static_cast<T>(scalar), vec.y * static_cast<T>(scalar));
 }
+
+template <typename T, typename U>
+constexpr typename std::enable_if_t<std::is_arithmetic<U>::value, vec2_t<T>>
+operator* (U scalar, const vec2_t<T>& vec) noexcept
+{
+    return vec * scalar;
+}
+//!@}
 
 //! \brief vec2_t division operator
 //! \param [in] lhs Left side vec2_t numerator
