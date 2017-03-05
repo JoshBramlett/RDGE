@@ -61,7 +61,7 @@ Text::Draw (SpriteBatch& renderer)
 void
 Text::SetDepth (float depth)
 {
-    vops::UpdateDepth(this->vertices, depth);
+    vops::SetDepth(this->vertices, depth);
 }
 
 void
@@ -87,7 +87,7 @@ Text::Rebuild (void)
     auto surface = m_font->RenderUTF8(m_text, color::WHITE, m_renderMode);
     m_texture->Reload(*surface);
 
-    vops::UpdateSize(this->vertices, to_ndc({ m_texture->width, m_texture->height }));
+    vops::SetSize(this->vertices, to_ndc({ m_texture->width, m_texture->height }));
 }
 
 } // namespace rdge

@@ -80,6 +80,16 @@ struct vec3
         return *this;
     }
 
+    //! \brief vec3 memberwise addition (x and y components only)
+    //! \param [in] rhs vec2 to add
+    //! \returns Reference to self
+    constexpr vec3& operator+= (const vec2& rhs) noexcept
+    {
+        x += rhs.x;
+        y += rhs.y;
+        return *this;
+    }
+
     //! \brief vec3 memberwise subtraction
     //! \param [in] rhs vec3 to subtract
     //! \returns Reference to self
@@ -102,12 +112,15 @@ struct vec3
         return *this;
     }
 
+    //!@{
     //! \brief Apply a linear transformation to the vector
     //! \details Only linear transforms should be supplied (e.g. translation,
     //!          rotation, etc.).
     //! \param [in] transformation Linear transformation
-    //! \returns Reference to self
-    vec3& affine_transform (const mat4& transformation);
+    //! \returns vec3 with applied transform
+    vec3& apply_transform (const mat4& transformation) noexcept;
+    vec3 apply_transform (const mat4& transformation) const noexcept;
+    //!@}
 
     //! \brief Vector length (magnitude)
     //! \returns Length of the vector

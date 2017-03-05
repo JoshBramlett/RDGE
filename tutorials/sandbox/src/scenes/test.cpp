@@ -53,88 +53,54 @@ Player::Player (void)
 void
 Player::OnEvent (const Event& event)
 {
-    if (event.Type() == EventType::KeyDown)
+    if (event.IsKeyboardEvent())
     {
         auto args = event.GetKeyboardEventArgs();
-        switch (args.Key())
+        if (args.IsRepeating())
         {
-            case KeyCode::J:
-                this->running = true;
-                break;
-            case KeyCode::W:
-                this->facing = PlayerFacing::Back;
-                this->walking = true;
-                break;
-            case KeyCode::A:
-                this->facing = PlayerFacing::Left;
-                this->walking = true;
-                break;
-            case KeyCode::S:
-                this->facing = PlayerFacing::Front;
-                this->walking = true;
-                break;
-            case KeyCode::D:
-                this->facing = PlayerFacing::Right;
-                this->walking = true;
-                break;
-            default:
-                break;
+            // ignore repeating events - nothing has changed
+            return;
         }
-    }
-    else if (event.Type() == EventType::KeyUp)
-    {
-        auto args = event.GetKeyboardEventArgs();
-        switch (args.Key())
-        {
-            case KeyCode::J:
-                this->running = false;
-                break;
-            case KeyCode::W:
-            case KeyCode::A:
-            case KeyCode::S:
-            case KeyCode::D:
-                this->walking = false;
-                break;
-            default:
-                break;
-        }
+
+        this->displacement.set_key_state(args.Key(), args.IsKeyPressed());
     }
 
-    if (this->walking)
-    {
-        if (this->running)
-        {
-            if (this->state_type != PlayerStateType::Running)
-            {
-                this->state_type = PlayerStateType::Running;
-                this->current_state = this->states[2].get();
-                this->current_state->is_dirty = true;
-            }
-        }
-        else
-        {
-            if (this->state_type != PlayerStateType::Walking)
-            {
-                this->state_type = PlayerStateType::Walking;
-                this->current_state = this->states[1].get();
-                this->current_state->is_dirty = true;
-            }
-        }
-    }
-    else
-    {
-        if (this->state_type != PlayerStateType::Idle)
-        {
-            this->state_type = PlayerStateType::Idle;
-            this->current_state = this->states[0].get();
-            this->current_state->is_dirty = true;
-        }
-    }
+    // ignore non-keyboard events
 }
 
 void
 Player::OnUpdate (uint32 ticks)
 {
+    this->current_state_changed = false;
+
+    if (this->displacement.is_dirty)
+    {
+        if (this->displacement.is_running() &&
+            this->state_type != PlayerStateType::Running)
+        {
+            this->state_type = PlayerStateType::Running;
+            this->current_state = this->states[(uint32)PlayerStateType::Running].get();
+            this->current_state_changed = true;
+        }
+        else if (this->displacement.is_walking() &&
+                 this->state_type != PlayerStateType::Walking)
+        {
+            this->state_type = PlayerStateType::Walking;
+            this->current_state = this->states[(uint32)PlayerStateType::Walking].get();
+            this->current_state_changed = true;
+        }
+        else if (!this->displacement.is_moving() &&
+                 this->state_type != PlayerStateType::Idle)
+        {
+            this->state_type = PlayerStateType::Idle;
+            this->current_state = this->states[(uint32)PlayerStateType::Idle].get();
+            this->current_state_changed = true;
+        }
+    }
+
+    this->displacement.calculate();
+    vops::UpdatePosition(this->sprite->vertices, this->displacement.uvec);
+
     vops::SetTexCoords(this->sprite->vertices,
                        this->current_state->GetFrame(*this, ticks).coords);
 }
@@ -142,13 +108,11 @@ Player::OnUpdate (uint32 ticks)
 const texture_part&
 idle_state::GetFrame (const Player& player, uint32 ticks)
 {
-    auto& anim = this->animations[(int)player.facing];
-
-    if (this->is_dirty || anim.IsFinished())
+    auto& anim = this->animations[(int)player.displacement.facing];
+    if (player.current_state_changed || anim.IsFinished())
     {
         anim.Reset();
         this->offset = 0;
-        this->is_dirty = false;
     }
 
     this->offset += ticks;
@@ -163,7 +127,11 @@ idle_state::GetFrame (const Player& player, uint32 ticks)
 const texture_part&
 walking_state::GetFrame (const Player& player, uint32 ticks)
 {
-    auto& anim = this->animations[(int)player.facing];
+    auto& anim = this->animations[(uint32)player.displacement.facing];
+    //if (player.current_state_changed)
+    //{
+        //anim.Reset();
+    //}
 
     return anim.GetFrame(ticks);
 }
@@ -171,7 +139,11 @@ walking_state::GetFrame (const Player& player, uint32 ticks)
 const texture_part&
 running_state::GetFrame (const Player& player, uint32 ticks)
 {
-    auto& anim = this->animations[(int)player.facing];
+    auto& anim = this->animations[(uint32)player.displacement.facing];
+    //if (player.current_state_changed)
+    //{
+        //anim.Reset();
+    //}
 
     return anim.GetFrame(ticks);
 }

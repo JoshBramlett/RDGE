@@ -63,7 +63,7 @@ Sprite::Draw (SpriteBatch& renderer)
 void
 Sprite::SetDepth (float depth)
 {
-    vops::UpdateDepth(this->vertices, depth);
+    vops::SetDepth(this->vertices, depth);
 }
 
 } // namespace rdge

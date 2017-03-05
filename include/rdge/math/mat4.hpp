@@ -173,21 +173,6 @@ inline vec4 operator* (const mat4& mat, const vec4& vec)
     };
 }
 
-//! \brief mat4-vec3 multiplication operator
-//! \details Assumes the w component of the vec3 is set to 1.
-//! \param [in] lhs mat4 to multiply
-//! \param [in] rhs vec3 to multiply
-//! \returns Multiplied vec3 result
-inline vec3 operator* (const mat4& mat, const vec3& vec)
-{
-    return vec3
-    {
-        (mat[0].x * vec.x) + (mat[1].x * vec.y) + (mat[2].x * vec.z) + mat[3].x,
-        (mat[0].y * vec.x) + (mat[1].y * vec.y) + (mat[2].y * vec.z) + mat[3].y,
-        (mat[0].z * vec.x) + (mat[1].z * vec.y) + (mat[2].z * vec.z) + mat[3].z
-    };
-}
-
 //! \brief mat4 stream output operator
 //! \param [in] os Output stream
 //! \param [in] matrix mat4 to write to the stream

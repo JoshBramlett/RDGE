@@ -272,7 +272,7 @@ SpriteBatch::Submit (const SpriteVertices& vertices)
 
     for (const auto& vertex : vertices)
     {
-        m_cursor->pos   = *m_transform * vertex.pos;
+        m_cursor->pos   = vertex.pos.apply_transform(*m_transform);
         m_cursor->uv    = vertex.uv;
         m_cursor->tid   = (vertex.tid == Texture::INVALID_UNIT_ID) ? 0 : vertex.tid;
         m_cursor->color = vertex.color;

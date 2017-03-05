@@ -29,7 +29,7 @@ vec3::operator[] (uint8 index) const noexcept
 }
 
 vec3&
-vec3::affine_transform (const mat4& mat)
+vec3::apply_transform (const mat4& mat) noexcept
 {
     float xx = (mat[0].x * this->x) + (mat[1].x * this->y) + (mat[2].x * this->z) + mat[3].x;
     float xy = (mat[0].y * this->x) + (mat[1].y * this->y) + (mat[2].y * this->z) + mat[3].y;
@@ -39,6 +39,13 @@ vec3::affine_transform (const mat4& mat)
     this->y = xy;
     this->z = xz;
     return *this;
+}
+
+vec3
+vec3::apply_transform (const mat4& mat) const noexcept
+{
+    vec3 result = *this;
+    return result.apply_transform(mat);
 }
 
 std::ostream& operator<< (std::ostream& os, const vec3& value)

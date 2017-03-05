@@ -43,7 +43,6 @@ struct player_state
                                                 rdge::uint32 ticks) = 0;
 
     std::vector<rdge::Animation> animations;
-    bool is_dirty = true;
 };
 
 struct idle_state : public player_state
@@ -65,6 +64,173 @@ struct running_state : public player_state
                                                 rdge::uint32 ticks) override;
 };
 
+// Persistant frame input handling
+// SDL keyboard event handling has some kinda funny behavior.  Only the last
+// key pressed is sent as an event, which is problematic when having to handle
+// if multiple keys are pressed simultaneously.  There are two options to handle
+// the behavior -
+//     a) Ignore the event data and do IsKeyPressed for every OnEvent
+//     b) Create a persistant cache (which is this struct)
+// The main benefit of (b) is performance with not having to query every key state
+// every time there's a keyboard event.
+//
+// TODO Rename this - maybe need to make it more universal (or even add parts
+//      of it to the engine)
+struct input_handler
+{
+    // TODO: Potentially a stop-gap solution:
+    //       The displacement vector is based upon a unit circle in order to
+    //       normalize the magnitude regardless of the direction.  The value
+    //       represents the x and y coordinates when the vector has an angle
+    //       of 45 degrees.
+    //
+    //       Value computes from [sin(45deg), cos(45deg)], or using the
+    //       pythagorean theorem where x and y are equal and the diagonal
+    //       has a value of 1 (x^2 + x^2 = d^2), solving for x evaluates to
+    //       x = sqrt(1/2).
+    static constexpr float DIAGONAL_DISPLACEMENT = 0.707106781187f;
+    static constexpr float WALK_VELOCITY = 10.f;
+    static constexpr float RUN_VELOCITY = 20.f;
+
+    rdge::KeyCode key_move_up    = rdge::KeyCode::W;
+    rdge::KeyCode key_move_right = rdge::KeyCode::D;
+    rdge::KeyCode key_move_down  = rdge::KeyCode::S;
+    rdge::KeyCode key_move_left  = rdge::KeyCode::A;
+    rdge::KeyCode key_run        = rdge::KeyCode::J;
+
+    // all flags persist from frame to frame - these correspond to key states.
+    // (i.e. set to true when pressed, false when not pressed)
+    // TODO Could (should?) be a bitset
+    bool walk_up_pressed    = false;
+    bool walk_left_pressed  = false;
+    bool walk_down_pressed  = false;
+    bool walk_right_pressed = false;
+    bool run_pressed        = false;
+
+    // Set to true when a flag has changed.  Only for the current frame, so it
+    // should be reset to false for the beginning of the next frame.  The calculate
+    // function does that, so make sure to call that every frame.
+    bool is_dirty = false;
+
+    rdge::math::vec2 uvec; // Coordinates of a unit circle to offset the position
+
+    PlayerFacing facing = PlayerFacing::Front;
+
+    void update_facing (PlayerFacing f, bool new_direction)
+    {
+        // since multiple keyboard keys can be pressed simultaneously, special
+        // logic is required to determine the correct facing direction.
+        //
+        // Logic is basically:
+        //     - If a new key is pressed, that's the direction
+        //     - Is a key is released:
+        //         - Matches the last direction, set to previous
+        //         - Doesn't match last direction, do nothing, but reset previous
+        //
+        // FIXME This works for most cases, but fails if more than two directions
+        //       are pressed at the same time.
+        static PlayerFacing previous = PlayerFacing::Front;
+
+        if (new_direction)
+        {
+            previous = facing;
+            facing = f;
+        }
+        else if (facing == f)
+        {
+            facing = previous;
+        }
+        else
+        {
+            previous = facing;
+        }
+    }
+
+    void set_key_state(rdge::KeyCode key, bool is_pressed)
+    {
+        if (key == key_move_up)
+        {
+            walk_up_pressed = is_pressed;
+            is_dirty = true;
+
+            update_facing(PlayerFacing::Back, is_pressed);
+        }
+        else if (key == key_move_left)
+        {
+            walk_left_pressed = is_pressed;
+            is_dirty = true;
+
+            update_facing(PlayerFacing::Left, is_pressed);
+        }
+        else if (key == key_move_down)
+        {
+            walk_down_pressed = is_pressed;
+            is_dirty = true;
+
+            update_facing(PlayerFacing::Front, is_pressed);
+        }
+        else if (key == key_move_right)
+        {
+            walk_right_pressed = is_pressed;
+            is_dirty = true;
+
+            update_facing(PlayerFacing::Right, is_pressed);
+        }
+        else if (key == key_run)
+        {
+            run_pressed = is_pressed;
+            is_dirty = true;
+        }
+    }
+
+    bool is_moving (void) const noexcept
+    {
+        return (walk_up_pressed != walk_down_pressed) ||
+               (walk_left_pressed != walk_right_pressed);
+    }
+
+    bool is_walking (void) const noexcept
+    {
+        return is_moving() && !run_pressed;
+    }
+
+    bool is_running (void) const noexcept
+    {
+        return is_moving() && run_pressed;
+    }
+
+    void calculate (void)
+    {
+        if (!is_dirty)
+        {
+            // nothing changed since last frame.  Displacement vector can be
+            // reused on next draw
+            return;
+        }
+
+        uvec = { 0.f, 0.f }; // reset every frame (if dirty)
+
+        if (!is_moving())
+        {
+            return;
+        }
+
+        uvec.x += walk_left_pressed ? -1.f : 0.f;
+        uvec.x += walk_right_pressed ? 1.f : 0.f;
+        uvec.y += walk_up_pressed ? 1.f : 0.f;
+        uvec.y += walk_down_pressed ? -1.f : 0.f;
+
+        if (uvec.x != 0.f && uvec.y != 0.f)
+        {
+            uvec *= DIAGONAL_DISPLACEMENT;
+        }
+
+        uvec *= is_running() ? RUN_VELOCITY : WALK_VELOCITY;
+
+        is_dirty = false;
+    }
+};
+
 class Player
 {
 public:
@@ -75,17 +241,12 @@ public:
 
 public:
     PlayerStateType state_type = PlayerStateType::Idle;
-    PlayerFacing facing = PlayerFacing::Front;
 
-    // cached for input transition logic - observed SDL behavior is if a key is held
-    // down it'll fire continuous events.  However, while a key is held down if another
-    // key is pressed any further keydown events are suppressed.  Therefore we need
-    // logic to hold the state.
-    bool walking = false;
-    bool running = false;
+    input_handler displacement;
 
     std::vector<std::unique_ptr<player_state>> states;
     player_state* current_state = nullptr;
+    bool current_state_changed = false;
 
     std::shared_ptr<rdge::Sprite> sprite;
 };

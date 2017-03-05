@@ -39,6 +39,12 @@ SetPosition (SpriteVertices& vertices, const math::vec3& pos, const math::vec2& 
 }
 
 inline void
+SetPosition (SpriteVertices& vertices, const math::vec3& pos)
+{
+    SetPosition(vertices, pos, GetSize(vertices));
+}
+
+inline void
 SetTexCoords (SpriteVertices& vertices, const tex_coords& uvs = tex_coords())
 {
     vertices[0].uv = uvs[0];
@@ -67,17 +73,16 @@ SetColor (SpriteVertices& vertices, const color& color)
 }
 
 inline void
-UpdatePosition (SpriteVertices& vertices, const math::vec3& pos)
+UpdatePosition (SpriteVertices& vertices, const math::vec2& pos)
 {
-    auto size = GetSize(vertices);
-    vertices[1].pos = pos;
-    vertices[2].pos = { pos.x, pos.y + size.y, pos.z };
-    vertices[2].pos = { pos.x + size.x, pos.y + size.y, pos.z };
-    vertices[3].pos = { pos.x + size.x, pos.y, pos.z };
+    vertices[0].pos += pos;
+    vertices[1].pos += pos;
+    vertices[2].pos += pos;
+    vertices[3].pos += pos;
 }
 
 inline void
-UpdateDepth (SpriteVertices& vertices, float32 depth)
+SetDepth (SpriteVertices& vertices, float32 depth)
 {
     vertices[0].pos.z = depth;
     vertices[1].pos.z = depth;
@@ -86,7 +91,7 @@ UpdateDepth (SpriteVertices& vertices, float32 depth)
 }
 
 inline void
-UpdateSize (SpriteVertices& vertices, const math::vec2& size)
+SetSize (SpriteVertices& vertices, const math::vec2& size)
 {
     auto x2 = vertices[0].pos.x + size.x;
     auto y2 = vertices[0].pos.y + size.y;
