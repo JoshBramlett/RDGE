@@ -21,9 +21,13 @@ message (STATUS "Processor:   ${CMAKE_SYSTEM_PROCESSOR}")
 message (STATUS "Compiler:    ${CMAKE_CXX_COMPILER_ID}")
 message (STATUS "Build type:  ${CMAKE_BUILD_TYPE}")
 
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    add_definitions("-DRDGE_DEBUG")
-endif ()
+# Add custom debug flag
+set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DRDGE_DEBUG")
+
+# alternatively...
+#if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    #add_definitions("-DRDGE_DEBUG")
+#endif ()
 
 # Set compiler flags
 if (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang") # Matches for "Clang" and "AppleClang"

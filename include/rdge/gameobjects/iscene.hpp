@@ -10,6 +10,21 @@
 
 namespace rdge {
 
+//! \struct delta_time
+//! \brief Container representing a time period
+//! \details Passed through the update phase
+struct delta_time
+{
+    uint32 ticks;  //!< Delta time in ticks (milliseconds)
+    float seconds; //!< Delta time in seconds
+
+    //! \brief delta_time ctor
+    explicit delta_time (uint32 dt)
+        : ticks(dt)
+        , seconds(static_cast<float>(ticks) / 1000.f)
+    { }
+};
+
 //! \class IScene
 //! \brief Interface for game scenes
 //! \details Scenes are containers stored and used by the \ref Game object that
@@ -56,8 +71,8 @@ public:
     //! \brief Game loop event processing
     //! \details Called only when the scene is active.  In order to receive these events
     //!          the scene must have already had Initialize or Activate called.
-    virtual void OnEvent (const Event& event) = 0;
-    virtual void OnUpdate (uint32 ticks) = 0;
+    virtual void OnEvent (const Event&) = 0;
+    virtual void OnUpdate (const delta_time&) = 0;
     virtual void OnRender (void) = 0;
     //!@}
 };

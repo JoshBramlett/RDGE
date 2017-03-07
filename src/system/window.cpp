@@ -41,10 +41,10 @@ constexpr int32 MIN_GL_CONTEXT_MINOR = 3;
     // TODO Move this to a self contained struct
     constexpr rdge::uint32 FRAME_SAMPLES = 100;
 
-    rdge::util::Timer s_frameTimer;
-    rdge::uint32      s_tickIndex;
-    rdge::uint32      s_tickSum;
-    rdge::uint32      s_tickSamples[FRAME_SAMPLES];
+    rdge::Timer  s_frameTimer;
+    rdge::uint32 s_tickIndex;
+    rdge::uint32 s_tickSum;
+    rdge::uint32 s_tickSamples[FRAME_SAMPLES];
 
     /*
      * Event Listener

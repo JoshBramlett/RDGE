@@ -8,6 +8,8 @@
 #include <rdge/core.hpp>
 #include <rdge/math/functions.hpp>
 
+#include <cassert>
+
 #include <ostream>
 
 //! \namespace RDGE Rainbow Drop Game Engine
@@ -79,10 +81,7 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     //! \returns Reference to element
     constexpr T& operator[] (uint8 index) noexcept
     {
-        // TODO static_assert doesn't work - and the only reason it compiles is b/c of the template,
-        //      so once I actually call this it'll fail.  I'll likely need to remove the constexpr
-        //      and move this to an implementation file so I can use a normal assert
-        //static_assert(index >= 0 && index < size(), "vec2_t index out of bounds");
+        assert(index < size());
         return (&x)[index];
     }
 
@@ -91,7 +90,7 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     //! \returns Const reference to element
     constexpr const T& operator[] (uint8 index) const noexcept
     {
-        //static_assert(index >= 0 && index < size(), "vec2_t index out of bounds");
+        assert(index < size());
         return (&x)[index];
     }
 
@@ -170,8 +169,7 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     template <typename U>
     constexpr vec2_t<T>& operator/= (const vec2_t<U>& rhs) noexcept
     {
-        static_assert(rhs.x == 0, "vec2_t attempting to divide by zero");
-        static_assert(rhs.y == 0, "vec2_t attempting to divide by zero");
+        assert(rhs.x != 0 && rhs.y != 0);
         x /= static_cast<T>(rhs.x);
         y /= static_cast<T>(rhs.y);
         return *this;
@@ -184,7 +182,7 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     constexpr typename std::enable_if_t<std::is_arithmetic<U>::value, vec2_t<T>&>
     operator/= (U scalar) noexcept
     {
-        static_assert(scalar == 0, "vec2_t attempting to divide by zero");
+        assert(scalar != 0);
         x /= static_cast<T>(scalar);
         y /= static_cast<T>(scalar);
         return *this;
@@ -211,6 +209,35 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
         x %= static_cast<T>(scalar);
         y %= static_cast<T>(scalar);
         return *this;
+    }
+
+    //! \brief Vector length (magnitude)
+    //! \returns Length of the vector
+    float length (void) const noexcept
+    {
+        static_assert(std::is_floating_point<T>::value,
+                      "'length' is only available for floating point types");
+        return std::sqrt((x * x) + (y * y));
+    }
+
+    //! \brief Dot product
+    //! \details Sum of the corresponding products within the containers.
+    //! \param [in] other Other vec2_t used in the calculation
+    //! \returns Dot product of the vectors
+    constexpr float dot (const vec2_t<T>& other) const noexcept
+    {
+        static_assert(std::is_floating_point<T>::value,
+                      "'dot' is only available for floating point types");
+        return (x * other.x) + (y * other.y);
+    }
+
+    //! \brief Get a vector perpendicular to the object
+    //! \returns Perpendicular vector
+    constexpr vec2_t<T> perp (void) const noexcept
+    {
+        static_assert(std::is_floating_point<T>::value,
+                      "'perp' is only available for floating point types");
+        return vec2_t<T>(-y, x);
     }
 };
 

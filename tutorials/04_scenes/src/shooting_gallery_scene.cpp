@@ -189,10 +189,10 @@ ShootingGalleryScene::OnEvent (const Event&)
 { }
 
 void
-ShootingGalleryScene::OnUpdate (uint32 ticks)
+ShootingGalleryScene::OnUpdate (const delta_time& dt)
 {
     static uint32 elapsed = 0;
-    elapsed += ticks;
+    elapsed += dt.ticks;
 
     const float displacement = 70.f;
     const float loop_duration = 5.0f;

@@ -73,7 +73,7 @@ void
 Game::Run (void)
 {
     Event event;
-    util::Timer timer;
+    Timer timer;
 
     bool using_vsync = this->window->IsUsingVSYNC();
     uint32 frame_cap = 1000 / this->settings.target_fps;
@@ -100,10 +100,10 @@ Game::Run (void)
             }
         }
 
-        uint32 ticks = timer.TickDelta();
-        if (!(this->on_update_hook && this->on_update_hook(ticks)))
+        delta_time dt(timer.TickDelta());
+        if (!(this->on_update_hook && this->on_update_hook(dt)))
         {
-            current_scene->OnUpdate(ticks);
+            current_scene->OnUpdate(dt);
         }
 
         this->window->Clear();

@@ -19,7 +19,7 @@ public:
     void Activate (void) override;
 
     void OnEvent (const rdge::Event& event) override;
-    void OnUpdate (rdge::uint32 ticks) override;
+    void OnUpdate (const rdge::delta_time& dt) override;
     void OnRender (void) override;
 
 public:

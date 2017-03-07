@@ -209,7 +209,7 @@ struct input_handler
         return is_moving() && run_pressed;
     }
 
-    void calculate (rdge::uint32 ticks)
+    void calculate (const rdge::delta_time& dt)
     {
         if (!is_dirty)
         {
@@ -237,14 +237,14 @@ struct input_handler
 
         uvec *= is_running() ? RUN_VELOCITY : WALK_VELOCITY; // base velocity (m/s)
         uvec *= 64.f;                                        // unit distance (meters)
-        uvec *= static_cast<float>(ticks) / 1000.0f;         // timestep (seconds)
+        uvec *= dt.seconds;                                  // delta time
 
         is_dirty = false;
     }
 
     // TODO Friction is not accounted for, so the player will go on forever
     //      HMH talks of ordinary differential equations
-    void calculate_with_acceleration (rdge::uint32 ticks)
+    void calculate_with_acceleration (const rdge::delta_time& dt)
     {
         rdge::math::vec2 acceleration = { 0.f, 0.f };
 
@@ -264,10 +264,9 @@ struct input_handler
         // emulates friction - but acceleration constant would need to be jacked up
         //acceleration += velocity * -5.5f;
 
-        float dt = static_cast<float>(ticks) / 1000.0f;
-        uvec = ((.5f * acceleration) * (dt * dt)) +
-               (velocity * dt);
-        velocity = (acceleration * dt) + velocity;
+        uvec = ((.5f * acceleration) * (dt.seconds * dt.seconds)) +
+               (velocity * dt.seconds);
+        velocity = (acceleration * dt.seconds) + velocity;
 
         is_dirty = false;
     }
@@ -279,7 +278,7 @@ public:
     Player (void);
 
     void OnEvent (const rdge::Event& event);
-    void OnUpdate (rdge::uint32 ticks);
+    void OnUpdate (const rdge::delta_time& dt);
 
 public:
     PlayerStateType state_type = PlayerStateType::Idle;
@@ -305,7 +304,7 @@ public:
     void Activate (void) override;
 
     void OnEvent (const rdge::Event& event) override;
-    void OnUpdate (rdge::uint32 ticks) override;
+    void OnUpdate (const rdge::delta_time& dt) override;
     void OnRender (void) override;
 
 public:

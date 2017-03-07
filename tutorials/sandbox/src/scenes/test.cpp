@@ -71,7 +71,7 @@ Player::OnEvent (const Event& event)
 }
 
 void
-Player::OnUpdate (uint32 ticks)
+Player::OnUpdate (const delta_time& dt)
 {
     this->current_state_changed = false;
 
@@ -100,12 +100,12 @@ Player::OnUpdate (uint32 ticks)
         }
     }
 
-    this->displacement.calculate(ticks);
-    //this->displacement.calculate_with_acceleration(ticks);
+    this->displacement.calculate(dt);
+    //this->displacement.calculate_with_acceleration(dt);
     vops::UpdatePosition(this->sprite->vertices, this->displacement.uvec);
 
     vops::SetTexCoords(this->sprite->vertices,
-                       this->current_state->GetFrame(*this, ticks).coords);
+                       this->current_state->GetFrame(*this, dt.ticks).coords);
 }
 
 const texture_part&
@@ -208,9 +208,9 @@ TestScene::OnEvent (const Event& event)
 }
 
 void
-TestScene::OnUpdate (uint32 ticks)
+TestScene::OnUpdate (const delta_time& dt)
 {
-    player.OnUpdate(ticks);
+    player.OnUpdate(dt);
 }
 
 void

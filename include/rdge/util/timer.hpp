@@ -7,90 +7,57 @@
 
 #include <rdge/core.hpp>
 
-//! \namespace RDGE Rainbow Drop Game Engine
+//! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
-namespace util {
 
 //! \class Timer
 //! \brief Timing mechanism
-//! \details Timer just stores native types and gets time using
-//!          calculations from SDL_GetTicks so copy/moves are supported.
-//!          Timer is not threadsafe.
+//! \details The most common practice is for querying \ref TickDelta every frame
+//!          to receive the number of ticks (in milliseconds) since the last call.
+//! \note Timer is not threadsafe.
 class Timer
 {
 public:
     //! \brief Timer ctor
-    //! \details Sets initial time and starts the timer
-    explicit Timer ()
-        : m_startTicks(0)
-        , m_pausedTicks(0)
-        , m_isRunning(false)
-        , m_isPaused(false)
-    { }
+    Timer (void) = default;
 
-    //! \brief Timer dtor
-    ~Timer () { }
-
-    //! \brief Timer Copy ctor
-    //! \details Default-copyable
-    Timer (const Timer&) = default;
-
-    //! \brief Image Move ctor
-    //! \details Default-movable
-    Timer (Timer&& rhs) = default;
-
-    //! \brief Timer Copy Assignment Operator
-    //! \details Default-copyable
-    Timer& operator= (const Timer&) = default;
-
-    //! \brief Image Move Assignment Operator
-    //! \details Default-movable
-    Timer& operator= (Timer&& rhs) = default;
-
-    //! \brief Start the timer
-    void Start (void);
-
-    //! \brief Stop the timer
-    void Stop (void);
-
-    //! \brief Pause the timer
-    void Pause (void);
-
-    //! \brief Unpause the timer
-    void Unpause (void);
+    void Start (void) noexcept;  //!< Start the timer
+    void Stop (void) noexcept;   //!< Stop the timer
+    void Pause (void) noexcept;  //!< Pause the timer
+    void Resume (void) noexcept; //!< Resume the timer
 
     //! \brief Restart the timer
     //! \returns Tick count since last start time
-    rdge::uint32 Restart (void);
+    uint32 Restart (void) noexcept;
 
-    //! \brief Get the tick count since the timer started
+    //! \brief Ticks since the timer started
     //! \returns Tick count since last start time
-    rdge::uint32 Ticks (void) const;
+    uint32 Ticks (void) const noexcept;
 
-    //! \brief Get the tick delta since the last call
+    //! \brief Ticks since last call to this function
+    //! \note The first call returns the delta from when the timer was started.
     //! \returns Tick count between calls
-    rdge::uint32 TickDelta (void);
+    uint32 TickDelta (void) noexcept;
 
-    //! \brief Get the tick count since the last call to
-    //!        TickDelta, without resetting the counter
-    //! \returns Tick count since last call to TickDelta
-    rdge::uint32 PollTickDelta (void);
+    //! \brief Ticks since the last call to \ref TickDelta without resetting
+    //! \returns Tick count since last call to \ref TickDelta
+    uint32 PollTickDelta (void) const noexcept;
 
     //! \brief Check if the timer is running
     //! \returns True if running, false otherwise
-    bool IsRunning (void) const { return m_isRunning; }
+    bool IsRunning (void) const noexcept { return m_isRunning; }
 
     //! \brief Check if the timer is paused
-    //! \returns True if running, false otherwise
-    bool IsPaused (void) const { return m_isPaused && m_isRunning; }
+    //! \returns True if paused, false otherwise
+    bool IsPaused (void) const noexcept { return m_isPaused && m_isRunning; }
 
 private:
-    rdge::uint32 m_startTicks;
-    rdge::uint32 m_pausedTicks;
-    rdge::uint32 m_previousTicks;
-    bool m_isRunning;
-    bool m_isPaused;
+    uint32 m_startTicks  = 0; //!< Ticks when the timer was started
+    uint32 m_pausedTicks = 0; //!< Ticks when the timer was paused
+    uint32 m_deltaTicks  = 0; //!< Ticks for the last delta call
+
+    bool m_isRunning = false; //!< Timer running flag
+    bool m_isPaused  = false; //!< Timer paused flag
 };
 
-} // namespace util
 } // namespace rdge

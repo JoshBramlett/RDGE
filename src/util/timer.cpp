@@ -2,60 +2,62 @@
 
 #include <SDL.h>
 
-using namespace rdge::util;
+namespace rdge {
 
 void
-Timer::Start (void)
+Timer::Start (void) noexcept
 {
     m_isRunning = true;
     m_isPaused = false;
-    m_startTicks = m_previousTicks = SDL_GetTicks();
+    m_startTicks = SDL_GetTicks();
+    m_deltaTicks = m_startTicks;
     m_pausedTicks = 0;
 }
 
 void
-Timer::Stop (void)
+Timer::Stop (void) noexcept
 {
     m_isRunning = false;
     m_isPaused = false;
     m_startTicks = 0;
     m_pausedTicks = 0;
-    m_previousTicks = 0;
+    m_deltaTicks = 0;
 }
 
 void
-Timer::Pause (void)
+Timer::Pause (void) noexcept
 {
     if (m_isRunning && !m_isPaused)
     {
         m_isPaused = true;
         m_pausedTicks = SDL_GetTicks() - m_startTicks;
-        m_startTicks = 0;
-        m_previousTicks = 0;
+        m_deltaTicks = 0;
     }
 }
 
 void
-Timer::Unpause (void)
+Timer::Resume (void) noexcept
 {
     if (m_isRunning && m_isPaused)
     {
         m_isPaused = false;
-        m_startTicks = m_previousTicks = SDL_GetTicks() - m_pausedTicks;
+        m_startTicks += SDL_GetTicks() - m_pausedTicks;
+        m_deltaTicks = m_startTicks;
         m_pausedTicks = 0;
     }
 }
 
-rdge::uint32
-Timer::Restart (void)
+uint32
+Timer::Restart (void) noexcept
 {
-    auto ticks = Ticks();
+    uint32 ticks = Ticks();
     Start();
+
     return ticks;
 }
 
-rdge::uint32
-Timer::Ticks (void) const
+uint32
+Timer::Ticks (void) const noexcept
 {
     if (m_isRunning)
     {
@@ -70,27 +72,30 @@ Timer::Ticks (void) const
     return 0;
 }
 
-rdge::uint32
-Timer::TickDelta (void)
+uint32
+Timer::TickDelta (void) noexcept
 {
     if (m_isRunning && !m_isPaused)
     {
-        auto ticks = SDL_GetTicks();
-        auto delta = ticks - m_previousTicks;
-        m_previousTicks = ticks;
+        uint32 ticks = SDL_GetTicks();
+        uint32 delta = ticks - m_deltaTicks;
+        m_deltaTicks = ticks;
+
         return delta;
     }
 
     return 0;
 }
 
-rdge::uint32
-Timer::PollTickDelta (void)
+uint32
+Timer::PollTickDelta (void) const noexcept
 {
     if (m_isRunning && !m_isPaused)
     {
-        return SDL_GetTicks() - m_previousTicks;
+        return SDL_GetTicks() - m_deltaTicks;
     }
 
     return 0;
 }
+
+} // namespace rdge

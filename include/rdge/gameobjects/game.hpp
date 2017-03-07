@@ -32,7 +32,7 @@ public:
     //! \details The result of each hook signifies whether the game loop will
     //!          suppress (true) or forward (false) the event to the current scene.
     using OnEventCallback  = std::function<bool(const Event&)>;
-    using OnUpdateCallback = std::function<bool(uint32 ticks)>;
+    using OnUpdateCallback = std::function<bool(const delta_time&)>;
     using OnRenderCallback = std::function<bool(void)>;
     //!@}
 
