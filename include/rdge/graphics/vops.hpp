@@ -45,6 +45,15 @@ SetPosition (SpriteVertices& vertices, const math::vec3& pos)
 }
 
 inline void
+ClonePosition (const SpriteVertices& source, SpriteVertices& dest)
+{
+    dest[0].pos = source[0].pos;
+    dest[1].pos = source[1].pos;
+    dest[2].pos = source[2].pos;
+    dest[3].pos = source[3].pos;
+}
+
+inline void
 SetTexCoords (SpriteVertices& vertices, const tex_coords& uvs = tex_coords())
 {
     vertices[0].uv = uvs[0];

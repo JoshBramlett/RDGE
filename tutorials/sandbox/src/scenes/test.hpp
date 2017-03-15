@@ -9,7 +9,6 @@
 
 // TODO (ongoing thoughts and interface improvements)
 // - No clear way to pass update/input events to an entity.
-// - Add 'animation' to the spritesheet, so it doesn't have to be defined in code
 // - Add 'hit box' to the spritesheet.  Similar to the hotspot, but each frame
 //   could be have a different size sprite.
 // - Idle animation is a single ping pong, but that's not supported so I added
@@ -88,6 +87,9 @@ struct running_state : public player_state
 //       has been up, but that may be a coincidence.  Could be that SDL gave me
 //       a keyup event and when I queried whether it was pressed it returned
 //       true.  If that's the case I'll have to log the events to verify.
+//     - Another very strange bug that's only happened a couple times...When
+//       first starting the scene the player has a very high velocity.  May be
+//       even higher than his run velocity.
 struct input_handler
 {
     // TODO: Potentially a stop-gap solution:

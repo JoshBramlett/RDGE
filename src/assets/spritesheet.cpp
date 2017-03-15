@@ -37,10 +37,10 @@ ProcessTexturePart (const json& part, const math::uivec2& surface_size, uint32 s
         throw std::invalid_argument("texture_part \"" + name + "\" expects unsigned");
     }
 
-    auto x    = part["x"].get<uint32>();
-    auto y    = part["y"].get<uint32>();
-    auto w    = part["width"].get<uint32>();
-    auto h    = part["height"].get<uint32>();
+    auto x = part["x"].get<uint32>();
+    auto y = part["y"].get<uint32>();
+    auto w = part["width"].get<uint32>();
+    auto h = part["height"].get<uint32>();
 
     // Validate values are within range
     if ((x + w > surface_size.w) || (y + h > surface_size.h))

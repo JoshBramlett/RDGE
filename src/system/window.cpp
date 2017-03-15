@@ -137,9 +137,9 @@ Window::Window (
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, MIN_GL_CONTEXT_MINOR);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-    // TODO Handmade goes through srgb, what it is and why it's used.  Make sure to
-    //      look it up to understand what it is.  Also, the SDL port to handmade
-    //      attempts to create a window with it, and if it fails creates one without it.
+    // TODO Add sRGB support
+    //      Look at SDL port of HMH - they attempt to create a window and if it fails
+    //      create one without it.
     SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
 
     // Frame buffer
@@ -158,11 +158,24 @@ Window::Window (
     // Omitting the call allows either.
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 
-    // The forward compatible flag means that no deprecated functionality will be supported.
-    // Can result in a performance gain, and is only for GL 3.0 and later contexts.  Flag is
-    // implementation defined, so it seems to do nothing on os x.
-    // https://wiki.libsdl.org/SDL_GLcontextFlag
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
+    // SDL_GLcontextFlag (https://wiki.libsdl.org/SDL_GLcontextFlag)
+    //
+    // Possible values:
+    //
+    // SDL_GL_CONTEXT_DEBUG_FLAG
+    //     - Put GL in "debug" mode.  Test after KHR_debug is available.
+    // SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG
+    //     - Deprecated functionality disabled.  Can result in a performance gain.
+    // SDL_GL_CONTEXT_ROBUST_ACCESS_FLAG
+    //     - A mode that offers a few APIs that are safer (think snprintf() vs sprintf()).
+    // SDL_GL_CONTEXT_RESET_ISOLATION_FLAG
+    //     - Require GL to make promises about what to do during driver or hardware failure.
+    //
+    // TODO All currently left unset.  I don't believe any have any effect on MacOS, so
+    //      this will have to be researched when I test on another machine or apply
+    //      finally updates their drivers.
+    //
+    // SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, <flag bitmask>);
 
     // Enable multisampling, which is a type of anti-aliasing.  We create a buffer and set the
     // number of samples per pixel.  Basically the fragment shader is run with vertex data

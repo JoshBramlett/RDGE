@@ -76,6 +76,24 @@ public:
 public:
     SpriteVertices vertices; //!< Array of vertex attribute data
 
+#if RDGE_DEBUG
+    //! \struct sprite_debug_bounds
+    //! \brief Draw a solid colored box underneath the sprite
+    //! \details Provides a visual for the sprite drawing bounds, intended for
+    //!          use with sprites rendered using a partially transparent texture.
+    //!          The bounding box is constructed every frame using the coordinates
+    //!          of the sprite, including the depth value.
+    //! \note Only available in debug builds.
+    //! \warning Enabling increases the submission count, so before use ensure
+    //!          the renderer's capacity can accomodate the extra submission.
+    struct sprite_debug_bounds
+    {
+        bool show = false;                //!< Show the debug bounds
+        color draw_color = color::YELLOW; //!< Color of the debug bounds
+
+    } debug_bounds;
+#endif
+
 private:
     std::shared_ptr<Texture> m_texture; //!< Texture associated with the sprite
 };

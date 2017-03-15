@@ -49,6 +49,8 @@ Player::Player (void)
 
 
     this->sprite = sheet.CreateSprite("idle_front_1", vec3(0.f, 0.f, 0.f));
+    this->sprite->debug_bounds.show = true;
+
     this->current_state = this->states[static_cast<uint32>(PlayerStateType::Idle)].get();
 }
 

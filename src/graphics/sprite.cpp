@@ -57,6 +57,17 @@ Sprite::Draw (SpriteBatch& renderer)
     // makes sure the texture ids match.
     SDL_assert(!m_texture || this->vertices[0].tid == m_texture->unit_id);
 
+#if RDGE_DEBUG
+    if (this->debug_bounds.show)
+    {
+        SpriteVertices bounds;
+        vops::ClonePosition(this->vertices, bounds);
+        vops::SetTexCoords(bounds);
+        vops::SetColor(bounds, this->debug_bounds.draw_color);
+        renderer.Submit(bounds);
+    }
+#endif
+
     renderer.Submit(this->vertices);
 }
 
