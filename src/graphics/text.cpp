@@ -41,7 +41,7 @@ Text::Text (std::string           text,
     m_texture = std::make_shared<Texture>(*surface);
 
     vops::SetPosition(this->vertices, pos, to_ndc({ m_texture->width, m_texture->height }));
-    vops::SetTexCoords(this->vertices);
+    vops::SetDefaultTexCoords(this->vertices);
     vops::SetColor(this->vertices, m_color);
 }
 

@@ -54,12 +54,18 @@ ClonePosition (const SpriteVertices& source, SpriteVertices& dest)
 }
 
 inline void
-SetTexCoords (SpriteVertices& vertices, const tex_coords& uvs = tex_coords())
+SetTexCoords (SpriteVertices& vertices, const tex_coords& uvs)
 {
     vertices[0].uv = uvs[0];
     vertices[1].uv = uvs[1];
     vertices[2].uv = uvs[2];
     vertices[3].uv = uvs[3];
+}
+
+inline void
+SetDefaultTexCoords (SpriteVertices& vertices)
+{
+    SetTexCoords(vertices, tex_coords());
 }
 
 inline void

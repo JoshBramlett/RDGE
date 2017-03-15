@@ -8,7 +8,7 @@ namespace rdge {
 Sprite::Sprite (const math::vec3& pos, const math::vec2& size, const color& color)
 {
     vops::SetPosition(this->vertices, pos, size);
-    vops::SetTexCoords(this->vertices);
+    vops::SetDefaultTexCoords(this->vertices);
     vops::SetColor(this->vertices, color);
 }
 
@@ -19,7 +19,7 @@ Sprite::Sprite (const math::vec3& pos, std::shared_ptr<Texture> texture)
 
     math::vec2 size(static_cast<float>(texture->width), static_cast<float>(texture->height));
     vops::SetPosition(this->vertices, pos, size);
-    vops::SetTexCoords(this->vertices);
+    vops::SetDefaultTexCoords(this->vertices);
     vops::SetTextureUnitID(this->vertices, m_texture->unit_id);
 }
 
@@ -62,7 +62,7 @@ Sprite::Draw (SpriteBatch& renderer)
     {
         SpriteVertices bounds;
         vops::ClonePosition(this->vertices, bounds);
-        vops::SetTexCoords(bounds);
+        vops::SetDefaultTexCoords(bounds);
         vops::SetColor(bounds, this->debug_bounds.draw_color);
         renderer.Submit(bounds);
     }
