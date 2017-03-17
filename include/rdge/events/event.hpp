@@ -180,12 +180,21 @@ public:
         return static_cast<EventType>(type);
     }
 
-    //! \brief Keyboard button triggering the event
-    //! \returns KeyboardButton enum
+    //! \brief Virtual mapping of the key that triggered the event
+    //! \returns KeyCode enum
     constexpr KeyCode Key (void) const
     {
         return static_cast<KeyCode>(keysym.sym);
     }
+
+    //! \brief Physical key that triggered the event
+    //! \returns ScanCode enum
+    constexpr ScanCode PhysicalKey (void) const
+    {
+        return static_cast<ScanCode>(keysym.scancode);
+    }
+
+    // TODO KeyMod and change all client keyboard events to use physical keys
 
     //! \brief Check if event was fired from a repeating action
     //! \returns True if repeating, false otherwise

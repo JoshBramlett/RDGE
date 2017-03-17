@@ -1,8 +1,10 @@
 #pragma once
 
 #include <rdge/core.hpp>
+#include <rdge/type_traits.hpp>
 #include <rdge/events/event.hpp>
 #include <rdge/gameobjects/iscene.hpp>
+#include <rdge/gameobjects/types.hpp>
 #include <rdge/graphics.hpp>
 
 #include <memory>
@@ -62,6 +64,145 @@ struct running_state : public player_state
     virtual const rdge::texture_part& GetFrame (const Player& player,
                                                 rdge::uint32 ticks) override;
 };
+
+
+class KeyboardDirectionalInputHandler
+{
+private:
+
+    bool m_dirty = false; //!< Denotes a state change between displacement calculations
+
+    rdge::math::vec2 m_displacement;                      //!< Displacement unit vector
+    rdge::Direction  m_stateMask = rdge::Direction::NONE; //!< Bitmask of key press states
+
+    //! \brief Unit circle coordinates for a 45 degree directional vector
+    //! \note Value computed from [sin(45deg), cos(45deg)], or more simply
+    //!       sqrt(1/2) by solving for equal opposite/adjacent edges in a
+    //!       right triangle (where the hypotenuse is 1).
+    static constexpr float DIAGONAL_MAGNITUDE = 0.707106781187f;
+
+    struct button_mapping
+    {
+        rdge::ScanCode up    = rdge::ScanCode::W;
+        rdge::ScanCode left  = rdge::ScanCode::A;
+        rdge::ScanCode down  = rdge::ScanCode::S;
+        rdge::ScanCode right = rdge::ScanCode::D;
+    } m_mapping;
+
+public:
+
+    rdge::Direction dominant_direction = rdge::Direction::NONE;
+
+public:
+
+    KeyboardDirectionalInputHandler (void) = default;
+
+    explicit KeyboardDirectionalInputHandler (rdge::ScanCode keymap_up,
+                                              rdge::ScanCode keymap_left,
+                                              rdge::ScanCode keymap_down,
+                                              rdge::ScanCode keymap_right)
+    {
+        m_mapping.up    = keymap_up;
+        m_mapping.left  = keymap_left;
+        m_mapping.down  = keymap_down;
+        m_mapping.right = keymap_right;
+    }
+
+    rdge::ScanCode& operator[] (rdge::Direction direction)
+    {
+        switch (direction)
+        {
+        case rdge::Direction::NORTH:
+            return m_mapping.up;
+        case rdge::Direction::EAST:
+            return m_mapping.right;
+        case rdge::Direction::SOUTH:
+            return m_mapping.down;
+        case rdge::Direction::WEST:
+            return m_mapping.left;
+        default:
+            break;
+        }
+
+        throw "out of range";
+        // std::out_of_range
+    }
+
+    rdge::Direction GetDirection (rdge::ScanCode code)
+    {
+        if (code == m_mapping.up) {
+            return rdge::Direction::NORTH;
+        } else if (code == m_mapping.left) {
+            return rdge::Direction::WEST;
+        } else if (code == m_mapping.down) {
+            return rdge::Direction::SOUTH;
+        } else if (code == m_mapping.right) {
+            return rdge::Direction::EAST;
+        }
+
+        return rdge::Direction::NONE;
+    }
+
+    void OnEvent (const rdge::Event& event)
+    {
+        if (event.IsKeyboardEvent())
+        {
+            auto args = event.GetKeyboardEventArgs();
+            if (args.IsRepeating())
+            {
+                return;
+            }
+
+            auto key_dir = GetDirection(args.PhysicalKey());
+            if (key_dir != rdge::Direction::NONE)
+            {
+                if (args.IsKeyPressed())
+                {
+                    m_stateMask |= key_dir;
+                    this->dominant_direction = key_dir;
+                }
+                else
+                {
+                    m_stateMask &= ~key_dir;
+                }
+
+                m_dirty = true;
+            }
+        }
+    }
+
+    rdge::math::vec2 Calculate (void)
+    {
+        if (!m_dirty)
+        {
+            return m_displacement;
+        }
+
+        m_displacement = { 0.f, 0.f };
+        m_displacement.y += ((m_stateMask & rdge::Direction::NORTH) != 0) ? 1.f : 0.f;
+        m_displacement.x += ((m_stateMask & rdge::Direction::EAST) != 0) ? 1.f : 0.f;
+        m_displacement.y += ((m_stateMask & rdge::Direction::SOUTH) != 0) ? -1.f : 0.f;
+        m_displacement.x += ((m_stateMask & rdge::Direction::WEST) != 0) ? -1.f : 0.f;
+
+        bool move_on_x = !rdge::math::fp_eq(m_displacement.x, 0.f);
+        bool move_on_y = !rdge::math::fp_eq(m_displacement.y, 0.f);
+        if (move_on_x && move_on_y)
+        {
+            m_displacement *= DIAGONAL_MAGNITUDE;
+        }
+        else if (move_on_x || move_on_y)
+        {
+            // dominant direction isn't updated for diagonal or no movement
+            // because we use the value set during the last key press event.
+            this->dominant_direction = m_stateMask;
+        }
+
+        m_dirty = false;
+        return m_displacement;
+    }
+};
+
+
 
 // Persistant frame input handling
 // SDL keyboard event handling has some kinda funny behavior.  Only the last
@@ -133,6 +274,10 @@ struct input_handler
 
     void update_facing (PlayerFacing f, bool new_direction)
     {
+        if (new_direction)
+        {
+            facing = f;
+        }
         // since multiple keyboard keys can be pressed simultaneously, special
         // logic is required to determine the correct facing direction.
         //
@@ -141,52 +286,54 @@ struct input_handler
         //     - Is a key is released:
         //         - Matches the last direction, set to previous
         //         - Doesn't match last direction, do nothing, but reset previous
-        static PlayerFacing previous = PlayerFacing::Front;
 
-        if (new_direction)
-        {
-            previous = facing;
-            facing = f;
-        }
-        else if (facing == f)
-        {
-            facing = previous;
-        }
-        else
-        {
-            previous = facing;
-        }
+        //static PlayerFacing previous = PlayerFacing::Front;
+
+        //if (new_direction)
+        //{
+            //previous = facing;
+            //facing = f;
+        //}
+        //else if (facing == f)
+        //{
+            //facing = previous;
+        //}
+        //else
+        //{
+            //previous = facing;
+        //}
     }
 
     void set_key_state(rdge::KeyCode key, bool is_pressed)
     {
+        bool pre_dirty = is_moving();
         if (key == key_move_up)
         {
             walk_up_pressed = is_pressed;
             is_dirty = true;
 
-            update_facing(PlayerFacing::Back, is_pressed);
+            if (!pre_dirty) update_facing(PlayerFacing::Back, is_pressed);
         }
         else if (key == key_move_left)
         {
             walk_left_pressed = is_pressed;
             is_dirty = true;
 
-            update_facing(PlayerFacing::Left, is_pressed);
+            if (!pre_dirty) update_facing(PlayerFacing::Left, is_pressed);
         }
         else if (key == key_move_down)
         {
             walk_down_pressed = is_pressed;
             is_dirty = true;
 
-            update_facing(PlayerFacing::Front, is_pressed);
+            if (!pre_dirty) update_facing(PlayerFacing::Front, is_pressed);
         }
         else if (key == key_move_right)
         {
             walk_right_pressed = is_pressed;
             is_dirty = true;
 
-            update_facing(PlayerFacing::Right, is_pressed);
+            if (!pre_dirty) update_facing(PlayerFacing::Right, is_pressed);
         }
         else if (key == key_run)
         {
@@ -285,6 +432,7 @@ public:
 public:
     PlayerStateType state_type = PlayerStateType::Idle;
 
+    KeyboardDirectionalInputHandler dir_handler;
     input_handler displacement;
 
     std::vector<std::unique_ptr<player_state>> states;

@@ -15,15 +15,20 @@
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
+// TODO: The only values supported are those on my Mac.  When I move to
+//       full cross platform support I need to add the remainder from here:
+//       https://wiki.libsdl.org/SDLKeycodeLookup
+//       https://wiki.libsdl.org/SDLScancodeLookup
+
 //! \enum KeyCode
-//! \brief SDL defined virtual key representation
-//! \details Direct mapping to SDL_Keycode, provided for abstraction and
-//!          ease of discovery.
+//! \brief Virtual key representation
+//! \details Regarded as virtual because it represents the key in the context of
+//!          the current keyboard layout.  Because they may not correspond to
+//!          physical keys they are better suited for character dependent controls
+//!          e.g. Press 'i' for inventory.
+//! \note Values map directly to SDL_Keycode
 enum class KeyCode : uint32
 {
-    // TODO: The only KeyCode values supported are those on my Mac.  When I move to
-    //       full cross platform support I need to add the remainder from here:
-    //       https://wiki.libsdl.org/SDLKeycodeLookup
     UNKNOWN    = SDLK_UNKNOWN,
     BACKSPACE  = SDLK_BACKSPACE,
     TAB        = SDLK_TAB,
@@ -101,15 +106,108 @@ enum class KeyCode : uint32
     RIGHTGUI   = SDLK_RGUI
 };
 
+//! \enum ScanCode
+//! \brief Physical key representation
+//! \details Maps to physical keys on the keyboard.  Their use is better suited for
+//!          layout dependent controls.  e.g. WASD.
+//! \note Values map directly to SDL_Scancode
+enum class ScanCode : uint32
+{
+    UNKNOWN    = SDL_SCANCODE_UNKNOWN,
+    BACKSPACE  = SDL_SCANCODE_BACKSPACE,
+    TAB        = SDL_SCANCODE_TAB,
+    RETURN     = SDL_SCANCODE_RETURN,
+    ESCAPE     = SDL_SCANCODE_ESCAPE,
+    SPACE      = SDL_SCANCODE_SPACE,
+    QUOTE      = SDL_SCANCODE_APOSTROPHE,
+    COMMA      = SDL_SCANCODE_COMMA,
+    MINUS      = SDL_SCANCODE_MINUS,
+    PERIOD     = SDL_SCANCODE_PERIOD,
+    SLASH      = SDL_SCANCODE_SLASH,
+    ZERO       = SDL_SCANCODE_0,
+    ONE        = SDL_SCANCODE_1,
+    TWO        = SDL_SCANCODE_2,
+    THREE      = SDL_SCANCODE_3,
+    FOUR       = SDL_SCANCODE_4,
+    FIVE       = SDL_SCANCODE_5,
+    SIX        = SDL_SCANCODE_6,
+    SEVEN      = SDL_SCANCODE_7,
+    EIGHT      = SDL_SCANCODE_8,
+    NINE       = SDL_SCANCODE_9,
+    SEMICOLON  = SDL_SCANCODE_SEMICOLON,
+    EQUALS     = SDL_SCANCODE_EQUALS,
+    BACKQUOTE  = SDL_SCANCODE_GRAVE,
+    A          = SDL_SCANCODE_A,
+    B          = SDL_SCANCODE_B,
+    C          = SDL_SCANCODE_C,
+    D          = SDL_SCANCODE_D,
+    E          = SDL_SCANCODE_E,
+    F          = SDL_SCANCODE_F,
+    G          = SDL_SCANCODE_G,
+    H          = SDL_SCANCODE_H,
+    I          = SDL_SCANCODE_I,
+    J          = SDL_SCANCODE_J,
+    K          = SDL_SCANCODE_K,
+    L          = SDL_SCANCODE_L,
+    M          = SDL_SCANCODE_M,
+    N          = SDL_SCANCODE_N,
+    O          = SDL_SCANCODE_O,
+    P          = SDL_SCANCODE_P,
+    Q          = SDL_SCANCODE_Q,
+    R          = SDL_SCANCODE_R,
+    S          = SDL_SCANCODE_S,
+    T          = SDL_SCANCODE_T,
+    U          = SDL_SCANCODE_U,
+    V          = SDL_SCANCODE_V,
+    W          = SDL_SCANCODE_W,
+    X          = SDL_SCANCODE_X,
+    Y          = SDL_SCANCODE_Y,
+    Z          = SDL_SCANCODE_Z,
+    CAPSLOCK   = SDL_SCANCODE_CAPSLOCK,
+    F1         = SDL_SCANCODE_F1,
+    F2         = SDL_SCANCODE_F2,
+    F3         = SDL_SCANCODE_F3,
+    F4         = SDL_SCANCODE_F4,
+    F5         = SDL_SCANCODE_F5,
+    F6         = SDL_SCANCODE_F6,
+    F7         = SDL_SCANCODE_F7,
+    F8         = SDL_SCANCODE_F8,
+    F9         = SDL_SCANCODE_F9,
+    F10        = SDL_SCANCODE_F10,
+    F11        = SDL_SCANCODE_F11,
+    F12        = SDL_SCANCODE_F12,
+    RIGHT      = SDL_SCANCODE_RIGHT,
+    LEFT       = SDL_SCANCODE_LEFT,
+    DOWN       = SDL_SCANCODE_DOWN,
+    UP         = SDL_SCANCODE_UP,
+    LEFTCTRL   = SDL_SCANCODE_LCTRL,
+    LEFTSHIFT  = SDL_SCANCODE_LSHIFT,
+    LEFTALT    = SDL_SCANCODE_LALT,
+    LEFTGUI    = SDL_SCANCODE_LGUI,
+    RIGHTCTRL  = SDL_SCANCODE_RCTRL,
+    RIGHTSHIFT = SDL_SCANCODE_RSHIFT,
+    RIGHTALT   = SDL_SCANCODE_RALT,
+    RIGHTGUI   = SDL_SCANCODE_RGUI
+};
+
+//!@{
 //! \brief Check if provided key is pressed
-//! \param [in] key Key code to query
+//! \param [in] key Code to query
 //! \returns True if key is pressed, false otherwise
 bool IsKeyPressed (KeyCode key) noexcept;
+bool IsKeyPressed (ScanCode key) noexcept;
+//!@}
 
 //! \brief KeyCode stream output operator
 //! \param [in] os Output stream
 //! \param [in] key KeyCode enum
 //! \returns Output stream
 std::ostream& operator<< (std::ostream& os, KeyCode key);
+
+//! \brief ScanCode stream output operator
+//! \param [in] os Output stream
+//! \param [in] key ScanCode enum
+//! \returns Output stream
+std::ostream& operator<< (std::ostream& os, ScanCode key);
 
 } // namespace rdge

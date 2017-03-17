@@ -57,17 +57,26 @@ Player::Player (void)
 void
 Player::OnEvent (const Event& event)
 {
-    if (event.IsKeyboardEvent())
-    {
-        auto args = event.GetKeyboardEventArgs();
-        if (args.IsRepeating())
-        {
-            // ignore repeating events - nothing has changed
-            return;
-        }
+    //std::cout << "south=" << std::hex << static_cast<uint32>(Direction::SOUTH)
+              //<< " west=" << std::hex << static_cast<uint32>(Direction::WEST)
+              //<< " sw=" << std::hex << static_cast<uint32>(Direction::SW)
+              //<< " equal=" << std::boolalpha
+              //<< ((Direction::SOUTH | Direction::WEST) == Direction::SW)
+              //<< std::endl;
 
-        this->displacement.set_key_state(args.Key(), args.IsKeyPressed());
-    }
+    dir_handler.OnEvent(event);
+
+    //if (event.IsKeyboardEvent())
+    //{
+        //auto args = event.GetKeyboardEventArgs();
+        //if (args.IsRepeating())
+        //{
+            //// ignore repeating events - nothing has changed
+            //return;
+        //}
+
+        //this->displacement.set_key_state(args.Key(), args.IsKeyPressed());
+    //}
 
     // ignore non-keyboard events
 }
@@ -77,37 +86,97 @@ Player::OnUpdate (const delta_time& dt)
 {
     this->current_state_changed = false;
 
-    if (this->displacement.is_dirty)
+    auto uvec = dir_handler.Calculate();
+    bool is_moving = uvec.x != 0.f || uvec.y != 0.f;
+    //bool is_moving = dir_handler.unit_direction.x != 0.f ||
+                     //dir_handler.unit_direction.y != 0.f;
+    bool is_running = is_moving && rdge::IsKeyPressed(ScanCode::J);
+
+    if (is_moving)
     {
-        if (this->displacement.is_running() &&
-            this->state_type != PlayerStateType::Running)
-        {
-            this->state_type = PlayerStateType::Running;
-            this->current_state = this->states[(uint32)PlayerStateType::Running].get();
-            this->current_state_changed = true;
-        }
-        else if (this->displacement.is_walking() &&
-                 this->state_type != PlayerStateType::Walking)
-        {
-            this->state_type = PlayerStateType::Walking;
-            this->current_state = this->states[(uint32)PlayerStateType::Walking].get();
-            this->current_state_changed = true;
-        }
-        else if (!this->displacement.is_moving() &&
-                 this->state_type != PlayerStateType::Idle)
-        {
-            this->state_type = PlayerStateType::Idle;
-            this->current_state = this->states[(uint32)PlayerStateType::Idle].get();
-            this->current_state_changed = true;
-        }
+        uvec *= (is_running) ? 20.f : 10.f;
+        uvec *= 64.f;
+        uvec *= dt.seconds;
     }
 
-    this->displacement.calculate(dt);
-    //this->displacement.calculate_with_acceleration(dt);
-    vops::UpdatePosition(this->sprite->vertices, this->displacement.uvec);
+    if (is_running && this->state_type != PlayerStateType::Running)
+    {
+        this->state_type = PlayerStateType::Running;
+        this->current_state = this->states[(uint32)PlayerStateType::Running].get();
+        this->current_state_changed = true;
+    }
+    else if (is_moving && this->state_type != PlayerStateType::Walking)
+    {
+        this->state_type = PlayerStateType::Walking;
+        this->current_state = this->states[(uint32)PlayerStateType::Walking].get();
+        this->current_state_changed = true;
+    }
+    else if (!is_moving && this->state_type != PlayerStateType::Idle)
+    {
+        this->state_type = PlayerStateType::Idle;
+        this->current_state = this->states[(uint32)PlayerStateType::Idle].get();
+        this->current_state_changed = true;
+    }
 
+    //std::cout << "dd=" << static_cast<uint32>(dir_handler.dominant_direction) << std::endl;
+    switch (dir_handler.dominant_direction)
+    {
+    case Direction::NORTH:
+        displacement.facing = PlayerFacing::Back;
+        break;
+    case Direction::EAST:
+        displacement.facing = PlayerFacing::Right;
+        break;
+    case Direction::SOUTH:
+        displacement.facing = PlayerFacing::Front;
+        break;
+    case Direction::WEST:
+        displacement.facing = PlayerFacing::Left;
+        break;
+    default:
+        displacement.facing = PlayerFacing::Front;
+        break;
+    }
+
+    vops::UpdatePosition(this->sprite->vertices, uvec);
     vops::SetTexCoords(this->sprite->vertices,
                        this->current_state->GetFrame(*this, dt.ticks).coords);
+
+
+
+    //this->current_state_changed = false;
+
+    //if (this->displacement.is_dirty)
+    //{
+        //if (this->displacement.is_running() &&
+            //this->state_type != PlayerStateType::Running)
+        //{
+            //this->state_type = PlayerStateType::Running;
+            //this->current_state = this->states[(uint32)PlayerStateType::Running].get();
+            //this->current_state_changed = true;
+        //}
+        //else if (this->displacement.is_walking() &&
+                 //this->state_type != PlayerStateType::Walking)
+        //{
+            //this->state_type = PlayerStateType::Walking;
+            //this->current_state = this->states[(uint32)PlayerStateType::Walking].get();
+            //this->current_state_changed = true;
+        //}
+        //else if (!this->displacement.is_moving() &&
+                 //this->state_type != PlayerStateType::Idle)
+        //{
+            //this->state_type = PlayerStateType::Idle;
+            //this->current_state = this->states[(uint32)PlayerStateType::Idle].get();
+            //this->current_state_changed = true;
+        //}
+    //}
+
+    //this->displacement.calculate(dt);
+    ////this->displacement.calculate_with_acceleration(dt);
+    //vops::UpdatePosition(this->sprite->vertices, this->displacement.uvec);
+
+    //vops::SetTexCoords(this->sprite->vertices,
+                       //this->current_state->GetFrame(*this, dt.ticks).coords);
 }
 
 const texture_part&
