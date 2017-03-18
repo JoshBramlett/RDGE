@@ -162,6 +162,7 @@ public:
 
 //! \class KeyboardEventArgs
 //! \brief Arguments for a keyboard event
+// TODO Add KeyMod
 class KeyboardEventArgs final : SDL_KeyboardEvent
 {
 public:
@@ -193,8 +194,6 @@ public:
     {
         return static_cast<ScanCode>(keysym.scancode);
     }
-
-    // TODO KeyMod and change all client keyboard events to use physical keys
 
     //! \brief Check if event was fired from a repeating action
     //! \returns True if repeating, false otherwise

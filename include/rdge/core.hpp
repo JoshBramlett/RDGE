@@ -11,6 +11,7 @@
 
 #ifdef RDGE_DEBUG
 #include <iostream>
+#include <iomanip>
 #endif
 
 #define RDGE_VERSION "0.0.10"

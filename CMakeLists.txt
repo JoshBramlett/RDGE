@@ -80,6 +80,7 @@ add_library (
              src/events/event.cpp
 
              src/gameobjects/game.cpp
+             src/gameobjects/input/keyboard_directional_input_handler.cpp
 
              src/graphics/animation.cpp
              src/graphics/blend.cpp

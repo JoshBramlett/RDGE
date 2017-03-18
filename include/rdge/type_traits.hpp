@@ -5,8 +5,11 @@
 
 #pragma once
 
+#include <rdge/core.hpp>
+
 #include <type_traits>
 
+//! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
 //! \brief Cast enum to it's underlying type

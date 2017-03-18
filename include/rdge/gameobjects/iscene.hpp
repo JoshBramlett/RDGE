@@ -68,7 +68,7 @@ public:
     //!@}
 
     //!@{
-    //! \brief Game loop event processing
+    //! \brief Game loop processing phases
     //! \details Called only when the scene is active.  In order to receive these events
     //!          the scene must have already had Initialize or Activate called.
     virtual void OnEvent (const Event&) = 0;

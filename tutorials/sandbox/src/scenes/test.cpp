@@ -47,38 +47,38 @@ Player::Player (void)
     running->animations.emplace_back(sheet.GetAnimation("run_back"));
     running->animations.emplace_back(sheet.GetAnimation("run_left"));
 
-
     this->sprite = sheet.CreateSprite("idle_front_1", vec3(0.f, 0.f, 0.f));
     this->sprite->debug_bounds.show = true;
 
     this->current_state = this->states[static_cast<uint32>(PlayerStateType::Idle)].get();
+
+    this->vdisp.unit_length = 64.f;
+    this->vdisp.base_velocities.push_back(10.f);
+    this->vdisp.base_velocities.push_back(20.f);
+
+    this->adisp.unit_length = 64.f;
+    this->adisp.base_velocities.push_back(10.f);
+    this->adisp.base_velocities.push_back(20.f);
 }
 
 void
 Player::OnEvent (const Event& event)
 {
-    //std::cout << "south=" << std::hex << static_cast<uint32>(Direction::SOUTH)
-              //<< " west=" << std::hex << static_cast<uint32>(Direction::WEST)
-              //<< " sw=" << std::hex << static_cast<uint32>(Direction::SW)
-              //<< " equal=" << std::boolalpha
-              //<< ((Direction::SOUTH | Direction::WEST) == Direction::SW)
-              //<< std::endl;
-
     dir_handler.OnEvent(event);
 
-    //if (event.IsKeyboardEvent())
-    //{
-        //auto args = event.GetKeyboardEventArgs();
-        //if (args.IsRepeating())
-        //{
-            //// ignore repeating events - nothing has changed
-            //return;
-        //}
+    if (event.IsKeyboardEvent())
+    {
+        auto args = event.GetKeyboardEventArgs();
+        if (args.IsRepeating())
+        {
+            return; // ignore repeating events - nothing has changed
+        }
 
-        //this->displacement.set_key_state(args.Key(), args.IsKeyPressed());
-    //}
-
-    // ignore non-keyboard events
+        if (args.PhysicalKey() == ScanCode::J)
+        {
+            run_pressed = args.IsKeyPressed();
+        }
+    }
 }
 
 void
@@ -86,17 +86,20 @@ Player::OnUpdate (const delta_time& dt)
 {
     this->current_state_changed = false;
 
-    auto uvec = dir_handler.Calculate();
-    bool is_moving = uvec.x != 0.f || uvec.y != 0.f;
-    //bool is_moving = dir_handler.unit_direction.x != 0.f ||
-                     //dir_handler.unit_direction.y != 0.f;
-    bool is_running = is_moving && rdge::IsKeyPressed(ScanCode::J);
+    auto result_pair = dir_handler.Calculate();
+    auto& uvec = result_pair.first;
 
+    bool is_moving = uvec.x != 0.f || uvec.y != 0.f;
+    bool is_running = is_moving && run_pressed;
+    bool is_walking = is_moving && !run_pressed;
+
+    // displacement using acceleration
+    //this->adisp.calculate(uvec, dt, (is_running) ? 1 : 0);
+
+    // displacement using velocity
     if (is_moving)
     {
-        uvec *= (is_running) ? 20.f : 10.f;
-        uvec *= 64.f;
-        uvec *= dt.seconds;
+        this->vdisp.calculate(uvec, dt, (is_running) ? 1 : 0);
     }
 
     if (is_running && this->state_type != PlayerStateType::Running)
@@ -105,7 +108,7 @@ Player::OnUpdate (const delta_time& dt)
         this->current_state = this->states[(uint32)PlayerStateType::Running].get();
         this->current_state_changed = true;
     }
-    else if (is_moving && this->state_type != PlayerStateType::Walking)
+    else if (is_walking && this->state_type != PlayerStateType::Walking)
     {
         this->state_type = PlayerStateType::Walking;
         this->current_state = this->states[(uint32)PlayerStateType::Walking].get();
@@ -118,71 +121,34 @@ Player::OnUpdate (const delta_time& dt)
         this->current_state_changed = true;
     }
 
-    //std::cout << "dd=" << static_cast<uint32>(dir_handler.dominant_direction) << std::endl;
-    switch (dir_handler.dominant_direction)
+    switch (result_pair.second)
     {
     case Direction::NORTH:
-        displacement.facing = PlayerFacing::Back;
+        facing = PlayerFacing::Back;
         break;
     case Direction::EAST:
-        displacement.facing = PlayerFacing::Right;
+        facing = PlayerFacing::Right;
         break;
     case Direction::SOUTH:
-        displacement.facing = PlayerFacing::Front;
+        facing = PlayerFacing::Front;
         break;
     case Direction::WEST:
-        displacement.facing = PlayerFacing::Left;
+        facing = PlayerFacing::Left;
         break;
     default:
-        displacement.facing = PlayerFacing::Front;
+        facing = PlayerFacing::Front;
         break;
     }
 
     vops::UpdatePosition(this->sprite->vertices, uvec);
     vops::SetTexCoords(this->sprite->vertices,
                        this->current_state->GetFrame(*this, dt.ticks).coords);
-
-
-
-    //this->current_state_changed = false;
-
-    //if (this->displacement.is_dirty)
-    //{
-        //if (this->displacement.is_running() &&
-            //this->state_type != PlayerStateType::Running)
-        //{
-            //this->state_type = PlayerStateType::Running;
-            //this->current_state = this->states[(uint32)PlayerStateType::Running].get();
-            //this->current_state_changed = true;
-        //}
-        //else if (this->displacement.is_walking() &&
-                 //this->state_type != PlayerStateType::Walking)
-        //{
-            //this->state_type = PlayerStateType::Walking;
-            //this->current_state = this->states[(uint32)PlayerStateType::Walking].get();
-            //this->current_state_changed = true;
-        //}
-        //else if (!this->displacement.is_moving() &&
-                 //this->state_type != PlayerStateType::Idle)
-        //{
-            //this->state_type = PlayerStateType::Idle;
-            //this->current_state = this->states[(uint32)PlayerStateType::Idle].get();
-            //this->current_state_changed = true;
-        //}
-    //}
-
-    //this->displacement.calculate(dt);
-    ////this->displacement.calculate_with_acceleration(dt);
-    //vops::UpdatePosition(this->sprite->vertices, this->displacement.uvec);
-
-    //vops::SetTexCoords(this->sprite->vertices,
-                       //this->current_state->GetFrame(*this, dt.ticks).coords);
 }
 
 const texture_part&
 idle_state::GetFrame (const Player& player, uint32 ticks)
 {
-    auto& anim = this->animations[(int)player.displacement.facing];
+    auto& anim = this->animations[(int)player.facing];
     if (player.current_state_changed || anim.IsFinished())
     {
         anim.Reset();
@@ -201,11 +167,7 @@ idle_state::GetFrame (const Player& player, uint32 ticks)
 const texture_part&
 walking_state::GetFrame (const Player& player, uint32 ticks)
 {
-    auto& anim = this->animations[(uint32)player.displacement.facing];
-    //if (player.current_state_changed)
-    //{
-        //anim.Reset();
-    //}
+    auto& anim = this->animations[(uint32)player.facing];
 
     return anim.GetFrame(ticks);
 }
@@ -213,14 +175,14 @@ walking_state::GetFrame (const Player& player, uint32 ticks)
 const texture_part&
 running_state::GetFrame (const Player& player, uint32 ticks)
 {
-    auto& anim = this->animations[(uint32)player.displacement.facing];
-    //if (player.current_state_changed)
-    //{
-        //anim.Reset();
-    //}
+    auto& anim = this->animations[(uint32)player.facing];
 
     return anim.GetFrame(ticks);
 }
+
+
+
+
 
 TestScene::TestScene (void)
     : render_target(std::make_shared<SpriteBatch>(10'000))
