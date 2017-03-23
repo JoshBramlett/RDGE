@@ -32,7 +32,7 @@ public:
     //! \details Loads the texture asset from a file.  The pixel data (\ref Surface)
     //!          is not managed and will be destroyed after texture is created.
     //! \param [in] path Path of the underlying asset to the texture
-    //! \throws RDGE::Exception Surface cannot be loaded
+    //! \throws rdge::Exception Surface cannot be loaded
     explicit Texture (const std::string& path);
 
     //!@{

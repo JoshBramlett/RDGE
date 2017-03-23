@@ -272,23 +272,4 @@ std::ostream& operator<< (std::ostream& os, EventType type)
     return os;
 }
 
-std::ostream& operator<< (std::ostream& os, MouseButton button)
-{
-    switch (button)
-    {
-#define CASE(X) case X: os << (strrchr(#X, ':') + 1); break;
-        CASE(MouseButton::Unknown)
-        CASE(MouseButton::Left)
-        CASE(MouseButton::Middle)
-        CASE(MouseButton::Right)
-        CASE(MouseButton::X1)
-        CASE(MouseButton::X2)
-#undef CASE
-        default:
-            os << "NOT_FOUND[" << static_cast<uint32>(button) << "]";
-    }
-
-    return os;
-}
-
 } // namespace rdge

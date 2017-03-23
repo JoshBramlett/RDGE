@@ -9,6 +9,7 @@
 #include <rdge/graphics/point.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/system/keyboard.hpp>
+#include <rdge/system/mouse.hpp>
 
 #include <SDL.h>
 
@@ -120,20 +121,6 @@ enum class EventType : uint32
     RenderTargetsReset = SDL_RENDER_TARGETS_RESET, //!< Render target contents must be updated
     RenderDeviceReset  = SDL_RENDER_DEVICE_RESET   //!< Device reset, all textures must be recreated
     //!@}
-};
-
-//! \enum MouseButton
-//! \brief Represents the different mouse buttons as defined by SDL
-enum class MouseButton : uint8
-{
-    // IMPORTANT - If enum is updated, update ostream operator<< as well
-
-    Unknown = 0,
-    Left    = SDL_BUTTON_LEFT,
-    Middle  = SDL_BUTTON_MIDDLE,
-    Right   = SDL_BUTTON_RIGHT,
-    X1      = SDL_BUTTON_X1,
-    X2      = SDL_BUTTON_X2
 };
 
 //! \class QuitEventArgs
@@ -655,11 +642,5 @@ void QueueCustomEvent (uint32 type,
 //! \param [in] type EventType enum
 //! \returns Output stream
 std::ostream& operator<< (std::ostream& os, rdge::EventType type);
-
-//! \brief MouseButton stream output operator
-//! \param [in] os Output stream
-//! \param [in] button MouseButton enum
-//! \returns Output stream
-std::ostream& operator<< (std::ostream& os, rdge::MouseButton button);
 
 } // namespace rdge

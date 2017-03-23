@@ -9,7 +9,9 @@
 #include <rdge/assets/surface.hpp>
 #include <rdge/graphics/animation.hpp>
 #include <rdge/graphics/isprite.hpp>
+#include <rdge/graphics/rect.hpp>
 #include <rdge/graphics/sprite.hpp>
+#include <rdge/graphics/sprite_group.hpp>
 #include <rdge/graphics/sprite_group.hpp>
 
 #include <memory>
@@ -37,8 +39,9 @@ class Animation;
 struct texture_part
 {
     std::string  name;    //!< Unique name
-    math::uivec2 size;    //!< Original size in pixels
-    math::uivec2 hotspot; //!< Origin used for drawing offsets
+    rect         clip;    //!< Unmodified clipping rectangle
+    math::uivec2 size;    //!< Size in pixels (scaled)
+    math::uivec2 hotspot; //!< Origin used for drawing offsets (scaled)
     tex_coords   coords;  //!< Normalized texture coordinates
 
     //!@{

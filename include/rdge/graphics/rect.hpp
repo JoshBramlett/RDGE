@@ -34,22 +34,18 @@
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
-template <typename T, typename = typename std::enable_if_t<std::is_arithmetic<T>::value>>
+template <typename T, typename = void>
 struct rect_t;
 
 //! \struct rect_t
 //! \brief Base templated type representing a rectangle
 template <typename T>
-struct rect_t<T>
+struct rect_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
 {
-    //! \var x X-coordinate
-    T x;
-    //! \var y Y-coordinate
-    T y;
-    //! \var w Width
-    T w;
-    //! \var h Height
-    T h;
+    T x; //!< x-coordinate
+    T y; //!< y-coordinate
+    T w; //!< width
+    T h; //!< height
 
     //! \brief rect_t ctor
     //! \details Initialize rect to [0,0,0,0]
@@ -70,11 +66,8 @@ struct rect_t<T>
     //! \brief rect_t ctor
     //! \details Initialize rect from vec4
     //! \param [in] vec vec4 structure
-    explicit constexpr rect_t (const rdge::math::vec4& vec)
-        : x(vec.x)
-        , y(vec.y)
-        , w(vec.z)
-        , h(vec.w)
+    explicit constexpr rect_t (const math::vec4& vec)
+        : x(vec.x), y(vec.y), w(vec.z), h(vec.w)
     { }
 
     //! \brief rect_t ctor
@@ -84,8 +77,8 @@ struct rect_t<T>
     explicit constexpr rect_t (const point& point, const math::uivec2& size)
         : x(point.x)
         , y(point.y)
-        , w(static_cast<rdge::int32>(size.w))
-        , h(static_cast<rdge::int32>(size.h))
+        , w(static_cast<int32>(size.w))
+        , h(static_cast<int32>(size.h))
     { }
 
     //! \brief rect_t ctor
@@ -99,33 +92,15 @@ struct rect_t<T>
         , h(size.y)
     { }
 
-    //! \brief rect_t Copy ctor
-    //! \details Default-copyable
-    constexpr rect_t (const rect_t&) noexcept = default;
-
-    //! \brief rect_t Move ctor
-    //! \details Default-movable
-    constexpr rect_t (rect_t&&) noexcept = default;
-
-    //! \brief rect_t Copy Assignment Operator
-    //! \details Default-copyable
-    rect_t& operator= (const rect_t&) noexcept = default;
-
-    //! \brief rect_t Move Assignment Operator
-    //! \details Default-movable
-    rect_t& operator= (rect_t&&) noexcept = default;
-
     //! \brief User-defined conversion to vec4
     //! \details Casts values to float during conversion.
     //! \returns vec4 containing the rectangle data
-    explicit constexpr operator rdge::math::vec4 (void) const
+    explicit constexpr operator math::vec4 (void) const
     {
-        return rdge::math::vec4(
-                                static_cast<float>(x),
-                                static_cast<float>(y),
-                                static_cast<float>(w),
-                                static_cast<float>(h)
-                               );
+        return math::vec4(static_cast<float>(x),
+                          static_cast<float>(y),
+                          static_cast<float>(w),
+                          static_cast<float>(h));
     }
 
     //! \brief User-defined conversion to native SDL_Rect
@@ -135,11 +110,11 @@ struct rect_t<T>
     explicit constexpr operator SDL_Rect (void) const
     {
         return SDL_Rect {
-                         static_cast<rdge::int32>(x),
-                         static_cast<rdge::int32>(y),
-                         static_cast<rdge::int32>(w),
-                         static_cast<rdge::int32>(h)
-                        };
+            static_cast<int32>(x),
+            static_cast<int32>(y),
+            static_cast<int32>(w),
+            static_cast<int32>(h)
+        };
     }
 
     //! \brief Size of the rectangle
@@ -304,7 +279,7 @@ inline std::ostream& operator<< (std::ostream& os, const rect_t<T>& rect)
 }
 
 //! \typedef Rect Signed integer rect_t structure
-using rect = rect_t<rdge::int32>;
+using rect = rect_t<int32>;
 //! \typedef RectF Float rect_t structure
 using RectF = rect_t<float>;
 

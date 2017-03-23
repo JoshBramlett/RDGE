@@ -4,6 +4,7 @@
 #include <rdge/events/event.hpp>
 #include <rdge/gameobjects/iscene.hpp>
 #include <rdge/graphics.hpp>
+#include <rdge/system.hpp>
 
 #include <memory>
 
@@ -24,6 +25,7 @@ public:
 
 public:
     rdge::OrthographicCamera camera;
+    rdge::Cursor crosshair;
 
     std::shared_ptr<rdge::SpriteBatch> render_target;
     rdge::SpriteLayer bg_layer;

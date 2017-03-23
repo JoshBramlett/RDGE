@@ -103,8 +103,8 @@ add_library (
              src/math/vec3.cpp
              src/math/vec4.cpp
 
-             src/system/cursor.cpp
              src/system/keyboard.cpp
+             src/system/mouse.cpp
              src/system/window.cpp
 
              src/util/exception.cpp

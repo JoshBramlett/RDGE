@@ -84,7 +84,8 @@ KeyboardDirectionalInputHandler::OnEvent (const Event& event)
         {
             if (args.IsKeyPressed())
             {
-                if (m_stateMask == 0)
+                using ::operator==;
+                if (m_stateMask == 0u)
                 {
                     // whatever the first key press is - is the facing direction
                     m_facing = key_dir;
@@ -120,6 +121,7 @@ KeyboardDirectionalInputHandler::Calculate (void)
         return std::make_pair(m_displacement, m_facing);
     }
 
+    using ::operator!=;
     m_displacement.y += ((m_stateMask & Direction::NORTH) != 0) ? 1.f : 0.f;
     m_displacement.x += ((m_stateMask & Direction::EAST) != 0) ? 1.f : 0.f;
     m_displacement.y += ((m_stateMask & Direction::SOUTH) != 0) ? -1.f : 0.f;

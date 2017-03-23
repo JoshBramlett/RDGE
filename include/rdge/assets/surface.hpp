@@ -6,6 +6,7 @@
 #pragma once
 
 #include <rdge/core.hpp>
+#include <rdge/graphics/rect.hpp>
 #include <rdge/math/vec2.hpp>
 
 #include <SDL.h>
@@ -32,6 +33,7 @@ inline auto CreateManagedSDLSurface (SDL_Surface* surface) -> SDLSurfaceUniquePt
 //! \brief Supported pixel depth values
 enum class PixelDepth : int32
 {
+    UNKNOWN = 0,
     BPP_24 = 24, //!< 24 bytes per pixel (RGB)
     BPP_32 = 32  //!< 32 bytes per pixel (RBGA)
 };
@@ -99,21 +101,32 @@ public:
         return m_surface;
     }
 
+    //! \brief User defined conversion to a raw SDL_Surface pointer
+    //! \returns Pointer to a native SDL_Surface
+    explicit operator SDL_Surface* (void) const noexcept
+    {
+        return m_surface;
+    }
+
     //! \brief Get the width of the surface
-    //! \return Surface width
+    //! \returns Surface width
     uint32 Width (void) const noexcept;
 
     //! \brief Get the height of the surface
-    //! \return Surface height
+    //! \returns Surface height
     uint32 Height (void) const noexcept;
 
     //! \brief Get the size (width and height) of the surface
-    //! \return Size structure
+    //! \returns Size structure
     math::uivec2 Size (void) const noexcept;
+
+    //! \brief Get the pixel depth of the surface
+    //! \returns Pixel depth value
+    PixelDepth Depth (void) const noexcept;
 
     //! \brief Get the internal pixel format of the surface
     //! \details Value represents the SDL_PixelFormatEnum value
-    //! \return Pixel format enumeration value
+    //! \returns Pixel format enumeration value
     //! \see https://wiki.libsdl.org/SDL_PixelFormatEnum
     uint32 PixelFormat (void) const noexcept;
 
@@ -123,6 +136,13 @@ public:
     //! \throws rdge::SDLException If SDL failed the conversion
     //! \see https://wiki.libsdl.org/SDL_PixelFormatEnum
     void ChangePixelFormat (uint32 pixel_format);
+
+    //! \brief Create a Surface from a sub-region in the current Surface
+    //! \details Useful for pulling a single region from a \ref SpriteSheet.
+    //!          Note The managed surface is unmodified.
+    //! \param [in] clip Sub-surface coordinates
+    //! \returns New Surface object
+    Surface CreateSubSurface (const rect& clip);
 
 private:
     SDL_Surface*             m_surface = nullptr;

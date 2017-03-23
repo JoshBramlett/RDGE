@@ -5,6 +5,7 @@
 #include <rdge/internal/hints.hpp>
 
 #include <SDL_image.h>
+#include <SDL_assert.h>
 
 #include <sstream>
 
@@ -60,7 +61,7 @@ GetMasksFromDepth (PixelDepth depth)
     masks.r_mask = 0x000000ff;
     masks.g_mask = 0x0000ff00;
     masks.b_mask = 0x00ff0000;
-    masks.a_mask = (depth == PixelDepth::BPP_24) ? 0 : 0x000000ff;
+    masks.a_mask = (depth == PixelDepth::BPP_24) ? 0 : 0xff000000;
 #endif
 
     return masks;
@@ -72,7 +73,10 @@ namespace rdge {
 
 Surface::Surface (SDL_Surface* surface)
     : m_surface(surface)
-{ }
+{
+    // TODO This wrapper could be smarter (and safer from double frees) if
+    //      support is added for using the SDL_Surface refcount property.
+}
 
 Surface::Surface (const std::string& path)
 {
@@ -120,6 +124,12 @@ Surface::Surface (std::unique_ptr<uint8[]> pixels,
     {
         RDGE_THROW("Pixel data is null");
     }
+
+    // TODO After upgrade to SDL 2.0.5 function should be changed to
+    //      SDL_CreateRGBSurfaceWithFormatFrom.  Could provide mechansim to
+    //          a) use the detected format on image load
+    //          b) query the window to get it's pixel format
+    //          c) provide override
 
     auto masks = GetMasksFromDepth(depth);
     auto pitch = static_cast<int32>(size.w * ((depth == PixelDepth::BPP_24) ? 3 : 4));
@@ -184,10 +194,7 @@ Surface::operator= (Surface&& rhs) noexcept
 uint32
 Surface::Width (void) const noexcept
 {
-    if (UNLIKELY(!m_surface))
-    {
-        return 0;
-    }
+    SDL_assert(m_surface != nullptr);
 
     return static_cast<uint32>(m_surface->w);
 }
@@ -195,10 +202,7 @@ Surface::Width (void) const noexcept
 uint32
 Surface::Height (void) const noexcept
 {
-    if (UNLIKELY(!m_surface))
-    {
-        return 0;
-    }
+    SDL_assert(m_surface != nullptr);
 
     return static_cast<uint32>(m_surface->h);
 }
@@ -206,10 +210,7 @@ Surface::Height (void) const noexcept
 math::uivec2
 Surface::Size (void) const noexcept
 {
-    if (UNLIKELY(!m_surface))
-    {
-        return math::uivec2();
-    }
+    SDL_assert(m_surface != nullptr);
 
     return { static_cast<uint32>(m_surface->w), static_cast<uint32>(m_surface->h) };
 }
@@ -217,21 +218,23 @@ Surface::Size (void) const noexcept
 uint32
 Surface::PixelFormat (void) const noexcept
 {
-    if (UNLIKELY(!m_surface))
-    {
-        return SDL_PIXELFORMAT_UNKNOWN;
-    }
+    SDL_assert(m_surface != nullptr);
 
     return m_surface->format->format;
+}
+
+PixelDepth
+Surface::Depth (void) const noexcept
+{
+    SDL_assert(m_surface != nullptr);
+
+    return static_cast<PixelDepth>(m_surface->format->BitsPerPixel);
 }
 
 void
 Surface::ChangePixelFormat (uint32 pixel_format)
 {
-    if (UNLIKELY(!m_surface))
-    {
-        RDGE_THROW("Attempting to change pixel format on a NULL surface");
-    }
+    SDL_assert(m_surface != nullptr);
 
     if (m_surface->format->format == pixel_format)
     {
@@ -254,6 +257,20 @@ Surface::ChangePixelFormat (uint32 pixel_format)
     m_pixelData.reset(nullptr);
 
     m_surface = new_surface;
+}
+
+Surface
+Surface::CreateSubSurface (const rect& clip)
+{
+    Surface dst(math::uivec2(clip.w, clip.h), Depth());
+
+    auto c = static_cast<SDL_Rect>(clip);
+    if (UNLIKELY(SDL_BlitSurface(m_surface, &c, static_cast<SDL_Surface*>(dst), nullptr) != 0))
+    {
+        SDL_THROW("Failed to create sub-surface", "SDL_BlitSurface");
+    }
+
+    return dst;
 }
 
 } // namespace rdge

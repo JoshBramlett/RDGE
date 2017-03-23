@@ -1,8 +1,8 @@
 #include "shooting_gallery_scene.hpp"
 
 #include <rdge/assets.hpp>
-#include <rdge/math.hpp>
 #include <rdge/graphics.hpp>
+#include <rdge/math.hpp>
 
 using namespace rdge;
 using namespace rdge::math;
@@ -37,7 +37,13 @@ ShootingGalleryScene::ShootingGalleryScene (void)
     , p1_layer(render_target)
     , curtain_layer(render_target)
 {
+    SpriteSheet hud_sheet("res/spritesheet_hud.json", true);
     SpriteSheet stall_sheet("res/spritesheet_stall.json", true);
+
+    // Load and set custom cursor
+    const auto& clip = hud_sheet["crosshair_blue_large.png"].clip;
+    crosshair = Cursor(hud_sheet.surface->CreateSubSurface(clip), clip.w / 2, clip.h / 2);
+    SetCursor(crosshair);
 
     ///////////////////
     // Background layer
@@ -57,8 +63,8 @@ ShootingGalleryScene::ShootingGalleryScene (void)
 
     {
         // Alternate between two different grass tex coords
-        auto part1 = stall_sheet["grass1.png"];
-        auto part2 = stall_sheet["grass2.png"];
+        const auto& part1 = stall_sheet["grass1.png"];
+        const auto& part2 = stall_sheet["grass2.png"];
         auto size1 = static_cast<math::vec2>(part1.size);
         auto size2 = static_cast<math::vec2>(part2.size);
 
@@ -136,11 +142,10 @@ ShootingGalleryScene::ShootingGalleryScene (void)
                                                          size,
                                                          stall_sheet.texture,
                                                          part.coords));
-        tex_coords flipped = part.coords;
         curtain_layer.AddSprite(std::make_shared<Sprite>(vec3(970.f - size.w, -430.f, 0.f),
                                                          size,
                                                          stall_sheet.texture,
-                                                         flipped.flip_horizontal()));
+                                                         part.coords.flip_horizontal()));
     }
 
     {
@@ -154,7 +159,7 @@ ShootingGalleryScene::ShootingGalleryScene (void)
         curtain_layer.AddSprite(std::make_shared<Sprite>(vec3(980.f - size.w, -35.f, 0.f),
                                                          size,
                                                          stall_sheet.texture,
-                                                         part.coords));
+                                                         part.coords.flip_horizontal()));
     }
 
     curtain_layer.AddSprite(stall_sheet.CreateSpriteChain("curtain_straight.png",
