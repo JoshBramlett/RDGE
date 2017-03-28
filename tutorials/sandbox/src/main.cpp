@@ -24,6 +24,7 @@ int main ()
     //settings.target_height = 1080;
     settings.window_title = "sandbox";
     settings.enable_png   = true;
+    settings.resizable    = true;
 
     // 1) Initialize SDL
     Application app(settings);

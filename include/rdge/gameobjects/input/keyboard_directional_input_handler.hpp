@@ -33,7 +33,8 @@ public:
 
     //! \brief Default KeyboardDirectionalInputHandler ctor
     //! \details Key mappings default to WASD.
-    KeyboardDirectionalInputHandler (void) = default;
+    //! \param [in] facing Initial facing direction
+    KeyboardDirectionalInputHandler (Direction facing = Direction::SOUTH);
 
     //! \brief KeyboardDirectionalInputHandler ctor
     //! \details Provides setup for custom key bindings.
@@ -41,15 +42,17 @@ public:
     //! \param [in] keymap_left Key bound to the left (west) direction
     //! \param [in] keymap_down Key bound to the down (south) direction
     //! \param [in] keymap_right Key bound to the right (east) direction
-    explicit KeyboardDirectionalInputHandler (ScanCode keymap_up,
-                                              ScanCode keymap_left,
-                                              ScanCode keymap_down,
-                                              ScanCode keymap_right);
+    //! \param [in] facing Initial facing direction
+    explicit KeyboardDirectionalInputHandler (ScanCode  keymap_up,
+                                              ScanCode  keymap_left,
+                                              ScanCode  keymap_down,
+                                              ScanCode  keymap_right,
+                                              Direction facing = Direction::SOUTH);
 
     //! \brief KeyboardDirectionalInputHandler subscript operator
     //! \details Retrieves key mapping by \ref Direction.  Key mappings exist for
-    //!          only NESW directions, and the returned result is a reference to
-    //!          allow setting a new mapping.  e.g.
+    //!          only cardinal (NESW) directions, and the returned result is a
+    //!          reference to allow setting a new mapping.  e.g.
     //! \code{.cpp}
     //! my_handler[Direction::NORTH] = ScanCode::UP;
     //! \endcode

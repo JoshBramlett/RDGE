@@ -17,54 +17,43 @@ Player::Player (void)
     //////////////////
     // idle animation
     //////////////////
-    this->states.emplace_back(std::make_unique<idle_state>());
-    auto& idle = this->states.back();
-
-    idle->animations.emplace_back(sheet.GetAnimation("idle_front"));
-    idle->animations.emplace_back(sheet.GetAnimation("idle_right"));
-    idle->animations.emplace_back(sheet.GetAnimation("idle_back"));
-    idle->animations.emplace_back(sheet.GetAnimation("idle_left"));
+    cd_anim_blink.animations.emplace_back(sheet.GetAnimation("idle_back"));
+    cd_anim_blink.animations.emplace_back(sheet.GetAnimation("idle_right"));
+    cd_anim_blink.animations.emplace_back(sheet.GetAnimation("idle_front"));
+    cd_anim_blink.animations.emplace_back(sheet.GetAnimation("idle_left"));
 
     //////////////////
     // walking animation
     //////////////////
-    this->states.emplace_back(std::make_unique<walking_state>());
-    auto& walking = this->states.back();
-
-    walking->animations.emplace_back(sheet.GetAnimation("walk_front"));
-    walking->animations.emplace_back(sheet.GetAnimation("walk_right"));
-    walking->animations.emplace_back(sheet.GetAnimation("walk_back"));
-    walking->animations.emplace_back(sheet.GetAnimation("walk_left"));
+    cd_anim_walk.animations.emplace_back(sheet.GetAnimation("walk_back"));
+    cd_anim_walk.animations.emplace_back(sheet.GetAnimation("walk_right"));
+    cd_anim_walk.animations.emplace_back(sheet.GetAnimation("walk_front"));
+    cd_anim_walk.animations.emplace_back(sheet.GetAnimation("walk_left"));
 
     //////////////////
     // running animation
     //////////////////
-    this->states.emplace_back(std::make_unique<running_state>());
-    auto& running = this->states.back();
-
-    running->animations.emplace_back(sheet.GetAnimation("run_front"));
-    running->animations.emplace_back(sheet.GetAnimation("run_right"));
-    running->animations.emplace_back(sheet.GetAnimation("run_back"));
-    running->animations.emplace_back(sheet.GetAnimation("run_left"));
+    cd_anim_run.animations.emplace_back(sheet.GetAnimation("run_back"));
+    cd_anim_run.animations.emplace_back(sheet.GetAnimation("run_right"));
+    cd_anim_run.animations.emplace_back(sheet.GetAnimation("run_front"));
+    cd_anim_run.animations.emplace_back(sheet.GetAnimation("run_left"));
 
     this->sprite = sheet.CreateSprite("idle_front_1", vec3(0.f, 0.f, 0.f));
     this->sprite->debug_bounds.show = true;
 
-    this->current_state = this->states[static_cast<uint32>(PlayerStateType::Idle)].get();
+    user_input.disp.unit_length = 64.f;
+    user_input.disp.base_velocities.push_back(10.f);
+    user_input.disp.base_velocities.push_back(20.f);
 
-    this->vdisp.unit_length = 64.f;
-    this->vdisp.base_velocities.push_back(10.f);
-    this->vdisp.base_velocities.push_back(20.f);
-
-    this->adisp.unit_length = 64.f;
-    this->adisp.base_velocities.push_back(10.f);
-    this->adisp.base_velocities.push_back(20.f);
+    user_input.facing = Direction::SOUTH;
+    current_animation = &cd_anim_blink[user_input.facing];
 }
 
 void
 Player::OnEvent (const Event& event)
 {
-    dir_handler.OnEvent(event);
+    //dir_handler.OnEvent(event);
+    user_input.dir_handler.OnEvent(event);
 
     if (event.IsKeyboardEvent())
     {
@@ -76,7 +65,8 @@ Player::OnEvent (const Event& event)
 
         if (args.PhysicalKey() == ScanCode::J)
         {
-            run_pressed = args.IsKeyPressed();
+            //run_pressed = args.IsKeyPressed();
+            user_input.run_button_pressed = args.IsKeyPressed();
         }
     }
 }
@@ -84,98 +74,39 @@ Player::OnEvent (const Event& event)
 void
 Player::OnUpdate (const delta_time& dt)
 {
-    this->current_state_changed = false;
-
-    auto result_pair = dir_handler.Calculate();
-    auto& uvec = result_pair.first;
-
-    bool is_moving = uvec.x != 0.f || uvec.y != 0.f;
-    bool is_running = is_moving && run_pressed;
-    bool is_walking = is_moving && !run_pressed;
-
-    // displacement using acceleration
-    //this->adisp.calculate(uvec, dt, (is_running) ? 1 : 0);
-
-    // displacement using velocity
-    if (is_moving)
+    user_input.calculate(dt);
+    uint32 ticks = dt.ticks;
+    if (!user_input.is_moving)
     {
-        this->vdisp.calculate(uvec, dt, (is_running) ? 1 : 0);
-    }
-
-    if (is_running && this->state_type != PlayerStateType::Running)
-    {
-        this->state_type = PlayerStateType::Running;
-        this->current_state = this->states[(uint32)PlayerStateType::Running].get();
-        this->current_state_changed = true;
-    }
-    else if (is_walking && this->state_type != PlayerStateType::Walking)
-    {
-        this->state_type = PlayerStateType::Walking;
-        this->current_state = this->states[(uint32)PlayerStateType::Walking].get();
-        this->current_state_changed = true;
-    }
-    else if (!is_moving && this->state_type != PlayerStateType::Idle)
-    {
-        this->state_type = PlayerStateType::Idle;
-        this->current_state = this->states[(uint32)PlayerStateType::Idle].get();
-        this->current_state_changed = true;
-    }
-
-    switch (result_pair.second)
-    {
-    case Direction::NORTH:
-        facing = PlayerFacing::Back;
-        break;
-    case Direction::EAST:
-        facing = PlayerFacing::Right;
-        break;
-    case Direction::SOUTH:
-        facing = PlayerFacing::Front;
-        break;
-    case Direction::WEST:
-        facing = PlayerFacing::Left;
-        break;
-    default:
-        facing = PlayerFacing::Front;
-        break;
-    }
-
-    vops::UpdatePosition(this->sprite->vertices, uvec);
-    vops::SetTexCoords(this->sprite->vertices,
-                       this->current_state->GetFrame(*this, dt.ticks).coords);
-}
-
-const texture_part&
-idle_state::GetFrame (const Player& player, uint32 ticks)
-{
-    auto& anim = this->animations[(int)player.facing];
-    if (player.current_state_changed || anim.IsFinished())
-    {
-        anim.Reset();
-        this->offset = 0;
-    }
-
-    this->offset += ticks;
-    if (this->offset < 4000)
-    {
+        // TODO No blinking animation enabled - but the first frame is used for
+        //      the oon-moving (idle) state.  To enable I need to set a counter
+        //      for the time idle, and play the animation after the threshold has
+        //      been met.  Also need to reset the animation if finished.
+        //
+        //      if (player.current_state_changed || anim.IsFinished())
+        //      {
+        //          anim.Reset();
+        //          offset = 0;
+        //      }
+        //
+        //      offset += ticks;
+        //      if (offset < 4000)
+        //      {
+        //          ticks = 0;
+        //      }
         ticks = 0;
+        current_animation = &cd_anim_blink[user_input.facing];
+    }
+    else if (user_input.is_walking)
+    {
+        current_animation = &cd_anim_walk[user_input.facing];
+    }
+    else if (user_input.is_running)
+    {
+        current_animation = &cd_anim_run[user_input.facing];
     }
 
-    return anim.GetFrame(ticks);
-}
-
-const texture_part&
-walking_state::GetFrame (const Player& player, uint32 ticks)
-{
-    auto& anim = this->animations[(uint32)player.facing];
-
-    return anim.GetFrame(ticks);
-}
-
-const texture_part&
-running_state::GetFrame (const Player& player, uint32 ticks)
-{
-    auto& anim = this->animations[(uint32)player.facing];
-
-    return anim.GetFrame(ticks);
+    vops::UpdatePosition(this->sprite->vertices, user_input.position_offset);
+    vops::SetTexCoords(this->sprite->vertices,
+                       current_animation->GetFrame(ticks).coords);
 }

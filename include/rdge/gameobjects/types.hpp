@@ -12,7 +12,7 @@
 namespace rdge {
 
 //! \enum Direction
-//! \brief Direction bitmask
+//! \brief Bitmask representing cardinal and primary intercardinal directions
 //! \note is_enum_bitmask is enabled and supports bitwise operations
 enum class Direction : uint8
 {

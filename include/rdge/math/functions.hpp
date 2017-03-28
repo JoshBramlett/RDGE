@@ -58,6 +58,15 @@ sign (T val) noexcept
     return (T(0) < val) - (val < T(0));
 }
 
+//! \brief Get the position of the least significant bit
+//! \param [in] val Value to check
+//! \returns One plus the lsb index, or zero if the parameter is zero
+constexpr int32 lsb (int64 val) noexcept
+{
+    // TODO Add Windows support
+    return __builtin_ffsll(val);
+}
+
 //! \brief Check if value is a power of two
 //! \param [in] val Value to check
 //! \returns True if value is a power of two, false otherwise

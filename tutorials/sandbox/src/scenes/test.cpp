@@ -25,9 +25,9 @@ TestScene::TestScene (void)
                                                  vec2(1920.f, 1080.f)));
 
     Random rng;
-    for (float y = -540.f; y < 540.f; y += 128.f)
+    for (float y = -540.f; y < 540.f; y += 64.f)
     {
-        for (float x = -960.f; x < 960.f; x += 128.f)
+        for (float x = -960.f; x < 960.f; x += 64.f)
         {
             auto random = rng.Next(15);
             if (random == 0)

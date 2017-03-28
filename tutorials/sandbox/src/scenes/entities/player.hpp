@@ -11,50 +11,15 @@
 #include <vector>
 #include <memory>
 
-enum class PlayerStateType : rdge::uint32
+class CardinalDirectionAnimation
 {
-    Idle,
-    Walking,
-    Running
-};
-
-enum class PlayerFacing : rdge::uint32
-{
-    Front,
-    Right,
-    Back,
-    Left
-};
-
-class Player;
-
-struct player_state
-{
-    virtual ~player_state (void) = default;
-
-    virtual const rdge::texture_part& GetFrame (const Player& player,
-                                                rdge::uint32 ticks) = 0;
+public:
+    rdge::Animation& operator[] (rdge::Direction dir)
+    {
+        return animations[rdge::math::lsb(rdge::to_underlying(dir)) - 1];
+    }
 
     std::vector<rdge::Animation> animations;
-};
-
-struct idle_state : public player_state
-{
-    virtual const rdge::texture_part& GetFrame (const Player& player,
-                                                rdge::uint32 ticks) override;
-    rdge::uint32 offset = 0;
-};
-
-struct walking_state : public player_state
-{
-    virtual const rdge::texture_part& GetFrame (const Player& player,
-                                                rdge::uint32 ticks) override;
-};
-
-struct running_state : public player_state
-{
-    virtual const rdge::texture_part& GetFrame (const Player& player,
-                                                rdge::uint32 ticks) override;
 };
 
 class Player
@@ -66,23 +31,39 @@ public:
     void OnUpdate (const rdge::delta_time& dt);
 
 public:
-    PlayerStateType state_type = PlayerStateType::Idle;
-    PlayerFacing facing = PlayerFacing::Front;
+    rdge::Animation* current_animation = nullptr;
+    CardinalDirectionAnimation cd_anim_blink;
+    CardinalDirectionAnimation cd_anim_walk;
+    CardinalDirectionAnimation cd_anim_run;
 
+    struct stateful_user_input {
+        // user input handler
+        rdge::KeyboardDirectionalInputHandler dir_handler;
+        bool run_button_pressed = false;
 
+        // displacement calculations
+        velocity_displacement disp;
 
+        // frame states
+        rdge::Direction facing = rdge::Direction::NONE;
+        rdge::math::vec2 position_offset;
+        bool is_moving = false;
+        bool is_walking = false;
+        bool is_running = false;
 
-    rdge::KeyboardDirectionalInputHandler dir_handler;
-    bool run_pressed = false;
-    velocity_displacement vdisp;
-    acceleration_displacement adisp;
+        void calculate (const rdge::delta_time& dt)
+        {
+            auto dir_pair = dir_handler.Calculate();
+            position_offset = dir_pair.first;
+            facing = dir_pair.second;
 
+            is_moving = position_offset.x != 0.f || position_offset.y != 0.f;
+            is_walking = is_moving && !run_button_pressed;
+            is_running = is_moving && run_button_pressed;
 
-
-
-    std::vector<std::unique_ptr<player_state>> states;
-    player_state* current_state = nullptr;
-    bool current_state_changed = false;
+            disp.calculate(position_offset, dt, (is_running) ? 1 : 0);
+        }
+    } user_input;
 
     std::shared_ptr<rdge::Sprite> sprite;
 };

@@ -6,10 +6,16 @@
 
 namespace rdge {
 
-KeyboardDirectionalInputHandler::KeyboardDirectionalInputHandler (ScanCode keymap_up,
-                                                                  ScanCode keymap_left,
-                                                                  ScanCode keymap_down,
-                                                                  ScanCode keymap_right)
+KeyboardDirectionalInputHandler::KeyboardDirectionalInputHandler (Direction facing)
+    : m_facing(facing)
+{ }
+
+KeyboardDirectionalInputHandler::KeyboardDirectionalInputHandler (ScanCode  keymap_up,
+                                                                  ScanCode  keymap_left,
+                                                                  ScanCode  keymap_down,
+                                                                  ScanCode  keymap_right,
+                                                                  Direction facing)
+    : m_facing(facing)
 {
     m_mapping.up    = keymap_up;
     m_mapping.left  = keymap_left;
@@ -20,8 +26,10 @@ KeyboardDirectionalInputHandler::KeyboardDirectionalInputHandler (ScanCode keyma
 ScanCode&
 KeyboardDirectionalInputHandler::operator[] (Direction direction)
 {
-    // NOTE Direction is a bitmask, therefore lookup is manual instead of by
-    //      index (and why a struct was chosen instead of an array).
+    // NOTE Alternative solution could be to store the keys in an array
+    //      and use the least significant bit intrinsic to compute the
+    //      index.  I don't believe there'd be any noticable performance
+    //      gain for changing it, but it's worth noting.
 
     switch (direction)
     {
@@ -121,11 +129,14 @@ KeyboardDirectionalInputHandler::Calculate (void)
         return std::make_pair(m_displacement, m_facing);
     }
 
+    // TODO Required b/c is_enum_bitmask operators are in the global scope.
+    //      Investigate moving operators inside rdge namespace and see if they
+    //      can still be used in the global namespace.  Also on line 87.
     using ::operator!=;
-    m_displacement.y += ((m_stateMask & Direction::NORTH) != 0) ? 1.f : 0.f;
-    m_displacement.x += ((m_stateMask & Direction::EAST) != 0) ? 1.f : 0.f;
-    m_displacement.y += ((m_stateMask & Direction::SOUTH) != 0) ? -1.f : 0.f;
-    m_displacement.x += ((m_stateMask & Direction::WEST) != 0) ? -1.f : 0.f;
+    m_displacement.y += ((m_stateMask & Direction::NORTH) != 0u) ? 1.f : 0.f;
+    m_displacement.x += ((m_stateMask & Direction::EAST) != 0u) ? 1.f : 0.f;
+    m_displacement.y += ((m_stateMask & Direction::SOUTH) != 0u) ? -1.f : 0.f;
+    m_displacement.x += ((m_stateMask & Direction::WEST) != 0u) ? -1.f : 0.f;
 
     bool move_on_x = !math::fp_eq(m_displacement.x, 0.f);
     bool move_on_y = !math::fp_eq(m_displacement.y, 0.f);
