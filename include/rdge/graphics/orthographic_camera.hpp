@@ -14,18 +14,38 @@
 namespace rdge {
 
 //! \class OrthographicCamera
-//! \details
+//! \brief Camera with an orthographic projection
+//! \details The camera region is represented with point [0,0] in the center of
+//!          the screen, and the edges being half the viewport size in both negative
+//!          (left and bottom) and positive (right and top) directions.
 class OrthographicCamera
 {
 public:
+    //! \brief OrthographicCamera default ctor
+    //! \details Creates an orthographic camera using the width and height values
+    //!          queried from the OpenGL viewport.
     OrthographicCamera (void);
 
+    //! \brief OrthographicCamera default ctor
+    //! \details Creates an orthographic camera with custom width and height values.
+    //! \param [in] width Viewport width
+    //! \param [in] height Viewport height
     explicit OrthographicCamera (float width, float height);
 
+    //! \brief Build matrices from the cached data
+    //! \details Rebuilds the view and projection matrices, and multiplies them to
+    //!          create the combined matrix.
     void Update (void);
 
+    //! \brief Translate the position of the camera
+    //! \param [in] displacement Position offset vector
+    //! \note Update will need to be called afterwards to apply the translation.
     void Translate (const math::vec2& displacement);
 
+    //! \brief Rotate the camera by the provided angle
+    //! \details Rotation is performed on the z-axis.
+    //! \param [in] angle Angle (in degrees) to rotate
+    //! \note Update will need to be called afterwards to apply the rotation.
     void Rotate (float angle);
 
 public:
@@ -35,7 +55,7 @@ public:
 
     math::mat4 projection;       //!< Projection matrix
     math::mat4 view;             //!< View matrix
-    math::mat4 combined;         //!< Combined view/projection matrix
+    math::mat4 combined;         //!< Combined projection/view matrix (in that order)
     math::mat4 inverse_combined; //!< Inverse of the combined matrix
 
     float near = 0.f;   //!< Near clipping plane

@@ -2,6 +2,7 @@
 //! \author Josh Bramlett
 //! \version 0.0.10
 //! \date 11/23/2016
+//! \see http://graphics.stanford.edu/~seander/bithacks.html
 
 #pragma once
 

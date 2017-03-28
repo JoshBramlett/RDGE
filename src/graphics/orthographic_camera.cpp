@@ -22,13 +22,15 @@ OrthographicCamera::OrthographicCamera (float width, float height)
 void
 OrthographicCamera::Update (void)
 {
-    this->projection = mat4::orthographic(zoom * -(viewport_size.w / 2.f),
-                                          zoom * (viewport_size.w / 2.f),
-                                          zoom * -(viewport_size.h / 2.f),
-                                          zoom * (viewport_size.h / 2.f),
-                                          near,
-                                          far);
-    this->view = mat4::look_at(position, (position + direction), up);
+    this->projection = mat4::orthographic(this->zoom * -(this->viewport_size.w / 2.f),
+                                          this->zoom * (this->viewport_size.w / 2.f),
+                                          this->zoom * -(this->viewport_size.h / 2.f),
+                                          this->zoom * (this->viewport_size.h / 2.f),
+                                          this->near,
+                                          this->far);
+    this->view = mat4::look_at(this->position,                   // camera eye
+                               this->position + this->direction, // what to look at
+                               this->up);                        // world "up"
     this->combined = this->projection * this->view;
 }
 

@@ -35,11 +35,16 @@ public:
     CardinalDirectionAnimation cd_anim_blink;
     CardinalDirectionAnimation cd_anim_walk;
     CardinalDirectionAnimation cd_anim_run;
+    CardinalDirectionAnimation cd_anim_sheathe;
+    CardinalDirectionAnimation cd_anim_fight;
 
     struct stateful_user_input {
         // user input handler
         rdge::KeyboardDirectionalInputHandler dir_handler;
         bool run_button_pressed = false;
+
+        bool sheathe_button_pressed = false; // TODO temp - for testing
+        bool fight_button_pressed = false; // TODO temp - for testing
 
         // displacement calculations
         velocity_displacement disp;

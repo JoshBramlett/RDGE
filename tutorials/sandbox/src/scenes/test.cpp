@@ -75,6 +75,7 @@ TestScene::OnUpdate (const delta_time& dt)
 void
 TestScene::OnRender (void)
 {
+    camera.Translate(player.user_input.position_offset);
     camera.Update();
     render_target->SetProjection(camera.combined);
 

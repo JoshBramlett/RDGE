@@ -38,6 +38,22 @@ Player::Player (void)
     cd_anim_run.animations.emplace_back(sheet.GetAnimation("run_front"));
     cd_anim_run.animations.emplace_back(sheet.GetAnimation("run_left"));
 
+    //////////////////
+    // sheathe animation
+    //////////////////
+    cd_anim_sheathe.animations.emplace_back(sheet.GetAnimation("sheathe_back"));
+    cd_anim_sheathe.animations.emplace_back(sheet.GetAnimation("sheathe_right"));
+    cd_anim_sheathe.animations.emplace_back(sheet.GetAnimation("sheathe_front"));
+    cd_anim_sheathe.animations.emplace_back(sheet.GetAnimation("sheathe_left"));
+
+    //////////////////
+    // fight stance animation
+    //////////////////
+    cd_anim_fight.animations.emplace_back(sheet.GetAnimation("fight_stance_back"));
+    cd_anim_fight.animations.emplace_back(sheet.GetAnimation("fight_stance_right"));
+    cd_anim_fight.animations.emplace_back(sheet.GetAnimation("fight_stance_front"));
+    cd_anim_fight.animations.emplace_back(sheet.GetAnimation("fight_stance_left"));
+
     this->sprite = sheet.CreateSprite("idle_front_1", vec3(0.f, 0.f, 0.f));
     this->sprite->debug_bounds.show = true;
 
@@ -52,7 +68,6 @@ Player::Player (void)
 void
 Player::OnEvent (const Event& event)
 {
-    //dir_handler.OnEvent(event);
     user_input.dir_handler.OnEvent(event);
 
     if (event.IsKeyboardEvent())
@@ -65,8 +80,15 @@ Player::OnEvent (const Event& event)
 
         if (args.PhysicalKey() == ScanCode::J)
         {
-            //run_pressed = args.IsKeyPressed();
             user_input.run_button_pressed = args.IsKeyPressed();
+        }
+        else if (args.PhysicalKey() == ScanCode::K)
+        {
+            user_input.sheathe_button_pressed = args.IsKeyPressed();
+        }
+        else if (args.PhysicalKey() == ScanCode::L)
+        {
+            user_input.fight_button_pressed = args.IsKeyPressed();
         }
     }
 }
@@ -76,7 +98,19 @@ Player::OnUpdate (const delta_time& dt)
 {
     user_input.calculate(dt);
     uint32 ticks = dt.ticks;
-    if (!user_input.is_moving)
+    if (user_input.sheathe_button_pressed)
+    {
+        current_animation = &cd_anim_sheathe[user_input.facing];
+        //if (current_animation->IsFinished())
+        //{
+            //current_animation->Reset();
+        //}
+    }
+    else if (user_input.fight_button_pressed)
+    {
+        current_animation = &cd_anim_fight[user_input.facing];
+    }
+    else if (!user_input.is_moving)
     {
         // TODO No blinking animation enabled - but the first frame is used for
         //      the oon-moving (idle) state.  To enable I need to set a counter

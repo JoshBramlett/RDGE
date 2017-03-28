@@ -530,7 +530,7 @@
   	{
   	  "name": "fight_stance_front",
   	  "mode": "looppingpong",
-  	  "interval": 100,
+  	  "interval": 180,
   	  "frames": [
   	    { "name": "fight_stance_front_1" },
   	    { "name": "fight_stance_front_2" },
@@ -540,7 +540,7 @@
   	{
   	  "name": "fight_stance_back",
   	  "mode": "looppingpong",
-  	  "interval": 100,
+  	  "interval": 180,
   	  "frames": [
   	    { "name": "fight_stance_back_1" },
   	    { "name": "fight_stance_back_2" },
@@ -550,7 +550,7 @@
   	{
   	  "name": "fight_stance_right",
   	  "mode": "looppingpong",
-  	  "interval": 100,
+  	  "interval": 180,
   	  "frames": [
   	    { "name": "fight_stance_side_1" },
   	    { "name": "fight_stance_side_2" },
@@ -560,7 +560,7 @@
   	{
   	  "name": "fight_stance_left",
   	  "mode": "looppingpong",
-  	  "interval": 100,
+  	  "interval": 180,
   	  "frames": [
   	    { "name": "fight_stance_side_1", "flip": "horizontal" },
   	    { "name": "fight_stance_side_2", "flip": "horizontal" },
