@@ -42,7 +42,9 @@ ShootingGalleryScene::ShootingGalleryScene (void)
 
     // Load and set custom cursor
     const auto& clip = hud_sheet["crosshair_blue_large.png"].clip;
-    crosshair = Cursor(hud_sheet.surface->CreateSubSurface(clip), clip.w / 2, clip.h / 2);
+    crosshair = Cursor(hud_sheet.surface->CreateSubSurface(clip),
+                       clip.width() / 2,
+                       clip.height() / 2);
     SetCursor(crosshair);
 
     ///////////////////

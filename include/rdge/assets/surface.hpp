@@ -142,7 +142,7 @@ public:
     //!          Note The managed surface is unmodified.
     //! \param [in] clip Sub-surface coordinates
     //! \returns New Surface object
-    Surface CreateSubSurface (const rect& clip);
+    Surface CreateSubSurface (const screen_rect& clip);
 
 private:
     SDL_Surface*             m_surface = nullptr;

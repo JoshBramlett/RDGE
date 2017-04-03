@@ -39,7 +39,7 @@ class Animation;
 struct texture_part
 {
     std::string  name;    //!< Unique name
-    rect         clip;    //!< Unmodified clipping rectangle
+    screen_rect  clip;    //!< Unmodified clipping rectangle
     math::uivec2 size;    //!< Size in pixels (scaled)
     math::uivec2 hotspot; //!< Origin used for drawing offsets (scaled)
     tex_coords   coords;  //!< Normalized texture coordinates

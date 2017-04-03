@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <rdge/core.hpp>
-#include <rdge/math/functions.hpp>
+#include <rdge/math/intrinsics.hpp>
 #include <cmath>
 
 using namespace rdge;

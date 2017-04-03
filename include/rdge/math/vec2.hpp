@@ -6,7 +6,7 @@
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/math/functions.hpp>
+#include <rdge/math/intrinsics.hpp>
 
 #include <cassert>
 
@@ -20,7 +20,7 @@ template <typename T, typename = void>
 struct vec2_t;
 
 //! \struct vec2_t
-//! \brief SFINAE specialized two element container
+//! \brief Arithmetic typed two element container
 template <typename T>
 struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
 {
@@ -29,7 +29,7 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
 
     //! \brief Number of elements
     //! \returns size_t type
-    constexpr size_t size (void) const noexcept
+    constexpr size_t size (void) const
     {
         return 2;
     }
@@ -71,7 +71,7 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     //!       initialization or explicit conversions.
     //! \returns Copy with casted underlying types
     template <typename U>
-    explicit constexpr operator vec2_t<U> (void) const noexcept
+    explicit constexpr operator vec2_t<U> (void) const
     {
         return vec2_t<U>(static_cast<U>(x), static_cast<U>(y));
     }
@@ -79,7 +79,7 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     //! \brief vec2_t subscript operator
     //! \param [in] index Index of containing element
     //! \returns Reference to element
-    constexpr T& operator[] (uint8 index) noexcept
+    constexpr T& operator[] (uint8 index)
     {
         assert(index < size());
         return (&x)[index];
@@ -88,7 +88,7 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     //! \brief vec2_t subscript operator
     //! \param [in] index Index of containing element
     //! \returns Const reference to element
-    constexpr const T& operator[] (uint8 index) const noexcept
+    constexpr const T& operator[] (uint8 index) const
     {
         assert(index < size());
         return (&x)[index];
@@ -98,7 +98,7 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     //! \param [in] rhs vec2_t to add
     //! \returns Reference to self
     template <typename U>
-    constexpr vec2_t<T>& operator+= (const vec2_t<U>& rhs) noexcept
+    constexpr vec2_t<T>& operator+= (const vec2_t<U>& rhs)
     {
         x += static_cast<T>(rhs.x);
         y += static_cast<T>(rhs.y);
@@ -110,7 +110,7 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     //! \returns Reference to self
     template <typename U>
     constexpr typename std::enable_if_t<std::is_arithmetic<U>::value, vec2_t<T>&>
-    operator+= (U scalar) noexcept
+    operator+= (U scalar)
     {
         x += static_cast<T>(scalar);
         y += static_cast<T>(scalar);
@@ -121,7 +121,7 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     //! \param [in] rhs vec2_t to subtract
     //! \returns Reference to self
     template <typename U>
-    constexpr vec2_t<T>& operator-= (const vec2_t<U>& rhs) noexcept
+    constexpr vec2_t<T>& operator-= (const vec2_t<U>& rhs)
     {
         x -= static_cast<T>(rhs.x);
         y -= static_cast<T>(rhs.y);
@@ -133,7 +133,7 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     //! \returns Reference to self
     template <typename U>
     constexpr typename std::enable_if_t<std::is_arithmetic<U>::value, vec2_t<T>&>
-    operator-= (U scalar) noexcept
+    operator-= (U scalar)
     {
         x -= static_cast<T>(scalar);
         y -= static_cast<T>(scalar);
@@ -144,7 +144,7 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     //! \param [in] rhs vec2_t to multiply
     //! \returns Reference to self
     template <typename U>
-    constexpr vec2_t<T>& operator*= (const vec2_t<U>& rhs) noexcept
+    constexpr vec2_t<T>& operator*= (const vec2_t<U>& rhs)
     {
         x *= static_cast<T>(rhs.x);
         y *= static_cast<T>(rhs.y);
@@ -156,7 +156,7 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     //! \returns Reference to self
     template <typename U>
     constexpr typename std::enable_if_t<std::is_arithmetic<U>::value, vec2_t<T>&>
-    operator*= (U scalar) noexcept
+    operator*= (U scalar)
     {
         x *= static_cast<T>(scalar);
         y *= static_cast<T>(scalar);
@@ -167,7 +167,7 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     //! \param [in] rhs vec2_t representing the divisor
     //! \returns Reference to self (quotient)
     template <typename U>
-    constexpr vec2_t<T>& operator/= (const vec2_t<U>& rhs) noexcept
+    constexpr vec2_t<T>& operator/= (const vec2_t<U>& rhs)
     {
         assert(rhs.x != 0 && rhs.y != 0);
         x /= static_cast<T>(rhs.x);
@@ -180,7 +180,7 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     //! \returns Reference to self (quotient)
     template <typename U>
     constexpr typename std::enable_if_t<std::is_arithmetic<U>::value, vec2_t<T>&>
-    operator/= (U scalar) noexcept
+    operator/= (U scalar)
     {
         assert(scalar != 0);
         x /= static_cast<T>(scalar);
@@ -192,7 +192,7 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     //! \param [in] rhs vec2_t representing the divisor
     //! \returns Reference to self (remainder)
     template <typename U>
-    constexpr vec2_t<T>& operator%= (const vec2_t<U>& rhs) noexcept
+    constexpr vec2_t<T>& operator%= (const vec2_t<U>& rhs)
     {
         x %= static_cast<T>(rhs.x);
         y %= static_cast<T>(rhs.y);
@@ -204,11 +204,18 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     //! \returns Reference to self (remainder)
     template <typename U>
     constexpr typename std::enable_if_t<std::is_arithmetic<U>::value, vec2_t<T>&>
-    operator%= (U scalar) noexcept
+    operator%= (U scalar)
     {
         x %= static_cast<T>(scalar);
         y %= static_cast<T>(scalar);
         return *this;
+    }
+
+    //! \brief Absolute value of the vector
+    //! \returns Vector containing absolute values
+    constexpr vec2_t<T> abs (void) const
+    {
+        return vec2_t<T>(math::abs(x), math::abs(y));
     }
 
     //! \brief Vector length (magnitude)
@@ -224,7 +231,7 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     //! \details Sum of the corresponding products within the containers.
     //! \param [in] other Other vec2_t used in the calculation
     //! \returns Dot product of the vectors
-    constexpr float dot (const vec2_t<T>& other) const noexcept
+    constexpr float dot (const vec2_t<T>& other) const
     {
         static_assert(std::is_floating_point<T>::value,
                       "'dot' is only available for floating point types");
@@ -233,7 +240,7 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
 
     //! \brief Get a vector perpendicular to the object
     //! \returns Perpendicular vector
-    constexpr vec2_t<T> perp (void) const noexcept
+    constexpr vec2_t<T> perp (void) const
     {
         static_assert(std::is_floating_point<T>::value,
                       "'perp' is only available for floating point types");
@@ -246,9 +253,8 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
 //! \param [in] rhs Right side vec2_t to compare
 //! \returns True iff vectors are identical
 template <typename T>
-constexpr bool operator== (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexcept
+constexpr bool operator== (const vec2_t<T>& lhs, const vec2_t<T>& rhs)
 {
-    // TODO floating point values need their own equality/inequality using fp_eq
     return (lhs.x == rhs.x) && (lhs.y == rhs.y);
 }
 
@@ -257,7 +263,7 @@ constexpr bool operator== (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexcept
 //! \param [in] rhs Right side vec2_t to compare
 //! \returns True iff vectors are not identical
 template <typename T>
-constexpr bool operator!= (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexcept
+constexpr bool operator!= (const vec2_t<T>& lhs, const vec2_t<T>& rhs)
 {
     return !(lhs == rhs);
 }
@@ -266,7 +272,7 @@ constexpr bool operator!= (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexcept
 //! \param [in] value vec2_t to negate
 //! \returns Negated vec2_t
 template <typename T>
-constexpr vec2_t<T> operator- (const vec2_t<T>& value) noexcept
+constexpr vec2_t<T> operator- (const vec2_t<T>& value)
 {
     return vec2_t<T>(-value.x, -value.y);
 }
@@ -276,7 +282,7 @@ constexpr vec2_t<T> operator- (const vec2_t<T>& value) noexcept
 //! \param [in] rhs Right side vec2_t
 //! \returns vec2_t of resultant values
 template <typename T>
-constexpr vec2_t<T> operator+ (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexcept
+constexpr vec2_t<T> operator+ (const vec2_t<T>& lhs, const vec2_t<T>& rhs)
 {
     return vec2_t<T>(lhs.x + rhs.x, lhs.y + rhs.y);
 }
@@ -287,7 +293,7 @@ constexpr vec2_t<T> operator+ (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexc
 //! \returns vec2_t of resultant values
 template <typename T, typename U>
 constexpr typename std::enable_if_t<std::is_arithmetic<U>::value, vec2_t<T>>
-operator+ (const vec2_t<T>& vec, U scalar) noexcept
+operator+ (const vec2_t<T>& vec, U scalar)
 {
     return vec2_t<T>(vec.x + static_cast<T>(scalar), vec.y + static_cast<T>(scalar));
 }
@@ -297,7 +303,7 @@ operator+ (const vec2_t<T>& vec, U scalar) noexcept
 //! \param [in] rhs Right side vec2_t
 //! \returns vec2_t of resultant values
 template <typename T>
-constexpr vec2_t<T> operator- (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexcept
+constexpr vec2_t<T> operator- (const vec2_t<T>& lhs, const vec2_t<T>& rhs)
 {
     return vec2_t<T>(lhs.x - rhs.x, lhs.y - rhs.y);
 }
@@ -308,7 +314,7 @@ constexpr vec2_t<T> operator- (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexc
 //! \returns vec2_t of resultant values
 template <typename T, typename U>
 constexpr typename std::enable_if_t<std::is_arithmetic<U>::value, vec2_t<T>>
-operator- (const vec2_t<T>& vec, U scalar) noexcept
+operator- (const vec2_t<T>& vec, U scalar)
 {
     return vec2_t<T>(vec.x - static_cast<T>(scalar), vec.y - static_cast<T>(scalar));
 }
@@ -318,7 +324,7 @@ operator- (const vec2_t<T>& vec, U scalar) noexcept
 //! \param [in] rhs Right side vec2_t
 //! \returns vec2_t of resultant values
 template <typename T>
-constexpr vec2_t<T> operator* (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexcept
+constexpr vec2_t<T> operator* (const vec2_t<T>& lhs, const vec2_t<T>& rhs)
 {
     return vec2_t<T>(lhs.x * rhs.x, lhs.y * rhs.y);
 }
@@ -330,14 +336,14 @@ constexpr vec2_t<T> operator* (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexc
 //! \returns vec2_t of resultant values
 template <typename T, typename U>
 constexpr typename std::enable_if_t<std::is_arithmetic<U>::value, vec2_t<T>>
-operator* (const vec2_t<T>& vec, U scalar) noexcept
+operator* (const vec2_t<T>& vec, U scalar)
 {
     return vec2_t<T>(vec.x * static_cast<T>(scalar), vec.y * static_cast<T>(scalar));
 }
 
 template <typename T, typename U>
 constexpr typename std::enable_if_t<std::is_arithmetic<U>::value, vec2_t<T>>
-operator* (U scalar, const vec2_t<T>& vec) noexcept
+operator* (U scalar, const vec2_t<T>& vec)
 {
     return vec * scalar;
 }
@@ -348,10 +354,9 @@ operator* (U scalar, const vec2_t<T>& vec) noexcept
 //! \param [in] rhs Right side vec2_t denominator
 //! \returns vec2_t of resultant values (quotient)
 template <typename T>
-constexpr vec2_t<T> operator/ (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexcept
+constexpr vec2_t<T> operator/ (const vec2_t<T>& lhs, const vec2_t<T>& rhs)
 {
-    static_assert(rhs.x == 0, "vec2_t attempting to divide by zero");
-    static_assert(rhs.y == 0, "vec2_t attempting to divide by zero");
+    assert(rhs.x != 0 && rhs.y != 0);
     return vec2_t<T>(lhs.x / rhs.x, lhs.y / rhs.y);
 }
 
@@ -360,12 +365,9 @@ constexpr vec2_t<T> operator/ (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexc
 //! \param [in] scalar Denominator
 //! \returns vec2_t of resultant values (quotient)
 template <typename T>
-constexpr vec2_t<T> operator/ (const vec2_t<T>& vec, T scalar) noexcept
+constexpr vec2_t<T> operator/ (const vec2_t<T>& vec, T scalar)
 {
-    static_assert(scalar == 0, "vec2_t attempting to divide by zero");
-    // TODO Test whether I need to check for the type (if it's required I do 0.0 for floats)
-    //      If so, update all div operators.  Example:
-    //static_assert(std::is_integral<T>::value && scalar == 0, "vec2_t attempting to divide by zero");
+    assert(scalar != 0);
     return vec2_t<T>(vec.x / scalar, vec.y / scalar);
 }
 
@@ -374,7 +376,7 @@ constexpr vec2_t<T> operator/ (const vec2_t<T>& vec, T scalar) noexcept
 //! \param [in] rhs Right side vec2_t divisor
 //! \returns vec2_t of resultant values (remainder)
 template <typename T>
-constexpr vec2_t<T> operator% (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexcept
+constexpr vec2_t<T> operator% (const vec2_t<T>& lhs, const vec2_t<T>& rhs)
 {
     return vec2_t<T>(lhs.x % rhs.x, lhs.y % rhs.y);
 }
@@ -384,7 +386,7 @@ constexpr vec2_t<T> operator% (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexc
 //! \param [in] scalar Divisor
 //! \returns vec2_t of resultant values (remainder)
 template <typename T>
-constexpr vec2_t<T> operator% (const vec2_t<T>& vec, T scalar) noexcept
+constexpr vec2_t<T> operator% (const vec2_t<T>& vec, T scalar)
 {
     return vec2_t<T>(vec.x % scalar, vec.y % scalar);
 }
@@ -399,11 +401,9 @@ inline std::ostream& operator<< (std::ostream& os, const vec2_t<T>& value)
     return os << "[" << value.x << ", " << value.y << "]";
 }
 
-//! \typedef Default vec2 float type
-using vec2   = vec2_t<float>;
-using uivec2 = vec2_t<uint32>;
-
-// TODO Add to_string function
+using vec2   = vec2_t<float>;  //!< Default floating point type
+using uivec2 = vec2_t<uint32>; //!< Unsigned (useful for size types)
+using ivec2  = vec2_t<int32>;  //!< Signed (useful for screen coordinates)
 
 } // namespace math
 } // namespace rdge

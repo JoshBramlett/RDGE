@@ -6,7 +6,7 @@
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/math/functions.hpp>
+#include <rdge/math/intrinsics.hpp>
 #include <rdge/math/vec2.hpp>
 
 #include <ostream>
@@ -72,7 +72,7 @@ struct vec3
     //! \brief vec3 memberwise addition
     //! \param [in] rhs vec3 to add
     //! \returns Reference to self
-    constexpr vec3& operator+= (const vec3& rhs) noexcept
+    constexpr vec3& operator+= (const vec3& rhs)
     {
         x += rhs.x;
         y += rhs.y;
@@ -83,7 +83,7 @@ struct vec3
     //! \brief vec3 memberwise addition (x and y components only)
     //! \param [in] rhs vec2 to add
     //! \returns Reference to self
-    constexpr vec3& operator+= (const vec2& rhs) noexcept
+    constexpr vec3& operator+= (const vec2& rhs)
     {
         x += rhs.x;
         y += rhs.y;
@@ -93,7 +93,7 @@ struct vec3
     //! \brief vec3 memberwise subtraction
     //! \param [in] rhs vec3 to subtract
     //! \returns Reference to self
-    constexpr vec3& operator-= (const vec3& rhs) noexcept
+    constexpr vec3& operator-= (const vec3& rhs)
     {
         x -= rhs.x;
         y -= rhs.y;
@@ -104,12 +104,19 @@ struct vec3
     //! \brief vec3 memberwise multiplication
     //! \param [in] rhs vec3 to multiply
     //! \returns Reference to self
-    constexpr vec3& operator*= (const vec3& rhs) noexcept
+    constexpr vec3& operator*= (const vec3& rhs)
     {
         x *= rhs.x;
         y *= rhs.y;
         z *= rhs.z;
         return *this;
+    }
+
+    //! \brief Get the xy coordinate vec2
+    //! \returns vec2 containing the x and y coordinates
+    constexpr vec2 xy (void) const
+    {
+        return { x, y };
     }
 
     //!@{

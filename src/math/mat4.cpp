@@ -1,5 +1,5 @@
 #include <rdge/math/mat4.hpp>
-#include <rdge/math/functions.hpp>
+#include <rdge/math/intrinsics.hpp>
 #include <rdge/internal/logger_macros.hpp>
 #include <rdge/internal/hints.hpp>
 

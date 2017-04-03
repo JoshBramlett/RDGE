@@ -6,7 +6,6 @@
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/graphics/point.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/system/keyboard.hpp>
 #include <rdge/system/mouse.hpp>
@@ -242,10 +241,10 @@ public:
     }
 
     //! \brief Cursor location in window coordinates
-    //! \returns Point containing the window coordinates
-    constexpr rdge::point CursorLocation (void) const
+    //! \returns Point of window coordinates
+    constexpr math::ivec2 CursorLocation (void) const
     {
-        return rdge::point(x, y);
+        return math::ivec2(x, y);
     }
 
     //! \brief Cursor location in normalized device coordinates
@@ -315,28 +314,28 @@ public:
     }
 
     //! \brief Cursor location in window coordinates
-    //! \returns Point object containing the window coordinates
-    constexpr rdge::point CursorLocation (void) const
+    //! \returns Point of window coordinates
+    constexpr math::ivec2 CursorLocation (void) const
     {
-        return rdge::point(x, y);
+        return math::ivec2(x, y);
     }
 
     //! \brief Cursor location in normalized device coordinates
     //! \returns vec2 containing the NDC
     //! \note If the call to get the window (which is used in the calculation)
     //!       fails, the value returned will be {0.0f, 0.0f}
-    rdge::math::vec2 CursorLocationInNDC (void) const;
+    math::vec2 CursorLocationInNDC (void) const;
 
     //! \brief Motion relative to the last event call
-    //! \returns Point object containing the relative x and y values
-    constexpr rdge::point RelativeMotion (void) const
+    //! \returns Point of relative x and y values
+    constexpr math::ivec2 RelativeMotion (void) const
     {
-        return rdge::point(xrel, yrel);
+        return math::ivec2(xrel, yrel);
     }
 
     //! \brief Device identifier of the mouse
     //! \returns Device identifier as stored in SDL
-    constexpr rdge::uint32 DeviceID (void) const
+    constexpr uint32 DeviceID (void) const
     {
         return which;
     }

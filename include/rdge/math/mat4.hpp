@@ -6,7 +6,6 @@
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/math/functions.hpp>
 #include <rdge/math/vec3.hpp>
 #include <rdge/math/vec4.hpp>
 

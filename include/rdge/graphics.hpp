@@ -6,7 +6,6 @@
 #include <rdge/graphics/isprite.hpp>
 #include <rdge/graphics/layers/sprite_layer.hpp>
 #include <rdge/graphics/orthographic_camera.hpp>
-#include <rdge/graphics/point.hpp>
 #include <rdge/graphics/rect.hpp>
 #include <rdge/graphics/shader.hpp>
 #include <rdge/graphics/sprite.hpp>

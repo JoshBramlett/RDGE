@@ -25,7 +25,7 @@ namespace math {
 //! \see http://en.cppreference.com/w/cpp/types/numeric_limits/epsilon
 template <typename T>
 constexpr typename std::enable_if_t<std::is_floating_point<T>::value, bool>
-fp_eq (T x, T y) noexcept
+fp_eq (T x, T y)
 {
     return (std::isnan(x) && std::isnan(y)) ||
            (std::isinf(x) && std::isinf(y)) ||
@@ -42,7 +42,7 @@ fp_eq (T x, T y) noexcept
 //! \returns Clamped value
 template <typename T>
 constexpr typename std::enable_if_t<std::is_arithmetic<T>::value, T>
-clamp (T val, T lbound, T ubound) noexcept
+clamp (T val, T lbound, T ubound)
 {
     return std::max(lbound, std::min(val, ubound));
 }
@@ -54,15 +54,25 @@ clamp (T val, T lbound, T ubound) noexcept
 //! \returns Integer representing the sign
 template <typename T>
 constexpr typename std::enable_if_t<std::is_arithmetic<T>::value, int32>
-sign (T val) noexcept
+sign (T val)
 {
     return (T(0) < val) - (val < T(0));
+}
+
+//! \brief Get the absolute value
+//! \param [in] val Value to compute
+//! \returns Converted positive value
+template <typename T>
+constexpr typename std::enable_if_t<std::is_arithmetic<T>::value, T>
+abs (T val)
+{
+    return ((val) < 0 ? -(val) : (val));
 }
 
 //! \brief Get the position of the least significant bit
 //! \param [in] val Value to check
 //! \returns One plus the lsb index, or zero if the parameter is zero
-constexpr int32 lsb (int64 val) noexcept
+constexpr int32 lsb (int64 val)
 {
     // TODO Add Windows support
     return __builtin_ffsll(val);
@@ -71,7 +81,7 @@ constexpr int32 lsb (int64 val) noexcept
 //! \brief Check if value is a power of two
 //! \param [in] val Value to check
 //! \returns True if value is a power of two, false otherwise
-constexpr bool is_pot (uint64 val) noexcept
+constexpr bool is_pot (uint64 val)
 {
     return (val != 0) && ((val & (val - 1)) == 0);
 }
@@ -81,7 +91,7 @@ constexpr bool is_pot (uint64 val) noexcept
 //! \returns Value in radians
 template <typename T>
 constexpr typename std::enable_if_t<std::is_floating_point<T>::value, T>
-to_radians (T degrees) noexcept
+to_radians (T degrees)
 {
     return static_cast<T>(degrees * (M_PI / 180.f));
 }
@@ -91,7 +101,7 @@ to_radians (T degrees) noexcept
 //! \returns Value in degrees
 template <typename T>
 constexpr typename std::enable_if_t<std::is_floating_point<T>::value, T>
-to_degrees (T radians) noexcept
+to_degrees (T radians)
 {
     return static_cast<T>(radians * (180.f / M_PI));
 }

@@ -403,7 +403,7 @@ Window::SetSize (uint32 width, uint32 height)
 }
 
 void
-Window::SetCursorLocation (const rdge::point& location)
+Window::SetCursorLocation (const rdge::math::ivec2& location)
 {
     SDL_WarpMouseInWindow(m_window, location.x, location.y);
 }

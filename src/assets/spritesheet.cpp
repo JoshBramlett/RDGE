@@ -1,6 +1,6 @@
 #include <rdge/assets/spritesheet.hpp>
 #include <rdge/math/vec2.hpp>
-#include <rdge/math/functions.hpp>
+#include <rdge/math/intrinsics.hpp>
 #include <rdge/util/io.hpp>
 #include <rdge/util/strings.hpp>
 #include <rdge/internal/exception_macros.hpp>
@@ -62,7 +62,8 @@ ProcessTexturePart (const json& part, const math::uivec2& surface_size, uint32 s
 
     texture_part result;
     result.name = name;
-    result.clip = rect(x, y, w, h);
+    result.clip = screen_rect(SDL_Rect { static_cast<int32>(x), static_cast<int32>(y),
+                                         static_cast<int32>(w), static_cast<int32>(h) });
     result.size = { w * scale, h * scale };
     result.hotspot = { hotspot_x * scale, hotspot_y * scale };
     result.coords.bottom_left  = math::vec2(normalize(x, surface_size.w),

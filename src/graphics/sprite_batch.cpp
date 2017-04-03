@@ -9,6 +9,7 @@
 #include <GL/glew.h>
 
 #include <algorithm> // std::generate
+#include <utility> // std::pair
 #include <sstream>
 
 namespace {
@@ -17,6 +18,59 @@ using namespace rdge;
 
 constexpr uint32 VERTEX_SIZE = sizeof(sprite_vertex);
 constexpr uint32 SPRITE_SIZE = VERTEX_SIZE * 4;
+
+std::pair<std::string, std::string>
+DefaultShaderSource (void)
+{
+    std::ostringstream vert;
+    vert << "#version 330 core\n"
+         //
+         << "layout (location = " << SpriteBatch::VATTR_POS_INDEX   << ") in vec4 position;\n"
+         << "layout (location = " << SpriteBatch::VATTR_UV_INDEX    << ") in vec2 uv;\n"
+         << "layout (location = " << SpriteBatch::VATTR_TID_INDEX   << ") in uint tid;\n"
+         << "layout (location = " << SpriteBatch::VATTR_COLOR_INDEX << ") in vec4 color;\n"
+         //
+         << "uniform mat4 " << SpriteBatch::UNI_PROJ_MATRIX << ";\n"
+         //
+         << "out vertex_attributes"
+         << "{\n"
+         << "  vec4 pos;\n"
+         << "  vec2 uv;\n"
+         << "  flat uint tid;\n"
+         << "  vec4 color;\n"
+         << "} vertex;\n"
+         //
+         << "void main()\n"
+         << "{\n"
+         << "  vertex.pos   = position;\n"
+         << "  vertex.uv    = uv;\n"
+         << "  vertex.tid   = tid;\n"
+         << "  vertex.color = color;\n"
+         << "  gl_Position  = " << SpriteBatch::UNI_PROJ_MATRIX << " * position;\n"
+         << "}\n";
+
+    std::ostringstream frag;
+    frag << "#version 330 core\n"
+         //
+         << "layout (location = 0) out vec4 color;\n"
+         //
+         << "uniform sampler2D " << SpriteBatch::UNI_SAMPLER_ARR << "[" << Shader::MaxFragmentShaderUnits() << "];\n"
+         //
+         << "in vertex_attributes"
+         << "{\n"
+         << "  vec4 pos;\n"
+         << "  vec2 uv;\n"
+         << "  flat uint tid;\n"
+         << "  vec4 color;\n"
+         << "} vertex;\n"
+         //
+         << "void main()\n"
+         << "{\n"
+         << "  color = vertex.color * texture(" << SpriteBatch::UNI_SAMPLER_ARR << "[vertex.tid], vertex.uv);\n"
+         << "}\n";
+
+    return std::make_pair(vert.str(), frag.str());
+}
 
 } // anonymous namespace
 
@@ -349,59 +403,6 @@ SpriteBatch::PopTransformation (void)
     }
 
     m_transform = &m_transformStack.back();
-}
-
-std::pair<std::string, std::string>
-SpriteBatch::DefaultShaderSource (void) const
-{
-    std::ostringstream vert;
-    vert << "#version 330 core\n"
-         //
-         << "layout (location = " << VATTR_POS_INDEX   << ") in vec4 position;\n"
-         << "layout (location = " << VATTR_UV_INDEX    << ") in vec2 uv;\n"
-         << "layout (location = " << VATTR_TID_INDEX   << ") in uint tid;\n"
-         << "layout (location = " << VATTR_COLOR_INDEX << ") in vec4 color;\n"
-         //
-         << "uniform mat4 " << UNI_PROJ_MATRIX << ";\n"
-         //
-         << "out vertex_attributes"
-         << "{\n"
-         << "  vec4 pos;\n"
-         << "  vec2 uv;\n"
-         << "  flat uint tid;\n"
-         << "  vec4 color;\n"
-         << "} vertex;\n"
-         //
-         << "void main()\n"
-         << "{\n"
-         << "  vertex.pos   = position;\n"
-         << "  vertex.uv    = uv;\n"
-         << "  vertex.tid   = tid;\n"
-         << "  vertex.color = color;\n"
-         << "  gl_Position  = " << UNI_PROJ_MATRIX << " * position;\n"
-         << "}\n";
-
-    std::ostringstream frag;
-    frag << "#version 330 core\n"
-         //
-         << "layout (location = 0) out vec4 color;\n"
-         //
-         << "uniform sampler2D " << UNI_SAMPLER_ARR << "[" << Shader::MaxFragmentShaderUnits() << "];\n"
-         //
-         << "in vertex_attributes"
-         << "{\n"
-         << "  vec4 pos;\n"
-         << "  vec2 uv;\n"
-         << "  flat uint tid;\n"
-         << "  vec4 color;\n"
-         << "} vertex;\n"
-         //
-         << "void main()\n"
-         << "{\n"
-         << "  color = vertex.color * texture(" << UNI_SAMPLER_ARR << "[vertex.tid], vertex.uv);\n"
-         << "}\n";
-
-    return std::make_pair(vert.str(), frag.str());
 }
 
 } // namespace rdge

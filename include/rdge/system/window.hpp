@@ -8,7 +8,6 @@
 #include <rdge/core.hpp>
 #include <rdge/application.hpp>
 #include <rdge/graphics/color.hpp>
-#include <rdge/graphics/point.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/math/vec4.hpp>
 #include <rdge/assets/surface.hpp>
@@ -167,7 +166,7 @@ public:
 
     //! \brief Set the cursor location
     //! \param [in] location Point containing the x and y coordinates
-    void SetCursorLocation (const point& location);
+    void SetCursorLocation (const math::ivec2& location);
 
     //! \brief Set the background color
     //! \details Color presented to the screen before any drawing takes place

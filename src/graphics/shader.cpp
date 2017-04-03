@@ -88,9 +88,6 @@ Link (const std::vector<uint32>& shaders)
 
 namespace rdge {
 
-Shader::Shader (void)
-{ }
-
 Shader::Shader (const std::string& vert_source, const std::string& frag_source)
 {
     std::vector<uint32> shaders;
@@ -151,6 +148,18 @@ Shader::SetUniformValue (const std::string& name, float value)
 }
 
 void
+Shader::SetUniformValue (const std::string& name, uint32 count, int32* values)
+{
+    opengl::SetUniformValue1iv(GetUniformLocation(name), count, values);
+}
+
+void
+Shader::SetUniformValue (const std::string& name, uint32 count, float* values)
+{
+    opengl::SetUniformValue1fv(GetUniformLocation(name), count, values);
+}
+
+void
 Shader::SetUniformValue (const std::string& name, const math::vec2& vec)
 {
     opengl::SetUniformValue2f(GetUniformLocation(name), vec.x, vec.y);
@@ -166,18 +175,6 @@ void
 Shader::SetUniformValue (const std::string& name, const math::vec4& vec)
 {
     opengl::SetUniformValue4f(GetUniformLocation(name), vec.x, vec.y, vec.z, vec.w);
-}
-
-void
-Shader::SetUniformValue (const std::string& name, uint32 count, int32* values)
-{
-    opengl::SetUniformValue1iv(GetUniformLocation(name), count, values);
-}
-
-void
-Shader::SetUniformValue (const std::string& name, uint32 count, float* values)
-{
-    opengl::SetUniformValue1fv(GetUniformLocation(name), count, values);
 }
 
 void

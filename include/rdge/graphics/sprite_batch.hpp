@@ -15,7 +15,6 @@
 #include <memory>
 #include <vector>
 #include <array>
-#include <utility> // std::pair
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
@@ -46,19 +45,13 @@ public:
     //! \brief SpriteBatch default ctor
     //! \details Creates a rendering buffer for the provided sprite count.  If no
     //!          shader is provided a default shader will be used.  The projection
-    //!          matrix is an orthographic projection based on the aspect ratio
-    //!          of the OpenGL viewport.
+    //!          is initialized to an orthographic based on the dimensions retrieved
+    //!          from the OpenGL viewport.
     //! \param [in] capacity Max number of sprites that can be submitted
     //! \param [in] shader Compatable shader
     //! \param [in] enable_blending Enable blending
     //! \throws rdge::Exception Initialization failure
     //! \warning Shader source must follow the required fields/values specification
-    // TODO Might need to update last statement in the details depending on how
-    //      I decide to implement the camera.
-    // TODO It'll throw if there's a memory alloc failure.  I wonder if a fatal state
-    //      should be treated differently.  e.g. Create a FATAL macro which could
-    //      write out and flush the log buffer, maybe suspending the calling thread
-    //      until the flush is done?
     explicit SpriteBatch (uint16                  capacity        = 1000,
                           std::shared_ptr<Shader> shader          = nullptr,
                           bool                    enable_blending = true);
@@ -66,8 +59,7 @@ public:
     //! \brief SpriteBatch dtor
     ~SpriteBatch (void) noexcept;
 
-    //!@{
-    //! \brief Non-copyable, move enabled
+    //!@{ Non-copyable, move enabled
     SpriteBatch (const SpriteBatch&) = delete;
     SpriteBatch& operator= (const SpriteBatch&) = delete;
     SpriteBatch (SpriteBatch&&) noexcept;
@@ -118,10 +110,6 @@ public:
 
     //! \brief Pop the top-most transformation off the stack
     void PopTransformation (void);
-
-    //! \brief Default shader source
-    //! \returns Pair containing the vertex and fragment shader source
-    std::pair<std::string, std::string> DefaultShaderSource (void) const;
 
     //! \brief SpriteBatch capacity (aka maximum submission count)
     //! \returns Capacity

@@ -8,6 +8,7 @@
 #include <rdge/core.hpp>
 #include <rdge/graphics/isprite.hpp>
 #include <rdge/graphics/color.hpp>
+#include <rdge/graphics/rect.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/math/vec3.hpp>
 
@@ -27,6 +28,12 @@ GetSize (const SpriteVertices& vertices)
 {
     return { (vertices[2].pos.x - vertices[0].pos.x),
              (vertices[2].pos.y - vertices[0].pos.y) };
+}
+
+constexpr rect
+GetRect (const SpriteVertices& vertices)
+{
+    return { vertices[0].pos.xy(), vertices[2].pos.xy() };
 }
 
 inline void

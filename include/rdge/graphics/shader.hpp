@@ -31,7 +31,7 @@ class Shader
 {
 public:
     //! \brief Shader default ctor
-    Shader (void);
+    Shader (void) = default;
 
     //! \brief Shader ctor
     //! \details Loads and compiles the shader source.
@@ -44,61 +44,28 @@ public:
     //! \details Deletes the shader program from the OpenGL context
     ~Shader (void) noexcept;
 
-    //!@{
-    //! \brief Non-copyable, move enabled
+    //!@{ Non-copyable, move enabled
     Shader (const Shader&) = delete;
     Shader& operator= (const Shader&) = delete;
     Shader (Shader&&) noexcept;
     Shader& operator= (Shader&&) noexcept;
     //!@}
 
-    //! \brief Installs the program as part of current rendering state
+    //!@{ Install/uninstall the program as part of the current rendering state
     void Enable (void) const;
-
-    //! \brief Uninstalls the program as part of current rendering state
     void Disable (void) const;
+    //!@}
 
-    //! \brief Set the integer uniform variable value
-    //! \param [in] name Name of the uniform variable
-    //! \param [in] value Value to set the uniform to
+    //!@{ Uniform setter overloads
     void SetUniformValue (const std::string& name, int32 value);
-
-    //! \brief Set the float uniform variable value
-    //! \param [in] name Name of the uniform variable
-    //! \param [in] value Value to set the uniform to
     void SetUniformValue (const std::string& name, float value);
-
-    //! \brief Set the vec2 float uniform variable value
-    //! \param [in] name Name of the uniform variable
-    //! \param [in] value Value to set the uniform to
-    void SetUniformValue (const std::string& name, const math::vec2& vec);
-
-    //! \brief Set the vec3 float uniform variable value
-    //! \param [in] name Name of the uniform variable
-    //! \param [in] value Value to set the uniform to
-    void SetUniformValue (const std::string& name, const math::vec3& vec);
-
-    //! \brief Set the vec4 float uniform variable value
-    //! \param [in] name Name of the uniform variable
-    //! \param [in] value Value to set the uniform to
-    void SetUniformValue (const std::string& name, const math::vec4& vec);
-
-    //! \brief Set the integer array uniform variable value
-    //! \param [in] name Name of the uniform variable
-    //! \param [in] count Number of elements to be modified
-    //! \param [in] values Array of values to update
     void SetUniformValue (const std::string& name, uint32 count, int32* values);
-
-    //! \brief Set the float array uniform variable value
-    //! \param [in] name Name of the uniform variable
-    //! \param [in] count Number of elements to be modified
-    //! \param [in] values Array of values to update
     void SetUniformValue (const std::string& name, uint32 count, float* values);
-
-    //! \brief Set the mat4 float uniform variable value
-    //! \param [in] name Name of the uniform variable
-    //! \param [in] matrix Matrix to update
+    void SetUniformValue (const std::string& name, const math::vec2& vec);
+    void SetUniformValue (const std::string& name, const math::vec3& vec);
+    void SetUniformValue (const std::string& name, const math::vec4& vec);
     void SetUniformValue (const std::string& name, const math::mat4& matrix);
+    //!@}
 
     //! \brief Create a program from source files
     //! \details Performs all setup as defined in the constructor.

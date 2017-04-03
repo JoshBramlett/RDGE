@@ -98,19 +98,7 @@ Player::OnUpdate (const delta_time& dt)
 {
     user_input.calculate(dt);
     uint32 ticks = dt.ticks;
-    if (user_input.sheathe_button_pressed)
-    {
-        current_animation = &cd_anim_sheathe[user_input.facing];
-        //if (current_animation->IsFinished())
-        //{
-            //current_animation->Reset();
-        //}
-    }
-    else if (user_input.fight_button_pressed)
-    {
-        current_animation = &cd_anim_fight[user_input.facing];
-    }
-    else if (!user_input.is_moving)
+    if (!user_input.is_moving)
     {
         // TODO No blinking animation enabled - but the first frame is used for
         //      the oon-moving (idle) state.  To enable I need to set a counter
@@ -128,8 +116,19 @@ Player::OnUpdate (const delta_time& dt)
         //      {
         //          ticks = 0;
         //      }
-        ticks = 0;
-        current_animation = &cd_anim_blink[user_input.facing];
+        if (user_input.sheathe_button_pressed)
+        {
+            current_animation = &cd_anim_sheathe[user_input.facing];
+        }
+        else if (user_input.fight_button_pressed)
+        {
+            current_animation = &cd_anim_fight[user_input.facing];
+        }
+        else
+        {
+            ticks = 0;
+            current_animation = &cd_anim_blink[user_input.facing];
+        }
     }
     else if (user_input.is_walking)
     {
@@ -138,6 +137,15 @@ Player::OnUpdate (const delta_time& dt)
     else if (user_input.is_running)
     {
         current_animation = &cd_anim_run[user_input.facing];
+    }
+
+    auto prect = vops::GetRect(this->sprite->vertices);
+    if (prect.left() + user_input.position_offset.x < -960.f ||
+        prect.right() + user_input.position_offset.x > 960.f ||
+        prect.bottom() + user_input.position_offset.y < -540.f ||
+        prect.top() + user_input.position_offset.y > 540.f)
+    {
+        user_input.position_offset = {0.f, 0.f};
     }
 
     vops::UpdatePosition(this->sprite->vertices, user_input.position_offset);
