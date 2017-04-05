@@ -1,15 +1,11 @@
 #include <rdge/core.hpp>
 #include <rdge/application.hpp>
-
-#include <rdge/gameobjects/game.hpp>
-#include <rdge/gameobjects/iscene.hpp>
-
 #include <rdge/events/event.hpp>
-#include <rdge/system/window.hpp>
-
 #include <rdge/assets.hpp>
+#include <rdge/gameobjects.hpp>
 #include <rdge/graphics.hpp>
 #include <rdge/math.hpp>
+#include <rdge/system.hpp>
 
 #include "scenes/test.hpp"
 

@@ -32,7 +32,7 @@ DefaultShaderSource (void)
          //
          << "uniform mat4 " << SpriteBatch::UNI_PROJ_MATRIX << ";\n"
          //
-         << "out vertex_attributes"
+         << "out vertex_attributes\n"
          << "{\n"
          << "  vec4 pos;\n"
          << "  vec2 uv;\n"
@@ -56,7 +56,7 @@ DefaultShaderSource (void)
          //
          << "uniform sampler2D " << SpriteBatch::UNI_SAMPLER_ARR << "[" << Shader::MaxFragmentShaderUnits() << "];\n"
          //
-         << "in vertex_attributes"
+         << "in vertex_attributes\n"
          << "{\n"
          << "  vec4 pos;\n"
          << "  vec2 uv;\n"
@@ -177,15 +177,13 @@ SpriteBatch::SpriteBatch (uint16 capacity, std::shared_ptr<Shader> shader, bool 
     int32 n = 0;
     std::generate(texture_units.begin(), texture_units.end(), [&n]{ return n++; });
 
-    // The projection maintains the width and height of the viewport by setting the
-    // the origin to the center and spanning half on each direction
-    auto viewport = opengl::GetViewport();
-    auto width  = viewport[2] / 2.f;
-    auto height = viewport[3] / 2.f;
     // TODO Figure out how depth is generally defined for an orthographic projection.  In
     //      the OrthographicCamera (taken from libgdx, near=0 and far=100).  LUL (and
     //      maybe some other sources) were setting it to NDC values (near=-1 and far=1)
     //m_projection = math::mat4::orthographic(-width, width, -height, height, -1.f, 1.f);
+    auto viewport = opengl::GetViewport();
+    auto width  = viewport[2] / 2.f;
+    auto height = viewport[3] / 2.f;
     m_projection = math::mat4::orthographic(-width, width, -height, height, 0.f, 100.f);
 
     m_shader->Enable();
@@ -210,10 +208,11 @@ SpriteBatch::SpriteBatch (uint16 capacity, std::shared_ptr<Shader> shader, bool 
     PushTransformation(math::mat4::identity(), true);
 
     std::ostringstream ss;
-    ss << "SpriteBatch[" << this << "] constructed:"
+    ss << "SpriteBatch[" << this << "]"
        << " capacity=" << m_capacity
-       << " vbo_size=" << vbo_size
-       << " ibo_size=" << ibo_size;
+       << " vao[" << m_vao << "]"
+       << " vbo[" << m_vbo << "].size=" << vbo_size
+       << " ibo[" << m_ibo << "].size=" << ibo_size;
     DLOG(ss.str());
 }
 

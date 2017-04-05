@@ -29,9 +29,11 @@
 #include <rdge/core.hpp>
 #include <rdge/util/logger.hpp>
 
-#include <SDL.h>
+#ifdef RDGE_DEBUG
+#include <rdge/debug.hpp>
+#endif
 
-#include <string>
+#include <SDL.h>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {

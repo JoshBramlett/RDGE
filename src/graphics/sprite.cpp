@@ -1,6 +1,8 @@
 #include <rdge/graphics/sprite.hpp>
 #include <rdge/graphics/vops.hpp>
 
+#include <rdge/debug.hpp>
+
 #include <SDL_assert.h>
 
 namespace rdge {
@@ -57,18 +59,14 @@ Sprite::Draw (SpriteBatch& renderer)
     // makes sure the texture ids match.
     SDL_assert(!m_texture || this->vertices[0].tid == m_texture->unit_id);
 
+    renderer.Submit(this->vertices);
+
 #if RDGE_DEBUG
     if (this->debug_bounds.show)
     {
-        SpriteVertices bounds;
-        vops::ClonePosition(this->vertices, bounds);
-        vops::SetDefaultTexCoords(bounds);
-        vops::SetColor(bounds, this->debug_bounds.draw_color);
-        renderer.Submit(bounds);
+        debug::DrawWireFrame(this->vertices, this->debug_bounds.draw_color);
     }
 #endif
-
-    renderer.Submit(this->vertices);
 }
 
 void

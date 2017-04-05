@@ -10,99 +10,99 @@
 #include <cerrno>
 #include <utility>
 
-using namespace rdge::util;
 using namespace std::chrono;
 
-namespace {
-    // Select Graphic Rendition Codes (used for console formatting)
-    // https://en.wikipedia.org/wiki/ANSI_escape_code
-    enum class SGRCode : rdge::uint16
-    {
-        Reset             = 0,
-        Bold              = 1,
-        Underline         = 4,
-        SlowBlink         = 5,
-        BoldOff           = 22,
-        UnderlineOff      = 24,
-        SlowBlinkOff      = 25,
-        BlackText         = 30,
-        RedText           = 31,
-        GreenText         = 32,
-        YellowText        = 33,
-        BlueText          = 34,
-        MagentaText       = 35,
-        CyanText          = 36,
-        WhiteText         = 37,
-        DefaultText       = 39,
-        BlackBackground   = 40,
-        RedBackground     = 41,
-        GreenBackground   = 42,
-        YellowBackground  = 43,
-        BlueBackground    = 44,
-        MagentaBackground = 45,
-        CyanBackground    = 46,
-        WhiteBackground   = 47,
-        DefaultBackground = 49
-    };
+namespace rdge {
+namespace util {
 
-    std::ostream& operator<< (std::ostream& os, SGRCode code)
+// Select Graphic Rendition Codes (used for console formatting)
+// https://en.wikipedia.org/wiki/ANSI_escape_code
+enum class SGRCode : rdge::uint16
+{
+    Reset             = 0,
+    Bold              = 1,
+    Underline         = 4,
+    SlowBlink         = 5,
+    BoldOff           = 22,
+    UnderlineOff      = 24,
+    SlowBlinkOff      = 25,
+    BlackText         = 30,
+    RedText           = 31,
+    GreenText         = 32,
+    YellowText        = 33,
+    BlueText          = 34,
+    MagentaText       = 35,
+    CyanText          = 36,
+    WhiteText         = 37,
+    DefaultText       = 39,
+    BlackBackground   = 40,
+    RedBackground     = 41,
+    GreenBackground   = 42,
+    YellowBackground  = 43,
+    BlueBackground    = 44,
+    MagentaBackground = 45,
+    CyanBackground    = 46,
+    WhiteBackground   = 47,
+    DefaultBackground = 49
+};
+
+std::ostream& operator<< (std::ostream& os, SGRCode code)
+{
+    return os << "\033[" << static_cast<rdge::uint16>(code) << "m";
+}
+
+std::ostream& operator<< (std::ostream& os, LogLevel level)
+{
+    switch (level)
     {
-        return os << "\033[" << static_cast<rdge::uint16>(code) << "m";
+    case LogLevel::DEBUG:
+        return os << "[DEBUG]";
+    case LogLevel::INFO:
+        return os << "[INFO]";
+    case LogLevel::WARNING:
+        return os << "[WARN]";
+    case LogLevel::ERROR:
+        return os << "[ERROR]";
+    case LogLevel::FATAL:
+        return os << "[FATAL]";
+    case LogLevel::CUSTOM:
+        return os << "[CUSTOM]";
+    default:
+        break;
     }
 
-    std::ostream& operator<< (std::ostream& os, LogLevel level)
-    {
-        switch (level)
-        {
-        case LogLevel::DEBUG:
-            return os << "[DEBUG]";
-        case LogLevel::INFO:
-            return os << "[INFO]";
-        case LogLevel::WARNING:
-            return os << "[WARN]";
-        case LogLevel::ERROR:
-            return os << "[ERROR]";
-        case LogLevel::FATAL:
-            return os << "[FATAL]";
-        case LogLevel::CUSTOM:
-            return os << "[CUSTOM]";
-        default:
-            break;
-        }
+    return os << "[UNKNOWN]";
+}
 
-        return os << "[UNKNOWN]";
+struct log_timestamp
+{
+    bool include_milliseconds = false;
+    bool use_gmt              = false;
+};
+
+std::ostream& operator<< (std::ostream& os, log_timestamp ts)
+{
+    auto chrono_now = system_clock::now();
+    time_t now = system_clock::to_time_t(chrono_now);
+    struct tm t = (ts.use_gmt) ? *gmtime(&now) : *localtime(&now);
+
+    auto epoch = chrono_now.time_since_epoch();
+    auto ms = duration_cast<milliseconds>(epoch).count() % 1000;
+
+    os << t.tm_year + 1900 << "/"
+       << std::setfill('0')
+       << std::setw(2) << t.tm_mon + 1 << "/"
+       << std::setw(2) << t.tm_mday << " "
+       << std::setw(2) << t.tm_hour << ":"
+       << std::setw(2) << t.tm_min << ":"
+       << std::setw(2) << t.tm_sec;
+
+    if (ts.include_milliseconds)
+    {
+        os << "." << std::setw(4) << ms;
     }
 
-    struct log_timestamp
-    {
-        bool include_milliseconds = false;
-        bool use_gmt              = false;
-    };
-
-    std::ostream& operator<< (std::ostream& os, log_timestamp ts)
-    {
-        auto chrono_now = system_clock::now();
-        time_t now = system_clock::to_time_t(chrono_now);
-        struct tm t = (ts.use_gmt) ? *gmtime(&now) : *localtime(&now);
-
-        auto epoch = chrono_now.time_since_epoch();
-        auto ms = duration_cast<milliseconds>(epoch).count() % 1000;
-
-        os << t.tm_year + 1900 << "/"
-           << std::setfill('0')
-           << std::setw(2) << t.tm_mon + 1 << "/"
-           << std::setw(2) << t.tm_mday << " "
-           << std::setw(2) << t.tm_hour << ":"
-           << std::setw(2) << t.tm_min << ":"
-           << std::setw(2) << t.tm_sec;
-
-        if (ts.include_milliseconds)
-        {
-            os << "." << std::setw(4) << ms;
-        }
-
-        return os << std::setfill(' ');
-    }
+    return os << std::setfill(' ');
 }
 
 //////////////////////////////////////////////////////////
@@ -132,7 +132,7 @@ ConsoleLogger::Write (
         auto out = (level >= LogLevel::ERROR) ? &std::cerr : &std::cout;
 
         log_timestamp ts { m_includeMilliseconds, m_useGMT };
-        std::stringstream location;
+        std::ostringstream location;
         if (!filename.empty() && line > 0)
         {
             location << "(" << filename << ":" << line << ") ";
@@ -365,3 +365,6 @@ ScopeLogger::~ScopeLogger (void)
 
     rdge::WriteToConsole(LogLevel::CUSTOM, ss.str());
 }
+
+} // namespace util
+} // namespace rdge

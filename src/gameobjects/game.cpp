@@ -2,6 +2,10 @@
 #include <rdge/util/timer.hpp>
 #include <rdge/internal/logger_macros.hpp>
 
+#if RDGE_DEBUG
+#include <rdge/debug.hpp>
+#endif
+
 #include <SDL_assert.h>
 
 namespace rdge {
@@ -78,6 +82,10 @@ Game::Run (void)
     bool using_vsync = this->window->IsUsingVSYNC();
     uint32 frame_cap = 1000 / this->settings.target_fps;
 
+#if RDGE_DEBUG
+    debug::InitializeRenderer();
+#endif
+
     m_running = true;
     timer.Start();
     while (m_running)
@@ -110,6 +118,9 @@ Game::Run (void)
         if (!(this->on_render_hook && this->on_render_hook()))
         {
             current_scene->OnRender();
+#if RDGE_DEBUG
+            debug::FlushRenderer();
+#endif
         }
         this->window->Present();
 

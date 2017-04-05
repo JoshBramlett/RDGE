@@ -77,6 +77,8 @@ add_library (
              src/assets/spritesheet.cpp
              src/assets/surface.cpp
 
+             src/debug/line_renderer.cpp
+
              src/events/event.cpp
 
              src/gameobjects/game.cpp

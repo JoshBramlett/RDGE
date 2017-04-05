@@ -5,6 +5,8 @@
 #include <rdge/system.hpp>
 #include <rdge/util.hpp>
 
+#include <rdge/debug.hpp>
+
 #include <SDL_assert.h>
 
 using namespace rdge;
@@ -80,4 +82,6 @@ TestScene::OnRender (void)
     render_target->SetProjection(camera.combined);
 
     background.Draw();
+
+    debug::SetProjection(camera.combined);
 }

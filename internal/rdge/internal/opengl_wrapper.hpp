@@ -11,6 +11,7 @@
 #include <GL/glew.h>
 #include <cstddef>
 #include <vector>
+#include <array>
 #include <type_traits>
 
 //! \namespace RDGE Rainbow Drop Game Engine
@@ -42,7 +43,7 @@ gl_throw_on_error (const char* func)
     GLenum code = glGetError();
     if (code != GL_NO_ERROR)
     {
-        GL_THROW("OpenGL call failed", func, static_cast<rdge::uint32>(code));
+        GL_THROW("OpenGL call failed", func, static_cast<uint32>(code));
     }
 }
 
@@ -70,7 +71,7 @@ do { \
 //! \param [in] pname Parameter name
 //! \see https://www.opengl.org/sdk/docs/man2/xhtml/glGet.xml
 inline bool
-GetBooleanValue (rdge::uint32 pname)
+GetBooleanValue (uint32 pname)
 {
     GLboolean value;
     GL_CHECK_ERROR(glGetBooleanv(pname, &value));
@@ -81,7 +82,7 @@ GetBooleanValue (rdge::uint32 pname)
 //! \param [in] pname Parameter name
 //! \see https://www.opengl.org/sdk/docs/man2/xhtml/glGet.xml
 inline float
-GetFloatValue (rdge::uint32 pname)
+GetFloatValue (uint32 pname)
 {
     GLfloat value;
     GL_CHECK_ERROR(glGetFloatv(pname, &value));
@@ -91,23 +92,49 @@ GetFloatValue (rdge::uint32 pname)
 //! \brief Query OpenGL for the integer value of a given parameter
 //! \param [in] pname Parameter name
 //! \see https://www.opengl.org/sdk/docs/man2/xhtml/glGet.xml
-inline rdge::int32
-GetIntegerValue (rdge::uint32 pname)
+inline int32
+GetIntegerValue (uint32 pname)
 {
     GLint value;
     GL_CHECK_ERROR(glGetIntegerv(pname, &value));
-    return static_cast<rdge::int32>(value);
+    return static_cast<int32>(value);
 }
 
 //! \brief Query OpenGL for the string value of a given parameter
 //! \param [in] name Parameter name
 //! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glGetString.xml
 inline std::string
-GetStringValue (rdge::uint32 name)
+GetStringValue (uint32 name)
 {
     const unsigned char* result;
     GL_CHECK_ERROR(result = glGetString(name));
     return reinterpret_cast<const char*>(result);
+}
+
+/******************************************************************
+ *                      Line Rasterization
+ *****************************************************************/
+
+//! \brief Get the supported line width max and min values
+//! \details Queries via glGet using GL_ALIASED_LINE_WIDTH_RANGE.
+//! \returns Array of floats including min and max values
+//! \see https://www.opengl.org/sdk/docs/man2/xhtml/glGet.xml
+inline std::array<float, 2>
+GetSupportedLineWidth (void)
+{
+    std::array<float, 2> result;
+    GL_CHECK_ERROR(glGetFloatv(GL_ALIASED_LINE_WIDTH_RANGE, result.data()));
+    return result;
+}
+
+//! \brief Specify the width of rasterized lines
+//! \param [in] width Line width
+//! \warning OpenGL spec does not require vendors support line width
+//! \see https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glLineWidth.xhtml
+inline void
+SetLineWidth (float width)
+{
+    GL_CHECK_ERROR(glLineWidth(width));
 }
 
 /******************************************************************
@@ -183,10 +210,10 @@ SetBlendEquation (uint32 mode_rgb, uint32 mode_alpha)
 //! \param [in] shader_type Type of shader to be created
 //! \returns Unique non-zero identifier
 //! \see https://www.opengl.org/sdk/docs/man/html/glCreateShader.xhtml
-inline rdge::uint32
-CreateShader (rdge::uint32 shader_type)
+inline uint32
+CreateShader (uint32 shader_type)
 {
-    rdge::uint32 handle;
+    uint32 handle;
     GL_CHECK_ERROR(handle = glCreateShader(shader_type));
     return handle;
 }
@@ -198,7 +225,7 @@ CreateShader (rdge::uint32 shader_type)
 //! \param [in] source Source code to be loaded into the shader
 //! \see https://www.opengl.org/sdk/docs/man/html/glShaderSource.xhtml
 inline void
-SetShaderSource (rdge::uint32 shader, const char** source)
+SetShaderSource (uint32 shader, const char** source)
 {
     GL_CHECK_ERROR(glShaderSource(shader, 1, source, nullptr));
 }
@@ -208,7 +235,7 @@ SetShaderSource (rdge::uint32 shader, const char** source)
 //! \param [in] shader Handle of the shader
 //! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glCompileShader.xml
 inline void
-CompileShader (rdge::uint32 shader)
+CompileShader (uint32 shader)
 {
     GL_CHECK_ERROR(glCompileShader(shader));
 }
@@ -218,7 +245,7 @@ CompileShader (rdge::uint32 shader)
 //! \param [in] shader Handle of the shader
 //! \see https://www.opengl.org/sdk/docs/man/html/glDeleteShader.xhtml
 inline void
-DeleteShader (rdge::uint32 shader)
+DeleteShader (uint32 shader)
 {
     GL_CHECK_ERROR(glDeleteShader(shader));
 }
@@ -227,10 +254,10 @@ DeleteShader (rdge::uint32 shader)
 //! \details Create a empty shader program object
 //! \returns Unique non-zero identifier
 //! \see https://www.opengl.org/sdk/docs/man2/xhtml/glCreateProgram.xml
-inline rdge::uint32
+inline uint32
 CreateProgram (void)
 {
-    rdge::uint32 handle;
+    uint32 handle;
     GL_CHECK_ERROR(handle = glCreateProgram());
     return handle;
 }
@@ -241,7 +268,7 @@ CreateProgram (void)
 //! \param [in] shader Handle of the shader
 //! \see https://www.opengl.org/sdk/docs/man/html/glAttachShader.xhtml
 inline void
-AttachShader (rdge::uint32 program, rdge::uint32 shader)
+AttachShader (uint32 program, uint32 shader)
 {
     GL_CHECK_ERROR(glAttachShader(program, shader));
 }
@@ -252,7 +279,7 @@ AttachShader (rdge::uint32 program, rdge::uint32 shader)
 //! \param [in] shader Handle of the shader
 //! \see https://www.opengl.org/sdk/docs/man/html/glDetachShader.xhtml
 inline void
-DetachShader (rdge::uint32 program, rdge::uint32 shader)
+DetachShader (uint32 program, uint32 shader)
 {
     GL_CHECK_ERROR(glDetachShader(program, shader));
 }
@@ -262,7 +289,7 @@ DetachShader (rdge::uint32 program, rdge::uint32 shader)
 //! \param [in] program Handle of the program
 //! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glLinkProgram.xml
 inline void
-LinkProgram (rdge::uint32 program)
+LinkProgram (uint32 program)
 {
     GL_CHECK_ERROR(glLinkProgram(program));
 }
@@ -274,7 +301,7 @@ LinkProgram (rdge::uint32 program)
 //!       program, and will have undefined behavior.
 //! \see https://www.opengl.org/sdk/docs/man/html/glUseProgram.xhtml
 inline void
-UseProgram (rdge::uint32 program)
+UseProgram (uint32 program)
 {
     GL_CHECK_ERROR(glUseProgram(program));
 }
@@ -285,10 +312,10 @@ UseProgram (rdge::uint32 program)
 //! \param [in] name Name of the uniform variable
 //! \returns Uniform variable location
 //! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glGetUniformLocation.xml
-inline rdge::int32
-GetUniformLocation (rdge::uint32 program, const std::string& name)
+inline int32
+GetUniformLocation (uint32 program, const std::string& name)
 {
-    rdge::int32 result;
+    int32 result;
     GL_CHECK_ERROR(result = glGetUniformLocation(program, name.c_str()));
     return result;
 }
@@ -299,7 +326,7 @@ GetUniformLocation (rdge::uint32 program, const std::string& name)
 //! \param [in] v0 Value to set
 //! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glUniform.xml
 inline void
-SetUniformValue1i (rdge::int32 location, rdge::int32 v0)
+SetUniformValue1i (int32 location, int32 v0)
 {
     GL_CHECK_ERROR(glUniform1i(location, v0));
 }
@@ -310,7 +337,7 @@ SetUniformValue1i (rdge::int32 location, rdge::int32 v0)
 //! \param [in] v0 Value to set
 //! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glUniform.xml
 inline void
-SetUniformValue1f (rdge::int32 location, float v0)
+SetUniformValue1f (int32 location, float v0)
 {
     GL_CHECK_ERROR(glUniform1f(location, v0));
 }
@@ -322,7 +349,7 @@ SetUniformValue1f (rdge::int32 location, float v0)
 //! \param [in] v1 Vector y value to set
 //! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glUniform.xml
 inline void
-SetUniformValue2f (rdge::int32 location, float v0, float v1)
+SetUniformValue2f (int32 location, float v0, float v1)
 {
     GL_CHECK_ERROR(glUniform2f(location, v0, v1));
 }
@@ -335,7 +362,7 @@ SetUniformValue2f (rdge::int32 location, float v0, float v1)
 //! \param [in] v2 Vector z value to set
 //! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glUniform.xml
 inline void
-SetUniformValue3f (rdge::int32 location, float v0, float v1, float v2)
+SetUniformValue3f (int32 location, float v0, float v1, float v2)
 {
     GL_CHECK_ERROR(glUniform3f(location, v0, v1, v2));
 }
@@ -349,7 +376,7 @@ SetUniformValue3f (rdge::int32 location, float v0, float v1, float v2)
 //! \param [in] v3 Vector w value to set
 //! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glUniform.xml
 inline void
-SetUniformValue4f (rdge::int32 location, float v0, float v1, float v2, float v3)
+SetUniformValue4f (int32 location, float v0, float v1, float v2, float v3)
 {
     GL_CHECK_ERROR(glUniform4f(location, v0, v1, v2, v3));
 }
@@ -361,7 +388,7 @@ SetUniformValue4f (rdge::int32 location, float v0, float v1, float v2, float v3)
 //! \param [in] value Pointer to an array of values to update
 //! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glUniform.xml
 inline void
-SetUniformValue1iv (rdge::int32 location, rdge::uint32 count, rdge::int32* value)
+SetUniformValue1iv (int32 location, uint32 count, int32* value)
 {
     GL_CHECK_ERROR(glUniform1iv(location, count, value));
 }
@@ -373,7 +400,7 @@ SetUniformValue1iv (rdge::int32 location, rdge::uint32 count, rdge::int32* value
 //! \param [in] value Pointer to an array of values to update
 //! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glUniform.xml
 inline void
-SetUniformValue1fv (rdge::int32 location, rdge::uint32 count, float* value)
+SetUniformValue1fv (int32 location, uint32 count, float* value)
 {
     GL_CHECK_ERROR(glUniform1fv(location, count, value));
 }
@@ -384,7 +411,7 @@ SetUniformValue1fv (rdge::int32 location, rdge::uint32 count, float* value)
 //! \param [in] value Pointer to an array of values to update
 //! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glUniform.xml
 inline void
-SetUniformValueMatrix4fv (rdge::int32 location, const float* value)
+SetUniformValueMatrix4fv (int32 location, const float* value)
 {
     GL_CHECK_ERROR(glUniformMatrix4fv(location, 1, GL_FALSE, value));
 }
@@ -397,10 +424,10 @@ SetUniformValueMatrix4fv (rdge::int32 location, const float* value)
 //! \details Generates a single vertex array object
 //! \returns Identifier of the generated vertex array
 //! \see https://www.opengl.org/sdk/docs/man/html/glGenVertexArrays.xhtml
-inline rdge::uint32
+inline uint32
 CreateVertexArray (void)
 {
-    rdge::uint32 name;
+    uint32 name;
     GL_CHECK_ERROR(glGenVertexArrays(1, &name));
     return name;
 }
@@ -411,7 +438,7 @@ CreateVertexArray (void)
 //! \param [out] arrays Array where generated names are stored
 //! \see https://www.opengl.org/sdk/docs/man/html/glGenVertexArrays.xhtml
 inline void
-CreateVertexArrays (rdge::int32 n, rdge::uint32* arrays)
+CreateVertexArrays (int32 n, uint32* arrays)
 {
     GL_CHECK_ERROR(glGenVertexArrays(n, arrays));
 }
@@ -421,7 +448,7 @@ CreateVertexArrays (rdge::int32 n, rdge::uint32* arrays)
 //! \param [in] name Name of the vertex array to bind
 //! \see https://www.opengl.org/sdk/docs/man/html/glBindVertexArray.xhtml
 inline void
-BindVertexArray (rdge::uint32 name)
+BindVertexArray (uint32 name)
 {
     GL_CHECK_ERROR(glBindVertexArray(name));
 }
@@ -434,12 +461,12 @@ UnbindVertexArrays (void)
     GL_CHECK_ERROR(glBindVertexArray(0));
 }
 
-inline void FreeVertexArray(rdge::uint32 array)
+inline void FreeVertexArray(uint32 array)
 {
     GL_CHECK_ERROR(glDeleteVertexArrays(1, &array));
 }
 
-inline void FreeVertexArrays(rdge::uint32 size, rdge::uint32* arrays)
+inline void FreeVertexArrays(uint32 size, uint32* arrays)
 {
     GL_CHECK_ERROR(glDeleteVertexArrays(size, arrays));
 }
@@ -449,12 +476,12 @@ inline void FreeVertexArrays(rdge::uint32 size, rdge::uint32* arrays)
 //! \param [in] index Index (used by shaders) of the generic vertex attribute
 //! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glEnableVertexAttribArray.xml
 inline void
-EnableVertexAttribute (rdge::uint32 index)
+EnableVertexAttribute (uint32 index)
 {
     GL_CHECK_ERROR(glEnableVertexAttribArray(index));
 }
 
-inline void DisableVertexAttribute(rdge::uint32 index)
+inline void DisableVertexAttribute(uint32 index)
 {
     GL_CHECK_ERROR(glDisableVertexAttribArray(index));
 }
@@ -500,9 +527,21 @@ VertexAttribIPointer (uint32 index,
 //! \param [in] indices Pointer to indices storage
 //! \see https://www.opengl.org/sdk/docs/man/html/glDrawElements.xhtml
 inline void
-DrawElements (rdge::uint32 mode, rdge::uint32 count, rdge::uint32 type, const void* indices)
+DrawElements (uint32 mode, uint32 count, uint32 type, const void* indices)
 {
     GL_CHECK_ERROR(glDrawElements(mode, count, type, indices));
+}
+
+//! \brief Direct map to glDrawArrays
+//! \details Renders primitives from array data.
+//! \param [in] mode Type of primitive to render
+//! \param [in] first Starting index in the enabled arrays
+//! \param [in] count The number of elements to be rendered
+//! \see https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glDrawArrays.xhtml
+inline void
+DrawArrays (uint32 mode, int32 first, uint32 count)
+{
+    GL_CHECK_ERROR(glDrawArrays(mode, first, count));
 }
 
 /******************************************************************
@@ -513,10 +552,10 @@ DrawElements (rdge::uint32 mode, rdge::uint32 count, rdge::uint32 type, const vo
 //! \details Generates a single buffer object
 //! \returns Identifier of the generated buffer
 //! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glGenBuffers.xml
-inline rdge::uint32
+inline uint32
 CreateBuffer (void)
 {
-    rdge::uint32 name;
+    uint32 name;
     GL_CHECK_ERROR(glGenBuffers(1, &name));
     return name;
 }
@@ -527,7 +566,7 @@ CreateBuffer (void)
 //! \param [out] buffers Array where generated names are stored
 //! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glGenBuffers.xml
 inline void
-CreateBuffers (rdge::int32 n, rdge::uint32* buffers)
+CreateBuffers (int32 n, uint32* buffers)
 {
     GL_CHECK_ERROR(glGenBuffers(n, buffers));
 }
@@ -538,7 +577,7 @@ CreateBuffers (rdge::int32 n, rdge::uint32* buffers)
 //! \param [in] buffer Identifier of the buffer object
 //! \see https://www.khronos.org/opengles/sdk/1.1/docs/man/glBindBuffer.xml
 inline void
-BindBuffer (rdge::uint32 target, rdge::uint32 buffer)
+BindBuffer (uint32 target, uint32 buffer)
 {
     GL_CHECK_ERROR(glBindBuffer(target, buffer));
 }
@@ -547,7 +586,7 @@ BindBuffer (rdge::uint32 target, rdge::uint32 buffer)
 //! \param [in] target The target to which the buffer will be unbound
 //! \see https://www.khronos.org/opengles/sdk/1.1/docs/man/glBindBuffer.xml
 inline void
-UnbindBuffers (rdge::uint32 target)
+UnbindBuffers (uint32 target)
 {
     GL_CHECK_ERROR(glBindBuffer(target, 0));
 }
@@ -556,7 +595,7 @@ UnbindBuffers (rdge::uint32 target)
 //! \param [in] name Name of the buffer
 //! \see https://www.opengl.org/sdk/docs/man/html/glDeleteBuffers.xhtml
 inline void
-DeleteBuffer (rdge::uint32 name)
+DeleteBuffer (uint32 name)
 {
     GL_CHECK_ERROR(glDeleteBuffers(1, &name));
 }
@@ -567,7 +606,7 @@ DeleteBuffer (rdge::uint32 name)
 //! \param [in] buffers Array of buffer objects to be deleted
 //! \see https://www.opengl.org/sdk/docs/man/html/glDeleteBuffers.xhtml
 inline void
-DeleteBuffers (rdge::uint32 n, rdge::uint32* buffers)
+DeleteBuffers (uint32 n, uint32* buffers)
 {
     GL_CHECK_ERROR(glDeleteBuffers(n, buffers));
 }
@@ -619,29 +658,29 @@ ReleaseBufferPointer (uint32 target)
  *                         Frame Buffers
  *****************************************************************/
 
-inline rdge::uint32 CreateFrameBuffer()
+inline uint32 CreateFrameBuffer()
 {
-    rdge::uint32 name;
+    uint32 name;
     GL_CHECK_ERROR(glGenFramebuffers(1, &name));
     return name;
 }
 
-inline void CreateFramebuffers(rdge::uint32 size, rdge::uint32* buffers)
+inline void CreateFramebuffers(uint32 size, uint32* buffers)
 {
     GL_CHECK_ERROR(glGenFramebuffers(size, buffers));
 }
 
-inline void BindFramebuffer(rdge::uint32 target, rdge::uint32 buffer)
+inline void BindFramebuffer(uint32 target, uint32 buffer)
 {
     GL_CHECK_ERROR(glBindFramebuffer(target, buffer));
 }
 
-inline void FreeFramebuffer(rdge::uint32 buffer)
+inline void FreeFramebuffer(uint32 buffer)
 {
     GL_CHECK_ERROR(glDeleteFramebuffers(1, &buffer));
 }
 
-inline void FreeFramebuffers(rdge::uint32 size, rdge::uint32* buffers)
+inline void FreeFramebuffers(uint32 size, uint32* buffers)
 {
     GL_CHECK_ERROR(glDeleteFramebuffers(size, buffers));
 }
@@ -650,19 +689,19 @@ inline void FreeFramebuffers(rdge::uint32 size, rdge::uint32* buffers)
  *                         Render Buffers
  *****************************************************************/
 
-inline rdge::uint32 CreateRenderBuffer()
+inline uint32 CreateRenderBuffer()
 {
-    rdge::uint32 result;
+    uint32 result;
     GL_CHECK_ERROR(glGenRenderbuffers(1, &result));
     return result;
 }
 
-inline void CreateRenderbuffers(rdge::uint32 size, rdge::uint32* buffers)
+inline void CreateRenderbuffers(uint32 size, uint32* buffers)
 {
     GL_CHECK_ERROR(glGenRenderbuffers(size, buffers));
 }
 
-inline void BindRenderbuffer(rdge::uint32 target, rdge::uint32 buffer)
+inline void BindRenderbuffer(uint32 target, uint32 buffer)
 {
     GL_CHECK_ERROR(glBindRenderbuffer(target, buffer));
 }
@@ -675,10 +714,10 @@ inline void BindRenderbuffer(rdge::uint32 target, rdge::uint32 buffer)
 //! \details Generates a single texture object
 //! \returns Identifier of the generated texture
 //! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glGenTextures.xml
-inline rdge::uint32
+inline uint32
 CreateTexture (void)
 {
-    rdge::uint32 name;
+    uint32 name;
     GL_CHECK_ERROR(glGenTextures(1, &name));
     return name;
 }
@@ -689,7 +728,7 @@ CreateTexture (void)
 //! \param [out] textures Array where generated names are stored
 //! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glGenTextures.xml
 inline void
-CreateTextures (rdge::uint32 n, rdge::uint32* textures)
+CreateTextures (uint32 n, uint32* textures)
 {
     // TODO: Be smart, return an array
     GL_CHECK_ERROR(glGenTextures(n, textures));
@@ -701,7 +740,7 @@ CreateTextures (rdge::uint32 n, rdge::uint32* textures)
 //! \param [in] texture Identifier of the texture object
 //! \see https://www.opengl.org/sdk/docs/man/html/glBindTexture.xhtml
 inline void
-BindTexture (rdge::uint32 target, rdge::uint32 texture)
+BindTexture (uint32 target, uint32 texture)
 {
     GL_CHECK_ERROR(glBindTexture(target, texture));
 }
@@ -710,7 +749,7 @@ BindTexture (rdge::uint32 target, rdge::uint32 texture)
 //! \param [in] target The target to which the texture will be unbound
 //! \see https://www.opengl.org/sdk/docs/man/html/glBindTexture.xhtml
 inline void
-UnbindTexture (rdge::uint32 target)
+UnbindTexture (uint32 target)
 {
     GL_CHECK_ERROR(glBindTexture(target, 0));
 }
@@ -722,7 +761,7 @@ UnbindTexture (rdge::uint32 target)
 //! \param [in] param Parameter value
 //! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glTexParameter.xml
 inline void
-SetTextureParameter (rdge::uint32 target, rdge::uint32 pname, rdge::int32 param)
+SetTextureParameter (uint32 target, uint32 pname, int32 param)
 {
     GL_CHECK_ERROR(glTexParameteri(target, pname, param));
 }
@@ -740,12 +779,12 @@ SetTextureParameter (rdge::uint32 target, rdge::uint32 pname, rdge::int32 param)
 //! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glTexImage2D.xml
 inline void
 SetTextureData (
-                rdge::uint32 target,
-                rdge::int32  internalformat,
-                rdge::int32  width,
-                rdge::int32  height,
-                rdge::int32  format,
-                rdge::uint32 type,
+                uint32 target,
+                int32  internalformat,
+                int32  width,
+                int32  height,
+                int32  format,
+                uint32 type,
                 const void*  data
                )
 {
@@ -767,17 +806,17 @@ SetTextureData (
 //! \param [in] texture Texture unit to activate
 //! \see https://www.opengl.org/sdk/docs/man/docbook4/xhtml/glActiveTexture.xml
 inline void
-SetActiveTexture (rdge::uint32 texture)
+SetActiveTexture (uint32 texture)
 {
     GL_CHECK_ERROR(glActiveTexture(texture));
 }
 
-inline void DeleteTexture(rdge::uint32 texture)
+inline void DeleteTexture(uint32 texture)
 {
     GL_CHECK_ERROR(glDeleteTextures(1, &texture));
 }
 
-inline void DeleteTextures(rdge::uint32 size, rdge::uint32* textures)
+inline void DeleteTextures(uint32 size, uint32* textures)
 {
     GL_CHECK_ERROR(glDeleteTextures(size, textures));
 }
@@ -791,7 +830,7 @@ inline void DeleteTextures(rdge::uint32 size, rdge::uint32* textures)
 //! \param [in] mask Bitwise OR of masks that indicate the buffers to be cleared
 //! \see https://www.opengl.org/sdk/docs/man2/xhtml/glClear.xml
 inline void
-Clear (rdge::uint32 mask)
+Clear (uint32 mask)
 {
     GL_CHECK_ERROR(glClear(mask));
 }
@@ -817,13 +856,13 @@ SetClearColor (float red, float green, float blue, float alpha)
 //! \param [in] height Height of the viewport
 //! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glViewport.xml
 inline void
-SetViewport (rdge::int32 x, rdge::int32 y, rdge::uint32 width, rdge::uint32 height)
+SetViewport (int32 x, int32 y, uint32 width, uint32 height)
 {
     GL_CHECK_ERROR(glViewport(x, y, width, height));
 }
 
 //! \brief Get the current viewport
-//! \details Queries OpenGL using the glGet function using the GL_VIEWPORT name.
+//! \details Queries via glGet using GL_VIEWPORT.
 //! \returns Vector of floats including x, y, width and height
 //! \see https://www.opengl.org/sdk/docs/man2/xhtml/glGet.xml
 inline std::vector<float>
@@ -845,22 +884,22 @@ inline int GetScreenBuffer()
     return result;
 }
 
-inline void SetBufferSubData(rdge::uint32 target, ptrdiff_t offset, ptrdiff_t size, const void* data)
+inline void SetBufferSubData(uint32 target, ptrdiff_t offset, ptrdiff_t size, const void* data)
 {
     GL_CHECK_ERROR(glBufferSubData(target, offset, size, data));
 }
 
-inline void FramebufferTexture2D(rdge::uint32 target, rdge::uint32 attachment, rdge::uint32 textarget, rdge::uint32 texture, int level)
+inline void FramebufferTexture2D(uint32 target, uint32 attachment, uint32 textarget, uint32 texture, int level)
 {
     GL_CHECK_ERROR(glFramebufferTexture2D(target, attachment, textarget, texture, level));
 }
 
-inline void FramebufferRenderbuffer(rdge::uint32 target, rdge::uint32 attachment, rdge::uint32 renderbuffertarget, rdge::uint32 renderbuffer)
+inline void FramebufferRenderbuffer(uint32 target, uint32 attachment, uint32 renderbuffertarget, uint32 renderbuffer)
 {
     GL_CHECK_ERROR(glFramebufferRenderbuffer(target, attachment, renderbuffertarget, renderbuffer));
 }
 
-inline void RenderbufferStorage(rdge::uint32 target, rdge::uint32 format, rdge::uint32 width, rdge::uint32 height)
+inline void RenderbufferStorage(uint32 target, uint32 format, uint32 width, uint32 height)
 {
     GL_CHECK_ERROR(glRenderbufferStorage(target, format, width, height));
 }
