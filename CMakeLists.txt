@@ -136,7 +136,7 @@ add_executable (rdge_test
                 tests/main.cpp
                 tests/assets/spritesheet.cpp
                 tests/graphics/color.cpp
-                tests/graphics/rect.cpp
+                tests/math/aabb.cpp
                 tests/math/intrinsics.cpp)
 target_link_libraries (rdge_test
                        RDGE

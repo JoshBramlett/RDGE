@@ -9,10 +9,10 @@
 #include <rdge/assets/surface.hpp>
 #include <rdge/graphics/animation.hpp>
 #include <rdge/graphics/isprite.hpp>
-#include <rdge/graphics/rect.hpp>
 #include <rdge/graphics/sprite.hpp>
 #include <rdge/graphics/sprite_group.hpp>
 #include <rdge/graphics/sprite_group.hpp>
+#include <rdge/system/types.hpp>
 
 #include <memory>
 #include <string>

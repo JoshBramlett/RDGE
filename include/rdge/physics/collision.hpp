@@ -8,6 +8,11 @@
 #include <rdge/core.hpp>
 #include <rdge/math/vec2.hpp>
 
+// sites of import:
+//
+// http://www.iforce2d.net/b2dtut/collision-anatomy
+// https://gamedevelopment.tutsplus.com/tutorials/how-to-create-a-custom-2d-physics-engine-the-basics-and-impulse-resolution--gamedev-6331
+
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 

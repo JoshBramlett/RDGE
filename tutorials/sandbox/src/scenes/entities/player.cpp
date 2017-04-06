@@ -139,14 +139,15 @@ Player::OnUpdate (const delta_time& dt)
         current_animation = &cd_anim_run[user_input.facing];
     }
 
-    auto prect = vops::GetRect(this->sprite->vertices);
-    if (prect.left() + user_input.position_offset.x < -960.f ||
-        prect.right() + user_input.position_offset.x > 960.f ||
-        prect.bottom() + user_input.position_offset.y < -540.f ||
-        prect.top() + user_input.position_offset.y > 540.f)
-    {
-        user_input.position_offset = {0.f, 0.f};
-    }
+    // naive wall collision check
+    //auto prect = vops::GetRect(this->sprite->vertices);
+    //if (prect.left() + user_input.position_offset.x < -960.f ||
+        //prect.right() + user_input.position_offset.x > 960.f ||
+        //prect.bottom() + user_input.position_offset.y < -540.f ||
+        //prect.top() + user_input.position_offset.y > 540.f)
+    //{
+        //user_input.position_offset = {0.f, 0.f};
+    //}
 
     vops::UpdatePosition(this->sprite->vertices, user_input.position_offset);
     vops::SetTexCoords(this->sprite->vertices,

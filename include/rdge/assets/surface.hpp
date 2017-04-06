@@ -6,8 +6,8 @@
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/graphics/rect.hpp>
 #include <rdge/math/vec2.hpp>
+#include <rdge/system/types.hpp>
 
 #include <SDL.h>
 

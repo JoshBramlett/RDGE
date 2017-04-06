@@ -262,10 +262,9 @@ Surface::ChangePixelFormat (uint32 pixel_format)
 Surface
 Surface::CreateSubSurface (const screen_rect& clip)
 {
-    auto c = static_cast<SDL_Rect>(clip);
-    Surface dst(math::uivec2(c.w, c.h), Depth());
+    Surface dst(math::uivec2(clip.w, clip.h), Depth());
 
-    if (UNLIKELY(SDL_BlitSurface(m_surface, &c, static_cast<SDL_Surface*>(dst), nullptr) != 0))
+    if (UNLIKELY(SDL_BlitSurface(m_surface, &clip, static_cast<SDL_Surface*>(dst), nullptr) != 0))
     {
         SDL_THROW("Failed to create sub-surface", "SDL_BlitSurface");
     }

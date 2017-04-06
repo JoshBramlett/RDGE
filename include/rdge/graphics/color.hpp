@@ -20,9 +20,8 @@ namespace rdge {
 //! \brief Container for RGBA colors
 //! \details RGBA values are on an integer scale of 0-255, with user
 //!          defined conversions to other relevant types.
-struct color final : public SDL_Color
+struct color : public SDL_Color
 {
-public:
     static const color BLACK;   //!< Pre-defined Black color
     static const color WHITE;   //!< Pre-defined White color
     static const color RED;     //!< Pre-defined Red color
@@ -41,7 +40,7 @@ public:
     //! \brief color ctor
     //! \details Initialize from SDL_Color
     //! \param [in] sdl_color SDL_Color struct
-    constexpr color (const SDL_Color& sdl_color)
+    explicit constexpr color (const SDL_Color& sdl_color)
         : SDL_Color{sdl_color}
     { }
 
@@ -54,17 +53,6 @@ public:
     constexpr color (uint8 r, uint8 g, uint8 b, uint8 a = 255)
         : SDL_Color{r, g, b, a}
     { }
-
-    //! \brief color dtor
-    ~color (void) noexcept = default;
-
-    //!@{
-    //! \brief Copy and move enabled
-    constexpr color (const color&) = default;
-    color& operator= (const color&) noexcept = default;
-    constexpr color (color&&) = default;
-    color& operator= (color&&) noexcept = default;
-    //!@}
 
     //! \brief User-defined conversion to uint32
     //! \details Endianness check performed to return appropriate format.
@@ -108,19 +96,17 @@ public:
 };
 
 //! \brief color equality operator
-//! \param [in] a First color to compare
-//! \param [in] b Second color to compare
-//! \returns True iff colors are identical
-constexpr bool operator== (const color& lhs, const color& rhs) noexcept
+//! \returns True iff identical
+constexpr bool
+operator== (const color& lhs, const color& rhs) noexcept
 {
     return (lhs.r == rhs.r) && (lhs.g == rhs.g) && (lhs.b == rhs.b) && (lhs.a == rhs.a);
 }
 
 //! \brief color inequality operator
-//! \param [in] a First color to compare
-//! \param [in] b Second color to compare
-//! \returns True iff colors are not identical
-constexpr bool operator!= (const color& lhs, const color& rhs) noexcept
+//! \returns True iff not identical
+constexpr bool
+operator!= (const color& lhs, const color& rhs) noexcept
 {
     return !(lhs == rhs);
 }
