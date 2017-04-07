@@ -87,10 +87,10 @@ TEST(AABBTest, HandlesContainsPoint)
     EXPECT_FALSE(a.contains(vec2(0.f, 0.f)));
 
     // c) Edge
-    EXPECT_TRUE(a.contains(vec2(1.f, 2.f)));
+    EXPECT_FALSE(a.contains(vec2(1.f, 2.f)));
 
     // d) Corner
-    EXPECT_TRUE(a.contains(vec2(1.f, 1.f)));
+    EXPECT_FALSE(a.contains(vec2(1.f, 1.f)));
 }
 
 TEST(AABBTest, HandlesContainsAABB)
@@ -98,124 +98,239 @@ TEST(AABBTest, HandlesContainsAABB)
     aabb a({ 1.f, 1.f }, { 4.f, 3.f });
 
     // a) Equal values
-    EXPECT_TRUE(a.contains(aabb({ 1.f, 1.f }, { 4.f, 3.f })));
+    EXPECT_FALSE(a.contains(aabb({ 1.f, 1.f }, { 4.f, 3.f })));
 
     // b) One/two side lengths longer
     EXPECT_FALSE(a.contains(aabb({ 1.f, 1.f }, { 4.f, 4.f })));
     EXPECT_FALSE(a.contains(aabb({ 1.f, 1.f }, { 5.f, 4.f })));
 
     // c) One/two side lengths shorter
-    EXPECT_TRUE(a.contains(aabb({ 1.f, 1.f }, { 3.f, 3.f })));
-    EXPECT_TRUE(a.contains(aabb({ 1.f, 1.f }, { 3.f, 2.f })));
+    EXPECT_FALSE(a.contains(aabb({ 1.f, 1.f }, { 3.f, 3.f })));
+    EXPECT_FALSE(a.contains(aabb({ 1.f, 1.f }, { 3.f, 2.f })));
 
     // d) Standard case
     EXPECT_TRUE(a.contains(aabb({ 1.5f, 1.5f }, { 3.5f, 2.5f })));
     EXPECT_FALSE(a.contains(aabb({ 0.5f, 0.5f }, { 4.5f, 3.5f })));
 
-    // TODO false - partial intersection
-    //      false - shared edge
-    //      false - shared corner
+    // d) Intersection/Edge/Corner
+    EXPECT_FALSE(a.contains(aabb({ 2.f, 2.f }, { 5.f, 4.f })));
+    EXPECT_FALSE(a.contains(aabb({ 1.f, 3.f }, { 4.f, 5.f })));
+    EXPECT_FALSE(a.contains(aabb({ 4.f, 3.f }, { 7.f, 6.f })));
 }
 
 TEST(AABBTest, HandlesIntersectsWith)
 {
+    // NOTE - Each case ran twice making sure the function generating the manifold
+    //        data has the same boolean result as the naive test.
+
     aabb a({ 1.f, 1.f }, { 4.f, 3.f });
+    collision_manifold dummy;
 
     // a) Equal values
     EXPECT_TRUE(a.intersects_with(aabb({ 1.f, 1.f }, { 4.f, 3.f })));
+    EXPECT_TRUE(a.intersects_with(aabb({ 1.f, 1.f }, { 4.f, 3.f }), dummy));
 
     // b) Shared lo point
     EXPECT_TRUE(a.intersects_with(aabb({ 1.f, 1.f }, { 4.f, 4.f })));
+    EXPECT_TRUE(a.intersects_with(aabb({ 1.f, 1.f }, { 4.f, 4.f }), dummy));
     EXPECT_TRUE(a.intersects_with(aabb({ 1.f, 1.f }, { 5.f, 4.f })));
+    EXPECT_TRUE(a.intersects_with(aabb({ 1.f, 1.f }, { 5.f, 4.f }), dummy));
     EXPECT_TRUE(a.intersects_with(aabb({ 1.f, 1.f }, { 3.f, 3.f })));
+    EXPECT_TRUE(a.intersects_with(aabb({ 1.f, 1.f }, { 3.f, 3.f }), dummy));
     EXPECT_TRUE(a.intersects_with(aabb({ 1.f, 1.f }, { 3.f, 2.f })));
+    EXPECT_TRUE(a.intersects_with(aabb({ 1.f, 1.f }, { 3.f, 2.f }), dummy));
 
     // c) Shared corner
-    EXPECT_TRUE(a.intersects_with(aabb({ 4.f, 3.f }, { 4.f, 3.f })));
-    EXPECT_TRUE(a.intersects_with(aabb({ -3.f, 3.f }, { 1.f, 5.f })));
+    EXPECT_FALSE(a.intersects_with(aabb({ 4.f, 3.f }, { 7.f, 6.f })));
+    EXPECT_FALSE(a.intersects_with(aabb({ 4.f, 3.f }, { 7.f, 6.f }), dummy));
+    EXPECT_FALSE(a.intersects_with(aabb({ -3.f, 3.f }, { 1.f, 5.f })));
+    EXPECT_FALSE(a.intersects_with(aabb({ -3.f, 3.f }, { 1.f, 5.f }), dummy));
 
     // d) Shared edge
-    EXPECT_TRUE(a.intersects_with(aabb({ 1.f, 3.f }, { 4.f, 5.f })));
-    EXPECT_TRUE(a.intersects_with(aabb({ 4.f, 1.f }, { 7.f, 3.f })));
+    EXPECT_FALSE(a.intersects_with(aabb({ 1.f, 3.f }, { 4.f, 5.f })));
+    EXPECT_FALSE(a.intersects_with(aabb({ 1.f, 3.f }, { 4.f, 5.f }), dummy));
+    EXPECT_FALSE(a.intersects_with(aabb({ 4.f, 1.f }, { 7.f, 3.f })));
+    EXPECT_FALSE(a.intersects_with(aabb({ 4.f, 1.f }, { 7.f, 3.f }), dummy));
 
     // e) Contains/Contained
     EXPECT_TRUE(a.intersects_with(aabb({ 1.5f, 1.5f }, { 3.5f, 2.5f })));
+    EXPECT_TRUE(a.intersects_with(aabb({ 1.5f, 1.5f }, { 3.5f, 2.5f }), dummy));
     EXPECT_TRUE(a.intersects_with(aabb({ 0.5f, 0.5f }, { 4.5f, 3.5f })));
+    EXPECT_TRUE(a.intersects_with(aabb({ 0.5f, 0.5f }, { 4.5f, 3.5f }), dummy));
 
     // f) Standard case
     EXPECT_TRUE(a.intersects_with(aabb({ 2.f, 2.f }, { 5.f, 4.f })));
+    EXPECT_TRUE(a.intersects_with(aabb({ 2.f, 2.f }, { 5.f, 4.f }), dummy));
     EXPECT_FALSE(a.intersects_with(aabb({ 1.f, 4.f }, { 4.f, 6.f })));
+    EXPECT_FALSE(a.intersects_with(aabb({ 1.f, 4.f }, { 4.f, 6.f }), dummy));
 }
 
-// TODO Add tests for contains() and intersects_with() once it's determined whether
-//      they will be inclusive tests or not.  Current collision manifold data below.
-//
-//      NOTE - make sure to run through the ringer with edge cases
-//    colliding rect:
-//      lo=[2, 2]
-//      hi=[9, 8]
-//
-//    Lower Left (x-axis)
-//      lo=[1, 1]
-//      hi=[3, 4]
-//      collision=true
-//      count=1
-//      depth=1
-//      contact=[3, 2]
-//      normal=[1, 0]
-//
-//    Lower Left (y-axis)    collision=true
-//      lo=[1, 1]
-//      hi=[4, 3]
-//      count=1
-//      depth=1
-//      contact=[2, 3]
-//      normal=[0, 1]
-//
-//    Upper Left (x-axis)    collision=true
-//      lo=[1, 6]
-//      hi=[3, 9]
-//      count=1
-//      depth=1
-//      contact=[3, 8]
-//      normal=[1, 0]
-//
-//    Upper Left (y-axis)    collision=true
-//      lo=[1, 7]
-//      hi=[4, 9]
-//      count=1
-//      depth=1
-//      contact=[2, 7]
-//      normal=[0, -1]
-//
-//    Upper Right (x-axis)    collision=true
-//      lo=[8, 6]
-//      hi=[10, 9]
-//      count=1
-//      depth=1
-//      contact=[8, 8]
-//      normal=[-1, 0]
-//
-//    Upper Right (y-axis)    collision=true
-//      lo=[7, 7]
-//      hi=[10, 9]
-//      count=1
-//      depth=1
-//      contact=[9, 7]
-//      normal=[0, -1]
-//
-//    Lower Right (x-axis)    collision=true
-//      lo=[8, 1]
-//      hi=[10, 4]
-//      count=1
-//      depth=1
-//      contact=[8, 2]
-//      normal=[-1, 0]
-//
-//    Lower Right (y-axis)    collision=true
-//      lo=[7, 1]
-//      hi=[10, 3]
-//      count=1
-//      depth=1
-//      contact=[9, 3]
-//      normal=[0, 1]
+TEST(AABBTest, HandlesManifoldValidation)
+{
+    // Details:
+    //
+    // Test contains a base AABB and validates the intersections on each of the four
+    // corners.  In order to validate the normals Two AABBs are tested on each corner,
+    // where the penetration depth is smaller on the different axes..
+    //
+    // Also, manifold data is generated from the perspective of the base object and how
+    // *it* should resolve itself with the foreign object (meaning a.intersects_with(b) and
+    // b.intersects_with(a) are not the same), we'll need to test for correctness from
+    // both vantage points.  Note that if the shorter penetration depth is on the same
+    // axis the normals should be inverse.
+
+    aabb a({ 2.f, 2.f }, { 9.f, 8.f });
+    collision_manifold mf;
+
+    // Lower Left (penetration on x-axis)
+    aabb lower_left_on_x({ 1.f, 1.f }, { 3.f, 4.f });
+
+    EXPECT_TRUE(a.intersects_with(lower_left_on_x, mf));
+    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.depths[0], 1.f);
+    EXPECT_EQ(mf.contacts[0].x, 2.f);
+    EXPECT_EQ(mf.contacts[0].y, 4.f);
+    EXPECT_EQ(mf.normal.x, -1.f);
+    EXPECT_EQ(mf.normal.y, 0.f);
+
+    EXPECT_TRUE(lower_left_on_x.intersects_with(a, mf));
+    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.depths[0], 1.f);
+    EXPECT_EQ(mf.contacts[0].x, 3.f);
+    EXPECT_EQ(mf.contacts[0].y, 2.f);
+    EXPECT_EQ(mf.normal.x, 1.f);
+    EXPECT_EQ(mf.normal.y, 0.f);
+
+    // Lower Left (penetration on y-axis)
+    aabb lower_left_on_y({ 1.f, 1.f }, { 4.f, 3.f });
+
+    EXPECT_TRUE(a.intersects_with(lower_left_on_y, mf));
+    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.depths[0], 1.f);
+    EXPECT_EQ(mf.contacts[0].x, 4.f);
+    EXPECT_EQ(mf.contacts[0].y, 2.f);
+    EXPECT_EQ(mf.normal.x, 0.f);
+    EXPECT_EQ(mf.normal.y, -1.f);
+
+    EXPECT_TRUE(lower_left_on_y.intersects_with(a, mf));
+    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.depths[0], 1.f);
+    EXPECT_EQ(mf.contacts[0].x, 2.f);
+    EXPECT_EQ(mf.contacts[0].y, 3.f);
+    EXPECT_EQ(mf.normal.x, 0.f);
+    EXPECT_EQ(mf.normal.y, 1.f);
+
+    // Upper Left (penetration on x-axis)
+    aabb upper_left_on_x({ 1.f, 6.f }, { 3.f, 9.f });
+
+    EXPECT_TRUE(a.intersects_with(upper_left_on_x, mf));
+    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.depths[0], 1.f);
+    EXPECT_EQ(mf.contacts[0].x, 2.f);
+    EXPECT_EQ(mf.contacts[0].y, 6.f);
+    EXPECT_EQ(mf.normal.x, -1.f);
+    EXPECT_EQ(mf.normal.y, 0.f);
+
+    EXPECT_TRUE(upper_left_on_x.intersects_with(a, mf));
+    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.depths[0], 1.f);
+    EXPECT_EQ(mf.contacts[0].x, 3.f);
+    EXPECT_EQ(mf.contacts[0].y, 8.f);
+    EXPECT_EQ(mf.normal.x, 1.f);
+    EXPECT_EQ(mf.normal.y, 0.f);
+
+    // Upper Left (penetration on y-axis)
+    aabb upper_left_on_y({ 1.f, 7.f }, { 4.f, 9.f });
+
+    EXPECT_TRUE(a.intersects_with(upper_left_on_y, mf));
+    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.depths[0], 1.f);
+    EXPECT_EQ(mf.contacts[0].x, 4.f);
+    EXPECT_EQ(mf.contacts[0].y, 8.f);
+    EXPECT_EQ(mf.normal.x, 0.f);
+    EXPECT_EQ(mf.normal.y, 1.f);
+
+    EXPECT_TRUE(upper_left_on_y.intersects_with(a, mf));
+    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.depths[0], 1.f);
+    EXPECT_EQ(mf.contacts[0].x, 2.f);
+    EXPECT_EQ(mf.contacts[0].y, 7.f);
+    EXPECT_EQ(mf.normal.x, 0.f);
+    EXPECT_EQ(mf.normal.y, -1.f);
+
+    // Upper Right (penetration on x-axis)
+    aabb upper_right_on_x({ 8.f, 6.f }, { 10.f, 9.f });
+
+    EXPECT_TRUE(a.intersects_with(upper_right_on_x, mf));
+    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.depths[0], 1.f);
+    EXPECT_EQ(mf.contacts[0].x, 9.f);
+    EXPECT_EQ(mf.contacts[0].y, 6.f);
+    EXPECT_EQ(mf.normal.x, 1.f);
+    EXPECT_EQ(mf.normal.y, 0.f);
+
+    EXPECT_TRUE(upper_right_on_x.intersects_with(a, mf));
+    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.depths[0], 1.f);
+    EXPECT_EQ(mf.contacts[0].x, 8.f);
+    EXPECT_EQ(mf.contacts[0].y, 8.f);
+    EXPECT_EQ(mf.normal.x, -1.f);
+    EXPECT_EQ(mf.normal.y, 0.f);
+
+    // Upper Right (penetration on y-axis)
+    aabb upper_right_on_y({ 7.f, 7.f }, { 10.f, 9.f });
+
+    EXPECT_TRUE(a.intersects_with(upper_right_on_y, mf));
+    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.depths[0], 1.f);
+    EXPECT_EQ(mf.contacts[0].x, 7.f);
+    EXPECT_EQ(mf.contacts[0].y, 8.f);
+    EXPECT_EQ(mf.normal.x, 0.f);
+    EXPECT_EQ(mf.normal.y, 1.f);
+
+    EXPECT_TRUE(upper_right_on_y.intersects_with(a, mf));
+    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.depths[0], 1.f);
+    EXPECT_EQ(mf.contacts[0].x, 9.f);
+    EXPECT_EQ(mf.contacts[0].y, 7.f);
+    EXPECT_EQ(mf.normal.x, 0.f);
+    EXPECT_EQ(mf.normal.y, -1.f);
+
+    // Lower Right (penetration on x-axis)
+    aabb lower_right_on_x({ 8.f, 1.f }, { 10.f, 4.f });
+
+    EXPECT_TRUE(a.intersects_with(lower_right_on_x, mf));
+    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.depths[0], 1.f);
+    EXPECT_EQ(mf.contacts[0].x, 9.f);
+    EXPECT_EQ(mf.contacts[0].y, 4.f);
+    EXPECT_EQ(mf.normal.x, 1.f);
+    EXPECT_EQ(mf.normal.y, 0.f);
+
+    EXPECT_TRUE(lower_right_on_x.intersects_with(a, mf));
+    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.depths[0], 1.f);
+    EXPECT_EQ(mf.contacts[0].x, 8.f);
+    EXPECT_EQ(mf.contacts[0].y, 2.f);
+    EXPECT_EQ(mf.normal.x, -1.f);
+    EXPECT_EQ(mf.normal.y, 0.f);
+
+    // Lower Right (penetration on y-axis)
+    aabb lower_right_on_y({ 7.f, 1.f }, { 10.f, 3.f });
+
+    EXPECT_TRUE(a.intersects_with(lower_right_on_y, mf));
+    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.depths[0], 1.f);
+    EXPECT_EQ(mf.contacts[0].x, 7.f);
+    EXPECT_EQ(mf.contacts[0].y, 2.f);
+    EXPECT_EQ(mf.normal.x, 0.f);
+    EXPECT_EQ(mf.normal.y, -1.f);
+
+    EXPECT_TRUE(lower_right_on_y.intersects_with(a, mf));
+    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.depths[0], 1.f);
+    EXPECT_EQ(mf.contacts[0].x, 9.f);
+    EXPECT_EQ(mf.contacts[0].y, 3.f);
+    EXPECT_EQ(mf.normal.x, 0.f);
+    EXPECT_EQ(mf.normal.y, 1.f);
+}

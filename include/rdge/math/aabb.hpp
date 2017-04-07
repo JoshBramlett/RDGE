@@ -3,12 +3,7 @@
 //! \version 0.0.10
 //! \date 03/30/2017
 
-// TODO
-//
-// 1) Ensure intersects_with() with manifold generation provides the same result
-//    logic as it's naive counterpart.
-// 2) Finish writing unit tests
-// 3) Many functions are missing and should be added on an as-needed basis.
+// TODO Many functions are missing and should be added on an as-needed basis.
 //
 // Other implementations:
 //
@@ -31,7 +26,9 @@ namespace math {
 //! \struct aabb
 //! \brief Floating point structure defining an axis aligned bounding box
 //! \details Structure contains two opposite points of a rectangle by grouping the
-//!          min(x,y) and max(x,y) together.
+//!          min(x,y) and max(x,y) together.  All collision checks do not include
+//!          the edges when checking, which means AABBs that are equal or share
+//!          an edge/corner are not regarded to collide.
 //! \warning Manually modify lo and hi bounds at your own risk.  Methods called
 //!          on an invalid container will yield spurious results.
 struct aabb
@@ -104,43 +101,40 @@ struct aabb
         return (hi - lo) * 0.5f;
     }
 
-    //! \brief Check if a point resides within the aabb
-    //! \note Inclusive edge check
+    //! \brief Check if a point resides within the aabb (edge exclusive)
     //! \param [in] point Point coordinates
     //! \returns True iff point is within the aabb
     constexpr bool contains (const vec2& point) const noexcept
     {
-        return point.x >= left() &&
-               point.x <= right() &&
-               point.y >= bottom() &&
-               point.y <= top();
+        return point.x > left() &&
+               point.x < right() &&
+               point.y > bottom() &&
+               point.y < top();
     }
 
-    //! \brief Check if an aabb resides within this aabb
-    //! \note Inclusive edge check
+    //! \brief Check if an aabb resides within this aabb (edge exclusive)
     //! \param [in] other aabb structure
     //! \returns True iff other is within the aabb
     constexpr bool contains (const aabb& other) const noexcept
     {
-        return other.left() >= left() &&
-               other.right() <= right() &&
-               other.bottom() >= bottom() &&
-               other.top() <= top();
+        return other.left() > left() &&
+               other.right() < right() &&
+               other.bottom() > bottom() &&
+               other.top() < top();
     }
 
-    //! \brief Check if the aabb intersects with another
-    //! \note Inclusive edge check
+    //! \brief Check if the aabb intersects with another (edge exclusive)
     //! \param [in] other aabb structure
     //! \returns True iff intersecting
     constexpr bool intersects_with (const aabb& other) const
     {
-        return other.left() <= right() &&
-               left() <= other.right() &&
-               other.bottom() <= top() &&
-               bottom() <= other.top();
+        return other.left() < right() &&
+               left() < other.right() &&
+               other.bottom() < top() &&
+               bottom() < other.top();
     }
 
-    //! \brief Check if the aabb intersects with another
+    //! \brief Check if the aabb intersects with another (edge exclusive)
     //! \details The provided \ref collision_manifold will be populated with details
     //!          on how the collision could be resolved.  If there was no collision
     //!          the manifold count will be set to zero.
@@ -157,13 +151,13 @@ struct aabb
         vec2 d = cen_b - cen_a;
 
         float overlap_x = ext_a.x + ext_b.x - std::fabs(d.x);
-        if (overlap_x < 0.f)
+        if (overlap_x <= 0.f)
         {
             return false;
         }
 
         float overlap_y = ext_a.y + ext_b.y - std::fabs(d.y);
-        if (overlap_y < 0.f)
+        if (overlap_y <= 0.f)
         {
             return false;
         }
