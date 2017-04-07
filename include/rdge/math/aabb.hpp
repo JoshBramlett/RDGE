@@ -126,7 +126,7 @@ struct aabb
     //! \brief Check if the aabb intersects with another (edge exclusive)
     //! \param [in] other aabb structure
     //! \returns True iff intersecting
-    constexpr bool intersects_with (const aabb& other) const
+    constexpr bool intersects_with (const aabb& other) const noexcept
     {
         return other.left() < right() &&
                left() < other.right() &&
@@ -141,7 +141,7 @@ struct aabb
     //! \param [in] other aabb structure
     //! \param [out] mf Manifold containing resolution
     //! \returns True iff intersecting
-    bool intersects_with (const aabb& other, collision_manifold& mf)
+    bool intersects_with (const aabb& other, collision_manifold& mf) const noexcept
     {
         mf.count = 0;
         vec2 cen_a = centroid();
