@@ -6,7 +6,7 @@
 #include <rdge/gameobjects.hpp>
 #include <rdge/graphics.hpp>
 
-#include "../../displacement.hpp"
+#include <rdge/physics/motion.hpp>
 
 #include <vector>
 #include <memory>
@@ -47,7 +47,7 @@ public:
         bool fight_button_pressed = false; // TODO temp - for testing
 
         // displacement calculations
-        velocity_displacement disp;
+        rdge::displacement disp;
 
         // frame states
         rdge::Direction facing = rdge::Direction::NONE;
@@ -66,7 +66,8 @@ public:
             is_walking = is_moving && !run_button_pressed;
             is_running = is_moving && run_button_pressed;
 
-            disp.calculate(position_offset, dt, (is_running) ? 1 : 0);
+            disp.coefficient = (is_running) ? 20.f : 10.f;
+            position_offset = disp.from_velocity(position_offset, dt);
         }
     } user_input;
 

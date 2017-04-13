@@ -61,7 +61,7 @@ sign (T val)
 
 //! \brief Get the absolute value
 //! \param [in] val Value to compute
-//! \returns Converted positive value
+//! \returns Positive value
 template <typename T>
 constexpr typename std::enable_if_t<std::is_arithmetic<T>::value, T>
 abs (T val)

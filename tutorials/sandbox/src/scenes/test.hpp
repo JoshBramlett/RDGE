@@ -6,7 +6,6 @@
 #include <rdge/gameobjects.hpp>
 #include <rdge/graphics.hpp>
 
-#include "../displacement.hpp"
 #include "entities/player.hpp"
 
 #include <memory>

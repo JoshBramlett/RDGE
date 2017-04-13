@@ -26,7 +26,7 @@ TEST(AABBTest, HandlesConstruction)
     EXPECT_TRUE(c.hi.x == 9.f && c.hi.y == 10.f);
 }
 
-TEST(AABBTest, HandlesOperatorOverloads)
+TEST(AABBTest, VerifyOperatorOverloads)
 {
     // a) Equality/inequality operators
     aabb a({ 1.f, 1.f }, { 4.f, 3.f });
@@ -38,7 +38,7 @@ TEST(AABBTest, HandlesOperatorOverloads)
     EXPECT_TRUE(a != c);
 }
 
-TEST(AABBTest, HandlesCoreProperties)
+TEST(AABBTest, VerifyCoreProperties)
 {
     // a) Size
     aabb a({ 1.f, 1.f }, { 4.f, 3.f });
@@ -57,7 +57,7 @@ TEST(AABBTest, HandlesCoreProperties)
     EXPECT_FALSE(a.is_valid());
 }
 
-TEST(AABBTest, HandlesCalculatedProperties)
+TEST(AABBTest, VerifyCalculatedProperties)
 {
     // a) Standard values
     aabb a({ 1.f, 1.f }, { 4.f, 3.f });
@@ -76,7 +76,7 @@ TEST(AABBTest, HandlesCalculatedProperties)
     EXPECT_TRUE(heb.x == 1.f && heb.y == 1.f);
 }
 
-TEST(AABBTest, HandlesContainsPoint)
+TEST(AABBTest, VerifyContainsPointResult)
 {
     aabb a({ 1.f, 1.f }, { 4.f, 3.f });
 
@@ -93,7 +93,7 @@ TEST(AABBTest, HandlesContainsPoint)
     EXPECT_FALSE(a.contains(vec2(1.f, 1.f)));
 }
 
-TEST(AABBTest, HandlesContainsAABB)
+TEST(AABBTest, VerifyContainsAABBResult)
 {
     aabb a({ 1.f, 1.f }, { 4.f, 3.f });
 
@@ -118,7 +118,7 @@ TEST(AABBTest, HandlesContainsAABB)
     EXPECT_FALSE(a.contains(aabb({ 4.f, 3.f }, { 7.f, 6.f })));
 }
 
-TEST(AABBTest, HandlesIntersectsWith)
+TEST(AABBTest, VerifyIntersectsWithResult)
 {
     // NOTE - Each case ran twice making sure the function generating the manifold
     //        data has the same boolean result as the naive test.
@@ -158,27 +158,157 @@ TEST(AABBTest, HandlesIntersectsWith)
     EXPECT_TRUE(a.intersects_with(aabb({ 0.5f, 0.5f }, { 4.5f, 3.5f })));
     EXPECT_TRUE(a.intersects_with(aabb({ 0.5f, 0.5f }, { 4.5f, 3.5f }), dummy));
 
-    // f) Standard case
+    // f) Corner (intersection on x and y)
     EXPECT_TRUE(a.intersects_with(aabb({ 2.f, 2.f }, { 5.f, 4.f })));
     EXPECT_TRUE(a.intersects_with(aabb({ 2.f, 2.f }, { 5.f, 4.f }), dummy));
+
+    // g) Edge (double intersection on the same axis)
+    EXPECT_TRUE(a.intersects_with(aabb({ 2.f, 0.f }, { 3.f, 2.f })));
+    EXPECT_TRUE(a.intersects_with(aabb({ 2.f, 0.f }, { 3.f, 2.f }), dummy));
+
+    // h) Double edge (quad intersection on the same axis)
+    EXPECT_TRUE(a.intersects_with(aabb({ 2.f, 0.f }, { 3.f, 4.f })));
+    EXPECT_TRUE(a.intersects_with(aabb({ 2.f, 0.f }, { 3.f, 4.f }), dummy));
+
+    // i) No intersection
     EXPECT_FALSE(a.intersects_with(aabb({ 1.f, 4.f }, { 4.f, 6.f })));
     EXPECT_FALSE(a.intersects_with(aabb({ 1.f, 4.f }, { 4.f, 6.f }), dummy));
 }
 
-TEST(AABBTest, HandlesManifoldValidation)
-{
-    // Details:
-    //
-    // Test contains a base AABB and validates the intersections on each of the four
-    // corners.  In order to validate the normals Two AABBs are tested on each corner,
-    // where the penetration depth is smaller on the different axes..
-    //
-    // Also, manifold data is generated from the perspective of the base object and how
-    // *it* should resolve itself with the foreign object (meaning a.intersects_with(b) and
-    // b.intersects_with(a) are not the same), we'll need to test for correctness from
-    // both vantage points.  Note that if the shorter penetration depth is on the same
-    // axis the normals should be inverse.
+// Manifold generation details:
+//
+// Test contains a base AABB and validates the intersections on each of the four
+// corners.  In order to validate the normals Two AABBs are tested on each corner,
+// where the penetration depth is smaller on the different axes..
+//
+// Also, manifold data is generated from the perspective of the base object and how
+// *it* should resolve itself with the foreign object (meaning a.intersects_with(b) and
+// b.intersects_with(a) are not the same), we'll need to test for correctness from
+// both vantage points.  Note that if the shorter penetration depth is on the same
+// axis the normals should be inverse.
 
+TEST(AABBTest, ValidateManifoldSingleAxis)
+{
+    aabb a({ 2.f, 2.f }, { 9.f, 8.f });
+    collision_manifold mf;
+
+    // Lower (double penetration on x-axis)
+    aabb lower_double_on_x({ 5.f, 1.f }, { 6.f, 3.f });
+
+    EXPECT_TRUE(a.intersects_with(lower_double_on_x, mf));
+    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.depths[0], 1.f);
+    EXPECT_EQ(mf.contacts[0].x, 5.f);
+    EXPECT_EQ(mf.contacts[0].y, 2.f);
+    EXPECT_EQ(mf.normal.x, 0.f);
+    EXPECT_EQ(mf.normal.y, -1.f);
+
+    EXPECT_TRUE(lower_double_on_x.intersects_with(a, mf));
+    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.depths[0], 1.f);
+    EXPECT_EQ(mf.contacts[0].x, 5.f);
+    EXPECT_EQ(mf.contacts[0].y, 2.f);
+    EXPECT_EQ(mf.normal.x, 0.f);
+    EXPECT_EQ(mf.normal.y, 1.f);
+
+    // Upper (double penetration on x-axis)
+    aabb upper_double_on_x({ 5.f, 7.f }, { 6.f, 9.f });
+
+    EXPECT_TRUE(a.intersects_with(upper_double_on_x, mf));
+    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.depths[0], 1.f);
+    EXPECT_EQ(mf.contacts[0].x, 5.f);
+    EXPECT_EQ(mf.contacts[0].y, 8.f);
+    EXPECT_EQ(mf.normal.x, 0.f);
+    EXPECT_EQ(mf.normal.y, 1.f);
+
+    EXPECT_TRUE(upper_double_on_x.intersects_with(a, mf));
+    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.depths[0], 1.f);
+    EXPECT_EQ(mf.contacts[0].x, 5.f);
+    EXPECT_EQ(mf.contacts[0].y, 8.f);
+    EXPECT_EQ(mf.normal.x, 0.f);
+    EXPECT_EQ(mf.normal.y, -1.f);
+
+    // Lower (double penetration on y-axis)
+    aabb lower_double_on_y({ 1.f, 4.f }, { 3.f, 6.f });
+
+    EXPECT_TRUE(a.intersects_with(lower_double_on_y, mf));
+    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.depths[0], 1.f);
+    EXPECT_EQ(mf.contacts[0].x, 2.f);
+    EXPECT_EQ(mf.contacts[0].y, 4.f);
+    EXPECT_EQ(mf.normal.x, -1.f);
+    EXPECT_EQ(mf.normal.y, 0.f);
+
+    EXPECT_TRUE(lower_double_on_y.intersects_with(a, mf));
+    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.depths[0], 1.f);
+    EXPECT_EQ(mf.contacts[0].x, 2.f);
+    EXPECT_EQ(mf.contacts[0].y, 4.f);
+    EXPECT_EQ(mf.normal.x, 1.f);
+    EXPECT_EQ(mf.normal.y, 0.f);
+
+    // Upper (double penetration on y-axis)
+    aabb upper_double_on_y({ 8.f, 4.f }, { 10.f, 6.f });
+
+    EXPECT_TRUE(a.intersects_with(upper_double_on_y, mf));
+    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.depths[0], 1.f);
+    EXPECT_EQ(mf.contacts[0].x, 9.f);
+    EXPECT_EQ(mf.contacts[0].y, 4.f);
+    EXPECT_EQ(mf.normal.x, 1.f);
+    EXPECT_EQ(mf.normal.y, 0.f);
+
+    EXPECT_TRUE(upper_double_on_y.intersects_with(a, mf));
+    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.depths[0], 1.f);
+    EXPECT_EQ(mf.contacts[0].x, 9.f);
+    EXPECT_EQ(mf.contacts[0].y, 4.f);
+    EXPECT_EQ(mf.normal.x, -1.f);
+    EXPECT_EQ(mf.normal.y, 0.f);
+
+    // Quad penetration on x-axis)
+    aabb quad_on_x({ 5.f, 1.f }, { 6.f, 9.f });
+
+    EXPECT_TRUE(a.intersects_with(quad_on_x, mf));
+    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.depths[0], 4.f);
+    EXPECT_EQ(mf.contacts[0].x, 5.f);
+    EXPECT_EQ(mf.contacts[0].y, 2.f);
+    EXPECT_EQ(mf.normal.x, 1.f);
+    EXPECT_EQ(mf.normal.y, 0.f);
+
+    EXPECT_TRUE(quad_on_x.intersects_with(a, mf));
+    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.depths[0], 4.f);
+    EXPECT_EQ(mf.contacts[0].x, 6.f);
+    EXPECT_EQ(mf.contacts[0].y, 2.f);
+    EXPECT_EQ(mf.normal.x, 1.f);
+    EXPECT_EQ(mf.normal.y, 0.f);
+
+    // Quad penetration on y-axis)
+    aabb quad_on_y({ 1.f, 4.f }, { 10.f, 6.f });
+
+    EXPECT_TRUE(a.intersects_with(quad_on_y, mf));
+    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.depths[0], 4.f);
+    EXPECT_EQ(mf.contacts[0].x, 2.f);
+    EXPECT_EQ(mf.contacts[0].y, 4.f);
+    EXPECT_EQ(mf.normal.x, 0.f);
+    EXPECT_EQ(mf.normal.y, 1.f);
+
+    EXPECT_TRUE(quad_on_y.intersects_with(a, mf));
+    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.depths[0], 4.f);
+    EXPECT_EQ(mf.contacts[0].x, 2.f);
+    EXPECT_EQ(mf.contacts[0].y, 6.f);
+    EXPECT_EQ(mf.normal.x, 0.f);
+    EXPECT_EQ(mf.normal.y, 1.f);
+}
+
+TEST(AABBTest, ValidateManifoldDoubleAxis)
+{
     aabb a({ 2.f, 2.f }, { 9.f, 8.f });
     collision_manifold mf;
 

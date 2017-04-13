@@ -7,6 +7,8 @@
 
 #include <SDL_assert.h>
 
+#include <rdge/physics/collision.hpp>
+
 using namespace rdge;
 using namespace rdge::math;
 
@@ -57,9 +59,8 @@ Player::Player (void)
     this->sprite = sheet.CreateSprite("idle_front_1", vec3(0.f, 0.f, 0.f));
     this->sprite->debug_bounds.show = true;
 
-    user_input.disp.unit_length = 64.f;
-    user_input.disp.base_velocities.push_back(10.f);
-    user_input.disp.base_velocities.push_back(20.f);
+    user_input.disp.unit = 64.f;
+    user_input.disp.coefficient = 10.f;
 
     user_input.facing = Direction::SOUTH;
     current_animation = &cd_anim_blink[user_input.facing];

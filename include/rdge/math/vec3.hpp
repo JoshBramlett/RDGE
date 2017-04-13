@@ -72,7 +72,7 @@ struct vec3
     //! \brief vec3 memberwise addition
     //! \param [in] rhs vec3 to add
     //! \returns Reference to self
-    constexpr vec3& operator+= (const vec3& rhs)
+    constexpr vec3& operator+= (const vec3& rhs) noexcept
     {
         x += rhs.x;
         y += rhs.y;
@@ -83,7 +83,7 @@ struct vec3
     //! \brief vec3 memberwise addition (x and y components only)
     //! \param [in] rhs vec2 to add
     //! \returns Reference to self
-    constexpr vec3& operator+= (const vec2& rhs)
+    constexpr vec3& operator+= (const vec2& rhs) noexcept
     {
         x += rhs.x;
         y += rhs.y;
@@ -93,7 +93,7 @@ struct vec3
     //! \brief vec3 memberwise subtraction
     //! \param [in] rhs vec3 to subtract
     //! \returns Reference to self
-    constexpr vec3& operator-= (const vec3& rhs)
+    constexpr vec3& operator-= (const vec3& rhs) noexcept
     {
         x -= rhs.x;
         y -= rhs.y;
@@ -104,7 +104,7 @@ struct vec3
     //! \brief vec3 memberwise multiplication
     //! \param [in] rhs vec3 to multiply
     //! \returns Reference to self
-    constexpr vec3& operator*= (const vec3& rhs)
+    constexpr vec3& operator*= (const vec3& rhs) noexcept
     {
         x *= rhs.x;
         y *= rhs.y;
@@ -112,9 +112,16 @@ struct vec3
         return *this;
     }
 
+    //! \brief Check if vector components are set to zero
+    //! \returns True iff all components are zero
+    constexpr bool is_zero (void) const noexcept
+    {
+        return x == 0.f && y == 0.f && z == 0.f;
+    }
+
     //! \brief Get the xy coordinate vec2
     //! \returns vec2 containing the x and y coordinates
-    constexpr vec2 xy (void) const
+    constexpr vec2 xy (void) const noexcept
     {
         return { x, y };
     }
@@ -142,7 +149,7 @@ struct vec3
     {
         float len = length();
 
-        return (fp_eq(len, 0.f)) ? vec3::ZERO : vec3((x / len), (y / len), (z / len));
+        return (len == 0.f) ? vec3::ZERO : vec3((x / len), (y / len), (z / len));
     }
 
     //! \brief Cross product
@@ -170,61 +177,48 @@ struct vec3
 };
 
 //! \brief vec3 equality operator
-//! \param [in] lhs Left side vec3 to compare
-//! \param [in] rhs Right side vec3 to compare
-//! \returns True iff vectors are identical
+//! \returns True iff identical
 constexpr bool operator== (const vec3& lhs, const vec3& rhs) noexcept
 {
     return fp_eq(lhs.x, rhs.x) && fp_eq(lhs.y, rhs.y) && fp_eq(lhs.z, rhs.z);
 }
 
 //! \brief vec3 inequality operator
-//! \param [in] lhs Left side vec3 to compare
-//! \param [in] rhs Right side vec3 to compare
-//! \returns True iff vectors are not identical
+//! \returns True iff not identical
 constexpr bool operator!= (const vec3& lhs, const vec3& rhs) noexcept
 {
     return !(lhs == rhs);
 }
 
 //! \brief vec3 unary negation operator
-//! \param [in] value vec3 to negate
-//! \returns Negated vec3
+//! \returns vec3 of negated components
 constexpr vec3 operator- (const vec3& value) noexcept
 {
     return vec3(-value.x, -value.y, -value.z);
 }
 
 //! \brief vec3 addition operator
-//! \param [in] lhs Left side vec3
-//! \param [in] rhs Right side vec3
-//! \returns vec3 of resultant values
+//! \returns vec3 of added components
 constexpr vec3 operator+ (const vec3& lhs, const vec3& rhs) noexcept
 {
     return vec3(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z);
 }
 
 //! \brief vec3 subtraction operator
-//! \param [in] lhs Left side vec3
-//! \param [in] rhs Right side vec3
-//! \returns vec3 of resultant values
+//! \returns vec3 of subtracted components
 constexpr vec3 operator- (const vec3& lhs, const vec3& rhs) noexcept
 {
     return vec3(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z);
 }
 
 //! \brief vec3 multiplication operator
-//! \param [in] lhs Left side vec3
-//! \param [in] rhs Right side vec3
-//! \returns vec3 of resultant values
+//! \returns vec3 of multiplied components
 constexpr vec3 operator* (const vec3& lhs, const vec3& rhs) noexcept
 {
     return vec3(lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z);
 }
 
 //! \brief vec3 stream output operator
-//! \param [in] os Output stream
-//! \param [in] value vec3 to write to the stream
 //! \returns Output stream
 std::ostream& operator<< (std::ostream& os, const vec3& value);
 

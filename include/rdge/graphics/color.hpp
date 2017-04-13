@@ -97,23 +97,19 @@ struct color : public SDL_Color
 
 //! \brief color equality operator
 //! \returns True iff identical
-constexpr bool
-operator== (const color& lhs, const color& rhs) noexcept
+constexpr bool operator== (const color& lhs, const color& rhs) noexcept
 {
     return (lhs.r == rhs.r) && (lhs.g == rhs.g) && (lhs.b == rhs.b) && (lhs.a == rhs.a);
 }
 
 //! \brief color inequality operator
 //! \returns True iff not identical
-constexpr bool
-operator!= (const color& lhs, const color& rhs) noexcept
+constexpr bool operator!= (const color& lhs, const color& rhs) noexcept
 {
     return !(lhs == rhs);
 }
 
 //! \brief color stream output operator
-//! \param [in] os Output stream
-//! \param [in] value color to write to the stream
 //! \returns Output stream
 std::ostream& operator<< (std::ostream& os, const color& value);
 

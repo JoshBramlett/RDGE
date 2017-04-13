@@ -98,7 +98,7 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     //! \param [in] rhs vec2_t to add
     //! \returns Reference to self
     template <typename U>
-    constexpr vec2_t<T>& operator+= (const vec2_t<U>& rhs)
+    constexpr vec2_t<T>& operator+= (const vec2_t<U>& rhs) noexcept
     {
         x += static_cast<T>(rhs.x);
         y += static_cast<T>(rhs.y);
@@ -110,7 +110,7 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     //! \returns Reference to self
     template <typename U>
     constexpr typename std::enable_if_t<std::is_arithmetic<U>::value, vec2_t<T>&>
-    operator+= (U scalar)
+    operator+= (U scalar) noexcept
     {
         x += static_cast<T>(scalar);
         y += static_cast<T>(scalar);
@@ -121,7 +121,7 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     //! \param [in] rhs vec2_t to subtract
     //! \returns Reference to self
     template <typename U>
-    constexpr vec2_t<T>& operator-= (const vec2_t<U>& rhs)
+    constexpr vec2_t<T>& operator-= (const vec2_t<U>& rhs) noexcept
     {
         x -= static_cast<T>(rhs.x);
         y -= static_cast<T>(rhs.y);
@@ -133,7 +133,7 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     //! \returns Reference to self
     template <typename U>
     constexpr typename std::enable_if_t<std::is_arithmetic<U>::value, vec2_t<T>&>
-    operator-= (U scalar)
+    operator-= (U scalar) noexcept
     {
         x -= static_cast<T>(scalar);
         y -= static_cast<T>(scalar);
@@ -144,7 +144,7 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     //! \param [in] rhs vec2_t to multiply
     //! \returns Reference to self
     template <typename U>
-    constexpr vec2_t<T>& operator*= (const vec2_t<U>& rhs)
+    constexpr vec2_t<T>& operator*= (const vec2_t<U>& rhs) noexcept
     {
         x *= static_cast<T>(rhs.x);
         y *= static_cast<T>(rhs.y);
@@ -156,66 +156,18 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     //! \returns Reference to self
     template <typename U>
     constexpr typename std::enable_if_t<std::is_arithmetic<U>::value, vec2_t<T>&>
-    operator*= (U scalar)
+    operator*= (U scalar) noexcept
     {
         x *= static_cast<T>(scalar);
         y *= static_cast<T>(scalar);
         return *this;
     }
 
-    //! \brief vec2_t memberwise division
-    //! \param [in] rhs vec2_t representing the divisor
-    //! \returns Reference to self (quotient)
-    template <typename U>
-    constexpr vec2_t<T>& operator/= (const vec2_t<U>& rhs)
+    //! \brief Check if vector components are set to zero
+    //! \returns True iff all components are zero
+    constexpr bool is_zero (void) const noexcept
     {
-        assert(rhs.x != 0 && rhs.y != 0);
-        x /= static_cast<T>(rhs.x);
-        y /= static_cast<T>(rhs.y);
-        return *this;
-    }
-
-    //! \brief vec2_t memberwise division
-    //! \param [in] scalar Divisor applied to all elements
-    //! \returns Reference to self (quotient)
-    template <typename U>
-    constexpr typename std::enable_if_t<std::is_arithmetic<U>::value, vec2_t<T>&>
-    operator/= (U scalar)
-    {
-        assert(scalar != 0);
-        x /= static_cast<T>(scalar);
-        y /= static_cast<T>(scalar);
-        return *this;
-    }
-
-    //! \brief vec2_t memberwise modulo (remainder)
-    //! \param [in] rhs vec2_t representing the divisor
-    //! \returns Reference to self (remainder)
-    template <typename U>
-    constexpr vec2_t<T>& operator%= (const vec2_t<U>& rhs)
-    {
-        x %= static_cast<T>(rhs.x);
-        y %= static_cast<T>(rhs.y);
-        return *this;
-    }
-
-    //! \brief vec2_t memberwise modulo (remainder)
-    //! \param [in] scalar Divisor applied to all elements
-    //! \returns Reference to self (remainder)
-    template <typename U>
-    constexpr typename std::enable_if_t<std::is_arithmetic<U>::value, vec2_t<T>&>
-    operator%= (U scalar)
-    {
-        x %= static_cast<T>(scalar);
-        y %= static_cast<T>(scalar);
-        return *this;
-    }
-
-    //! \brief Absolute value of the vector
-    //! \returns Vector containing absolute values
-    constexpr vec2_t<T> abs (void) const
-    {
-        return vec2_t<T>(math::abs(x), math::abs(y));
+        return x == 0 && y == 0;
     }
 
     //! \brief Vector length (magnitude)
@@ -231,7 +183,7 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     //! \details Sum of the corresponding products within the containers.
     //! \param [in] other Other vec2_t used in the calculation
     //! \returns Dot product of the vectors
-    constexpr float dot (const vec2_t<T>& other) const
+    constexpr float dot (const vec2_t<T>& other) const noexcept
     {
         static_assert(std::is_floating_point<T>::value,
                       "'dot' is only available for floating point types");
@@ -240,7 +192,7 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
 
     //! \brief Get a vector perpendicular to the object
     //! \returns Perpendicular vector
-    constexpr vec2_t<T> perp (void) const
+    constexpr vec2_t<T> perp (void) const noexcept
     {
         static_assert(std::is_floating_point<T>::value,
                       "'perp' is only available for floating point types");
@@ -248,152 +200,108 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     }
 };
 
-//! \brief vec2_t equality operator
-//! \param [in] lhs Left side vec2_t to compare
-//! \param [in] rhs Right side vec2_t to compare
-//! \returns True iff vectors are identical
+//! \brief Intrinsic vec2_t abs specialization
+//! \returns vec2_t of abs components
 template <typename T>
-constexpr bool operator== (const vec2_t<T>& lhs, const vec2_t<T>& rhs)
+constexpr vec2_t<T> abs (const vec2_t<T>& vec) noexcept
+{
+    return vec2_t<T>(math::abs(vec.x), math::abs(vec.y));
+}
+
+//! \brief Intrinsic vec2_t clamp specialization
+//! \returns vec2_t of clamped components
+template <typename T>
+constexpr vec2_t<T> clamp (const vec2_t<T>& vec, T lbound, T ubound) noexcept
+{
+    return vec2_t<T>(math::clamp(vec.x, lbound, ubound),
+                     math::clamp(vec.y, lbound, ubound));
+}
+
+//! \brief vec2_t equality operator
+//! \returns True iff identical
+template <typename T>
+constexpr bool operator== (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexcept
 {
     return (lhs.x == rhs.x) && (lhs.y == rhs.y);
 }
 
 //! \brief vec2_t inequality operator
-//! \param [in] lhs Left side vec2_t to compare
-//! \param [in] rhs Right side vec2_t to compare
-//! \returns True iff vectors are not identical
+//! \returns True iff not identical
 template <typename T>
-constexpr bool operator!= (const vec2_t<T>& lhs, const vec2_t<T>& rhs)
+constexpr bool operator!= (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexcept
 {
     return !(lhs == rhs);
 }
 
 //! \brief vec2_t unary negation operator
-//! \param [in] value vec2_t to negate
-//! \returns Negated vec2_t
+//! \returns vec2_t of negated components
 template <typename T>
-constexpr vec2_t<T> operator- (const vec2_t<T>& value)
+constexpr vec2_t<T> operator- (const vec2_t<T>& value) noexcept
 {
     return vec2_t<T>(-value.x, -value.y);
 }
 
 //! \brief vec2_t addition operator
-//! \param [in] lhs Left side vec2_t
-//! \param [in] rhs Right side vec2_t
-//! \returns vec2_t of resultant values
+//! \returns vec2_t of added components
 template <typename T>
-constexpr vec2_t<T> operator+ (const vec2_t<T>& lhs, const vec2_t<T>& rhs)
+constexpr vec2_t<T> operator+ (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexcept
 {
     return vec2_t<T>(lhs.x + rhs.x, lhs.y + rhs.y);
 }
 
-//! \brief vec2_t addition operator
-//! \param [in] vec vec2_t
-//! \param [in] scalar Value applied to all elements
-//! \returns vec2_t of resultant values
+//! \brief vec2_t scalar addition operator
+//! \returns vec2_t of components after addition of the scalar
 template <typename T, typename U>
 constexpr typename std::enable_if_t<std::is_arithmetic<U>::value, vec2_t<T>>
-operator+ (const vec2_t<T>& vec, U scalar)
+operator+ (const vec2_t<T>& vec, U scalar) noexcept
 {
     return vec2_t<T>(vec.x + static_cast<T>(scalar), vec.y + static_cast<T>(scalar));
 }
 
 //! \brief vec2_t subtraction operator
-//! \param [in] lhs Left side vec2_t
-//! \param [in] rhs Right side vec2_t
-//! \returns vec2_t of resultant values
+//! \returns vec2_t of subtracted components
 template <typename T>
-constexpr vec2_t<T> operator- (const vec2_t<T>& lhs, const vec2_t<T>& rhs)
+constexpr vec2_t<T> operator- (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexcept
 {
     return vec2_t<T>(lhs.x - rhs.x, lhs.y - rhs.y);
 }
 
-//! \brief vec2_t subtraction operator
-//! \param [in] vec vec2_t
-//! \param [in] scalar Value applied to all elements
-//! \returns vec2_t of resultant values
+//! \brief vec2_t scalar subtraction operator
+//! \returns vec2_t of components after subtraction of the scalar
 template <typename T, typename U>
 constexpr typename std::enable_if_t<std::is_arithmetic<U>::value, vec2_t<T>>
-operator- (const vec2_t<T>& vec, U scalar)
+operator- (const vec2_t<T>& vec, U scalar) noexcept
 {
     return vec2_t<T>(vec.x - static_cast<T>(scalar), vec.y - static_cast<T>(scalar));
 }
 
 //! \brief vec2_t multiplication operator
-//! \param [in] lhs Left side vec2_t
-//! \param [in] rhs Right side vec2_t
-//! \returns vec2_t of resultant values
+//! \returns vec2_t of multiplied components
 template <typename T>
-constexpr vec2_t<T> operator* (const vec2_t<T>& lhs, const vec2_t<T>& rhs)
+constexpr vec2_t<T> operator* (const vec2_t<T>& lhs, const vec2_t<T>& rhs) noexcept
 {
     return vec2_t<T>(lhs.x * rhs.x, lhs.y * rhs.y);
 }
 
-//!@{
-//! \brief vec2_t multiplication operator
-//! \param [in] vec vec2_t
-//! \param [in] scalar Value applied to all elements
-//! \returns vec2_t of resultant values
+//! \brief vec2_t scalar multiplication operator
+//! \returns vec2_t of components after multiplication of the scalar
 template <typename T, typename U>
 constexpr typename std::enable_if_t<std::is_arithmetic<U>::value, vec2_t<T>>
-operator* (const vec2_t<T>& vec, U scalar)
+operator* (const vec2_t<T>& vec, U scalar) noexcept
 {
     return vec2_t<T>(vec.x * static_cast<T>(scalar), vec.y * static_cast<T>(scalar));
 }
 
+//! \brief vec2_t scalar multiplication operator
+//! \returns vec2_t of components after multiplication of the scalar
 template <typename T, typename U>
 constexpr typename std::enable_if_t<std::is_arithmetic<U>::value, vec2_t<T>>
-operator* (U scalar, const vec2_t<T>& vec)
+operator* (U scalar, const vec2_t<T>& vec) noexcept
 {
     return vec * scalar;
 }
-//!@}
-
-//! \brief vec2_t division operator
-//! \param [in] lhs Left side vec2_t numerator
-//! \param [in] rhs Right side vec2_t denominator
-//! \returns vec2_t of resultant values (quotient)
-template <typename T>
-constexpr vec2_t<T> operator/ (const vec2_t<T>& lhs, const vec2_t<T>& rhs)
-{
-    assert(rhs.x != 0 && rhs.y != 0);
-    return vec2_t<T>(lhs.x / rhs.x, lhs.y / rhs.y);
-}
-
-//! \brief vec2_t division operator
-//! \param [in] vec vec2_t numerator
-//! \param [in] scalar Denominator
-//! \returns vec2_t of resultant values (quotient)
-template <typename T>
-constexpr vec2_t<T> operator/ (const vec2_t<T>& vec, T scalar)
-{
-    assert(scalar != 0);
-    return vec2_t<T>(vec.x / scalar, vec.y / scalar);
-}
-
-//! \brief vec2_t modulo operator
-//! \param [in] lhs Left side vec2_t dividend
-//! \param [in] rhs Right side vec2_t divisor
-//! \returns vec2_t of resultant values (remainder)
-template <typename T>
-constexpr vec2_t<T> operator% (const vec2_t<T>& lhs, const vec2_t<T>& rhs)
-{
-    return vec2_t<T>(lhs.x % rhs.x, lhs.y % rhs.y);
-}
-
-//! \brief vec2_t modulo operator
-//! \param [in] vec vec2_t dividend
-//! \param [in] scalar Divisor
-//! \returns vec2_t of resultant values (remainder)
-template <typename T>
-constexpr vec2_t<T> operator% (const vec2_t<T>& vec, T scalar)
-{
-    return vec2_t<T>(vec.x % scalar, vec.y % scalar);
-}
 
 //! \brief vec2_t stream output operator
-//! \param [in] os Output stream
-//! \param [in] value vec2_t to write to the stream
 //! \returns Output stream
 template <typename T>
 inline std::ostream& operator<< (std::ostream& os, const vec2_t<T>& value)

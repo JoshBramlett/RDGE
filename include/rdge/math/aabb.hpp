@@ -170,15 +170,33 @@ struct aabb
         {
             mf.depths[0] = overlap_x;
             mf.normal = { 1.f * sign_x, 0.f };
-            mf.contacts[0] = { cen_a.x + (ext_a.x * sign_x),
-                               cen_b.y - (ext_b.y * sign_y) };
+
+            if (d.y != 0.f || bottom() < other.bottom())
+            {
+                mf.contacts[0] = { cen_a.x + (ext_a.x * sign_x),
+                                   cen_b.y - (ext_b.y * sign_y) };
+            }
+            else
+            {
+                mf.contacts[0] = { cen_b.x + (ext_b.x * -sign_x),
+                                   cen_a.y - (ext_a.y * sign_y) };
+            }
         }
         else
         {
             mf.depths[0] = overlap_y;
             mf.normal = { 0.f, 1.f * sign_y };
-            mf.contacts[0] = { cen_b.x - (ext_b.x * sign_x),
-                               cen_a.y + (ext_a.y * sign_y) };
+
+            if (d.x != 0.f || left() < other.left())
+            {
+                mf.contacts[0] = { cen_b.x - (ext_b.x * sign_x),
+                                   cen_a.y + (ext_a.y * sign_y) };
+            }
+            else
+            {
+                mf.contacts[0] = { cen_a.x - (ext_a.x * sign_x),
+                                   cen_b.y + (ext_b.y * -sign_y) };
+            }
         }
 
         return true;
@@ -187,23 +205,20 @@ struct aabb
 
 //! \brief aabb equality operator
 //! \returns True iff identical
-constexpr bool
-operator== (const aabb& lhs, const aabb& rhs) noexcept
+constexpr bool operator== (const aabb& lhs, const aabb& rhs) noexcept
 {
     return (lhs.lo == rhs.lo) && (lhs.hi == rhs.hi);
 }
 
 //! \brief aabb inequality operator
 //! \returns True iff not identical
-constexpr bool
-operator!= (const aabb& lhs, const aabb& rhs) noexcept
+constexpr bool operator!= (const aabb& lhs, const aabb& rhs) noexcept
 {
     return !(lhs == rhs);
 }
 
 //! \brief aabb stream output operator
-inline std::ostream&
-operator<< (std::ostream& os, const aabb& rect)
+inline std::ostream& operator<< (std::ostream& os, const aabb& rect)
 {
     return os << "[ " << rect.lo << ", " << rect.hi << " ]";
 }
