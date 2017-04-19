@@ -171,6 +171,11 @@ struct aabb
             mf.depths[0] = overlap_x;
             mf.normal = { 1.f * sign_x, 0.f };
 
+            // NOTE A distance of zero on the opposite axis means there are either two
+            //      or four contact points (e.g. "T" or "+" shape, respectively) all
+            //      on the same axis.  Currently only a single contact point is
+            //      included in the manifold.
+
             if (d.y != 0.f || bottom() < other.bottom())
             {
                 mf.contacts[0] = { cen_a.x + (ext_a.x * sign_x),

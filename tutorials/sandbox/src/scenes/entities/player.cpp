@@ -19,42 +19,42 @@ Player::Player (void)
     //////////////////
     // idle animation
     //////////////////
-    cd_anim_blink.animations.emplace_back(sheet.GetAnimation("idle_back"));
-    cd_anim_blink.animations.emplace_back(sheet.GetAnimation("idle_right"));
-    cd_anim_blink.animations.emplace_back(sheet.GetAnimation("idle_front"));
-    cd_anim_blink.animations.emplace_back(sheet.GetAnimation("idle_left"));
+    cd_anim_blink[Direction::UP]    = sheet.GetAnimation("idle_back");
+    cd_anim_blink[Direction::RIGHT] = sheet.GetAnimation("idle_right");
+    cd_anim_blink[Direction::DOWN]  = sheet.GetAnimation("idle_front");
+    cd_anim_blink[Direction::LEFT]  = sheet.GetAnimation("idle_left");
 
     //////////////////
     // walking animation
     //////////////////
-    cd_anim_walk.animations.emplace_back(sheet.GetAnimation("walk_back"));
-    cd_anim_walk.animations.emplace_back(sheet.GetAnimation("walk_right"));
-    cd_anim_walk.animations.emplace_back(sheet.GetAnimation("walk_front"));
-    cd_anim_walk.animations.emplace_back(sheet.GetAnimation("walk_left"));
+    cd_anim_walk[Direction::UP]    = sheet.GetAnimation("walk_back");
+    cd_anim_walk[Direction::RIGHT] = sheet.GetAnimation("walk_right");
+    cd_anim_walk[Direction::DOWN]  = sheet.GetAnimation("walk_front");
+    cd_anim_walk[Direction::LEFT]  = sheet.GetAnimation("walk_left");
 
     //////////////////
     // running animation
     //////////////////
-    cd_anim_run.animations.emplace_back(sheet.GetAnimation("run_back"));
-    cd_anim_run.animations.emplace_back(sheet.GetAnimation("run_right"));
-    cd_anim_run.animations.emplace_back(sheet.GetAnimation("run_front"));
-    cd_anim_run.animations.emplace_back(sheet.GetAnimation("run_left"));
+    cd_anim_run[Direction::UP]    = sheet.GetAnimation("run_back");
+    cd_anim_run[Direction::RIGHT] = sheet.GetAnimation("run_right");
+    cd_anim_run[Direction::DOWN]  = sheet.GetAnimation("run_front");
+    cd_anim_run[Direction::LEFT]  = sheet.GetAnimation("run_left");
 
     //////////////////
     // sheathe animation
     //////////////////
-    cd_anim_sheathe.animations.emplace_back(sheet.GetAnimation("sheathe_back"));
-    cd_anim_sheathe.animations.emplace_back(sheet.GetAnimation("sheathe_right"));
-    cd_anim_sheathe.animations.emplace_back(sheet.GetAnimation("sheathe_front"));
-    cd_anim_sheathe.animations.emplace_back(sheet.GetAnimation("sheathe_left"));
+    cd_anim_sheathe[Direction::UP]    = sheet.GetAnimation("sheathe_back");
+    cd_anim_sheathe[Direction::RIGHT] = sheet.GetAnimation("sheathe_right");
+    cd_anim_sheathe[Direction::DOWN]  = sheet.GetAnimation("sheathe_front");
+    cd_anim_sheathe[Direction::LEFT]  = sheet.GetAnimation("sheathe_left");
 
     //////////////////
     // fight stance animation
     //////////////////
-    cd_anim_fight.animations.emplace_back(sheet.GetAnimation("fight_stance_back"));
-    cd_anim_fight.animations.emplace_back(sheet.GetAnimation("fight_stance_right"));
-    cd_anim_fight.animations.emplace_back(sheet.GetAnimation("fight_stance_front"));
-    cd_anim_fight.animations.emplace_back(sheet.GetAnimation("fight_stance_left"));
+    cd_anim_fight[Direction::UP]    = sheet.GetAnimation("fight_stance_back");
+    cd_anim_fight[Direction::RIGHT] = sheet.GetAnimation("fight_stance_right");
+    cd_anim_fight[Direction::DOWN]  = sheet.GetAnimation("fight_stance_front");
+    cd_anim_fight[Direction::LEFT]  = sheet.GetAnimation("fight_stance_left");
 
     this->sprite = sheet.CreateSprite("idle_front_1", vec3(0.f, 0.f, 0.f));
     this->sprite->debug_bounds.show = true;

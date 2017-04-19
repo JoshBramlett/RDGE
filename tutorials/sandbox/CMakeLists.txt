@@ -28,6 +28,7 @@ include_directories (${RDGE_INCLUDE_DIR})
 add_executable (sandbox
                 src/main.cpp
                 src/scenes/test.cpp
+                src/scenes/entities/duck.cpp
                 src/scenes/entities/player.cpp)
 
 target_link_libraries (sandbox

@@ -318,6 +318,27 @@ DrawWireFrame (const SpriteVertices& vertices, const color& c)
     renderer.DrawLine(vertices[3].pos, vertices[0].pos, ic);
 }
 
+void
+DrawWireFrame (const math::aabb& box)
+{
+    auto& renderer = Instance();
+    renderer.DrawLine(box.top_left(), box.top_right());
+    renderer.DrawLine(box.top_right(), box.bottom_right());
+    renderer.DrawLine(box.bottom_right(), box.bottom_left());
+    renderer.DrawLine(box.bottom_left(), box.top_left());
+}
+
+void
+DrawWireFrame (const math::aabb& box, const color& c)
+{
+    auto& renderer = Instance();
+    auto ic = static_cast<uint32>(c);
+    renderer.DrawLine(box.top_left(), box.top_right(), ic);
+    renderer.DrawLine(box.top_right(), box.bottom_right(), ic);
+    renderer.DrawLine(box.bottom_right(), box.bottom_left(), ic);
+    renderer.DrawLine(box.bottom_left(), box.top_left(), ic);
+}
+
 } // namespace debug
 } // namespace rdge
 

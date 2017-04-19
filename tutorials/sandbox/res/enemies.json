@@ -1,0 +1,86 @@
+{
+  "texture_parts": [
+    {
+      "name": "duck_front_1",
+      "x": 0,
+      "y": 0,
+      "width": 16,
+      "height": 16
+    },
+    {
+      "name": "duck_front_2",
+      "x": 16,
+      "y": 0,
+      "width": 16,
+      "height": 16
+    },
+    {
+      "name": "duck_side_1",
+      "x": 0,
+      "y": 16,
+      "width": 16,
+      "height": 16
+    },
+    {
+      "name": "duck_side_2",
+      "x": 16,
+      "y": 16,
+      "width": 16,
+      "height": 16
+    },
+    {
+      "name": "duck_back_1",
+      "x": 0,
+      "y": 32,
+      "width": 16,
+      "height": 16
+    },
+    {
+      "name": "duck_back_2",
+      "x": 16,
+      "y": 32,
+      "width": 16,
+      "height": 16
+    }
+  ],
+  "animations": [
+  	{
+  	  "name": "duck_front",
+  	  "mode": "loop",
+  	  "interval": 175,
+  	  "frames": [
+  	    { "name": "duck_front_1" },
+  	    { "name": "duck_front_2" }
+  	  ]
+  	},
+  	{
+  	  "name": "duck_back",
+  	  "mode": "loop",
+  	  "interval": 175,
+  	  "frames": [
+  	    { "name": "duck_back_1" },
+  	    { "name": "duck_back_2" }
+  	  ]
+  	},
+  	{
+  	  "name": "duck_right",
+  	  "mode": "loop",
+  	  "interval": 175,
+  	  "frames": [
+  	    { "name": "duck_side_1" },
+  	    { "name": "duck_side_2" }
+  	  ]
+  	},
+  	{
+  	  "name": "duck_left",
+  	  "mode": "loop",
+  	  "interval": 175,
+  	  "frames": [
+  	    { "name": "duck_side_1", "flip": "horizontal" },
+  	    { "name": "duck_side_2", "flip": "horizontal" }
+  	  ]
+  	}
+  ],
+  "image_path": "res/enemies.png",
+  "image_scale": 2
+}

@@ -13,7 +13,8 @@ using namespace rdge;
 using namespace rdge::math;
 
 TestScene::TestScene (void)
-    : render_target(std::make_shared<SpriteBatch>(10'000))
+    : duck(vec3::ZERO)
+    , render_target(std::make_shared<SpriteBatch>(10'000))
     , background(render_target)
 {
     SpriteSheet sheet("res/environment.json", Window::Current().IsHighDPI());
@@ -44,6 +45,9 @@ TestScene::TestScene (void)
     }
 
     background.AddSprite(player.sprite);
+    background.AddSprite(duck.sprite);
+
+    walls.left = aabb({ -990.f, -570.f }, { -960.f, 570.f });
 }
 
 void
@@ -72,6 +76,7 @@ void
 TestScene::OnUpdate (const delta_time& dt)
 {
     player.OnUpdate(dt);
+    duck.OnUpdate(dt);
 }
 
 void
@@ -82,6 +87,17 @@ TestScene::OnRender (void)
     render_target->SetProjection(camera.combined);
 
     background.Draw();
+
+    aabb player_aabb(player.sprite->vertices[0].pos.xy(),
+                     player.sprite->vertices[2].pos.xy());
+    if (player_aabb.intersects_with(walls.left))
+    {
+        debug::DrawWireFrame(walls.left, color::RED);
+    }
+    else
+    {
+        debug::DrawWireFrame(walls.left);
+    }
 
     debug::SetProjection(camera.combined);
 }

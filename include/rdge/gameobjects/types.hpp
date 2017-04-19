@@ -17,14 +17,21 @@ namespace rdge {
 enum class Direction : uint8
 {
     NONE  = 0x00,
+
     NORTH = 0x01,
     EAST  = 0x02,
     SOUTH = 0x04,
     WEST  = 0x08,
+
     NE    = NORTH | EAST, // 0x03
     SE    = SOUTH | EAST, // 0x06
     SW    = SOUTH | WEST, // 0x0C
-    NW    = NORTH | WEST  // 0x09
+    NW    = NORTH | WEST, // 0x09
+
+    UP    = NORTH,
+    RIGHT = EAST,
+    DOWN  = SOUTH,
+    LEFT  = WEST,
 };
 
 //! \brief Enable Direction enum for bitmask operations

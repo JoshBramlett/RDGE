@@ -5,22 +5,13 @@
 #include <rdge/events/event.hpp>
 #include <rdge/gameobjects.hpp>
 #include <rdge/graphics.hpp>
-
+#include <rdge/math.hpp>
 #include <rdge/physics/motion.hpp>
+
+#include "cardinal_direction_animation.hpp"
 
 #include <vector>
 #include <memory>
-
-class CardinalDirectionAnimation
-{
-public:
-    rdge::Animation& operator[] (rdge::Direction dir)
-    {
-        return animations[rdge::math::lsb(rdge::to_underlying(dir)) - 1];
-    }
-
-    std::vector<rdge::Animation> animations;
-};
 
 class Player
 {

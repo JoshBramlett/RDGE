@@ -8,6 +8,7 @@
 #include <rdge/core.hpp>
 #include <rdge/graphics/isprite.hpp>
 #include <rdge/graphics/color.hpp>
+#include <rdge/math/aabb.hpp>
 #include <rdge/math/vec3.hpp>
 #include <rdge/math/mat4.hpp>
 
@@ -41,6 +42,8 @@ void DrawLine (const math::vec3& pa, const math::vec3& pb, const color& c);
 //!@{ Draw wireframe (with color override)
 void DrawWireFrame (const SpriteVertices& vertices);
 void DrawWireFrame (const SpriteVertices& vertices, const color& c);
+void DrawWireFrame (const math::aabb& box);
+void DrawWireFrame (const math::aabb& box, const color& c);
 //!@}
 
 #else
@@ -54,6 +57,8 @@ inline void DrawLine (const math::vec3&, const math::vec3&) { }
 inline void DrawLine (const math::vec3&, const math::vec3&, const color&) { }
 inline void DrawWireFrame (const SpriteVertices&) { }
 inline void DrawWireFrame (const SpriteVertices&, const color&) { }
+inline void DrawWireFrame (const math::aabb&) { }
+inline void DrawWireFrame (const math::aabb&, const color&) { }
 #endif
 
 } // namespace debug
