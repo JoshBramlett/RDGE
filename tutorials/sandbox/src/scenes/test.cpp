@@ -88,6 +88,7 @@ TestScene::OnRender (void)
 
     background.Draw();
 
+    debug::SetLineColor(color::CYAN);
     aabb player_aabb(player.sprite->vertices[0].pos.xy(),
                      player.sprite->vertices[2].pos.xy());
     if (player_aabb.intersects_with(walls.left))
@@ -98,6 +99,9 @@ TestScene::OnRender (void)
     {
         debug::DrawWireFrame(walls.left);
     }
+
+    //debug::DrawWireFrame(circle(vec2(100.f, 100.f), 50.f), color::BLUE);
+    debug::DrawWireFrame(circle(vec2(100.f, 100.f), 50.f));
 
     debug::SetProjection(camera.combined);
 }

@@ -55,7 +55,7 @@ struct vec3
     //! \details Initialize vec3 from vec2 and Z values.
     //! \param [in] v vec2 containing the x and y coordinates
     //! \param [in] pz Z-Coordinate
-    constexpr vec3 (const vec2& v, float pz = 0.f)
+    constexpr vec3 (const vec2& v, float pz)
         : x(v.x), y(v.y), z(pz)
     { }
 

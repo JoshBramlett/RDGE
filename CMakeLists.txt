@@ -104,6 +104,7 @@ add_library (
              src/math/mat4.cpp
              src/math/vec3.cpp
              src/math/vec4.cpp
+             src/math/geometry/circle.cpp
 
              src/system/keyboard.cpp
              src/system/mouse.cpp

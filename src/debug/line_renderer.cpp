@@ -25,6 +25,8 @@ struct line_vertex
     uint32     color = 0xFFFFFFFF;
 };
 
+rdge::color s_defultColor = color::YELLOW;
+
 constexpr uint32 VERTEX_SIZE = sizeof(line_vertex);
 constexpr uint32 LINE_SIZE = VERTEX_SIZE * 2;
 
@@ -81,12 +83,9 @@ public:
     LineRenderer& operator= (LineRenderer&&) = delete;
 
     void SetProjection (const math::mat4& projection);
-    void DrawLine (const math::vec3& pa, const math::vec3& pb) noexcept;
     void DrawLine (const math::vec3& pa, const math::vec3& pb, uint32 color) noexcept;
 
     void Flush (void);
-
-    uint32 default_color = static_cast<uint32>(color::YELLOW);
 
 private:
     uint32 m_vao = 0;
@@ -162,12 +161,6 @@ LineRenderer::~LineRenderer (void) noexcept
 {
     glDeleteBuffers(1, &m_vbo);
     glDeleteVertexArrays(1, &m_vao);
-}
-
-void
-LineRenderer::DrawLine (const math::vec3& pa, const math::vec3& pb) noexcept
-{
-    DrawLine(pa, pb, this->default_color);
 }
 
 void
@@ -272,8 +265,7 @@ SetLineWidth (float width)
 void
 SetLineColor (const color& c)
 {
-    auto& renderer = Instance();
-    renderer.default_color = static_cast<uint32>(c);
+    s_defultColor = c;
 }
 
 void
@@ -286,8 +278,7 @@ SetProjection (const math::mat4& projection)
 void
 DrawLine (const math::vec3& pa, const math::vec3& pb)
 {
-    auto& renderer = Instance();
-    renderer.DrawLine(pa, pb);
+    DrawLine(pa, pb, s_defultColor);
 }
 
 void
@@ -300,43 +291,59 @@ DrawLine (const math::vec3& pa, const math::vec3& pb, const color& c)
 void
 DrawWireFrame (const SpriteVertices& vertices)
 {
-    auto& renderer = Instance();
-    renderer.DrawLine(vertices[0].pos, vertices[1].pos);
-    renderer.DrawLine(vertices[1].pos, vertices[2].pos);
-    renderer.DrawLine(vertices[2].pos, vertices[3].pos);
-    renderer.DrawLine(vertices[3].pos, vertices[0].pos);
+    DrawWireFrame(vertices, s_defultColor);
 }
 
 void
 DrawWireFrame (const SpriteVertices& vertices, const color& c)
 {
-    auto& renderer = Instance();
-    auto ic = static_cast<uint32>(c);
-    renderer.DrawLine(vertices[0].pos, vertices[1].pos, ic);
-    renderer.DrawLine(vertices[1].pos, vertices[2].pos, ic);
-    renderer.DrawLine(vertices[2].pos, vertices[3].pos, ic);
-    renderer.DrawLine(vertices[3].pos, vertices[0].pos, ic);
+    DrawLine(vertices[0].pos, vertices[1].pos, c);
+    DrawLine(vertices[1].pos, vertices[2].pos, c);
+    DrawLine(vertices[2].pos, vertices[3].pos, c);
+    DrawLine(vertices[3].pos, vertices[0].pos, c);
 }
 
 void
 DrawWireFrame (const math::aabb& box)
 {
-    auto& renderer = Instance();
-    renderer.DrawLine(box.top_left(), box.top_right());
-    renderer.DrawLine(box.top_right(), box.bottom_right());
-    renderer.DrawLine(box.bottom_right(), box.bottom_left());
-    renderer.DrawLine(box.bottom_left(), box.top_left());
+    DrawWireFrame(box, s_defultColor);
 }
 
 void
 DrawWireFrame (const math::aabb& box, const color& c)
 {
-    auto& renderer = Instance();
-    auto ic = static_cast<uint32>(c);
-    renderer.DrawLine(box.top_left(), box.top_right(), ic);
-    renderer.DrawLine(box.top_right(), box.bottom_right(), ic);
-    renderer.DrawLine(box.bottom_right(), box.bottom_left(), ic);
-    renderer.DrawLine(box.bottom_left(), box.top_left(), ic);
+    DrawLine({ box.top_left(), 0.f }, { box.top_right(), 0.f }, c);
+    DrawLine({ box.top_right(), 0.f }, { box.bottom_right(), 0.f }, c);
+    DrawLine({ box.bottom_right(), 0.f }, { box.bottom_left(), 0.f }, c);
+    DrawLine({ box.bottom_left(), 0.f }, { box.top_left(), 0.f }, c);
+}
+
+void
+DrawWireFrame (const math::circle& circle)
+{
+    DrawWireFrame(circle, s_defultColor);
+}
+
+void
+DrawWireFrame (const math::circle& circle, const color& c)
+{
+    uint32 segments = 40;
+    float theta = 0.f;
+    float inc = 3.14159265f * 2.0f / static_cast<float>(segments);
+
+    math::vec3 p { std::cosf(theta), std::sinf(theta) };
+    p *= circle.radius;
+    p += circle.pos;
+    for (uint32 i = 0; i <= segments; ++i)
+    {
+        theta += inc;
+        math::vec3 next_p = { std::cosf(theta), std::sinf(theta) };
+        next_p *= circle.radius;
+        next_p += circle.pos;
+
+        DrawLine(p, next_p, c);
+        p = next_p;
+    }
 }
 
 } // namespace debug

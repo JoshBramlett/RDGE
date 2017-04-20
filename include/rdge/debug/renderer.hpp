@@ -11,6 +11,7 @@
 #include <rdge/math/aabb.hpp>
 #include <rdge/math/vec3.hpp>
 #include <rdge/math/mat4.hpp>
+#include <rdge/math/geometry/circle.hpp>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
@@ -44,6 +45,8 @@ void DrawWireFrame (const SpriteVertices& vertices);
 void DrawWireFrame (const SpriteVertices& vertices, const color& c);
 void DrawWireFrame (const math::aabb& box);
 void DrawWireFrame (const math::aabb& box, const color& c);
+void DrawWireFrame (const math::circle& circle);
+void DrawWireFrame (const math::circle& circle, const color& c);
 //!@}
 
 #else
@@ -55,10 +58,9 @@ inline void SetLineColor (const color&) { }
 inline void SetProjection (const math::mat4&) { }
 inline void DrawLine (const math::vec3&, const math::vec3&) { }
 inline void DrawLine (const math::vec3&, const math::vec3&, const color&) { }
-inline void DrawWireFrame (const SpriteVertices&) { }
-inline void DrawWireFrame (const SpriteVertices&, const color&) { }
-inline void DrawWireFrame (const math::aabb&) { }
-inline void DrawWireFrame (const math::aabb&, const color&) { }
+template <typename T> inline void DrawWireFrame (const T&) { }
+template <typename T> inline void DrawWireFrame (const T&, const color&) { }
+
 #endif
 
 } // namespace debug

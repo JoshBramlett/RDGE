@@ -32,7 +32,7 @@ struct color : public SDL_Color
     static const color MAGENTA; //!< Pre-defined Magenta color
 
     //! \brief color ctor
-    //! \details Initialize color to [0,0,0,0]
+    //! \details Zero initialization
     constexpr color (void)
         : SDL_Color{0, 0, 0, 0}
     { }

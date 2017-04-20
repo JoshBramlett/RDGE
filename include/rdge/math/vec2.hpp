@@ -190,6 +190,15 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
         return (x * other.x) + (y * other.y);
     }
 
+    //! \brief Compute the dot product with itself
+    //! \details Represents the length squared, and is useful for avoiding
+    //!          an expensive sqrt call when comparing lengths.
+    //! \returns Length squared
+    constexpr float self_dot (void) const noexcept
+    {
+        return (x * x) + (y * y);
+    }
+
     //! \brief Get a vector perpendicular to the object
     //! \returns Perpendicular vector
     constexpr vec2_t<T> perp (void) const noexcept

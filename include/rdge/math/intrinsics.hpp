@@ -69,6 +69,16 @@ abs (T val)
     return ((val) < 0 ? -(val) : (val));
 }
 
+//! \brief Square the value
+//! \param [in] val Value to square
+//! \returns Value squared
+template <typename T>
+constexpr typename std::enable_if_t<std::is_arithmetic<T>::value, T>
+square (T val)
+{
+    return (val * val);
+}
+
 //! \brief Get the position of the least significant bit
 //! \param [in] val Value to check
 //! \returns One plus the lsb index, or zero if the parameter is zero

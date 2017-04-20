@@ -37,7 +37,7 @@ struct aabb
     vec2 hi; //!< Higher x and y coordinate position
 
     //! \brief aabb default ctor
-    //! \details Initialize aabb to [0,0], [0,0].
+    //! \details Zero initialization
     constexpr aabb (void)
         : lo(0.f, 0.f), hi(0.f, 0.f)
     { }
