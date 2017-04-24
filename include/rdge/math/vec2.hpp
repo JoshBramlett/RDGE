@@ -12,7 +12,7 @@
 
 #include <ostream>
 
-//! \namespace RDGE Rainbow Drop Game Engine
+//! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 namespace math {
 
@@ -209,23 +209,6 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     }
 };
 
-//! \brief Intrinsic vec2_t abs specialization
-//! \returns vec2_t of abs components
-template <typename T>
-constexpr vec2_t<T> abs (const vec2_t<T>& vec) noexcept
-{
-    return vec2_t<T>(math::abs(vec.x), math::abs(vec.y));
-}
-
-//! \brief Intrinsic vec2_t clamp specialization
-//! \returns vec2_t of clamped components
-template <typename T>
-constexpr vec2_t<T> clamp (const vec2_t<T>& vec, T lbound, T ubound) noexcept
-{
-    return vec2_t<T>(math::clamp(vec.x, lbound, ubound),
-                     math::clamp(vec.y, lbound, ubound));
-}
-
 //! \brief vec2_t equality operator
 //! \returns True iff identical
 template <typename T>
@@ -308,6 +291,31 @@ constexpr typename std::enable_if_t<std::is_arithmetic<U>::value, vec2_t<T>>
 operator* (U scalar, const vec2_t<T>& vec) noexcept
 {
     return vec * scalar;
+}
+
+//! \brief Intrinsic vec2_t abs specialization
+//! \returns vec2_t of abs components
+template <typename T>
+constexpr vec2_t<T> abs (const vec2_t<T>& vec) noexcept
+{
+    return vec2_t<T>(math::abs(vec.x), math::abs(vec.y));
+}
+
+//! \brief Intrinsic vec2_t clamp specialization
+//! \returns vec2_t of clamped components
+template <typename T>
+constexpr vec2_t<T> clamp (const vec2_t<T>& vec, T lbound, T ubound) noexcept
+{
+    return vec2_t<T>(math::clamp(vec.x, lbound, ubound),
+                     math::clamp(vec.y, lbound, ubound));
+}
+
+//! \brief vec2_t dot specialization
+//! \returns Dot product of vec2_t components
+template <typename T>
+constexpr vec2_t<T> dot (const vec2_t<T>& a, const vec2_t<T>& b) noexcept
+{
+    return (a.x * b.x) + (a.y * b.y);
 }
 
 //! \brief vec2_t stream output operator
