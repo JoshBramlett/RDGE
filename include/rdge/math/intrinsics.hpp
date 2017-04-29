@@ -103,7 +103,7 @@ template <typename T>
 constexpr typename std::enable_if_t<std::is_floating_point<T>::value, T>
 to_radians (T degrees)
 {
-    return static_cast<T>(degrees * (M_PI / 180.f));
+    return degrees * 0.0174532925199432957;
 }
 
 //! \brief Convert radians to degrees
@@ -113,7 +113,7 @@ template <typename T>
 constexpr typename std::enable_if_t<std::is_floating_point<T>::value, T>
 to_degrees (T radians)
 {
-    return static_cast<T>(radians * (180.f / M_PI));
+    return radians * 57.295779513082320876;
 }
 
 } // namespace math

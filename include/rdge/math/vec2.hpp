@@ -41,8 +41,9 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     //! \union Member access through x,y or w.h
     union
     {
-        struct { T x, y; };
-        struct { T w, h; };
+        struct { T x, y; }; //!< x/y coordinates
+        struct { T w, h; }; //!< width/height
+        struct { T s, c; }; //!< sine/cosine
     };
 
 #pragma GCC diagnostic pop
@@ -207,6 +208,60 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
                       "'perp' is only available for floating point types");
         return vec2_t<T>(-y, x);
     }
+
+    //!@{
+    //! \ingroup Rotation
+    // TODO This might be confusing to include with vec2 natively.  Thinking of
+    //      placing this in it's own 'rotation' struct and placing it in the
+    //      physics section along with transform.hpp
+
+    //! \brief Get the angle from the sine/cosine components
+    //! \returns Angle of the vector
+    constexpr T angle (void) const noexcept
+    {
+        static_assert(std::is_floating_point<T>::value,
+                      "'angle' is only available for floating point types");
+        return std::atan2f(s, c);
+    }
+
+    //! \brief Get the x-axis of the rotation
+    //! \returns x-axis of the rotation
+    constexpr vec2_t<T> x_axis (void) const noexcept
+    {
+        static_assert(std::is_floating_point<T>::value,
+                      "'x_axis' is only available for floating point types");
+        return { c, s };
+    }
+
+    //! \brief Get the y-axis of the rotation
+    //! \returns y-axis of the rotation
+    constexpr vec2_t<T> y_axis (void) const noexcept
+    {
+        static_assert(std::is_floating_point<T>::value,
+                      "'y_axis' is only available for floating point types");
+        return { -s, c };
+    }
+
+    //! \brief Set the identity rotation
+    constexpr void set_identity (void) noexcept
+    {
+        static_assert(std::is_floating_point<T>::value,
+                      "'set_identity' is only available for floating point types");
+        s = 0.f;
+        c = 1.f;
+    }
+
+    //! \brief Create a vector from an angle
+    //! \param [in] radians Angle
+    //! \returns Vector containing sine/cosine values
+    static constexpr vec2_t<T> from_angle (float radians) noexcept
+    {
+        static_assert(std::is_floating_point<T>::value,
+                      "'from_angle' is only available for floating point types");
+        return { std::sinf(radians),  std::cosf(radians) };
+    }
+
+    //!@}
 };
 
 //! \brief vec2_t equality operator
@@ -326,9 +381,10 @@ inline std::ostream& operator<< (std::ostream& os, const vec2_t<T>& value)
     return os << "[" << value.x << ", " << value.y << "]";
 }
 
-using vec2   = vec2_t<float>;  //!< Default floating point type
-using uivec2 = vec2_t<uint32>; //!< Unsigned (useful for size types)
-using ivec2  = vec2_t<int32>;  //!< Signed (useful for screen coordinates)
+using vec2     = vec2_t<float>;  //!< Default floating point type
+using uivec2   = vec2_t<uint32>; //!< Unsigned (useful for size types)
+using ivec2    = vec2_t<int32>;  //!< Signed (useful for screen coordinates)
+using rotation = vec2_t<float>;  //!< Rotation vector
 
 } // namespace math
 } // namespace rdge

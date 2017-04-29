@@ -13,21 +13,22 @@
 #include <memory>
 
 // TODO Immediate
-// - Create an enemy entity.
-//   The reason for doing so is because I want to create a collision system
-//   based on the supposition that entities need to react to what type of object
-//   it's colliding with.  Yes, the physics part can be dumb, but the callback
-//   handler should be able to do more.  e.g. A player colliding with an enemy
-//   is different than a player colliding with a wall.
 //
-//   Perhaps have a struct that contains a shape, and some values that denote
-//   how the other colliding shape can react?  e.g. a universal damage value,
-//   so a player can look to that to determine how hard the enemy hits, but a
-//   wall wouldn't care?
+// 1. Design a custom allocator for the physics and rendering components
+//   - b2BlockAllocator.cpp
+//   - http://stackoverflow.com/questions/19385853
+//   - Insomniac DynamicComponent:
+//     - https://d3cw3dd2w32x2b.cloudfront.net/wp-content/uploads/2011/06/6-1-2010.pdf
+// 2. Create an Entity/Actor class
+//   - Should include a Sprite and a RigidBody.
+//     - The physics simulation should be responsible for updating the position,
+//       which will be sent to the renderer.
+//     - Both should be raw pointers to block allocated objects to have better
+//       cache locality.
+// 3. Refactor how Sprite is used across code base (from shared_ptr to raw)
+// 4. Refactor SpriteBatch to use a custom allocator
 //
-//   Would it be best to have all collidables provide their displacement, then
-//   have the collision engine provide callbacks to resolve, then continue
-//   with the update phase?  Only finally continuing once everything has resolved?
+//
 //
 // Ideas from Box2D to implement
 //   - Define MKS system (meters, kilograms, seconds)
@@ -46,7 +47,7 @@
 //     - User data
 //     - Filtering flags
 //     - Sensor
-//
+
 // Box2D Manual notes:
 //
 // 4. Collision System

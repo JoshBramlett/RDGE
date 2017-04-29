@@ -113,6 +113,7 @@ add_library (
              src/util/exception.cpp
              src/util/logger.cpp
              src/util/timer.cpp
+             src/util/memory/small_block_allocator.cpp
             )
 
 target_link_libraries (RDGE
