@@ -7,6 +7,7 @@
 
 #include <rdge/core.hpp>
 #include <rdge/math/vec2.hpp>
+#include <rdge/math/geometry/shape.hpp>
 #include <rdge/physics/collision.hpp>
 
 #include <algorithm>
@@ -15,19 +16,6 @@
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 namespace math {
-
-struct shape
-{
-    enum class Type : uint8
-    {
-        CIRCLE = 1,
-        POLYGON
-    };
-
-    //https://github.com/erincatto/Box2D/blob/master/Box2D/Box2D/Collision/Shapes/b2Shape.h
-
-    virtual ~shape (void) = default;
-};
 
 //! \struct circle
 //! \brief Floating point structure defining an axis aligned bounding box
@@ -56,9 +44,9 @@ struct circle : public shape
         : pos(px), radius(r)
     { }
 
-    constexpr shape::Type type (void) const noexcept
+    virtual ShapeType type (void) const noexcept override
     {
-        return shape::Type::CIRCLE;
+        return ShapeType::CIRCLE;
     }
 
     //! \brief Check if a point resides within the circle (edge exclusive)
@@ -84,7 +72,7 @@ struct circle : public shape
     //! \param [in] other circle structure
     //! \param [out] mf Manifold containing resolution
     //! \returns True iff intersecting
-    bool intersects_with (const circle& other, collision_manifold& mf) const noexcept;
+    bool intersects_with (const circle& other, physics::collision_manifold& mf) const noexcept;
 };
 
 //! \brief circle equality operator

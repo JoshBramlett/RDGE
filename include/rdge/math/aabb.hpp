@@ -141,7 +141,7 @@ struct aabb
     //! \param [in] other aabb structure
     //! \param [out] mf Manifold containing resolution
     //! \returns True iff intersecting
-    bool intersects_with (const aabb& other, collision_manifold& mf) const noexcept
+    bool intersects_with (const aabb& other, physics::collision_manifold& mf) const noexcept
     {
         mf.count = 0;
         vec2 cen_a = centroid();

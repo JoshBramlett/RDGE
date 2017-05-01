@@ -16,6 +16,11 @@
 namespace rdge {
 namespace math {
 
+//!@{ \brief Math constants
+constexpr float PI = 3.14159265358979f;
+constexpr float TWO_PI = PI * 2.f;
+//!@}
+
 //! \brief Floating point equality
 //! \details Uses machine epsilon scaled to the magnitue of the values used.
 //! \param [in] x First value to compare

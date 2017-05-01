@@ -2,11 +2,13 @@
 
 #include <rdge/math/aabb.hpp>
 #include <rdge/math/vec2.hpp>
+#include <rdge/physics/collision.hpp>
 
 #include <exception>
 
 using namespace rdge;
 using namespace rdge::math;
+using namespace rdge::physics;
 
 TEST(AABBTest, HandlesConstruction)
 {

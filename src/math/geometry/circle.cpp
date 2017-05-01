@@ -4,7 +4,7 @@ namespace rdge {
 namespace math {
 
 bool
-circle::intersects_with (const circle& other, collision_manifold& mf) const noexcept
+circle::intersects_with (const circle& other, physics::collision_manifold& mf) const noexcept
 {
     mf.count = 0;
     vec2 d = other.pos - pos;
