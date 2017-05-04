@@ -7,9 +7,9 @@
 
 #include <rdge/core.hpp>
 #include <rdge/physics/collision.hpp>
+#include <rdge/physics/shapes/ishape.hpp>
 #include <rdge/math/intrinsics.hpp>
 #include <rdge/math/vec2.hpp>
-#include <rdge/math/geometry/shape.hpp>
 
 #include <SDL_assert.h>
 
@@ -28,7 +28,7 @@ struct collision_filter
 
 struct fixture_profile
 {
-    math::shape shape;         //!< Fixture underlying shape
+    ishape* shape;             //!< Fixture underlying shape
     void* user_data = nullptr; //!< Custom opaque pointer
 
     float density = 0.f;       //!< Shape density in kg/m^2

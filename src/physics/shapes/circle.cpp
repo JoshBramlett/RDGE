@@ -1,10 +1,12 @@
-#include <rdge/math/geometry/circle.hpp>
+#include <rdge/physics/shapes/circle.hpp>
 
 namespace rdge {
-namespace math {
+namespace physics {
+
+using namespace rdge::math;
 
 bool
-circle::intersects_with (const circle& other, physics::collision_manifold& mf) const noexcept
+circle::intersects_with (const circle& other, collision_manifold& mf) const noexcept
 {
     mf.count = 0;
     vec2 d = other.pos - pos;
@@ -24,5 +26,5 @@ circle::intersects_with (const circle& other, physics::collision_manifold& mf) c
     return false;
 }
 
-} // namespace math
+} // namespace physics
 } // namespace rdge

@@ -52,11 +52,11 @@ struct sweep_step
     //! \brief Calculate the interpolated transform for a given time
     //! \param [in] beta Normalized time fraction, where 0 indicates alpha_0
     //! \returns Interpolated transform
-    isometry lerp_transform (float beta) noexcept
+    iso_transform lerp_transform (float beta) noexcept
     {
         SDL_assert(0.f <= beta && beta <= 1.f);
 
-        isometry result(((1.f - beta) * pos_0) + (beta * pos_n),
+        iso_transform result(((1.f - beta) * pos_0) + (beta * pos_n),
                         ((1.f - beta) * angle_0) + (beta * angle_n));
 
         result.pos -= (local_center * result.rot);

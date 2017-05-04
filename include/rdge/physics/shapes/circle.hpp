@@ -1,4 +1,4 @@
-//! \headerfile <rdge/math/geometry/circle.hpp>
+//! \headerfile <rdge/physics/shapes/circle.hpp>
 //! \author Josh Bramlett
 //! \version 0.0.10
 //! \date 04/19/2017
@@ -7,7 +7,7 @@
 
 #include <rdge/core.hpp>
 #include <rdge/math/vec2.hpp>
-#include <rdge/math/geometry/shape.hpp>
+#include <rdge/physics/shapes/ishape.hpp>
 #include <rdge/physics/collision.hpp>
 
 #include <algorithm>
@@ -15,14 +15,14 @@
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
-namespace math {
+namespace physics {
 
 //! \struct circle
 //! \brief Floating point structure defining a circle
 //! \details Structure contains the position and radius
-struct circle : public shape
+struct circle : public ishape
 {
-    vec2  pos;          //!< Position at center
+    math::vec2 pos;     //!< Position at center
     float radius = 0.f; //!< Circle radius
 
     //! \brief circle default ctor
@@ -35,10 +35,11 @@ struct circle : public shape
     //! \details Initialize circle from position and radius
     //! \param [in] px Position
     //! \param [in] r Radius
-    constexpr circle (const vec2& px, float r)
+    constexpr circle (const math::vec2& px, float r)
         : pos(px), radius(r)
     { }
 
+    //! \returns Underlying type (used for casting)
     virtual ShapeType type (void) const noexcept override
     {
         return ShapeType::CIRCLE;
@@ -47,9 +48,9 @@ struct circle : public shape
     //! \brief Check if a point resides within the circle (edge exclusive)
     //! \param [in] point Point coordinates
     //! \returns True iff point is within the circle
-    constexpr bool contains (const vec2& point) const noexcept
+    constexpr bool contains (const math::vec2& point) const noexcept
     {
-        return (point - pos).self_dot() < square(radius);
+        return (point - pos).self_dot() < math::square(radius);
     }
 
     //! \brief Check if the circle intersects with another (edge exclusive)
@@ -57,7 +58,7 @@ struct circle : public shape
     //! \returns True iff intersecting
     constexpr bool intersects_with (const circle& other) const noexcept
     {
-        return (other.pos - pos).self_dot() < square(radius + other.radius);
+        return (other.pos - pos).self_dot() < math::square(radius + other.radius);
     }
 
     //! \brief Check if the circle intersects with another (edge exclusive)
@@ -67,7 +68,7 @@ struct circle : public shape
     //! \param [in] other circle structure
     //! \param [out] mf Manifold containing resolution
     //! \returns True iff intersecting
-    bool intersects_with (const circle& other, physics::collision_manifold& mf) const noexcept;
+    bool intersects_with (const circle& other, collision_manifold& mf) const noexcept;
 };
 
 //! \brief circle equality operator
@@ -90,5 +91,5 @@ inline std::ostream& operator<< (std::ostream& os, const circle& c)
     return os << "[ " << c.pos << ", r=" << c.radius << " ]";
 }
 
-} // namespace math
+} // namespace physics
 } // namespace rdge

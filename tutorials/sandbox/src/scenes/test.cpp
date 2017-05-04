@@ -1,7 +1,6 @@
 #include "test.hpp"
 
 #include <rdge/assets.hpp>
-#include <rdge/math.hpp>
 #include <rdge/system.hpp>
 #include <rdge/util.hpp>
 
@@ -11,6 +10,7 @@
 
 using namespace rdge;
 using namespace rdge::math;
+using namespace rdge::physics;
 
 TestScene::TestScene (void)
     : duck(vec3::ZERO)

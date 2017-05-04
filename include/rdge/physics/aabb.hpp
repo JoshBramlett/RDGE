@@ -1,4 +1,4 @@
-//! \headerfile <rdge/math/aabb.hpp>
+//! \headerfile <rdge/physics/aabb.hpp>
 //! \author Josh Bramlett
 //! \version 0.0.10
 //! \date 03/30/2017
@@ -21,7 +21,7 @@
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
-namespace math {
+namespace physics {
 
 //! \struct aabb
 //! \brief Floating point structure defining an axis aligned bounding box
@@ -33,8 +33,8 @@ namespace math {
 //!          on an invalid container will yield spurious results.
 struct aabb
 {
-    vec2 lo; //!< Lower x and y coordinate position
-    vec2 hi; //!< Higher x and y coordinate position
+    math::vec2 lo; //!< Lower x and y coordinate position
+    math::vec2 hi; //!< Higher x and y coordinate position
 
     //! \brief aabb default ctor
     //! \details Zero initialization
@@ -46,7 +46,7 @@ struct aabb
     //! \details Initialize aabb from min/max coordinates
     //! \param [in] plo Lower coordinate
     //! \param [in] phi Higher coordinate
-    constexpr aabb (const vec2& plo, const vec2& phi)
+    constexpr aabb (const math::vec2& plo, const math::vec2& phi)
         : lo(std::min(plo.x, phi.x), std::min(plo.y, phi.y))
         , hi(std::max(plo.x, phi.x), std::max(plo.y, phi.y))
     { }
@@ -56,7 +56,7 @@ struct aabb
     //! \param [in] origin Origin (lower left)
     //! \param [in] width aabb width
     //! \param [in] height aabb height
-    constexpr aabb (const vec2& origin, float width, float height)
+    constexpr aabb (const math::vec2& origin, float width, float height)
         : lo(origin)
         , hi(origin.x + width, origin.y + height)
     { }
@@ -81,22 +81,22 @@ struct aabb
     //!@}
 
     //!@{ \brief Corner values
-    constexpr vec2 top_left (void) const noexcept { return { left(), top() }; }
-    constexpr vec2 top_right (void) const noexcept { return { right(), top() }; }
-    constexpr vec2 bottom_left (void) const noexcept { return { left(), bottom() }; }
-    constexpr vec2 bottom_right (void) const noexcept { return { right(), bottom() }; }
+    constexpr math::vec2 top_left (void) const noexcept { return { left(), top() }; }
+    constexpr math::vec2 top_right (void) const noexcept { return { right(), top() }; }
+    constexpr math::vec2 bottom_left (void) const noexcept { return { left(), bottom() }; }
+    constexpr math::vec2 bottom_right (void) const noexcept { return { right(), bottom() }; }
     //!@}
 
     //! \brief Get the calculated center of the aabb
     //! \returns Center point
-    constexpr vec2 centroid (void) const noexcept
+    constexpr math::vec2 centroid (void) const noexcept
     {
         return (lo + hi) * 0.5f;
     }
 
     //! \brief Get the distance between an edge and the centroid
     //! \returns Half-widths
-    constexpr vec2 half_extent (void) const noexcept
+    constexpr math::vec2 half_extent (void) const noexcept
     {
         return (hi - lo) * 0.5f;
     }
@@ -104,7 +104,7 @@ struct aabb
     //! \brief Check if a point resides within the aabb (edge exclusive)
     //! \param [in] point Point coordinates
     //! \returns True iff point is within the aabb
-    constexpr bool contains (const vec2& point) const noexcept
+    constexpr bool contains (const math::vec2& point) const noexcept
     {
         return point.x > left() &&
                point.x < right() &&
@@ -141,71 +141,7 @@ struct aabb
     //! \param [in] other aabb structure
     //! \param [out] mf Manifold containing resolution
     //! \returns True iff intersecting
-    bool intersects_with (const aabb& other, physics::collision_manifold& mf) const noexcept
-    {
-        mf.count = 0;
-        vec2 cen_a = centroid();
-        vec2 ext_a = half_extent();
-        vec2 cen_b = other.centroid();
-        vec2 ext_b = other.half_extent();
-        vec2 d = cen_b - cen_a;
-
-        float overlap_x = ext_a.x + ext_b.x - std::fabs(d.x);
-        if (overlap_x <= 0.f)
-        {
-            return false;
-        }
-
-        float overlap_y = ext_a.y + ext_b.y - std::fabs(d.y);
-        if (overlap_y <= 0.f)
-        {
-            return false;
-        }
-
-        float sign_x = (d.x < 0.f) ? -1.f : 1.f;
-        float sign_y = (d.y < 0.f) ? -1.f : 1.f;
-
-        mf.count = 1;
-        if (overlap_x < overlap_y)
-        {
-            mf.depths[0] = overlap_x;
-            mf.normal = { 1.f * sign_x, 0.f };
-
-            // NOTE A distance of zero on the opposite axis means there are either two
-            //      or four contact points (e.g. "T" or "+" shape, respectively) all
-            //      on the same axis.  Currently only a single contact point is
-            //      included in the manifold.
-
-            if (d.y != 0.f || bottom() < other.bottom())
-            {
-                mf.contacts[0] = { cen_a.x + (ext_a.x * sign_x),
-                                   cen_b.y - (ext_b.y * sign_y) };
-            }
-            else
-            {
-                mf.contacts[0] = { cen_b.x + (ext_b.x * -sign_x),
-                                   cen_a.y - (ext_a.y * sign_y) };
-            }
-        }
-        else
-        {
-            mf.depths[0] = overlap_y;
-            mf.normal = { 0.f, 1.f * sign_y };
-
-            if (d.x != 0.f || left() < other.left())
-            {
-                mf.contacts[0] = { cen_b.x - (ext_b.x * sign_x),
-                                   cen_a.y + (ext_a.y * sign_y) };
-            }
-            else
-            {
-                mf.contacts[0] = { cen_a.x - (ext_a.x * sign_x),
-                                   cen_b.y + (ext_b.y * -sign_y) };
-            }
-        }
-
-        return true;
-    }
+    bool intersects_with (const aabb& other, collision_manifold& mf) const noexcept;
 };
 
 //! \brief aabb equality operator
@@ -228,5 +164,5 @@ inline std::ostream& operator<< (std::ostream& os, const aabb& rect)
     return os << "[ " << rect.lo << ", " << rect.hi << " ]";
 }
 
-} // namespace math
+} // namespace physics
 } // namespace rdge

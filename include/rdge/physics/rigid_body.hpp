@@ -6,8 +6,7 @@
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/math/aabb.hpp>
-#include <rdge/math/geometry/circle.hpp>
+#include <rdge/physics/aabb.hpp>
 #include <rdge/physics/collision.hpp>
 
 //! \namespace rdge Rainbow Drop Game Engine
@@ -27,26 +26,26 @@ enum class RigidBodyType : uint8
 //! \brief Profile for constructing a \ref RigidBody
 struct rigid_body_profile
 {
-    void* user_data = nullptr;        //!< Opaque pointer
+    void* user_data = nullptr;    //!< Opaque pointer
 
-    math::vec2 position;              //!< World position
-    math::vec2 linear_velocity;       //!< Linear velocity of the body's origin
+    math::vec2 position;          //!< World position
+    math::vec2 linear_velocity;   //!< Linear velocity of the body's origin
 
-    float angle = 0.f;                //!< Angle in radians
-    float angular_velocity = 0.f;     //!< Angular velocity
+    float angle = 0.f;            //!< Angle in radians
+    float angular_velocity = 0.f; //!< Angular velocity
 
-    float linear_damping = 0.f;       //!< Coefficient to reduce linear velocity
-    float angular_damping = 0.f;      //!< Coefficient to reduce angular velocity
+    float linear_damping = 0.f;   //!< Coefficient to reduce linear velocity
+    float angular_damping = 0.f;  //!< Coefficient to reduce angular velocity
 
-    float gravity_scale = 1.f;        //!< Normalized scale of the gravitational impact
+    float gravity_scale = 1.f;    //!< Normalized scale of the gravitational impact
 
-    bool active = true;               //!< Body is initially active
-    bool awake = true;                //!< Body is initially awake
-    bool bullet = false;              //!< High velocity body - prevents tunneling
-    bool fixed_rotation = false;      //!< Prevent rotation
-    bool allow_sleep = true;          //!< Body is allowed to enter a sleep state
+    bool active = true;           //!< Body is initially active
+    bool awake = true;            //!< Body is initially awake
+    bool bullet = false;          //!< High velocity body - prevents tunneling
+    bool fixed_rotation = false;  //!< Prevent rotation
+    bool allow_sleep = true;      //!< Body is allowed to enter a sleep state
 
-    BodyType type = BodyType::STATIC; //!< Canonical type defining the body
+    RigidBodyType type = RigidBodyType::STATIC; //!< Canonical type defining the body
 };
 
 //! \class RigidBody
@@ -172,16 +171,16 @@ private:
         TOI_FLAG            = 0x0040
     };
 
-    isometry   m_transform;
-    sweep_step m_sweep;
+    iso_transform m_transform;
+    sweep_step    m_sweep;
 
     math::vec2 m_force;
     float      m_torque = 0.f;
 
-    float      m_mass = 0.f;
-    float      m_invMass = 0.f;
-    float      m_inertia = 0.f;
-    float      m_invInertia = 0.f;
+    //float      m_mass = 0.f;
+    //float      m_invMass = 0.f;
+    //float      m_inertia = 0.f;
+    //float      m_invInertia = 0.f;
 
     float      m_sleepTime = 0.f;
 

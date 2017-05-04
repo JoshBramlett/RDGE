@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include <rdge/math/aabb.hpp>
 #include <rdge/math/vec2.hpp>
+#include <rdge/physics/aabb.hpp>
 #include <rdge/physics/collision.hpp>
 
 #include <exception>

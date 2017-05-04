@@ -1,4 +1,4 @@
-//! \headerfile <rdge/math/geometry/polygon.hpp>
+//! \headerfile <rdge/physics/shapes/polygon.hpp>
 //! \author Josh Bramlett
 //! \version 0.0.10
 //! \date 05/01/2017
@@ -7,7 +7,7 @@
 
 #include <rdge/core.hpp>
 #include <rdge/math/vec2.hpp>
-#include <rdge/math/geometry/shape.hpp>
+#include <rdge/physics/shapes/ishape.hpp>
 #include <rdge/physics/collision.hpp>
 
 #include <array>
@@ -15,17 +15,17 @@
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
-namespace math {
+namespace physics {
 
 //! \struct polygon
 //! \brief Convex polygon whose vertices are in CCW order
 //! \details Structure has a maximum number of vertices defined by \ref
 //!          MAX_VERTICES.
-struct polygon : public shape
+struct polygon : public ishape
 {
     static constexpr uint8 MAX_VERTICES = 8; //!< Maximum number of vertices
 
-    using PolygonData = std::array<vec2, MAX_VERTICES>; //!< Vertex container
+    using PolygonData = std::array<math::vec2, MAX_VERTICES>; //!< Vertex container
 
     // TODO vec2 centroid;        //!< Position at center
     PolygonData vertices; //!< Collection of vertices
@@ -35,7 +35,7 @@ struct polygon : public shape
     //! \brief polygon default ctor
     //! \details Zero initialization
     constexpr polygon (void)
-        : centroid(0.f, 0.f)
+        //: centroid(0.f, 0.f)
     {
         vertices.fill(0.f);
         normals.fill(0.f);
@@ -133,5 +133,5 @@ inline bool operator!= (const polygon& lhs, const polygon& rhs) noexcept
     //return os << "[ " << c.pos << ", r=" << c.radius << " ]";
 //}
 
-} // namespace math
+} // namespace physics
 } // namespace physics

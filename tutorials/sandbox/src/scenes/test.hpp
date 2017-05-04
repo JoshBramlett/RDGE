@@ -6,6 +6,7 @@
 #include <rdge/gameobjects.hpp>
 #include <rdge/graphics.hpp>
 #include <rdge/math.hpp>
+#include <rdge/physics.hpp>
 
 #include "entities/player.hpp"
 #include "entities/duck.hpp"
@@ -220,10 +221,10 @@ public:
     Player player;
     Duck duck;
     struct wall_boundary {
-        rdge::math::aabb left;
-        rdge::math::aabb top;
-        rdge::math::aabb right;
-        rdge::math::aabb bottom;
+        rdge::physics::aabb left;
+        rdge::physics::aabb top;
+        rdge::physics::aabb right;
+        rdge::physics::aabb bottom;
     } walls;
 
     std::shared_ptr<rdge::SpriteBatch> render_target;

@@ -74,30 +74,30 @@ constexpr math::vec2 operator* (const math::vec2& vec, const rotation& rot) noex
              rot.s * vec.x + rot.c * vec.y };
 }
 
-//! \struct isometry
+//! \struct iso_transform
 //! \brief 2D linear transformation that preserves the solid body shape
 //! \details Includes translation and rotation transformations built specifically
 //!          for 2D physics simulation.
 //! \see http://www.euclideanspace.com/maths/geometry/affine/index.htm
-struct isometry
+struct iso_transform
 {
     math::vec2 pos; //!< Position (translation)
     rotation   rot; //!< Rotation
 
-    //! \brief isometry default ctor
-    isometry (void) = default;
+    //! \brief iso_transform default ctor
+    iso_transform (void) = default;
 
-    //! \brief isometry ctor
+    //! \brief iso_transform ctor
     //! \param [in] p Position
     //! \param [in] r Rotation
-    explicit isometry (const math::vec2& p, const rotation& r)
+    explicit iso_transform (const math::vec2& p, const rotation& r)
         : pos(p), rot(r)
     { }
 
-    //! \brief isometry ctor
+    //! \brief iso_transform ctor
     //! \param [in] p Position
     //! \param [in] theta Angle in radians
-    explicit isometry (const math::vec2& p, float theta)
+    explicit iso_transform (const math::vec2& p, float theta)
         : pos(p), rot(theta)
     { }
 
@@ -108,11 +108,11 @@ struct isometry
         rot = rotation(theta);
     }
 
-    //! \brief Get the identity isometry
-    //! \returns Identity isometry
-    static isometry identity (void) noexcept
+    //! \brief Get the identity isometric transformation
+    //! \returns Identity isometric transformation
+    static iso_transform identity (void) noexcept
     {
-        isometry result;
+        iso_transform result;
         result.pos = { 0.f, 0.f };
         result.rot = rotation::identity();
 

@@ -1,4 +1,4 @@
-//! \headerfile <rdge/math/geometry/shape.hpp>
+//! \headerfile <rdge/physics/shapes/ishape.hpp>
 //! \author Josh Bramlett
 //! \version 0.0.10
 //! \date 05/01/2017
@@ -9,7 +9,7 @@
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
-namespace math {
+namespace physics {
 
 enum class ShapeType : uint8
 {
@@ -19,16 +19,16 @@ enum class ShapeType : uint8
 
 
     // TODO shell of a class.
-struct shape
+struct ishape
 {
 
 
     //https://github.com/erincatto/Box2D/blob/master/Box2D/Box2D/Collision/Shapes/b2Shape.h
 
-    virtual ~shape (void) = default;
+    virtual ~ishape (void) = default;
 
     virtual ShapeType type (void) const noexcept = 0;
 };
 
-} // namespace math
+} // namespace physics
 } // namespace rdge

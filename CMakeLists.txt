@@ -104,8 +104,10 @@ add_library (
              src/math/mat4.cpp
              src/math/vec3.cpp
              src/math/vec4.cpp
-             src/math/geometry/circle.cpp
-             src/math/geometry/polygon.cpp
+
+             src/physics/aabb.cpp
+             src/physics/shapes/circle.cpp
+             src/physics/shapes/polygon.cpp
 
              src/system/keyboard.cpp
              src/system/mouse.cpp
@@ -139,7 +141,7 @@ add_executable (rdge_test
                 tests/main.cpp
                 tests/assets/spritesheet.cpp
                 tests/graphics/color.cpp
-                tests/math/aabb.cpp
+                tests/physics/aabb.cpp
                 tests/math/intrinsics.cpp)
 target_link_libraries (rdge_test
                        RDGE

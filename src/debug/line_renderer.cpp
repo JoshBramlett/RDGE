@@ -304,13 +304,13 @@ DrawWireFrame (const SpriteVertices& vertices, const color& c)
 }
 
 void
-DrawWireFrame (const math::aabb& box)
+DrawWireFrame (const physics::aabb& box)
 {
     DrawWireFrame(box, s_defultColor);
 }
 
 void
-DrawWireFrame (const math::aabb& box, const color& c)
+DrawWireFrame (const physics::aabb& box, const color& c)
 {
     DrawLine({ box.top_left(), 0.f }, { box.top_right(), 0.f }, c);
     DrawLine({ box.top_right(), 0.f }, { box.bottom_right(), 0.f }, c);
@@ -319,13 +319,13 @@ DrawWireFrame (const math::aabb& box, const color& c)
 }
 
 void
-DrawWireFrame (const math::circle& circle)
+DrawWireFrame (const physics::circle& circle)
 {
     DrawWireFrame(circle, s_defultColor);
 }
 
 void
-DrawWireFrame (const math::circle& circle, const color& c)
+DrawWireFrame (const physics::circle& circle, const color& c)
 {
     uint32 segments = 40;
     float theta = 0.f;

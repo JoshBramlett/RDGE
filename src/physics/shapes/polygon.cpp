@@ -1,11 +1,13 @@
-#include <rdge/math/geometry/polygon.hpp>
+#include <rdge/physics/shapes/polygon.hpp>
 
 namespace rdge {
-namespace math {
+namespace physics {
+
+using namespace rdge::math;
 
 namespace {
 
-    constexpr float HALF_SLOP_SQUARED = square(physics::LINEAR_SLOP * 0.5f);
+    constexpr float HALF_SLOP_SQUARED = math::square(LINEAR_SLOP * 0.5f);
 
 } // anonymous namespace
 
@@ -112,5 +114,5 @@ polygon::polygon (const PolygonData& verts, size_t count)
     // TODO centroid = ...
 }
 
-} // namespace math
+} // namespace physics
 } // namespace rdge
