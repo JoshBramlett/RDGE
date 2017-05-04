@@ -40,8 +40,9 @@ polygon::polygon (const PolygonData& verts, size_t count)
     count = weld_count;
     SDL_assert(3 <= count);
 
-    // convex hull
+    // convex hull using the gift wrapping algorithm
 
+    // find the rightmost vertex
     size_t right_idx = 0;
     float max_x = welds[0].x;
     for (size_t i = 1; i < count; ++i)
@@ -102,9 +103,8 @@ polygon::polygon (const PolygonData& verts, size_t count)
     this->normals.fill(0.f);
     for (size_t i = 0; i < count; ++i)
     {
-        int32 index_a = i;
-        int32 index_b = ((i + i) < count) ? (i + 1) : 0;
-        vec2 edge = this->vertices[index_b] - this->vertices[index_a];
+        auto other_idx = ((i + i) < count) ? (i + 1) : 0; // wrap if last
+        vec2 edge = this->vertices[i] - this->vertices[other_idx];
 
         this->normals[i] = edge.perp_ccw().normalize();
     }
