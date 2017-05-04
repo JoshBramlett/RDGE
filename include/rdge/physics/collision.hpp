@@ -21,6 +21,9 @@
 namespace rdge {
 namespace physics {
 
+static constexpr float LINEAR_SLOP = 0.005f;               //!< Collision tolerance
+static constexpr float POLYGON_RADIUS = LINEAR_SLOP * 2.f; //!< Do not modify
+
 //! \struct collision_manifold
 //! \brief Container for collision resolution details
 struct collision_manifold

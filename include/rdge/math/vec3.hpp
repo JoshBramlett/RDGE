@@ -143,13 +143,17 @@ struct vec3
         return std::sqrt((x * x) + (y * y) + (z * z));
     }
 
-    //! \brief Normalize vector components to [0,1]
-    //! \returns Normalized vector
-    vec3 normalize (void) const noexcept
+    //! \brief Normalize to a unit vector
+    //! \returns Reference to self
+    vec3& normalize (void) noexcept
     {
-        float len = length();
+        if (!is_zero())
+        {
+            float inv_length = 1.f / length();
+            *this *= inv_length;
+        }
 
-        return (len == 0.f) ? vec3::ZERO : vec3((x / len), (y / len), (z / len));
+        return *this;
     }
 
     //! \brief Cross product

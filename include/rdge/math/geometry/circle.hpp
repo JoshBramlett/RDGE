@@ -18,13 +18,8 @@ namespace rdge {
 namespace math {
 
 //! \struct circle
-//! \brief Floating point structure defining an axis aligned bounding box
-//! \details Structure contains two opposite points of a rectangle by grouping the
-//!          min(x,y) and max(x,y) together.  All collision checks do not include
-//!          the edges when checking, which means AABBs that are equal or share
-//!          an edge/corner are not regarded to collide.
-//! \warning Manually modify lo and hi bounds at your own risk.  Methods called
-//!          on an invalid container will yield spurious results.
+//! \brief Floating point structure defining a circle
+//! \details Structure contains the position and radius
 struct circle : public shape
 {
     vec2  pos;          //!< Position at center
@@ -89,7 +84,7 @@ constexpr bool operator!= (const circle& lhs, const circle& rhs) noexcept
     return !(lhs == rhs);
 }
 
-//! \brief aabb stream output operator
+//! \brief circle stream output operator
 inline std::ostream& operator<< (std::ostream& os, const circle& c)
 {
     return os << "[ " << c.pos << ", r=" << c.radius << " ]";

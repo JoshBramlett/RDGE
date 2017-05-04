@@ -179,6 +179,21 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
         return std::sqrt((x * x) + (y * y));
     }
 
+    //! \brief Normalize to a unit vector
+    //! \returns Reference to self
+    vec2_t<T>& normalize (void) noexcept
+    {
+        static_assert(std::is_floating_point<T>::value,
+                      "'normalize' is only available for floating point types");
+        if (!is_zero())
+        {
+            float inv_length = 1.f / length();
+            *this *= inv_length;
+        }
+
+        return *this;
+    }
+
     //! \brief Dot product
     //! \details Sum of the corresponding products within the containers.
     //! \param [in] other Other vec2_t used in the calculation
@@ -196,16 +211,27 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     //! \returns Length squared
     constexpr float self_dot (void) const noexcept
     {
+        static_assert(std::is_floating_point<T>::value,
+                      "'self_dot' is only available for floating point types");
         return (x * x) + (y * y);
     }
 
-    //! \brief Get a vector perpendicular to the object
+    //! \brief Get a perpendicular vector (rotated clockwise)
     //! \returns Perpendicular vector
     constexpr vec2_t<T> perp (void) const noexcept
     {
         static_assert(std::is_floating_point<T>::value,
                       "'perp' is only available for floating point types");
         return vec2_t<T>(-y, x);
+    }
+
+    //! \brief Get a perpendicular vector (rotated counter-clockwise)
+    //! \returns Perpendicular vector
+    constexpr vec2_t<T> perp_ccw (void) const noexcept
+    {
+        static_assert(std::is_floating_point<T>::value,
+                      "'perp_ccw' is only available for floating point types");
+        return vec2_t<T>(y, -x);
     }
 };
 
@@ -315,7 +341,22 @@ constexpr vec2_t<T> clamp (const vec2_t<T>& vec, T lbound, T ubound) noexcept
 template <typename T>
 constexpr vec2_t<T> dot (const vec2_t<T>& a, const vec2_t<T>& b) noexcept
 {
+    static_assert(std::is_floating_point<T>::value,
+                  "'dot' is only available for floating point types");
     return (a.x * b.x) + (a.y * b.y);
+}
+
+//! \brief vec2_t cross product specialization
+//! \details In 2D the cross product of two vectors is the determinant of
+//!          the product of the vectors.  i.e. cross(a, b) == det(ab)
+//! \returns Cross product scalar
+//! \see http://mathworld.wolfram.com/CrossProduct.html
+template <typename T>
+constexpr T cross (const vec2_t<T>& a, const vec2_t<T>& b) noexcept
+{
+    static_assert(std::is_floating_point<T>::value,
+                  "'cross' is only available for floating point types");
+    return (a.x * b.y) - (a.y * b.x);
 }
 
 //! \brief vec2_t stream output operator
