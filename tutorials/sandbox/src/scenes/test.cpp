@@ -13,7 +13,8 @@ using namespace rdge::math;
 using namespace rdge::physics;
 
 TestScene::TestScene (void)
-    : duck(vec3::ZERO)
+    : collision_graph({ 0.f, 9.8f })
+    , duck(vec3::ZERO)
     , render_target(std::make_shared<SpriteBatch>(10'000))
     , background(render_target)
 {
@@ -88,7 +89,6 @@ TestScene::OnRender (void)
 
     background.Draw();
 
-    debug::SetLineColor(color::CYAN);
     aabb player_aabb(player.sprite->vertices[0].pos.xy(),
                      player.sprite->vertices[2].pos.xy());
     if (player_aabb.intersects_with(walls.left))
@@ -99,6 +99,13 @@ TestScene::OnRender (void)
     {
         debug::DrawWireFrame(walls.left);
     }
+
+    polygon::PolygonData data;
+    data[0] = {0.f, 0.f};
+    data[1] = {1.5f, 3.f};
+    data[2] = {0.f, 3.f};
+    auto p = polygon(data, 3);
+    debug::DrawWireFrame(p);
 
     //debug::DrawWireFrame(circle(vec2(100.f, 100.f), 50.f), color::BLUE);
     debug::DrawWireFrame(circle(vec2(100.f, 100.f), 50.f));

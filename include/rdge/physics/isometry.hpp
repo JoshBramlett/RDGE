@@ -40,6 +40,25 @@ struct rotation
         return std::atan2f(s, c);
     }
 
+    //! \brief Rotate a vector
+    //! \param [in] vec Vector to rotate
+    //! \returns Vector rotated about the angle
+    math::vec2 rotate (const math::vec2& vec) const noexcept
+    {
+        return { c * vec.x - s * vec.y,
+                 s * vec.x + c * vec.y };
+    }
+
+    //! \brief Rotate a vector using the inverted rotation
+    //! \details For rotations the inverse matrix is the same as the transpose.
+    //! \param [in] vec Vector to rotate
+    //! \returns Vector rotated about the negative angle
+    math::vec2 inv_rotate (const math::vec2& vec) const noexcept
+    {
+        return { c * vec.x + s * vec.y,
+                 -s * vec.x + c * vec.y };
+    }
+
     //! \brief Get the x-axis of the rotation identity
     //! \returns Vector of cos/sin values
     math::vec2 x_axis (void) const noexcept
@@ -65,14 +84,6 @@ struct rotation
         return result;
     }
 };
-
-//! \brief vec2 rotation multiplication operator
-//! \returns vec2 product
-constexpr math::vec2 operator* (const math::vec2& vec, const rotation& rot) noexcept
-{
-    return { rot.c * vec.x - rot.s * vec.y,
-             rot.s * vec.x + rot.c * vec.y };
-}
 
 //! \struct iso_transform
 //! \brief 2D linear transformation that preserves the solid body shape

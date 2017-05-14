@@ -1,10 +1,12 @@
 #include <rdge/physics/rigid_body.hpp>
+#include <rdge/physics/collision_graph.hpp>
 
 namespace rdge {
 namespace physics {
 
-RigidBody::RigidBody (const rigid_body_profile& profile);
-    : user_data(profile.user_data)
+RigidBody::RigidBody (const rigid_body_profile& profile, CollisionGraph* parent)
+    : graph(parent)
+    , user_data(profile.user_data)
     , linear_velocity(profile.linear_velocity)
     , angular_velocity(profile.angular_velocity)
     , linear_damping(profile.linear_damping)
@@ -48,6 +50,94 @@ RigidBody::RigidBody (const rigid_body_profile& profile);
         m_mass = 1.f;
         m_invMass = 1.f;
     }
+}
+
+Fixture*
+RigidBody::CreateFixture (const fixture_profile& profile)
+{
+    // TODO IsLocked
+
+    void* cursor = graph->block_allocator.Alloc(sizeof(Fixture));
+    Fixture* result = new (cursor) Fixture(profile, this);
+
+    result->body = this;
+    result->next = this->fixtures;
+    this->fixtures = result;
+    fixture_count++;
+
+    if (result->density > 0.f)
+    {
+        ComputeMass();
+    }
+
+    return result;
+}
+
+void
+RigidBody::DestroyFixture (Fixture* /* fixture */)
+{
+    // TODO
+}
+
+void
+RigidBody::ComputeMass (void)
+{
+    m_mass = 0.f;
+    m_invMass = 0.f;
+    m_inertia = 0.f;
+    m_invInertia = 0.f;
+    m_sweep.local_center = { 0.f, 0.f };
+
+    if (m_type == RigidBodyType::STATIC || m_type == RigidBodyType::KINEMATIC)
+    {
+        m_sweep.pos_0 = m_transform.pos;
+        m_sweep.pos_n = m_transform.pos;
+        m_sweep.angle_0 = m_sweep.angle_n;
+        return;
+    }
+
+    math::vec2 local_center;
+    for (Fixture* f = this->fixtures; f != nullptr; f = f->next)
+    {
+        if (f->density == 0.f)
+        {
+            continue;
+        }
+
+        mass_data md = f->GetMassData();
+        m_mass += md.mass;
+        local_center += md.mass * md.centroid;
+        m_inertia += md.mmoi;
+    }
+
+    if (m_mass > 0.f)
+    {
+        m_invMass = 1.f / m_mass;
+        local_center *= m_invMass;
+    }
+    else
+    {
+        m_mass = 1.f;
+        m_invMass = 1.f;
+    }
+
+    if (m_inertia > 0.f && (m_flags & FIXED_ROTATION_FLAG) == 0u)
+    {
+        m_inertia -= m_mass * local_center.self_dot();
+        SDL_assert(m_inertia > 0.f);
+        m_invInertia = 1.f / m_inertia;
+    }
+    else
+    {
+        m_inertia = 0.f;
+        m_invInertia = 0.f;
+    }
+
+    math::vec2 old_center = m_sweep.pos_n;
+    m_sweep.local_center = local_center;
+    m_sweep.pos_0 = m_sweep.pos_n * m_transform.rot.rotate(m_sweep.local_center);
+
+    this->linear_velocity += (m_sweep.pos_n - old_center).perp() * this->angular_velocity;
 }
 
 } // namespace physics

@@ -25,8 +25,6 @@ struct line_vertex
     uint32     color = 0xFFFFFFFF;
 };
 
-rdge::color s_defultColor = color::YELLOW;
-
 constexpr uint32 VERTEX_SIZE = sizeof(line_vertex);
 constexpr uint32 LINE_SIZE = VERTEX_SIZE * 2;
 
@@ -263,12 +261,6 @@ SetLineWidth (float width)
 }
 
 void
-SetLineColor (const color& c)
-{
-    s_defultColor = c;
-}
-
-void
 SetProjection (const math::mat4& projection)
 {
     auto& renderer = Instance();
@@ -276,22 +268,10 @@ SetProjection (const math::mat4& projection)
 }
 
 void
-DrawLine (const math::vec3& pa, const math::vec3& pb)
-{
-    DrawLine(pa, pb, s_defultColor);
-}
-
-void
 DrawLine (const math::vec3& pa, const math::vec3& pb, const color& c)
 {
     auto& renderer = Instance();
     renderer.DrawLine(pa, pb, static_cast<uint32>(c));
-}
-
-void
-DrawWireFrame (const SpriteVertices& vertices)
-{
-    DrawWireFrame(vertices, s_defultColor);
 }
 
 void
@@ -304,24 +284,12 @@ DrawWireFrame (const SpriteVertices& vertices, const color& c)
 }
 
 void
-DrawWireFrame (const physics::aabb& box)
-{
-    DrawWireFrame(box, s_defultColor);
-}
-
-void
 DrawWireFrame (const physics::aabb& box, const color& c)
 {
     DrawLine({ box.top_left(), 0.f }, { box.top_right(), 0.f }, c);
     DrawLine({ box.top_right(), 0.f }, { box.bottom_right(), 0.f }, c);
     DrawLine({ box.bottom_right(), 0.f }, { box.bottom_left(), 0.f }, c);
     DrawLine({ box.bottom_left(), 0.f }, { box.top_left(), 0.f }, c);
-}
-
-void
-DrawWireFrame (const physics::circle& circle)
-{
-    DrawWireFrame(circle, s_defultColor);
 }
 
 void
@@ -343,6 +311,16 @@ DrawWireFrame (const physics::circle& circle, const color& c)
 
         DrawLine(p, next_p, c);
         p = next_p;
+    }
+}
+
+void
+DrawWireFrame (const physics::polygon& poly, const color& c)
+{
+    for (size_t i = 0; i < poly.count; ++i)
+    {
+        size_t next_i = (i < poly.count) ? i + 1 : 0;
+        DrawLine({ poly.vertices[i], 0.f }, { poly.vertices[next_i], 0.f }, c);
     }
 }
 

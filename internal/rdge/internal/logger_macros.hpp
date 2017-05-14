@@ -20,6 +20,10 @@
     #endif
 #endif
 
+#ifndef DLOG_IF
+    #define DLOG_IF(cond, msg) do { if (cond) { DLOG(msg); } } while (0)
+#endif
+
 #ifndef ILOG
     #ifdef RDGE_DEBUG
         #define ILOG(msg) do { \

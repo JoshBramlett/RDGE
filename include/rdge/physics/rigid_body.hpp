@@ -8,6 +8,7 @@
 #include <rdge/core.hpp>
 #include <rdge/physics/aabb.hpp>
 #include <rdge/physics/collision.hpp>
+#include <rdge/physics/fixture.hpp>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
@@ -48,6 +49,8 @@ struct rigid_body_profile
     RigidBodyType type = RigidBodyType::STATIC; //!< Canonical type defining the body
 };
 
+class CollisionGraph;
+
 //! \class RigidBody
 //! \brief Base physics simulation object
 //! \details Maintains a position and velocity, and contains a collection of all
@@ -56,7 +59,12 @@ class RigidBody
 {
 public:
 
+    explicit RigidBody (const rigid_body_profile& profile,
+                        CollisionGraph*           parent);
 
+    Fixture* CreateFixture (const fixture_profile& profile);
+    void DestroyFixture (Fixture* fixture);
+    void ComputeMass (void);
 
     //b2Fixture* CreateFixture(const b2FixtureDef* def);
     //b2Fixture* CreateFixture(const b2Shape* shape, float32 density);
@@ -148,7 +156,14 @@ public:
 
 public:
 
+    CollisionGraph* graph = nullptr;
+    RigidBody* prev = nullptr;
+    RigidBody* next = nullptr;
+
     void*      user_data = nullptr;
+
+    Fixture* fixtures = nullptr;
+    size_t fixture_count = 0;
 
     math::vec2 linear_velocity;
     float      angular_velocity = 0.f;
@@ -156,6 +171,8 @@ public:
     float      linear_damping = 0.f;
     float      angular_damping = 0.f;
     float      gravity_scale = 0.f;
+
+
 
 private:
 
@@ -177,10 +194,10 @@ private:
     math::vec2 m_force;
     float      m_torque = 0.f;
 
-    //float      m_mass = 0.f;
-    //float      m_invMass = 0.f;
-    //float      m_inertia = 0.f;
-    //float      m_invInertia = 0.f;
+    float      m_mass = 0.f;
+    float      m_invMass = 0.f;
+    float      m_inertia = 0.f;
+    float      m_invInertia = 0.f;
 
     float      m_sleepTime = 0.f;
 

@@ -16,6 +16,8 @@ namespace debug {
 
 #ifdef RDGE_DEBUG
 
+static const rdge::color DEFAULT_COLOR = color::YELLOW; //!< Default line color
+
 //!@{
 //! \brief Stateless debug rendering
 //! \details Initialize and flush calls are performed automatically by the
@@ -28,22 +30,18 @@ void FlushRenderer (void);
 
 //!@{ Set values impacting the global debug renderer state
 void SetLineWidth (float width);
-void SetLineColor (const color& c);
 void SetProjection (const math::mat4& projection);
 //!@}
 
 //!@{ Draw line (with color override)
-void DrawLine (const math::vec3& pa, const math::vec3& pb);
-void DrawLine (const math::vec3& pa, const math::vec3& pb, const color& c);
+void DrawLine (const math::vec3& pa, const math::vec3& pb, const color& c = DEFAULT_COLOR);
 //!@}
 
 //!@{ Draw wireframe (with color override)
-void DrawWireFrame (const SpriteVertices& vertices);
-void DrawWireFrame (const SpriteVertices& vertices, const color& c);
-void DrawWireFrame (const physics::aabb& box);
-void DrawWireFrame (const physics::aabb& box, const color& c);
-void DrawWireFrame (const physics::circle& circle);
-void DrawWireFrame (const physics::circle& circle, const color& c);
+void DrawWireFrame (const SpriteVertices& vertices, const color& c = DEFAULT_COLOR);
+void DrawWireFrame (const physics::aabb& box, const color& c = DEFAULT_COLOR);
+void DrawWireFrame (const physics::circle& circle, const color& c = DEFAULT_COLOR);
+void DrawWireFrame (const physics::polygon& poly, const color& c = DEFAULT_COLOR);
 //!@}
 
 #else
@@ -51,13 +49,9 @@ inline void InitializeRenderer (void) { }
 inline void InitializeRenderer (uint16) { }
 inline void FlushRenderer (void) { }
 inline void SetLineWidth (float) { }
-inline void SetLineColor (const color&) { }
 inline void SetProjection (const math::mat4&) { }
-inline void DrawLine (const math::vec3&, const math::vec3&) { }
 inline void DrawLine (const math::vec3&, const math::vec3&, const color&) { }
-template <typename T> inline void DrawWireFrame (const T&) { }
 template <typename T> inline void DrawWireFrame (const T&, const color&) { }
-
 #endif
 
 } // namespace debug

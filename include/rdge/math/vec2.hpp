@@ -339,20 +339,24 @@ constexpr vec2_t<T> clamp (const vec2_t<T>& vec, T lbound, T ubound) noexcept
 //! \brief vec2_t dot specialization
 //! \returns Dot product of vec2_t components
 template <typename T>
-constexpr vec2_t<T> dot (const vec2_t<T>& a, const vec2_t<T>& b) noexcept
+constexpr T dot (const vec2_t<T>& a, const vec2_t<T>& b) noexcept
 {
     static_assert(std::is_floating_point<T>::value,
                   "'dot' is only available for floating point types");
     return (a.x * b.x) + (a.y * b.y);
 }
 
-//! \brief vec2_t cross product specialization
-//! \details In 2D the cross product of two vectors is the determinant of
-//!          the product of the vectors.  i.e. cross(a, b) == det(ab)
-//! \returns Cross product scalar
-//! \see http://mathworld.wolfram.com/CrossProduct.html
+//! \brief vec2_t perp_dot product specialization
+//! \details The dot product of the perpendicular of vector a with vector b.
+//!          The result represents the area of the parallelogram created by
+//!          the vectors.  Also referred to as the 2D analog of the cross
+//!          product.  Other properties include:
+//!            a) result > 0 iff b is CCW from a
+//!            b) result < 0 iff b is CW from a
+//!            c) result == 0 iff a and b are parallel
+//! \returns Perpendicular dot product scalar
 template <typename T>
-constexpr T cross (const vec2_t<T>& a, const vec2_t<T>& b) noexcept
+constexpr T perp_dot (const vec2_t<T>& a, const vec2_t<T>& b) noexcept
 {
     static_assert(std::is_floating_point<T>::value,
                   "'cross' is only available for floating point types");
@@ -367,9 +371,9 @@ inline std::ostream& operator<< (std::ostream& os, const vec2_t<T>& value)
     return os << "[" << value.x << ", " << value.y << "]";
 }
 
-using vec2     = vec2_t<float>;  //!< Default floating point type
-using uivec2   = vec2_t<uint32>; //!< Unsigned (useful for size types)
-using ivec2    = vec2_t<int32>;  //!< Signed (useful for screen coordinates)
+using vec2   = vec2_t<float>;  //!< Default floating point type
+using uivec2 = vec2_t<uint32>; //!< Unsigned (useful for size types)
+using ivec2  = vec2_t<int32>;  //!< Signed (useful for screen coordinates)
 
 } // namespace math
 } // namespace rdge

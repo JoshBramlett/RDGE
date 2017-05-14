@@ -106,6 +106,9 @@ add_library (
              src/math/vec4.cpp
 
              src/physics/aabb.cpp
+             src/physics/fixture.cpp
+             src/physics/rigid_body.cpp
+             src/physics/shapes/ishape.cpp
              src/physics/shapes/circle.cpp
              src/physics/shapes/polygon.cpp
 
@@ -142,6 +145,8 @@ add_executable (rdge_test
                 tests/assets/spritesheet.cpp
                 tests/graphics/color.cpp
                 tests/physics/aabb.cpp
+                tests/physics/circle.cpp
+                tests/physics/polygon.cpp
                 tests/math/intrinsics.cpp)
 target_link_libraries (rdge_test
                        RDGE

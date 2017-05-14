@@ -217,6 +217,7 @@ public:
 
 public:
     rdge::OrthographicCamera camera;
+    rdge::physics::CollisionGraph collision_graph;
 
     Player player;
     Duck duck;

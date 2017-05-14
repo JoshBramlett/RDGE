@@ -39,10 +39,38 @@ struct circle : public ishape
         : pos(px), radius(r)
     { }
 
-    //! \returns Underlying type (used for casting)
-    virtual ShapeType type (void) const noexcept override
+    //! \returns Underlying type
+    ShapeType type (void) const override { return ShapeType::CIRCLE; }
+
+    bool contains (const iso_transform& xf, const math::vec2& point) const override
     {
-        return ShapeType::CIRCLE;
+        math::vec2 world_pos = xf.pos + xf.rot.rotate(pos);
+        return (point - world_pos).self_dot() < math::square(radius);
+    }
+
+    aabb compute_aabb (const iso_transform& xf) const override
+    {
+        math::vec2 world_pos = xf.pos + xf.rot.rotate(pos);
+        return aabb({ world_pos.x - radius, world_pos.y - radius },
+                    { world_pos.x + radius, world_pos.y + radius });
+    }
+
+    //! \brief Compute the mass and analog data
+    //! \param [in] density Density of the shape
+    //! \returns Mass, centroid, and mass moment of inertia
+    //! \see https://en.wikipedia.org/wiki/List_of_moments_of_inertia
+    mass_data compute_mass (float density) const override
+    {
+        mass_data result;
+        result.centroid = pos;
+        result.mass = density * math::PI * math::square(radius);
+
+        // circle mass moment of inertia: (mass * radius^2) / 2
+        // parallel axis theorem: (inertia at center of mass) + (mass * distance^2)
+        result.mmoi = (0.5f * result.mass * math::square(radius)) + // mmoi
+                      (result.mass * pos.self_dot());               // parallel axis
+
+        return result;
     }
 
     //! \brief Check if a point resides within the circle (edge exclusive)

@@ -28,7 +28,7 @@ struct collision_filter
 
 struct fixture_profile
 {
-    ishape* shape;             //!< Fixture underlying shape
+    ishape* shape = nullptr;   //!< Fixture underlying shape
     void* user_data = nullptr; //!< Custom opaque pointer
 
     float density = 0.f;       //!< Shape density in kg/m^2
@@ -38,6 +38,17 @@ struct fixture_profile
     collision_filter filter;   //!< Collision filter
     bool is_sensor = false;    //!< If fixture generates a collision response
 };
+
+//! \struct fixture_proxy
+//! \brief Broad phase proxy
+struct fixture_proxy
+{
+    aabb box;
+    // Fixture* fixture = nullptr;
+    // int32 proxy_id;
+};
+
+class RigidBody;
 
 class Fixture
 {
@@ -90,8 +101,19 @@ protected:
 	void Synchronize(b2BroadPhase* broadPhase, const b2Transform& xf1, const b2Transform& xf2);
     */
 
+    explicit Fixture (const fixture_profile& profile, RigidBody* parent);
+    ~Fixture (void) noexcept;
 
-    //Shape shape;
+    mass_data GetMassData (void) const noexcept
+    {
+        SDL_assert(this->shape != nullptr);
+        return this->shape->compute_mass(this->density);
+    }
+
+    RigidBody* body = nullptr;
+    Fixture* next = nullptr;
+
+    ishape* shape = nullptr;
     void* user_data = nullptr;
 
     float density = 0.f;

@@ -21,8 +21,7 @@
 namespace rdge {
 namespace physics {
 
-static constexpr float LINEAR_SLOP = 0.005f;               //!< Collision tolerance
-static constexpr float POLYGON_RADIUS = LINEAR_SLOP * 2.f; //!< Do not modify
+static constexpr float LINEAR_SLOP = 0.005f; //!< Collision tolerance
 
 //! \struct collision_manifold
 //! \brief Container for collision resolution details
@@ -57,9 +56,9 @@ struct sweep_step
         SDL_assert(0.f <= beta && beta <= 1.f);
 
         iso_transform result(((1.f - beta) * pos_0) + (beta * pos_n),
-                        ((1.f - beta) * angle_0) + (beta * angle_n));
+                             ((1.f - beta) * angle_0) + (beta * angle_n));
 
-        result.pos -= (local_center * result.rot);
+        result.pos -= result.rot.rotate(local_center);
         return result;
     }
 
@@ -83,16 +82,6 @@ struct sweep_step
         angle_0 -= d;
         angle_n -= d;
     }
-};
-
-
-
-
-
-
-class CollisionGraph
-{
-public:
 };
 
 } // namespace physics
