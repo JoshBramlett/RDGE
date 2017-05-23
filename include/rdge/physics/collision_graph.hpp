@@ -31,23 +31,8 @@ public:
         //}
     }
 
-    RigidBody* CreateBody (const rigid_body_profile& profile)
-    {
-        // TODO IsLocked
-
-        void* cursor = block_allocator.Alloc(sizeof(RigidBody));
-        RigidBody* result = new (cursor) RigidBody(profile, this);
-
-        result->next = bodies;
-        if (bodies)
-        {
-            bodies->prev = result;
-        }
-        bodies = result;
-        body_count++;
-
-        return result;
-    }
+    RigidBody* CreateBody (const rigid_body_profile& profile);
+    void DestroyBody (RigidBody* body);
 
     SmallBlockAllocator block_allocator;
 

@@ -1,4 +1,5 @@
 #include <rdge/physics/aabb.hpp>
+#include <rdge/physics/collision.hpp>
 
 namespace rdge {
 namespace physics {

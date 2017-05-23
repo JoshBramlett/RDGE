@@ -17,6 +17,19 @@
 namespace rdge {
 namespace physics {
 
+// Box2D dependency tree:
+// Fixture
+//   Body
+//   BroadPhase
+//   World
+//   ContactManager
+//   ContactEdge
+//   Contact
+//   BlockAllocator
+
+class RigidBody;
+class Fixture;
+
 //! \struct collision_filter
 //! \brief Collision filtering data
 struct collision_filter
@@ -44,70 +57,80 @@ struct fixture_profile
 struct fixture_proxy
 {
     aabb box;
-    // Fixture* fixture = nullptr;
-    // int32 proxy_id;
+    Fixture* fixture = nullptr;
+    int32 proxy_id = 0;
 };
-
-class RigidBody;
 
 class Fixture
 {
 public:
-    /*
-**  b2Shape::Type GetType() const;
-**  b2Shape* GetShape();
-**  const b2Shape* GetShape() const;
-
-    // Awakens the body
-    void SetSensor(bool sensor);
-**  bool IsSensor() const;
-
-    // SetFilterData calls Refilter, which updates contacts and proxies in the
-    // broad phase - need to look at this further
-    void SetFilterData(const b2Filter& filter);
-**  const b2Filter& GetFilterData() const;
-    void Refilter();
-
-**  b2Body* GetBody();
-**  const b2Body* GetBody() const;
-
-**  b2Fixture* GetNext();
-**  const b2Fixture* GetNext() const;
-
-**  void* GetUserData() const;
-**  void SetUserData(void* data);
-
-    bool TestPoint(const b2Vec2& p) const;
-    bool RayCast(b2RayCastOutput* output, const b2RayCastInput& input, int32 childIndex) const;
-
-    void GetMassData(b2MassData* massData) const;
-**  void SetDensity(float32 density);
-**  float32 GetDensity() const;
-**  float32 GetFriction() const;
-**  void SetFriction(float32 friction);
-**  float32 GetRestitution() const;
-**  void SetRestitution(float32 restitution);
-
-    const b2AABB& GetAABB(int32 childIndex) const;
-
-protected:
-	void Create(b2BlockAllocator* allocator, b2Body* body, const b2FixtureDef* def);
-	void Destroy(b2BlockAllocator* allocator);
-
-	// These support body activation/deactivation.
-	void CreateProxies(b2BroadPhase* broadPhase, const b2Transform& xf);
-	void DestroyProxies(b2BroadPhase* broadPhase);
-
-	void Synchronize(b2BroadPhase* broadPhase, const b2Transform& xf1, const b2Transform& xf2);
-    */
-
     explicit Fixture (const fixture_profile& profile, RigidBody* parent);
     ~Fixture (void) noexcept;
 
-    mass_data GetMassData (void) const noexcept
+    void CreateProxy (/* broad_phase, const iso_transform& xf */)
     {
-        SDL_assert(this->shape != nullptr);
+        throw "not yet implemented";
+        // Box2D:
+        // 1) create one proxy per shape child
+        // 2) compute the aabb
+        // 3) register the proxy to the broad phase
+    }
+
+    void DestroyProxy (/* broad_phase */)
+    {
+        throw "not yet implemented";
+        // Box2D:
+        // 1) have broad phase destroy each proxy
+        // 2) assign the proxy id to "null" constant
+    }
+
+    void Synchronize (/* broad_phase, const iso_transform& xf1, const iso_transform& xf2 */)
+    {
+        throw "not yet implemented";
+        // This is used to update the aabbs in the proxies
+        // The two transforms are used to combine the aabbs in the sweep step
+
+        // Box2D:
+        // 1) for each proxy compute the aabb with xf1 and xf2
+        // 2) combine the aabbs
+        // 3) calculate the displacement of the transforms
+        // 4) have the broad phase move the proxy by the displacement
+    }
+
+    void SetFilter (/* const collision_filter& f */)
+    {
+        throw "not yet implemented";
+        //this->filter = f;
+        //Refilter();
+    }
+
+    void Refilter (void)
+    {
+        throw "not yet implemented";
+        // Box2D:
+        // 1) for each contact list in the body
+        // 2) if the contact fixture is this, set the contact's filter flag
+        // 3) have the broad phase "touch" each proxy
+    }
+
+    void SetSensor (/* bool s */)
+    {
+        throw "not yet implemented";
+        //if (is_sensor != s)
+        //{
+            //body->SetAwake(true);
+            //is_sensor = s;
+        //}
+    }
+
+    mass_data ComputeMass (void) const noexcept
+    {
         return this->shape->compute_mass(this->density);
+    }
+
+    const aabb& GetAABB (void) const noexcept
+    {
+        return m_proxy->box;
     }
 
     RigidBody* body = nullptr;
@@ -123,12 +146,9 @@ protected:
     collision_filter filter;
     bool is_sensor = false;
 
-    /*
-	b2FixtureProxy* m_proxies; // <-- defined in b2Fixture.h
-	int32 m_proxyCount;
-	b2Fixture* m_next;
-	b2Body* m_body;
-    */
+private:
+
+    fixture_proxy* m_proxy = nullptr;
 };
 
 } // namespace physics

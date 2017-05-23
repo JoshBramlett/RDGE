@@ -42,17 +42,21 @@ struct circle : public ishape
     //! \returns Underlying type
     ShapeType type (void) const override { return ShapeType::CIRCLE; }
 
-    bool contains (const iso_transform& xf, const math::vec2& point) const override
+    //! \brief Check if a point resides within the circle (edge exclusive)
+    //! \param [in] point Local point coordinates
+    //! \returns True iff point is within the circle
+    bool contains (const math::vec2& point) const override
     {
-        math::vec2 world_pos = xf.pos + xf.rot.rotate(pos);
-        return (point - world_pos).self_dot() < math::square(radius);
+        return (point - pos).self_dot() < math::square(radius);
     }
 
-    aabb compute_aabb (const iso_transform& xf) const override
+    //! \brief Compute an aabb surrounding the circle
+    //! \warning Resultant value may still need to be converted to world space
+    //! \returns Surrounding aabb
+    aabb compute_aabb (void) const override
     {
-        math::vec2 world_pos = xf.pos + xf.rot.rotate(pos);
-        return aabb({ world_pos.x - radius, world_pos.y - radius },
-                    { world_pos.x + radius, world_pos.y + radius });
+        return aabb({ pos.x - radius, pos.y - radius },
+                    { pos.x + radius, pos.y + radius });
     }
 
     //! \brief Compute the mass and analog data
@@ -71,14 +75,6 @@ struct circle : public ishape
                       (result.mass * pos.self_dot());               // parallel axis
 
         return result;
-    }
-
-    //! \brief Check if a point resides within the circle (edge exclusive)
-    //! \param [in] point Point coordinates
-    //! \returns True iff point is within the circle
-    constexpr bool contains (const math::vec2& point) const noexcept
-    {
-        return (point - pos).self_dot() < math::square(radius);
     }
 
     //! \brief Check if the circle intersects with another (edge exclusive)

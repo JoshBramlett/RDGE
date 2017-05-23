@@ -106,6 +106,7 @@ add_library (
              src/math/vec4.cpp
 
              src/physics/aabb.cpp
+             src/physics/collision_graph.cpp
              src/physics/fixture.cpp
              src/physics/rigid_body.cpp
              src/physics/shapes/ishape.cpp
@@ -147,7 +148,8 @@ add_executable (rdge_test
                 tests/physics/aabb.cpp
                 tests/physics/circle.cpp
                 tests/physics/polygon.cpp
-                tests/math/intrinsics.cpp)
+                tests/math/intrinsics.cpp
+                tests/util/nodeless_forward_list.cpp)
 target_link_libraries (rdge_test
                        RDGE
                        ${GTEST_BOTH_LIBRARIES})

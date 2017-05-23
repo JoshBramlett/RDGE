@@ -73,39 +73,16 @@ struct polygon : public ishape
     //! \returns Underlying type
     ShapeType type (void) const noexcept override { return ShapeType::POLYGON; }
 
-    bool contains (const iso_transform& xf, const math::vec2& p) const override
-    {
-        math::vec2 p_local = xf.rot.inv_rotate(p - xf.pos);
-        for (size_t i = 0; i < count; ++i)
-        {
-            // dot product with a unit vector provides the vector lengths on the axes
-            // of the unit vector.  Because the vertices are in CCW order, the normals
-            // should be pointing to their left, so the value should be negative.
-            if (math::dot(normals[i], p_local - vertices[i]) > 0.f)
-            {
-                return false;
-            }
-        }
+    //! \brief Check if a point resides within the polygon (edge exclusive)
+    //! \param [in] point Local point coordinates
+    //! \returns True iff point is within the polygon
+    bool contains (const math::vec2& point) const override;
 
-        return true;
-    }
-
-    aabb compute_aabb (const iso_transform& xf) const override
-    {
-        math::vec2 lo = xf.rot.rotate(vertices[0]);
-        math::vec2 hi = lo;
-
-        for (size_t i = 0; i < count; ++i)
-        {
-            math::vec2 v = xf.rot.rotate(vertices[i]);
-            lo.x = std::min(lo.x, v.x);
-            lo.y = std::min(lo.y, v.y);
-            hi.x = std::max(hi.x, v.x);
-            hi.y = std::max(hi.y, v.y);
-        }
-
-        return aabb(lo - AABB_PADDING, hi + AABB_PADDING);
-    }
+    //! \brief Compute an aabb surrounding the polygon
+    //! \note aabb edges will be padded by \ref AABB_PADDING
+    //! \warning Resultant value may still need to be converted to world space
+    //! \returns Surrounding aabb
+    aabb compute_aabb (void) const override;
 
     //! \brief Compute the mass and analog data
     //! \param [in] density Density of the shape
@@ -113,14 +90,6 @@ struct polygon : public ishape
     //! \see https://en.wikipedia.org/wiki/Centroid#Centroid_of_a_polygon
     //! \see https://en.wikipedia.org/wiki/List_of_moments_of_inertia
     mass_data compute_mass (float density) const override;
-
-    //! \brief Check if a point resides within the polygon (edge exclusive)
-    //! \param [in] point Point coordinates
-    //! \returns True iff point is within the polygon
-    //constexpr bool contains (const vec2& point) const noexcept
-    //{
-        //return (point - pos).self_dot() < square(radius);
-    //}
 
     //! \brief Check if the polygon intersects with another (edge exclusive)
     //! \param [in] other polygon structure

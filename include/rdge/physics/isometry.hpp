@@ -7,6 +7,7 @@
 
 #include <rdge/core.hpp>
 #include <rdge/math/vec2.hpp>
+#include <rdge/physics/aabb.hpp>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
@@ -117,6 +118,30 @@ struct iso_transform
     void set_angle (float theta) noexcept
     {
         rot = rotation(theta);
+    }
+
+    //! \brief Convert a point in world space to local space
+    //! \param [in] point Point to convert
+    //! \returns Point in local coordinates
+    math::vec2 to_local (const math::vec2& point) const noexcept
+    {
+        return rot.inv_rotate(point - pos);
+    }
+
+    //! \brief Convert a point in local space to world space
+    //! \param [in] point Point to convert
+    //! \returns Point in world coordinates
+    math::vec2 to_world (const math::vec2& point) const noexcept
+    {
+        return rot.rotate(point) + pos;
+    }
+
+    //! \brief Convert an aabb in local space to world space
+    //! \param [in] box aabb to convert
+    //! \returns aabb in world coordinates
+    aabb to_world (const aabb& box) const noexcept
+    {
+        return aabb(to_world(box.lo), to_world(box.hi));
     }
 
     //! \brief Get the identity isometric transformation

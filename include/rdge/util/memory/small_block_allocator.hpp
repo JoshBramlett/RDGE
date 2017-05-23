@@ -8,6 +8,7 @@
 #include <rdge/core.hpp>
 
 #include <array>
+#include <utility>
 #include <ostream>
 
 //! \namespace rdge Rainbow Drop Game Engine
@@ -88,6 +89,17 @@ public:
         return reinterpret_cast<T*>(Alloc(sizeof(T)));
     }
 
+    //! \brief Perform new initialization on an allocated block of memory
+    //! \details Uses placement new with the allocated block for initialization,
+    //!          forwarding any parameters provided.
+    //! \returns Type casted pointer to an initialized object
+    template <typename T, typename... U>
+    T* New (U&&... u)
+    {
+        void* cursor = Alloc(sizeof(T));
+        return new (cursor) T(std::forward<U>(u)...);
+    }
+
     //! \brief Release ownership of the allocated memory
     //! \warning Pointer must be allocated from this instance
     //! \param [in] p Opaque pointer to free
@@ -100,6 +112,17 @@ public:
     template <typename T>
     void Free (T* p)
     {
+        Free(reinterpret_cast<void*>(p), sizeof(T));
+    }
+
+    //! \brief Destruct and release ownership of the allocated memory
+    //! \details Calls the destructor prior to freeing the memory, and should
+    //!          only be used in conjunction with objects created via \ref New.
+    //! \param [in] p Pointer to destruct and free
+    template <typename T>
+    void Delete (T* p)
+    {
+        p->~T();
         Free(reinterpret_cast<void*>(p), sizeof(T));
     }
 

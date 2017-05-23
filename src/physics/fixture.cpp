@@ -20,23 +20,15 @@ Fixture::Fixture (const fixture_profile& profile, RigidBody* parent)
 {
     SDL_assert(parent != nullptr);
 
-    auto& block_allocator = body->graph->block_allocator;
+    auto& allocator = body->graph->block_allocator;
     switch (this->shape->type())
     {
     case ShapeType::CIRCLE:
-        {
-            void* cursor = block_allocator.Alloc(sizeof(circle));
-            this->shape = new (cursor) circle;
-            *this->shape = *static_cast<const circle*>(profile.shape);
-        }
+        this->shape = allocator.New<circle>(*static_cast<const circle*>(profile.shape));
         break;
 
     case ShapeType::POLYGON:
-        {
-            void* cursor = block_allocator.Alloc(sizeof(polygon));
-            this->shape = new (cursor) polygon;
-            *this->shape = *static_cast<const polygon*>(profile.shape);
-        }
+        this->shape = allocator.New<polygon>(*static_cast<const polygon*>(profile.shape));
         break;
 
     default:
@@ -44,7 +36,9 @@ Fixture::Fixture (const fixture_profile& profile, RigidBody* parent)
         break;
     }
 
-    // TODO create proxy
+    m_proxy = allocator.Alloc<fixture_proxy>();
+    m_proxy->fixture = this;
+    m_proxy->box = this->body->world_transform.to_world(this->shape->compute_aabb());
 }
 
 Fixture::~Fixture (void) noexcept
@@ -52,23 +46,18 @@ Fixture::~Fixture (void) noexcept
     SDL_assert(this->shape != nullptr);
     SDL_assert(this->body != nullptr && this->body->graph != nullptr);
 
-    auto& block_allocator = this->body->graph->block_allocator;
+    auto& allocator = this->body->graph->block_allocator;
+    allocator.Free<fixture_proxy>(m_proxy);
+    m_proxy = nullptr;
+
     switch (this->shape->type())
     {
     case ShapeType::CIRCLE:
-        {
-            circle* s = static_cast<circle*>(this->shape);
-            s->~circle();
-            block_allocator.Free(s, sizeof(circle));
-        }
+        allocator.Delete<circle>(static_cast<circle*>(this->shape));
         break;
 
     case ShapeType::POLYGON:
-        {
-            polygon* s = static_cast<polygon*>(this->shape);
-            s->~polygon();
-            block_allocator.Free(s, sizeof(polygon));
-        }
+        allocator.Delete<polygon>(static_cast<polygon*>(this->shape));
         break;
 
     default:

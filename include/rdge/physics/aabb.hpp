@@ -14,7 +14,6 @@
 
 #include <rdge/core.hpp>
 #include <rdge/math/vec2.hpp>
-#include <rdge/physics/collision.hpp>
 
 #include <algorithm>
 #include <ostream>
@@ -22,6 +21,8 @@
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 namespace physics {
+
+struct collision_manifold;
 
 //! \struct aabb
 //! \brief Floating point structure defining an axis aligned bounding box

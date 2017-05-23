@@ -15,6 +15,7 @@ constexpr float HALF_SLOP_SQUARED = math::square(LINEAR_SLOP * 0.5f);
 math::vec2
 compute_centroid (const polygon::PolygonData& verts, size_t count)
 {
+    // TODO this is done during the mass calculation as well.  seems redundant.
     //https://en.wikipedia.org/wiki/Centroid#Centroid_of_a_polygon
 
     math::vec2 result;
@@ -178,9 +179,49 @@ polygon::polygon (const vec2& p1, const vec2& p2, const vec2& p3,
     : polygon({{ p1, p2, p3, p4, p5 }}, 5)
 { }
 
+bool
+polygon::contains (const vec2& point) const
+{
+    SDL_assert(count >= 3);
+
+    for (size_t i = 0; i < count; ++i)
+    {
+        // dot product with a unit vector provides the vector lengths on the axes
+        // of the unit vector.  Because the vertices are in CCW order, the normals
+        // should be pointing to their left, so the value should be negative.
+        if (dot(normals[i], point - vertices[i]) > 0.f)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+aabb
+polygon::compute_aabb (void) const
+{
+    SDL_assert(count >= 3);
+
+    vec2 lo = vertices[0];
+    vec2 hi = vertices[0];
+
+    for (size_t i = 1; i < count; ++i)
+    {
+        lo.x = std::min(lo.x, vertices[i].x);
+        lo.y = std::min(lo.y, vertices[i].y);
+        hi.x = std::max(hi.x, vertices[i].x);
+        hi.y = std::max(hi.y, vertices[i].y);
+    }
+
+    return aabb(lo - AABB_PADDING, hi + AABB_PADDING);
+}
+
 mass_data
 polygon::compute_mass (float density) const
 {
+    SDL_assert(count >= 3);
+
     // polygon is broken down into triangle components, whose calculations are
     // aggregated to find the final result
 
@@ -192,12 +233,12 @@ polygon::compute_mass (float density) const
         const auto& b = vertices[((i + 1) < count) ? (i + 1) : 0];
 
         // signed area of the parallelogram component
-        float component_area = math::perp_dot(a, b);
+        float component_area = perp_dot(a, b);
         area += component_area;
 
         // triangle mass moment of inertia: (mass/6.f) * (dot(a, a) + dot(a, b) + dot(b, b))
         float component_mmoi = ((density * component_area * 0.5f) / 6.f) *
-                               (math::dot(a, a) + math::dot(a, b) + math::dot(b, b));
+                               (dot(a, a) + dot(a, b) + dot(b, b));
 
         result.centroid += (a + b) * component_area;
         result.mmoi += component_mmoi;

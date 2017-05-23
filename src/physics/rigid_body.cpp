@@ -4,17 +4,20 @@
 namespace rdge {
 namespace physics {
 
+using namespace rdge::math;
+
 RigidBody::RigidBody (const rigid_body_profile& profile, CollisionGraph* parent)
     : graph(parent)
     , user_data(profile.user_data)
-    , linear_velocity(profile.linear_velocity)
-    , angular_velocity(profile.angular_velocity)
-    , linear_damping(profile.linear_damping)
-    , angular_damping(profile.angular_damping)
+    , world_transform(profile.position, profile.angle)
     , gravity_scale(profile.gravity_scale)
-    , m_transform(profile.position, profile.angle)
     , m_type(profile.type)
 {
+    this->linear.velocity = profile.linear_velocity;
+    this->linear.damping = profile.linear_damping;
+    this->angular.velocity = profile.angular_velocity;
+    this->angular.damping = profile.angular_damping;
+
     if (profile.active)
     {
         m_flags |= ACTIVE_FLAG;
@@ -40,15 +43,15 @@ RigidBody::RigidBody (const rigid_body_profile& profile, CollisionGraph* parent)
         m_flags |= AUTOSLEEP_FLAG;
     }
 
-    m_sweep.pos_0 = m_transform.pos;
-    m_sweep.pos_n = m_transform.pos;
+    m_sweep.pos_0 = world_transform.pos;
+    m_sweep.pos_n = world_transform.pos;
     m_sweep.angle_0 = profile.angle;
     m_sweep.angle_n = profile.angle;
 
     if (m_type == RigidBodyType::DYNAMIC)
     {
-        m_mass = 1.f;
-        m_invMass = 1.f;
+        this->linear.mass = 1.f;
+        this->linear.inv_mass = 1.f;
     }
 }
 
@@ -57,87 +60,94 @@ RigidBody::CreateFixture (const fixture_profile& profile)
 {
     // TODO IsLocked
 
-    void* cursor = graph->block_allocator.Alloc(sizeof(Fixture));
-    Fixture* result = new (cursor) Fixture(profile, this);
-
-    result->body = this;
-    result->next = this->fixtures;
-    this->fixtures = result;
-    fixture_count++;
+    Fixture* result = graph->block_allocator.New<Fixture>(profile, this);
+    fixtures.push_back(result);
 
     if (result->density > 0.f)
     {
         ComputeMass();
     }
 
+    // TODO fixture->CreateProxies(...)
+    //      Issue I have with this is the need to pass the broad phase to the
+    //      fixture.  Let's try to keep classes as segregated as possible.
+    //
+    // TODO m_world->m_flags |= b2World::e_newFixture;
+
     return result;
 }
 
 void
-RigidBody::DestroyFixture (Fixture* /* fixture */)
+RigidBody::DestroyFixture (Fixture* fixture)
 {
-    // TODO
+    // TODO IsLocked
+
+    fixtures.remove(fixture);
+
+    // TODO fixture->DestroyProxies(...)
+
+    graph->block_allocator.Delete<Fixture>(fixture);
+    ComputeMass();
 }
 
 void
 RigidBody::ComputeMass (void)
 {
-    m_mass = 0.f;
-    m_invMass = 0.f;
-    m_inertia = 0.f;
-    m_invInertia = 0.f;
+    this->linear.mass = 0.f;
+    this->linear.inv_mass = 0.f;
+    this->angular.mmoi = 0.f;
+    this->angular.inv_mmoi = 0.f;
     m_sweep.local_center = { 0.f, 0.f };
 
     if (m_type == RigidBodyType::STATIC || m_type == RigidBodyType::KINEMATIC)
     {
-        m_sweep.pos_0 = m_transform.pos;
-        m_sweep.pos_n = m_transform.pos;
+        m_sweep.pos_0 = world_transform.pos;
+        m_sweep.pos_n = world_transform.pos;
         m_sweep.angle_0 = m_sweep.angle_n;
         return;
     }
 
     math::vec2 local_center;
-    for (Fixture* f = this->fixtures; f != nullptr; f = f->next)
-    {
+    fixtures.for_each([this, &local_center](Fixture* f) {
         if (f->density == 0.f)
         {
-            continue;
+            return;
         }
 
-        mass_data md = f->GetMassData();
-        m_mass += md.mass;
+        mass_data md = f->ComputeMass();
+        this->linear.mass += md.mass;
         local_center += md.mass * md.centroid;
-        m_inertia += md.mmoi;
-    }
+        this->angular.mmoi += md.mmoi;
+    });
 
-    if (m_mass > 0.f)
+    if (this->linear.mass > 0.f)
     {
-        m_invMass = 1.f / m_mass;
-        local_center *= m_invMass;
+        this->linear.inv_mass = 1.f / this->linear.mass;
+        local_center *= this->linear.inv_mass;
     }
     else
     {
-        m_mass = 1.f;
-        m_invMass = 1.f;
+        this->linear.mass = 1.f;
+        this->linear.inv_mass = 1.f;
     }
 
-    if (m_inertia > 0.f && (m_flags & FIXED_ROTATION_FLAG) == 0u)
+    if (this->angular.mmoi > 0.f && (m_flags & FIXED_ROTATION_FLAG) == 0u)
     {
-        m_inertia -= m_mass * local_center.self_dot();
-        SDL_assert(m_inertia > 0.f);
-        m_invInertia = 1.f / m_inertia;
+        this->angular.mmoi -= this->linear.mass * local_center.self_dot();
+        SDL_assert(this->angular.mmoi > 0.f);
+        this->angular.inv_mmoi = 1.f / this->angular.mmoi;
     }
     else
     {
-        m_inertia = 0.f;
-        m_invInertia = 0.f;
+        this->angular.mmoi = 0.f;
+        this->angular.inv_mmoi = 0.f;
     }
 
     math::vec2 old_center = m_sweep.pos_n;
     m_sweep.local_center = local_center;
-    m_sweep.pos_0 = m_sweep.pos_n * m_transform.rot.rotate(m_sweep.local_center);
+    m_sweep.pos_0 = m_sweep.pos_n * world_transform.rot.rotate(m_sweep.local_center);
 
-    this->linear_velocity += (m_sweep.pos_n - old_center).perp() * this->angular_velocity;
+    this->linear.velocity += (m_sweep.pos_n - old_center).perp() * this->angular.velocity;
 }
 
 } // namespace physics

@@ -9,10 +9,21 @@
 #include <rdge/physics/aabb.hpp>
 #include <rdge/physics/collision.hpp>
 #include <rdge/physics/fixture.hpp>
+#include <rdge/util/containers/nodeless_forward_list.hpp>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 namespace physics {
+
+// Box2D dependency tree:
+// Body
+//   Fixture
+//   World
+//   ContactManager
+//   ContactEdge
+//   Contact
+//   BroadPhase
+//   BlockAllocator
 
 //! \enum RigidBodyType
 //! \brief Defines how a body acts during simulation
@@ -66,9 +77,7 @@ public:
     void DestroyFixture (Fixture* fixture);
     void ComputeMass (void);
 
-    //b2Fixture* CreateFixture(const b2FixtureDef* def);
     //b2Fixture* CreateFixture(const b2Shape* shape, float32 density);
-    //void DestroyFixture(b2Fixture* fixture);
 
     //void SetTransform(const b2Vec2& position, float32 angle);
     //const b2Transform& GetTransform() const;
@@ -124,7 +133,7 @@ public:
     //const b2World* GetWorld() const;
 
     RigidBodyType GetType (void) const noexcept { return m_type; }
-    const math::vec2& GetPosition (void) const noexcept { return m_transform.pos; }
+    const math::vec2& GetPosition (void) const noexcept { return world_transform.pos; }
     float GetAngle (void) const noexcept { return m_sweep.angle_n; }
     const math::vec2& GetWorldCenter (void) const noexcept { return m_sweep.pos_n; }
     const math::vec2& GetLocalCenter (void) const noexcept { return m_sweep.local_center; }
@@ -148,10 +157,10 @@ public:
     {
         m_flags &= ~AWAKE_FLAG;
         m_sleepTime = 0.f;
-        m_force = { 0.f, 0.f };
-        m_torque = 0.f;
-        this->linear_velocity = { 0.f, 0.f };
-        this->angular_velocity = 0.f;
+        this->linear.force = { 0.f, 0.f };
+        this->angular.torque = 0.f;
+        this->linear.velocity = { 0.f, 0.f };
+        this->angular.velocity = 0.f;
     }
 
 public:
@@ -160,19 +169,34 @@ public:
     RigidBody* prev = nullptr;
     RigidBody* next = nullptr;
 
-    void*      user_data = nullptr;
+    void* user_data = nullptr;
 
-    Fixture* fixtures = nullptr;
-    size_t fixture_count = 0;
+    nodeless_forward_list<Fixture> fixtures;
 
-    math::vec2 linear_velocity;
-    float      angular_velocity = 0.f;
+    //! \brief Collection of elements defining the linear motion
+    struct linear_motion
+    {
+        math::vec2 velocity;
+        math::vec2 force;
+        float      damping = 0.f;
+        float      mass = 0.f;
+        float      inv_mass = 0.f;
+    } linear;
 
-    float      linear_damping = 0.f;
-    float      angular_damping = 0.f;
-    float      gravity_scale = 0.f;
+    //! \brief Collection of elements defining the angular motion
+    struct angular_motion
+    {
+        float velocity = 0.f;
+        float torque = 0.f;
+        float damping = 0.f;
+        float mmoi = 0.f;
+        float inv_mmoi = 0.f;
+    } angular;
 
+    //! \brief Linear/angular transforms to represent the body in world space
+    iso_transform world_transform;
 
+    float gravity_scale = 0.f; //!< Gravitational impact on the body
 
 private:
 
@@ -188,16 +212,9 @@ private:
         TOI_FLAG            = 0x0040
     };
 
-    iso_transform m_transform;
-    sweep_step    m_sweep;
-
-    math::vec2 m_force;
-    float      m_torque = 0.f;
-
-    float      m_mass = 0.f;
-    float      m_invMass = 0.f;
-    float      m_inertia = 0.f;
-    float      m_invInertia = 0.f;
+    //! \brief Contains the local center of mass, and the position/angle over the
+    //!        the timestep.
+    sweep_step m_sweep;
 
     float      m_sleepTime = 0.f;
 
