@@ -10,6 +10,7 @@
 #include <rdge/physics/shapes/ishape.hpp>
 #include <rdge/math/intrinsics.hpp>
 #include <rdge/math/vec2.hpp>
+#include <rdge/util/containers/nodeless_list.hpp>
 
 #include <SDL_assert.h>
 
@@ -39,6 +40,8 @@ struct collision_filter
     uint16 mask     = 0xFFFF; //!< Mask of other categories the object can collide with
 };
 
+//! \struct fixture_profile
+//! \brief Profile used to constrct a fixture
 struct fixture_profile
 {
     ishape* shape = nullptr;   //!< Fixture underlying shape
@@ -53,7 +56,8 @@ struct fixture_profile
 };
 
 //! \struct fixture_proxy
-//! \brief Broad phase proxy
+//! \brief Container for the shape's wrapping aabb
+//! \details Used for broad phase collision detection.
 struct fixture_proxy
 {
     aabb box;
@@ -61,7 +65,7 @@ struct fixture_proxy
     int32 proxy_id = 0;
 };
 
-class Fixture
+class Fixture : public nodeless_forward_list_element<Fixture>
 {
 public:
     explicit Fixture (const fixture_profile& profile, RigidBody* parent);
@@ -97,11 +101,10 @@ public:
         // 4) have the broad phase move the proxy by the displacement
     }
 
-    void SetFilter (/* const collision_filter& f */)
+    void SetFilter (const collision_filter& f)
     {
-        throw "not yet implemented";
-        //this->filter = f;
-        //Refilter();
+        this->filter = f;
+        m_flags |= FILTER_DIRTY;
     }
 
     void Refilter (void)
@@ -111,17 +114,20 @@ public:
         // 1) for each contact list in the body
         // 2) if the contact fixture is this, set the contact's filter flag
         // 3) have the broad phase "touch" each proxy
+        //
+        // NOTE: 1 & 2 are not needed because of adding the DIRTY_FILTER flag.
+        //       Still need to implement a better solution for point 3.
     }
 
-    void SetSensor (/* bool s */)
+    void FlagFilterClean (void) noexcept
     {
-        throw "not yet implemented";
-        //if (is_sensor != s)
-        //{
-            //body->SetAwake(true);
-            //is_sensor = s;
-        //}
+        m_flags &= ~FILTER_DIRTY;
     }
+
+    void SetSensor (bool value) noexcept;
+
+    bool IsSensor (void) const noexcept { return m_flags & SENSOR; }
+    bool IsFilterDirty (void) const noexcept { return m_flags & FILTER_DIRTY; }
 
     mass_data ComputeMass (void) const noexcept
     {
@@ -130,25 +136,29 @@ public:
 
     const aabb& GetAABB (void) const noexcept
     {
-        return m_proxy->box;
+        return proxy->box;
     }
 
-    RigidBody* body = nullptr;
-    Fixture* next = nullptr;
-
-    ishape* shape = nullptr;
-    void* user_data = nullptr;
+    RigidBody*     body = nullptr;
+    void*          user_data = nullptr;
+    ishape*        shape = nullptr;
+    fixture_proxy* proxy = nullptr;
 
     float density = 0.f;
     float friction = 0.2f;
     float restitution = 0.f;
 
     collision_filter filter;
-    bool is_sensor = false;
 
 private:
 
-    fixture_proxy* m_proxy = nullptr;
+    enum StateFlags
+    {
+        SENSOR       = 0x0001,
+        FILTER_DIRTY = 0x0002
+    };
+
+    uint16 m_flags = 0;
 };
 
 } // namespace physics

@@ -1,21 +1,20 @@
 #include <gtest/gtest.h>
 
 #include <rdge/core.hpp>
-#include <rdge/util/containers/nodeless_forward_list.hpp>
+#include <rdge/util/containers/nodeless_list.hpp>
 
 #include <exception>
 
 using namespace rdge;
 
-struct test_node
+struct test_node : public nodeless_list_element<test_node>
 {
-    test_node* next = nullptr;
     uint32 value = 0;
 };
 
-TEST(NodelessForwardListTest, ValidatePushFront)
+TEST(NodelessListTest, ValidatePushFront)
 {
-    nodeless_forward_list<test_node> list;
+    nodeless_list<test_node> list;
     test_node a;
     test_node b;
     test_node c;
@@ -26,14 +25,18 @@ TEST(NodelessForwardListTest, ValidatePushFront)
 
     EXPECT_TRUE(list.count == 3);
     EXPECT_TRUE(list.first == &c);
+    EXPECT_TRUE(list.last == &a);
+    EXPECT_TRUE(c.prev == nullptr);
     EXPECT_TRUE(c.next == &b);
+    EXPECT_TRUE(b.prev == &c);
     EXPECT_TRUE(b.next == &a);
+    EXPECT_TRUE(a.prev == &b);
     EXPECT_TRUE(a.next == nullptr);
 }
 
-TEST(NodelessForwardListTest, ValidatePushBack)
+TEST(NodelessListTest, ValidatePushBack)
 {
-    nodeless_forward_list<test_node> list;
+    nodeless_list<test_node> list;
     test_node a;
     test_node b;
     test_node c;
@@ -44,14 +47,18 @@ TEST(NodelessForwardListTest, ValidatePushBack)
 
     EXPECT_TRUE(list.count == 3);
     EXPECT_TRUE(list.first == &a);
+    EXPECT_TRUE(list.last == &c);
+    EXPECT_TRUE(a.prev == nullptr);
     EXPECT_TRUE(a.next == &b);
+    EXPECT_TRUE(b.prev == &a);
     EXPECT_TRUE(b.next == &c);
+    EXPECT_TRUE(c.prev == &b);
     EXPECT_TRUE(c.next == nullptr);
 }
 
-TEST(NodelessForwardListTest, ValidateRemove)
+TEST(NodelessListTest, ValidateRemove)
 {
-    nodeless_forward_list<test_node> list;
+    nodeless_list<test_node> list;
     test_node a;
     test_node b;
     test_node c;
@@ -61,6 +68,8 @@ TEST(NodelessForwardListTest, ValidateRemove)
     list.remove(&a);
     EXPECT_TRUE(list.count == 0);
     EXPECT_TRUE(list.first == nullptr);
+    EXPECT_TRUE(list.last == nullptr);
+    EXPECT_TRUE(a.prev == nullptr);
     EXPECT_TRUE(a.next == nullptr);
 
     // b) remove a middle entry
@@ -70,13 +79,20 @@ TEST(NodelessForwardListTest, ValidateRemove)
     list.remove(&b);
 
     EXPECT_TRUE(list.count == 2);
+    EXPECT_TRUE(list.first == &a);
+    EXPECT_TRUE(list.last == &c);
+    EXPECT_TRUE(b.prev == nullptr);
     EXPECT_TRUE(b.next == nullptr);
     EXPECT_TRUE(a.next == &c);
+    EXPECT_TRUE(c.prev == &a);
 
     // c) remove the last entry
     list.remove(&c);
 
     EXPECT_TRUE(list.count == 1);
+    EXPECT_TRUE(list.first == &a);
+    EXPECT_TRUE(list.last == &a);
+    EXPECT_TRUE(c.prev == nullptr);
     EXPECT_TRUE(c.next == nullptr);
     EXPECT_TRUE(a.next == nullptr);
 
@@ -86,13 +102,16 @@ TEST(NodelessForwardListTest, ValidateRemove)
 
     EXPECT_TRUE(list.count == 1);
     EXPECT_TRUE(list.first == &b);
+    EXPECT_TRUE(list.last == &b);
+    EXPECT_TRUE(b.prev == nullptr);
     EXPECT_TRUE(b.next == nullptr);
+    EXPECT_TRUE(a.prev == nullptr);
     EXPECT_TRUE(a.next == nullptr);
 }
 
-TEST(NodelessForwardListTest, ValidateForEach)
+TEST(NodelessListTest, ValidateForEach)
 {
-    nodeless_forward_list<test_node> list;
+    nodeless_list<test_node> list;
     test_node a;
     test_node b;
     test_node c;

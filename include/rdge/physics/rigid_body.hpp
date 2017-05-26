@@ -9,7 +9,7 @@
 #include <rdge/physics/aabb.hpp>
 #include <rdge/physics/collision.hpp>
 #include <rdge/physics/fixture.hpp>
-#include <rdge/util/containers/nodeless_forward_list.hpp>
+#include <rdge/util/containers/nodeless_list.hpp>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
@@ -66,26 +66,22 @@ class CollisionGraph;
 //! \brief Base physics simulation object
 //! \details Maintains a position and velocity, and contains a collection of all
 //!          objects that further define itself in the physical world.
-class RigidBody
+class RigidBody : public nodeless_list_element<RigidBody>
 {
 public:
 
     explicit RigidBody (const rigid_body_profile& profile,
                         CollisionGraph*           parent);
+    ~RigidBody (void) noexcept;
 
     Fixture* CreateFixture (const fixture_profile& profile);
     void DestroyFixture (Fixture* fixture);
+    void SynchronizeFixtures (void);
     void ComputeMass (void);
 
-    //b2Fixture* CreateFixture(const b2Shape* shape, float32 density);
-
     //void SetTransform(const b2Vec2& position, float32 angle);
-    //const b2Transform& GetTransform() const;
-
     //void SetLinearVelocity(const b2Vec2& v);
-    //const b2Vec2& GetLinearVelocity() const;
     //void SetAngularVelocity(float32 omega);
-    //float32 GetAngularVelocity() const;
 
     //void ApplyForce(const b2Vec2& force, const b2Vec2& point, bool wake);
     //void ApplyForceToCenter(const b2Vec2& force, bool wake);
@@ -117,34 +113,34 @@ public:
 
     //void SetFixedRotation(bool flag);
 
-    //b2Fixture* GetFixtureList();
-    //const b2Fixture* GetFixtureList() const;
-
-    //b2JointEdge* GetJointList();
-    //const b2JointEdge* GetJointList() const;
-
-    //b2ContactEdge* GetContactList();
-    //const b2ContactEdge* GetContactList() const;
-
-    //b2Body* GetNext();
-    //const b2Body* GetNext() const;
-
-    //b2World* GetWorld();
-    //const b2World* GetWorld() const;
-
     RigidBodyType GetType (void) const noexcept { return m_type; }
+    // world position of the body origin
     const math::vec2& GetPosition (void) const noexcept { return world_transform.pos; }
     float GetAngle (void) const noexcept { return m_sweep.angle_n; }
+    // world position of the body center of mass
     const math::vec2& GetWorldCenter (void) const noexcept { return m_sweep.pos_n; }
     const math::vec2& GetLocalCenter (void) const noexcept { return m_sweep.local_center; }
 
+
+    bool IsAwake (void) const noexcept
+    {
+        // Static bodies are always sleeping
+        // TODO This behavior differs from Box2D
+        return (m_type == RigidBodyType::STATIC) || (m_flags & AWAKE_FLAG);
+    }
+
     bool IsActive (void) const noexcept { return m_flags & ACTIVE_FLAG; }
-    bool IsAwake (void) const noexcept { return m_flags & AWAKE_FLAG; }
     bool IsBullet (void) const noexcept { return m_flags & BULLET_FLAG; }
     bool IsFixedRotation (void) const noexcept { return m_flags & FIXED_ROTATION_FLAG; }
     bool IsSleepingAllowed (void) const noexcept { return m_flags & AUTOSLEEP_FLAG; }
 
-    void Wake (void) noexcept
+    bool ShouldCollide (RigidBody* other)
+    {
+        return m_type == RigidBodyType::DYNAMIC ||
+               other->m_type == RigidBodyType::DYNAMIC;
+    }
+
+    void WakeUp (void) noexcept
     {
         if ((m_flags & AWAKE_FLAG) == 0)
         {
@@ -166,9 +162,6 @@ public:
 public:
 
     CollisionGraph* graph = nullptr;
-    RigidBody* prev = nullptr;
-    RigidBody* next = nullptr;
-
     void* user_data = nullptr;
 
     nodeless_forward_list<Fixture> fixtures;
@@ -202,7 +195,7 @@ private:
 
     enum InternalFlags
     {
-        ACTIVE_FLAG         = 0x0091,
+        ACTIVE_FLAG         = 0x0001,
         AWAKE_FLAG          = 0x0002,
         BULLET_FLAG         = 0x0004,
         FIXED_ROTATION_FLAG = 0x0008,

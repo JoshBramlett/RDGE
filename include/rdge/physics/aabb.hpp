@@ -15,6 +15,8 @@
 #include <rdge/core.hpp>
 #include <rdge/math/vec2.hpp>
 
+#include <SDL_assert.h>
+
 #include <algorithm>
 #include <ostream>
 
@@ -34,6 +36,8 @@ struct collision_manifold;
 //!          on an invalid container will yield spurious results.
 struct aabb
 {
+    static constexpr float DEFAULT_FATTENING = 0.1f; //!< Default amount for AABB fattening
+
     math::vec2 lo; //!< Lower x and y coordinate position
     math::vec2 hi; //!< Higher x and y coordinate position
 
@@ -87,6 +91,28 @@ struct aabb
     constexpr math::vec2 bottom_left (void) const noexcept { return { left(), bottom() }; }
     constexpr math::vec2 bottom_right (void) const noexcept { return { right(), bottom() }; }
     //!@}
+
+    //! \brief Extend the lo and hi coordinates by the provided value
+    //! \param [in] amount Amount to extend
+    void fatten (float amount = DEFAULT_FATTENING) noexcept
+    {
+        lo -= amount;
+        hi += amount;
+    }
+
+    //! \brief Merge another aabb with this one
+    //! \param [in] other aabb to merge
+    //! \returns Reference to self
+    aabb& merge (const aabb& other) noexcept
+    {
+        SDL_assert(other.is_valid());
+
+        lo.x = std::min(lo.x, other.lo.x);
+        lo.y = std::min(lo.y, other.lo.y);
+        hi.x = std::max(hi.x, other.hi.x);
+        hi.y = std::max(hi.y, other.hi.y);
+        return *this;
+    }
 
     //! \brief Get the calculated center of the aabb
     //! \returns Center point

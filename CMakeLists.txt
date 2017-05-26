@@ -107,6 +107,7 @@ add_library (
 
              src/physics/aabb.cpp
              src/physics/collision_graph.cpp
+             src/physics/contact.cpp
              src/physics/fixture.cpp
              src/physics/rigid_body.cpp
              src/physics/shapes/ishape.cpp
@@ -143,13 +144,14 @@ add_subdirectory (tutorials/04_scenes)
 
 add_executable (rdge_test
                 tests/main.cpp
-                tests/assets/spritesheet.cpp
-                tests/graphics/color.cpp
-                tests/physics/aabb.cpp
-                tests/physics/circle.cpp
-                tests/physics/polygon.cpp
-                tests/math/intrinsics.cpp
-                tests/util/nodeless_forward_list.cpp)
+                tests/assets/spritesheet_test.cpp
+                tests/graphics/color_test.cpp
+                tests/physics/aabb_test.cpp
+                tests/physics/circle_test.cpp
+                tests/physics/polygon_test.cpp
+                tests/math/intrinsics_test.cpp
+                tests/util/nodeless_list_test.cpp
+                tests/util/nodeless_forward_list_test.cpp)
 target_link_libraries (rdge_test
                        RDGE
                        ${GTEST_BOTH_LIBRARIES})

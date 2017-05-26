@@ -55,23 +55,36 @@ RigidBody::RigidBody (const rigid_body_profile& profile, CollisionGraph* parent)
     }
 }
 
+RigidBody::~RigidBody (void) noexcept
+{
+    fixtures.for_each([this](auto* f) {
+        graph->UnregisterProxy(f->proxy);
+        graph->block_allocator.Delete<Fixture>(f);
+    });
+}
+
 Fixture*
 RigidBody::CreateFixture (const fixture_profile& profile)
 {
-    // TODO IsLocked
+    if (graph->IsLocked())
+    {
+        SDL_assert(false);
+        return nullptr;
+    }
 
     Fixture* result = graph->block_allocator.New<Fixture>(profile, this);
     fixtures.push_back(result);
+
+    if (IsActive())
+    {
+        graph->RegisterProxy(result->proxy);
+    }
 
     if (result->density > 0.f)
     {
         ComputeMass();
     }
 
-    // TODO fixture->CreateProxies(...)
-    //      Issue I have with this is the need to pass the broad phase to the
-    //      fixture.  Let's try to keep classes as segregated as possible.
-    //
     // TODO m_world->m_flags |= b2World::e_newFixture;
 
     return result;
@@ -80,23 +93,68 @@ RigidBody::CreateFixture (const fixture_profile& profile)
 void
 RigidBody::DestroyFixture (Fixture* fixture)
 {
-    // TODO IsLocked
+    SDL_assert(fixture);
+    SDL_assert(fixture->body == this);
+
+    if (graph->IsLocked())
+    {
+        SDL_assert(false);
+        return;
+    }
+
+    if (IsActive())
+    {
+        graph->UnregisterProxy(fixture->proxy);
+    }
+
+    // TODO remove all contacts associated with the fixture
 
     fixtures.remove(fixture);
-
-    // TODO fixture->DestroyProxies(...)
-
     graph->block_allocator.Delete<Fixture>(fixture);
+
     ComputeMass();
+}
+
+void
+RigidBody::SynchronizeFixtures (void)
+{
+    // TODO ??? Don't really understand how this works.  Code below breaks behavior.
+    //      The only comment from Box2D:
+    //
+    // Compute an AABB that covers the swept shape (may miss some rotation effect).
+    //
+    //      Important note is the fixture proxy is merged with both the
+    //      start and end of the sweep.  I was considering simply storing the
+    //      fat aabb in the proxy to avoid the duplicate, but I'll need to
+    //      revisit that when I implement the broad phase.
+    //
+    //      Also this makes me wonder if my overall understanding was wrong.  I thought
+    //      the sweep step would basically be reset every frame, but I'm not sure
+    //      that's the case anymore.
+    rotation q(m_sweep.angle_0);
+    math::vec2 p = m_sweep.pos_0 - q.rotate(m_sweep.local_center);
+    iso_transform sweep_start(p, q);
+
+    auto displacement = world_transform.pos - sweep_start.pos;
+    fixtures.for_each([&](auto* f) {
+        aabb box = f->shape->compute_aabb();
+        aabb box_0 = sweep_start.to_world(box);
+        aabb box_n = world_transform.to_world(box);
+
+        f->proxy->box.merge(box_0).merge(box_n);
+
+        Unused(displacement);
+        //broadPhase->MoveProxy(proxy->proxyId, proxy->aabb, displacement);
+    });
 }
 
 void
 RigidBody::ComputeMass (void)
 {
-    this->linear.mass = 0.f;
-    this->linear.inv_mass = 0.f;
-    this->angular.mmoi = 0.f;
-    this->angular.inv_mmoi = 0.f;
+    linear.mass = 0.f;
+    linear.inv_mass = 0.f;
+    angular.mmoi = 0.f;
+    angular.inv_mmoi = 0.f;
     m_sweep.local_center = { 0.f, 0.f };
 
     if (m_type == RigidBodyType::STATIC || m_type == RigidBodyType::KINEMATIC)
@@ -107,47 +165,48 @@ RigidBody::ComputeMass (void)
         return;
     }
 
-    math::vec2 local_center;
-    fixtures.for_each([this, &local_center](Fixture* f) {
-        if (f->density == 0.f)
+    mass_data body_mass;
+    fixtures.for_each([&](auto* f) {
+        if (f->density != 0.f)
         {
-            return;
+            mass_data fixture_mass = f->ComputeMass();
+            body_mass.mass += fixture_mass.mass;
+            body_mass.centroid += fixture_mass.mass * fixture_mass.centroid;
+            body_mass.mmoi += fixture_mass.mmoi;
         }
-
-        mass_data md = f->ComputeMass();
-        this->linear.mass += md.mass;
-        local_center += md.mass * md.centroid;
-        this->angular.mmoi += md.mmoi;
     });
 
-    if (this->linear.mass > 0.f)
+    if (body_mass.mass > 0.f)
     {
-        this->linear.inv_mass = 1.f / this->linear.mass;
-        local_center *= this->linear.inv_mass;
+        linear.mass = body_mass.mass;
+        linear.inv_mass = 1.f / linear.mass;
+        body_mass.centroid *= linear.inv_mass;
     }
     else
     {
-        this->linear.mass = 1.f;
-        this->linear.inv_mass = 1.f;
+        linear.mass = 1.f;
+        linear.inv_mass = 1.f;
     }
 
-    if (this->angular.mmoi > 0.f && (m_flags & FIXED_ROTATION_FLAG) == 0u)
+    if (body_mass.mmoi > 0.f && !IsFixedRotation())
     {
-        this->angular.mmoi -= this->linear.mass * local_center.self_dot();
-        SDL_assert(this->angular.mmoi > 0.f);
-        this->angular.inv_mmoi = 1.f / this->angular.mmoi;
+        // TODO ??? Why subtract the parallel axis?
+        angular.mmoi -= linear.mass * body_mass.centroid.self_dot();
+        SDL_assert(angular.mmoi > 0.f);
+        angular.inv_mmoi = 1.f / angular.mmoi;
     }
     else
     {
-        this->angular.mmoi = 0.f;
-        this->angular.inv_mmoi = 0.f;
+        angular.mmoi = 0.f;
+        angular.inv_mmoi = 0.f;
     }
 
     math::vec2 old_center = m_sweep.pos_n;
-    m_sweep.local_center = local_center;
+    m_sweep.local_center = body_mass.centroid;
     m_sweep.pos_0 = m_sweep.pos_n * world_transform.rot.rotate(m_sweep.local_center);
 
-    this->linear.velocity += (m_sweep.pos_n - old_center).perp() * this->angular.velocity;
+    // TODO ??? Don't really understand this
+    linear.velocity += (m_sweep.pos_n - old_center).perp() * angular.velocity;
 }
 
 } // namespace physics

@@ -16,19 +16,23 @@ Fixture::Fixture (const fixture_profile& profile, RigidBody* parent)
     , friction(profile.friction)
     , restitution(profile.restitution)
     , filter(profile.filter)
-    , is_sensor(profile.is_sensor)
 {
     SDL_assert(parent != nullptr);
 
+    if (profile.is_sensor)
+    {
+        m_flags |= SENSOR;
+    }
+
     auto& allocator = body->graph->block_allocator;
-    switch (this->shape->type())
+    switch (profile.shape->type())
     {
     case ShapeType::CIRCLE:
-        this->shape = allocator.New<circle>(*static_cast<const circle*>(profile.shape));
+        shape = allocator.New<circle>(*static_cast<const circle*>(profile.shape));
         break;
 
     case ShapeType::POLYGON:
-        this->shape = allocator.New<polygon>(*static_cast<const polygon*>(profile.shape));
+        shape = allocator.New<polygon>(*static_cast<const polygon*>(profile.shape));
         break;
 
     default:
@@ -36,33 +40,52 @@ Fixture::Fixture (const fixture_profile& profile, RigidBody* parent)
         break;
     }
 
-    m_proxy = allocator.Alloc<fixture_proxy>();
-    m_proxy->fixture = this;
-    m_proxy->box = this->body->world_transform.to_world(this->shape->compute_aabb());
+    proxy = allocator.Alloc<fixture_proxy>();
+    proxy->fixture = this;
+    proxy->box = body->world_transform.to_world(shape->compute_aabb());
+    proxy->box.fatten();
 }
 
 Fixture::~Fixture (void) noexcept
 {
-    SDL_assert(this->shape != nullptr);
-    SDL_assert(this->body != nullptr && this->body->graph != nullptr);
+    SDL_assert(shape != nullptr);
+    SDL_assert(body != nullptr && body->graph != nullptr);
 
-    auto& allocator = this->body->graph->block_allocator;
-    allocator.Free<fixture_proxy>(m_proxy);
-    m_proxy = nullptr;
+    auto& allocator = body->graph->block_allocator;
+    allocator.Free<fixture_proxy>(proxy);
+    proxy = nullptr;
 
-    switch (this->shape->type())
+    switch (shape->type())
     {
     case ShapeType::CIRCLE:
-        allocator.Delete<circle>(static_cast<circle*>(this->shape));
+        allocator.Delete<circle>(static_cast<circle*>(shape));
         break;
 
     case ShapeType::POLYGON:
-        allocator.Delete<polygon>(static_cast<polygon*>(this->shape));
+        allocator.Delete<polygon>(static_cast<polygon*>(shape));
         break;
 
     default:
         SDL_assert(false);
         break;
+    }
+}
+
+void
+Fixture::SetSensor (bool value) noexcept
+{
+    if (IsSensor() != value)
+    {
+        body->WakeUp();
+
+        if (value)
+        {
+            m_flags |= SENSOR;
+        }
+        else
+        {
+            m_flags &= ~SENSOR;
+        }
     }
 }
 
