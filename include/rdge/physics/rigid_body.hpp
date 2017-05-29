@@ -15,6 +15,10 @@
 namespace rdge {
 namespace physics {
 
+class RigidBody;
+class CollisionGraph;
+class Contact;
+
 // Box2D dependency tree:
 // Body
 //   Fixture
@@ -60,7 +64,16 @@ struct rigid_body_profile
     RigidBodyType type = RigidBodyType::STATIC; //!< Canonical type defining the body
 };
 
-class CollisionGraph;
+//! \struct contact_edge
+//! \brief Represents contact between two bodies
+//! \details The bodies which have fixtures in contact represent nodes in a
+//!          graph and the contact is the edge between them.  This is used
+//!          when determining which bodies make up an island.
+struct contact_edge : public nodeless_list_element<contact_edge>
+{
+    RigidBody* other = nullptr; //!< Body connected by the edge
+    Contact* contact = nullptr; //!< Contact connecting the bodies
+};
 
 //! \class RigidBody
 //! \brief Base physics simulation object
@@ -90,12 +103,6 @@ public:
     //void ApplyLinearImpulseToCenter(const b2Vec2& impulse, bool wake);
     //void ApplyAngularImpulse(float32 impulse, bool wake);
 
-    //float32 GetMass() const;
-    //float32 GetInertia() const;
-    //void GetMassData(b2MassData* data) const;
-    //void SetMassData(const b2MassData* data);
-    //void ResetMassData();
-
     //b2Vec2 GetWorldPoint(const b2Vec2& localPoint) const;
     //b2Vec2 GetWorldVector(const b2Vec2& localVector) const;
     //b2Vec2 GetLocalPoint(const b2Vec2& worldPoint) const;
@@ -103,8 +110,6 @@ public:
 
     //b2Vec2 GetLinearVelocityFromWorldPoint(const b2Vec2& worldPoint) const;
     //b2Vec2 GetLinearVelocityFromLocalPoint(const b2Vec2& localPoint) const;
-
-    //void SetType(b2BodyType type);
 
     //void SetBullet(bool flag);
 
@@ -165,6 +170,7 @@ public:
     void* user_data = nullptr;
 
     nodeless_forward_list<Fixture> fixtures;
+    nodeless_list<contact_edge> contacts;
 
     //! \brief Collection of elements defining the linear motion
     struct linear_motion

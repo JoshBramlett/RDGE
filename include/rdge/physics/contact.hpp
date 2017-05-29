@@ -7,19 +7,15 @@
 
 #include <rdge/core.hpp>
 #include <rdge/physics/collision.hpp>
-#include <rdge/physics/fixture.hpp>
 #include <rdge/util/containers/nodeless_list.hpp>
-
-#include <SDL_assert.h>
-
-#include <rdge/math/intrinsics.hpp>
-#include <rdge/math/vec2.hpp>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 namespace physics {
 
 class ContactListener;
+class Fixture;
+struct contact_edge;
 
 struct contact_impulse
 {
@@ -28,7 +24,7 @@ struct contact_impulse
     size_t count;
 };
 
-class Contact : public nodeless_forward_list_element<Contact>
+class Contact : public nodeless_list_element<Contact>
 {
 public:
     explicit Contact (Fixture* a, Fixture* b);
@@ -42,11 +38,14 @@ public:
     Fixture* fixture_a = nullptr;
     Fixture* fixture_b = nullptr;
 
+    contact_edge* edge_a = nullptr;
+    contact_edge* edge_b = nullptr;
+
     collision_manifold manifold;
 
 private:
 
-    enum InternalFlags
+    enum StateFlags
     {
         ENABLED  = 0x0001,
         TOUCHING = 0x0002,

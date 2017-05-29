@@ -46,7 +46,7 @@ public:
 
 
     // TODO maybe make contact data private?
-    nodeless_forward_list<Contact> contacts;
+    nodeless_list<Contact> contacts;
     ContactFilter* custom_filter = nullptr;
     ContactListener* listener = nullptr;
 
@@ -59,7 +59,7 @@ public:
     } iterations;
 
 private:
-    enum InternalFlags
+    enum StateFlags
     {
         LOCKED = 0x0001
     };

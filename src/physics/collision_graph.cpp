@@ -64,6 +64,9 @@ CollisionGraph::CreateContact (Fixture* a, Fixture* b)
 void
 CollisionGraph::DestroyContact (Contact* contact)
 {
+    RigidBody* body_a = contact->fixture_a->body;
+    RigidBody* body_b = contact->fixture_b->body;
+
     if (contact->IsTouching())
     {
         if (listener)
@@ -74,16 +77,14 @@ CollisionGraph::DestroyContact (Contact* contact)
         if (!contact->fixture_a->IsSensor() &&
             !contact->fixture_b->IsSensor())
         {
-            contact->fixture_a->body->WakeUp();
-            contact->fixture_b->body->WakeUp();
+            body_a->WakeUp();
+            body_b->WakeUp();
         }
     }
 
-    // TODO not sure why, but the contact list is a double linked list
     contacts.remove(contact);
-
-    // TODO remove contact from body 1
-    // TODO remove contact from body 2
+    body_a->contacts.remove(contact->edge_a);
+    body_b->contacts.remove(contact->edge_b);
 
     // TODO dealloc
 }

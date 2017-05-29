@@ -3,13 +3,15 @@
 
 #include <SDL_assert.h>
 
+#include <cstdlib>
 #include <memory> // call_once
 #include <sstream>
 #include <iomanip>
 #include <limits>
 
+namespace rdge {
+
 namespace {
-    using namespace rdge;
 
     // supported block sizes
     std::array<size_t, SmallBlockAllocator::NUM_BLOCK_SIZES> s_blockSizes {
@@ -21,8 +23,6 @@ namespace {
     std::array<uint8, SmallBlockAllocator::MAX_BLOCK_SIZE + 1> s_blockSizeLookup;
 
 } // anonymous namespace
-
-namespace rdge {
 
 SmallBlockAllocator::SmallBlockAllocator (void)
     : m_chunkCapacity(CHUNK_ELEMENTS)
@@ -66,6 +66,10 @@ SmallBlockAllocator::SmallBlockAllocator (SmallBlockAllocator&& rhs) noexcept
 {
     std::swap(m_chunks, rhs.m_chunks);
     std::swap(m_chunkCount, rhs.m_chunkCount);
+
+#ifdef RDGE_DEBUG
+    stats = std::move(rhs.stats);
+#endif
 }
 
 SmallBlockAllocator&
@@ -78,6 +82,10 @@ SmallBlockAllocator::operator= (SmallBlockAllocator&& rhs) noexcept
 
         m_chunkCapacity = rhs.m_chunkCapacity;
         m_available = std::move(rhs.m_available);
+
+#ifdef RDGE_DEBUG
+        stats = std::move(rhs.stats);
+#endif
     }
 
     return *this;

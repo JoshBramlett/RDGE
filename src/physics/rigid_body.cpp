@@ -107,7 +107,13 @@ RigidBody::DestroyFixture (Fixture* fixture)
         graph->UnregisterProxy(fixture->proxy);
     }
 
-    // TODO remove all contacts associated with the fixture
+    contacts.for_each([=](auto* edge) {
+        Contact* c = edge->contact;
+        if (fixture == c->fixture_a || fixture == c->fixture_b)
+        {
+            graph->DestroyContact(c);
+        }
+    });
 
     fixtures.remove(fixture);
     graph->block_allocator.Delete<Fixture>(fixture);
