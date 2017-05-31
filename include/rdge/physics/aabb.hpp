@@ -16,6 +16,7 @@
 #include <rdge/math/vec2.hpp>
 
 #include <SDL_assert.h>
+#include <cassert>
 
 #include <algorithm>
 #include <ostream>
@@ -36,8 +37,6 @@ struct collision_manifold;
 //!          on an invalid container will yield spurious results.
 struct aabb
 {
-    static constexpr float DEFAULT_FATTENING = 0.1f; //!< Default amount for AABB fattening
-
     math::vec2 lo; //!< Lower x and y coordinate position
     math::vec2 hi; //!< Higher x and y coordinate position
 
@@ -48,7 +47,7 @@ struct aabb
     { }
 
     //! \brief aabb ctor
-    //! \details Initialize aabb from min/max coordinates
+    //! \details Initialize aabb from min/max coordinates.
     //! \param [in] plo Lower coordinate
     //! \param [in] phi Higher coordinate
     constexpr aabb (const math::vec2& plo, const math::vec2& phi)
@@ -57,7 +56,7 @@ struct aabb
     { }
 
     //! \brief aabb ctor
-    //! \details Initialize aabb from origin and width/height values
+    //! \details Initialize aabb from origin and width/height values.
     //! \param [in] origin Origin (lower left)
     //! \param [in] width aabb width
     //! \param [in] height aabb height
@@ -92,14 +91,6 @@ struct aabb
     constexpr math::vec2 bottom_right (void) const noexcept { return { right(), bottom() }; }
     //!@}
 
-    //! \brief Extend the lo and hi coordinates by the provided value
-    //! \param [in] amount Amount to extend
-    void fatten (float amount = DEFAULT_FATTENING) noexcept
-    {
-        lo -= amount;
-        hi += amount;
-    }
-
     //! \brief Merge another aabb with this one
     //! \param [in] other aabb to merge
     //! \returns Reference to self
@@ -112,6 +103,29 @@ struct aabb
         hi.x = std::max(hi.x, other.hi.x);
         hi.y = std::max(hi.y, other.hi.y);
         return *this;
+    }
+
+    //!@{
+    //! \brief Extend the lo and hi coordinates by the provided value
+    //! \param [in] amount Amount to extend
+    aabb& fatten (float amount) noexcept
+    {
+        lo -= amount;
+        hi += amount;
+        return *this;
+    }
+
+    constexpr aabb fatten (float amount) const noexcept
+    {
+        return aabb(lo - amount, hi + amount);
+    }
+    //!@}
+
+    //! \brief Get the perimeter length
+    //! \returns Perimeter length
+    constexpr float perimeter (void) const noexcept
+    {
+        return 2.f * ((hi.x - lo.x) + (hi.y - lo.y));
     }
 
     //! \brief Get the calculated center of the aabb
@@ -169,6 +183,19 @@ struct aabb
     //! \param [out] mf Manifold containing resolution
     //! \returns True iff intersecting
     bool intersects_with (const aabb& other, collision_manifold& mf) const noexcept;
+
+    //! \brief Construct an aabb by merging two aabbs
+    //! \param [in] a First aabb
+    //! \param [in] b Second aabb
+    //! \returns Merged aabb
+    static aabb merge (const aabb& a, const aabb& b)
+    {
+        SDL_assert(a.is_valid());
+        SDL_assert(b.is_valid());
+
+        return aabb({ std::min(a.lo.x, b.lo.x), std::min(a.lo.y, b.lo.y) },
+                    { std::max(a.hi.x, b.hi.x), std::max(a.hi.y, b.hi.y) });
+    }
 };
 
 //! \brief aabb equality operator

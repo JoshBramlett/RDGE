@@ -106,6 +106,7 @@ add_library (
              src/math/vec4.cpp
 
              src/physics/aabb.cpp
+             src/physics/bvh.cpp
              src/physics/collision_graph.cpp
              src/physics/contact.cpp
              src/physics/fixture.cpp

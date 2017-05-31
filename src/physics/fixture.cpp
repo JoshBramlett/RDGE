@@ -43,7 +43,7 @@ Fixture::Fixture (const fixture_profile& profile, RigidBody* parent)
     proxy = allocator.Alloc<fixture_proxy>();
     proxy->fixture = this;
     proxy->box = body->world_transform.to_world(shape->compute_aabb());
-    proxy->box.fatten();
+    //proxy->box.fatten();
 }
 
 Fixture::~Fixture (void) noexcept

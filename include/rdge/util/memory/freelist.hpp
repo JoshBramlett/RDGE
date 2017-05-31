@@ -10,6 +10,7 @@
 #include <SDL_assert.h>
 
 #include <cstdlib>
+#include <cstring>
 #include <utility>
 
 //! \namespace rdge Rainbow Drop Game Engine
@@ -117,7 +118,7 @@ public:
         SDL_assert(handle < m_capacity);
         SDL_assert((ptrdiff_t(&m_handles[handle] - m_handles) / sizeof(uint32)) <= m_count);
 
-        memset(m_data[handle], 0, sizeof(T));
+        memset(&m_data[handle], 0, sizeof(T));
         std::swap(m_handles[handle], m_handles[m_count--]);
     }
 
