@@ -8,7 +8,6 @@
 #include <rdge/core.hpp>
 #include <rdge/physics/collision.hpp>
 #include <rdge/physics/shapes/ishape.hpp>
-#include <rdge/math/intrinsics.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/util/containers/nodeless_list.hpp>
 
@@ -16,17 +15,10 @@
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
-namespace physics {
 
-// Box2D dependency tree:
-// Fixture
-//   Body
-//   BroadPhase
-//   World
-//   ContactManager
-//   ContactEdge
-//   Contact
-//   BlockAllocator
+class SmallBlockAllocator;
+
+namespace physics {
 
 class RigidBody;
 class Fixture;
@@ -56,51 +48,21 @@ struct fixture_profile
 };
 
 //! \struct fixture_proxy
-//! \brief Container for the shape's wrapping aabb
-//! \details Used for broad phase collision detection.
+//! \brief Container used by the broad phase
+//! \details The proxy represents the fixture's wrapped AABB in world coordinates,
+//!          used by the broad phase for collision detection.
 struct fixture_proxy
 {
-    aabb box;
-    Fixture* fixture = nullptr;
-    int32 proxy_id = 0;
+    static constexpr int32 INVALID_HANDLE = -1;
+
+    Fixture* fixture = nullptr;    //!< Circular reference
+    aabb box;                      //!< AABB wrapper for the fixture shape
+    int32 handle = INVALID_HANDLE; //!< Handle provided by the broad phase
 };
 
 class Fixture : public nodeless_forward_list_element<Fixture>
 {
 public:
-    explicit Fixture (const fixture_profile& profile, RigidBody* parent);
-    ~Fixture (void) noexcept;
-
-    void CreateProxy (/* broad_phase, const iso_transform& xf */)
-    {
-        throw "not yet implemented";
-        // Box2D:
-        // 1) create one proxy per shape child
-        // 2) compute the aabb
-        // 3) register the proxy to the broad phase
-    }
-
-    void DestroyProxy (/* broad_phase */)
-    {
-        throw "not yet implemented";
-        // Box2D:
-        // 1) have broad phase destroy each proxy
-        // 2) assign the proxy id to "null" constant
-    }
-
-    void Synchronize (/* broad_phase, const iso_transform& xf1, const iso_transform& xf2 */)
-    {
-        throw "not yet implemented";
-        // This is used to update the aabbs in the proxies
-        // The two transforms are used to combine the aabbs in the sweep step
-
-        // Box2D:
-        // 1) for each proxy compute the aabb with xf1 and xf2
-        // 2) combine the aabbs
-        // 3) calculate the displacement of the transforms
-        // 4) have the broad phase move the proxy by the displacement
-    }
-
     void SetFilter (const collision_filter& f)
     {
         this->filter = f;
@@ -131,18 +93,18 @@ public:
 
     mass_data ComputeMass (void) const noexcept
     {
-        return this->shape->compute_mass(this->density);
+        return shape->compute_mass(density);
     }
 
-    const aabb& GetAABB (void) const noexcept
+    aabb ComputeAABB (void) const noexcept
     {
-        return proxy->box;
+        return shape->compute_aabb();
     }
 
-    RigidBody*     body = nullptr;
-    void*          user_data = nullptr;
-    ishape*        shape = nullptr;
-    fixture_proxy* proxy = nullptr;
+    RigidBody*     body = nullptr;      //!< Circular reference to parent
+    void*          user_data = nullptr; //!< Opaque user data
+    ishape*        shape = nullptr;   //!< Fixture shape
+    fixture_proxy* proxy = nullptr;     //!< Broad phase proxy
 
     float density = 0.f;
     float friction = 0.2f;
@@ -151,6 +113,11 @@ public:
     collision_filter filter;
 
 private:
+    friend class RigidBody;
+    friend class rdge::SmallBlockAllocator;
+
+    explicit Fixture (const fixture_profile& profile, RigidBody* parent);
+    ~Fixture (void) noexcept;
 
     enum StateFlags
     {

@@ -91,6 +91,33 @@ struct polygon : public ishape
     //! \see https://en.wikipedia.org/wiki/List_of_moments_of_inertia
     mass_data compute_mass (float density) const override;
 
+    //!@{ GJK support functions
+    //! \brief Provides the first point in the array
+    math::vec2 first_point (void) const override
+    {
+        return vertices[0];
+    }
+
+    //! \brief Retrieves the farthest point along the provided direction
+    //! \param [in] d Direction to find the farthest point
+    math::vec2 farthest_point (const math::vec2& d) const override
+    {
+        size_t index = 0;
+        float max_product = d.dot(vertices[index]);
+        for (size_t i = 1; i < count; ++i)
+        {
+            float p = d.dot(vertices[i]);
+            if (p > max_product)
+            {
+                max_product = p;
+                index = i;
+            }
+        }
+
+        return vertices[index];
+    }
+    //!@}
+
     //! \brief Check if the polygon intersects with another (edge exclusive)
     //! \param [in] other polygon structure
     //! \returns True iff intersecting

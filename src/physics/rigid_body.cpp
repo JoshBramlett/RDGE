@@ -1,5 +1,7 @@
 #include <rdge/physics/rigid_body.hpp>
 #include <rdge/physics/collision_graph.hpp>
+#include <rdge/physics/aabb.hpp>
+#include <rdge/util/memory/small_block_allocator.hpp>
 
 namespace rdge {
 namespace physics {
@@ -13,34 +15,34 @@ RigidBody::RigidBody (const rigid_body_profile& profile, CollisionGraph* parent)
     , gravity_scale(profile.gravity_scale)
     , m_type(profile.type)
 {
-    this->linear.velocity = profile.linear_velocity;
-    this->linear.damping = profile.linear_damping;
-    this->angular.velocity = profile.angular_velocity;
-    this->angular.damping = profile.angular_damping;
+    linear.velocity = profile.linear_velocity;
+    linear.damping = profile.linear_damping;
+    angular.velocity = profile.angular_velocity;
+    angular.damping = profile.angular_damping;
 
-    if (profile.active)
+    if (profile.simulate)
     {
-        m_flags |= ACTIVE_FLAG;
+        m_flags |= SIMULATE;
     }
 
     if (profile.awake)
     {
-        m_flags |= AWAKE_FLAG;
+        m_flags |= AWAKE;
+    }
+
+    if (profile.prevent_rotation)
+    {
+        m_flags |= PREVENT_ROTATION;
+    }
+
+    if (profile.prevent_sleep)
+    {
+        m_flags |= PREVENT_SLEEP;
     }
 
     if (profile.bullet)
     {
-        m_flags |= BULLET_FLAG;
-    }
-
-    if (profile.fixed_rotation)
-    {
-        m_flags |= FIXED_ROTATION_FLAG;
-    }
-
-    if (profile.allow_sleep)
-    {
-        m_flags |= AUTOSLEEP_FLAG;
+        m_flags |= BULLET;
     }
 
     m_sweep.pos_0 = world_transform.pos;
@@ -50,17 +52,25 @@ RigidBody::RigidBody (const rigid_body_profile& profile, CollisionGraph* parent)
 
     if (m_type == RigidBodyType::DYNAMIC)
     {
-        this->linear.mass = 1.f;
-        this->linear.inv_mass = 1.f;
+        linear.mass = 1.f;
+        linear.inv_mass = 1.f;
     }
 }
 
 RigidBody::~RigidBody (void) noexcept
 {
-    fixtures.for_each([this](auto* f) {
+    fixtures.for_each([=](auto* f) {
         graph->UnregisterProxy(f->proxy);
         graph->block_allocator.Delete<Fixture>(f);
     });
+
+    contact_edges.for_each([=](auto* edge) {
+        // body should never remove edges from it's list.  Doing so would
+        // leave the other body with a dangling pointer.
+        graph->DestroyContact(edge->contact);
+    });
+
+    // TODO destroy joints
 }
 
 Fixture*
@@ -75,17 +85,16 @@ RigidBody::CreateFixture (const fixture_profile& profile)
     Fixture* result = graph->block_allocator.New<Fixture>(profile, this);
     fixtures.push_back(result);
 
-    if (IsActive())
+    if (IsSimulating())
     {
-        graph->RegisterProxy(result->proxy);
+        result->proxy->box = world_transform.to_world(result->ComputeAABB());
+        result->proxy->handle = graph->RegisterProxy(result->proxy);
     }
 
     if (result->density > 0.f)
     {
         ComputeMass();
     }
-
-    // TODO m_world->m_flags |= b2World::e_newFixture;
 
     return result;
 }
@@ -95,6 +104,7 @@ RigidBody::DestroyFixture (Fixture* fixture)
 {
     SDL_assert(fixture);
     SDL_assert(fixture->body == this);
+    SDL_assert(fixtures.contains(fixture));
 
     if (graph->IsLocked())
     {
@@ -102,12 +112,13 @@ RigidBody::DestroyFixture (Fixture* fixture)
         return;
     }
 
-    if (IsActive())
+    if (IsSimulating())
     {
         graph->UnregisterProxy(fixture->proxy);
+        fixture->proxy->handle = fixture_proxy::INVALID_HANDLE;
     }
 
-    contacts.for_each([=](auto* edge) {
+    contact_edges.for_each([=](auto* edge) {
         Contact* c = edge->contact;
         if (fixture == c->fixture_a || fixture == c->fixture_b)
         {
@@ -121,36 +132,48 @@ RigidBody::DestroyFixture (Fixture* fixture)
     ComputeMass();
 }
 
-void
-RigidBody::SynchronizeFixtures (void)
+bool
+RigidBody::HasEdge (const Fixture* a, const Fixture* b) noexcept
 {
-    // TODO ??? Don't really understand how this works.  Code below breaks behavior.
-    //      The only comment from Box2D:
-    //
-    // Compute an AABB that covers the swept shape (may miss some rotation effect).
-    //
-    //      Important note is the fixture proxy is merged with both the
-    //      start and end of the sweep.  I was considering simply storing the
-    //      fat aabb in the proxy to avoid the duplicate, but I'll need to
-    //      revisit that when I implement the broad phase.
-    //
-    //      Also this makes me wonder if my overall understanding was wrong.  I thought
-    //      the sweep step would basically be reset every frame, but I'm not sure
-    //      that's the case anymore.
-    rotation q(m_sweep.angle_0);
-    math::vec2 p = m_sweep.pos_0 - q.rotate(m_sweep.local_center);
-    iso_transform sweep_start(p, q);
+    SDL_assert(a && b);
+    SDL_assert(a->body == this || b->body == this);
+    if (b->body == this)
+    {
+        std::swap(a, b);
+    }
 
+    bool result = false;
+    contact_edges.for_each([=, &result](auto* edge) {
+        if (edge->other == b->body)
+        {
+            Contact* c = edge->contact;
+            if ((c->fixture_a == a && c->fixture_b == b) ||
+                (c->fixture_a == b && c->fixture_b == a))
+            {
+                result = true;
+                return;
+            }
+        }
+    });
+
+    return result;
+}
+
+void
+RigidBody::SyncProxies (void)
+{
+    // From Box2D
+    // Compute an AABB that covers the swept shape (may miss some rotation effect)
+
+    auto sweep_start = m_sweep.lerp_transform(0.f);
     auto displacement = world_transform.pos - sweep_start.pos;
     fixtures.for_each([&](auto* f) {
-        aabb box = f->shape->compute_aabb();
+        aabb box = f->ComputeAABB();
         aabb box_0 = sweep_start.to_world(box);
         aabb box_n = world_transform.to_world(box);
 
-        f->proxy->box.merge(box_0).merge(box_n);
-
-        Unused(displacement);
-        //broadPhase->MoveProxy(proxy->proxyId, proxy->aabb, displacement);
+        f->proxy->box = aabb::merge(box_0, box_n);
+        graph->MoveProxy(f->proxy, displacement);
     });
 }
 

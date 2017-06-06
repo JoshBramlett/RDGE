@@ -28,10 +28,16 @@ template <typename T, size_t ChunkSize = 128>
 class DynamicFreelist
 {
 public:
-    // TODO Because of the realloc the interface cannot allow pointers
-    //      to the data to be stored.  This is why the subscript returns
-    //      a reference.  To support persisting pointers bookkeeping
-    //      needs to be added for the new chunks created.
+    // TODO Because of the realloc it's easy to have a use after free:
+    //        1) Create reference to object
+    //        2) Reserve a new spot in the list (realloc occurs)
+    //        3) Write to the first object
+    //
+    //      Bookkeeping could be added so previous allocated memory
+    //      is not freed up.  Until then any references retrieved for
+    //      writing should have a small scope and never be accessed
+    //      after a Reserve() call.  References retrieved for reads
+    //      should be const.
 
     //! \brief DynamicFreelist ctor
     //! \details Allocates heap and initializes the handle list

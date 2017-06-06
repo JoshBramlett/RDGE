@@ -32,6 +32,7 @@ set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DRDGE_DEBUG")
 # Set compiler flags
 if (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang") # Matches for "Clang" and "AppleClang"
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -std=c++14")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
 
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -std=c++14")
@@ -148,6 +149,7 @@ add_executable (rdge_test
                 tests/assets/spritesheet_test.cpp
                 tests/graphics/color_test.cpp
                 tests/physics/aabb_test.cpp
+                tests/physics/gjk_test.cpp
                 tests/physics/circle_test.cpp
                 tests/physics/polygon_test.cpp
                 tests/math/intrinsics_test.cpp

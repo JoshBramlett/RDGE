@@ -19,6 +19,7 @@ BVHTree::CreateProxy (const aabb& box, void* user_data)
 void
 BVHTree::DestroyProxy (int32 handle)
 {
+    SDL_assert(handle != bvh_node::NULL_NODE);
     SDL_assert(m_nodes[handle].is_leaf());
 
     RemoveLeaf(handle);

@@ -5,6 +5,8 @@
 
 #include <exception>
 
+namespace {
+
 using namespace rdge;
 
 struct test_object
@@ -52,8 +54,10 @@ TEST(DynamicFreelistTest, ValidateReallocation)
     EXPECT_EQ(a.Capacity(), 129);
 
     // b) validate values persist after reallocation
-    h1_obj = a[h1];
-    EXPECT_EQ(h1_obj.a, 3);
-    EXPECT_EQ(h1_obj.b, 7);
-    EXPECT_EQ(h1_obj.c, 15);
+    const auto& h1_obj2 = a[h1];
+    EXPECT_EQ(h1_obj2.a, 3);
+    EXPECT_EQ(h1_obj2.b, 7);
+    EXPECT_EQ(h1_obj2.c, 15);
 }
+
+} // anonymous namespace

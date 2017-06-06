@@ -107,6 +107,7 @@ struct nodeless_list
     {
         SDL_assert(count > 0);
         SDL_assert(element != nullptr);
+        SDL_assert(this->contains(element));
 
         if (element->prev)
         {
@@ -131,6 +132,25 @@ struct nodeless_list
         element->prev = nullptr;
         element->next = nullptr;
         this->count--;
+    }
+
+    //! \brief Check if an element is contained in the list
+    //! \param [in] element Element to be checked
+    //! \returns True iff the list contains the element
+    bool contains (T* element) const noexcept
+    {
+        T* cursor = this->first;
+        while (cursor)
+        {
+            if (cursor == element)
+            {
+                return true;
+            }
+
+            cursor = cursor->next;
+        }
+
+        return false;
     }
 
     //! \brief Call the provided function for each member of the list
@@ -222,11 +242,9 @@ struct nodeless_forward_list
     //! \param [in] element Element to be removed
     void remove (T* element)
     {
-#ifdef RDGE_DEBUG
-        size_t old_count = this->count;
-#endif
         SDL_assert(count > 0);
         SDL_assert(element != nullptr);
+        SDL_assert(this->contains(element));
 
         T** cursor = &this->first;
         while (*cursor != nullptr)
@@ -241,10 +259,25 @@ struct nodeless_forward_list
 
             cursor = &(*cursor)->next;
         }
+    }
 
-#ifdef RDGE_DEBUG
-        SDL_assert(old_count == (count + 1));
-#endif
+    //! \brief Check if an element is contained in the list
+    //! \param [in] element Element to be checked
+    //! \returns True iff the list contains the element
+    bool contains (T* element) const noexcept
+    {
+        T* cursor = this->first;
+        while (cursor)
+        {
+            if (cursor == element)
+            {
+                return true;
+            }
+
+            cursor = cursor->next;
+        }
+
+        return false;
     }
 
     //! \brief Call the provided function for each member of the list

@@ -51,6 +51,12 @@ struct ishape
     virtual bool contains (const math::vec2& point) const = 0;
     virtual aabb compute_aabb (void) const = 0;
     virtual mass_data compute_mass (float density) const = 0;
+
+    //!@{
+    //! \brief GJK support functions
+    virtual math::vec2 first_point (void) const = 0;
+    virtual math::vec2 farthest_point (const math::vec2& d) const = 0;
+    //!@}
 };
 
 inline std::ostream& operator<< (std::ostream& os, const mass_data& data)

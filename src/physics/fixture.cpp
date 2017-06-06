@@ -3,6 +3,7 @@
 #include <rdge/physics/collision_graph.hpp>
 #include <rdge/physics/shapes/circle.hpp>
 #include <rdge/physics/shapes/polygon.hpp>
+#include <rdge/util/memory/small_block_allocator.hpp>
 
 #include <SDL_assert.h>
 
@@ -42,8 +43,7 @@ Fixture::Fixture (const fixture_profile& profile, RigidBody* parent)
 
     proxy = allocator.Alloc<fixture_proxy>();
     proxy->fixture = this;
-    proxy->box = body->world_transform.to_world(shape->compute_aabb());
-    //proxy->box.fatten();
+    proxy->handle = fixture_proxy::INVALID_HANDLE;
 }
 
 Fixture::~Fixture (void) noexcept
@@ -53,7 +53,6 @@ Fixture::~Fixture (void) noexcept
 
     auto& allocator = body->graph->block_allocator;
     allocator.Free<fixture_proxy>(proxy);
-    proxy = nullptr;
 
     switch (shape->type())
     {

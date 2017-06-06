@@ -6,12 +6,15 @@
 #pragma once
 
 #include <rdge/core.hpp>
+#include <rdge/physics/bvh.hpp>
 #include <rdge/physics/contact.hpp>
 #include <rdge/physics/fixture.hpp>
 #include <rdge/physics/rigid_body.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/util/containers/nodeless_list.hpp>
 #include <rdge/util/memory/small_block_allocator.hpp>
+
+#include <vector>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
@@ -26,18 +29,26 @@ public:
     RigidBody* CreateBody (const rigid_body_profile& profile);
     void DestroyBody (RigidBody* body);
 
-    void CreateContact (Fixture* a, Fixture* b);
+    void CreateContact (fixture_proxy* a, fixture_proxy* b);
     void DestroyContact (Contact* contact);
     void PurgeContacts (void);
 
-    void RegisterProxy (fixture_proxy* proxy);
-    void UnregisterProxy (fixture_proxy* proxy);
 
     void Step (float dt);
 
     bool IsLocked (void) const noexcept { return m_flags & LOCKED; }
 
 
+private:
+
+    friend class RigidBody;
+
+    int32 RegisterProxy (fixture_proxy* proxy);
+    void UnregisterProxy (const fixture_proxy* proxy);
+    void MoveProxy (const fixture_proxy* proxy, const math::vec2& displacement);
+    void TouchProxy (const fixture_proxy* proxy);
+
+public:
     SmallBlockAllocator block_allocator;
 
     math::vec2 gravity;
@@ -59,9 +70,13 @@ public:
     } iterations;
 
 private:
+
+    BVHTree m_tree;
+    std::vector<int32> m_dirtyProxies;
+
     enum StateFlags
     {
-        LOCKED = 0x0001
+        LOCKED    = 0x0001,
     };
 
     uint16 m_flags = 0;

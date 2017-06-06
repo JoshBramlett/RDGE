@@ -6,13 +6,16 @@
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/physics/aabb.hpp>
+#include <rdge/physics/contact.hpp>
 #include <rdge/physics/collision.hpp>
 #include <rdge/physics/fixture.hpp>
 #include <rdge/util/containers/nodeless_list.hpp>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
+
+class SmallBlockAllocator;
+
 namespace physics {
 
 class RigidBody;
@@ -42,37 +45,30 @@ enum class RigidBodyType : uint8
 //! \brief Profile for constructing a \ref RigidBody
 struct rigid_body_profile
 {
-    void* user_data = nullptr;    //!< Opaque pointer
-
-    math::vec2 position;          //!< World position
-    math::vec2 linear_velocity;   //!< Linear velocity of the body's origin
-
-    float angle = 0.f;            //!< Angle in radians
-    float angular_velocity = 0.f; //!< Angular velocity
-
-    float linear_damping = 0.f;   //!< Coefficient to reduce linear velocity
-    float angular_damping = 0.f;  //!< Coefficient to reduce angular velocity
-
-    float gravity_scale = 1.f;    //!< Normalized scale of the gravitational impact
-
-    bool active = true;           //!< Body is initially active
-    bool awake = true;            //!< Body is initially awake
-    bool bullet = false;          //!< High velocity body - prevents tunneling
-    bool fixed_rotation = false;  //!< Prevent rotation
-    bool allow_sleep = true;      //!< Body is allowed to enter a sleep state
-
     RigidBodyType type = RigidBodyType::STATIC; //!< Canonical type defining the body
-};
 
-//! \struct contact_edge
-//! \brief Represents contact between two bodies
-//! \details The bodies which have fixtures in contact represent nodes in a
-//!          graph and the contact is the edge between them.  This is used
-//!          when determining which bodies make up an island.
-struct contact_edge : public nodeless_list_element<contact_edge>
-{
-    RigidBody* other = nullptr; //!< Body connected by the edge
-    Contact* contact = nullptr; //!< Contact connecting the bodies
+    float gravity_scale = 1.f;     //!< Normalized scale of the gravitational impact
+    void* user_data = nullptr;     //!< Opaque user data
+
+    //!@{ Linear properties
+    math::vec2 position;           //!< World position
+    math::vec2 linear_velocity;    //!< Linear velocity of the body's origin
+    float linear_damping = 0.f;    //!< Coefficient to reduce linear velocity
+    //!@}
+
+    //!@{ Angular properties
+    float angle = 0.f;             //!< Angle in radians
+    float angular_velocity = 0.f;  //!< Angular velocity
+    float angular_damping = 0.f;   //!< Coefficient to reduce angular velocity
+    //!@}
+
+    //!@{ RigidBody state flags
+    bool simulate = true;          //!< Include body in physics simulation
+    bool awake = true;             //!< Body is initially awake
+    bool prevent_rotation = false; //!< Prevent rotation
+    bool prevent_sleep = false;    //!< Keep body awake
+    bool bullet = false;           //!< High velocity body - prevents tunneling
+    //!@}
 };
 
 //! \class RigidBody
@@ -83,13 +79,24 @@ class RigidBody : public nodeless_list_element<RigidBody>
 {
 public:
 
-    explicit RigidBody (const rigid_body_profile& profile,
-                        CollisionGraph*           parent);
-    ~RigidBody (void) noexcept;
-
+    //! \brief Create a fixture and attach it to this body
+    //! \details Initializes a fixture from the provided profile.  If the
+    //!          body is simulating contacts will be added during the next
+    //!          time step.  Mass data is automatically re-calculated.
+    //! \param [in] profile Profile defining the fixture
+    //! \returns Pointer to the created fixture
+    //! \warning Function is locked during simulation
     Fixture* CreateFixture (const fixture_profile& profile);
+
+    //! \brief Destroy an attached fixture
+    //! \details If the body is simulating contacts associated with the fixture
+    //!          are destroyed.  Mass data is automatically re-calculated.
+    //! \param [in] fixture Fixture to destroy
+    //! \warning Function is locked during simulation
     void DestroyFixture (Fixture* fixture);
-    void SynchronizeFixtures (void);
+
+    bool HasEdge (const Fixture* a, const Fixture* b) noexcept;
+    void SyncProxies (void);
     void ComputeMass (void);
 
     //void SetTransform(const b2Vec2& position, float32 angle);
@@ -127,36 +134,27 @@ public:
     const math::vec2& GetLocalCenter (void) const noexcept { return m_sweep.local_center; }
 
 
+    bool IsSimulating (void) const noexcept { return m_flags & SIMULATE; }
+
     bool IsAwake (void) const noexcept
     {
         // Static bodies are always sleeping
         // TODO This behavior differs from Box2D
-        return (m_type == RigidBodyType::STATIC) || (m_flags & AWAKE_FLAG);
-    }
-
-    bool IsActive (void) const noexcept { return m_flags & ACTIVE_FLAG; }
-    bool IsBullet (void) const noexcept { return m_flags & BULLET_FLAG; }
-    bool IsFixedRotation (void) const noexcept { return m_flags & FIXED_ROTATION_FLAG; }
-    bool IsSleepingAllowed (void) const noexcept { return m_flags & AUTOSLEEP_FLAG; }
-
-    bool ShouldCollide (RigidBody* other)
-    {
-        return m_type == RigidBodyType::DYNAMIC ||
-               other->m_type == RigidBodyType::DYNAMIC;
+        return (m_type == RigidBodyType::STATIC) || (m_flags & AWAKE);
     }
 
     void WakeUp (void) noexcept
     {
-        if ((m_flags & AWAKE_FLAG) == 0)
+        if (!(m_flags & AWAKE))
         {
-            m_flags |= AWAKE_FLAG;
+            m_flags |= AWAKE;
             m_sleepTime = 0.f;
         }
     }
 
     void Sleep (void) noexcept
     {
-        m_flags &= ~AWAKE_FLAG;
+        m_flags &= ~AWAKE;
         m_sleepTime = 0.f;
         this->linear.force = { 0.f, 0.f };
         this->angular.torque = 0.f;
@@ -164,13 +162,39 @@ public:
         this->angular.velocity = 0.f;
     }
 
+    bool IsFixedRotation (void) const noexcept { return m_flags & PREVENT_ROTATION; }
+    bool IsSleepProhibited (void) const noexcept { return m_flags & PREVENT_SLEEP; }
+    bool IsBullet (void) const noexcept { return m_flags & BULLET; }
+
+    bool ShouldCollide (RigidBody* other)
+    {
+        return m_type == RigidBodyType::DYNAMIC ||
+               other->m_type == RigidBodyType::DYNAMIC;
+    }
+
+private:
+
+    friend class CollisionGraph;
+    friend class rdge::SmallBlockAllocator;
+
+    //! \brief RigidBody ctor
+    //! \details Initialized from the provided profile.  Creation is done
+    //!          through \ref CollisionGraph::CreateBody.
+    //! \param [in] profile Profile defining the object
+    //! \param [in] parent Parent object responsible for creation
+    explicit RigidBody (const rigid_body_profile& profile, CollisionGraph* parent);
+
+    //! \brief RigidBody dtor
+    //! \details Responsible for cleaning up child fixtures.
+    ~RigidBody (void) noexcept;
+
 public:
 
-    CollisionGraph* graph = nullptr;
-    void* user_data = nullptr;
+    CollisionGraph* graph = nullptr; //!< Circular reference to parent
+    void* user_data = nullptr;       //!< Opaque user data
 
     nodeless_forward_list<Fixture> fixtures;
-    nodeless_list<contact_edge> contacts;
+    nodeless_list<contact_edge> contact_edges;
 
     //! \brief Collection of elements defining the linear motion
     struct linear_motion
@@ -199,16 +223,16 @@ public:
 
 private:
 
-    enum InternalFlags
+    enum StateFlags
     {
-        ACTIVE_FLAG         = 0x0001,
-        AWAKE_FLAG          = 0x0002,
-        BULLET_FLAG         = 0x0004,
-        FIXED_ROTATION_FLAG = 0x0008,
-        AUTOSLEEP_FLAG      = 0x0010,
+        SIMULATE         = 0x0001,
+        AWAKE            = 0x0002,
+        PREVENT_ROTATION = 0x0004,
+        PREVENT_SLEEP    = 0x0008,
 
-        ISLAND_FLAG         = 0x0020,
-        TOI_FLAG            = 0x0040
+        BULLET           = 0x0010,
+        ISLAND           = 0x0020,
+        TOI              = 0x0040
     };
 
     //! \brief Contains the local center of mass, and the position/angle over the

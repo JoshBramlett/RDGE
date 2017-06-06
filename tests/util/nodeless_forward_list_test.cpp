@@ -5,6 +5,8 @@
 
 #include <exception>
 
+namespace {
+
 using namespace rdge;
 
 struct test_node : public nodeless_forward_list_element<test_node>
@@ -89,6 +91,24 @@ TEST(NodelessForwardListTest, ValidateRemove)
     EXPECT_TRUE(a.next == nullptr);
 }
 
+TEST(NodelessForwardListTest, ValidateContains)
+{
+    nodeless_forward_list<test_node> list;
+    test_node a;
+    test_node b;
+    test_node c;
+    test_node d;
+
+    list.push_back(&a);
+    list.push_back(&b);
+    list.push_back(&c);
+
+    EXPECT_TRUE(list.contains(&a));
+    EXPECT_TRUE(list.contains(&b));
+    EXPECT_TRUE(list.contains(&c));
+    EXPECT_FALSE(list.contains(&d));
+}
+
 TEST(NodelessForwardListTest, ValidateForEach)
 {
     nodeless_forward_list<test_node> list;
@@ -109,3 +129,5 @@ TEST(NodelessForwardListTest, ValidateForEach)
     EXPECT_EQ(b.value, 2);
     EXPECT_EQ(c.value, 3);
 }
+
+} // anonymous namespace

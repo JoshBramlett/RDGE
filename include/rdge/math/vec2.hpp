@@ -359,8 +359,20 @@ template <typename T>
 constexpr T perp_dot (const vec2_t<T>& a, const vec2_t<T>& b) noexcept
 {
     static_assert(std::is_floating_point<T>::value,
-                  "'cross' is only available for floating point types");
+                  "'perp_dot' is only available for floating point types");
     return (a.x * b.y) - (a.y * b.x);
+}
+
+//! \brief vec2_t vector triple product specialization
+//! \details The cross product of vector a with the cross product of vectors
+//!          b and c.  e.g. [a x (b x c)].  Known by the mnemonic BAC - CAB.
+//! \returns Vector triple product
+template <typename T>
+constexpr vec2_t<T> triple (const vec2_t<T>& a, const vec2_t<T>& b, const vec2_t<T>& c) noexcept
+{
+    static_assert(std::is_floating_point<T>::value,
+                  "'triple' is only available for floating point types");
+    return (b * dot(a, c)) - (c * dot(a, b));
 }
 
 //! \brief vec2_t stream output operator

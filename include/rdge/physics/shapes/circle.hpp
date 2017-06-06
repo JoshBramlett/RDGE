@@ -77,6 +77,20 @@ struct circle : public ishape
         return result;
     }
 
+    //!@{ GJK support functions
+    //! \brief Provides the topmost point
+    math::vec2 first_point (void) const override { return { pos.x + radius, pos.y }; }
+
+    //! \brief Retrieves the farthest point along the provided direction
+    //! \param [in] d Direction to find the farthest point
+    math::vec2 farthest_point (const math::vec2& d) const override
+    {
+        float theta = atan2(d.y, d.x);
+        return { pos.x + (radius * cosf(theta)),
+                 pos.y + (radius * sinf(theta)) };
+    }
+    //!@}
+
     //! \brief Check if the circle intersects with another (edge exclusive)
     //! \param [in] other circle structure
     //! \returns True iff intersecting
