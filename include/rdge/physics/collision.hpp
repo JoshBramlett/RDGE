@@ -34,57 +34,6 @@ struct collision_manifold
     math::vec2 normal;              //!< Vector of resolution, or collision normal
 };
 
-//! \struct sweep_step
-//! \brief Describes the motion of a body/shape during the time step
-//! \details Stores an advancing time and caches the position and angle at
-//!          that time period (pos_0 and angle_0 are at the time alpha_0).
-//! \see https://www.gamedev.net/resources/_/technical/game-programming/swept-aabb-collision-detection-and-response-r3084
-struct sweep_step
-{
-    math::vec2 local_center; //!< Local center of mass position
-    math::vec2 pos_0;        //!< World position at alpha_0
-    math::vec2 pos_n;        //!< World position at frame end
-    float angle_0 = 0.f;     //!< World angle at alpha_0
-    float angle_n = 0.f;     //!< World angle at frame end
-
-    float alpha_0 = 0.f;     //!< Normalized fraction of the current time step
-
-    //! \brief Calculate the interpolated transform for a given time
-    //! \param [in] beta Normalized time fraction, where 0 indicates alpha_0
-    //! \returns Interpolated transform
-    iso_transform lerp_transform (float beta) noexcept
-    {
-        SDL_assert(0.f <= beta && beta <= 1.f);
-
-        iso_transform result(((1.f - beta) * pos_0) + (beta * pos_n),
-                             ((1.f - beta) * angle_0) + (beta * angle_n));
-
-        result.pos -= result.rot.rotate(local_center);
-        return result;
-    }
-
-    //! \brief Advance the sweep forward, yielding a new initial state
-    //! \param [in] alpha The new \ref alpha_0
-    void advance (float alpha) noexcept
-    {
-        SDL_assert(0.f <= alpha && alpha <= 1.f);
-
-        float beta = (alpha - alpha_0) / (1.f - alpha_0);
-        pos_0 += ((pos_n - pos_0) * beta);
-        angle_0 += ((angle_n - angle_0) * beta);
-
-        alpha_0 = alpha;
-    }
-
-    //! \brief Normalize the angle in radians between -pi and pi
-    void normalize (void) noexcept
-    {
-        float d = math::TWO_PI * std::floorf(angle_0 / math::TWO_PI);
-        angle_0 -= d;
-        angle_n -= d;
-    }
-};
-
 //! \struct gjk
 //! \brief Implementation of the GJK algorithm for collision detection
 //! \details The algorithm operates on two convex shapes, and performs it's
@@ -97,8 +46,8 @@ struct sweep_step
 //! \see http://mollyrocket.com/849
 struct gjk
 {
-    ishape* shape_a = nullptr;
-    ishape* shape_b = nullptr;
+    const ishape* shape_a = nullptr;
+    const ishape* shape_b = nullptr;
 
     math::vec2 simplex[3]; //!< Triangle surrounding the origin
     size_t count = 0;      //!< Number of vertices in the simplex
@@ -109,7 +58,7 @@ struct gjk
     //!          direction for the intersection test to start.
     //! \param [in] a First shape
     //! \param [in] b Second shape
-    gjk (ishape* a, ishape* b)
+    gjk (const ishape* a, const ishape* b)
         : shape_a(a)
         , shape_b(b)
     {
@@ -122,6 +71,10 @@ struct gjk
     //! \returns True iff shapes intersect
     bool intersects (void)
     {
+        // TODO This causes a segfault if called twice.  Could be converted to a function
+        //      instead of a class.
+        SDL_assert(count == 1);
+
         while (true)
         {
             auto a = support(d);
@@ -165,7 +118,7 @@ struct gjk
             auto ab = b - a;
             auto ac = c - a;
 
-            auto ac_perp = ac.perp() * math::perp_dot(ab, ac);
+            auto ac_perp = ac.perp_ccw() * math::perp_dot(ac, ab);
             if (ac_perp.dot(ao) > 0)
             {
                 // If the edge AC normal has the same direction as the origin
@@ -177,7 +130,7 @@ struct gjk
             }
             else
             {
-                auto ab_perp = ab.perp() * math::perp_dot(ac, ab);
+                auto ab_perp = ab.perp_ccw() * math::perp_dot(ab, ac);
                 if (ab_perp.dot(ao) > 0)
                 {
                     // If the edge AB normal has the same direction as the origin

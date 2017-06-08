@@ -73,10 +73,46 @@ struct polygon : public ishape
     //! \returns Underlying type
     ShapeType type (void) const noexcept override { return ShapeType::POLYGON; }
 
+    //! \brief Converts the polygon to world space
+    //! \param [in] xf Transform
+    void to_world (const iso_transform& xf) override
+    {
+        centroid = xf.to_world(centroid);
+        for (size_t i = 0; i < count; ++i)
+        {
+            vertices[i] = xf.to_world(vertices[i]);
+            normals[i] = xf.to_world(normals[i]);
+        }
+    }
+
     //! \brief Check if a point resides within the polygon (edge exclusive)
     //! \param [in] point Local point coordinates
     //! \returns True iff point is within the polygon
     bool contains (const math::vec2& point) const override;
+
+    //! \brief Check if the polygon intersects with another shape
+    //! \param [in] other Other shape to test
+    //! \returns True iff shapes intersect
+    bool intersects_with (const ishape* other) const override
+    {
+        gjk test(this, other);
+        return test.intersects();
+    }
+
+    //! \brief Check if the circle intersects with another shape
+    //! \details The provided \ref collision_manifold will be populated with details
+    //!          on how the collision could be resolved.  If there was no collision
+    //!          the manifold count will be set to zero.
+    //! \param [in] other shape
+    //! \param [out] mf Manifold containing resolution
+    //! \returns True iff intersecting
+    bool intersects_with (const ishape* other, collision_manifold& mf) const override
+    {
+        Unused(other);
+        Unused(mf);
+        throw "not yet implemented";
+        return false;
+    }
 
     //! \brief Compute an aabb surrounding the polygon
     //! \note aabb edges will be padded by \ref AABB_PADDING
@@ -90,6 +126,30 @@ struct polygon : public ishape
     //! \see https://en.wikipedia.org/wiki/Centroid#Centroid_of_a_polygon
     //! \see https://en.wikipedia.org/wiki/List_of_moments_of_inertia
     mass_data compute_mass (float density) const override;
+
+    //!@{ SAT support functions
+    //! \brief Provides the min and max projection on the provided axis
+    //! \param [in] axis Normalized axis
+    math::vec2 project (const math::vec2& axis) const override
+    {
+        float min = axis.dot(vertices[0]);
+        float max = min;
+        for (size_t i = 1; i < count; ++i)
+        {
+            float p = axis.dot(vertices[i]);
+            if (p < min)
+            {
+                min = p;
+            }
+            else if (p > max)
+            {
+                max = p;
+            }
+        }
+
+        return { min, max };
+    }
+    //!@}
 
     //!@{ GJK support functions
     //! \brief Provides the first point in the array

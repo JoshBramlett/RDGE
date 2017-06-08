@@ -19,17 +19,6 @@ constexpr float mix_restitution (float a, float b)
     return std::max(a, b);
 }
 
-Contact::ManifoldGenerationFn s_circleCircle = [](ishape* a, ishape* b) {
-    circle* ca = static_cast<circle*>(a);
-    circle* cb = static_cast<circle*>(b);
-
-    // TODO Needs the transform
-    collision_manifold mf;
-    ca->intersects_with(*cb, mf);
-
-    return mf;
-};
-
 } // anonymous namespace
 
 Contact::Contact (Fixture* a, Fixture* b)
@@ -42,11 +31,6 @@ Contact::Contact (Fixture* a, Fixture* b)
     edge_b.contact = this;
     edge_a.other = b->body;
     edge_b.other = a->body;
-
-    if (a->shape->type() == ShapeType::CIRCLE && b->shape->type() == ShapeType::CIRCLE)
-    {
-        m_evaluate = s_circleCircle;
-    }
 }
 
 void
@@ -57,26 +41,56 @@ Contact::Update (ContactListener* listener)
     bool was_touching = IsTouching();
     bool is_touching = false;
 
+    auto shape_a = fixture_a->GetWorldShape();
+    auto shape_b = fixture_b->GetWorldShape();
+
     bool is_sensor = fixture_a->IsSensor() || fixture_b->IsSensor();
     if (is_sensor)
     {
-
+        manifold.count = 0;
+        is_touching = shape_a->intersects_with(shape_b);
     }
     else
     {
+        is_touching = shape_a->intersects_with(shape_b, manifold);
 
+        // TODO ??? Don't really understand Box2D here.  They compare the previous
+        //      contacts with the current before storing the impulses.  From the
+        //      Box2D comments:
+        //      "Match old contact ids to new contact ids and copy the
+        //      stored impulses to warm start the solver."
+
+        if (was_touching != is_touching)
+        {
+            fixture_a->body->WakeUp();
+            fixture_b->body->WakeUp();
+        }
+    }
+
+    if (is_touching)
+    {
+        m_flags |= TOUCHING;
+    }
+    else
+    {
+        m_flags &= ~TOUCHING;
     }
 
     if (listener)
     {
-        if (was_touching == false && is_touching == true)
+        if (is_touching && (was_touching == false))
         {
             listener->BeginContact(this);
         }
 
-        if (was_touching == true && is_touching == false)
+        if (was_touching && (is_touching == false))
         {
             listener->EndContact(this);
+        }
+
+        if (is_touching && (is_sensor == false))
+        {
+            // TODO Presolve
         }
     }
 }

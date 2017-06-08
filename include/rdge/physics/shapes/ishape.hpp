@@ -37,23 +37,43 @@ struct mass_data
     float mmoi = 0.f;
 };
 
-// TODO shell of a class.
+//! \struct ishape
+//! \brief Abstract interface for a convex shape
+//! \details Shapes inheriting from the ishape iterface contain functionality
+//!          supporting multiple aspects of the simulation, including narrow
+//!          phase collision routines, creating broad phase proxy aabb wrappers,
+//!          and computation of mass data.
 struct ishape
 {
-
 
     //https://github.com/erincatto/Box2D/blob/master/Box2D/Box2D/Collision/Shapes/b2Shape.h
     // TODO raycast
 
-    virtual ~ishape (void) = default;
+    virtual ~ishape (void) noexcept = default;
 
+    //! \brief Type of shape
     virtual ShapeType type (void) const = 0;
-    virtual bool contains (const math::vec2& point) const = 0;
+
+    //! \brief Transform the shape to world space
+    virtual void to_world (const iso_transform& xf) = 0;
+
+    //! \brief Compute aabb wrapper for use in the broad phase
     virtual aabb compute_aabb (void) const = 0;
+
+    //! \brief Compute mass data used in physics simulation
     virtual mass_data compute_mass (float density) const = 0;
 
-    //!@{
-    //! \brief GJK support functions
+    //!@{ Narrow phase collision detection routines
+    virtual bool contains (const math::vec2& point) const = 0;
+    virtual bool intersects_with (const ishape* other) const = 0;
+    virtual bool intersects_with (const ishape* other, collision_manifold& mf) const = 0;
+    //!@}
+
+    //!@{ SAT support functions
+    virtual math::vec2 project (const math::vec2& axis) const = 0;
+    //!@}
+
+    //!@{ GJK support functions
     virtual math::vec2 first_point (void) const = 0;
     virtual math::vec2 farthest_point (const math::vec2& d) const = 0;
     //!@}

@@ -29,11 +29,13 @@ Fixture::Fixture (const fixture_profile& profile, RigidBody* parent)
     switch (profile.shape->type())
     {
     case ShapeType::CIRCLE:
-        shape = allocator.New<circle>(*static_cast<const circle*>(profile.shape));
+        m_shape = allocator.New<circle>(*static_cast<const circle*>(profile.shape));
+        m_worldShape = allocator.Alloc<circle>();
         break;
 
     case ShapeType::POLYGON:
-        shape = allocator.New<polygon>(*static_cast<const polygon*>(profile.shape));
+        m_shape = allocator.New<polygon>(*static_cast<const polygon*>(profile.shape));
+        m_worldShape = allocator.Alloc<polygon>();
         break;
 
     default:
@@ -48,20 +50,22 @@ Fixture::Fixture (const fixture_profile& profile, RigidBody* parent)
 
 Fixture::~Fixture (void) noexcept
 {
-    SDL_assert(shape != nullptr);
+    SDL_assert(m_shape != nullptr);
     SDL_assert(body != nullptr && body->graph != nullptr);
 
     auto& allocator = body->graph->block_allocator;
     allocator.Free<fixture_proxy>(proxy);
 
-    switch (shape->type())
+    switch (m_shape->type())
     {
     case ShapeType::CIRCLE:
-        allocator.Delete<circle>(static_cast<circle*>(shape));
+        allocator.Delete<circle>(static_cast<circle*>(m_shape));
+        allocator.Free<circle>(static_cast<circle*>(m_worldShape));
         break;
 
     case ShapeType::POLYGON:
-        allocator.Delete<polygon>(static_cast<polygon*>(shape));
+        allocator.Delete<polygon>(static_cast<polygon*>(m_shape));
+        allocator.Free<polygon>(static_cast<polygon*>(m_worldShape));
         break;
 
     default:
@@ -86,6 +90,28 @@ Fixture::SetSensor (bool value) noexcept
             m_flags &= ~SENSOR;
         }
     }
+}
+
+ishape*
+Fixture::GetWorldShape (void) noexcept
+{
+    switch (m_shape->type())
+    {
+    case ShapeType::CIRCLE:
+        *static_cast<circle*>(m_worldShape) = *static_cast<const circle*>(m_shape);
+        break;
+
+    case ShapeType::POLYGON:
+        *static_cast<polygon*>(m_worldShape) = *static_cast<const polygon*>(m_shape);
+        break;
+
+    default:
+        SDL_assert(false);
+        break;
+    }
+
+    m_worldShape->to_world(body->world_transform);
+    return m_worldShape;
 }
 
 } // namespace physics

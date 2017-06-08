@@ -93,17 +93,21 @@ public:
 
     mass_data ComputeMass (void) const noexcept
     {
-        return shape->compute_mass(density);
+        return m_shape->compute_mass(density);
     }
 
     aabb ComputeAABB (void) const noexcept
     {
-        return shape->compute_aabb();
+        return m_shape->compute_aabb();
     }
+
+    // TODO Maybe instead of recalculating every call I could do something similar
+    //      to the SyncProxies methdod, where this is updated only if the transform
+    //      is moved, then the cached lookup would be very fast.
+    ishape* GetWorldShape (void) noexcept;
 
     RigidBody*     body = nullptr;      //!< Circular reference to parent
     void*          user_data = nullptr; //!< Opaque user data
-    ishape*        shape = nullptr;   //!< Fixture shape
     fixture_proxy* proxy = nullptr;     //!< Broad phase proxy
 
     float density = 0.f;
@@ -124,6 +128,9 @@ private:
         SENSOR       = 0x0001,
         FILTER_DIRTY = 0x0002
     };
+
+    ishape* m_shape = nullptr;      //!< Fixture shape
+    ishape* m_worldShape = nullptr; //!< Shape transformed to world coordinates
 
     uint16 m_flags = 0;
 };

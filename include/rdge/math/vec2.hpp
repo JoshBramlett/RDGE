@@ -194,6 +194,21 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
         return *this;
     }
 
+    //! \brief Normalize to a unit vector
+    //! \returns Normalized vector
+    const vec2_t<T> normalize (void) const noexcept
+    {
+        static_assert(std::is_floating_point<T>::value,
+                      "'normalize' is only available for floating point types");
+        if (!is_zero())
+        {
+            float inv_length = 1.f / length();
+            return *this * inv_length;
+        }
+
+        return { 0.f, 0.f };
+    }
+
     //! \brief Dot product
     //! \details Sum of the corresponding products within the containers.
     //! \param [in] other Other vec2_t used in the calculation

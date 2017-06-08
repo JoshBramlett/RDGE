@@ -6,9 +6,13 @@
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/graphics.hpp>
-#include <rdge/math.hpp>
-#include <rdge/physics.hpp>
+#include <rdge/graphics/color.hpp>
+#include <rdge/graphics/isprite.hpp>
+#include <rdge/math/mat4.hpp>
+#include <rdge/math/vec3.hpp>
+#include <rdge/physics/aabb.hpp>
+#include <rdge/physics/shapes/circle.hpp>
+#include <rdge/physics/shapes/polygon.hpp>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {

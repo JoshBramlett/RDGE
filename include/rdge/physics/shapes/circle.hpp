@@ -42,12 +42,53 @@ struct circle : public ishape
     //! \returns Underlying type
     ShapeType type (void) const override { return ShapeType::CIRCLE; }
 
+    //! \brief Converts the polygon to world space
+    //! \param [in] xf Transform
+    void to_world (const iso_transform& xf) override
+    {
+        pos = xf.to_world(pos);
+    }
+
     //! \brief Check if a point resides within the circle (edge exclusive)
     //! \param [in] point Local point coordinates
     //! \returns True iff point is within the circle
     bool contains (const math::vec2& point) const override
     {
         return (point - pos).self_dot() < math::square(radius);
+    }
+
+    //! \brief Check if the circle intersects with another shape
+    //! \param [in] other Other shape to test
+    //! \warning Before calling ensure both shapes are in the same coordinate space
+    //! \returns True iff shapes intersect
+    bool intersects_with (const ishape* other) const override
+    {
+        if (other->type() == ShapeType::CIRCLE)
+        {
+            return intersects_with(*static_cast<const circle*>(other));
+        }
+
+        gjk test(this, other);
+        return test.intersects();
+    }
+
+    //! \brief Check if the circle intersects with another shape
+    //! \details The provided \ref collision_manifold will be populated with details
+    //!          on how the collision could be resolved.  If there was no collision
+    //!          the manifold count will be set to zero.
+    //! \param [in] other shape
+    //! \param [out] mf Manifold containing resolution
+    //! \warning Before calling ensure both shapes are in the same coordinate space
+    //! \returns True iff intersecting
+    bool intersects_with (const ishape* other, collision_manifold& mf) const override
+    {
+        if (other->type() == ShapeType::CIRCLE)
+        {
+            return intersects_with(*static_cast<const circle*>(other), mf);
+        }
+
+        throw "not yet implemented";
+        return false;
     }
 
     //! \brief Compute an aabb surrounding the circle
@@ -77,6 +118,16 @@ struct circle : public ishape
         return result;
     }
 
+    //!@{ SAT support functions
+    //! \brief Provides the min and max projection on the provided axis
+    //! \param [in] axis Normalized axis
+    math::vec2 project (const math::vec2& axis) const override
+    {
+        float center = axis.dot(pos);
+        return { center - radius, center + radius };
+    }
+    //!@}
+
     //!@{ GJK support functions
     //! \brief Provides the topmost point
     math::vec2 first_point (void) const override { return { pos.x + radius, pos.y }; }
@@ -85,9 +136,9 @@ struct circle : public ishape
     //! \param [in] d Direction to find the farthest point
     math::vec2 farthest_point (const math::vec2& d) const override
     {
-        float theta = atan2(d.y, d.x);
-        return { pos.x + (radius * cosf(theta)),
-                 pos.y + (radius * sinf(theta)) };
+        math::vec2 d_normal = d.normalize();
+        return { pos.x + (radius * d_normal.x),
+                 pos.y + (radius * d_normal.y) };
     }
     //!@}
 

@@ -40,8 +40,6 @@ struct contact_edge : public nodeless_list_element<contact_edge>
 class Contact : public nodeless_list_element<Contact>
 {
 public:
-    using ManifoldGenerationFn = std::function<collision_manifold(ishape*, ishape*)>;
-
     explicit Contact (Fixture* a, Fixture* b);
     ~Contact (void) noexcept = default;
 
@@ -74,7 +72,6 @@ private:
         TOUCHING = 0x0002,
     };
 
-    ManifoldGenerationFn m_evaluate;
     uint16 m_flags;
 };
 
