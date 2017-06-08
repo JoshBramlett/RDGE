@@ -139,11 +139,6 @@ add_subdirectory (tutorials/02_layers)
 add_subdirectory (tutorials/03_spritesheet)
 add_subdirectory (tutorials/04_scenes)
 
-# deprecated
-#add_subdirectory (examples/pong)
-#add_subdirectory (examples/glpong)
-#add_subdirectory (examples/gui)
-
 add_executable (rdge_test
                 tests/main.cpp
                 tests/assets/spritesheet_test.cpp
