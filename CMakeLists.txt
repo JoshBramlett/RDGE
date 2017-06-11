@@ -21,6 +21,9 @@ message (STATUS "Processor:   ${CMAKE_SYSTEM_PROCESSOR}")
 message (STATUS "Compiler:    ${CMAKE_CXX_COMPILER_ID}")
 message (STATUS "Build type:  ${CMAKE_BUILD_TYPE}")
 
+# Flags for AddressSanitizer
+set(ASAN_FLAGS "-fsanitize=address -fno-omit-frame-pointer")
+
 # Add custom debug flag
 set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DRDGE_DEBUG")
 
@@ -32,10 +35,11 @@ set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DRDGE_DEBUG")
 # Set compiler flags
 if (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang") # Matches for "Clang" and "AppleClang"
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -std=c++14")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
+    set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${ASAN_FLAGS}")
 
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -std=c++14")
+    set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${ASAN_FLAGS}")
 
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
     if (${CMAKE_CXX_FLAGS} MATCHES "/W[0-4]")
@@ -133,7 +137,8 @@ target_link_libraries (RDGE
                        ${GLEW_LIBRARIES}
                        ${OPENGL_LIBRARIES})
 
-add_subdirectory (tutorials/sandbox)
+add_subdirectory (sandbox/chrono)
+add_subdirectory (sandbox/physics)
 add_subdirectory (tutorials/01_textures)
 add_subdirectory (tutorials/02_layers)
 add_subdirectory (tutorials/03_spritesheet)

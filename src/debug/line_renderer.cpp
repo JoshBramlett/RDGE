@@ -268,6 +268,12 @@ SetProjection (const math::mat4& projection)
 }
 
 void
+DrawLine (const math::vec2& pa, const math::vec2& pb, const color& c)
+{
+    DrawLine(math::vec3(pa, 0.f), math::vec3(pb, 0.f), c);
+}
+
+void
 DrawLine (const math::vec3& pa, const math::vec3& pb, const color& c)
 {
     auto& renderer = Instance();
@@ -319,7 +325,7 @@ DrawWireFrame (const physics::polygon& poly, const color& c)
 {
     for (size_t i = 0; i < poly.count; ++i)
     {
-        size_t next_i = (i < poly.count) ? i + 1 : 0;
+        size_t next_i = (i < (poly.count - 1)) ? i + 1 : 0;
         DrawLine({ poly.vertices[i], 0.f }, { poly.vertices[next_i], 0.f }, c);
     }
 }

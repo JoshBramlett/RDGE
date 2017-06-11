@@ -9,6 +9,7 @@
 #include <rdge/graphics/color.hpp>
 #include <rdge/graphics/isprite.hpp>
 #include <rdge/math/mat4.hpp>
+#include <rdge/math/vec2.hpp>
 #include <rdge/math/vec3.hpp>
 #include <rdge/physics/aabb.hpp>
 #include <rdge/physics/shapes/circle.hpp>
@@ -38,6 +39,7 @@ void SetProjection (const math::mat4& projection);
 //!@}
 
 //!@{ Draw line (with color override)
+void DrawLine (const math::vec2& pa, const math::vec2& pb, const color& c = DEFAULT_COLOR);
 void DrawLine (const math::vec3& pa, const math::vec3& pb, const color& c = DEFAULT_COLOR);
 //!@}
 

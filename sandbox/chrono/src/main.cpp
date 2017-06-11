@@ -18,7 +18,7 @@ int main ()
     app_settings settings;
     //settings.target_width = 1920;
     //settings.target_height = 1080;
-    settings.window_title = "sandbox";
+    settings.window_title = "sandbox: chrono";
     settings.enable_png   = true;
     settings.resizable    = true;
 

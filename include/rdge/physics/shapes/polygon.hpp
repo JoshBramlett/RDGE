@@ -92,6 +92,7 @@ struct polygon : public ishape
 
     //! \brief Check if the polygon intersects with another shape
     //! \param [in] other Other shape to test
+    //! \warning Before calling ensure both shapes are in the same coordinate space
     //! \returns True iff shapes intersect
     bool intersects_with (const ishape* other) const override
     {
@@ -105,6 +106,7 @@ struct polygon : public ishape
     //!          the manifold count will be set to zero.
     //! \param [in] other shape
     //! \param [out] mf Manifold containing resolution
+    //! \warning Before calling ensure both shapes are in the same coordinate space
     //! \returns True iff intersecting
     bool intersects_with (const ishape* other, collision_manifold& mf) const override
     {
@@ -116,7 +118,6 @@ struct polygon : public ishape
 
     //! \brief Compute an aabb surrounding the polygon
     //! \note aabb edges will be padded by \ref AABB_PADDING
-    //! \warning Resultant value may still need to be converted to world space
     //! \returns Surrounding aabb
     aabb compute_aabb (void) const override;
 
