@@ -11,6 +11,8 @@
 #include <rdge/physics/collision.hpp>
 
 #include <array>
+#include <limits>
+#include <utility>
 #include <ostream>
 
 //! \namespace rdge Rainbow Drop Game Engine
@@ -30,6 +32,9 @@ struct polygon : public ishape
     //!      distinct relationship with the linear slop as it provides a sufficient
     //!      buffer for continuous collision.
     static constexpr float AABB_PADDING = LINEAR_SLOP * 2.f;
+
+    // TODO doc
+    static constexpr float RELATIVE_TOLERANCE = LINEAR_SLOP * 0.1f;
 
     //! \typedef Vertex container
     using PolygonData = std::array<math::vec2, MAX_VERTICES>;
@@ -100,7 +105,7 @@ struct polygon : public ishape
         return test.intersects();
     }
 
-    //! \brief Check if the circle intersects with another shape
+    //! \brief Check if the polygon intersects with another shape
     //! \details The provided \ref collision_manifold will be populated with details
     //!          on how the collision could be resolved.  If there was no collision
     //!          the manifold count will be set to zero.
@@ -110,8 +115,11 @@ struct polygon : public ishape
     //! \returns True iff intersecting
     bool intersects_with (const ishape* other, collision_manifold& mf) const override
     {
-        Unused(other);
-        Unused(mf);
+        if (other->type() == ShapeType::POLYGON)
+        {
+            return intersects_with(*static_cast<const polygon*>(other), mf);
+        }
+
         throw "not yet implemented";
         return false;
     }
@@ -135,7 +143,7 @@ struct polygon : public ishape
     {
         float min = axis.dot(vertices[0]);
         float max = min;
-        for (size_t i = 1; i < count; ++i)
+        for (size_t i = 1; i < count; i++)
         {
             float p = axis.dot(vertices[i]);
             if (p < min)
@@ -150,6 +158,42 @@ struct polygon : public ishape
 
         return { min, max };
     }
+
+    //! \brief Max separation of two polygons using the edge normals
+    //! \details Similar to \ref farthest_point, where the edge normals are the
+    //!          axes to test for separation.  Basically computes each Minkowski
+    //!          difference vertex, and projects that onto the normal axis.  The
+    //!          projection minimums are compared, with the largest of the values
+    //!          being the result.  If this value is positive there exists an
+    //!          axis of separation and therefore no collision.
+    //! \param [in] other Polygon to test
+    //! \returns Pair containing the max distance and corresponding edge index
+    std::pair<float, int32> max_separation (const polygon& other) const
+    {
+        float sep_max = std::numeric_limits<float>::lowest();
+        int32 edge_index = 0;
+        for (size_t i = 0; i < count; i++)
+        {
+            float sep_axis = math::dot(normals[i], other.vertices[0] - vertices[i]);
+            for (size_t j = 1; j < other.count; j++)
+            {
+                float sep = math::dot(normals[i], other.vertices[j] - vertices[i]);
+                if (sep < sep_axis)
+                {
+                    sep_axis = sep;
+                }
+            }
+
+            if (sep_axis > sep_max)
+            {
+                sep_max = sep_axis;
+                edge_index = i;
+            }
+        }
+
+        return std::make_pair(sep_max, edge_index);
+    }
+
     //!@}
 
     //!@{ GJK support functions
@@ -161,16 +205,17 @@ struct polygon : public ishape
 
     //! \brief Retrieves the farthest point along the provided direction
     //! \param [in] d Direction to find the farthest point
+    //! \note Provided direction requires no normalization
     math::vec2 farthest_point (const math::vec2& d) const override
     {
         size_t index = 0;
-        float max_product = d.dot(vertices[index]);
-        for (size_t i = 1; i < count; ++i)
+        float max_separation = math::dot(d, vertices[0]);
+        for (size_t i = 1; i < count; i++)
         {
-            float p = d.dot(vertices[i]);
-            if (p > max_product)
+            float p = math::dot(d, vertices[i]);
+            if (p > max_separation)
             {
-                max_product = p;
+                max_separation = p;
                 index = i;
             }
         }
@@ -182,10 +227,11 @@ struct polygon : public ishape
     //! \brief Check if the polygon intersects with another (edge exclusive)
     //! \param [in] other polygon structure
     //! \returns True iff intersecting
-    //constexpr bool intersects_with (const polygon& other) const noexcept
-    //{
-        //return (other.pos - pos).self_dot() < square(radius + other.radius);
-    //}
+    bool intersects_with (const polygon& other) const noexcept
+    {
+        gjk test(this, &other);
+        return test.intersects();
+    }
 
     //! \brief Check if the polygon intersects with another (edge exclusive)
     //! \details The provided \ref collision_manifold will be populated with details
@@ -194,8 +240,7 @@ struct polygon : public ishape
     //! \param [in] other polygon structure
     //! \param [out] mf Manifold containing resolution
     //! \returns True iff intersecting
-    //bool intersects_with (const polygon& other, physics::collision_manifold& mf) const noexcept;
-
+    bool intersects_with (const polygon& other, collision_manifold& mf) const noexcept;
 };
 
 //! \brief polygon equality operator
@@ -225,11 +270,8 @@ inline bool operator!= (const polygon& lhs, const polygon& rhs) noexcept
     return !(lhs == rhs);
 }
 
-//! \brief aabb stream output operator
-//inline std::ostream& operator<< (std::ostream& os, const polygon& c)
-//{
-    //return os << "[ " << c.pos << ", r=" << c.radius << " ]";
-//}
+//! \brief polygon stream output operator
+std::ostream& operator<< (std::ostream&, const polygon&);
 
 } // namespace physics
 } // namespace physics

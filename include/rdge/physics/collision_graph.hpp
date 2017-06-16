@@ -11,7 +11,7 @@
 #include <rdge/physics/fixture.hpp>
 #include <rdge/physics/rigid_body.hpp>
 #include <rdge/math/vec2.hpp>
-#include <rdge/util/containers/nodeless_list.hpp>
+#include <rdge/util/containers/intrusive_list.hpp>
 #include <rdge/util/memory/small_block_allocator.hpp>
 
 #include <vector>
@@ -53,11 +53,11 @@ public:
 
     math::vec2 gravity;
 
-    nodeless_list<RigidBody> bodies;
+    intrusive_list<RigidBody> bodies;
 
 
     // TODO maybe make contact data private?
-    nodeless_list<Contact> contacts;
+    intrusive_list<Contact> contacts;
     ContactFilter* custom_filter = nullptr;
     ContactListener* listener = nullptr;
 

@@ -13,6 +13,8 @@
 
 #include <SDL_assert.h>
 
+#include <ostream>
+
 // sites of import:
 //
 // http://www.iforce2d.net/b2dtut/collision-anatomy
@@ -32,7 +34,29 @@ struct collision_manifold
     float depths[2] = { 0.f, 0.f }; //!< Penetration depths
     math::vec2 contacts[2];         //!< Contact points
     math::vec2 normal;              //!< Vector of resolution, or collision normal
+    bool flip_dominant = false;     //!< Manifold data is relative to shape b
 };
+
+//! \struct half_plane
+//! \brief 2d hyperplane (aka line)
+//! \details Line that divides space into two infinite sets of points.  Points on
+//!          the plane satisfy dot(normal, p) == d.
+//! \note From Real-Time Collision Detection, Vol 1. (3.6 Planes and Halfspaces)
+struct half_plane
+{
+    math::vec2 normal; //!< Plane normal (normalized)
+    float d;           //!< distance to origin from plane
+};
+
+//! \brief Distance from a point to the plane
+//! \param [in] hp Half-plane
+//! \param [in] point Point to test
+//! \returns Distance
+constexpr float
+distance (const half_plane& hp, const math::vec2& point)
+{
+    return math::dot(hp.normal, point) - hp.d;
+}
 
 //! \struct gjk
 //! \brief Implementation of the GJK algorithm for collision detection
@@ -159,6 +183,28 @@ struct gjk
         return false;
     }
 };
+
+//! \brief collision_manifold stream output operator
+inline std::ostream& operator<< (std::ostream& os, const collision_manifold& mf)
+{
+    if (mf.count == 0)
+    {
+        return os << "[ manifold: count=0 ]\n";
+    }
+
+    os << "manifold: ["
+       << "\n  count=" << mf.count
+       << "\n  normal=" << mf.normal
+       << "\n  flip_dominant=" << std::boolalpha << mf.flip_dominant;
+
+    for (size_t i = 0; i < mf.count; i++)
+    {
+        os << "\n  contacts[" << i << "]=" << mf.contacts[i]
+           << " depths[" << i << "]=" << mf.depths[i];
+    }
+
+    return os << "\n]\n";
+}
 
 } // namespace physics
 } // namespace rdge

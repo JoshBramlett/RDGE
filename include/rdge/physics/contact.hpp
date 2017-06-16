@@ -8,7 +8,7 @@
 #include <rdge/core.hpp>
 #include <rdge/physics/collision.hpp>
 #include <rdge/physics/shapes/ishape.hpp>
-#include <rdge/util/containers/nodeless_list.hpp>
+#include <rdge/util/containers/intrusive_list.hpp>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
@@ -31,13 +31,13 @@ struct contact_impulse
 //! \details The bodies which have fixtures in contact represent nodes in a
 //!          graph and the contact is the edge between them.  This is used
 //!          when determining which bodies make up an island.
-struct contact_edge : public nodeless_list_element<contact_edge>
+struct contact_edge : public intrusive_list_element<contact_edge>
 {
     RigidBody* other = nullptr; //!< Body connected by the edge
     Contact* contact = nullptr; //!< Contact connecting the bodies
 };
 
-class Contact : public nodeless_list_element<Contact>
+class Contact : public intrusive_list_element<Contact>
 {
 public:
     explicit Contact (Fixture* a, Fixture* b);

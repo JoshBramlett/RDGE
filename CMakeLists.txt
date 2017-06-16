@@ -154,8 +154,8 @@ add_executable (rdge_test
                 tests/physics/polygon_test.cpp
                 tests/math/intrinsics_test.cpp
                 tests/util/dynamic_freelist_test.cpp
-                tests/util/nodeless_list_test.cpp
-                tests/util/nodeless_forward_list_test.cpp)
+                tests/util/intrusive_list_test.cpp
+                tests/util/intrusive_forward_list_test.cpp)
 target_link_libraries (rdge_test
                        RDGE
                        ${GTEST_BOTH_LIBRARIES})

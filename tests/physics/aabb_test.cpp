@@ -6,6 +6,8 @@
 
 #include <exception>
 
+namespace {
+
 using namespace rdge;
 using namespace rdge::math;
 using namespace rdge::physics;
@@ -466,3 +468,5 @@ TEST(AABBTest, ValidateManifoldDoubleAxis)
     EXPECT_EQ(mf.normal.x, 0.f);
     EXPECT_EQ(mf.normal.y, 1.f);
 }
+
+} // anonymous namespace

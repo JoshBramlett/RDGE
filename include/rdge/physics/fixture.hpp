@@ -9,7 +9,7 @@
 #include <rdge/physics/collision.hpp>
 #include <rdge/physics/shapes/ishape.hpp>
 #include <rdge/math/vec2.hpp>
-#include <rdge/util/containers/nodeless_list.hpp>
+#include <rdge/util/containers/intrusive_list.hpp>
 
 #include <SDL_assert.h>
 
@@ -60,7 +60,7 @@ struct fixture_proxy
     int32 handle = INVALID_HANDLE; //!< Handle provided by the broad phase
 };
 
-class Fixture : public nodeless_forward_list_element<Fixture>
+class Fixture : public intrusive_forward_list_element<Fixture>
 {
 public:
     void SetFilter (const collision_filter& f)

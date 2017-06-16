@@ -49,6 +49,26 @@ TestScene::OnUpdate (const delta_time& dt)
 void
 TestScene::OnRender (void)
 {
+    polygon tri_a({ 2.f, 7.f }, { 4.f, 2.f }, { 8.f, 7.f });
+    polygon tri_b({ 5.f, 9.f }, { 9.f, 3.f }, { 11.f, 10.f });
+
+    static bool once = true;
+    if (once)
+    {
+        collision_manifold mf;
+        bool result = tri_a.intersects_with(tri_b, mf);
+
+        std::cout << "tri_a:" << tri_a
+                  << "tri_b:" << tri_b
+                  << "result=" << std::boolalpha << result << "\n"
+                  << "mf:" << mf;
+
+        once = false;
+    }
+
+    debug::DrawWireFrame(tri_a);
+    debug::DrawWireFrame(tri_b);
+/*
     polygon::PolygonData data;
     data[0] = {0.f, 0.f};
     data[1] = {150.f, 300.f};
@@ -61,22 +81,14 @@ TestScene::OnRender (void)
     //debug::DrawWireFrame(c);
 
     math::vec2 axis({ 0.707106781187f, 0.707106781187f });
-    math::vec2 trans = { -200.f, 200.f };
     auto proj = p.project(axis);
     auto start = axis * proj.x;
     auto end = axis * proj.y;
 
-    //start.x -= 200.f;
-    //start.y += 200.f;
-    //end.x -= 200.f;
-    //end.y += 200.f;
-    //debug::DrawLine(start, end);
+    math::vec2 trans = { -200.f, 200.f };
     debug::DrawLine(trans + start, trans + end);
-    //std::cout << "proj=" << proj << std::endl
-              //<< "  start=" << (d * proj.x) << std::endl
-              //<< "  end=" << (d * proj.y) << std::endl;
 
-
+*/
     camera.Translate({ 0.f, 0.f });
     camera.Update();
     debug::SetProjection(camera.combined);

@@ -9,7 +9,7 @@
 #include <rdge/physics/contact.hpp>
 #include <rdge/physics/collision.hpp>
 #include <rdge/physics/fixture.hpp>
-#include <rdge/util/containers/nodeless_list.hpp>
+#include <rdge/util/containers/intrusive_list.hpp>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
@@ -126,7 +126,7 @@ struct rigid_body_profile
 //! \brief Base physics simulation object
 //! \details Maintains a position and velocity, and contains a collection of all
 //!          objects that further define itself in the physical world.
-class RigidBody : public nodeless_list_element<RigidBody>
+class RigidBody : public intrusive_list_element<RigidBody>
 {
 public:
 
@@ -244,8 +244,8 @@ public:
     CollisionGraph* graph = nullptr; //!< Circular reference to parent
     void* user_data = nullptr;       //!< Opaque user data
 
-    nodeless_forward_list<Fixture> fixtures;
-    nodeless_list<contact_edge> contact_edges;
+    intrusive_forward_list<Fixture> fixtures;
+    intrusive_list<contact_edge> contact_edges;
 
     //! \brief Collection of elements defining the linear motion
     struct linear_motion

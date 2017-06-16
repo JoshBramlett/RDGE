@@ -21,7 +21,7 @@ compute_centroid (const polygon::PolygonData& verts, size_t count)
     math::vec2 result;
     float area = 0.f;
 
-    for (size_t i = 0; i < count; ++i)
+    for (size_t i = 0; i < count; i++)
     {
         const auto& a = verts[i];
         const auto& b = verts[((i + 1) < count) ? (i + 1) : 0];
@@ -55,7 +55,7 @@ polygon::polygon (const PolygonData& verts, size_t num_verts)
     // vertex welding
     PolygonData welds;
     size_t weld_count = 0;
-    for (size_t i = 0; i < count; ++i)
+    for (size_t i = 0; i < count; i++)
     {
         auto& v = verts[i];
 
@@ -85,7 +85,7 @@ polygon::polygon (const PolygonData& verts, size_t num_verts)
     // find the rightmost vertex
     size_t right_idx = 0;
     float max_x = welds[0].x;
-    for (size_t i = 1; i < count; ++i)
+    for (size_t i = 1; i < count; i++)
     {
         float x = welds[i].x;
         if (x > max_x || (x == max_x && welds[i].y < welds[right_idx].y))
@@ -104,7 +104,7 @@ polygon::polygon (const PolygonData& verts, size_t num_verts)
         hull[out_count] = index;
         uint32 next = 0;
 
-        for (size_t i = 1; i < count; ++i)
+        for (size_t i = 1; i < count; i++)
         {
             if (next == index)
             {
@@ -141,13 +141,14 @@ polygon::polygon (const PolygonData& verts, size_t num_verts)
         this->vertices[i] = welds[hull[i]];
     }
 
+    // polygon is built ccw, perp() used b/c edge normals point outwards
     this->normals.fill(0.f);
-    for (size_t i = 0; i < count; ++i)
+    for (size_t i = 0; i < count; i++)
     {
-        auto other_idx = ((i + i) < count) ? (i + 1) : 0; // wrap if last
+        auto other_idx = ((i + i) < count) ? (i + 1) : 0;
         vec2 edge = this->vertices[i] - this->vertices[other_idx];
 
-        this->normals[i] = edge.perp_ccw().normalize();
+        this->normals[i] = edge.perp().normalize();
     }
 
     this->centroid = compute_centroid(this->vertices, this->count);
@@ -184,12 +185,9 @@ polygon::contains (const vec2& point) const
 {
     SDL_assert(count >= 3);
 
-    for (size_t i = 0; i < count; ++i)
+    for (size_t i = 0; i < count; i++)
     {
-        // dot product with a unit vector provides the vector lengths on the axes
-        // of the unit vector.  Because the vertices are in CCW order, the normals
-        // should be pointing to their left, so the value should be negative.
-        if (dot(normals[i], point - vertices[i]) > 0.f)
+        if (dot(normals[i], point - vertices[i]) >= 0.f)
         {
             return false;
         }
@@ -206,7 +204,7 @@ polygon::compute_aabb (void) const
     vec2 lo = vertices[0];
     vec2 hi = vertices[0];
 
-    for (size_t i = 1; i < count; ++i)
+    for (size_t i = 1; i < count; i++)
     {
         lo.x = std::min(lo.x, vertices[i].x);
         lo.y = std::min(lo.y, vertices[i].y);
@@ -227,7 +225,7 @@ polygon::compute_mass (float density) const
 
     mass_data result;
     float area = 0.f;
-    for (size_t i = 0; i < count; ++i)
+    for (size_t i = 0; i < count; i++)
     {
         const auto& a = vertices[i];
         const auto& b = vertices[((i + 1) < count) ? (i + 1) : 0];
@@ -252,6 +250,166 @@ polygon::compute_mass (float density) const
     result.mass = density * area;
 
     return result;
+}
+
+bool
+polygon::intersects_with (const polygon& other, collision_manifold& mf) const noexcept
+{
+    // Uses SAT to perform the test and generate the manifold.  Based on:
+    //   - Box2D b2CollidePolygons()
+    //   - tinyc2 c2PolytoPolyManifold()
+
+    mf.count = 0;
+
+    // bail if separating axis is found
+    auto sep_a = max_separation(other);
+    if (sep_a.first > 0.f)
+    {
+        return false;
+    }
+
+    auto sep_b = other.max_separation(*this);
+    if (sep_b.first > 0.f)
+    {
+        return false;
+    }
+
+    // define reference and incident polygons
+    const polygon* ref_shape = nullptr;
+    const polygon* inc_shape = nullptr;
+    uint32 ref_edge = 0;
+    uint32 inc_edge = 0;
+
+    if (sep_b.first > sep_a.first + RELATIVE_TOLERANCE)
+    {
+        ref_shape = &other;
+        inc_shape = this;
+        ref_edge = sep_b.second;
+        mf.flip_dominant = true;
+    }
+    else
+    {
+        ref_shape = this;
+        inc_shape = &other;
+        ref_edge = sep_a.second;
+        mf.flip_dominant = false;
+    }
+
+    // find the incident edge
+    {
+        const auto& ref_n = ref_shape->normals[ref_edge];
+        float d_min = math::dot(ref_n, inc_shape->normals[0]);
+        for (size_t i = 1; i < inc_shape->count; i++)
+        {
+            float d = math::dot(ref_n, inc_shape->normals[i]);
+            if (d < d_min)
+            {
+                d_min = d;
+                inc_edge = i;
+            }
+        }
+    }
+
+    // build the clip vertices for the incident edge
+    math::vec2 inc_vertices[2];
+    inc_vertices[0] = inc_shape->vertices[inc_edge];
+    uint32 next_v = ((inc_edge + 1) < inc_shape->count) ? (inc_edge + 1) : 0;
+    inc_vertices[1] = inc_shape->vertices[next_v];
+
+    // create two orthogonal planes from the reference edge attached to the end points
+    math::vec2 ref_vertices[2];
+    ref_vertices[0] = ref_shape->vertices[ref_edge];
+    next_v = ((ref_edge + 1) < ref_shape->count) ? ref_edge + 1 : 0;
+    ref_vertices[1] = ref_shape->vertices[next_v];
+
+    auto tangent = (ref_vertices[1] - ref_vertices[0]).normalize();
+    half_plane left = { -tangent, math::dot(-tangent, ref_vertices[0]) };
+    half_plane right = { tangent, math::dot(tangent, ref_vertices[1]) };
+
+    // clip incident vertices to reference planes
+    {
+        int32 num_out = 0;
+        float d0 = distance(left, inc_vertices[0]);
+        float d1 = distance(left, inc_vertices[1]);
+
+        // points are behind the plane
+        if (d0 <= 0.f) { num_out++; }
+        if (d1 <= 0.f) { num_out++; }
+
+        // points are on different sides of the plane
+        if ((d0 * d1) < 0.f)
+        {
+            inc_vertices[num_out++] = inc_vertices[0] +
+                                      (d0 / (d0 - d1)) * (inc_vertices[1] - inc_vertices[0]);
+        }
+
+        if (num_out < 2)
+        {
+            return false;
+        }
+    }
+
+    {
+        int32 num_out = 0;
+        float d0 = distance(right, inc_vertices[0]);
+        float d1 = distance(right, inc_vertices[1]);
+
+        if (d0 <= 0.f) { num_out++; }
+        if (d1 <= 0.f) { num_out++; }
+
+        if ((d0 * d1) < 0.f)
+        {
+            inc_vertices[num_out++] = inc_vertices[0] +
+                                      (d0 / (d0 - d1)) * (inc_vertices[1] - inc_vertices[0]);
+        }
+
+        if (num_out < 2)
+        {
+            return false;
+        }
+    }
+
+    half_plane penetration_plane = {
+        tangent.perp_ccw(),
+        math::dot(tangent.perp_ccw(), ref_vertices[0])
+    };
+
+    int32 cp = 0;
+    for (int32 i = 0; i < 2; i++)
+    {
+        auto p = inc_vertices[i];
+        float d = distance(penetration_plane, p);
+        if (d < 0.f)
+        {
+            mf.contacts[cp] = p;
+            mf.depths[cp] = -d;
+            cp++;
+        }
+    }
+
+    mf.count = cp;
+    mf.normal = penetration_plane.normal; // TODO: this is in world coordinates, does it matter?
+    return true;
+}
+
+std::ostream& operator<< (std::ostream& os, const polygon& p)
+{
+    if (p.count == 0)
+    {
+        return os << "[ polygon: count=0 ]\n";
+    }
+
+    os << "polygon: ["
+       << "\n  count=" << p.count
+       << "\n  centroid=" << p.centroid;
+
+    for (size_t i = 0; i < p.count; i++)
+    {
+        os << "\n  vertices[" << i << "]=" << p.vertices[i]
+           << " normals[" << i << "]=" << p.normals[i];
+    }
+
+    return os << "\n]\n";
 }
 
 } // namespace physics

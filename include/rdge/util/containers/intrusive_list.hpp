@@ -1,4 +1,4 @@
-//! \headerfile <rdge/util/containers/nodeless_list.hpp>
+//! \headerfile <rdge/util/containers/intrusive_list.hpp>
 //! \author Josh Bramlett
 //! \version 0.0.10
 //! \date 05/22/2017
@@ -14,26 +14,26 @@
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
-//! \struct nodeless_list_element
+//! \struct intrusive_list_element
 //! \brief CRTP base class for the list elements
 //! \details Inheriting from this class contains the 'next' pointer
-//!          required by the \ref nodeless_list.
+//!          required by the \ref intrusive_list.
 template <typename T>
-struct nodeless_list_element
+struct intrusive_list_element
 {
-    virtual ~nodeless_list_element (void) noexcept = default;
+    virtual ~intrusive_list_element (void) noexcept = default;
 
     T* prev = nullptr; //!< Pointer to the previous element
     T* next = nullptr; //!< Pointer to the next element
 };
 
-//! \struct nodeless_list
+//! \struct intrusive_list
 //! \brief Doubly linked list where the templated type is the node
 //! \details Avoids wrapping the type in a node to avoid an uneccessary
 //!          dereference.  The templated type must contain public
 //!          member pointers 'prev' and 'next' in order to be compatible.
 //!          Alternatively the templated type may inherit the \ref
-//!          nodeless_list_element that contains the pointers.
+//!          intrusive_list_element that contains the pointers.
 //!          These members must NEVER be modified manually.
 //! \code{.cpp}
 //! struct foo
@@ -43,7 +43,7 @@ struct nodeless_list_element
 //!     int32 some_value;
 //! };
 //!
-//! struct bar : public nodeless_list_element<bar>
+//! struct bar : public intrusive_list_element<bar>
 //! {
 //!     int32 some_value;
 //! };
@@ -51,7 +51,7 @@ struct nodeless_list_element
 //! \warning Container does not take ownership of the list elements, so
 //!          memory management must be done externally.
 template <typename T>
-struct nodeless_list
+struct intrusive_list
 {
     T* first = nullptr;
     T* last = nullptr;
@@ -166,25 +166,25 @@ struct nodeless_list
     }
 };
 
-//! \struct nodeless_forward_list_element
+//! \struct intrusive_forward_list_element
 //! \brief CRTP base class for the list elements
 //! \details Inheriting from this class contains the 'next' pointer
-//!          required by the \ref nodeless_forward_list.
+//!          required by the \ref intrusive_forward_list.
 template <typename T>
-struct nodeless_forward_list_element
+struct intrusive_forward_list_element
 {
-    virtual ~nodeless_forward_list_element (void) noexcept = default;
+    virtual ~intrusive_forward_list_element (void) noexcept = default;
 
     T* next = nullptr; //!< Pointer to the next element
 };
 
-//! \struct nodeless_forward_list
+//! \struct intrusive_forward_list
 //! \brief Forward linked list where the templated type is the node
 //! \details Avoids wrapping the type in a node to avoid an uneccessary
 //!          dereference.  The templated type must contain a public
 //!          member pointer named 'next' in order to be compatible.
 //!          Alternatively the templated type may inherit the \ref
-//!          nodeless_forward_list_element that contains the pointer.
+//!          intrusive_forward_list_element that contains the pointer.
 //!          This member must NEVER be modified manually.
 //! \code{.cpp}
 //! struct foo
@@ -193,7 +193,7 @@ struct nodeless_forward_list_element
 //!     int32 some_value;
 //! };
 //!
-//! struct bar : public nodeless_forward_list_element<bar>
+//! struct bar : public intrusive_forward_list_element<bar>
 //! {
 //!     int32 some_value;
 //! };
@@ -201,7 +201,7 @@ struct nodeless_forward_list_element
 //! \warning Container does not take ownership of the list elements, so
 //!          memory management must be done externally.
 template <typename T>
-struct nodeless_forward_list
+struct intrusive_forward_list
 {
     T* first = nullptr;
     size_t count = 0;
