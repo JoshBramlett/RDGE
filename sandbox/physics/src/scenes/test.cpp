@@ -12,22 +12,59 @@ using namespace rdge;
 using namespace rdge::math;
 using namespace rdge::physics;
 
-TestScene::TestScene (void)
-    : collision_graph({ 0.f, 9.8f })
+class TestSceneListener : public GraphListener
 {
+public:
+
+    ~TestSceneListener (void) noexcept = default;
+
+    void OnContactStart (Contact*) override
+    {
+        std::cout << "OnContactStart" << std::endl;
+    }
+
+    void OnContactEnd (Contact*) override
+    {
+        std::cout << "OnContactEnd" << std::endl;
+    }
+
+    void OnPreSolve (Contact*, const collision_manifold*) override { }
+    void OnPostSolve (Contact*, const contact_impulse*) override { }
+    void OnDestroyed (Fixture*) override { }
+};
+
+namespace {
+
+    TestSceneListener l;
+
+} // anonymous namespace
+
+TestScene::TestScene (void)
+    : collision_graph({ 0.f, -9.8f })
+{
+    collision_graph.listener = &l;
+
     rigid_body_profile bprof;
     bprof.type = RigidBodyType::DYNAMIC;
-    RigidBody* body = collision_graph.CreateBody(bprof);
+    body_a = collision_graph.CreateBody(bprof);
+    bprof.linear_velocity = { 9.8f, 0.f };
+    bprof.angular_velocity = 25.f;
+    body_b = collision_graph.CreateBody(bprof);
 
-    polygon tri_a({ 20.f, 70.f }, { 40.f, 20.f }, { 80.f, 70.f });
+    //polygon tri_a({ 20.f, 70.f }, { 40.f, 20.f }, { 80.f, 70.f });
+    polygon tri_a({ 20.f, 20.f }, { 20.f, 80.f }, { 80.f, 20.f }, { 80.f, 80.f });
+    //polygon tri_a({ 2.f, 7.f }, { 4.f, 2.f }, { 8.f, 7.f });
     fixture_profile fprof;
     fprof.shape = &tri_a;
     fprof.density = 1.f;
-    fixture_a = body->CreateFixture(fprof);
+    fixture_a = body_a->CreateFixture(fprof);
 
-    circle cir_a(vec2(100.f, 100.f), 50.f);
-    fprof.shape = &cir_a;
-    fixture_b = body->CreateFixture(fprof);
+    //circle cir_a(vec2(-100.f, 100.f), 50.f);
+    //polygon tri_b({ -20.f, 70.f }, { -40.f, 20.f }, { -80.f, 70.f });
+    polygon tri_b({ -20.f, 20.f }, { -20.f, 80.f }, { -80.f, 20.f }, { -80.f, 80.f });
+    //polygon tri_b({ -2.f, 7.f }, { -4.f, 2.f }, { -8.f, 7.f });
+    fprof.shape = &tri_b;
+    fixture_b = body_b->CreateFixture(fprof);
 }
 
 void
@@ -56,20 +93,30 @@ void
 TestScene::OnUpdate (const delta_time& dt)
 {
     Unused(dt);
+
+    //body_b->linear.force = { 20000.2f, 0.f };
+    //body->angular.torque = 200000.f;
+
+    //collision_graph.Step(dt.seconds);
+    collision_graph.Step(1.f / 60.f);
 }
 
 void
 TestScene::OnRender (void)
 {
-    collision_graph.Step(1.f / 60.f);
 
     debug::DrawWireFrame(fixture_a->proxy->box);
     debug::DrawWireFrame(fixture_b->proxy->box);
 
-    //auto tri_a = static_cast<polygon*>(fixture_a->m_worldShape);
-    //debug::DrawWireFrame(*tri_a);
-    //auto cir_a = static_cast<circle*>(fixture_b->m_worldShape);
-    //debug::DrawWireFrame(*cir_a);
+    auto tri_a = static_cast<polygon*>(fixture_a->shape.world);
+    debug::DrawWireFrame(*tri_a);
+    auto tri_b = static_cast<polygon*>(fixture_b->shape.world);
+    debug::DrawWireFrame(*tri_b);
+
+    //aabb a({-280.11, -270.11}, {-219.89, -219.89});
+    //aabb b({19.89, 19.89}, {80.11, 70.11});
+    //debug::DrawWireFrame(a);
+    //debug::DrawWireFrame(b);
 
 /*
     polygon tri_a({ 2.f, 7.f }, { 4.f, 2.f }, { 8.f, 7.f });

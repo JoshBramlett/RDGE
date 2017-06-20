@@ -228,7 +228,8 @@ RigidBody::ComputeMass (void)
 
     math::vec2 old_center = sweep.pos_n;
     sweep.local_center = local_center;
-    sweep.pos_0 = sweep.pos_n * world_transform.rot.rotate(sweep.local_center);
+    sweep.pos_n = world_transform.rot.rotate(sweep.local_center);
+    sweep.pos_0 = sweep.pos_n;
 
     // TODO ??? Don't really understand this
     linear.velocity += (sweep.pos_n - old_center).perp() * angular.velocity;

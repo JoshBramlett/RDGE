@@ -224,10 +224,10 @@ public:
     bool IsSleepProhibited (void) const noexcept { return m_flags & PREVENT_SLEEP; }
     bool IsBullet (void) const noexcept { return m_flags & BULLET; }
 
-    bool ShouldCollide (RigidBody* other)
+    bool ShouldCollide (RigidBody* other) const noexcept
     {
-        return m_type == RigidBodyType::DYNAMIC ||
-               other->m_type == RigidBodyType::DYNAMIC;
+        return (this != other) &&
+               (m_type == RigidBodyType::DYNAMIC || other->m_type == RigidBodyType::DYNAMIC);
     }
 
 private:

@@ -29,15 +29,13 @@ Fixture::Fixture (const fixture_profile& profile, RigidBody* parent)
     switch (profile.shape->type())
     {
     case ShapeType::CIRCLE:
-        m_shape = allocator.New<circle>(*static_cast<const circle*>(profile.shape));
-        m_worldShape = allocator.New<circle>(*static_cast<const circle*>(profile.shape));
-        //m_worldShape = allocator.Alloc<circle>();
+        shape.local = allocator.New<circle>(*static_cast<const circle*>(profile.shape));
+        shape.world = allocator.New<circle>(*static_cast<const circle*>(profile.shape));
         break;
 
     case ShapeType::POLYGON:
-        m_shape = allocator.New<polygon>(*static_cast<const polygon*>(profile.shape));
-        m_worldShape = allocator.New<polygon>(*static_cast<const polygon*>(profile.shape));
-        //m_worldShape = allocator.Alloc<polygon>();
+        shape.local = allocator.New<polygon>(*static_cast<const polygon*>(profile.shape));
+        shape.world = allocator.New<polygon>(*static_cast<const polygon*>(profile.shape));
         break;
 
     default:
@@ -52,24 +50,23 @@ Fixture::Fixture (const fixture_profile& profile, RigidBody* parent)
 
 Fixture::~Fixture (void) noexcept
 {
-    SDL_assert(m_shape != nullptr);
+    SDL_assert(shape.local != nullptr);
+    SDL_assert(shape.world != nullptr);
     SDL_assert(body != nullptr && body->graph != nullptr);
 
     auto& allocator = body->graph->block_allocator;
     allocator.Free<fixture_proxy>(proxy);
 
-    switch (m_shape->type())
+    switch (shape.local->type())
     {
     case ShapeType::CIRCLE:
-        allocator.Delete<circle>(static_cast<circle*>(m_shape));
-        allocator.Delete<circle>(static_cast<circle*>(m_worldShape));
-        //allocator.Free<circle>(static_cast<circle*>(m_worldShape));
+        allocator.Delete<circle>(static_cast<circle*>(shape.local));
+        allocator.Delete<circle>(static_cast<circle*>(shape.world));
         break;
 
     case ShapeType::POLYGON:
-        allocator.Delete<polygon>(static_cast<polygon*>(m_shape));
-        allocator.Delete<polygon>(static_cast<polygon*>(m_worldShape));
-        //allocator.Free<polygon>(static_cast<polygon*>(m_worldShape));
+        allocator.Delete<polygon>(static_cast<polygon*>(shape.local));
+        allocator.Delete<polygon>(static_cast<polygon*>(shape.world));
         break;
 
     default:
@@ -99,45 +96,22 @@ Fixture::SetSensor (bool value) noexcept
 void
 Fixture::Syncronize (void)
 {
-    //switch (m_shape->type())
-    //{
-    //case ShapeType::CIRCLE:
-        //*static_cast<circle*>(m_worldShape) = *static_cast<const circle*>(m_shape);
-        //break;
+    switch (shape.local->type())
+    {
+    case ShapeType::CIRCLE:
+        *static_cast<circle*>(shape.world) = *static_cast<const circle*>(shape.local);
+        break;
 
-    //case ShapeType::POLYGON:
-        //*static_cast<polygon*>(m_worldShape) = *static_cast<const polygon*>(m_shape);
-        //break;
+    case ShapeType::POLYGON:
+        *static_cast<polygon*>(shape.world) = *static_cast<const polygon*>(shape.local);
+        break;
 
-    //default:
-        //SDL_assert(false);
-        //break;
-    //}
+    default:
+        SDL_assert(false);
+        break;
+    }
 
-    std::cout << body->world_transform.pos << std::endl;
-    m_worldShape->to_world(body->world_transform);
-}
-
-ishape*
-Fixture::GetWorldShape (void) noexcept
-{
-    //switch (m_shape->type())
-    //{
-    //case ShapeType::CIRCLE:
-        //*static_cast<circle*>(m_worldShape) = *static_cast<const circle*>(m_shape);
-        //break;
-
-    //case ShapeType::POLYGON:
-        //*static_cast<polygon*>(m_worldShape) = *static_cast<const polygon*>(m_shape);
-        //break;
-
-    //default:
-        //SDL_assert(false);
-        //break;
-    //}
-
-    //m_worldShape->to_world(body->world_transform);
-    return m_worldShape;
+    shape.world->to_world(body->world_transform);
 }
 
 } // namespace physics

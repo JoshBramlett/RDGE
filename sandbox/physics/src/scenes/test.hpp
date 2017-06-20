@@ -29,6 +29,9 @@ public:
     rdge::OrthographicCamera camera;
     rdge::physics::CollisionGraph collision_graph;
 
+    rdge::physics::RigidBody* body_a;
     rdge::physics::Fixture* fixture_a;
+
+    rdge::physics::RigidBody* body_b;
     rdge::physics::Fixture* fixture_b;
 };

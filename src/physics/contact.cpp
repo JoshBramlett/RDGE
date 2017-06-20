@@ -42,8 +42,8 @@ Contact::Update (GraphListener* listener)
     bool was_touching = IsTouching();
     bool is_touching = false;
 
-    auto shape_a = fixture_a->GetWorldShape();
-    auto shape_b = fixture_b->GetWorldShape();
+    auto shape_a = fixture_a->shape.world;
+    auto shape_b = fixture_b->shape.world;
 
     bool is_sensor = fixture_a->IsSensor() || fixture_b->IsSensor();
     if (is_sensor)
@@ -54,6 +54,14 @@ Contact::Update (GraphListener* listener)
     else
     {
         is_touching = shape_a->intersects_with(shape_b, manifold);
+        bool x_is_touching = shape_a->intersects_with(shape_b);
+
+        if (is_touching != x_is_touching)
+        {
+            std::cout << "FUCK" << std::endl;
+            is_touching = shape_a->intersects_with(shape_b, manifold);
+        }
+
 
         // TODO ??? Don't really understand Box2D here.  They compare the previous
         //      contacts with the current before storing the impulses.  From the
@@ -79,12 +87,12 @@ Contact::Update (GraphListener* listener)
 
     if (listener)
     {
-        if (is_touching && (was_touching == false))
+        if (is_touching && !was_touching)
         {
             listener->OnContactStart(this);
         }
 
-        if (was_touching && (is_touching == false))
+        if (was_touching && !is_touching)
         {
             listener->OnContactEnd(this);
         }

@@ -6,18 +6,13 @@
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/physics/collision.hpp>
-#include <rdge/physics/shapes/ishape.hpp>
 #include <rdge/math/vec2.hpp>
+#include <rdge/physics/aabb.hpp>
+#include <rdge/physics/shapes/ishape.hpp>
 #include <rdge/util/containers/intrusive_list.hpp>
-
-#include <SDL_assert.h>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
-
-class SmallBlockAllocator;
-
 namespace physics {
 
 class RigidBody;
@@ -95,30 +90,34 @@ public:
 
     mass_data ComputeMass (void) const noexcept
     {
-        return m_shape->compute_mass(density);
+        return shape.local->compute_mass(density);
     }
 
     aabb ComputeAABB (void) const noexcept
     {
-        return m_shape->compute_aabb();
+        return shape.local->compute_aabb();
     }
-
-    // TODO Maybe instead of recalculating every call I could do something similar
-    //      to the SyncProxies methdod, where this is updated only if the transform
-    //      is moved, then the cached lookup would be very fast.
-    ishape* GetWorldShape (void) noexcept;
 
     RigidBody*     body = nullptr;      //!< Circular reference to parent
     void*          user_data = nullptr; //!< Opaque user data
     fixture_proxy* proxy = nullptr;     //!< Broad phase proxy
+
+    //! \details Contains shapes in both local and world coordinate space.  The
+    //!          world coordinate shape is updated only when the body transform
+    //!          has changed therefore removing the requirement to pass the
+    //!          transformation object throughout the simulation, and avoids
+    //!          multiple conversions to a different coordinate space.
+    struct fixture_shapes
+    {
+        ishape* local = nullptr;
+        ishape* world = nullptr;
+    } shape;
 
     float density = 0.f;
     float friction = 0.2f;
     float restitution = 0.f;
 
     collision_filter filter;
-    ishape* m_shape = nullptr;      //!< Fixture shape
-    ishape* m_worldShape = nullptr; //!< Shape transformed to world coordinates
 
 private:
     friend class RigidBody;

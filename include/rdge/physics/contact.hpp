@@ -69,7 +69,7 @@ private:
         ON_ISLAND = 0x0004
     };
 
-    uint16 m_flags;
+    uint16 m_flags = 0;
 };
 
 } // namespace physics

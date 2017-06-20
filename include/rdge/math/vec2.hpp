@@ -391,7 +391,6 @@ constexpr vec2_t<T> triple (const vec2_t<T>& a, const vec2_t<T>& b, const vec2_t
 }
 
 //! \brief vec2_t stream output operator
-//! \returns Output stream
 template <typename T>
 inline std::ostream& operator<< (std::ostream& os, const vec2_t<T>& value)
 {

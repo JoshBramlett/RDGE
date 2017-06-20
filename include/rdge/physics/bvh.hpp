@@ -88,6 +88,17 @@ public:
     template <typename T>
     std::vector<T*> Query (const aabb& box) const;
 
+    bool Intersects (int32 handle_a, int32 handle_b)
+    {
+        SDL_assert(handle_a != bvh_node::NULL_NODE);
+        SDL_assert(handle_b != bvh_node::NULL_NODE);
+
+        auto& node_a = m_nodes[handle_a];
+        auto& node_b = m_nodes[handle_b];
+
+        return node_a.fat_box.intersects_with(node_b.fat_box);
+    }
+
     int32 Height (void) const noexcept
     {
         return (m_root == bvh_node::NULL_NODE) ? 0 : m_nodes[m_root].height;

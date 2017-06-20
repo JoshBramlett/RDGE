@@ -70,7 +70,9 @@ struct island_solver
             // From Box2D:
             // ODE: dv/dt + c * v = 0
             // Solution: v(t) = v0 * exp(-c * t)
-            // Time step: v(t + dt) = v0 * exp(-c * (t + dt)) = v0 * exp(-c * t) * exp(-c * dt) = v * exp(-c * dt)
+            // Time step: v(t + dt)
+            //            = v0 * exp(-c * (t + dt))
+            //            = v0 * exp(-c * t) * exp(-c * dt) = v * exp(-c * dt)
             // v2 = exp(-c * dt) * v1
             // Pade approximation:
             // v2 = v1 * 1 / (1 + c * dt)
@@ -97,6 +99,28 @@ struct island_solver
 
     void solve (void)
     {
+        for (auto contact : contacts)
+        {
+            auto& mf = contact->manifold;
+            auto body_a = contact->fixture_a->body;
+            auto body_b = contact->fixture_b->body;
+            for (size_t i = 0; i < mf.count; i++)
+            {
+                auto& vel_a = velocities[body_a->island_index].linear;
+                auto& vel_b = velocities[body_b->island_index].linear;
+
+                float d = math::dot((vel_b - vel_a), mf.normal);
+
+                // impulse scalar
+                float j = -(1.f + contact->restitution) * d;
+                j *= body_a->linear.inv_mass + body_b->linear.inv_mass;
+
+                auto impulse = mf.normal * j;
+                vel_a -= impulse * body_a->linear.inv_mass;
+                vel_b += impulse * body_b->linear.inv_mass;
+            }
+        }
+
         // Copy state buffers back to the bodies
         for (size_t i = 0; i < bodies.size(); i++)
         {
@@ -299,22 +323,17 @@ CollisionGraph::CreateContact (fixture_proxy* a, fixture_proxy* b)
     RigidBody* body_a = a->fixture->body;
     RigidBody* body_b = b->fixture->body;
 
-    if (body_a == body_b)
-    {
-        return;
-    }
-
     if (!body_a->ShouldCollide(body_b))
     {
         return;
     }
 
-    if (!body_a->HasEdge(a->fixture, b->fixture))
+    if (custom_filter && !custom_filter->ShouldCollide(a->fixture, b->fixture))
     {
         return;
     }
 
-    if (custom_filter && custom_filter->ShouldCollide(a->fixture, b->fixture) == false)
+    if (body_a->HasEdge(a->fixture, b->fixture))
     {
         return;
     }
@@ -330,6 +349,8 @@ CollisionGraph::CreateContact (fixture_proxy* a, fixture_proxy* b)
         body_a->WakeUp();
         body_b->WakeUp();
     }
+
+    std::cout << "Contact created" << std::endl;
 }
 
 void
@@ -358,6 +379,8 @@ CollisionGraph::DestroyContact (Contact* contact)
     body_b->contact_edges.remove(&contact->edge_b);
 
     block_allocator.Delete<Contact>(contact);
+
+    std::cout << "Contact destroyed" << std::endl;
 }
 
 void
@@ -391,8 +414,8 @@ CollisionGraph::PurgeContacts (void)
             return;
         }
 
-        // purge non-intersecting contacts
-        if (a->proxy->box.intersects_with(b->proxy->box))
+        // purge non-intersecting contacts.  check is on the enlarged AABBs
+        if (!m_tree.Intersects(a->proxy->handle, b->proxy->handle))
         {
             DestroyContact(contact);
             return;
@@ -435,8 +458,6 @@ CollisionGraph::MoveProxy (const fixture_proxy* proxy, const math::vec2& displac
 {
     m_tree.MoveProxy(proxy->handle, proxy->box, displacement);
     m_dirtyProxies.push_back(proxy->handle);
-
-    std::cout << "move: " << m_tree.Dump() << std::endl;
 }
 
 void
