@@ -37,6 +37,13 @@ struct collision_manifold
     bool flip_dominant = false;     //!< Manifold data is relative to shape b
 };
 
+struct contact_impulse
+{
+    float normalImpulses[2]; // b2_maxManifoldPoints
+    float tangentImpulses[2];
+    size_t count;
+};
+
 //! \struct half_plane
 //! \brief 2d hyperplane (aka line)
 //! \details Line that divides space into two infinite sets of points.  Points on

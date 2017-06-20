@@ -15,16 +15,9 @@ namespace rdge {
 namespace physics {
 
 class Contact;
-class ContactListener;
+class GraphListener;
 class Fixture;
 class RigidBody;
-
-struct contact_impulse
-{
-    float normalImpulses[2]; // b2_maxManifoldPoints
-    float tangentImpulses[2];
-    size_t count;
-};
 
 //! \struct contact_edge
 //! \brief Represents contact between two bodies
@@ -51,7 +44,7 @@ public:
     bool IsTouching (void) const noexcept { return m_flags & TOUCHING; }
     bool IsEnabled (void) const noexcept { return m_flags & ENABLED; }
 
-    void Update (ContactListener* listener);
+    void Update (GraphListener* listener);
 
     Fixture* fixture_a = nullptr;
     Fixture* fixture_b = nullptr;
@@ -66,32 +59,17 @@ public:
 
 private:
 
+    friend class CollisionGraph;
+
     enum StateFlags
     {
         ENABLED  = 0x0001,
         TOUCHING = 0x0002,
+
+        ON_ISLAND = 0x0004
     };
 
     uint16 m_flags;
-};
-
-class ContactFilter
-{
-public:
-    virtual ~ContactFilter (void) noexcept = default;
-
-    virtual bool ShouldCollide (Fixture* a, Fixture* b) const noexcept;
-};
-
-class ContactListener
-{
-public:
-    virtual ~ContactListener (void) noexcept = default;
-
-    virtual void BeginContact (Contact*) { }
-    virtual void EndContact (Contact*) { }
-    virtual void PreSolve (Contact*, const collision_manifold*) { }
-    virtual void PostSolve (Contact*, const contact_impulse*) { }
 };
 
 } // namespace physics

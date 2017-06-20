@@ -1,5 +1,7 @@
 #include <rdge/physics/bvh.hpp>
 
+#include <sstream>
+
 namespace rdge {
 namespace physics {
 
@@ -73,6 +75,7 @@ BVHTree::CreateNode (void)
     node.parent = bvh_node::NULL_NODE;
     node.left = bvh_node::NULL_NODE;
     node.right = bvh_node::NULL_NODE;
+    node.user_data = nullptr;
 
     return handle;
 }
@@ -218,8 +221,6 @@ BVHTree::RemoveLeaf (int32 leaf_handle)
     auto& parent_node = m_nodes[parent_handle];
 
     int32 grandparent_handle = parent_node.parent;
-    auto& grandparent_node = m_nodes[grandparent_handle];
-
     int32 sibling_handle = (parent_node.left == leaf_handle)
         ? parent_node.right
         : parent_node.left;
@@ -227,6 +228,7 @@ BVHTree::RemoveLeaf (int32 leaf_handle)
     if (grandparent_handle != bvh_node::NULL_NODE)
     {
         // destroy parent and connect sibling to grandparent
+        auto& grandparent_node = m_nodes[grandparent_handle];
         if (grandparent_node.left == parent_handle)
         {
             grandparent_node.left = sibling_handle;
@@ -400,6 +402,54 @@ BVHTree::Balance (int32 handle_a)
     }
 
     return handle_a;
+}
+
+std::string
+BVHTree::Dump (void)
+{
+    std::ostringstream ss;
+    std::vector<int32> stack;
+
+    stack.push_back(m_root);
+    while (!stack.empty())
+    {
+        int32 handle = stack.back();
+        stack.pop_back();
+
+        if (handle == bvh_node::NULL_NODE)
+        {
+            continue;
+        }
+
+        auto& node = m_nodes[handle];
+        ss << "[" << handle << "] " << node;
+
+        if (!node.is_leaf())
+        {
+            stack.push_back(node.left);
+            stack.push_back(node.right);
+        }
+    }
+
+    return ss.str();
+}
+
+std::ostream& operator<< (std::ostream& os, const bvh_node& node)
+{
+    os << "bvh_node: ["
+       << "\n  parent=" << node.parent
+       << "\n  height=" << node.height
+       << "\n  fat_box=" << node.fat_box;
+
+    if (!node.is_leaf())
+    {
+        os << "\n  children: ["
+           << "\n    left=" << node.left
+           << "\n    right=" << node.right
+           << "\n  ]";
+    }
+
+    return os << "\n]\n";
 }
 
 } // namespace physics

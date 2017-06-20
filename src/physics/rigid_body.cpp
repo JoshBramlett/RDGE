@@ -45,10 +45,10 @@ RigidBody::RigidBody (const rigid_body_profile& profile, CollisionGraph* parent)
         m_flags |= BULLET;
     }
 
-    m_sweep.pos_0 = world_transform.pos;
-    m_sweep.pos_n = world_transform.pos;
-    m_sweep.angle_0 = profile.angle;
-    m_sweep.angle_n = profile.angle;
+    sweep.pos_0 = world_transform.pos;
+    sweep.pos_n = world_transform.pos;
+    sweep.angle_0 = profile.angle;
+    sweep.angle_n = profile.angle;
 
     if (m_type == RigidBodyType::DYNAMIC)
     {
@@ -60,17 +60,8 @@ RigidBody::RigidBody (const rigid_body_profile& profile, CollisionGraph* parent)
 RigidBody::~RigidBody (void) noexcept
 {
     fixtures.for_each([=](auto* f) {
-        graph->UnregisterProxy(f->proxy);
         graph->block_allocator.Delete<Fixture>(f);
     });
-
-    contact_edges.for_each([=](auto* edge) {
-        // body should never remove edges from it's list.  Doing so would
-        // leave the other body with a dangling pointer.
-        graph->DestroyContact(edge->contact);
-    });
-
-    // TODO destroy joints
 }
 
 Fixture*
@@ -160,12 +151,16 @@ RigidBody::HasEdge (const Fixture* a, const Fixture* b) noexcept
 }
 
 void
-RigidBody::SyncProxies (void)
+RigidBody::SyncFixtures (void)
 {
     // From Box2D
     // Compute an AABB that covers the swept shape (may miss some rotation effect)
 
-    auto sweep_start = m_sweep.lerp_transform(0.f);
+    // TODO This should not only sync the proxy aabb for the broad phase,
+    //      but also sync the shape in world coordinates.  Basically any time
+    //      the transform is updated the fixtures should be synced
+
+    auto sweep_start = sweep.lerp_transform(0.f);
     auto displacement = world_transform.pos - sweep_start.pos;
     fixtures.for_each([&](auto* f) {
         aabb box = f->ComputeAABB();
@@ -174,6 +169,8 @@ RigidBody::SyncProxies (void)
 
         f->proxy->box = aabb::merge(box_0, box_n);
         graph->MoveProxy(f->proxy, displacement);
+
+        f->Syncronize();
     });
 }
 
@@ -184,32 +181,31 @@ RigidBody::ComputeMass (void)
     linear.inv_mass = 0.f;
     angular.mmoi = 0.f;
     angular.inv_mmoi = 0.f;
-    m_sweep.local_center = { 0.f, 0.f };
+    sweep.local_center = { 0.f, 0.f };
 
     if (m_type == RigidBodyType::STATIC || m_type == RigidBodyType::KINEMATIC)
     {
-        m_sweep.pos_0 = world_transform.pos;
-        m_sweep.pos_n = world_transform.pos;
-        m_sweep.angle_0 = m_sweep.angle_n;
+        sweep.pos_0 = world_transform.pos;
+        sweep.pos_n = world_transform.pos;
+        sweep.angle_0 = sweep.angle_n;
         return;
     }
 
-    mass_data body_mass;
+    math::vec2 local_center(0.f, 0.f);
     fixtures.for_each([&](auto* f) {
         if (f->density != 0.f)
         {
             mass_data fixture_mass = f->ComputeMass();
-            body_mass.mass += fixture_mass.mass;
-            body_mass.centroid += fixture_mass.mass * fixture_mass.centroid;
-            body_mass.mmoi += fixture_mass.mmoi;
+            linear.mass += fixture_mass.mass;
+            angular.mmoi += fixture_mass.mmoi;
+            local_center += fixture_mass.mass * fixture_mass.centroid;
         }
     });
 
-    if (body_mass.mass > 0.f)
+    if (linear.mass > 0.f)
     {
-        linear.mass = body_mass.mass;
         linear.inv_mass = 1.f / linear.mass;
-        body_mass.centroid *= linear.inv_mass;
+        local_center *= linear.inv_mass;
     }
     else
     {
@@ -217,10 +213,10 @@ RigidBody::ComputeMass (void)
         linear.inv_mass = 1.f;
     }
 
-    if (body_mass.mmoi > 0.f && !IsFixedRotation())
+    if (angular.mmoi > 0.f && !IsFixedRotation())
     {
         // TODO ??? Why subtract the parallel axis?
-        angular.mmoi -= linear.mass * body_mass.centroid.self_dot();
+        angular.mmoi -= linear.mass * local_center.self_dot();
         SDL_assert(angular.mmoi > 0.f);
         angular.inv_mmoi = 1.f / angular.mmoi;
     }
@@ -230,12 +226,12 @@ RigidBody::ComputeMass (void)
         angular.inv_mmoi = 0.f;
     }
 
-    math::vec2 old_center = m_sweep.pos_n;
-    m_sweep.local_center = body_mass.centroid;
-    m_sweep.pos_0 = m_sweep.pos_n * world_transform.rot.rotate(m_sweep.local_center);
+    math::vec2 old_center = sweep.pos_n;
+    sweep.local_center = local_center;
+    sweep.pos_0 = sweep.pos_n * world_transform.rot.rotate(sweep.local_center);
 
     // TODO ??? Don't really understand this
-    linear.velocity += (m_sweep.pos_n - old_center).perp() * angular.velocity;
+    linear.velocity += (sweep.pos_n - old_center).perp() * angular.velocity;
 }
 
 } // namespace physics

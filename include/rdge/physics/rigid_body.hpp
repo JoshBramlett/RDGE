@@ -147,7 +147,7 @@ public:
     void DestroyFixture (Fixture* fixture);
 
     bool HasEdge (const Fixture* a, const Fixture* b) noexcept;
-    void SyncProxies (void);
+    void SyncFixtures (void);
     void ComputeMass (void);
 
     //void SetTransform(const b2Vec2& position, float32 angle);
@@ -179,24 +179,27 @@ public:
     RigidBodyType GetType (void) const noexcept { return m_type; }
     // world position of the body origin
     const math::vec2& GetPosition (void) const noexcept { return world_transform.pos; }
-    float GetAngle (void) const noexcept { return m_sweep.angle_n; }
+    float GetAngle (void) const noexcept { return sweep.angle_n; }
     // world position of the body center of mass
-    const math::vec2& GetWorldCenter (void) const noexcept { return m_sweep.pos_n; }
-    const math::vec2& GetLocalCenter (void) const noexcept { return m_sweep.local_center; }
+    const math::vec2& GetWorldCenter (void) const noexcept { return sweep.pos_n; }
+    const math::vec2& GetLocalCenter (void) const noexcept { return sweep.local_center; }
 
 
+
+    //! \brief Check if body is participating in the physics simulation
     bool IsSimulating (void) const noexcept { return m_flags & SIMULATE; }
 
+    //! \brief Check if body is awake
+    //! \note Static bodies are always in a sleeping state
     bool IsAwake (void) const noexcept
     {
-        // Static bodies are always sleeping
-        // TODO This behavior differs from Box2D
-        return (m_type == RigidBodyType::STATIC) || (m_flags & AWAKE);
+        // TODO PREVENT_SLEEP
+        return (m_type != RigidBodyType::STATIC) && (m_flags & AWAKE);
     }
 
     void WakeUp (void) noexcept
     {
-        if (!(m_flags & AWAKE))
+        if (!IsAwake())
         {
             m_flags |= AWAKE;
             m_sleepTime = 0.f;
@@ -205,12 +208,16 @@ public:
 
     void Sleep (void) noexcept
     {
-        m_flags &= ~AWAKE;
-        m_sleepTime = 0.f;
-        this->linear.force = { 0.f, 0.f };
-        this->angular.torque = 0.f;
-        this->linear.velocity = { 0.f, 0.f };
-        this->angular.velocity = 0.f;
+        if (IsAwake())
+        {
+            m_flags &= ~AWAKE;
+            m_sleepTime = 0.f;
+
+            linear.force = { 0.f, 0.f };
+            angular.torque = 0.f;
+            linear.velocity = { 0.f, 0.f };
+            angular.velocity = 0.f;
+        }
     }
 
     bool IsFixedRotation (void) const noexcept { return m_flags & PREVENT_ROTATION; }
@@ -270,7 +277,13 @@ public:
     //! \brief Linear/angular transforms to represent the body in world space
     iso_transform world_transform;
 
+    //! \brief Contains the local center of mass, and the position/angle over the
+    //!        the timestep.
+    sweep_step sweep;
+
     float gravity_scale = 0.f; //!< Gravitational impact on the body
+
+    size_t island_index;
 
 private:
 
@@ -281,14 +294,10 @@ private:
         PREVENT_ROTATION = 0x0004,
         PREVENT_SLEEP    = 0x0008,
 
-        BULLET           = 0x0010,
-        ISLAND           = 0x0020,
+        ON_ISLAND        = 0x0010,
+        BULLET           = 0x0020,
         TOI              = 0x0040
     };
-
-    //! \brief Contains the local center of mass, and the position/angle over the
-    //!        the timestep.
-    sweep_step m_sweep;
 
     float      m_sleepTime = 0.f;
 

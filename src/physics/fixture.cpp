@@ -30,12 +30,14 @@ Fixture::Fixture (const fixture_profile& profile, RigidBody* parent)
     {
     case ShapeType::CIRCLE:
         m_shape = allocator.New<circle>(*static_cast<const circle*>(profile.shape));
-        m_worldShape = allocator.Alloc<circle>();
+        m_worldShape = allocator.New<circle>(*static_cast<const circle*>(profile.shape));
+        //m_worldShape = allocator.Alloc<circle>();
         break;
 
     case ShapeType::POLYGON:
         m_shape = allocator.New<polygon>(*static_cast<const polygon*>(profile.shape));
-        m_worldShape = allocator.Alloc<polygon>();
+        m_worldShape = allocator.New<polygon>(*static_cast<const polygon*>(profile.shape));
+        //m_worldShape = allocator.Alloc<polygon>();
         break;
 
     default:
@@ -60,12 +62,14 @@ Fixture::~Fixture (void) noexcept
     {
     case ShapeType::CIRCLE:
         allocator.Delete<circle>(static_cast<circle*>(m_shape));
-        allocator.Free<circle>(static_cast<circle*>(m_worldShape));
+        allocator.Delete<circle>(static_cast<circle*>(m_worldShape));
+        //allocator.Free<circle>(static_cast<circle*>(m_worldShape));
         break;
 
     case ShapeType::POLYGON:
         allocator.Delete<polygon>(static_cast<polygon*>(m_shape));
-        allocator.Free<polygon>(static_cast<polygon*>(m_worldShape));
+        allocator.Delete<polygon>(static_cast<polygon*>(m_worldShape));
+        //allocator.Free<polygon>(static_cast<polygon*>(m_worldShape));
         break;
 
     default:
@@ -92,25 +96,47 @@ Fixture::SetSensor (bool value) noexcept
     }
 }
 
+void
+Fixture::Syncronize (void)
+{
+    //switch (m_shape->type())
+    //{
+    //case ShapeType::CIRCLE:
+        //*static_cast<circle*>(m_worldShape) = *static_cast<const circle*>(m_shape);
+        //break;
+
+    //case ShapeType::POLYGON:
+        //*static_cast<polygon*>(m_worldShape) = *static_cast<const polygon*>(m_shape);
+        //break;
+
+    //default:
+        //SDL_assert(false);
+        //break;
+    //}
+
+    std::cout << body->world_transform.pos << std::endl;
+    m_worldShape->to_world(body->world_transform);
+}
+
 ishape*
 Fixture::GetWorldShape (void) noexcept
 {
-    switch (m_shape->type())
-    {
-    case ShapeType::CIRCLE:
-        *static_cast<circle*>(m_worldShape) = *static_cast<const circle*>(m_shape);
-        break;
+    //switch (m_shape->type())
+    //{
+    //case ShapeType::CIRCLE:
+        //*static_cast<circle*>(m_worldShape) = *static_cast<const circle*>(m_shape);
+        //break;
 
-    case ShapeType::POLYGON:
-        *static_cast<polygon*>(m_worldShape) = *static_cast<const polygon*>(m_shape);
-        break;
+    //case ShapeType::POLYGON:
+        //*static_cast<polygon*>(m_worldShape) = *static_cast<const polygon*>(m_shape);
+        //break;
 
-    default:
-        SDL_assert(false);
-        break;
-    }
+    //default:
+        //SDL_assert(false);
+        //break;
+    //}
 
-    m_worldShape->to_world(body->world_transform);
+    //m_worldShape->to_world(body->world_transform);
     return m_worldShape;
 }
 

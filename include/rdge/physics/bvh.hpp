@@ -17,6 +17,8 @@
 namespace rdge {
 namespace physics {
 
+//! \struct bvh_node
+//! \brief Node in the \ref BVHTree
 struct bvh_node
 {
     static constexpr int32 NULL_NODE = -1;
@@ -26,36 +28,29 @@ struct bvh_node
     int32 height;
     int32 parent;
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wgnu-anonymous-struct"
-#pragma GCC diagnostic ignored "-Wnested-anon-types"
+    int32 left;
+    int32 right;
 
-    union
-    {
-        struct
-        {
-            int32 left;
-            int32 right;
-        };
-
-        void* user_data;
-    };
-
-#pragma GCC diagnostic pop
+    void* user_data;
 
     bool is_leaf (void) const noexcept
     {
-        return (right == NULL_NODE);
+        return (user_data != nullptr);
     }
 };
 
 //! \class BVHTree
 //! \brief Bounding Volume Hierarchy
+//! \details Used for spacial partitioning, the BVH is a binary tree where the leaf
+//!          nodes are the AABBs of the scene and parent nodes are AABBs that
+//!          encapsulate their children.  This allows for queries on the tree
+//!          (e.g. ray cast and intersection) to be done in O(log n) time.
 //! \see http://www.randygaul.net/2013/08/06/dynamic-aabb-tree/
 //! \see https://www.codeproject.com/Articles/832957/Dynamic-Bounding-Volume-Hiearchy-in-Csharp
 class BVHTree
 {
 public:
+    //! \brief Amount of padding added to AABBs
     static constexpr float FATTEN_AMOUNT = 0.1f;  //!< Padding added to aabb
 
     //! \brief Displacement multiplier for movement predictive AABB expansion
@@ -64,7 +59,13 @@ public:
     BVHTree (void) = default;
     ~BVHTree (void) noexcept = default;
 
-    // TODO add move/copy
+    //!@{
+    //! \brief Non-copyable, move enabled
+    BVHTree (const BVHTree&) = delete;
+    BVHTree& operator= (const BVHTree&) = delete;
+    BVHTree (BVHTree&&) = default;
+    BVHTree& operator= (BVHTree&&) = default;
+    //!@}
 
     int32 CreateProxy (const aabb& box, void* user_data);
     void DestroyProxy (int32 handle);
@@ -92,6 +93,9 @@ public:
         return (m_root == bvh_node::NULL_NODE) ? 0 : m_nodes[m_root].height;
     }
 
+    // TODO Normalize debug printing.
+    std::string Dump (void);
+
 private:
 
     int32 CreateNode (void);
@@ -100,15 +104,15 @@ private:
     int32 Balance (int32 handle);
 
     DynamicFreelist<bvh_node> m_nodes;
-    int32 m_root;
+    int32 m_root = bvh_node::NULL_NODE;
 };
 
 template <typename T>
 inline std::vector<std::pair<T*, T*>>
 BVHTree::Query (const std::vector<int32>& handles) const
 {
-    std::vector<std::pair<int32, int32>> pairs(64);
-    std::vector<int32> stack(256);
+    std::vector<std::pair<int32, int32>> pairs;
+    std::vector<int32> stack;
     for (int32 handle_a : handles)
     {
         auto& node_a = m_nodes[handle_a];
@@ -162,7 +166,8 @@ BVHTree::Query (const std::vector<int32>& handles) const
     auto last = std::unique(pairs.begin(), pairs.end());
     pairs.erase(last, pairs.end());
 
-    std::vector<std::pair<T*, T*>> result(pairs.size());
+    std::vector<std::pair<T*, T*>> result;
+    result.reserve(pairs.size());
     for (auto& p : pairs)
     {
         result.emplace_back(reinterpret_cast<T*>(m_nodes[p.first].user_data),
@@ -176,8 +181,8 @@ template <typename T>
 inline std::vector<T*>
 BVHTree::Query (const aabb& box) const
 {
-    std::vector<T*> result(64);
-    std::vector<int32> stack(256);
+    std::vector<T*> result;
+    std::vector<int32> stack;
 
     stack.push_back(m_root);
     while (!stack.empty())
@@ -207,6 +212,9 @@ BVHTree::Query (const aabb& box) const
 
     return result;
 }
+
+//! \brief bvh_node stream output operator
+std::ostream& operator<< (std::ostream& os, const bvh_node& node);
 
 } // namespace physics
 } // namespace rdge

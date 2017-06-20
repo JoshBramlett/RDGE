@@ -1,4 +1,5 @@
 #include <rdge/physics/contact.hpp>
+#include <rdge/physics/collision_graph.hpp>
 #include <rdge/physics/fixture.hpp>
 #include <rdge/physics/rigid_body.hpp>
 #include <rdge/physics/shapes/circle.hpp>
@@ -34,7 +35,7 @@ Contact::Contact (Fixture* a, Fixture* b)
 }
 
 void
-Contact::Update (ContactListener* listener)
+Contact::Update (GraphListener* listener)
 {
     m_flags |= ENABLED;
 
@@ -80,12 +81,12 @@ Contact::Update (ContactListener* listener)
     {
         if (is_touching && (was_touching == false))
         {
-            listener->BeginContact(this);
+            listener->OnContactStart(this);
         }
 
         if (was_touching && (is_touching == false))
         {
-            listener->EndContact(this);
+            listener->OnContactEnd(this);
         }
 
         if (is_touching && (is_sensor == false))
@@ -93,18 +94,6 @@ Contact::Update (ContactListener* listener)
             // TODO Presolve
         }
     }
-}
-
-bool
-ContactFilter::ShouldCollide (Fixture* a, Fixture* b) const noexcept
-{
-    if (a->filter.group && a->filter.group == b->filter.group)
-    {
-        return (a->filter.group > 0);
-    }
-
-    return (a->filter.mask & b->filter.category) &&
-           (b->filter.mask & a->filter.category);
 }
 
 } // namespace physics

@@ -25,9 +25,11 @@ class Fixture;
 
 //! \struct collision_filter
 //! \brief Collision filtering data
+//! \details The filter is directly tied to the \ref ContactFilter class.
+//! \see ContactFilter
 struct collision_filter
 {
-    uint16 group    = 0;
+    uint16 group    = 0;      //!< Logical grouping (positive to collide, negative to not)
     uint16 category = 0x0001; //!< Category the filter belongs to
     uint16 mask     = 0xFFFF; //!< Mask of other categories the object can collide with
 };
@@ -115,6 +117,8 @@ public:
     float restitution = 0.f;
 
     collision_filter filter;
+    ishape* m_shape = nullptr;      //!< Fixture shape
+    ishape* m_worldShape = nullptr; //!< Shape transformed to world coordinates
 
 private:
     friend class RigidBody;
@@ -123,14 +127,13 @@ private:
     explicit Fixture (const fixture_profile& profile, RigidBody* parent);
     ~Fixture (void) noexcept;
 
+    void Syncronize (void);
+
     enum StateFlags
     {
         SENSOR       = 0x0001,
         FILTER_DIRTY = 0x0002
     };
-
-    ishape* m_shape = nullptr;      //!< Fixture shape
-    ishape* m_worldShape = nullptr; //!< Shape transformed to world coordinates
 
     uint16 m_flags = 0;
 };

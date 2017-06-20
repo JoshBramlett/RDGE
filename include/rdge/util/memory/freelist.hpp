@@ -28,6 +28,11 @@ template <typename T, size_t ChunkSize = 128>
 class DynamicFreelist
 {
 public:
+    // TODO Move to containers
+    // TODO Make sure move semantics work w/o the templated type provided.
+    //      Also, how should a move be done if they each have a different
+    //      ChunkSize
+
     // TODO Because of the realloc it's easy to have a use after free:
     //        1) Create reference to object
     //        2) Reserve a new spot in the list (realloc occurs)
