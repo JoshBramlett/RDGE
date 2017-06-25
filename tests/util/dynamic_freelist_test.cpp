@@ -37,11 +37,14 @@ TEST(DynamicFreelistTest, ValidateReallocation)
     EXPECT_EQ(a.Capacity(), 1);
 
     auto h1 = a.Reserve();
-    auto& h1_obj = a[h1];
-    h1_obj.a = 3;
-    h1_obj.b = 7;
-    h1_obj.c = 15;
-    EXPECT_EQ(h1, 0);
+
+    {
+        auto& h1_obj = a[h1];
+        h1_obj.a = 3;
+        h1_obj.b = 7;
+        h1_obj.c = 15;
+        EXPECT_EQ(h1, 0);
+    }
 
     EXPECT_EQ(a.Size(), 1);
     EXPECT_EQ(a.Capacity(), 1);
@@ -54,10 +57,53 @@ TEST(DynamicFreelistTest, ValidateReallocation)
     EXPECT_EQ(a.Capacity(), 129);
 
     // b) validate values persist after reallocation
-    const auto& h1_obj2 = a[h1];
-    EXPECT_EQ(h1_obj2.a, 3);
-    EXPECT_EQ(h1_obj2.b, 7);
-    EXPECT_EQ(h1_obj2.c, 15);
+    {
+        const auto& h1_obj = a[h1];
+        EXPECT_EQ(h1_obj.a, 3);
+        EXPECT_EQ(h1_obj.b, 7);
+        EXPECT_EQ(h1_obj.c, 15);
+    }
+}
+
+TEST(DynamicFreelistTest, ValidateRelease)
+{
+    DynamicFreelist<test_object> a;
+
+    auto h1 = a.Reserve();
+    auto h2 = a.Reserve();
+    auto h3 = a.Reserve();
+    auto h4 = a.Reserve();
+    auto h5 = a.Reserve();
+
+    a.Release(h3);
+    EXPECT_EQ(a.Size(), 4);
+    EXPECT_TRUE(a.IsReserved(h1));
+    EXPECT_TRUE(a.IsReserved(h2));
+    EXPECT_FALSE(a.IsReserved(h3));
+    EXPECT_TRUE(a.IsReserved(h4));
+    EXPECT_TRUE(a.IsReserved(h5));
+
+    a.Release(h1);
+    EXPECT_EQ(a.Size(), 3);
+    EXPECT_FALSE(a.IsReserved(h1));
+    EXPECT_TRUE(a.IsReserved(h2));
+    EXPECT_TRUE(a.IsReserved(h4));
+    EXPECT_TRUE(a.IsReserved(h5));
+
+    a.Release(h5);
+    EXPECT_EQ(a.Size(), 2);
+    EXPECT_TRUE(a.IsReserved(h2));
+    EXPECT_TRUE(a.IsReserved(h4));
+    EXPECT_FALSE(a.IsReserved(h5));
+
+    a.Release(h2);
+    EXPECT_EQ(a.Size(), 1);
+    EXPECT_FALSE(a.IsReserved(h2));
+    EXPECT_TRUE(a.IsReserved(h4));
+
+    a.Release(h4);
+    EXPECT_EQ(a.Size(), 0);
+    EXPECT_FALSE(a.IsReserved(h4));
 }
 
 } // anonymous namespace

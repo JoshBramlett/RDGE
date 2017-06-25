@@ -150,6 +150,11 @@ public:
     void SyncFixtures (void);
     void ComputeMass (void);
 
+    math::vec2 GetLinearVelocityFromWorldPoint (const math::vec2& point)
+    {
+        return linear.velocity + ((point - sweep.pos_n).perp() * angular.velocity);
+    }
+
     //void SetTransform(const b2Vec2& position, float32 angle);
     //void SetLinearVelocity(const b2Vec2& v);
     //void SetAngularVelocity(float32 omega);
@@ -283,7 +288,7 @@ public:
 
     float gravity_scale = 0.f; //!< Gravitational impact on the body
 
-    size_t island_index;
+    size_t solver_index;
 
 private:
 

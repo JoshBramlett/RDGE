@@ -35,7 +35,7 @@ struct bvh_node
 
     bool is_leaf (void) const noexcept
     {
-        return (user_data != nullptr);
+        return (right == NULL_NODE);
     }
 };
 
@@ -108,6 +108,8 @@ public:
     std::string Dump (void);
 
 private:
+
+    void ValidateStructure (int32 index);
 
     int32 CreateNode (void);
     void InsertLeaf (int32 leaf_handle);

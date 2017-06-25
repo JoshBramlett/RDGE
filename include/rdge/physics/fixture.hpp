@@ -18,6 +18,11 @@ namespace physics {
 class RigidBody;
 class Fixture;
 
+// TODO remove
+// b2Cross(vec, vec)    = math::perp_dot()
+// b2Cross(vec, scalar) = vec2.perp_ccw() * scalar
+// b2Cross(scalar, vec) = vec2.perp() * scalar
+
 //! \struct collision_filter
 //! \brief Collision filtering data
 //! \details The filter is directly tied to the \ref ContactFilter class.
@@ -95,7 +100,7 @@ public:
 
     aabb ComputeAABB (void) const noexcept
     {
-        return shape.local->compute_aabb();
+        return shape.world->compute_aabb();
     }
 
     RigidBody*     body = nullptr;      //!< Circular reference to parent

@@ -204,6 +204,8 @@ BVHTree::InsertLeaf (int32 leaf_handle)
 
         test_handle = test_node.parent;
     }
+
+    ValidateStructure(m_root);
 }
 
 void
@@ -216,6 +218,7 @@ BVHTree::RemoveLeaf (int32 leaf_handle)
     }
 
     auto& leaf_node = m_nodes[leaf_handle];
+    SDL_assert(leaf_node.is_leaf());
 
     int32 parent_handle = leaf_node.parent;
     auto& parent_node = m_nodes[parent_handle];
@@ -265,6 +268,8 @@ BVHTree::RemoveLeaf (int32 leaf_handle)
         m_nodes[sibling_handle].parent = bvh_node::NULL_NODE;
         m_nodes.Release(parent_handle);
     }
+
+    ValidateStructure(m_root);
 }
 
 int32
@@ -275,6 +280,7 @@ BVHTree::Balance (int32 handle_a)
     auto& node_a = m_nodes[handle_a];
     if (node_a.is_leaf() || node_a.height < 2)
     {
+        SDL_assert(m_nodes[handle_a].parent != handle_a);
         return handle_a;
     }
 
@@ -402,6 +408,37 @@ BVHTree::Balance (int32 handle_a)
     }
 
     return handle_a;
+}
+
+void
+BVHTree::ValidateStructure (int32 index)
+{
+    if (index == bvh_node::NULL_NODE)
+    {
+        return;
+    }
+
+    SDL_assert(m_nodes.IsReserved(index));
+
+    if (index == m_root)
+    {
+        SDL_assert(m_nodes[index].parent == bvh_node::NULL_NODE);
+    }
+
+    auto& node = m_nodes[index];
+    if (node.is_leaf())
+    {
+        SDL_assert(node.left == bvh_node::NULL_NODE);
+        SDL_assert(node.right == bvh_node::NULL_NODE);
+        SDL_assert(node.height == 0);
+        return;
+    }
+
+    SDL_assert(m_nodes[node.left].parent == index);
+    SDL_assert(m_nodes[node.right].parent == index);
+
+    ValidateStructure(node.left);
+    ValidateStructure(node.right);
 }
 
 std::string

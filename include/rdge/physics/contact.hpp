@@ -54,6 +54,7 @@ public:
 
     float friction = 0.f;
     float restitution = 0.f;
+    float tangent_speed = 0.f;
 
     collision_manifold manifold;
 

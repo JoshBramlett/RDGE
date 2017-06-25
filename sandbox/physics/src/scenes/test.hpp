@@ -34,4 +34,8 @@ public:
 
     rdge::physics::RigidBody* body_b;
     rdge::physics::Fixture* fixture_b;
+
+
+    rdge::physics::RigidBody* body_c;
+    rdge::physics::Fixture* fixture_c;
 };

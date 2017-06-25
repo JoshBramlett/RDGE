@@ -100,6 +100,7 @@ public:
     {
         SDL_assert(m_count > 0);
         SDL_assert(handle < m_capacity);
+        SDL_assert(IsReserved(handle));
         SDL_assert((ptrdiff_t(&m_handles[handle] - m_handles) / sizeof(uint32)) <= m_count);
 
         return m_data[handle];
@@ -127,10 +128,18 @@ public:
     {
         SDL_assert(m_count > 0);
         SDL_assert(handle < m_capacity);
+        SDL_assert(IsReserved(handle));
         SDL_assert((ptrdiff_t(&m_handles[handle] - m_handles) / sizeof(uint32)) <= m_count);
 
         memset(&m_data[handle], 0, sizeof(T));
-        std::swap(m_handles[handle], m_handles[m_count--]);
+        for (size_t i = 0; i < m_count; i++)
+        {
+            if (m_handles[i] == handle)
+            {
+                std::swap(m_handles[i], m_handles[--m_count]);
+                return;
+            }
+        }
     }
 
     //! \returns Number of elements reserved
@@ -143,6 +152,20 @@ public:
     size_t Capacity (void) const noexcept
     {
         return m_capacity;
+    }
+
+    //! \returns True iff handle is in the reserved list
+    bool IsReserved (uint32 handle) const noexcept
+    {
+        for (size_t i = 0; i < m_count; i++)
+        {
+            if (m_handles[i] == handle)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 private:

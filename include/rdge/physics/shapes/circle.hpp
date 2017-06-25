@@ -100,6 +100,13 @@ struct circle : public ishape
                     { pos.x + radius, pos.y + radius });
     }
 
+    aabb compute_aabb (const iso_transform& xf) const override
+    {
+        math::vec2 p = xf.to_world(pos);
+        return aabb({ p.x - radius, p.y - radius },
+                    { p.x + radius, p.y + radius });
+    }
+
     //! \brief Compute the mass and analog data
     //! \param [in] density Density of the shape
     //! \returns Mass, centroid, and mass moment of inertia

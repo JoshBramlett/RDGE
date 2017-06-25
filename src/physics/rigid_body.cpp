@@ -153,24 +153,19 @@ RigidBody::HasEdge (const Fixture* a, const Fixture* b) noexcept
 void
 RigidBody::SyncFixtures (void)
 {
-    // From Box2D
-    // Compute an AABB that covers the swept shape (may miss some rotation effect)
-
-    // TODO This should not only sync the proxy aabb for the broad phase,
-    //      but also sync the shape in world coordinates.  Basically any time
-    //      the transform is updated the fixtures should be synced
+    // world transform has been updated.  the fixtures need to reset their
+    // world shape and proxies (set to the swept shape over the time step)
 
     auto sweep_start = sweep.lerp_transform(0.f);
     auto displacement = world_transform.pos - sweep_start.pos;
     fixtures.for_each([&](auto* f) {
-        aabb box = f->ComputeAABB();
-        aabb box_0 = sweep_start.to_world(box);
-        aabb box_n = world_transform.to_world(box);
+        f->Syncronize();
+
+        aabb box_0 = f->shape.local->compute_aabb(sweep_start);
+        aabb box_n = f->shape.local->compute_aabb(world_transform);
 
         f->proxy->box = aabb::merge(box_0, box_n);
         graph->MoveProxy(f->proxy, displacement);
-
-        f->Syncronize();
     });
 }
 

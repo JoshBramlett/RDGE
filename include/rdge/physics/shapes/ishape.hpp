@@ -59,6 +59,7 @@ struct ishape
 
     //! \brief Compute aabb wrapper for use in the broad phase
     virtual aabb compute_aabb (void) const = 0;
+    virtual aabb compute_aabb (const iso_transform& xf) const = 0;
 
     //! \brief Compute mass data used in physics simulation
     virtual mass_data compute_mass (float density) const = 0;

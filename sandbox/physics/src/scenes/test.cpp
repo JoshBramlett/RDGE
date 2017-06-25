@@ -45,18 +45,29 @@ TestScene::TestScene (void)
     collision_graph.listener = &l;
 
     rigid_body_profile bprof;
+    fixture_profile fprof;
+
+    bprof.type = RigidBodyType::STATIC;
+    body_c = collision_graph.CreateBody(bprof);
+
     bprof.type = RigidBodyType::DYNAMIC;
     body_a = collision_graph.CreateBody(bprof);
-    bprof.linear_velocity = { 9.8f, 0.f };
-    bprof.angular_velocity = 25.f;
+
+    bprof.linear_velocity = { 19.8f, 0.f };
+    //bprof.angular_velocity = 25.f;
     body_b = collision_graph.CreateBody(bprof);
+
+    polygon floor({ -100.f, -100.f }, { -100.f, -110.f },
+                  { 100.f, -110.f, }, { 100.f, -100.f });
+    fprof.shape = &floor;
+    fixture_c = body_c->CreateFixture(fprof);
 
     //polygon tri_a({ 20.f, 70.f }, { 40.f, 20.f }, { 80.f, 70.f });
     polygon tri_a({ 20.f, 20.f }, { 20.f, 80.f }, { 80.f, 20.f }, { 80.f, 80.f });
     //polygon tri_a({ 2.f, 7.f }, { 4.f, 2.f }, { 8.f, 7.f });
-    fixture_profile fprof;
     fprof.shape = &tri_a;
     fprof.density = 1.f;
+    fprof.restitution = 0.5f;
     fixture_a = body_a->CreateFixture(fprof);
 
     //circle cir_a(vec2(-100.f, 100.f), 50.f);
@@ -65,6 +76,10 @@ TestScene::TestScene (void)
     //polygon tri_b({ -2.f, 7.f }, { -4.f, 2.f }, { -8.f, 7.f });
     fprof.shape = &tri_b;
     fixture_b = body_b->CreateFixture(fprof);
+
+
+
+
 }
 
 void
@@ -99,19 +114,22 @@ TestScene::OnUpdate (const delta_time& dt)
 
     //collision_graph.Step(dt.seconds);
     collision_graph.Step(1.f / 60.f);
+    collision_graph.Step(1.f / 60.f);
 }
 
 void
 TestScene::OnRender (void)
 {
 
-    debug::DrawWireFrame(fixture_a->proxy->box);
-    debug::DrawWireFrame(fixture_b->proxy->box);
+    debug::DrawWireFrame(fixture_a->proxy->box, color::WHITE);
+    debug::DrawWireFrame(fixture_b->proxy->box, color::WHITE);
 
     auto tri_a = static_cast<polygon*>(fixture_a->shape.world);
     debug::DrawWireFrame(*tri_a);
     auto tri_b = static_cast<polygon*>(fixture_b->shape.world);
     debug::DrawWireFrame(*tri_b);
+    auto floor = static_cast<polygon*>(fixture_c->shape.world);
+    debug::DrawWireFrame(*floor);
 
     //aabb a({-280.11, -270.11}, {-219.89, -219.89});
     //aabb b({19.89, 19.89}, {80.11, 70.11});

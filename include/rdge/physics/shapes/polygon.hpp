@@ -127,6 +127,7 @@ struct polygon : public ishape
     //! \note aabb edges will be padded by \ref AABB_PADDING
     //! \returns Surrounding aabb
     aabb compute_aabb (void) const override;
+    aabb compute_aabb (const iso_transform& xf) const override;
 
     //! \brief Compute the mass and analog data
     //! \param [in] density Density of the shape

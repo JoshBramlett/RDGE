@@ -56,9 +56,13 @@ Contact::Update (GraphListener* listener)
         is_touching = shape_a->intersects_with(shape_b, manifold);
         bool x_is_touching = shape_a->intersects_with(shape_b);
 
-        if (is_touching != x_is_touching)
+        if (is_touching)
         {
-            std::cout << "FUCK" << std::endl;
+            if (is_touching != x_is_touching)
+            {
+                std::cout << "FUCK" << std::endl;
+            }
+
             is_touching = shape_a->intersects_with(shape_b, manifold);
         }
 

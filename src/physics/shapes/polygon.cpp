@@ -145,7 +145,7 @@ polygon::polygon (const PolygonData& verts, size_t num_verts)
     this->normals.fill(0.f);
     for (size_t i = 0; i < count; i++)
     {
-        auto other_idx = ((i + i) < count) ? (i + 1) : 0;
+        auto other_idx = ((i + 1) < count) ? (i + 1) : 0;
         vec2 edge = this->vertices[i] - this->vertices[other_idx];
 
         this->normals[i] = edge.perp().normalize();
@@ -202,7 +202,7 @@ polygon::compute_aabb (void) const
     SDL_assert(count >= 3);
 
     vec2 lo = vertices[0];
-    vec2 hi = vertices[0];
+    vec2 hi = lo;
 
     for (size_t i = 1; i < count; i++)
     {
@@ -210,6 +210,26 @@ polygon::compute_aabb (void) const
         lo.y = std::min(lo.y, vertices[i].y);
         hi.x = std::max(hi.x, vertices[i].x);
         hi.y = std::max(hi.y, vertices[i].y);
+    }
+
+    return aabb(lo - AABB_PADDING, hi + AABB_PADDING);
+}
+
+aabb
+polygon::compute_aabb (const iso_transform& xf) const
+{
+    SDL_assert(count >= 3);
+
+    vec2 lo = xf.to_world(vertices[0]);
+    vec2 hi = lo;
+
+    for (size_t i = 1; i < count; i++)
+    {
+        vec2 p = xf.to_world(vertices[i]);
+        lo.x = std::min(lo.x, p.x);
+        lo.y = std::min(lo.y, p.y);
+        hi.x = std::max(hi.x, p.x);
+        hi.y = std::max(hi.y, p.y);
     }
 
     return aabb(lo - AABB_PADDING, hi + AABB_PADDING);

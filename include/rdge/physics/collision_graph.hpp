@@ -107,12 +107,6 @@ public:
 
 
 
-    struct step_iterations
-    {
-        uint8 velocity = 8;
-        uint8 position = 3;
-    } iterations;
-
 private:
 
     BVHTree m_tree;
