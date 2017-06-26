@@ -107,6 +107,8 @@ public:
     // TODO Normalize debug printing.
     std::string Dump (void);
 
+    void DebugDraw (void);
+
 private:
 
     void ValidateStructure (int32 index);

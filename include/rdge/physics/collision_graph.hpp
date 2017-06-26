@@ -80,6 +80,7 @@ public:
 
     bool IsLocked (void) const noexcept { return m_flags & LOCKED; }
 
+    void DebugDraw (void);
 
 private:
 

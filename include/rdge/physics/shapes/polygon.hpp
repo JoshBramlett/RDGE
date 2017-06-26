@@ -86,6 +86,7 @@ struct polygon : public ishape
         for (size_t i = 0; i < count; ++i)
         {
             vertices[i] = xf.to_world(vertices[i]);
+            normals[i] = xf.rot.rotate(normals[i]);
         }
     }
 

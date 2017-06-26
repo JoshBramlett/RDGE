@@ -60,6 +60,7 @@ Contact::Update (GraphListener* listener)
         {
             if (is_touching != x_is_touching)
             {
+                SDL_assert(false);
                 std::cout << "FUCK" << std::endl;
             }
 

@@ -42,6 +42,8 @@ namespace {
 TestScene::TestScene (void)
     : collision_graph({ 0.f, -9.8f })
 {
+    camera.zoom = 0.1f;
+
     collision_graph.listener = &l;
 
     rigid_body_profile bprof;
@@ -53,27 +55,30 @@ TestScene::TestScene (void)
     bprof.type = RigidBodyType::DYNAMIC;
     body_a = collision_graph.CreateBody(bprof);
 
-    bprof.linear_velocity = { 19.8f, 0.f };
+    bprof.linear_velocity = { 6.5f, 0.f };
     //bprof.angular_velocity = 25.f;
     body_b = collision_graph.CreateBody(bprof);
 
-    polygon floor({ -100.f, -100.f }, { -100.f, -110.f },
-                  { 100.f, -110.f, }, { 100.f, -100.f });
+    polygon floor({ -10.f, -10.f }, { -10.f, -11.f },
+                  { 10.f, -11.f, }, { 10.f, -10.f });
+    //polygon floor({ -100.f, -100.f }, { -100.f, -110.f },
+                  //{ 100.f, -110.f, }, { 100.f, -100.f });
     fprof.shape = &floor;
     fixture_c = body_c->CreateFixture(fprof);
 
-    //polygon tri_a({ 20.f, 70.f }, { 40.f, 20.f }, { 80.f, 70.f });
-    polygon tri_a({ 20.f, 20.f }, { 20.f, 80.f }, { 80.f, 20.f }, { 80.f, 80.f });
     //polygon tri_a({ 2.f, 7.f }, { 4.f, 2.f }, { 8.f, 7.f });
+    //polygon tri_a({ 20.f, 70.f }, { 40.f, 20.f }, { 80.f, 70.f });
+    polygon tri_a({ 2.f, 2.f }, { 2.f, 8.f }, { 8.f, 2.f }, { 8.f, 8.f });
+    //polygon tri_a({ 20.f, 20.f }, { 20.f, 80.f }, { 80.f, 20.f }, { 80.f, 80.f });
     fprof.shape = &tri_a;
     fprof.density = 1.f;
     fprof.restitution = 0.5f;
     fixture_a = body_a->CreateFixture(fprof);
 
-    //circle cir_a(vec2(-100.f, 100.f), 50.f);
-    //polygon tri_b({ -20.f, 70.f }, { -40.f, 20.f }, { -80.f, 70.f });
-    polygon tri_b({ -20.f, 20.f }, { -20.f, 80.f }, { -80.f, 20.f }, { -80.f, 80.f });
     //polygon tri_b({ -2.f, 7.f }, { -4.f, 2.f }, { -8.f, 7.f });
+    //polygon tri_b({ -20.f, 70.f }, { -40.f, 20.f }, { -80.f, 70.f });
+    polygon tri_b({ -2.f, 2.f }, { -2.f, 8.f }, { -8.f, 2.f }, { -8.f, 8.f });
+    //polygon tri_b({ -20.f, 20.f }, { -20.f, 80.f }, { -80.f, 20.f }, { -80.f, 80.f });
     fprof.shape = &tri_b;
     fixture_b = body_b->CreateFixture(fprof);
 
@@ -121,8 +126,10 @@ void
 TestScene::OnRender (void)
 {
 
-    debug::DrawWireFrame(fixture_a->proxy->box, color::WHITE);
-    debug::DrawWireFrame(fixture_b->proxy->box, color::WHITE);
+    //debug::DrawWireFrame(fixture_a->proxy->box, color::WHITE);
+    //debug::DrawWireFrame(fixture_b->proxy->box, color::WHITE);
+
+    collision_graph.DebugDraw();
 
     auto tri_a = static_cast<polygon*>(fixture_a->shape.world);
     debug::DrawWireFrame(*tri_a);

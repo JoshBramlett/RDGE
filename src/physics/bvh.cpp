@@ -1,4 +1,5 @@
 #include <rdge/physics/bvh.hpp>
+#include <rdge/debug/renderer.hpp>
 
 #include <sstream>
 
@@ -469,6 +470,33 @@ BVHTree::Dump (void)
     }
 
     return ss.str();
+}
+
+void
+BVHTree::DebugDraw (void)
+{
+    std::vector<int32> stack;
+
+    stack.push_back(m_root);
+    while (!stack.empty())
+    {
+        int32 handle = stack.back();
+        stack.pop_back();
+
+        if (handle == bvh_node::NULL_NODE)
+        {
+            continue;
+        }
+
+        auto& node = m_nodes[handle];
+        debug::DrawWireFrame(node.fat_box, color::CYAN);
+
+        if (!node.is_leaf())
+        {
+            stack.push_back(node.left);
+            stack.push_back(node.right);
+        }
+    }
 }
 
 std::ostream& operator<< (std::ostream& os, const bvh_node& node)

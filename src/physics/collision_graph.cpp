@@ -12,9 +12,9 @@ GraphListener s_defaultGraphListener;
 
 
 constexpr float VELOCITY_THRESHOLD = 1.f;
-constexpr float BAUMGARTE = 0.2f;
+constexpr float BAUMGARTE_STABILIZATION = 0.2f;
 constexpr float MAX_LINEAR_CORRECTION = 0.2f;
-constexpr float MAX_TRANSLATION = 0.2f;
+constexpr float MAX_TRANSLATION = 2.f;
 constexpr float MAX_TRANSLATION_SQAURED = MAX_TRANSLATION * MAX_TRANSLATION;
 constexpr float MAX_ROTATION = 0.5f * math::PI;
 constexpr float MAX_ROTATION_SQUARED = MAX_ROTATION * MAX_ROTATION;
@@ -28,14 +28,15 @@ struct island_solver
         math::vec2 linear_vel;  //!< body.linear.velocity
         float      angle;       //!< body.sweep.angle_n
         float      angular_vel; //!< body.angular.velocity
+        float      inv_mass;    //!< body.linear.inv_mass
+        float      inv_mmoi;    //!< body.angular.inv_mmoi
     };
 
     struct solver_contact_data
     {
         Contact* contact;
         size_t body_index[2];
-        float inv_mass[2];
-        float inv_mmoi[2];
+        float combined_inv_mass;
 
         struct velocity_constraint_point
         {
@@ -77,7 +78,9 @@ struct island_solver
             b->sweep.pos_n,
             b->linear.velocity,
             b->sweep.angle_n,
-            b->angular.velocity
+            b->angular.velocity,
+            b->linear.inv_mass,
+            b->angular.inv_mmoi
         };
 
         if (b->GetType() == RigidBodyType::DYNAMIC)
@@ -160,12 +163,12 @@ struct island_solver
                 // apply contact impulse
                 math::vec2 impulse = tangent * lambda;
 
-                bdata_a.linear_vel -= data.inv_mass[0] * impulse;
-                bdata_a.angular_vel -= data.inv_mmoi[0] *
+                bdata_a.linear_vel -= bdata_a.inv_mass * impulse;
+                bdata_a.angular_vel -= bdata_a.inv_mmoi *
                                        math::perp_dot(vcp.rel_point[0], impulse);
 
-                bdata_b.linear_vel += data.inv_mass[1] * impulse;
-                bdata_b.angular_vel += data.inv_mmoi[1] *
+                bdata_b.linear_vel += bdata_b.inv_mass * impulse;
+                bdata_b.angular_vel += bdata_b.inv_mmoi *
                                        math::perp_dot(vcp.rel_point[1], impulse);
             }
 
@@ -193,12 +196,12 @@ struct island_solver
                 // apply contact impulse
                 math::vec2 impulse = mf.normal * lambda;
 
-                bdata_a.linear_vel -= data.inv_mass[0] * impulse;
-                bdata_a.angular_vel -= data.inv_mmoi[0] *
+                bdata_a.linear_vel -= bdata_a.inv_mass * impulse;
+                bdata_a.angular_vel -= bdata_a.inv_mmoi *
                                        math::perp_dot(vcp.rel_point[0], impulse);
 
-                bdata_b.linear_vel += data.inv_mass[1] * impulse;
-                bdata_b.angular_vel += data.inv_mmoi[1] *
+                bdata_b.linear_vel += bdata_b.inv_mass * impulse;
+                bdata_b.angular_vel += bdata_b.inv_mmoi *
                                        math::perp_dot(vcp.rel_point[1], impulse);
             }
         }
@@ -228,26 +231,25 @@ struct island_solver
                     max_depth = mf.depths[i];
                 }
 
-                float C = math::clamp(BAUMGARTE * (-mf.depths[i] + LINEAR_SLOP),
+                float C = math::clamp(BAUMGARTE_STABILIZATION * (-mf.depths[i] + LINEAR_SLOP),
                                       -MAX_LINEAR_CORRECTION, 0.f);
 
-                float rel_normal_a = math::perp_dot(vcp.rel_point[0], normal);
-                float rel_normal_b = math::perp_dot(vcp.rel_point[1], normal);
+                float radius_normal_a = math::perp_dot(vcp.rel_point[0], normal);
+                float radius_normal_b = math::perp_dot(vcp.rel_point[1], normal);
 
                 // effective mass on the normal
-                float enm = data.inv_mass[0] +
-                            data.inv_mass[1] +
-                            (data.inv_mmoi[0] * math::square(rel_normal_a)) +
-                            (data.inv_mmoi[1] * math::square(rel_normal_b));
+                float enm = data.combined_inv_mass +
+                            (bdata_a.inv_mmoi * math::square(radius_normal_a)) +
+                            (bdata_b.inv_mmoi * math::square(radius_normal_b));
                 float normal_mass = (enm > 0.f) ? (-C / enm) : 0.f;
                 auto impulse = normal * normal_mass;
 
-                bdata_a.pos -= data.inv_mass[0] * impulse;
-                bdata_a.angle -= data.inv_mmoi[0] *
+                bdata_a.pos -= bdata_a.inv_mass * impulse;
+                bdata_a.angle -= bdata_a.inv_mmoi *
                                  math::perp_dot(vcp.rel_point[0], impulse);
 
-                bdata_b.pos += data.inv_mass[1] * impulse;
-                bdata_b.angle += data.inv_mmoi[1] *
+                bdata_b.pos += bdata_b.inv_mass * impulse;
+                bdata_b.angle += bdata_b.inv_mmoi *
                                  math::perp_dot(vcp.rel_point[1], impulse);
             }
         }
@@ -285,17 +287,13 @@ struct island_solver
             const auto body_b = data.contact->fixture_b->body;
 
             data.body_index[0] = body_a->solver_index;
-            data.inv_mass[0] = body_a->linear.inv_mass;
-            data.inv_mmoi[0] = body_a->angular.inv_mmoi;
-
             data.body_index[1] = body_b->solver_index;
-            data.inv_mass[1] = body_b->linear.inv_mass;
-            data.inv_mmoi[1] = body_b->angular.inv_mmoi;
 
-            // build the velocity constraint points
             auto& bdata_a = body_data[data.body_index[0]];
             auto& bdata_b = body_data[data.body_index[1]];
+            data.combined_inv_mass = bdata_a.inv_mass + bdata_b.inv_mass;
 
+            // build the velocity constraint points
             const auto& mf = data.contact->manifold;
             math::vec2 tangent = mf.normal.perp_ccw();
             float restitution = data.contact->restitution;
@@ -307,32 +305,28 @@ struct island_solver
                 vcp.rel_point[0] = mf.contacts[i] - bdata_a.pos;
                 vcp.rel_point[1] = mf.contacts[i] - bdata_b.pos;
 
-                float rel_normal_a = math::perp_dot(vcp.rel_point[0], mf.normal);
-                float rel_normal_b = math::perp_dot(vcp.rel_point[1], mf.normal);
-
                 // effective mass on the normal
-                float enm = data.inv_mass[0] +
-                            data.inv_mass[1] +
-                            (data.inv_mmoi[0] * math::square(rel_normal_a)) +
-                            (data.inv_mmoi[1] * math::square(rel_normal_b));
+                float radius_normal_a = math::perp_dot(vcp.rel_point[0], mf.normal);
+                float radius_normal_b = math::perp_dot(vcp.rel_point[1], mf.normal);
+                float enm = data.combined_inv_mass +
+                            (bdata_a.inv_mmoi * math::square(radius_normal_a)) +
+                            (bdata_b.inv_mmoi * math::square(radius_normal_b));
                 vcp.normal_mass = (enm > 0.f) ? (1.f / enm) : 0.f;
 
-                float rel_tangent_a = math::perp_dot(vcp.rel_point[0], tangent);
-                float rel_tangent_b = math::perp_dot(vcp.rel_point[1], tangent);
-
                 // effective mass on the tangent
-                float etm = data.inv_mass[0] +
-                            data.inv_mass[1] +
-                            (data.inv_mmoi[0] * math::square(rel_tangent_a)) +
-                            (data.inv_mmoi[1] * math::square(rel_tangent_b));
+                float radius_tangent_a = math::perp_dot(vcp.rel_point[0], tangent);
+                float radius_tangent_b = math::perp_dot(vcp.rel_point[1], tangent);
+                float etm = data.combined_inv_mass +
+                            (bdata_a.inv_mmoi * math::square(radius_tangent_a)) +
+                            (bdata_b.inv_mmoi * math::square(radius_tangent_b));
                 vcp.tangent_mass = (etm > 0.f) ? (1.f / etm) : 0.f;
 
-                // relative velocity at contact normal
-                math::vec2 rvel_a = bdata_a.linear_vel +
-                                    (vcp.rel_point[0].perp() * bdata_a.angular_vel);
-                math::vec2 rvel_b = bdata_b.linear_vel +
-                                    (vcp.rel_point[1].perp() * bdata_b.angular_vel);
-                float rnv = math::dot(mf.normal, rvel_b - rvel_a);
+                // relative velocity along direction of contact normal
+                math::vec2 vel_a = bdata_a.linear_vel +
+                                   (vcp.rel_point[0].perp() * bdata_a.angular_vel);
+                math::vec2 vel_b = bdata_b.linear_vel +
+                                   (vcp.rel_point[1].perp() * bdata_b.angular_vel);
+                float rnv = math::dot(mf.normal, vel_b - vel_a);
 
                 vcp.velocity_bias = 0.f;
                 if (rnv < -VELOCITY_THRESHOLD)
@@ -347,23 +341,23 @@ struct island_solver
             solve_velocity();
         }
 
-        //for (auto& data : body_data)
-        //{
-            //auto t = data.linear_vel * dt;
-            //if (t.self_dot() > MAX_TRANSLATION_SQAURED)
-            //{
-                //data.linear_vel *= MAX_TRANSLATION / t.length();
-            //}
+        for (auto& data : body_data)
+        {
+            auto t = data.linear_vel * dt;
+            if (t.self_dot() > MAX_TRANSLATION_SQAURED)
+            {
+                data.linear_vel *= MAX_TRANSLATION / t.length();
+            }
 
-            //auto r = data.angular_vel * dt;
-            //if (math::square(r) > MAX_ROTATION_SQUARED)
-            //{
-                //data.angular_vel *= MAX_ROTATION / math::abs(r);
-            //}
+            auto r = data.angular_vel * dt;
+            if (math::square(r) > MAX_ROTATION_SQUARED)
+            {
+                data.angular_vel *= MAX_ROTATION / math::abs(r);
+            }
 
-            //data.pos += data.linear_vel * dt;
-            //data.angle += data.angular_vel * dt;
-        //}
+            data.pos += data.linear_vel * dt;
+            data.angle += data.angular_vel * dt;
+        }
 
         for (size_t iter = 0; iter < position_iterations; iter++)
         {
@@ -376,13 +370,16 @@ struct island_solver
         for (auto& data : body_data)
         {
             auto body = data.body;
-            body->sweep.pos_n = data.pos + (data.linear_vel * dt);
-            body->sweep.angle_n = data.angle + (data.angular_vel * dt);
+            body->sweep.pos_n = data.pos;
+            body->sweep.angle_n = data.angle;
             body->linear.velocity = data.linear_vel;
             body->angular.velocity = data.angular_vel;
 
-            body->world_transform.set_angle(body->sweep.angle_n);
-            body->world_transform.pos = body->sweep.pos_n -
+            //body->world_transform.set_angle(body->sweep.angle_n);
+            //body->world_transform.pos = body->sweep.pos_n -
+                                        //body->world_transform.rot.rotate(body->sweep.local_center);
+            body->world_transform.set_angle(data.angle);
+            body->world_transform.pos = data.pos -
                                         body->world_transform.rot.rotate(body->sweep.local_center);
         }
     }
@@ -714,6 +711,12 @@ void
 CollisionGraph::TouchProxy (const fixture_proxy* proxy)
 {
     m_dirtyProxies.push_back(proxy->handle);
+}
+
+void
+CollisionGraph::DebugDraw (void)
+{
+    m_tree.DebugDraw();
 }
 
 } // namespace physics

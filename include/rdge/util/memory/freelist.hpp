@@ -101,7 +101,6 @@ public:
         SDL_assert(m_count > 0);
         SDL_assert(handle < m_capacity);
         SDL_assert(IsReserved(handle));
-        SDL_assert((ptrdiff_t(&m_handles[handle] - m_handles) / sizeof(uint32)) <= m_count);
 
         return m_data[handle];
     }
@@ -129,7 +128,6 @@ public:
         SDL_assert(m_count > 0);
         SDL_assert(handle < m_capacity);
         SDL_assert(IsReserved(handle));
-        SDL_assert((ptrdiff_t(&m_handles[handle] - m_handles) / sizeof(uint32)) <= m_count);
 
         memset(&m_data[handle], 0, sizeof(T));
         for (size_t i = 0; i < m_count; i++)
