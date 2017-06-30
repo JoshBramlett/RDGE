@@ -117,7 +117,7 @@ LineRenderer::LineRenderer (uint16 capacity)
     opengl::BindBuffer(GL_ARRAY_BUFFER, m_vbo);
 
     uint32 vbo_size = static_cast<uint32>(m_capacity) * LINE_SIZE;
-    m_buffer = reinterpret_cast<line_vertex*>(malloc(vbo_size));
+    m_buffer = (line_vertex*)malloc(vbo_size);
     opengl::SetBufferData(GL_ARRAY_BUFFER, vbo_size, nullptr, GL_DYNAMIC_DRAW);
 
     opengl::EnableVertexAttribute(VATTR_POS_INDEX);

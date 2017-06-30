@@ -16,22 +16,22 @@ Random::Random (void) { }
 
 Random::~Random (void) { }
 
-rdge::uint32
+uint32
 Random::Next (void) const
 {
-    return Next(0, std::numeric_limits<rdge::uint32>::max());
+    return Next(0, std::numeric_limits<uint32>::max());
 }
 
-rdge::uint32
-Random::Next (rdge::uint32 max) const
+uint32
+Random::Next (uint32 max) const
 {
     return Next(0, max);
 }
 
-rdge::uint32
-Random::Next (rdge::uint32 low, rdge::uint32 high) const
+uint32
+Random::Next (uint32 low, uint32 high) const
 {
-    std::uniform_int_distribution<rdge::uint32> dist(low, high);
+    std::uniform_int_distribution<uint32> dist(low, high);
     return dist(s_mt);
 }
 

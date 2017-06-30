@@ -10,6 +10,7 @@
 #include <rdge/physics/contact.hpp>
 #include <rdge/physics/fixture.hpp>
 #include <rdge/physics/rigid_body.hpp>
+#include <rdge/physics/solver.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/util/containers/intrusive_list.hpp>
 #include <rdge/util/memory/small_block_allocator.hpp>
@@ -56,8 +57,8 @@ public:
 
     virtual void OnContactStart (Contact*) { }
     virtual void OnContactEnd (Contact*) { }
-    virtual void OnPreSolve (Contact*, const collision_manifold*) { }
-    virtual void OnPostSolve (Contact*, const contact_impulse*) { }
+    virtual void OnPreSolve (Contact*, const collision_manifold&) { }
+    virtual void OnPostSolve (Contact*) { }
 
     //! \brief Triggered during destruction of the parent \ref RigidBody
     virtual void OnDestroyed (Fixture*) { }
@@ -72,13 +73,14 @@ public:
     RigidBody* CreateBody (const rigid_body_profile& profile);
     void DestroyBody (RigidBody* body);
 
-    void CreateContact (fixture_proxy* a, fixture_proxy* b);
-    void DestroyContact (Contact* contact);
+    void DisableForceClearing (void) noexcept { m_flags &= ~CLEAR_FORCES; }
+    void ClearForces (void) noexcept;
 
 
     void Step (float dt);
 
     bool IsLocked (void) const noexcept { return m_flags & LOCKED; }
+    bool IsSleepPrevented (void) const noexcept { return m_flags & LOCKED; }
 
     void DebugDraw (void);
 
@@ -86,6 +88,8 @@ private:
 
     friend class RigidBody;
 
+    void CreateContact (fixture_proxy* a, fixture_proxy* b);
+    void DestroyContact (Contact* contact);
     void PurgeContacts (void);
 
     int32 RegisterProxy (fixture_proxy* proxy);
@@ -94,28 +98,28 @@ private:
     void TouchProxy (const fixture_proxy* proxy);
 
 public:
-    SmallBlockAllocator block_allocator;
 
-    math::vec2 gravity;
+    SmallBlockAllocator block_allocator;
 
     intrusive_list<RigidBody> bodies;
 
-
-    // TODO maybe make contact data private?
-    intrusive_list<Contact> contacts;
     ContactFilter* custom_filter = nullptr;
     GraphListener* listener = nullptr;
-
-
 
 private:
 
     BVHTree m_tree;
+    Solver m_solver;
+
     std::vector<int32> m_dirtyProxies;
+    // TODO maybe make contact data private?
+    intrusive_list<Contact> contacts;
 
     enum StateFlags
     {
-        LOCKED    = 0x0001,
+        LOCKED        = 0x0001,
+        CLEAR_FORCES  = 0x0002,
+        PREVENT_SLEEP = 0x0004
     };
 
     uint16 m_flags = 0;

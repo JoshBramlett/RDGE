@@ -44,8 +44,6 @@ public:
     bool IsTouching (void) const noexcept { return m_flags & TOUCHING; }
     bool IsEnabled (void) const noexcept { return m_flags & ENABLED; }
 
-    void Update (GraphListener* listener);
-
     Fixture* fixture_a = nullptr;
     Fixture* fixture_b = nullptr;
 
@@ -57,10 +55,17 @@ public:
     float tangent_speed = 0.f;
 
     collision_manifold manifold;
+    contact_impulse impulse;
 
 private:
 
     friend class CollisionGraph;
+    friend class Solver;
+
+    //! \brief Narrow phase contact evaluation
+    //! \details Performs narrow phase intersection tests and manifold generation.
+    //!          Responsible for sending contact listener events during state changes.
+    void Update (GraphListener* listener);
 
     enum StateFlags
     {

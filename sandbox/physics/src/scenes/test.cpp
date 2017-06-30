@@ -28,8 +28,8 @@ public:
         std::cout << "OnContactEnd" << std::endl;
     }
 
-    void OnPreSolve (Contact*, const collision_manifold*) override { }
-    void OnPostSolve (Contact*, const contact_impulse*) override { }
+    void OnPreSolve (Contact*, const collision_manifold&) override { }
+    void OnPostSolve (Contact*) override { }
     void OnDestroyed (Fixture*) override { }
 };
 

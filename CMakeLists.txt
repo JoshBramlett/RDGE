@@ -116,6 +116,7 @@ add_library (
              src/physics/contact.cpp
              src/physics/fixture.cpp
              src/physics/rigid_body.cpp
+             src/physics/solver.cpp
              src/physics/shapes/ishape.cpp
              src/physics/shapes/circle.cpp
              src/physics/shapes/polygon.cpp

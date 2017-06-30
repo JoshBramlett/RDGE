@@ -39,8 +39,8 @@ struct collision_manifold
 
 struct contact_impulse
 {
-    float normalImpulses[2]; // b2_maxManifoldPoints
-    float tangentImpulses[2];
+    float normals[2];
+    float tangents[2];
     size_t count;
 };
 

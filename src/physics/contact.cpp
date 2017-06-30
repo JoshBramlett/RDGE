@@ -39,6 +39,7 @@ Contact::Update (GraphListener* listener)
 {
     m_flags |= ENABLED;
 
+    auto old_manifold = manifold;
     bool was_touching = IsTouching();
     bool is_touching = false;
 
@@ -54,25 +55,6 @@ Contact::Update (GraphListener* listener)
     else
     {
         is_touching = shape_a->intersects_with(shape_b, manifold);
-        bool x_is_touching = shape_a->intersects_with(shape_b);
-
-        if (is_touching)
-        {
-            if (is_touching != x_is_touching)
-            {
-                SDL_assert(false);
-                std::cout << "FUCK" << std::endl;
-            }
-
-            is_touching = shape_a->intersects_with(shape_b, manifold);
-        }
-
-
-        // TODO ??? Don't really understand Box2D here.  They compare the previous
-        //      contacts with the current before storing the impulses.  From the
-        //      Box2D comments:
-        //      "Match old contact ids to new contact ids and copy the
-        //      stored impulses to warm start the solver."
 
         if (was_touching != is_touching)
         {
@@ -102,9 +84,9 @@ Contact::Update (GraphListener* listener)
             listener->OnContactEnd(this);
         }
 
-        if (is_touching && (is_sensor == false))
+        if (is_touching && !is_sensor)
         {
-            // TODO Presolve
+            listener->OnPreSolve(this, old_manifold);
         }
     }
 }

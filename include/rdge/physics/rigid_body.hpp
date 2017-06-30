@@ -202,6 +202,11 @@ public:
         return (m_type != RigidBodyType::STATIC) && (m_flags & AWAKE);
     }
 
+    bool IsSleepPrevented (void) const noexcept
+    {
+        return (m_type == RigidBodyType::STATIC) || (m_flags & PREVENT_SLEEP);
+    }
+
     void WakeUp (void) noexcept
     {
         if (!IsAwake())
@@ -225,8 +230,8 @@ public:
         }
     }
 
+
     bool IsFixedRotation (void) const noexcept { return m_flags & PREVENT_ROTATION; }
-    bool IsSleepProhibited (void) const noexcept { return m_flags & PREVENT_SLEEP; }
     bool IsBullet (void) const noexcept { return m_flags & BULLET; }
 
     bool ShouldCollide (RigidBody* other) const noexcept
@@ -238,6 +243,7 @@ public:
 private:
 
     friend class CollisionGraph;
+    friend class Solver;
     friend class rdge::SmallBlockAllocator;
 
     //! \brief RigidBody ctor
