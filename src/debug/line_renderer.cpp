@@ -1,6 +1,10 @@
 #include <rdge/debug/renderer.hpp>
 #include <rdge/graphics/shader.hpp>
 #include <rdge/math/intrinsics.hpp>
+#include <rdge/physics/aabb.hpp>
+#include <rdge/physics/shapes/circle.hpp>
+#include <rdge/physics/shapes/polygon.hpp>
+#include <rdge/physics/fixture.hpp>
 
 #include <rdge/internal/hints.hpp>
 #include <rdge/internal/logger_macros.hpp>
@@ -14,10 +18,13 @@
 #include <sstream>
 #include <memory>
 
-namespace {
+namespace rdge {
+namespace debug {
 
-using namespace rdge;
-using namespace rdge::debug;
+using namespace rdge::math;
+using namespace rdge::physics;
+
+namespace {
 
 struct line_vertex
 {
@@ -225,9 +232,6 @@ LineRenderer& Instance (uint16 cap = 5000)
 
 #ifdef RDGE_DEBUG
 
-namespace rdge {
-namespace debug {
-
 void
 InitializeRenderer (uint16 capacity)
 {
@@ -299,19 +303,19 @@ DrawWireFrame (const physics::aabb& box, const color& c)
 }
 
 void
-DrawWireFrame (const physics::circle& circle, const color& c)
+DrawWireFrame (const circle& circle, const color& c)
 {
     uint32 segments = 40;
     float theta = 0.f;
     float inc = 3.14159265f * 2.0f / static_cast<float>(segments);
 
-    math::vec3 p { std::cosf(theta), std::sinf(theta) };
+    vec3 p { std::cosf(theta), std::sinf(theta) };
     p *= circle.radius;
     p += circle.pos;
     for (uint32 i = 0; i <= segments; ++i)
     {
         theta += inc;
-        math::vec3 next_p = { std::cosf(theta), std::sinf(theta) };
+        vec3 next_p = { std::cosf(theta), std::sinf(theta) };
         next_p *= circle.radius;
         next_p += circle.pos;
 
@@ -321,12 +325,24 @@ DrawWireFrame (const physics::circle& circle, const color& c)
 }
 
 void
-DrawWireFrame (const physics::polygon& poly, const color& c)
+DrawWireFrame (const polygon& poly, const color& c)
 {
     for (size_t i = 0; i < poly.count; ++i)
     {
         size_t next_i = (i < (poly.count - 1)) ? i + 1 : 0;
         DrawLine({ poly.vertices[i], 0.f }, { poly.vertices[next_i], 0.f }, c);
+    }
+}
+
+void
+DrawWireFrame (const Fixture* fixture, const color& c)
+{
+    switch (fixture->shape.world->type())
+    {
+    case ShapeType::CIRCLE:
+        DrawWireFrame(*static_cast<const circle*>(fixture->shape.world), c);
+    case ShapeType::POLYGON:
+        DrawWireFrame(*static_cast<const polygon*>(fixture->shape.world), c);
     }
 }
 

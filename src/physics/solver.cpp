@@ -37,7 +37,7 @@ Solver::Add (RigidBody* b)
 
     // Awake flag is set b/c for a body to be added to the island it
     // was already awake or now in contact with an awake body
-    b->m_flags |= RigidBody::ON_ISLAND | RigidBody::AWAKE;
+    b->m_flags |= RigidBody::AWAKE;
     b->solver_index = m_bodies.size();
 
     auto& data = m_bodies.next();
@@ -76,7 +76,6 @@ Solver::Add (RigidBody* b)
 void
 Solver::Add (Contact* c)
 {
-    c->m_flags |= Contact::ON_ISLAND;
     auto& data = m_contacts.next();
     data.contact = c;
 }

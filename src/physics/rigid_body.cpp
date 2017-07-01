@@ -40,11 +40,6 @@ RigidBody::RigidBody (const rigid_body_profile& profile, CollisionGraph* parent)
         m_flags |= PREVENT_SLEEP;
     }
 
-    if (profile.bullet)
-    {
-        m_flags |= BULLET;
-    }
-
     sweep.pos_0 = world_transform.pos;
     sweep.pos_n = world_transform.pos;
     sweep.angle_0 = profile.angle;
@@ -88,6 +83,16 @@ RigidBody::CreateFixture (const fixture_profile& profile)
     }
 
     return result;
+}
+
+Fixture*
+RigidBody::CreateFixture (ishape* shape, float density)
+{
+    fixture_profile p;
+    p.shape = shape;
+    p.density = density;
+
+    return CreateFixture(p);
 }
 
 void
@@ -210,7 +215,7 @@ RigidBody::ComputeMass (void)
 
     if (angular.mmoi > 0.f && !IsFixedRotation())
     {
-        // TODO ??? Why subtract the parallel axis?
+        // NOTE: mmoi is NOT stored relative to the center
         angular.mmoi -= linear.mass * local_center.self_dot();
         SDL_assert(angular.mmoi > 0.f);
         angular.inv_mmoi = 1.f / angular.mmoi;

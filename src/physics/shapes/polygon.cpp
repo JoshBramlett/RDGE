@@ -167,6 +167,19 @@ polygon::polygon (float he_x, float he_y)
     normals[3] = { -1.f, 0.f };
 }
 
+polygon::polygon (float he_x, float he_y, const math::vec2& center, float angle)
+    : polygon(he_x, he_y)
+{
+    centroid = center;
+    iso_transform xf(center, angle);
+
+    for (size_t i = 0; i < count; ++i)
+    {
+        vertices[i] = xf.to_world(vertices[i]);
+        normals[i] = xf.rot.rotate(normals[i]);
+    }
+}
+
 polygon::polygon (const vec2& p1, const vec2& p2, const vec2& p3)
     : polygon({{ p1, p2, p3 }}, 3)
 { }

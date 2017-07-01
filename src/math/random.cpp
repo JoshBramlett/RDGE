@@ -10,11 +10,7 @@ namespace math {
 namespace {
     std::random_device s_rd;
     std::mt19937 s_mt(s_rd());
-}
-
-Random::Random (void) { }
-
-Random::~Random (void) { }
+} // anonymous namespace
 
 uint32
 Random::Next (void) const
@@ -35,10 +31,10 @@ Random::Next (uint32 low, uint32 high) const
     return dist(s_mt);
 }
 
-double
+float
 Random::Sample (void) const
 {
-    std::uniform_real_distribution<double> dist(0, 1.0);
+    std::uniform_real_distribution<float> dist(0, 1.0);
     return dist(s_mt);
 }
 

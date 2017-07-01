@@ -42,9 +42,10 @@ namespace {
 TestScene::TestScene (void)
     : collision_graph({ 0.f, -9.8f })
 {
-    camera.zoom = 0.1f;
+    camera.zoom = 0.05f;
 
     collision_graph.listener = &l;
+    collision_graph.debug_flags = CollisionGraph::DRAW_FIXTURES;
 
     rigid_body_profile bprof;
     fixture_profile fprof;
@@ -81,10 +82,6 @@ TestScene::TestScene (void)
     //polygon tri_b({ -20.f, 20.f }, { -20.f, 80.f }, { -80.f, 20.f }, { -80.f, 80.f });
     fprof.shape = &tri_b;
     fixture_b = body_b->CreateFixture(fprof);
-
-
-
-
 }
 
 void
@@ -125,23 +122,8 @@ TestScene::OnUpdate (const delta_time& dt)
 void
 TestScene::OnRender (void)
 {
-
-    //debug::DrawWireFrame(fixture_a->proxy->box, color::WHITE);
-    //debug::DrawWireFrame(fixture_b->proxy->box, color::WHITE);
-
     collision_graph.DebugDraw();
 
-    auto tri_a = static_cast<polygon*>(fixture_a->shape.world);
-    debug::DrawWireFrame(*tri_a);
-    auto tri_b = static_cast<polygon*>(fixture_b->shape.world);
-    debug::DrawWireFrame(*tri_b);
-    auto floor = static_cast<polygon*>(fixture_c->shape.world);
-    debug::DrawWireFrame(*floor);
-
-    //aabb a({-280.11, -270.11}, {-219.89, -219.89});
-    //aabb b({19.89, 19.89}, {80.11, 70.11});
-    //debug::DrawWireFrame(a);
-    //debug::DrawWireFrame(b);
 
 /*
     polygon tri_a({ 2.f, 7.f }, { 4.f, 2.f }, { 8.f, 7.f });

@@ -22,16 +22,6 @@ class RigidBody;
 class CollisionGraph;
 class Contact;
 
-// Box2D dependency tree:
-// Body
-//   Fixture
-//   World
-//   ContactManager
-//   ContactEdge
-//   Contact
-//   BroadPhase
-//   BlockAllocator
-
 //! \struct sweep_step
 //! \brief Describes the motion of a body/shape during the time step
 //! \details Stores an advancing time and caches the position and angle at
@@ -118,7 +108,6 @@ struct rigid_body_profile
     bool awake = true;             //!< Body is initially awake
     bool prevent_rotation = false; //!< Prevent rotation
     bool prevent_sleep = false;    //!< Keep body awake
-    bool bullet = false;           //!< High velocity body - prevents tunneling
     //!@}
 };
 
@@ -139,16 +128,19 @@ public:
     //! \warning Function is locked during simulation
     Fixture* CreateFixture (const fixture_profile& profile);
 
+    //! \brief Specialized overload for shape/density
+    //! \param [in] shape Shape of the fixture
+    //! \param [in] density Density of the fixture
+    //! \returns Pointer to the created fixture
+    //! \warning Function is locked during simulation
+    Fixture* CreateFixture (ishape* shape, float density);
+
     //! \brief Destroy an attached fixture
     //! \details If the body is simulating contacts associated with the fixture
     //!          are destroyed.  Mass data is automatically re-calculated.
     //! \param [in] fixture Fixture to destroy
     //! \warning Function is locked during simulation
     void DestroyFixture (Fixture* fixture);
-
-    bool HasEdge (const Fixture* a, const Fixture* b) noexcept;
-    void SyncFixtures (void);
-    void ComputeMass (void);
 
     math::vec2 GetLinearVelocityFromWorldPoint (const math::vec2& point)
     {
@@ -232,7 +224,6 @@ public:
 
 
     bool IsFixedRotation (void) const noexcept { return m_flags & PREVENT_ROTATION; }
-    bool IsBullet (void) const noexcept { return m_flags & BULLET; }
 
     bool ShouldCollide (RigidBody* other) const noexcept
     {
@@ -256,6 +247,10 @@ private:
     //! \brief RigidBody dtor
     //! \details Responsible for cleaning up child fixtures.
     ~RigidBody (void) noexcept;
+
+    bool HasEdge (const Fixture* a, const Fixture* b) noexcept;
+    void SyncFixtures (void);
+    void ComputeMass (void);
 
 public:
 
@@ -305,9 +300,7 @@ private:
         PREVENT_ROTATION = 0x0004,
         PREVENT_SLEEP    = 0x0008,
 
-        ON_ISLAND        = 0x0010,
-        BULLET           = 0x0020,
-        TOI              = 0x0040
+        ON_ISLAND        = 0x0010
     };
 
     float      m_sleepTime = 0.f;

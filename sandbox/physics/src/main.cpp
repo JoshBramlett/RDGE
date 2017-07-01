@@ -8,6 +8,8 @@
 #include <rdge/system.hpp>
 
 #include "scenes/test.hpp"
+#include "scenes/tiles.hpp"
+#include "scenes/tumbler.hpp"
 
 #include <memory>
 
@@ -52,7 +54,9 @@ int main ()
         return false;
     };
 
-    game.PushScene(std::make_shared<TestScene>());
+    //game.PushScene(std::make_shared<TestScene>());
+    //game.PushScene(std::make_shared<TilesScene>());
+    game.PushScene(std::make_shared<TumblerScene>());
     game.Run();
 
     return 0;

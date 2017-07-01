@@ -65,6 +65,15 @@ struct polygon : public ishape
     //! \param [in] he_y y-axis half extent
     explicit polygon (float he_x, float he_y);
 
+    //! \brief polygon transformed rectangle specialization ctor
+    //! \details Initializes a box and transforms it according to the provided
+    //!          position and angle.
+    //! \param [in] he_x x-axis half extent
+    //! \param [in] he_y y-axis half extent
+    //! \param [in] center Centroid position
+    //! \param [in] angle Rotation angle (in radians)
+    explicit polygon (float he_x, float he_y, const math::vec2& center, float angle = 0.f);
+
     //!@{
     //! \brief polygon explicit vertices ctor
     //! \details Initialize a polygon from the list of vertices

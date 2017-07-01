@@ -17,6 +17,16 @@
 
 #include <vector>
 
+// Physics TODO
+// 1) Something is not right in the solver.  See Tumbler sandbox.
+//      - Look at position correction and manifold generation.  It's
+//        implementation is quite different from Box2D
+// 2) Circle/Polygon manifold generation
+// 3) Warm starting seems to cut down on processing time considerably
+// 4) RigidBody has a lot of unimplemented methods
+// 5) Clean up and finish documenting
+// 6) Stats
+
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 namespace physics {
@@ -80,9 +90,23 @@ public:
     void Step (float dt);
 
     bool IsLocked (void) const noexcept { return m_flags & LOCKED; }
-    bool IsSleepPrevented (void) const noexcept { return m_flags & LOCKED; }
+    bool IsSleepPrevented (void) const noexcept { return m_flags & PREVENT_SLEEP; }
 
+#ifdef RDGE_DEBUG
     void DebugDraw (void);
+
+    enum DebugFlags
+    {
+        DRAW_BVH_NODES      = 0x0001,
+        DRAW_FIXTURES       = 0x0002,
+        DRAW_AABBS          = 0x0004,
+        DRAW_CENTER_OF_MASS = 0x0008,
+        DRAW_BODIES         = DRAW_FIXTURES | DRAW_AABBS | DRAW_CENTER_OF_MASS,
+        DRAW_ALL            = 0xFFFF
+    };
+
+    uint16 debug_flags = 0;
+#endif
 
 private:
 
@@ -99,12 +123,10 @@ private:
 
 public:
 
-    SmallBlockAllocator block_allocator;
+    SmallBlockAllocator block_allocator;    //!< Allocator for all simulation
 
-    intrusive_list<RigidBody> bodies;
-
-    ContactFilter* custom_filter = nullptr;
-    GraphListener* listener = nullptr;
+    ContactFilter* custom_filter = nullptr; //!< Fixture filtering
+    GraphListener* listener = nullptr;      //!< Callback listener
 
 private:
 
@@ -112,8 +134,8 @@ private:
     Solver m_solver;
 
     std::vector<int32> m_dirtyProxies;
-    // TODO maybe make contact data private?
-    intrusive_list<Contact> contacts;
+    intrusive_list<RigidBody> m_bodies;
+    intrusive_list<Contact> m_contacts;
 
     enum StateFlags
     {

@@ -22,54 +22,23 @@ namespace math {
 class Random
 {
 public:
-    //! \brief Random ctor
-    Random (void);
-
-    //! \brief Random dtor
-    ~Random (void);
-
-    //! \brief Random Copy ctor
-    //! \details Non-copyable
-    Random (const Random&) = delete;
-
-    //! \brief Random Move ctor
-    //! \details Non-moveable
-    Random (Random&&) = delete;
-
-    //! \brief Random Copy Assignment Operator
-    //! \details Non-copyable
-    Random& operator= (const Random&) = delete;
-
-    //! \brief Random Move Assignment Operator
-    //! \details Non-moveable
-    Random& operator= (Random&&) = delete;
+    //! \brief Random default ctor
+    Random (void) = default;
 
     //! \brief Generates a random integer within [0, MAX_INT]
-    //! \details Each random number has a uniform probability of occurring
-    //!          and is inclusive of the range provided
-    //! \returns Random integer
-    rdge::uint32 Next (void) const;
+    uint32 Next (void) const;
 
     //! \brief Generates a random integer within [0, max]
-    //! \details Each random number has a uniform probability of occurring
-    //!          and is inclusive of the range provided
     //! \param [in] max Maximum inclusive value
-    //! \returns Random integer
-    rdge::uint32 Next (rdge::uint32 max) const;
+    uint32 Next (uint32 max) const;
 
     //! \brief Generates a random integer within [low, high]
-    //! \details Each random number has a uniform probability of occurring
-    //!          and is inclusive of the range provided
     //! \param [in] low Low end inclusive range
     //! \param [in] high High end inclusive range
-    //! \returns Random integer
-    rdge::uint32 Next (rdge::uint32 low, rdge::uint32 high) const;
+    uint32 Next (uint32 low, uint32 high) const;
 
-    //! \brief Generates a random double within [0, 1)
-    //! \details Each random number has a uniform probability of occurring
-    //!          and is between 0 inclusive and 1 exclusive
-    //! \returns Random double
-    double Sample (void) const;
+    //! \brief Generates a random normalized float within [0, 1)
+    float Sample (void) const;
 };
 
 } // namespace math

@@ -1,5 +1,9 @@
 #include <rdge/physics/bvh.hpp>
+
+#ifdef RDGE_DEBUG
 #include <rdge/debug/renderer.hpp>
+#include <rdge/graphics/color.hpp>
+#endif
 
 #include <sstream>
 
@@ -90,15 +94,14 @@ BVHTree::InsertLeaf (int32 leaf_handle)
         return;
     }
 
-    auto& leaf = m_nodes[leaf_handle];
-
+    aabb leaf_box = m_nodes[leaf_handle].fat_box;
     int32 test_handle = m_root;
     while (!m_nodes[test_handle].is_leaf())
     {
         auto& node = m_nodes[test_handle];
         float node_area = node.fat_box.perimeter();
 
-        aabb combined = aabb::merge(node.fat_box, leaf.fat_box);
+        aabb combined = aabb::merge(node.fat_box, leaf_box);
         float combined_area = combined.perimeter();
 
         // Cost of creating a new parent for this node and the new leaf
@@ -114,12 +117,12 @@ BVHTree::InsertLeaf (int32 leaf_handle)
         auto& left_child = m_nodes[node.left];
         if (left_child.is_leaf())
         {
-            aabb temp = aabb::merge(left_child.fat_box, leaf.fat_box);
+            aabb temp = aabb::merge(left_child.fat_box, leaf_box);
             left_cost = temp.perimeter() + inheritance_cost;
         }
         else
         {
-            aabb temp = aabb::merge(left_child.fat_box, leaf.fat_box);
+            aabb temp = aabb::merge(left_child.fat_box, leaf_box);
             float old_area = left_child.fat_box.perimeter();
             float new_area = temp.perimeter();
             left_cost = (new_area - old_area) + inheritance_cost;
@@ -129,12 +132,12 @@ BVHTree::InsertLeaf (int32 leaf_handle)
         auto& right_child = m_nodes[node.right];
         if (right_child.is_leaf())
         {
-            aabb temp = aabb::merge(right_child.fat_box, leaf.fat_box);
+            aabb temp = aabb::merge(right_child.fat_box, leaf_box);
             right_cost = temp.perimeter() + inheritance_cost;
         }
         else
         {
-            aabb temp = aabb::merge(right_child.fat_box, leaf.fat_box);
+            aabb temp = aabb::merge(right_child.fat_box, leaf_box);
             float old_area = right_child.fat_box.perimeter();
             float new_area = temp.perimeter();
             right_cost = (new_area - old_area) + inheritance_cost;
@@ -151,23 +154,23 @@ BVHTree::InsertLeaf (int32 leaf_handle)
 
     // Create a new parent
     int32 sibling_handle = test_handle;
-    auto& sibling = m_nodes[sibling_handle];
-
-    int32 old_parent_handle = sibling.parent;
+    int32 old_parent_handle = m_nodes[sibling_handle].parent;
     int32 new_parent_handle = CreateNode();
 
+    auto& sibling = m_nodes[sibling_handle];
     auto& new_parent = m_nodes[new_parent_handle];
     new_parent.parent = old_parent_handle;
-    new_parent.fat_box = aabb::merge(leaf.fat_box, sibling.fat_box);
+    new_parent.fat_box = aabb::merge(leaf_box, sibling.fat_box);
     new_parent.height = sibling.height + 1;
+    new_parent.left = sibling_handle;
+    new_parent.right = leaf_handle;
+
+    sibling.parent = new_parent_handle;
+    m_nodes[leaf_handle].parent = new_parent_handle;
 
     if (old_parent_handle == bvh_node::NULL_NODE)
     {
         // Sibling was the root
-        new_parent.left = sibling_handle;
-        new_parent.right = leaf_handle;
-        sibling.parent = new_parent_handle;
-        leaf.parent = new_parent_handle;
         m_root = new_parent_handle;
     }
     else
@@ -181,15 +184,10 @@ BVHTree::InsertLeaf (int32 leaf_handle)
         {
             m_nodes[old_parent_handle].right = new_parent_handle;
         }
-
-        new_parent.left = sibling_handle;
-        new_parent.right = leaf_handle;
-        sibling.parent = new_parent_handle;
-        leaf.parent = new_parent_handle;
     }
 
     // Walk back up the tree fixing heights and AABBs
-    test_handle = leaf.parent;
+    test_handle = new_parent_handle;
     while (test_handle != bvh_node::NULL_NODE)
     {
         test_handle = Balance(test_handle);
@@ -353,10 +351,10 @@ BVHTree::Balance (int32 handle_a)
     // rotate node_b up
     if (balance < -1)
     {
-        int32 handle_f = node_b.left;
-        int32 handle_g = node_b.right;
-        auto& node_f = m_nodes[handle_f];
-        auto& node_g = m_nodes[handle_g];
+        int32 handle_d = node_b.left;
+        int32 handle_e = node_b.right;
+        auto& node_d = m_nodes[handle_d];
+        auto& node_e = m_nodes[handle_e];
 
         // swap node_a and node_b
         node_b.left = handle_a;
@@ -382,27 +380,27 @@ BVHTree::Balance (int32 handle_a)
         }
 
         // rotate
-        if (node_f.height > node_g.height)
+        if (node_d.height > node_e.height)
         {
-            node_b.right = handle_f;
-            node_a.right = handle_g;
-            node_g.parent = handle_a;
+            node_b.right = handle_d;
+            node_a.left = handle_e;
+            node_e.parent = handle_a;
 
-            node_a.fat_box = aabb::merge(node_c.fat_box, node_g.fat_box);
-            node_b.fat_box = aabb::merge(node_a.fat_box, node_f.fat_box);
-            node_a.height = 1 + std::max(node_c.height, node_g.height);
-            node_b.height = 1 + std::max(node_a.height, node_f.height);
+            node_a.fat_box = aabb::merge(node_c.fat_box, node_e.fat_box);
+            node_b.fat_box = aabb::merge(node_a.fat_box, node_d.fat_box);
+            node_a.height = 1 + std::max(node_c.height, node_e.height);
+            node_b.height = 1 + std::max(node_a.height, node_d.height);
         }
         else
         {
-            node_b.right = handle_g;
-            node_a.right = handle_f;
-            node_f.parent = handle_a;
+            node_b.right = handle_e;
+            node_a.left = handle_d;
+            node_d.parent = handle_a;
 
-            node_a.fat_box = aabb::merge(node_c.fat_box, node_f.fat_box);
-            node_b.fat_box = aabb::merge(node_a.fat_box, node_g.fat_box);
-            node_a.height = 1 + std::max(node_c.height, node_f.height);
-            node_b.height = 1 + std::max(node_a.height, node_g.height);
+            node_a.fat_box = aabb::merge(node_c.fat_box, node_d.fat_box);
+            node_b.fat_box = aabb::merge(node_a.fat_box, node_e.fat_box);
+            node_a.height = 1 + std::max(node_c.height, node_d.height);
+            node_b.height = 1 + std::max(node_a.height, node_e.height);
         }
 
         return handle_b;
@@ -489,7 +487,7 @@ BVHTree::DebugDraw (void)
         }
 
         auto& node = m_nodes[handle];
-        debug::DrawWireFrame(node.fat_box, color::CYAN);
+        debug::DrawWireFrame(node.fat_box, color::WHITE);
 
         if (!node.is_leaf())
         {

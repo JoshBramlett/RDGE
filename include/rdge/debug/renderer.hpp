@@ -11,12 +11,19 @@
 #include <rdge/math/mat4.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/math/vec3.hpp>
-#include <rdge/physics/aabb.hpp>
-#include <rdge/physics/shapes/circle.hpp>
-#include <rdge/physics/shapes/polygon.hpp>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
+
+namespace physics {
+
+class Fixture;
+struct aabb;
+struct circle;
+struct polygon;
+
+}
+
 namespace debug {
 
 #ifdef RDGE_DEBUG
@@ -48,6 +55,7 @@ void DrawWireFrame (const SpriteVertices& vertices, const color& c = DEFAULT_COL
 void DrawWireFrame (const physics::aabb& box, const color& c = DEFAULT_COLOR);
 void DrawWireFrame (const physics::circle& circle, const color& c = DEFAULT_COLOR);
 void DrawWireFrame (const physics::polygon& poly, const color& c = DEFAULT_COLOR);
+void DrawWireFrame (const physics::Fixture* fixture, const color& c = DEFAULT_COLOR);
 //!@}
 
 #else
