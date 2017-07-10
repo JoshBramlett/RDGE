@@ -56,8 +56,16 @@ Player::Player (void)
     cd_anim_fight[Direction::DOWN]  = sheet.GetAnimation("fight_stance_front");
     cd_anim_fight[Direction::LEFT]  = sheet.GetAnimation("fight_stance_left");
 
+    //////////////////
+    // attack animation
+    //////////////////
+    cd_anim_attack[Direction::UP]    = sheet.GetAnimation("attack_back");
+    cd_anim_attack[Direction::RIGHT] = sheet.GetAnimation("attack_right");
+    cd_anim_attack[Direction::DOWN]  = sheet.GetAnimation("attack_front");
+    cd_anim_attack[Direction::LEFT]  = sheet.GetAnimation("attack_left");
+
     this->sprite = sheet.CreateSprite("idle_front_1", vec3(-64.f, -96.f, 0.f));
-    //this->sprite->debug_bounds.show = true;
+    this->sprite->debug_bounds.show = true;
 
     m_facing = Direction::SOUTH;
     current_animation = &cd_anim_blink[m_facing];
@@ -113,6 +121,18 @@ Player::OnEvent (const Event& event)
                 m_flags &= ~RUN_BUTTON_PRESSED;
             }
         }
+
+        if (args.PhysicalKey() == ScanCode::K)
+        {
+            if (args.IsKeyPressed())
+            {
+                m_flags |= ATTACK_BUTTON_PRESSED;
+            }
+            else
+            {
+                m_flags &= ~ATTACK_BUTTON_PRESSED;
+            }
+        }
     }
 }
 
@@ -142,6 +162,14 @@ Player::OnUpdate (const delta_time& dt)
             desired_velocity *= 10.f;
         }
     }
+    else if (m_flags & ATTACK_BUTTON_PRESSED)
+    {
+        current_animation = &cd_anim_attack[m_facing];
+        if (current_animation->IsFinished())
+        {
+            current_animation->Reset();
+        }
+    }
     else
     {
         ticks = 0;
@@ -158,19 +186,22 @@ Player::OnUpdate (const delta_time& dt)
     }
 
     body->ApplyForce(impulse);
+    //body->linear.velocity = desired_velocity;
 
-    // the reason you can't use GetPosition() is b/c it represents the world
-    // transform of the body, and not the shape position for the sprite.
-    // Alternatively you could get the world coordinates of the shape, or
-    // subtract the local shape position from the transform.
+    auto& frame = current_animation->GetFrame(ticks);
+
     // !!! The only reason this works is b/c the body has a single fixture !!!
+    //
+    // Once more fixtures are added (e.g. circle sensor that represents when
+    // an enemy "hears" the player) this will break.  We'll need to cache the
+    // fixture, and transform the local centroid of the players shape with
+    // the body transform.
     math::vec2 pos = body->GetWorldCenter() * 64.f;
-    pos.x -= 64.f;
-    pos.y -= 96.f;
-    vops::SetPosition(sprite->vertices, pos);
+    pos.x -= frame.origin.x;
+    pos.y -= frame.origin.y;
 
-    vops::SetTexCoords(this->sprite->vertices,
-                       current_animation->GetFrame(ticks).coords);
+    vops::SetPosition(sprite->vertices, vec3(pos, 0.f), static_cast<vec2>(frame.size));
+    vops::SetTexCoords(this->sprite->vertices, frame.coords);
 }
 
 math::vec2

@@ -31,18 +31,21 @@ class Animation;
 //! \brief Represents an individual section of the \ref SpriteSheet
 //! \details Container includes the data the client can use for rendering and
 //!          commonly represents a sprite texture or alternatively a single
-//!          animation frame.  The hotspot is an optional field in the config
-//!          intended to be used to align animation frames which may have a
-//!          different size.
-//! \note The size and hotspot values may be modified from the config to
+//!          animation frame.
+//! \note The size and origin values may be modified from the config to
 //!       accommodate the scale multiplication.
 struct texture_part
 {
-    std::string  name;    //!< Unique name
-    screen_rect  clip;    //!< Unmodified clipping rectangle
-    math::uivec2 size;    //!< Size in pixels (scaled)
-    math::uivec2 hotspot; //!< Origin used for drawing offsets (scaled)
-    tex_coords   coords;  //!< Normalized texture coordinates
+    std::string  name;   //!< Unique name
+    screen_rect  clip;   //!< Unmodified clipping rectangle
+    tex_coords   coords; //!< Normalized texture coordinates
+    math::uivec2 size;   //!< Size in pixels (scaled)
+
+    //! \brief Origin used for drawing offsets (scaled)
+    //! \details Optional field used to align frames, and to generate sprite
+    //!          vertices from a world center point.  Value is defaulted to
+    //!          the centroid if unset.
+    math::vec2 origin;
 
     //!@{
     //! \brief Basic tex_coords transforms
@@ -68,7 +71,7 @@ struct texture_part
 //!          left corner and will be normalized to inverted floating point
 //!          texture coordinates.  The image_scale is an optional parameter
 //!          which is a scale multiplier applied to all texture parts.  This
-//!          is useful for small pixel art.  Specifying a hotspot is optional
+//!          is useful for small pixel art.  Specifying a origin is optional
 //!          whose coordinates should be set relative to the texture_part,
 //!          not the spritesheet.
 //!          Animations are optional and will create an \ref Animation object

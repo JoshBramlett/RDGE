@@ -52,10 +52,6 @@
 //
 // 4. Refactor SpriteBatch to use a custom allocator
 //
-// 5. Add support for different texture parts to have different sizes and offsets
-//   - Clearer spritesheet "hotspot" support.  Maybe rename to origin.
-//   - Calculate sprite coordinates from a world point.
-//
 //
 // ** PHYSICS **
 // 1. Collision impulse is not strong enough.  Entities are getting "stuck" on

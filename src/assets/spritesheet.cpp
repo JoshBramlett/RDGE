@@ -48,16 +48,23 @@ ProcessTexturePart (const json& part, const math::uivec2& surface_size, uint32 s
         throw std::invalid_argument("texture_part \"" + name + "\" has invalid dimensions");
     }
 
-    // Optional hotspot
-    uint32 hotspot_x = 0;
-    uint32 hotspot_y = 0;
-    if (part.count("hotspot_x") > 0 && part["hotspot_x"].is_number_unsigned() &&
-        part.count("hotspot_x") > 0 && part["hotspot_y"].is_number_unsigned())
+    // Optional origin
+    math::vec2 origin;
+    if (part.count("origin") > 0 && part["origin"].is_array())
     {
-        hotspot_x = part["hotspot_x"].get<uint32>();
-        hotspot_y = part["hotspot_y"].get<uint32>();
+        const auto& values = part["origin"];
+        SDL_assert(values[0].is_number_unsigned());
+        SDL_assert(values[1].is_number_unsigned());
 
-        SDL_assert(hotspot_x <= w && hotspot_y <= h);
+        origin.x = values[0];
+        origin.y = values[1];
+
+        SDL_assert(origin.x <= w && origin.y <= h);
+    }
+    else
+    {
+        origin.x = static_cast<float>(w) * 0.5f;
+        origin.y = static_cast<float>(h) * 0.5f;
     }
 
     texture_part result;
@@ -65,7 +72,7 @@ ProcessTexturePart (const json& part, const math::uivec2& surface_size, uint32 s
     result.clip = { static_cast<int32>(x), static_cast<int32>(y),
                     static_cast<int32>(w), static_cast<int32>(h) };
     result.size = { w * scale, h * scale };
-    result.hotspot = { hotspot_x * scale, hotspot_y * scale };
+    result.origin = origin * scale;
     result.coords.bottom_left  = math::vec2(normalize(x, surface_size.w),
                                             normalize(y, surface_size.h));
     result.coords.bottom_right = math::vec2(normalize(x + w, surface_size.w),
@@ -86,7 +93,7 @@ texture_part&
 texture_part::flip_horizontal (void) noexcept
 {
     this->coords.flip_horizontal();
-    this->hotspot.x = this->size.w - this->hotspot.x;
+    this->origin.x = this->size.w - this->origin.x;
 
     return *this;
 }
@@ -95,7 +102,7 @@ texture_part&
 texture_part::flip_vertical (void) noexcept
 {
     this->coords.flip_vertical();
-    this->hotspot.y = this->size.h - this->hotspot.y;
+    this->origin.y = this->size.h - this->origin.y;
 
     return *this;
 }

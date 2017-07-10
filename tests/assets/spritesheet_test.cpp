@@ -37,10 +37,13 @@ TEST_F(SpriteSheetTest, HandlesSuccess)
 
     const auto& part1 = sheet["uv_1"];
     EXPECT_TRUE(part1.size == uivec2(128, 128)); // size accommodates image_scale
-    EXPECT_TRUE(part1.hotspot == uivec2(0, 0));  // optional hotspot not set
 
+    // origin not set (defaults to center)
+    EXPECT_EQ(part1.origin, vec2(64.f, 64.f));
+
+    // origin set (accomodates scale)
     const auto& part2 = sheet["uv_2"];
-    EXPECT_TRUE(part2.hotspot == uivec2(128, 128));  // hotspot set - accommodates scale
+    EXPECT_EQ(part2.origin, vec2(32.f, 64.f));
 
     // 2) Texture coordinates match expected (tests float normalization)
     // 2a) Test lower bound where normalized coordinate == 0.f

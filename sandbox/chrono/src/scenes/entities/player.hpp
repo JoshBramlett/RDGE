@@ -32,6 +32,7 @@ public:
     CardinalDirectionAnimation cd_anim_run;
     CardinalDirectionAnimation cd_anim_sheathe;
     CardinalDirectionAnimation cd_anim_fight;
+    CardinalDirectionAnimation cd_anim_attack;
 
     std::shared_ptr<rdge::Sprite> sprite;
     rdge::physics::RigidBody* body;
@@ -44,7 +45,8 @@ private:
 
     enum StateFlags
     {
-        RUN_BUTTON_PRESSED = 0x0001
+        RUN_BUTTON_PRESSED = 0x0001,
+        ATTACK_BUTTON_PRESSED = 0x0002
     };
 
     rdge::uint16 m_flags = 0;
