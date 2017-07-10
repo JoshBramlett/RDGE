@@ -107,7 +107,7 @@ public:
     // TODO Normalize debug printing.
     std::string Dump (void);
 
-    void DebugDraw (void);
+    void DebugDraw (float pixel_ratio);
 
 private:
 

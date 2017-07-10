@@ -122,7 +122,7 @@ TestScene::OnUpdate (const delta_time& dt)
 void
 TestScene::OnRender (void)
 {
-    collision_graph.DebugDraw();
+    collision_graph.DebugDraw(1.f);
 
 
 /*

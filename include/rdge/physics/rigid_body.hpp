@@ -114,7 +114,8 @@ struct rigid_body_profile
 //! \class RigidBody
 //! \brief Base physics simulation object
 //! \details Maintains a position and velocity, and contains a collection of all
-//!          objects that further define itself in the physical world.
+//!          fixtures that further define itself in the physical world.  Forces,
+//!          torque, and impulses can be applied.
 class RigidBody : public intrusive_list_element<RigidBody>
 {
 public:
@@ -147,16 +148,140 @@ public:
         return linear.velocity + ((point - sweep.pos_n).perp() * angular.velocity);
     }
 
+    //! \brief Apply a force at a world point
+    //! \details Forces not applied to the center of mass will generate a
+    //!          torque and affect the angular velocity.
+    //! \param [in] force World force (in Newtons)
+    //! \param [in] point World position of the point to apply
+    //! \param [in] wake_up Optional flag to wake up the body if sleeping
+    void ApplyForce (const math::vec2& force, const math::vec2& point, bool wake_up = true)
+    {
+        if (m_type != RigidBodyType::DYNAMIC)
+        {
+            return;
+        }
+        else if (wake_up)
+        {
+            WakeUp();
+        }
+
+        if (m_flags & AWAKE)
+        {
+            linear.force += force;
+            angular.torque += math::perp_dot(point - sweep.pos_n, force);
+        }
+    }
+
+    //! \brief Apply a force at the center of mass
+    //! \param [in] force World force (in Newtons)
+    //! \param [in] wake_up Optional flag to wake up the body if sleeping
+    void ApplyForce (const math::vec2& force, bool wake_up = true)
+    {
+        if (m_type != RigidBodyType::DYNAMIC)
+        {
+            return;
+        }
+        else if (wake_up)
+        {
+            WakeUp();
+        }
+
+        if (m_flags & AWAKE)
+        {
+            linear.force += force;
+        }
+    }
+
+    //! \brief Apply torque
+    //! \details This affects angular velocity without affecting the linear
+    //!          velocity of the center of mass.
+    //! \param [in] torque Torque about the z-axis (in Newtons/meter)
+    //! \param [in] wake_up Optional flag to wake up the body if sleeping
+    void ApplyTorque (float torque, bool wake_up = true)
+    {
+        if (m_type != RigidBodyType::DYNAMIC)
+        {
+            return;
+        }
+        else if (wake_up)
+        {
+            WakeUp();
+        }
+
+        if (m_flags & AWAKE)
+        {
+            angular.torque = torque;
+        }
+    }
+
+    //! \brief Apply a linear impulse at a world point
+    //! \details Immediately modifies linear velocity.  If not applied to the center
+    //!          of mass it will also modify the angular velocity.
+    //! \param [in] impulse World impulse (in Newtons/second or kg * meters/second)
+    //! \param [in] point World position of the point to apply
+    //! \param [in] wake_up Optional flag to wake up the body if sleeping
+    void ApplyLinearImpulse (const math::vec2& impulse, const math::vec2& point, bool wake_up = true)
+    {
+        if (m_type != RigidBodyType::DYNAMIC)
+        {
+            return;
+        }
+        else if (wake_up)
+        {
+            WakeUp();
+        }
+
+        if (m_flags & AWAKE)
+        {
+            linear.velocity += impulse * linear.inv_mass;
+            angular.velocity += math::perp_dot(point - sweep.pos_n, impulse) * angular.inv_mmoi;
+        }
+    }
+
+    //! \brief Apply a linear impulse at the center of mass
+    //! \details Immediately modifies linear velocity.
+    //! \param [in] impulse World impulse (in Newtons/second or kg * meters/second)
+    //! \param [in] wake_up Optional flag to wake up the body if sleeping
+    void ApplyLinearImpulse (const math::vec2& impulse, bool wake_up = true)
+    {
+        if (m_type != RigidBodyType::DYNAMIC)
+        {
+            return;
+        }
+        else if (wake_up)
+        {
+            WakeUp();
+        }
+
+        if (m_flags & AWAKE)
+        {
+            linear.velocity += impulse * linear.inv_mass;
+        }
+    }
+
+    //! \brief Apply an angular impulse
+    //! \param [in] impulse World impulse (in Newtons/second or kg * meters/second)
+    //! \param [in] wake_up Optional flag to wake up the body if sleeping
+    void ApplyAngularImpulse (float impulse, bool wake_up = true)
+    {
+        if (m_type != RigidBodyType::DYNAMIC)
+        {
+            return;
+        }
+        else if (wake_up)
+        {
+            WakeUp();
+        }
+
+        if (m_flags & AWAKE)
+        {
+            angular.velocity += impulse * angular.inv_mmoi;
+        }
+    }
+
     //void SetTransform(const b2Vec2& position, float32 angle);
     //void SetLinearVelocity(const b2Vec2& v);
     //void SetAngularVelocity(float32 omega);
-
-    //void ApplyForce(const b2Vec2& force, const b2Vec2& point, bool wake);
-    //void ApplyForceToCenter(const b2Vec2& force, bool wake);
-    //void ApplyTorque(float32 torque, bool wake);
-    //void ApplyLinearImpulse(const b2Vec2& impulse, const b2Vec2& point, bool wake);
-    //void ApplyLinearImpulseToCenter(const b2Vec2& impulse, bool wake);
-    //void ApplyAngularImpulse(float32 impulse, bool wake);
 
     //b2Vec2 GetWorldPoint(const b2Vec2& localPoint) const;
     //b2Vec2 GetWorldVector(const b2Vec2& localVector) const;
@@ -166,7 +291,6 @@ public:
     //b2Vec2 GetLinearVelocityFromWorldPoint(const b2Vec2& worldPoint) const;
     //b2Vec2 GetLinearVelocityFromLocalPoint(const b2Vec2& localPoint) const;
 
-    //void SetBullet(bool flag);
 
     //void SetSleepingAllowed(bool flag);
     //void SetActive(bool flag);
@@ -289,7 +413,7 @@ public:
 
     float gravity_scale = 0.f; //!< Gravitational impact on the body
 
-    size_t solver_index;
+    size_t solver_index; //!< Used internally by the solver
 
 private:
 

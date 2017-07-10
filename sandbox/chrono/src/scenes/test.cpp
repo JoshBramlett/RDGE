@@ -13,10 +13,11 @@ using namespace rdge::math;
 using namespace rdge::physics;
 
 TestScene::TestScene (void)
-    : collision_graph({ 0.f, 9.8f })
-    , duck(vec3::ZERO)
+    : collision_graph({ 0.f, -9.8f })
+    , duck(this, vec3::ZERO)
     , render_target(std::make_shared<SpriteBatch>(10'000))
     , background(render_target)
+    , entities(render_target)
 {
     SpriteSheet sheet("res/environment.json", Window::Current().IsHighDPI());
 
@@ -24,14 +25,31 @@ TestScene::TestScene (void)
     // Background layer
     ///////////////////
 
-    background.AddSprite(sheet.CreateSpriteChain("dirt",
-                                                 vec3(-960.f, -540.f, 0.f),
-                                                 vec2(1920.f, 1080.f)));
+    // TODO config file?
+    float window_height = 1080.f;
+    float window_width  = 1920.f;
+    float half_height   = window_height * 0.5f;
+    float half_width    = window_width * 0.5f;
 
+    // TODO Think about how to properly handle conversion from physics simulation
+    //      coordinates to rendering coordinates.
+    //        - Should everything be defined in simulation coordinates, then do the
+    //          conversion at the render phase?
+    //        - Should only entities in the simulation be defined in simulation
+    //          coordinates, having each entity (simulation or no) handle their
+    //          own rendering?
+
+#if 1
+    background.AddSprite(sheet.CreateSpriteChain("dirt",
+                                                 vec3(-half_width, -half_height, 0.f),
+                                                 vec2(window_width, window_height)));
+
+    // 1920.f -> 30
+    // 1080.f -> 16.875
     Random rng;
-    for (float y = -540.f; y < 540.f; y += 64.f)
+    for (float y = -half_height; y < half_height; y += PIXELS_PER_METER)
     {
-        for (float x = -960.f; x < 960.f; x += 64.f)
+        for (float x = -half_width; x < half_width; x += PIXELS_PER_METER)
         {
             auto random = rng.Next(15);
             if (random == 0)
@@ -44,11 +62,43 @@ TestScene::TestScene (void)
             }
         }
     }
+#else
+    //collision_graph.debug_flags = CollisionGraph::DRAW_ALL;
+    collision_graph.debug_flags = CollisionGraph::DRAW_FIXTURES;
+#endif
 
-    background.AddSprite(player.sprite);
-    background.AddSprite(duck.sprite);
+    rigid_body_profile bprof;
+    bprof.type = RigidBodyType::STATIC;
+    auto walls = collision_graph.CreateBody(bprof);
 
-    walls.left = aabb({ -990.f, -570.f }, { -960.f, 570.f });
+    float pad = 0.05f;
+    float sim_half_width = half_width * INV_PIXELS_PER_METER;
+    float sim_half_height = half_height * INV_PIXELS_PER_METER;
+
+
+    polygon left_wall(pad, sim_half_height + pad + pad,
+                      { -(sim_half_width + pad), 0.f });
+    walls->CreateFixture(&left_wall, 0.f);
+
+    polygon right_wall(pad, sim_half_height + pad + pad,
+                       { sim_half_width + pad, 0.f });
+    walls->CreateFixture(&right_wall, 0.f);
+
+    polygon top_wall(sim_half_width + pad + pad, pad,
+                     { 0.f, sim_half_height + pad });
+    walls->CreateFixture(&top_wall, 0.f);
+
+    polygon bottom_wall(sim_half_width + pad + pad, pad,
+                        { 0.f, -(sim_half_height + pad) });
+    walls->CreateFixture(&bottom_wall, 0.f);
+
+    player.InitPhysics(collision_graph, INV_PIXELS_PER_METER);
+    duck.InitPhysics(collision_graph, INV_PIXELS_PER_METER);
+
+    entities.AddSprite(player.sprite);
+    entities.AddSprite(duck.sprite);
+
+    //camera.zoom = 1.5f;
 }
 
 void
@@ -76,6 +126,7 @@ TestScene::OnEvent (const Event& event)
 void
 TestScene::OnUpdate (const delta_time& dt)
 {
+    collision_graph.Step(1.f / 60.f);
     player.OnUpdate(dt);
     duck.OnUpdate(dt);
 }
@@ -83,32 +134,18 @@ TestScene::OnUpdate (const delta_time& dt)
 void
 TestScene::OnRender (void)
 {
-    camera.Translate(player.user_input.position_offset);
+    debug::DrawWireFrame(aabb({ -960.f, -540.f}, { 960.f, 540.f }), color::RED);
+
+    math::vec2 t = { camera.position.x, camera.position.y };
+    camera.Translate((player.GetWorldCenter() * PIXELS_PER_METER) - t);
+
+    //camera.SetPosition(player.GetWorldCenter() * PIXELS_PER_METER);
     camera.Update();
+
     render_target->SetProjection(camera.combined);
+    debug::SetProjection(camera.combined);
 
     background.Draw();
-
-    aabb player_aabb(player.sprite->vertices[0].pos.xy(),
-                     player.sprite->vertices[2].pos.xy());
-    if (player_aabb.intersects_with(walls.left))
-    {
-        debug::DrawWireFrame(walls.left, color::RED);
-    }
-    else
-    {
-        debug::DrawWireFrame(walls.left);
-    }
-
-    polygon::PolygonData data;
-    data[0] = {0.f, 0.f};
-    data[1] = {1.5f, 3.f};
-    data[2] = {0.f, 3.f};
-    auto p = polygon(data, 3);
-    debug::DrawWireFrame(p);
-
-    //debug::DrawWireFrame(circle(vec2(100.f, 100.f), 50.f), color::BLUE);
-    debug::DrawWireFrame(circle(vec2(100.f, 100.f), 50.f));
-
-    debug::SetProjection(camera.combined);
+    entities.Draw();
+    collision_graph.DebugDraw(PIXELS_PER_METER);
 }

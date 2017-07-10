@@ -37,7 +37,15 @@ OrthographicCamera::Update (void)
 void
 OrthographicCamera::Translate (const vec2& displacement)
 {
-    this->position += vec3(displacement, 0.f);
+    this->position.x += displacement.x;
+    this->position.y += displacement.y;
+}
+
+void
+OrthographicCamera::SetPosition (const vec2& position)
+{
+    this->position.x = position.x;
+    this->position.y = position.y;
 }
 
 void

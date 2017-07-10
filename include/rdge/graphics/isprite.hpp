@@ -6,19 +6,20 @@
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/graphics/texture.hpp>
 #include <rdge/graphics/color.hpp>
+#include <rdge/graphics/texture.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/math/vec3.hpp>
 
 #include <array>
-#include <cmath>
+#include <ostream>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
-class SpriteBatch; //!< Forward declaration
-
+//!@{ Forward declarations
+class SpriteBatch;
+//!@}
 
 //! \struct sprite_vertex
 //! \brief The organization of sprite vertex attributes
@@ -90,9 +91,9 @@ public:
 };
 
 //! \brief tex_coords stream output operator
-//! \param [in] os Output stream
-//! \param [in] value tex_coords to write to the stream
-//! \returns Output stream
 std::ostream& operator<< (std::ostream& os, const tex_coords& value);
+
+//! \brief SpriteVertices stream output operator
+std::ostream& operator<< (std::ostream& os, const SpriteVertices& value);
 
 } // namespace rdge

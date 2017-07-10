@@ -93,7 +93,10 @@ public:
     bool IsSleepPrevented (void) const noexcept { return m_flags & PREVENT_SLEEP; }
 
 #ifdef RDGE_DEBUG
-    void DebugDraw (void);
+    //! \brief Draw wireframes of the graph
+    //! \details What is drawn is determined by the \ref debug_flags
+    //! \param [in] pixel_ratio The number of pixels per meter
+    void DebugDraw (float pixel_ratio);
 
     enum DebugFlags
     {

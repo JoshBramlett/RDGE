@@ -76,11 +76,13 @@ Contact::Update (GraphListener* listener)
     {
         if (is_touching && !was_touching)
         {
+            std::cout << "OnContactStart" << std::endl;
             listener->OnContactStart(this);
         }
 
         if (was_touching && !is_touching)
         {
+            std::cout << "OnContactEnd" << std::endl;
             listener->OnContactEnd(this);
         }
 

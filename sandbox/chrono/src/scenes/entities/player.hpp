@@ -6,6 +6,7 @@
 #include <rdge/gameobjects.hpp>
 #include <rdge/graphics.hpp>
 #include <rdge/math.hpp>
+#include <rdge/physics.hpp>
 #include <rdge/physics/motion.hpp>
 
 #include "cardinal_direction_animation.hpp"
@@ -18,8 +19,11 @@ class Player
 public:
     Player (void);
 
+    void InitPhysics (rdge::physics::CollisionGraph& graph, float inv_ratio);
     void OnEvent (const rdge::Event& event);
     void OnUpdate (const rdge::delta_time& dt);
+
+    rdge::math::vec2 GetWorldCenter (void) const noexcept;
 
 public:
     rdge::Animation* current_animation = nullptr;
@@ -29,38 +33,19 @@ public:
     CardinalDirectionAnimation cd_anim_sheathe;
     CardinalDirectionAnimation cd_anim_fight;
 
-    struct stateful_user_input {
-        // user input handler
-        rdge::KeyboardDirectionalInputHandler dir_handler;
-        bool run_button_pressed = false;
-
-        bool sheathe_button_pressed = false; // TODO temp - for testing
-        bool fight_button_pressed = false; // TODO temp - for testing
-
-        // displacement calculations
-        rdge::displacement disp;
-
-        // frame states
-        rdge::Direction facing = rdge::Direction::NONE;
-        rdge::math::vec2 position_offset;
-        bool is_moving = false;
-        bool is_walking = false;
-        bool is_running = false;
-
-        void calculate (const rdge::delta_time& dt)
-        {
-            auto dir_pair = dir_handler.Calculate();
-            position_offset = dir_pair.first;
-            facing = dir_pair.second;
-
-            is_moving = position_offset.x != 0.f || position_offset.y != 0.f;
-            is_walking = is_moving && !run_button_pressed;
-            is_running = is_moving && run_button_pressed;
-
-            disp.coefficient = (is_running) ? 20.f : 10.f;
-            position_offset = disp.from_velocity(position_offset, dt);
-        }
-    } user_input;
-
     std::shared_ptr<rdge::Sprite> sprite;
+    rdge::physics::RigidBody* body;
+
+private:
+    // input handling
+    rdge::KeyboardDirectionalInputHandler m_handler;
+    rdge::math::vec2 m_direction;
+    rdge::Direction m_facing = rdge::Direction::NONE;
+
+    enum StateFlags
+    {
+        RUN_BUTTON_PRESSED = 0x0001
+    };
+
+    rdge::uint16 m_flags = 0;
 };

@@ -45,17 +45,28 @@ void SetLineWidth (float width);
 void SetProjection (const math::mat4& projection);
 //!@}
 
-//!@{ Draw line (with color override)
+//!@{ Draw line
 void DrawLine (const math::vec2& pa, const math::vec2& pb, const color& c = DEFAULT_COLOR);
 void DrawLine (const math::vec3& pa, const math::vec3& pb, const color& c = DEFAULT_COLOR);
 //!@}
 
-//!@{ Draw wireframe (with color override)
+//!@{ Draw wireframe
 void DrawWireFrame (const SpriteVertices& vertices, const color& c = DEFAULT_COLOR);
-void DrawWireFrame (const physics::aabb& box, const color& c = DEFAULT_COLOR);
-void DrawWireFrame (const physics::circle& circle, const color& c = DEFAULT_COLOR);
-void DrawWireFrame (const physics::polygon& poly, const color& c = DEFAULT_COLOR);
-void DrawWireFrame (const physics::Fixture* fixture, const color& c = DEFAULT_COLOR);
+//!@}
+
+//!@{ Draw wireframe for physics objects (ratio is the pixels per meter)
+void DrawWireFrame (const physics::aabb& box,
+                    const color& c = DEFAULT_COLOR,
+                    float ratio = 1.f);
+void DrawWireFrame (const physics::circle& circle,
+                    const color& c = DEFAULT_COLOR,
+                    float ratio = 1.f);
+void DrawWireFrame (const physics::polygon& poly,
+                    const color& c = DEFAULT_COLOR,
+                    float ratio = 1.f);
+void DrawWireFrame (const physics::Fixture* fixture,
+                    const color& c = DEFAULT_COLOR,
+                    float ratio = 1.f);
 //!@}
 
 #else
@@ -66,6 +77,7 @@ inline void SetLineWidth (float) { }
 inline void SetProjection (const math::mat4&) { }
 inline void DrawLine (const math::vec3&, const math::vec3&, const color&) { }
 template <typename T> inline void DrawWireFrame (const T&, const color&) { }
+template <typename T> inline void DrawWireFrame (const T&, float, const color&) { }
 #endif
 
 } // namespace debug

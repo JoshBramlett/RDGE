@@ -45,6 +45,20 @@ SetPosition (SpriteVertices& vertices, const math::vec3& pos)
 }
 
 inline void
+SetPosition (SpriteVertices& vertices, const math::vec2& pos)
+{
+    const auto size = GetSize(vertices);
+    vertices[0].pos.x = pos.x;
+    vertices[0].pos.y = pos.y;
+    vertices[1].pos.x = pos.x;
+    vertices[1].pos.y = pos.y + size.y;
+    vertices[2].pos.x = pos.x + size.x;
+    vertices[2].pos.y = pos.y + size.y;
+    vertices[3].pos.x = pos.x + size.x;
+    vertices[3].pos.y = pos.y;
+}
+
+inline void
 ClonePosition (const SpriteVertices& source, SpriteVertices& dest)
 {
     dest[0].pos = source[0].pos;

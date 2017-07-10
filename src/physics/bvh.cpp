@@ -471,7 +471,7 @@ BVHTree::Dump (void)
 }
 
 void
-BVHTree::DebugDraw (void)
+BVHTree::DebugDraw (float pixel_ratio)
 {
     std::vector<int32> stack;
 
@@ -487,7 +487,7 @@ BVHTree::DebugDraw (void)
         }
 
         auto& node = m_nodes[handle];
-        debug::DrawWireFrame(node.fat_box, color::WHITE);
+        debug::DrawWireFrame(node.fat_box, color::WHITE, pixel_ratio);
 
         if (!node.is_leaf())
         {

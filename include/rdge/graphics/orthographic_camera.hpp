@@ -42,6 +42,11 @@ public:
     //! \note Update will need to be called afterwards to apply the translation.
     void Translate (const math::vec2& displacement);
 
+    //! \brief Set the position of the camera
+    //! \param [in] position Position
+    //! \note Update will need to be called afterwards to apply the translation.
+    void SetPosition (const math::vec2& position);
+
     //! \brief Rotate the camera by the provided angle
     //! \details Rotation is performed on the z-axis.
     //! \param [in] angle Angle (in degrees) to rotate

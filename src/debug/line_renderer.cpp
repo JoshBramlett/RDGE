@@ -294,16 +294,16 @@ DrawWireFrame (const SpriteVertices& vertices, const color& c)
 }
 
 void
-DrawWireFrame (const physics::aabb& box, const color& c)
+DrawWireFrame (const physics::aabb& box, const color& c, float ratio)
 {
-    DrawLine({ box.top_left(), 0.f }, { box.top_right(), 0.f }, c);
-    DrawLine({ box.top_right(), 0.f }, { box.bottom_right(), 0.f }, c);
-    DrawLine({ box.bottom_right(), 0.f }, { box.bottom_left(), 0.f }, c);
-    DrawLine({ box.bottom_left(), 0.f }, { box.top_left(), 0.f }, c);
+    DrawLine({ box.top_left() * ratio, 0.f }, { box.top_right() * ratio, 0.f }, c);
+    DrawLine({ box.top_right() * ratio, 0.f }, { box.bottom_right() * ratio, 0.f }, c);
+    DrawLine({ box.bottom_right() * ratio, 0.f }, { box.bottom_left() * ratio, 0.f }, c);
+    DrawLine({ box.bottom_left() * ratio, 0.f }, { box.top_left() * ratio, 0.f }, c);
 }
 
 void
-DrawWireFrame (const circle& circle, const color& c)
+DrawWireFrame (const circle& circle, const color& c, float ratio)
 {
     uint32 segments = 40;
     float theta = 0.f;
@@ -319,30 +319,30 @@ DrawWireFrame (const circle& circle, const color& c)
         next_p *= circle.radius;
         next_p += circle.pos;
 
-        DrawLine(p, next_p, c);
+        DrawLine(p * ratio, next_p * ratio, c);
         p = next_p;
     }
 }
 
 void
-DrawWireFrame (const polygon& poly, const color& c)
+DrawWireFrame (const polygon& poly, const color& c, float ratio)
 {
     for (size_t i = 0; i < poly.count; ++i)
     {
         size_t next_i = (i < (poly.count - 1)) ? i + 1 : 0;
-        DrawLine({ poly.vertices[i], 0.f }, { poly.vertices[next_i], 0.f }, c);
+        DrawLine({ poly.vertices[i] * ratio, 0.f }, { poly.vertices[next_i] * ratio, 0.f }, c);
     }
 }
 
 void
-DrawWireFrame (const Fixture* fixture, const color& c)
+DrawWireFrame (const Fixture* fixture, const color& c, float ratio)
 {
     switch (fixture->shape.world->type())
     {
     case ShapeType::CIRCLE:
-        DrawWireFrame(*static_cast<const circle*>(fixture->shape.world), c);
+        DrawWireFrame(*static_cast<const circle*>(fixture->shape.world), c, ratio);
     case ShapeType::POLYGON:
-        DrawWireFrame(*static_cast<const polygon*>(fixture->shape.world), c);
+        DrawWireFrame(*static_cast<const polygon*>(fixture->shape.world), c, ratio);
     }
 }
 

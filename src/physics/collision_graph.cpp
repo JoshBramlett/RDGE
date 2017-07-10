@@ -332,11 +332,11 @@ CollisionGraph::TouchProxy (const fixture_proxy* proxy)
 
 #ifdef RDGE_DEBUG
 void
-CollisionGraph::DebugDraw (void)
+CollisionGraph::DebugDraw (float pixel_ratio)
 {
     if (debug_flags & DRAW_BVH_NODES)
     {
-        m_tree.DebugDraw();
+        m_tree.DebugDraw(pixel_ratio);
     }
 
     if (debug_flags & DRAW_BODIES)
@@ -347,29 +347,29 @@ CollisionGraph::DebugDraw (void)
                 {
                     if (!body->IsSimulating())
                     {
-                        debug::DrawWireFrame(f, color(127, 127, 76));
+                        debug::DrawWireFrame(f, color(127, 127, 76), pixel_ratio);
                     }
                     else if (body->GetType() == RigidBodyType::STATIC)
                     {
-                        debug::DrawWireFrame(f, color(127, 230, 127));
+                        debug::DrawWireFrame(f, color(127, 230, 127), pixel_ratio);
                     }
                     else if (body->GetType() == RigidBodyType::KINEMATIC)
                     {
-                        debug::DrawWireFrame(f, color(127, 127, 230));
+                        debug::DrawWireFrame(f, color(127, 127, 230), pixel_ratio);
                     }
                     if (!body->IsAwake())
                     {
-                        debug::DrawWireFrame(f, color(152, 152, 152));
+                        debug::DrawWireFrame(f, color(152, 152, 152), pixel_ratio);
                     }
                     else
                     {
-                        debug::DrawWireFrame(f, color(230, 178, 178));
+                        debug::DrawWireFrame(f, color(230, 178, 178), pixel_ratio);
                     }
                 }
 
                 if (debug_flags & DRAW_AABBS)
                 {
-                    debug::DrawWireFrame(f->proxy->box, color(230, 76, 230));
+                    debug::DrawWireFrame(f->proxy->box, color(230, 76, 230), pixel_ratio);
                 }
 
                 if (debug_flags & DRAW_CENTER_OF_MASS)

@@ -122,8 +122,8 @@ KeyboardDirectionalInputHandler::Calculate (void)
     m_displacement = { 0.f, 0.f };
 
     // invalid key combinations
-    static Direction ns = Direction::NORTH | Direction::SOUTH;
-    static Direction ew = Direction::EAST | Direction::WEST;
+    static const Direction ns = Direction::NORTH | Direction::SOUTH;
+    static const Direction ew = Direction::EAST | Direction::WEST;
     if (((m_stateMask & ns) == ns) || ((m_stateMask & ew) == ew))
     {
         return std::make_pair(m_displacement, m_facing);

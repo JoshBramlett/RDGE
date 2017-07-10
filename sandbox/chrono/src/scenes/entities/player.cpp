@@ -2,15 +2,15 @@
 
 #include <rdge/assets.hpp>
 #include <rdge/math.hpp>
+#include <rdge/physics.hpp>
 #include <rdge/system.hpp>
 #include <rdge/util.hpp>
 
 #include <SDL_assert.h>
 
-#include <rdge/physics/collision.hpp>
-
 using namespace rdge;
 using namespace rdge::math;
+using namespace rdge::physics;
 
 Player::Player (void)
 {
@@ -56,20 +56,43 @@ Player::Player (void)
     cd_anim_fight[Direction::DOWN]  = sheet.GetAnimation("fight_stance_front");
     cd_anim_fight[Direction::LEFT]  = sheet.GetAnimation("fight_stance_left");
 
-    this->sprite = sheet.CreateSprite("idle_front_1", vec3(0.f, 0.f, 0.f));
-    this->sprite->debug_bounds.show = true;
+    this->sprite = sheet.CreateSprite("idle_front_1", vec3(-64.f, -96.f, 0.f));
+    //this->sprite->debug_bounds.show = true;
 
-    user_input.disp.unit = 64.f;
-    user_input.disp.coefficient = 10.f;
+    m_facing = Direction::SOUTH;
+    current_animation = &cd_anim_blink[m_facing];
+}
 
-    user_input.facing = Direction::SOUTH;
-    current_animation = &cd_anim_blink[user_input.facing];
+void
+Player::InitPhysics (CollisionGraph& graph, float inv_ratio)
+{
+    rigid_body_profile bprof;
+    bprof.type = RigidBodyType::DYNAMIC;
+    bprof.gravity_scale = 0.f;
+    bprof.prevent_rotation = true;
+    bprof.prevent_sleep = true;
+    bprof.linear_damping = 0.5f;
+    body = graph.CreateBody(bprof);
+
+    polygon::PolygonData data;
+    data[0] = { sprite->vertices[0].pos.x * inv_ratio, sprite->vertices[0].pos.y * inv_ratio };
+    data[1] = { sprite->vertices[1].pos.x * inv_ratio, sprite->vertices[1].pos.y * inv_ratio };
+    data[2] = { sprite->vertices[2].pos.x * inv_ratio, sprite->vertices[2].pos.y * inv_ratio };
+    data[3] = { sprite->vertices[3].pos.x * inv_ratio, sprite->vertices[3].pos.y * inv_ratio };
+    auto p = polygon(data, 4);
+
+    fixture_profile fprof;
+    fprof.shape = &p;
+    fprof.density = 1.f;
+    fprof.restitution = 0.1f;
+
+    body->CreateFixture(fprof);
 }
 
 void
 Player::OnEvent (const Event& event)
 {
-    user_input.dir_handler.OnEvent(event);
+    m_handler.OnEvent(event);
 
     if (event.IsKeyboardEvent())
     {
@@ -81,15 +104,14 @@ Player::OnEvent (const Event& event)
 
         if (args.PhysicalKey() == ScanCode::J)
         {
-            user_input.run_button_pressed = args.IsKeyPressed();
-        }
-        else if (args.PhysicalKey() == ScanCode::K)
-        {
-            user_input.sheathe_button_pressed = args.IsKeyPressed();
-        }
-        else if (args.PhysicalKey() == ScanCode::L)
-        {
-            user_input.fight_button_pressed = args.IsKeyPressed();
+            if (args.IsKeyPressed())
+            {
+                m_flags |= RUN_BUTTON_PRESSED;
+            }
+            else
+            {
+                m_flags &= ~RUN_BUTTON_PRESSED;
+            }
         }
     }
 }
@@ -97,60 +119,62 @@ Player::OnEvent (const Event& event)
 void
 Player::OnUpdate (const delta_time& dt)
 {
-    user_input.calculate(dt);
     uint32 ticks = dt.ticks;
-    if (!user_input.is_moving)
+
     {
-        // TODO No blinking animation enabled - but the first frame is used for
-        //      the oon-moving (idle) state.  To enable I need to set a counter
-        //      for the time idle, and play the animation after the threshold has
-        //      been met.  Also need to reset the animation if finished.
-        //
-        //      if (player.current_state_changed || anim.IsFinished())
-        //      {
-        //          anim.Reset();
-        //          offset = 0;
-        //      }
-        //
-        //      offset += ticks;
-        //      if (offset < 4000)
-        //      {
-        //          ticks = 0;
-        //      }
-        if (user_input.sheathe_button_pressed)
+        auto p = m_handler.Calculate();
+        m_direction = p.first;
+        m_facing = p.second;
+    }
+
+    math::vec2 desired_velocity = m_direction;
+    bool is_moving = !m_direction.is_zero();
+    if (is_moving)
+    {
+        if (m_flags & RUN_BUTTON_PRESSED)
         {
-            current_animation = &cd_anim_sheathe[user_input.facing];
-        }
-        else if (user_input.fight_button_pressed)
-        {
-            current_animation = &cd_anim_fight[user_input.facing];
+            current_animation = &cd_anim_run[m_facing];
+            desired_velocity *= 20.f;
         }
         else
         {
-            ticks = 0;
-            current_animation = &cd_anim_blink[user_input.facing];
+            current_animation = &cd_anim_walk[m_facing];
+            desired_velocity *= 10.f;
         }
     }
-    else if (user_input.is_walking)
+    else
     {
-        current_animation = &cd_anim_walk[user_input.facing];
-    }
-    else if (user_input.is_running)
-    {
-        current_animation = &cd_anim_run[user_input.facing];
+        ticks = 0;
+        current_animation = &cd_anim_blink[m_facing];
     }
 
-    // naive wall collision check
-    //auto prect = vops::GetRect(this->sprite->vertices);
-    //if (prect.left() + user_input.position_offset.x < -960.f ||
-        //prect.right() + user_input.position_offset.x > 960.f ||
-        //prect.bottom() + user_input.position_offset.y < -540.f ||
-        //prect.top() + user_input.position_offset.y > 540.f)
-    //{
-        //user_input.position_offset = {0.f, 0.f};
-    //}
+    math::vec2 delta = desired_velocity - body->linear.velocity;
+    math::vec2 impulse = delta * body->linear.mass;
 
-    vops::UpdatePosition(this->sprite->vertices, user_input.position_offset);
+    if (ticks == 0)
+    {
+        // abrupt stop
+        impulse *= 9.5f;
+    }
+
+    body->ApplyForce(impulse);
+
+    // the reason you can't use GetPosition() is b/c it represents the world
+    // transform of the body, and not the shape position for the sprite.
+    // Alternatively you could get the world coordinates of the shape, or
+    // subtract the local shape position from the transform.
+    // !!! The only reason this works is b/c the body has a single fixture !!!
+    math::vec2 pos = body->GetWorldCenter() * 64.f;
+    pos.x -= 64.f;
+    pos.y -= 96.f;
+    vops::SetPosition(sprite->vertices, pos);
+
     vops::SetTexCoords(this->sprite->vertices,
                        current_animation->GetFrame(ticks).coords);
+}
+
+math::vec2
+Player::GetWorldCenter (void) const noexcept
+{
+    return body->GetWorldCenter();
 }

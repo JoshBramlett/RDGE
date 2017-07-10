@@ -93,7 +93,7 @@ TumblerScene::OnUpdate (const delta_time& dt)
 void
 TumblerScene::OnRender (void)
 {
-    collision_graph.DebugDraw();
+    collision_graph.DebugDraw(1.f);
 
     camera.Translate({ 0.f, 0.f });
     camera.Update();
