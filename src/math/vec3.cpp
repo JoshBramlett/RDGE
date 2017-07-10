@@ -21,7 +21,7 @@ vec3::operator[] (uint8 index) noexcept
     return (&this->x)[index];
 }
 
-const float&
+float
 vec3::operator[] (uint8 index) const noexcept
 {
     SDL_assert(index < 3);
@@ -29,23 +29,23 @@ vec3::operator[] (uint8 index) const noexcept
 }
 
 vec3&
-vec3::apply_transform (const mat4& mat) noexcept
+vec3::transform (const mat4& xf) noexcept
 {
-    float xx = (mat[0].x * this->x) + (mat[1].x * this->y) + (mat[2].x * this->z) + mat[3].x;
-    float xy = (mat[0].y * this->x) + (mat[1].y * this->y) + (mat[2].y * this->z) + mat[3].y;
-    float xz = (mat[0].z * this->x) + (mat[1].z * this->y) + (mat[2].z * this->z) + mat[3].z;
+    float xx = (xf[0].x * x) + (xf[1].x * y) + (xf[2].x * z) + xf[3].x;
+    float xy = (xf[0].y * x) + (xf[1].y * y) + (xf[2].y * z) + xf[3].y;
+    float xz = (xf[0].z * x) + (xf[1].z * y) + (xf[2].z * z) + xf[3].z;
 
-    this->x = xx;
-    this->y = xy;
-    this->z = xz;
+    x = xx;
+    y = xy;
+    z = xz;
     return *this;
 }
 
 vec3
-vec3::apply_transform (const mat4& mat) const noexcept
+vec3::transform (const mat4& xf) const noexcept
 {
     vec3 result = *this;
-    return result.apply_transform(mat);
+    return result.transform(xf);
 }
 
 std::ostream& operator<< (std::ostream& os, const vec3& value)

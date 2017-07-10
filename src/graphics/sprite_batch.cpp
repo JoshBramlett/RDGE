@@ -325,7 +325,7 @@ SpriteBatch::Submit (const SpriteVertices& vertices)
 
     for (const auto& vertex : vertices)
     {
-        m_cursor->pos   = vertex.pos.apply_transform(*m_transform);
+        m_cursor->pos   = vertex.pos.transform(*m_transform);
         m_cursor->uv    = vertex.uv;
         m_cursor->tid   = (vertex.tid == Texture::INVALID_UNIT_ID) ? 0 : vertex.tid;
         m_cursor->color = vertex.color;
@@ -379,7 +379,7 @@ SpriteBatch::SetProjection (const math::mat4& projection)
 }
 
 void
-SpriteBatch::PushTransformation (const rdge::math::mat4& matrix, bool override)
+SpriteBatch::PushTransformation (const math::mat4& matrix, bool override)
 {
     if (override)
     {

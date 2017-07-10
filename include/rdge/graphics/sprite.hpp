@@ -18,6 +18,11 @@
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
+//!@{ Forward declarations
+class Texture;
+class SpriteBatch;
+//!@}
+
 //! \class Sprite
 //! \brief Represents a 2D renderable sprite
 class Sprite : public ISprite
@@ -48,17 +53,6 @@ public:
                      const math::vec2&        size,
                      std::shared_ptr<Texture> texture,
                      const tex_coords&        coords = tex_coords());
-
-    //! \brief Sprite dtor
-    ~Sprite (void) noexcept = default;
-
-    //!@{
-    //! \brief Copy and move enabled
-    Sprite (const Sprite&) noexcept = default;
-    Sprite& operator= (const Sprite&) noexcept = default;
-    Sprite (Sprite&&) noexcept = default;
-    Sprite& operator= (Sprite&&) noexcept = default;
-    //!@}
 
     //! \brief Register the texture with the render target
     //! \details This step must be performed prior to making a draw call.

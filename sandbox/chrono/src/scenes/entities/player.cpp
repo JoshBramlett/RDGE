@@ -200,7 +200,9 @@ Player::OnUpdate (const delta_time& dt)
     pos.x -= frame.origin.x;
     pos.y -= frame.origin.y;
 
-    vops::SetPosition(sprite->vertices, vec3(pos, 0.f), static_cast<vec2>(frame.size));
+    // TODO SetPosition should really only take a vec2.  Logically I should
+    //      separate the location from the depth.
+    vops::SetPosition(sprite->vertices, pos, static_cast<vec2>(frame.size));
     vops::SetTexCoords(this->sprite->vertices, frame.coords);
 }
 

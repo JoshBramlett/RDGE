@@ -67,7 +67,7 @@ struct vec3
     //! \brief vec3 subscript operator
     //! \param [in] index Index of containing element
     //! \returns Const reference to element
-    const float& operator[] (uint8 index) const noexcept;
+    float operator[] (uint8 index) const noexcept;
 
     //! \brief vec3 memberwise addition
     //! \param [in] rhs vec3 to add
@@ -130,10 +130,10 @@ struct vec3
     //! \brief Apply a linear transformation to the vector
     //! \details Only linear transforms should be supplied (e.g. translation,
     //!          rotation, etc.).
-    //! \param [in] transformation Linear transformation
+    //! \param [in] xf Linear transformation
     //! \returns vec3 with applied transform
-    vec3& apply_transform (const mat4& transformation) noexcept;
-    vec3 apply_transform (const mat4& transformation) const noexcept;
+    vec3& transform (const mat4& xf) noexcept;
+    vec3 transform (const mat4& xf) const noexcept;
     //!@}
 
     //! \brief Vector length (magnitude)
@@ -223,7 +223,6 @@ constexpr vec3 operator* (const vec3& lhs, const vec3& rhs) noexcept
 }
 
 //! \brief vec3 stream output operator
-//! \returns Output stream
 std::ostream& operator<< (std::ostream& os, const vec3& value);
 
 } // namespace math

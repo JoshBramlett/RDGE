@@ -11,7 +11,6 @@
 #include <rdge/graphics/isprite.hpp>
 #include <rdge/graphics/sprite.hpp>
 #include <rdge/graphics/sprite_group.hpp>
-#include <rdge/graphics/sprite_group.hpp>
 #include <rdge/system/types.hpp>
 
 #include <memory>
@@ -22,8 +21,7 @@
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
-//!@{
-//! \brief Forward declarations
+//!@{ Forward declarations
 class Animation;
 //!@}
 

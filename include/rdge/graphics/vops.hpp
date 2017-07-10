@@ -39,15 +39,8 @@ SetPosition (SpriteVertices& vertices, const math::vec3& pos, const math::vec2& 
 }
 
 inline void
-SetPosition (SpriteVertices& vertices, const math::vec3& pos)
+SetPosition (SpriteVertices& vertices, const math::vec2& pos, const math::vec2& size)
 {
-    SetPosition(vertices, pos, GetSize(vertices));
-}
-
-inline void
-SetPosition (SpriteVertices& vertices, const math::vec2& pos)
-{
-    const auto size = GetSize(vertices);
     vertices[0].pos.x = pos.x;
     vertices[0].pos.y = pos.y;
     vertices[1].pos.x = pos.x;
@@ -59,12 +52,9 @@ SetPosition (SpriteVertices& vertices, const math::vec2& pos)
 }
 
 inline void
-ClonePosition (const SpriteVertices& source, SpriteVertices& dest)
+SetPosition (SpriteVertices& vertices, const math::vec2& pos)
 {
-    dest[0].pos = source[0].pos;
-    dest[1].pos = source[1].pos;
-    dest[2].pos = source[2].pos;
-    dest[3].pos = source[3].pos;
+    SetPosition(vertices, pos, GetSize(vertices));
 }
 
 inline void

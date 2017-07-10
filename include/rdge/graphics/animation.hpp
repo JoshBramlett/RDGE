@@ -14,7 +14,7 @@
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
-//!@{ Forward Declarations
+//!@{ Forward declarations
 struct texture_part;
 //!@}
 

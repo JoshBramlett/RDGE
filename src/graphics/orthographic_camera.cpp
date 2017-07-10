@@ -52,8 +52,8 @@ void
 OrthographicCamera::Rotate (float angle)
 {
     auto rotation = mat4::rotation(angle, this->direction);
-    this->direction.apply_transform(rotation);
-    this->up.apply_transform(rotation);
+    this->direction.transform(rotation);
+    this->up.transform(rotation);
 }
 
 } // namespace rdge
