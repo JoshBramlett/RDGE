@@ -18,14 +18,18 @@
 #include <vector>
 
 // Physics TODO
-// 1) Something is not right in the solver.  See Tumbler sandbox.
-//      - Look at position correction and manifold generation.  It's
-//        implementation is quite different from Box2D
-// 2) Circle/Polygon manifold generation
-// 3) Warm starting seems to cut down on processing time considerably
-// 4) RigidBody has a lot of unimplemented methods
-// 5) Clean up and finish documenting
-// 6) Stats
+// - Move GJK and all itersects methods out of the shapes and into collision.cpp
+//   - Pass transforms and remove local manifold conversion from Contact.cpp
+// - Solving:
+//   - Warm starting (seems to cut down processing time considerably)
+//   - Box2D "Box Solver"
+//   - TOI solver
+// - Joints
+// - Circle/Polygon manifold generation
+// - Change GraphListener to lambdas.  Implement destruction listener.
+// - RigidBody has a lot of unimplemented methods
+// - Clean up and finish documenting
+// - Stats
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {

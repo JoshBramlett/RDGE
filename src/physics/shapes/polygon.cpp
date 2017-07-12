@@ -318,14 +318,14 @@ polygon::intersects_with (const polygon& other, collision_manifold& mf) const no
         ref_shape = &other;
         inc_shape = this;
         ref_edge = sep_b.second;
-        mf.flip_dominant = true;
+        mf.flip = true;
     }
     else
     {
         ref_shape = this;
         inc_shape = &other;
         ref_edge = sep_a.second;
-        mf.flip_dominant = false;
+        mf.flip = false;
     }
 
     // find the incident edge
@@ -407,21 +407,22 @@ polygon::intersects_with (const polygon& other, collision_manifold& mf) const no
         math::dot(tangent.perp_ccw(), ref_vertices[0])
     };
 
-    int32 cp = 0;
+    int32 num_points = 0;
     for (int32 i = 0; i < 2; i++)
     {
         auto p = inc_vertices[i];
         float d = distance(penetration_plane, p);
         if (d < 0.f)
         {
-            mf.contacts[cp] = p;
-            mf.depths[cp] = -d;
-            cp++;
+            mf.contacts[num_points] = p;
+            mf.depths[num_points] = -d;
+            num_points++;
         }
     }
 
-    mf.count = cp;
-    mf.normal = penetration_plane.normal; // TODO: this is in world coordinates, does it matter?
+    mf.count = num_points;
+    mf.normal = penetration_plane.normal;
+    mf.local_plane = (ref_vertices[0] + ref_vertices[1]) * 0.5f;
     return true;
 }
 

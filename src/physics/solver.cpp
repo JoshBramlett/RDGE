@@ -43,6 +43,7 @@ Solver::Add (RigidBody* b)
     auto& data = m_bodies.next();
     data.body = b;
     data.pos = b->sweep.pos_n;
+    data.local_center = b->sweep.local_center;
     data.linear_vel = b->linear.velocity;
     data.angle = b->sweep.angle_n;
     data.angular_vel = b->angular.velocity;
@@ -76,7 +77,7 @@ Solver::Add (RigidBody* b)
 void
 Solver::Add (Contact* c)
 {
-    auto& data = m_contacts.next();
+    auto& data = m_contacts.next_clean();
     data.contact = c;
 }
 
@@ -341,7 +342,20 @@ Solver::SolveVelocityConstraints (void)
 bool
 Solver::CorrectPositions (void)
 {
-    float max_depth = 0.f;
+    // Iterative position correcting, done after positions are updated after solving
+    // velocity contraints.  This provides two benefits:
+    //
+    // 1) Solves an object "sinking" into another by reducing the penetration.
+    // 2) If the penetration is under a slop threshold, no positional updates
+    //    are made which can create jitter.
+    //
+    // Naive primer:
+    // http://bit.ly/2ul0uEw
+    //
+    // Full constraing definition:
+    // http://www.dyn4j.org/2010/07/point-to-point-constraint/
+
+    float min_separation = 0.f;
 
     for (auto& data : m_contacts)
     {
@@ -349,42 +363,67 @@ Solver::CorrectPositions (void)
         auto& bdata_b = m_bodies[data.body_index[1]];
 
         const auto& mf = data.contact->manifold;
-        math::vec2 normal = mf.flip_dominant ? -mf.normal : mf.normal;
 
         for (size_t i = 0; i < mf.count; i++)
         {
-            // For math involved: http://bit.ly/2ul0uEw
-            auto& vcp = data.points[i];
+            // world centers of mass
+            iso_transform xf_a;
+            xf_a.set_angle(bdata_a.angle);
+            xf_a.pos = bdata_a.pos - xf_a.rot.rotate(bdata_a.local_center);
+            iso_transform xf_b;
+            xf_b.set_angle(bdata_b.angle);
+            xf_b.pos = bdata_b.pos - xf_b.rot.rotate(bdata_b.local_center);
 
-            if (mf.depths[i] > max_depth)
+            math::vec2 normal;
+            math::vec2 point;
+            float separation;
+
+            if (mf.flip == false)
             {
-                max_depth = mf.depths[i];
+                normal = xf_a.rot.rotate(mf.local_normal);
+                math::vec2 plane_point = xf_a.to_world(mf.local_plane);
+                math::vec2 clip_point = xf_b.to_world(mf.local_contacts[i]);
+                separation = math::dot(clip_point - plane_point, normal);
+                point = clip_point;
+            }
+            else
+            {
+                normal = xf_b.rot.rotate(mf.local_normal);
+                math::vec2 plane_point = xf_b.to_world(mf.local_plane);
+                math::vec2 clip_point = xf_a.to_world(mf.local_contacts[i]);
+                separation = math::dot(clip_point - plane_point, normal);
+                point = clip_point;
+
+                normal = -normal;
             }
 
-            float C = math::clamp(SCALE_FACTOR * (-mf.depths[i] + LINEAR_SLOP),
-                                  -MAX_LINEAR_CORRECTION, 0.f);
+            min_separation = std::min(min_separation, separation);
+            float correction = math::clamp(SCALE_FACTOR * (separation + LINEAR_SLOP),
+                                           -MAX_LINEAR_CORRECTION, 0.f);
 
-            float radius_normal_a = math::perp_dot(vcp.rel_point[0], normal);
-            float radius_normal_b = math::perp_dot(vcp.rel_point[1], normal);
+            // vectors from the centers of mass to a common point
+            auto r_a = point - bdata_a.pos;
+            auto r_b = point - bdata_b.pos;
 
-            // effective mass on the normal
+            float radius_normal_a = math::perp_dot(r_a, normal);
+            float radius_normal_b = math::perp_dot(r_b, normal);
             float enm = data.combined_inv_mass +
                         (bdata_a.inv_mmoi * math::square(radius_normal_a)) +
                         (bdata_b.inv_mmoi * math::square(radius_normal_b));
-            float normal_mass = (enm > 0.f) ? (-C / enm) : 0.f;
+            float normal_mass = (enm > 0.f) ? (-correction / enm) : 0.f;
             auto impulse = normal * normal_mass;
 
             bdata_a.pos -= bdata_a.inv_mass * impulse;
             bdata_a.angle -= bdata_a.inv_mmoi *
-                             math::perp_dot(vcp.rel_point[0], impulse);
+                             math::perp_dot(r_a, impulse);
 
             bdata_b.pos += bdata_b.inv_mass * impulse;
             bdata_b.angle += bdata_b.inv_mmoi *
-                             math::perp_dot(vcp.rel_point[1], impulse);
+                             math::perp_dot(r_b, impulse);
         }
     }
 
-    return max_depth <= LINEAR_SLOP * 3.f;
+    return min_separation >= LINEAR_SLOP * -3.f;
 }
 
 } // namespace physics

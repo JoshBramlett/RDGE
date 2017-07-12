@@ -109,12 +109,13 @@ private:
     struct solver_body_data
     {
         RigidBody* body;
-        math::vec2 pos;         //!< maps to sweep.pos_n
-        math::vec2 linear_vel;  //!< maps to linear.velocity
-        float      angle;       //!< maps to sweep.angle_n
-        float      angular_vel; //!< maps to angular.velocity
-        float      inv_mass;    //!< maps to linear.inv_mass
-        float      inv_mmoi;    //!< maps to angular.inv_mmoi
+        math::vec2 pos;          //!< maps to sweep.pos_n
+        math::vec2 local_center; //!< maps to sweep.local_center
+        math::vec2 linear_vel;   //!< maps to linear.velocity
+        float      angle;        //!< maps to sweep.angle_n
+        float      angular_vel;  //!< maps to angular.velocity
+        float      inv_mass;     //!< maps to linear.inv_mass
+        float      inv_mmoi;     //!< maps to angular.inv_mmoi
     };
 
     //! \struct solver_contact_data

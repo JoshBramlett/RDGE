@@ -96,6 +96,19 @@ struct stack_array
         return m_data[m_count++];
     }
 
+    //! \brief Get the next free element initialized to zero
+    //! \details Increments the size of the container
+    //! \returns Reference to the data at the next available index
+    T& next_clean (void) noexcept
+    {
+        SDL_assert(m_data);
+        SDL_assert(m_capacity > 0);
+        SDL_assert(m_count < m_capacity);
+
+        memset(m_data + m_count, 0, sizeof(T));
+        return m_data[m_count++];
+    }
+
     //! \brief Reserve a number of elements
     //! \details Call does nothing if the requested capacity is less than
     //!          the current capacity.

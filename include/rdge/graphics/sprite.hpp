@@ -7,8 +7,6 @@
 
 #include <rdge/core.hpp>
 #include <rdge/graphics/isprite.hpp>
-#include <rdge/graphics/sprite_batch.hpp>
-#include <rdge/graphics/texture.hpp>
 #include <rdge/graphics/color.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/math/vec3.hpp>

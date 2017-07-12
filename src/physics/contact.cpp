@@ -55,6 +55,29 @@ Contact::Update (GraphListener* listener)
     else
     {
         is_touching = shape_a->intersects_with(shape_b, manifold);
+        if (is_touching)
+        {
+            iso_transform* ref;
+            iso_transform* inc;
+
+            if (manifold.flip)
+            {
+                ref = &fixture_b->body->world_transform;
+                inc = &fixture_a->body->world_transform;
+            }
+            else
+            {
+                ref = &fixture_a->body->world_transform;
+                inc = &fixture_b->body->world_transform;
+            }
+
+            manifold.local_normal = ref->rot.inv_rotate(manifold.normal);
+            manifold.local_plane = ref->to_local(manifold.local_plane);
+            for (size_t i = 0; i < manifold.count; i++)
+            {
+                manifold.local_contacts[i] = inc->to_local(manifold.contacts[i]);
+            }
+        }
 
         if (was_touching != is_touching)
         {
@@ -76,13 +99,11 @@ Contact::Update (GraphListener* listener)
     {
         if (is_touching && !was_touching)
         {
-            std::cout << "OnContactStart" << std::endl;
             listener->OnContactStart(this);
         }
 
         if (was_touching && !is_touching)
         {
-            std::cout << "OnContactEnd" << std::endl;
             listener->OnContactEnd(this);
         }
 

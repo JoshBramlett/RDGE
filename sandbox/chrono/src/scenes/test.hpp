@@ -51,12 +51,6 @@
 // 3. Refactor how Sprite is used across code base (from shared_ptr to raw)
 //
 // 4. Refactor SpriteBatch to use a custom allocator
-//
-//
-// ** PHYSICS **
-// 1. Collision impulse is not strong enough.  Entities are getting "stuck" on
-//    the wall when running directly towards it.
-// 2. Create poly/circle manifold generation
 
 // TODO (ongoing thoughts and interface improvements)
 // - No clear way to pass update/input events to an entity.

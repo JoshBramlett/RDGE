@@ -31,10 +31,19 @@ static constexpr float LINEAR_SLOP = 0.005f; //!< Collision tolerance
 struct collision_manifold
 {
     size_t count = 0;               //!< Number of collision points
+
+    //!@{ World space
     float depths[2] = { 0.f, 0.f }; //!< Penetration depths
     math::vec2 contacts[2];         //!< Contact points
     math::vec2 normal;              //!< Vector of resolution, or collision normal
-    bool flip_dominant = false;     //!< Manifold data is relative to shape b
+    //!@}
+
+    //!@{ Local space
+    math::vec2 local_plane;         //!< Reference shape half plane
+    math::vec2 local_normal;        //!< Reference shape local normal
+    math::vec2 local_contacts[2];   //!< Incident shape local edge points
+    bool flip = false;              //!< Flip reference/incident shapes
+    //!@}
 };
 
 struct contact_impulse
@@ -202,12 +211,31 @@ inline std::ostream& operator<< (std::ostream& os, const collision_manifold& mf)
     os << "manifold: ["
        << "\n  count=" << mf.count
        << "\n  normal=" << mf.normal
-       << "\n  flip_dominant=" << std::boolalpha << mf.flip_dominant;
+       << "\n  flip=" << std::boolalpha << mf.flip;
 
     for (size_t i = 0; i < mf.count; i++)
     {
         os << "\n  contacts[" << i << "]=" << mf.contacts[i]
            << " depths[" << i << "]=" << mf.depths[i];
+    }
+
+    return os << "\n]\n";
+}
+
+inline std::ostream& operator<< (std::ostream& os, const contact_impulse& impulse)
+{
+    if (impulse.count == 0)
+    {
+        return os << "[ impulse: count=0 ]\n";
+    }
+
+    os << "impulse: ["
+       << "\n  count=" << impulse.count;
+
+    for (size_t i = 0; i < impulse.count; i++)
+    {
+        os << "\n  normals[" << i << "]=" << impulse.normals[i]
+           << " tangents[" << i << "]=" << impulse.tangents[i];
     }
 
     return os << "\n]\n";
