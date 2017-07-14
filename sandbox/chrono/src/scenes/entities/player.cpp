@@ -64,7 +64,7 @@ Player::Player (void)
     cd_anim_attack[Direction::DOWN]  = sheet.GetAnimation("attack_front");
     cd_anim_attack[Direction::LEFT]  = sheet.GetAnimation("attack_left");
 
-    this->sprite = sheet.CreateSprite("idle_front_1", vec3(-64.f, -96.f, 0.f));
+    this->sprite = sheet.CreateSprite("idle_front_1", vec3(0.f, 0.f, 0.f));
     this->sprite->debug_bounds.show = true;
 
     m_facing = Direction::SOUTH;
@@ -74,6 +74,8 @@ Player::Player (void)
 void
 Player::InitPhysics (CollisionGraph& graph, float inv_ratio)
 {
+    inv_ratio *= 0.5f;
+
     rigid_body_profile bprof;
     bprof.type = RigidBodyType::DYNAMIC;
     bprof.gravity_scale = 0.f;
@@ -82,19 +84,14 @@ Player::InitPhysics (CollisionGraph& graph, float inv_ratio)
     bprof.linear_damping = 0.5f;
     body = graph.CreateBody(bprof);
 
-    polygon::PolygonData data;
-    data[0] = { sprite->vertices[0].pos.x * inv_ratio, sprite->vertices[0].pos.y * inv_ratio };
-    data[1] = { sprite->vertices[1].pos.x * inv_ratio, sprite->vertices[1].pos.y * inv_ratio };
-    data[2] = { sprite->vertices[2].pos.x * inv_ratio, sprite->vertices[2].pos.y * inv_ratio };
-    data[3] = { sprite->vertices[3].pos.x * inv_ratio, sprite->vertices[3].pos.y * inv_ratio };
-    auto p = polygon(data, 4);
-
+    // players body
+    polygon p(0.5f, 1.f);
     fixture_profile fprof;
     fprof.shape = &p;
     fprof.density = 1.f;
-    fprof.restitution = 0.1f;
+    fprof.restitution = 0.8f;
 
-    body->CreateFixture(fprof);
+    hitbox = body->CreateFixture(fprof);
 }
 
 void
@@ -141,39 +138,49 @@ Player::OnUpdate (const delta_time& dt)
 {
     uint32 ticks = dt.ticks;
 
-    {
-        auto p = m_handler.Calculate();
-        m_direction = p.first;
-        m_facing = p.second;
-    }
-
     math::vec2 desired_velocity = m_direction;
-    bool is_moving = !m_direction.is_zero();
-    if (is_moving)
+    if (m_flags & ATTACKING)
     {
-        if (m_flags & RUN_BUTTON_PRESSED)
-        {
-            current_animation = &cd_anim_run[m_facing];
-            desired_velocity *= 20.f;
-        }
-        else
-        {
-            current_animation = &cd_anim_walk[m_facing];
-            desired_velocity *= 10.f;
-        }
-    }
-    else if (m_flags & ATTACK_BUTTON_PRESSED)
-    {
-        current_animation = &cd_anim_attack[m_facing];
+        desired_velocity *= 30.f;
+
         if (current_animation->IsFinished())
         {
             current_animation->Reset();
+            m_flags &= ~ATTACKING;
         }
     }
     else
     {
-        ticks = 0;
-        current_animation = &cd_anim_blink[m_facing];
+        auto p = m_handler.Calculate();
+        m_direction = p.first;
+        m_facing = p.second;
+
+        bool is_moving = !m_direction.is_zero();
+        if (m_flags & ATTACK_BUTTON_PRESSED)
+        {
+            current_animation = &cd_anim_attack[m_facing];
+            desired_velocity *= 30.f;
+
+            m_flags |= ATTACKING;
+        }
+        else if (is_moving)
+        {
+            if (m_flags & RUN_BUTTON_PRESSED)
+            {
+                current_animation = &cd_anim_run[m_facing];
+                desired_velocity *= 20.f;
+            }
+            else
+            {
+                current_animation = &cd_anim_walk[m_facing];
+                desired_velocity *= 10.f;
+            }
+        }
+        else
+        {
+            ticks = 0;
+            current_animation = &cd_anim_blink[m_facing];
+        }
     }
 
     math::vec2 delta = desired_velocity - body->linear.velocity;
@@ -190,13 +197,7 @@ Player::OnUpdate (const delta_time& dt)
 
     auto& frame = current_animation->GetFrame(ticks);
 
-    // !!! The only reason this works is b/c the body has a single fixture !!!
-    //
-    // Once more fixtures are added (e.g. circle sensor that represents when
-    // an enemy "hears" the player) this will break.  We'll need to cache the
-    // fixture, and transform the local centroid of the players shape with
-    // the body transform.
-    math::vec2 pos = body->GetWorldCenter() * 64.f;
+    math::vec2 pos = hitbox->GetWorldCenter() * 64.f;
     pos.x -= frame.origin.x;
     pos.y -= frame.origin.y;
 
@@ -209,5 +210,5 @@ Player::OnUpdate (const delta_time& dt)
 math::vec2
 Player::GetWorldCenter (void) const noexcept
 {
-    return body->GetWorldCenter();
+    return hitbox->GetWorldCenter();
 }

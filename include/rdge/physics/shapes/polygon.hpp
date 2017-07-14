@@ -84,8 +84,10 @@ struct polygon : public ishape
                       const math::vec2& p4, const math::vec2& p5);
     //!@}
 
-    //! \returns Underlying type
-    ShapeType type (void) const noexcept override { return ShapeType::POLYGON; }
+    //!@{ Shape properties
+    ShapeType type (void) const override { return ShapeType::POLYGON; }
+    math::vec2 get_centroid (void) const override { return centroid; }
+    //!@}
 
     //! \brief Converts the polygon to world space
     //! \param [in] xf Transform

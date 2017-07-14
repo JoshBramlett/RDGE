@@ -51,8 +51,10 @@ struct ishape
 
     virtual ~ishape (void) noexcept = default;
 
-    //! \brief Type of shape
+    //!@{ Shape properties
     virtual ShapeType type (void) const = 0;
+    virtual math::vec2 get_centroid (void) const = 0;
+    //!@}
 
     //! \brief Transform the shape to world space
     virtual void to_world (const iso_transform& xf) = 0;

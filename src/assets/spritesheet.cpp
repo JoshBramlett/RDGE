@@ -56,8 +56,8 @@ ProcessTexturePart (const json& part, const math::uivec2& surface_size, uint32 s
         SDL_assert(values[0].is_number_unsigned());
         SDL_assert(values[1].is_number_unsigned());
 
-        origin.x = values[0];
-        origin.y = values[1];
+        origin.x = values[0].get<uint32>();
+        origin.y = values[1].get<uint32>();
 
         SDL_assert(origin.x <= w && origin.y <= h);
     }
@@ -319,6 +319,19 @@ SpriteSheet::CreateSpriteChain (const std::string& name,
     }
 
     return group;
+}
+
+std::ostream& operator<< (std::ostream& os, const texture_part& p)
+{
+    os << "texture_part: ["
+       << "\n  name=" << p.name
+       << "\n  clip=" << p.clip
+       << "\n  coords=" << p.coords
+       << "\n  size=" << p.size
+       << "\n  origin=" << p.origin
+       << "\n]\n";
+
+    return os;
 }
 
 } // namespace rdge

@@ -36,6 +36,7 @@ public:
 
     std::shared_ptr<rdge::Sprite> sprite;
     rdge::physics::RigidBody* body;
+    rdge::physics::Fixture* hitbox;
 
 private:
     // input handling
@@ -45,8 +46,9 @@ private:
 
     enum StateFlags
     {
-        RUN_BUTTON_PRESSED = 0x0001,
-        ATTACK_BUTTON_PRESSED = 0x0002
+        RUN_BUTTON_PRESSED    = 0x0001,
+        ATTACK_BUTTON_PRESSED = 0x0002,
+        ATTACKING             = 0x0004
     };
 
     rdge::uint16 m_flags = 0;

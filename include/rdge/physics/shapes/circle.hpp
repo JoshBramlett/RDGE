@@ -39,8 +39,10 @@ struct circle : public ishape
         : pos(px), radius(r)
     { }
 
-    //! \returns Underlying type
+    //!@{ Shape properties
     ShapeType type (void) const override { return ShapeType::CIRCLE; }
+    math::vec2 get_centroid (void) const override { return pos; }
+    //!@}
 
     //! \brief Converts the polygon to world space
     //! \param [in] xf Transform

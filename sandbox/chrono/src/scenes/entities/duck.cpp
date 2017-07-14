@@ -55,7 +55,7 @@ Duck::InitPhysics (CollisionGraph& graph, float inv_ratio)
     fixture_profile fprof;
     fprof.shape = &p;
     fprof.density = 1.f;
-    fprof.restitution = 0.1f;
+    fprof.restitution = 0.9f;
 
     body->CreateFixture(fprof);
 }

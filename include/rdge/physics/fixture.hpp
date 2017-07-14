@@ -103,6 +103,11 @@ public:
         return shape.world->compute_aabb();
     }
 
+    math::vec2 GetWorldCenter (void) const noexcept
+    {
+        return shape.world->get_centroid();
+    }
+
     RigidBody*     body = nullptr;      //!< Circular reference to parent
     void*          user_data = nullptr; //!< Opaque user data
     fixture_proxy* proxy = nullptr;     //!< Broad phase proxy

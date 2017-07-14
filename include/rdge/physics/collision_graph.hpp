@@ -22,7 +22,7 @@
 //   - Pass transforms and remove local manifold conversion from Contact.cpp
 // - Solving:
 //   - Warm starting (seems to cut down processing time considerably)
-//   - Box2D "Box Solver"
+//   - Box2D "Box Solver" LCP (Linear complementarity problem)
 //   - TOI solver
 // - Joints
 // - Circle/Polygon manifold generation

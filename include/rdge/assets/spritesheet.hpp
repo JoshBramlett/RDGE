@@ -17,6 +17,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <ostream>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
@@ -178,5 +179,8 @@ private:
     std::unordered_map<std::string, texture_part> m_parts;   //!< Collection of texture parts
     std::unordered_map<std::string, Animation> m_animations; //!< Collection of animations
 };
+
+//! \brief texture_part stream output operator
+std::ostream& operator<< (std::ostream&, const texture_part&);
 
 } // namespace rdge
