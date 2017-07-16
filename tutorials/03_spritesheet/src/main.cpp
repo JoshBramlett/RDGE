@@ -20,7 +20,6 @@ int main ()
 {
     app_settings settings;
     settings.window_title = "03_spritesheet";
-    settings.enable_png   = true;
 
     // 1) Initialize SDL
     Application app(settings);

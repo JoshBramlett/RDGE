@@ -25,7 +25,6 @@ int main ()
     {
         app_settings settings;
         settings.window_title = "01_textures";
-        settings.enable_png   = true;
         settings.enable_fonts = true;
 
         // 1) Initialize SDL

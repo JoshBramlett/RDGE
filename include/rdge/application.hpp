@@ -44,9 +44,6 @@ namespace rdge {
 //!          using the \ref rdge::LoadAppSettings function.
 struct app_settings
 {
-    bool enable_jpg   = false; //!< Enable support for loading JPG images
-    bool enable_png   = false; //!< Enable support for loading PNG images
-    bool enable_tif   = false; //!< Enable support for loading TIF images
     bool enable_fonts = false; //!< Enable support for loading TTF fonts
 
     std::string window_title  = "RDGE"; //!< Title of the game window
@@ -113,10 +110,6 @@ public:
     //! \return String containing the major, minor, and patch
     std::string SDLVersion (void) const;
 
-    //! \brief SDL_image version linked against
-    //! \return String containing the major, minor, and patch
-    std::string SDLImageVersion (void) const;
-
     //! \brief SDL_ttf version linked against
     //! \return String containing the major, minor, and patch
     std::string SDLTTFVersion (void) const;
@@ -144,7 +137,7 @@ public:
 //! \brief Load and parse the app settings configuration file
 //! \details The configuration file must be a json object with the app_settings
 //!          variables representing keys.  All fields are optional, and if no file
-//!          is found a default game_settings struct will be returned.
+//!          is found a default \ref app_settings struct will be returned.
 //! \param [in] path Configuration file path
 //! \returns Populated app_settings struct
 //! \throws rdge::Exception Configuration file parsing failed

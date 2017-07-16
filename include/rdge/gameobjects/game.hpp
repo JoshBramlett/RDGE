@@ -21,7 +21,7 @@ namespace rdge {
 //! \class Game
 //! \brief Game loop and scene stack
 //! \details The Game will create a window and run a game loop in accordance with
-//!          the provided \ref game_settings.  Maintains a stack of \ref Scene
+//!          the provided \ref app_settings.  Maintains a stack of \ref Scene
 //!          objects with the topmost being the current scene that will receive
 //!          the game loop events.
 class Game

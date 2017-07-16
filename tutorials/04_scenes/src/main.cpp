@@ -26,7 +26,6 @@ int main ()
 {
     app_settings settings;
     settings.window_title = "04_scenes";
-    settings.enable_png   = true;
 
     // 1) Initialize SDL
     Application app(settings);

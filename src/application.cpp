@@ -3,7 +3,6 @@
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/hints.hpp>
 
-#include <SDL_image.h>
 #include <SDL_ttf.h>
 #include <SDL_version.h>
 #include <nlohmann/json.hpp>
@@ -74,20 +73,6 @@ Application::Application (const app_settings& settings)
     }
 
     /***********************************************
-     *          3.  Initialize SDL_image
-     **********************************************/
-
-    int32 image_flags = 0;
-    image_flags |= (settings.enable_jpg) ? IMG_INIT_JPG : 0;
-    image_flags |= (settings.enable_png) ? IMG_INIT_PNG : 0;
-    image_flags |= (settings.enable_tif) ? IMG_INIT_TIF : 0;
-
-    if (UNLIKELY((IMG_Init(image_flags) & image_flags) != image_flags))
-    {
-        SDL_THROW("SDL_image failed to initialize", "IMG_Init");
-    }
-
-    /***********************************************
      *          4.  Initialize SDL_ttf
      **********************************************/
 
@@ -117,7 +102,6 @@ Application::~Application (void) noexcept
         TTF_Quit();
     }
 
-    IMG_Quit();
     SDL_Quit();
 }
 
@@ -131,19 +115,6 @@ Application::SDLVersion (void) const
     ss << static_cast<int>(linked.major) << "."
        << static_cast<int>(linked.minor) << "."
        << static_cast<int>(linked.patch);
-
-    return ss.str();
-}
-
-std::string
-Application::SDLImageVersion (void) const
-{
-    const SDL_version* linked = IMG_Linked_Version();
-
-    std::ostringstream ss;
-    ss << static_cast<int>(linked->major) << "."
-       << static_cast<int>(linked->minor) << "."
-       << static_cast<int>(linked->patch);
 
     return ss.str();
 }
@@ -218,21 +189,6 @@ rdge::LoadAppSettings (const std::string& path)
         if (!j.is_object())
         {
             return settings;
-        }
-
-        if (j["enable_jpg"].is_boolean())
-        {
-            settings.enable_jpg = j["enable_jpg"];
-        }
-
-        if (j["enable_png"].is_boolean())
-        {
-            settings.enable_png = j["enable_png"];
-        }
-
-        if (j["enable_tif"].is_boolean())
-        {
-            settings.enable_tif = j["enable_tif"];
         }
 
         if (j["enable_fonts"].is_boolean())

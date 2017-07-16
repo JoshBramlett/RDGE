@@ -22,7 +22,6 @@ int main ()
 {
     app_settings settings;
     settings.window_title = "02_layers";
-    settings.enable_png   = true;
     settings.enable_fonts = true;
 
     // 1) Initialize SDL

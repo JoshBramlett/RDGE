@@ -76,9 +76,13 @@ Texture::Reload (Surface& surface)
     //       support it out of the box.  I believe the changes would be to convert
     //       the surface to SDL_PIXELFORMAT_BGR888, and set GL_RGB in the OpenGL call.
     //       To check whether 24 or 32bpp, BytesPerPixel should be 3 or 4.
+    //
+    //       Removing ChangePixelFormat creates an ASAN crash in 04_scenes b/c it
+    //       it loads RGB textures and their isn't proper support.
 
     // Change pixel format to what OpenGL understands
-    // TODO: This should be set to whatever the window uses - SDL_GetWindowPixelFormat(m_window);
+    // TODO: This should be set to whatever the window uses
+    //          SDL_GetWindowPixelFormat(m_window);
     surface.ChangePixelFormat(SDL_PIXELFORMAT_ABGR8888);
 
     opengl::BindTexture(GL_TEXTURE_2D, m_handle);

@@ -11,9 +11,6 @@
 
 #include <SDL.h>
 
-#include <string>
-#include <memory>
-
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
@@ -40,89 +37,49 @@ enum class PixelDepth : int32
 
 //! \class Surface
 //! \brief Wrapper for an SDL_Surface, which represents an image in memory
-//! \details A surface provides a mechanism for loading images from disk and
-//!          creating an image from pixel data.  Surfaces can be cached to
-//!          provide faster lookup, but should not be used for rendering.
-//!          Surfaces should be converted to textures for rendering.
-//! \see rdge::Texture
+//! \details A surface provides a mechanism for loading images from disk.
+//!          Surfaces are used for caching the image data, but cannot be used
+//!          for rendering.  To render, Surfaces are used to build a
+//!          \ref Texture object.
 class Surface
 {
 public:
     //! \brief Surface ctor
-    //! \details Creates a surface from a native SDL_Surface.  The object will take
-    //!          ownership of the SDL_Surface.
-    //! \param [in] surface Pointer to SDL_Surface
+    //! \details Take ownership of an existing SDL_Surface.
+    //! \param [in] surface Native SDL_Surface
     explicit Surface (SDL_Surface* surface);
 
     //! \brief Surface ctor
-    //! \details Uses the SDL_image library to load from file
-    //! \param [in] file File path of the image to load
-    //! \throws rdge::SDLException Image initialization failed
-    explicit Surface (const std::string& path);
-
-    //! \brief Surface ctor
-    //! \details Create a blank surface.
-    //! \param [in] size Size of the surface
-    //! \param [in] depth Pixel depth (bits per pixel)
-    //! \throws rdge::SDLException Image initialization failed
-    //! \note A depth of 24bpp creates an RGB surface, 32bpp creates an RGBA surface
-    explicit Surface (const math::uivec2& size, PixelDepth depth = PixelDepth::BPP_32);
-
-    //! \brief Surface ctor
-    //! \details Create a surface from pixel data.  The object will take ownership
-    //!          of the pixel data.
-    //! \param [in] pixels Unique pointer to pixel data
-    //! \param [in] size Size of the surface
-    //! \param [in] depth Pixel depth (bits per pixel)
-    //! \throws rdge::Exception Pixel data is invalid
-    //! \throws rdge::SDLException Image initialization failed
-    //! \note A depth of 24bpp creates an RGB surface, 32bpp creates an RGBA surface
-    explicit Surface (std::unique_ptr<uint8[]> pixels,
-                      const math::uivec2&      size,
-                      PixelDepth               depth = PixelDepth::BPP_32);
+    //! \details Create a Surface from an image on disk.  If image depth is not
+    //!          overridden the depth will be determined by the file.
+    //! \param [in] path File path of the image to load
+    //! \param [in] depth Optional requested depth
+    //! \throws rdge::Exception Image initialization failed
+    explicit Surface (const std::string& path, PixelDepth depth = PixelDepth::UNKNOWN);
 
     //! \brief Surface dtor
     ~Surface (void) noexcept;
 
-    //!@{
-    //! \brief Non-copyable and move enabled
+    //!@{ Non-copyable and move enabled
     Surface (const Surface&) = delete;
     Surface& operator= (const Surface&) = delete;
     Surface (Surface&&) noexcept;
     Surface& operator= (Surface&&) noexcept;
     //!@}
 
+    //!@{
     //! \brief User defined conversion to a raw SDL_Surface pointer
-    //! \warning Be careful not to dereference the pointer after the
-    //!          parent Surface object falls out of scope
-    //! \returns const pointer to a native SDL_Surface
-    explicit operator const SDL_Surface* (void) const noexcept
-    {
-        return m_surface;
-    }
+    //! \warning Pointer will be invalidated when parent object is destroyed
+    explicit operator const SDL_Surface* (void) const noexcept { return m_surface; }
+    explicit operator SDL_Surface* (void) const noexcept { return m_surface; }
+    //!@}
 
-    //! \brief User defined conversion to a raw SDL_Surface pointer
-    //! \returns Pointer to a native SDL_Surface
-    explicit operator SDL_Surface* (void) const noexcept
-    {
-        return m_surface;
-    }
-
-    //! \brief Get the width of the surface
-    //! \returns Surface width
+    //!@{ Basic Surface properties
     uint32 Width (void) const noexcept;
-
-    //! \brief Get the height of the surface
-    //! \returns Surface height
     uint32 Height (void) const noexcept;
-
-    //! \brief Get the size (width and height) of the surface
-    //! \returns Size structure
     math::uivec2 Size (void) const noexcept;
-
-    //! \brief Get the pixel depth of the surface
-    //! \returns Pixel depth value
     PixelDepth Depth (void) const noexcept;
+    //!@}
 
     //! \brief Get the internal pixel format of the surface
     //! \details Value represents the SDL_PixelFormatEnum value
@@ -145,8 +102,8 @@ public:
     Surface CreateSubSurface (const screen_rect& clip);
 
 private:
-    SDL_Surface*             m_surface = nullptr;
-    std::unique_ptr<uint8[]> m_pixelData;
+    uint8*       m_data = nullptr;
+    SDL_Surface* m_surface = nullptr;
 };
 
 } // namespace rdge
