@@ -1,6 +1,10 @@
 #include <rdge/assets/font.hpp>
+#include <rdge/util/io.hpp>
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/hints.hpp>
+
+#define STB_TRUETYPE_IMPLEMENTATION
+#include <nothings/stb_truetype.h>
 
 namespace rdge {
 
@@ -24,6 +28,22 @@ Font::Font (const std::string& file, uint32 point_size, int64 index)
     {
         SDL_THROW("Failed to load font. file=" + file, "TTF_OpenFontIndex");
     }
+}
+
+Font::Font (const std::string& file)
+{
+    loaded_file lf = read_file(file.c_str());
+
+    stbtt_fontinfo font;
+    stbtt_InitFont(&font, (uint8*)lf.data, stbtt_GetFontOffsetForIndex((uint8*)lf.data, 0));
+
+    int32 w, h;
+    int32 scale = 20;
+    uint8* bitmap = stbtt_GetCodepointBitmap(&font,
+                                             0,
+                                             stbtt_ScaleForPixelHeight(&font, scale),
+                                             'a', &w, &h, 0, 0);
+    STBTT_free(bitmap, nullptr);
 }
 
 Font::~Font (void) noexcept

@@ -90,6 +90,9 @@ public:
     //! \throws rdge::SDLException Font initialization failed
     explicit Font (const std::string& path, uint32 point_size, int64 index = 0);
 
+    // TODO this is throwaway for testing stb_truetype
+    explicit Font (const std::string& path);
+
     //! \brief Font dtor
     ~Font (void) noexcept;
 

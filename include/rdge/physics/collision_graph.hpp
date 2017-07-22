@@ -17,20 +17,6 @@
 
 #include <vector>
 
-// Physics TODO
-// - Move GJK and all itersects methods out of the shapes and into collision.cpp
-//   - Pass transforms and remove local manifold conversion from Contact.cpp
-// - Solving:
-//   - Warm starting (seems to cut down processing time considerably)
-//   - Box2D "Box Solver" LCP (Linear complementarity problem)
-//   - TOI solver
-// - Joints
-// - Circle/Polygon manifold generation
-// - Change GraphListener to lambdas.  Implement destruction listener.
-// - RigidBody has a lot of unimplemented methods
-// - Clean up and finish documenting
-// - Stats
-
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 namespace physics {

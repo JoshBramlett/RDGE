@@ -11,13 +11,45 @@
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace rdge {
+
+struct loaded_file
+{
+    size_t size;
+    void* data;
+};
+
+inline loaded_file
+read_file (const char* filepath)
+{
+    loaded_file result = {};
+
+    FILE* file = fopen(filepath, "rb");
+    if (file)
+    {
+        fseek(file, 0, SEEK_END);
+        result.size = ftell(file);
+        fseek(file, 0, SEEK_SET);
+
+        result.data = malloc(result.size);
+        fread(result.data, result.size, 1, file);
+        fclose(file);
+    }
+    else
+    {
+        // TODO throw?
+    }
+
+    return result;
+}
+
 namespace util {
 
 //! \brief Read and return contents of a text file
 //! \param [in] filepath Full path of the file to read
 //! \returns Contents of the text file
 //! \throws File cannot be found or read
-inline std::string read_text_file (const char* filepath)
+inline std::string
+read_text_file (const char* filepath)
 {
     // TODO: Make smart, should check std::string::max_size to make
     //       sure that the file is not too big.  Also, look into
