@@ -1,5 +1,5 @@
 #include <rdge/physics/shapes/polygon.hpp>
-#include <rdge/internal/logger_macros.hpp>
+#include <rdge/util/logger.hpp>
 
 #include <SDL_assert.h>
 
@@ -76,7 +76,7 @@ polygon::polygon (const PolygonData& verts, size_t num_verts)
     }
 
     // new count - check for degenerate
-    DLOG_IF(count != weld_count, "Polygon welded vertices");
+    DLOG_IF(count != weld_count) << "Polygon welded vertices";
     count = weld_count;
     SDL_assert(3 <= count);
 
@@ -131,7 +131,7 @@ polygon::polygon (const PolygonData& verts, size_t num_verts)
     }
 
     // new count - check for degenerate
-    DLOG_IF(count != out_count, "Polygon convex hull ignored vertices");
+    DLOG_IF(count != weld_count) << "Polygon convex hull ignored vertices";
     count = out_count;
     SDL_assert(3 <= count);
 

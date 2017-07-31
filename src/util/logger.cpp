@@ -2,22 +2,21 @@
 #include <rdge/application.hpp>
 #include <rdge/internal/exception_macros.hpp>
 
-#include <ostream>
-#include <sstream>
-#include <iostream>
+#include <thread>
 #include <iomanip>
-#include <ctime>
 #include <cerrno>
 #include <utility>
+#include <system_error>
 
 using namespace std::chrono;
 
 namespace rdge {
-namespace util {
+
+namespace {
 
 // Select Graphic Rendition Codes (used for console formatting)
 // https://en.wikipedia.org/wiki/ANSI_escape_code
-enum class SGRCode : rdge::uint16
+enum class SGRCode : uint16
 {
     Reset             = 0,
     Bold              = 1,
@@ -48,7 +47,7 @@ enum class SGRCode : rdge::uint16
 
 std::ostream& operator<< (std::ostream& os, SGRCode code)
 {
-    return os << "\033[" << static_cast<rdge::uint16>(code) << "m";
+    return os << "\033[" << static_cast<uint16>(code) << "m";
 }
 
 std::ostream& operator<< (std::ostream& os, LogLevel level)
@@ -74,143 +73,227 @@ std::ostream& operator<< (std::ostream& os, LogLevel level)
     return os << "[UNKNOWN]";
 }
 
-struct log_timestamp
+std::string
+GetFormattedTimestamp (bool use_gmt, bool include_milliseconds)
 {
-    bool include_milliseconds = false;
-    bool use_gmt              = false;
-};
+    auto tp_now = system_clock::now();
+    time_t now = system_clock::to_time_t(tp_now);
+    struct tm t = (use_gmt) ? *gmtime(&now) : *localtime(&now);
 
-std::ostream& operator<< (std::ostream& os, log_timestamp ts)
-{
-    auto chrono_now = system_clock::now();
-    time_t now = system_clock::to_time_t(chrono_now);
-    struct tm t = (ts.use_gmt) ? *gmtime(&now) : *localtime(&now);
-
-    auto epoch = chrono_now.time_since_epoch();
-    auto ms = duration_cast<milliseconds>(epoch).count() % 1000;
-
-    os << t.tm_year + 1900 << "/"
+    std::ostringstream ss;
+    ss << (t.tm_year + 1900) << "/"
        << std::setfill('0')
-       << std::setw(2) << t.tm_mon + 1 << "/"
+       << std::setw(2) << (t.tm_mon + 1) << "/"
        << std::setw(2) << t.tm_mday << " "
        << std::setw(2) << t.tm_hour << ":"
        << std::setw(2) << t.tm_min << ":"
        << std::setw(2) << t.tm_sec;
 
-    if (ts.include_milliseconds)
+    if (include_milliseconds)
     {
-        os << "." << std::setw(4) << ms;
+        auto epoch = tp_now.time_since_epoch();
+        auto ms = duration_cast<milliseconds>(epoch).count() % 1000;
+
+        ss << "." << std::setw(4) << ms;
     }
 
-    return os << std::setfill(' ');
+    return ss.str();
+}
+
+std::ostringstream&
+GetThreadLocalStream (void)
+{
+    // TODO Perf: This could be modified to use a custom allocator, which would
+    //      limit the number of dynamic allocations
+    thread_local std::ostringstream ss;
+    ss.str(std::string());
+    ss.clear();
+    return ss;
+}
+
+class AsyncLogHandler
+{
+public:
+    AsyncLogHandler (void)
+    {
+        m_thread = std::thread([=](void) {
+            using namespace std::chrono_literals;
+            while (m_running.load(std::memory_order_relaxed))
+            {
+                log_record record;
+                if (m_queue.wait_and_pop(record, 250ms))
+                {
+                    if (record.level < GetMinLogLevel())
+                    {
+                        continue;
+                    }
+
+                    if (m_running.load(std::memory_order_relaxed))
+                    {
+                        // TODO Perf: Remove lock and have consuming thread add/remove
+                        //      handlers.  Would require making the queue consume an
+                        //      abstract type and branch.
+                        std::lock_guard<std::mutex> guard(m_handlerMutex);
+                        for (auto& handler : m_handlers)
+                        {
+                            handler->Log(record);
+                        }
+                    }
+                }
+            }
+        });
+
+        m_running.store(true, std::memory_order_relaxed);
+    }
+
+    ~AsyncLogHandler (void) noexcept
+    {
+        m_running.store(false, std::memory_order_relaxed);
+
+        try {
+            m_thread.join(); // thread should always be joinable
+        } catch (const std::system_error& ex) {
+            std::cerr << "~AsyncLogHandler Exception caught:"
+                      << " what=" << ex.what() << '\n';
+        }
+    }
+
+    void AddHandler (std::unique_ptr<RecordHandler>&& handler)
+    {
+        std::lock_guard<std::mutex> guard(m_handlerMutex);
+        m_handlers.emplace_back(std::move(handler));
+    }
+
+    void Log (log_record&& record)
+    {
+        if (record.level < GetMinLogLevel())
+        {
+            return;
+        }
+
+        m_queue.push(std::move(record));
+    }
+
+private:
+    threadsafe_queue<log_record> m_queue;
+    std::thread                  m_thread;
+    std::atomic_bool             m_running = ATOMIC_VAR_INIT(false);
+
+    std::mutex m_handlerMutex;
+    std::vector<std::unique_ptr<RecordHandler>> m_handlers;
+};
+
+std::unique_ptr<AsyncLogHandler> s_logHandler;
+
+} // anonymous namespace
+
+
+namespace detail {
+
+#ifdef RDGE_DEBUG
+std::atomic<LogLevel> g_minLogLevel = ATOMIC_VAR_INIT(LogLevel::DEBUG);
+#else
+std::atomic<LogLevel> g_minLogLevel = ATOMIC_VAR_INIT(LogLevel::WARNING);
+#endif
+
+LogStream::LogStream (LogLevel level, const char* file, int32 line)
+    : m_level(level)
+    , m_file(file)
+    , m_line(line)
+    , m_stream(GetThreadLocalStream())
+{ }
+
+LogStream::~LogStream (void) noexcept
+{
+    if (s_logHandler)
+    {
+        s_logHandler->Log(log_record { m_level, m_file, m_line, m_stream.str() });
+    }
+}
+
+} // namespace detail
+
+
+//////////////////////////////////////////////////////////
+//                   RecordHandler
+//////////////////////////////////////////////////////////
+
+RecordHandler::RecordHandler (bool use_gmt, bool log_milli)
+{
+    if (use_gmt)
+    {
+        m_flags |= USE_GMT;
+    }
+
+    if (log_milli)
+    {
+        m_flags |= LOG_MILLISECONDS;
+    }
 }
 
 //////////////////////////////////////////////////////////
-//                  ConsoleLogger
+//                 ConsoleRecordHandler
 //////////////////////////////////////////////////////////
 
-ConsoleLogger::ConsoleLogger (
-                              LogLevel min_level,
-                              bool     include_ms,
-                              bool     use_gmt
-                             )
-    : m_minLogLevel(min_level)
-    , m_includeMilliseconds(include_ms)
-    , m_useGMT(use_gmt)
+ConsoleRecordHandler::ConsoleRecordHandler (bool use_gmt, bool log_milli)
+    : RecordHandler(use_gmt, log_milli)
 { }
 
 void
-ConsoleLogger::Write (
-                      rdge::util::LogLevel level,
-                      const std::string&   message,
-                      const std::string&   filename,
-                      rdge::uint32         line
-                     )
+ConsoleRecordHandler::Log (const log_record& record)
 {
-    if (level >= m_minLogLevel)
+    auto& out = (record.level >= LogLevel::ERROR) ? std::cerr : std::cout;
+
+    auto ts = GetFormattedTimestamp(m_flags & USE_GMT, m_flags & LOG_MILLISECONDS);
+    out << SGRCode::WhiteText << ts << " ";
+
+    switch (record.level)
     {
-        auto out = (level >= LogLevel::ERROR) ? &std::cerr : &std::cout;
-
-        log_timestamp ts { m_includeMilliseconds, m_useGMT };
-        std::ostringstream location;
-        if (!filename.empty() && line > 0)
-        {
-            location << "(" << filename << ":" << line << ") ";
-        }
-
-        switch (level)
-        {
-        case LogLevel::DEBUG:
-            *out << SGRCode::WhiteText << ts << " "
-                 << SGRCode::CyanText << level << " "
-                 << SGRCode::YellowText << location.str()
-                 << SGRCode::Reset << message
-                 << std::endl;
-            break;
-        case LogLevel::INFO:
-            *out << SGRCode::WhiteText << ts << " "
-                 << SGRCode::BlueText << level << " "
-                 << SGRCode::YellowText << location.str()
-                 << SGRCode::Reset << message
-                 << std::endl;
-            break;
-        case LogLevel::WARNING:
-            *out << SGRCode::WhiteText << ts << " "
-                 << SGRCode::MagentaText << level << " "
-                 << SGRCode::YellowText << location.str()
-                 << SGRCode::Reset << message
-                 << std::endl;
-            break;
-        case LogLevel::ERROR:
-            *out << SGRCode::WhiteText << ts << " "
-                 << SGRCode::Bold << SGRCode::RedText << level << SGRCode::BoldOff << " "
-                 << SGRCode::YellowText << location.str()
-                 << SGRCode::Reset << message
-                 << std::endl;
-            break;
-        case LogLevel::FATAL:
-            *out << SGRCode::WhiteText << ts << " "
-                 << SGRCode::Bold << SGRCode::RedBackground << level << SGRCode::Reset << " "
-                 << SGRCode::YellowText << location.str()
-                 << SGRCode::Reset << message
-                 << std::endl;
-            break;
-        case LogLevel::CUSTOM:
-            *out << SGRCode::WhiteText << ts << " "
-                 << SGRCode::Bold << SGRCode::GreenBackground << level << SGRCode::Reset << " "
-                 << SGRCode::YellowText << location.str()
-                 << SGRCode::Reset << message
-                 << std::endl;
-            break;
-        }
+    case LogLevel::DEBUG:
+        out << SGRCode::CyanText << record.level << " ";
+        break;
+    case LogLevel::INFO:
+        out << SGRCode::BlueText << record.level << " ";
+        break;
+    case LogLevel::WARNING:
+        out << SGRCode::MagentaText << record.level << " ";
+        break;
+    case LogLevel::ERROR:
+        out << SGRCode::Bold << SGRCode::RedText << record.level << SGRCode::BoldOff << " ";
+        break;
+    case LogLevel::FATAL:
+        out << SGRCode::Bold << SGRCode::RedBackground << record.level << SGRCode::Reset << " ";
+        break;
+    case LogLevel::CUSTOM:
+        out << SGRCode::Bold << SGRCode::GreenBackground << record.level << SGRCode::Reset << " ";
+        break;
     }
+
+#ifdef RDGE_DEBUG
+    if (record.file)
+    {
+        out << SGRCode::YellowText << "(" << record.file << ":" << record.line << ") ";
+    }
+#endif
+
+    out << SGRCode::Reset << record.message << '\n';
+    out.flush();
 }
 
 //////////////////////////////////////////////////////////
-//                    FileLogger
+//                 FileRecordHandler
 //////////////////////////////////////////////////////////
 
-FileLogger::FileLogger (
-                        std::string file,
-                        LogLevel    min_level,
-                        bool        overwrite,
-                        bool        include_ms,
-                        bool        use_gmt
-                       )
-    : m_file(std::move(file))
-    , m_minLogLevel(min_level)
-    , m_includeMilliseconds(include_ms)
-    , m_useGMT(use_gmt)
-    , m_active(true)
-    , m_stream(nullptr)
-    , m_worker(nullptr)
-    , m_workerRunning(false)
+FileRecordHandler::FileRecordHandler (std::string file,
+                                      bool overwrite,
+                                      bool use_gmt,
+                                      bool log_milli)
+    : RecordHandler(use_gmt, log_milli)
+    , m_file(std::move(file))
 {
     auto mode = (overwrite) ? std::ofstream::trunc : std::ofstream::app;
-
-    m_stream = new std::ofstream();
-    m_stream->open(m_file, std::ofstream::out | mode);
-    if (m_stream->is_open() == false)
+    m_stream.open(m_file, std::ofstream::out | mode);
+    if (!m_stream.is_open())
     {
         std::stringstream ss;
         ss << "File cannot open:"
@@ -220,151 +303,61 @@ FileLogger::FileLogger (
 
         RDGE_THROW(ss.str());
     }
-
-    m_worker = std::make_unique<WorkerThread>([this]() {
-        while (m_workerRunning)
-        {
-            std::unique_ptr<LogInfo> entry;
-            if (m_queue.WaitAndPop(entry, 250) && m_workerRunning)
-            {
-                if (m_stream->is_open() && m_active && entry->level >= m_minLogLevel)
-                {
-                    log_timestamp ts { m_includeMilliseconds, m_useGMT };
-                    std::stringstream location;
-                    if (!entry->filename.empty() && entry->line > 0)
-                    {
-                        location << "(" << entry->filename << ":" << entry->line << ") ";
-                    }
-
-                    *m_stream << ts << " "
-                              << entry->level << " "
-                              << location.str()
-                              << entry->message
-                              << std::endl;
-
-                    m_stream->flush();
-                }
-            }
-        }
-    }, [this]() { m_workerRunning = false; });
-
-    m_workerRunning = true;
 }
 
-FileLogger::FileLogger (FileLogger&& rhs) noexcept
-    : m_file(std::move(rhs.m_file))
-    , m_minLogLevel(rhs.m_minLogLevel)
-    , m_includeMilliseconds(rhs.m_includeMilliseconds)
-    , m_useGMT(rhs.m_useGMT)
-    , m_stream(rhs.m_stream)
-    , m_queue(std::move(rhs.m_queue))
-    , m_worker(std::move(rhs.m_worker))
+FileRecordHandler::~FileRecordHandler (void) noexcept
 {
-    m_active.store(rhs.m_active);
-    m_workerRunning.store(rhs.m_workerRunning);
-
-    rhs.m_stream = nullptr;
-}
-
-FileLogger&
-FileLogger::operator= (FileLogger&& rhs) noexcept
-{
-    if (this != &rhs)
+    if (m_stream.is_open())
     {
-        m_worker->Stop();
-
-        if (m_stream->is_open())
-        {
-            m_stream->close();
-        }
-
-        delete m_stream;
-
-        m_file = std::move(rhs.m_file);
-        m_minLogLevel = rhs.m_minLogLevel;
-        m_includeMilliseconds = rhs.m_includeMilliseconds;
-        m_useGMT = rhs.m_useGMT;
-        m_active.store(rhs.m_active);
-        m_stream = rhs.m_stream;
-        m_queue = std::move(rhs.m_queue);
-        m_worker = std::move(rhs.m_worker);
-        m_workerRunning.store(rhs.m_workerRunning);
-
-        rhs.m_stream = nullptr;
+        m_stream.close();
     }
-
-    return *this;
-}
-
-FileLogger::~FileLogger (void)
-{
-    m_worker->Stop();
-
-    if (m_stream->is_open())
-    {
-        m_stream->close();
-    }
-
-    delete m_stream;
 }
 
 void
-FileLogger::SetActive (bool active)
+FileRecordHandler::Log (const log_record& record)
 {
-    m_active = active;
+    if (m_stream.is_open())
+    {
+        auto ts = GetFormattedTimestamp(m_flags & USE_GMT, m_flags & LOG_MILLISECONDS);
+        m_stream << ts << " "
+                 << record.level << " ";
+
+#ifdef RDGE_DEBUG
+        if (record.file)
+        {
+            m_stream << "(" << record.file << ":" << record.line << ") ";
+        }
+#endif
+
+        m_stream << record.message << '\n';
+        m_stream.flush();
+    }
+}
+
+//////////////////////////////////////////////////////////
+//                    Global Methods
+//////////////////////////////////////////////////////////
+
+void
+InitializeLogger (void)
+{
+    if (!s_logHandler)
+    {
+        s_logHandler = std::make_unique<AsyncLogHandler>();
+
+        s_logHandler->AddHandler(std::make_unique<ConsoleRecordHandler>());
+        s_logHandler->AddHandler(std::make_unique<FileRecordHandler>("rdge.log"));
+    }
 }
 
 void
-FileLogger::Write (
-                   rdge::util::LogLevel level,
-                   const std::string&   message,
-                   const std::string&   filename,
-                   rdge::uint32         line
-                  )
+AddRecordHandler (std::unique_ptr<RecordHandler>&& handler)
 {
-    m_queue.Push(std::make_unique<LogInfo>(LogInfo { level, message, filename, line }));
-}
-
-//////////////////////////////////////////////////////////
-//                    ScopeLogger
-//////////////////////////////////////////////////////////
-
-ScopeLogger::ScopeLogger (
-                          std::string        identifier,
-                          const std::string& function_name,
-                          const std::string& filename
-                         )
-    : m_identifier(std::move(identifier))
-{
-    std::ostringstream ss;
-    ss << "ScopeLogger[" << m_identifier << "] START";
-
-    if (!function_name.empty())
+    if (s_logHandler)
     {
-        ss << " function_name=" << function_name;
+        s_logHandler->AddHandler(std::move(handler));
     }
-
-    if (!filename.empty())
-    {
-        ss << " filename=" << filename;
-    }
-
-    rdge::WriteToConsole(LogLevel::CUSTOM, ss.str());
-
-    // for more accurate results, the last thing must be to get the timestamp
-    m_startPoint = time_point_cast<Duration>(HiResClock::now());
 }
 
-ScopeLogger::~ScopeLogger (void)
-{
-    auto stop = HiResClock::now();
-    auto delta = duration_cast<Duration>(stop - m_startPoint).count();
-
-    std::stringstream ss;
-    ss << "ScopeLogger[" << m_identifier << "] STOP delta=" << delta << "μs";
-
-    rdge::WriteToConsole(LogLevel::CUSTOM, ss.str());
-}
-
-} // namespace util
 } // namespace rdge
+

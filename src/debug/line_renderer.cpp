@@ -5,9 +5,9 @@
 #include <rdge/physics/shapes/circle.hpp>
 #include <rdge/physics/shapes/polygon.hpp>
 #include <rdge/physics/fixture.hpp>
+#include <rdge/util/logger.hpp>
 
 #include <rdge/internal/hints.hpp>
-#include <rdge/internal/logger_macros.hpp>
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
 
@@ -154,12 +154,10 @@ LineRenderer::LineRenderer (uint16 capacity)
     m_shader->SetUniformValue(UNI_PROJ_MATRIX, m_projection);
     m_shader->Disable();
 
-    std::ostringstream ss;
-    ss << "debug::LineRenderer"
-       << " capacity=" << m_capacity
-       << " vao[" << m_vao << "]"
-       << " vbo[" << m_vbo << "].size=" << vbo_size;
-    DLOG(ss.str());
+    DLOG() << "debug::LineRenderer"
+           << " capacity=" << m_capacity
+           << " vao[" << m_vao << "]"
+           << " vbo[" << m_vbo << "].size=" << vbo_size;
 }
 
 LineRenderer::~LineRenderer (void) noexcept
@@ -251,12 +249,10 @@ SetLineWidth (float width)
     auto supported = opengl::GetSupportedLineWidth();
     if (width < supported[0] || width > supported[1])
     {
-        std::ostringstream ss;
-        ss << "SetLineWidth request is outside supported bounds and will be clamped."
-           << "  min=" << supported[0]
-           << "  max=" << supported[1]
-           << "  requested=" << width;
-        WLOG(ss.str());
+        WLOG() << "SetLineWidth request is outside supported bounds and will be clamped."
+               << "  min=" << supported[0]
+               << "  max=" << supported[1]
+               << "  requested=" << width;
 
         width = math::clamp(width, supported[0], supported[1]);
     }

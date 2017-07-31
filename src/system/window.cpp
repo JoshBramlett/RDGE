@@ -1,7 +1,7 @@
 #include <rdge/system/window.hpp>
 #include <rdge/util/timer.hpp>
+#include <rdge/util/logger.hpp>
 #include <rdge/internal/exception_macros.hpp>
-#include <rdge/internal/logger_macros.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
 #include <rdge/internal/hints.hpp>
 #include <rdge/debug/sdl_dumper.hpp>
@@ -91,7 +91,7 @@ Window::Window (
     , m_targetWidth(target_width)
     , m_targetHeight(target_height)
 {
-    ILOG("Initializing Window");
+    ILOG() << "Initializing Window";
 
     // Ensure video subsystem is created.  Events subsystem (which is required by the
     // class) is initialized automatically by initializing video
@@ -213,7 +213,7 @@ Window::Window (
         SDL_THROW("SDL failed to create an OpenGL context", "SDL_GL_CreateContext");
     }
 
-    ILOG("Created OpenGL context v" + opengl::GetStringValue(GL_VERSION));
+    ILOG() << "Created OpenGL context v" << opengl::GetStringValue(GL_VERSION);
 
     // !!!  IMPORTANT  !!!
     // There are a couple issues with GLEW initialization (as far as 1.13).
@@ -256,16 +256,13 @@ Window::Window (
         int32 interval = 1;
         if (UNLIKELY(SDL_GL_SetSwapInterval(interval) != 0))
         {
-            std::ostringstream ss;
-            ss << "SDL failed to set swap interval "
-               << " interval=" << interval
-               << " error=" << SDL_GetError();
-
-            WLOG(ss.str());
+            WLOG() << "SDL failed to set swap interval "
+                   << " interval=" << interval
+                   << " error=" << SDL_GetError();
         }
         else
         {
-            ILOG("Swap interval set to use VSYNC");
+            ILOG() << "Swap interval set to use VSYNC";
         }
     }
 
@@ -279,7 +276,7 @@ Window::Window (
 
 Window::~Window (void)
 {
-    ILOG("Destroying Window");
+    ILOG() << "Destroying Window";
 
     SDL_DelEventWatch(&OnWindowEvent, this);
 
@@ -389,7 +386,7 @@ Window::IsHighDPI (void) const noexcept
 void
 Window::SetTitle (const std::string& title)
 {
-    DLOG("Setting window title to " + title);
+    DLOG() << "Setting window title to " << title;
 
     SDL_SetWindowTitle(m_window, title.c_str());
 }
@@ -397,7 +394,7 @@ Window::SetTitle (const std::string& title)
 void
 Window::SetSize (uint32 width, uint32 height)
 {
-    DLOG("Setting window size to [" + std::to_string(width) + "," + std::to_string(height) + "]");
+    DLOG() << "Setting window size to [" << width << ',' << height << ']';
 
     SDL_SetWindowSize(m_window, width, height);
 }

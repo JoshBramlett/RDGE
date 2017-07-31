@@ -1,7 +1,7 @@
 #include <rdge/assets/surface.hpp>
 #include <rdge/math/intrinsics.hpp>
+#include <rdge/util/logger.hpp>
 #include <rdge/internal/exception_macros.hpp>
-#include <rdge/internal/logger_macros.hpp>
 #include <rdge/internal/hints.hpp>
 
 #include <SDL_assert.h>
@@ -87,13 +87,10 @@ Surface::Surface (const std::string& path, PixelDepth depth)
     }
     else if (orig_format != req_format)
     {
-        std::ostringstream ss;
-        ss << "Surface format overridden."
-           << " orig=" << orig_format
-           << " req=" << req_format
-           << " path=" << path;
-
-        ILOG(ss.str());
+        ILOG() << "Surface format overridden."
+               << " orig=" << orig_format
+               << " req=" << req_format
+               << " path=" << path;
     }
 
     // TODO Format is hard-coded.  When adding 24BPP support make sure to query
@@ -138,13 +135,10 @@ Surface::Surface (const std::string& path, PixelDepth depth)
 
     if (!math::is_pot(m_surface->w) || !math::is_pot(m_surface->h))
     {
-        std::ostringstream ss;
-        ss << "Surface loaded has NPOT dimensions."
-           << " w=" << m_surface->w
-           << " h=" << m_surface->h
-           << " path=" << path;
-
-        WLOG(ss.str());
+        WLOG() << "Surface loaded has NPOT dimensions."
+               << " w=" << m_surface->w
+               << " h=" << m_surface->h
+               << " path=" << path;
     }
 }
 

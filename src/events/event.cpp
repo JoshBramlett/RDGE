@@ -1,6 +1,6 @@
 #include <rdge/events/event.hpp>
+#include <rdge/util/logger.hpp>
 #include <rdge/internal/exception_macros.hpp>
-#include <rdge/internal/logger_macros.hpp>
 #include <rdge/internal/hints.hpp>
 
 #include <vector>
@@ -94,11 +94,8 @@ PollEvent (Event* event)
                                 static_cast<EventType>(event->sdl_event.type));
         if (result == s_supportedEventTypes.end())
         {
-            std::ostringstream ss;
-            ss << "Unsupported EventType! type="
-               << static_cast<EventType>(event->sdl_event.type);
-
-            WLOG(ss.str());
+            WLOG() << "Unsupported EventType! type="
+                   << static_cast<EventType>(event->sdl_event.type);
         }
 #endif
         return true;
@@ -138,12 +135,9 @@ SetEventState (EventType type, bool enable)
         SDL_EventState(static_cast<uint32>(type), enable ? SDL_ENABLE : SDL_DISABLE);
     }
 
-    std::ostringstream ss;
-    ss << "Setting Event State"
-       << " type=" << type
-       << " state=" << (enable ? "enabled" : "disabled");
-
-    ILOG(ss.str());
+    ILOG() << "Setting Event State"
+           << " type=" << type
+           << " state=" << (enable ? "enabled" : "disabled");
 }
 
 void

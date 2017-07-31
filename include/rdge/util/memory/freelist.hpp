@@ -64,8 +64,7 @@ public:
         free(m_handles);
     }
 
-    //!@{
-    //! \brief Non-copyable, move enabled
+    //!@{ Non-copyable, move enabled
     DynamicFreelist (const DynamicFreelist&) = delete;
     DynamicFreelist& operator= (const DynamicFreelist&) = delete;
 

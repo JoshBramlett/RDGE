@@ -98,8 +98,7 @@ public:
     //! \details Calls SDL_Quit
     ~Application (void) noexcept;
 
-    //!@{
-    //! \details Non-copyable and non-movable
+    //!@{ Non-copyable and non-movable
     Application (const Application&) = delete;
     Application& operator= (const Application&) = delete;
     Application (Application&&) = delete;
@@ -143,28 +142,5 @@ public:
 //! \throws rdge::Exception Configuration file parsing failed
 app_settings
 LoadAppSettings (const std::string& path);
-
-//! \brief Writes an entry to the RDGE log file
-//! \param [in] log_level Logging severity
-//! \param [in] message Message to write to the log file
-//! \param [in] filename Name of the file of the caller (FILE_NAME)
-//! \param [in] line Line number of the caller (__LINE__)
-void
-WriteToLogFile (rdge::LogLevel     log_level,
-                const std::string& message,
-                const std::string& filename = "",
-                rdge::uint32       line     = 0);
-
-//! \brief Writes an entry to the console
-//! \details Only enabled in debug builds.
-//! \param [in] log_level Logging severity
-//! \param [in] message Message to write to the log file
-//! \param [in] filename Name of the file of the caller (FILE_NAME)
-//! \param [in] line Line number of the caller (__LINE__)
-void
-WriteToConsole (rdge::LogLevel     log_level,
-                const std::string& message,
-                const std::string& filename = "",
-                rdge::uint32       line     = 0);
 
 } // namespace rdge

@@ -10,16 +10,9 @@
 #include <exception>
 #include <sstream>
 
-using namespace rdge;
 using json = nlohmann::json;
 
-namespace {
-
-    // global loggers
-    rdge::util::FileLogger* s_fileLogger = nullptr;
-    rdge::util::ConsoleLogger* s_consoleLogger = nullptr;
-
-} // anonymous namespace
+namespace rdge {
 
 Application::Application (const std::string& path)
     : Application(LoadAppSettings(path))
@@ -31,21 +24,14 @@ Application::Application (const app_settings& settings)
      *          1.  Initialize Logging
      **********************************************/
 
-    // FIXME RDGE-00054 Refactor app logging
+    InitializeLogger();
 
-    // Validate log level
-    auto log_level = static_cast<LogLevel>(settings.min_log_level);
-    if (log_level < LogLevel::DEBUG || log_level > LogLevel::FATAL)
-    {
-        log_level = LogLevel::WARNING;
-    }
-
-    s_fileLogger = new rdge::util::FileLogger("rdge.log", log_level, true);
-    s_fileLogger->Write(LogLevel::INFO, "Built with RDGE v" RDGE_VERSION);
-
-#ifdef RDGE_DEBUG
-    s_consoleLogger = new rdge::util::ConsoleLogger(LogLevel::DEBUG, true);
-#endif
+    // TODO settings file should be for overriding the default log level
+    //      (which depends on whether it's a debug or release build).  Therefore
+    //      setting a default value in the settings is wrong - this value
+    //      should be optional.
+    //
+    //      Holding off setting the log level from a config until that's done.
 
     /***********************************************
      *             2.  Initialize SDL
@@ -87,16 +73,6 @@ Application::Application (const app_settings& settings)
 
 Application::~Application (void) noexcept
 {
-    if (!s_fileLogger)
-    {
-        delete s_fileLogger;
-    }
-
-    if (!s_consoleLogger)
-    {
-        delete s_consoleLogger;
-    }
-
     if (TTF_WasInit())
     {
         TTF_Quit();
@@ -161,19 +137,17 @@ Application::MessageBox (MessageBoxType     type,
                          const std::string& message,
                          SDL_Window*        window)
 {
-    if (UNLIKELY(SDL_ShowSimpleMessageBox(
-                                          static_cast<uint32>(type),
+    if (UNLIKELY(SDL_ShowSimpleMessageBox(static_cast<uint32>(type),
                                           title.c_str(),
                                           message.c_str(),
-                                          window
-                                         ) != 0))
+                                          window) != 0))
     {
         RDGE_THROW("Failed to show message box");
     }
 }
 
 app_settings
-rdge::LoadAppSettings (const std::string& path)
+LoadAppSettings (const std::string& path)
 {
     app_settings settings;
 
@@ -253,26 +227,4 @@ rdge::LoadAppSettings (const std::string& path)
     return settings;
 }
 
-void
-rdge::WriteToLogFile (LogLevel           log_level,
-                      const std::string& message,
-                      const std::string& filename,
-                      uint32             line)
-{
-    if (s_fileLogger)
-    {
-        s_fileLogger->Write(log_level, message, filename, line);
-    }
-}
-
-void
-rdge::WriteToConsole (LogLevel           log_level,
-                      const std::string& message,
-                      const std::string& filename,
-                      uint32             line)
-{
-    if (s_consoleLogger)
-    {
-        s_consoleLogger->Write(log_level, message, filename, line);
-    }
-}
+} // namespace rdge

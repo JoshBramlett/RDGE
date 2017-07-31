@@ -5,6 +5,7 @@
 #include <rdge/internal/hints.hpp>
 
 #include <GL/glew.h>
+#include <SDL_assert.h>
 
 #include <algorithm>
 #include <memory>

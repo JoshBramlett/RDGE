@@ -48,8 +48,7 @@ public:
     //! \details Deletes the texture from the OpenGL context
     ~Texture (void) noexcept;
 
-    //!@{
-    //! \brief Non-copyable, move enabled
+    //!@{ Non-copyable, move enabled
     Texture (const Texture&) = delete;
     Texture& operator= (const Texture&) = delete;
     Texture (Texture&&) noexcept;

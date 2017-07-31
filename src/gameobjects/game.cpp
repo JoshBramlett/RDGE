@@ -1,6 +1,6 @@
 #include <rdge/gameobjects/game.hpp>
+#include <rdge/util/logger.hpp>
 #include <rdge/util/timer.hpp>
-#include <rdge/internal/logger_macros.hpp>
 
 #if RDGE_DEBUG
 #include <rdge/debug.hpp>
@@ -15,13 +15,13 @@ Game::Game (const app_settings& s)
 {
     SDL_assert(this->settings.target_fps >= 30);
 
-    ILOG("Constructing Game object");
+    ILOG() << "Constructing Game object";
     this->window = std::make_unique<Window>(this->settings);
 }
 
 Game::~Game (void) noexcept
 {
-    DLOG("Destroying Game object");
+    DLOG() << "Destroying Game object";
 }
 
 // The game object provides a guarantee to the scenes that game loop events

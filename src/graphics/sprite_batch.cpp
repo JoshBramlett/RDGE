@@ -1,6 +1,7 @@
 #include <rdge/graphics/sprite_batch.hpp>
 #include <rdge/graphics/color.hpp>
 #include <rdge/assets/surface.hpp>
+#include <rdge/util/logger.hpp>
 #include <rdge/internal/hints.hpp>
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
@@ -207,13 +208,11 @@ SpriteBatch::SpriteBatch (uint16 capacity, std::shared_ptr<Shader> shader, bool 
     // as a no-op transform if none are provided.
     PushTransformation(math::mat4::identity(), true);
 
-    std::ostringstream ss;
-    ss << "SpriteBatch[" << this << "]"
-       << " capacity=" << m_capacity
-       << " vao[" << m_vao << "]"
-       << " vbo[" << m_vbo << "].size=" << vbo_size
-       << " ibo[" << m_ibo << "].size=" << ibo_size;
-    DLOG(ss.str());
+    DLOG() << "SpriteBatch[" << this << "]"
+           << " capacity=" << m_capacity
+           << " vao[" << m_vao << "]"
+           << " vbo[" << m_vbo << "].size=" << vbo_size
+           << " ibo[" << m_ibo << "].size=" << ibo_size;
 }
 
 SpriteBatch::~SpriteBatch (void) noexcept
@@ -300,11 +299,9 @@ SpriteBatch::RegisterTexture (std::shared_ptr<Texture> texture)
     texture->unit_id = size;
     m_textures.emplace_back(texture);
 
-    std::ostringstream ss;
-    ss << "SpriteBatch[" << this << "] texture registered:"
-       << " texture=" << texture.get()
-       << " unit_id=" << texture->unit_id;
-    DLOG(ss.str());
+    DLOG() << "SpriteBatch[" << this << "] texture registered:"
+           << " texture=" << texture.get()
+           << " unit_id=" << texture->unit_id;
 }
 
 void

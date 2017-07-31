@@ -32,8 +32,7 @@ Physics:
 Math:
 
 Util:
-  - Logging refactor for stream support
-    - Add proper logging across the library
+  - Add proper logging across the library
   - Normalize and add support for normal print and pretty printing
   - Implement global memory tracker
   - Create wrapper for RWops

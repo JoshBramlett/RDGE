@@ -1,6 +1,6 @@
 #include <rdge/system/mouse.hpp>
+#include <rdge/util/logger.hpp>
 #include <rdge/internal/exception_macros.hpp>
-#include <rdge/internal/logger_macros.hpp>
 #include <rdge/internal/hints.hpp>
 
 #include <SDL_assert.h>
@@ -107,7 +107,7 @@ SetDefaultCursor (void) noexcept
     auto cursor = SDL_GetDefaultCursor();
     if (UNLIKELY(!cursor))
     {
-        WLOG("SDL_GetDefaultCursor returned a nullptr");
+        WLOG() << "SDL_GetDefaultCursor returned a nullptr";
     }
     else
     {
