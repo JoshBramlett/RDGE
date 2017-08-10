@@ -9,7 +9,7 @@
 //!          from many published projects that provided inspiration.
 //!          Thanks to everyone listed below whose examples have given
 //!          me a better understanding of how to go about creating this
-//!          game engine.
+//!          game engine.  These are all in chronological order of discovery.
 //! \li GatorQue Engine
 //!     The first homebrew game engine I dissected to learn it's internals
 //!     \see http://code.google.com/p/gqe/
@@ -17,12 +17,17 @@
 //!     Easy to understand tutorials for getting started with CMake and SDL
 //!     \see http://www.willusher.io/pages/sdl2/
 //!     \see https://github.com/Twinklebear/LPCGame
-//! \li C++11 bindings/wrapper for SDL2
+//! \li libSDL2pp - C++11 bindings/wrapper for SDL2
 //!     Good resource for wrapping SDL2 in an RAII friendly manner
 //!     \see https://github.com/libSDL2pp/libSDL2pp
-//! \li Simple C++11 friendly header-only bindings to Lua
-//!     Comes with a great tutorial for creating Lua bindings
-//!     \see https://github.com/jeremyong/Selene
+//! \li LibGDX
+//!     Open source Java game engine
+//! \li Sparky Game Engine
+//!     Decent videos for constructing a basic game engine using OpenGL
+//! \li Handmade Hero
+//!     Invaluable resource.  A game/game engine written from scratch
+//! \li Box2D
+//!     Fantastic open source 2D rigid body physics engine
 
 #pragma once
 

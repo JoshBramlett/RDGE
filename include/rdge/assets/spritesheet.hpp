@@ -6,60 +6,22 @@
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/assets/surface.hpp>
+#include <rdge/assets/texture_part.hpp>
 #include <rdge/graphics/animation.hpp>
-#include <rdge/graphics/isprite.hpp>
-#include <rdge/graphics/sprite.hpp>
-#include <rdge/graphics/sprite_group.hpp>
-#include <rdge/system/types.hpp>
 
 #include <memory>
-#include <string>
 #include <unordered_map>
 #include <vector>
-#include <ostream>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
 //!@{ Forward declarations
-class Animation;
+class Sprite;
+class SpriteGroup;
+class Surface;
+class Texture;
 //!@}
-
-//! \class texture_part
-//! \brief Represents an individual section of the \ref SpriteSheet
-//! \details Container includes the data the client can use for rendering and
-//!          commonly represents a sprite texture or alternatively a single
-//!          animation frame.
-//! \note The size and origin values may be modified from the config to
-//!       accommodate the scale multiplication.
-struct texture_part
-{
-    std::string  name;   //!< Unique name
-    screen_rect  clip;   //!< Unmodified clipping rectangle
-    tex_coords   coords; //!< Normalized texture coordinates
-    math::uivec2 size;   //!< Size in pixels (scaled)
-
-    //! \brief Origin used for drawing offsets (scaled)
-    //! \details Optional field used to align frames, and to generate sprite
-    //!          vertices from a world center point.  Value is defaulted to
-    //!          the centroid if unset.
-    math::vec2 origin;
-
-    //!@{
-    //! \brief Basic tex_coords transforms
-    //! \returns Reference to self
-    texture_part& flip_horizontal (void) noexcept;
-    texture_part& flip_vertical (void) noexcept;
-    //!@}
-
-    //!@{
-    //! \brief Basic tex_coords transforms
-    //! \returns Value after transform
-    texture_part flip_horizontal (void) const noexcept;
-    texture_part flip_vertical (void) const noexcept;
-    //!@}
-};
 
 //! \class SpriteSheet
 //! \brief Load sprite sheet from a json formatted config file
@@ -89,8 +51,7 @@ struct texture_part
 //!         "y": 0,
 //!         "width": 32,
 //!         "height": 32,
-//!         "hotspot_x": 0,
-//!         "hotspot_y": 0
+//!         "origin": [ 16, 16 ]
 //!     } ],
 //!     "animations": [ {
 //!         "name": "animation_name",
@@ -114,16 +75,15 @@ public:
     //!          for use with a standard display and ran using (and configured for)
     //!          a hi-res display, setting the scale_for_hires flag to true will scale
     //!          the texture_part.size value by a multiple of 2.
-    //! \param [in] path Path to the config file
+    //! \param [in] filepath Path to the config file
     //! \param [in] scale_for_hidpi Scale original image size for hi-resolution display
     //! \throws rdge::Exception Unable to parse config
-    explicit SpriteSheet (const std::string& path, bool scale_for_hidpi = false);
+    explicit SpriteSheet (const std::string& filepath, bool scale_for_hidpi = false);
 
     //! \brief SpriteSheet dtor
     ~SpriteSheet (void) noexcept = default;
 
-    //!@{
-    //! \brief Non-copyable and move enabled
+    //!@{ Non-copyable and move enabled
     SpriteSheet (const SpriteSheet&) = delete;
     SpriteSheet& operator= (const SpriteSheet&) = delete;
     SpriteSheet (SpriteSheet&&) noexcept = default;
@@ -179,8 +139,5 @@ private:
     std::unordered_map<std::string, texture_part> m_parts;   //!< Collection of texture parts
     std::unordered_map<std::string, Animation> m_animations; //!< Collection of animations
 };
-
-//! \brief texture_part stream output operator
-std::ostream& operator<< (std::ostream&, const texture_part&);
 
 } // namespace rdge

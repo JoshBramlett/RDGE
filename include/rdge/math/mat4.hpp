@@ -9,8 +9,6 @@
 #include <rdge/math/vec3.hpp>
 #include <rdge/math/vec4.hpp>
 
-#include <ostream>
-
 /* TODO
  *
  * A lot of this I don't understand, so I'll have to go back later to add some

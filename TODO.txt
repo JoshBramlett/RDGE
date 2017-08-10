@@ -1,7 +1,12 @@
+Assets:
+  - Add bitmap font support
+  - Remove SDL_ttf dependency
+
 Graphics:
   - Create a more cohesive way to represent sprites
     - Allocation should be done through a block allocator
     - Tie in with physics system (via entity).  Note: SpriteGroup/RigidBody
+  - Add shader support for distance field fonts
   - Add support for 24bpp images (surface and texture)
   - Better support for texture based filter, blending & wrapping (look to LibGDX)
   - Remove glew dependency in favor of glLoadGen
@@ -35,7 +40,6 @@ Util:
   - Add proper logging across the library
   - Normalize and add support for normal print and pretty printing
   - Implement global memory tracker
-  - Create wrapper for RWops
   - Build asset system to manage memory/loading/caching etc.
   - Support TextInput and TextEdit SDL events
 

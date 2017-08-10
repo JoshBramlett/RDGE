@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <limits>
 #include <string>
+#include <ostream>
 
 #ifdef RDGE_DEBUG
 #include <iostream>

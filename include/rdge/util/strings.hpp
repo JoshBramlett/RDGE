@@ -8,6 +8,7 @@
 #include <rdge/core.hpp>
 
 #include <string>
+#include <vector>
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
@@ -15,7 +16,8 @@
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
-inline std::string to_lower (const std::string& value)
+inline std::string
+to_lower (const std::string& value)
 {
     std::string result = value;
     std::transform(result.begin(), result.end(), result.begin(), ::tolower);
@@ -23,12 +25,38 @@ inline std::string to_lower (const std::string& value)
     return result;
 }
 
-inline std::string to_upper (const std::string& value)
+inline std::string
+to_upper (const std::string& value)
 {
     std::string result = value;
     std::transform(result.begin(), result.end(), result.begin(), ::toupper);
 
     return result;
+}
+
+inline std::vector<std::string>
+split (const std::string& s, char delim = ' ')
+{
+    std::vector<std::string> result;
+    for (size_t p = 0, q = 0; p != s.npos; p = q)
+    {
+        p = s.find_first_not_of(delim, p);
+        result.emplace_back(s.substr(p, (q = s.find(delim, p + 1)) - p));
+    }
+
+    return result;
+}
+
+inline bool
+starts_with (const std::string& source, const std::string& prefix)
+{
+    return source.rfind(prefix, 0) == 0;
+}
+
+inline void
+remove_all (std::string& source, char c)
+{
+    source.erase(std::remove(source.begin(), source.end(), c), source.end());
 }
 
 template <typename T>

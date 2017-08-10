@@ -10,9 +10,6 @@
 
 #include <SDL_mouse.h>
 
-#include <ostream>
-#include <string>
-
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 

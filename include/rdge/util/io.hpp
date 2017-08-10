@@ -6,6 +6,7 @@
 #pragma once
 
 #include <rdge/core.hpp>
+#include <rdge/util/io/rwops_base.hpp>
 
 #include <string>
 
@@ -51,6 +52,21 @@ namespace util {
 inline std::string
 read_text_file (const char* filepath)
 {
+    auto rwops = rwops_base::from_file(filepath, "rt");
+    auto size = rwops.size();
+    if (size >= 0)
+    {
+        char* data = (char*)malloc(size+1);
+        data[size] = 0;
+        rwops.read(data, size, 1);
+
+        std::string result(data);
+        free(data);
+        return result;
+    }
+
+    return std::string();
+
     // TODO: Make smart, should check std::string::max_size to make
     //       sure that the file is not too big.  Also, look into
     //       how to handle adverse behavior from our C functions
@@ -60,25 +76,26 @@ read_text_file (const char* filepath)
     //       treated as a text file by default and may be library
     //       implementation specific.
     // http://www.cplusplus.com/reference/cstdio/fopen/
-    FILE* file = fopen(filepath, "rt");
-    if (!file)
-    {
-        return "";
-    }
 
-    fseek(file, 0, SEEK_END);
-    unsigned long length = ftell(file);
-    char* data = new char[length + 1];
-    memset(data, 0, length + 1);
+    //FILE* file = fopen(filepath, "rt");
+    //if (!file)
+    //{
+        //return "";
+    //}
 
-    fseek(file, 0, SEEK_SET);
-    fread(data, 1, length, file);
-    fclose(file);
+    //fseek(file, 0, SEEK_END);
+    //unsigned long length = ftell(file);
+    //char* data = new char[length + 1];
+    //memset(data, 0, length + 1);
 
-    std::string result { data };
-    delete[] data;
+    //fseek(file, 0, SEEK_SET);
+    //fread(data, 1, length, file);
+    //fclose(file);
 
-    return result;
+    //std::string result { data };
+    //delete[] data;
+
+    //return result;
 }
 
 } // namespace util

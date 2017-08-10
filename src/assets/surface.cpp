@@ -69,6 +69,9 @@ Surface::Surface (const std::string& path, PixelDepth depth)
         req_format = STBI_rgb_alpha;
     }
 
+    // TODO when implementing a memory tracker, stbi has a define rule to use
+    //      a custom allocator.  Look into the same for SDL.
+
     int32 w, h, orig_format;
     m_data = stbi_load(path.c_str(), &w, &h, &orig_format, req_format);
     if (UNLIKELY(!m_data))
@@ -123,14 +126,15 @@ Surface::Surface (const std::string& path, PixelDepth depth)
     }
 
     m_surface = SDL_CreateRGBSurfaceWithFormatFrom((void*)m_data,
-                                         w, h,
-                                         static_cast<int32>(depth),
-                                         pitch,
-                                         sdl_pixel_format);
+                                                   w, h,
+                                                   static_cast<int32>(depth),
+                                                   pitch,
+                                                   sdl_pixel_format);
     if (UNLIKELY(!m_surface))
     {
         stbi_image_free(m_data);
-        SDL_THROW("Failed to create surface from pixel data", "SDL_CreateRGBSurfaceFrom");
+        SDL_THROW("Failed to create surface from pixel data",
+                  "SDL_CreateRGBSurfaceWithFormatFrom");
     }
 
     if (!math::is_pot(m_surface->w) || !math::is_pot(m_surface->h))

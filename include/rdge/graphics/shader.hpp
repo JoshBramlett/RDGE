@@ -13,7 +13,6 @@
 
 #include <GL/glew.h>
 
-#include <string>
 #include <vector>
 #include <unordered_map>
 

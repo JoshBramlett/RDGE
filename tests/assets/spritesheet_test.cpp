@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <rdge/assets/spritesheet.hpp>
+#include <rdge/graphics/sprite.hpp>
 #include <rdge/math/intrinsics.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/math/vec3.hpp>
@@ -16,14 +17,13 @@ namespace {
 using namespace rdge;
 using namespace rdge::math;
 
-// NOTE: Cannot test for missing elements b/c the json lib has an assertion
+// NOTE: No test for missing elements b/c the json lib has an assertion
 
 class SpriteSheetTest : public ::testing::Test
 {
 protected:
-    SpriteSheetTest() { }
-
-    virtual ~SpriteSheetTest() { }
+    SpriteSheetTest (void) = default;
+    virtual ~SpriteSheetTest (void) noexcept = default;
 
     rdge::tests::DummyWindow m_window; // For OpenGL context
 };

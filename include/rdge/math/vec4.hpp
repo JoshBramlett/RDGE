@@ -9,8 +9,6 @@
 #include <rdge/math/intrinsics.hpp>
 #include <rdge/math/vec3.hpp>
 
-#include <ostream>
-
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 namespace math {

@@ -1,5 +1,8 @@
 #include <rdge/assets/spritesheet.hpp>
-#include <rdge/math/vec2.hpp>
+#include <rdge/graphics/sprite.hpp>
+#include <rdge/graphics/sprite_group.hpp>
+#include <rdge/assets/surface.hpp>
+#include <rdge/graphics/texture.hpp>
 #include <rdge/math/intrinsics.hpp>
 #include <rdge/util/io.hpp>
 #include <rdge/util/strings.hpp>
@@ -73,14 +76,14 @@ ProcessTexturePart (const json& part, const math::uivec2& surface_size, uint32 s
                     static_cast<int32>(w), static_cast<int32>(h) };
     result.size = { w * scale, h * scale };
     result.origin = origin * scale;
-    result.coords.bottom_left  = math::vec2(normalize(x, surface_size.w),
-                                            normalize(y, surface_size.h));
-    result.coords.bottom_right = math::vec2(normalize(x + w, surface_size.w),
-                                            normalize(y, surface_size.h));
-    result.coords.top_left     = math::vec2(normalize(x, surface_size.w),
-                                            normalize(y + h, surface_size.h));
-    result.coords.top_right    = math::vec2(normalize(x + w, surface_size.w),
-                                            normalize(y + h, surface_size.h));
+    result.coords.bottom_left  = math::vec2(::normalize(x, surface_size.w),
+                                            ::normalize(y, surface_size.h));
+    result.coords.bottom_right = math::vec2(::normalize(x + w, surface_size.w),
+                                            ::normalize(y, surface_size.h));
+    result.coords.top_left     = math::vec2(::normalize(x, surface_size.w),
+                                            ::normalize(y + h, surface_size.h));
+    result.coords.top_right    = math::vec2(::normalize(x + w, surface_size.w),
+                                            ::normalize(y + h, surface_size.h));
 
     return std::make_pair(name, result);
 }
@@ -89,43 +92,11 @@ ProcessTexturePart (const json& part, const math::uivec2& surface_size, uint32 s
 
 namespace rdge {
 
-texture_part&
-texture_part::flip_horizontal (void) noexcept
-{
-    this->coords.flip_horizontal();
-    this->origin.x = this->size.w - this->origin.x;
-
-    return *this;
-}
-
-texture_part&
-texture_part::flip_vertical (void) noexcept
-{
-    this->coords.flip_vertical();
-    this->origin.y = this->size.h - this->origin.y;
-
-    return *this;
-}
-
-texture_part
-texture_part::flip_horizontal (void) const noexcept
-{
-    texture_part result = *this;
-    return result.flip_horizontal();
-}
-
-texture_part
-texture_part::flip_vertical (void) const noexcept
-{
-    texture_part result = *this;
-    return result.flip_vertical();
-}
-
-SpriteSheet::SpriteSheet (const std::string& path, bool scale_for_hidpi)
+SpriteSheet::SpriteSheet (const std::string& filepath, bool scale_for_hidpi)
 {
     try
     {
-        auto config = rdge::util::read_text_file(path.c_str());
+        auto config = rdge::util::read_text_file(filepath.c_str());
         if (config.empty())
         {
             throw std::invalid_argument("File does not exist.");
@@ -319,19 +290,6 @@ SpriteSheet::CreateSpriteChain (const std::string& name,
     }
 
     return group;
-}
-
-std::ostream& operator<< (std::ostream& os, const texture_part& p)
-{
-    os << "texture_part: ["
-       << "\n  name=" << p.name
-       << "\n  clip=" << p.clip
-       << "\n  coords=" << p.coords
-       << "\n  size=" << p.size
-       << "\n  origin=" << p.origin
-       << "\n]\n";
-
-    return os;
 }
 
 } // namespace rdge

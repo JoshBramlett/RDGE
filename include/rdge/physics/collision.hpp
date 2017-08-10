@@ -13,8 +13,6 @@
 
 #include <SDL_assert.h>
 
-#include <ostream>
-
 // sites of import:
 //
 // http://www.iforce2d.net/b2dtut/collision-anatomy

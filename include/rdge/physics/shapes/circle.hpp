@@ -11,7 +11,6 @@
 #include <rdge/physics/collision.hpp>
 
 #include <algorithm>
-#include <ostream>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {

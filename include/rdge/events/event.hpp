@@ -12,9 +12,6 @@
 
 #include <SDL.h>
 
-#include <string>
-#include <ostream>
-
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 

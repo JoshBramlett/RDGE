@@ -46,8 +46,8 @@ class Surface
 public:
     //! \brief Surface ctor
     //! \details Take ownership of an existing SDL_Surface.
-    //! \param [in] surface Native SDL_Surface
-    explicit Surface (SDL_Surface* surface);
+    //! \param [in] sdl_surface Native SDL_Surface
+    explicit Surface (SDL_Surface* sdl_surface);
 
     //! \brief Surface ctor
     //! \details Create a Surface from an image on disk.  If image depth is not
@@ -60,7 +60,7 @@ public:
     //! \brief Surface dtor
     ~Surface (void) noexcept;
 
-    //!@{ Non-copyable and move enabled
+    //!@{ Non-copyable, move enabled
     Surface (const Surface&) = delete;
     Surface& operator= (const Surface&) = delete;
     Surface (Surface&&) noexcept;

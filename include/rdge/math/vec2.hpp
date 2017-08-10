@@ -10,8 +10,6 @@
 
 #include <cassert>
 
-#include <ostream>
-
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 namespace math {

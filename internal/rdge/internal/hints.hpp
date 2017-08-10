@@ -5,10 +5,8 @@
 
 #pragma once
 
-#ifndef UNLIKELY
-    #if defined(COMPILER_GCC) || defined(__clang__)
-        #define UNLIKELY(x) __builtin_expect(!!(x), 0)
-    #else
-        #define UNLIKELY(x) (x)
-    #endif
+#if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
+    #define UNLIKELY(x) __builtin_expect(!!(x), 0)
+#else
+    #define UNLIKELY(x) (x)
 #endif

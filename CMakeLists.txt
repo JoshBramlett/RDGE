@@ -76,9 +76,12 @@ add_library (
              RDGE SHARED
              src/application.cpp
 
+             src/assets/bmfont.cpp
+             src/assets/bitmap_font.cpp
              src/assets/font.cpp
              src/assets/spritesheet.cpp
              src/assets/surface.cpp
+             src/assets/texture_part.cpp
 
              src/debug/line_renderer.cpp
 
@@ -126,6 +129,7 @@ add_library (
              src/util/exception.cpp
              src/util/logger.cpp
              src/util/timer.cpp
+             src/util/io/rwops_base.cpp
              src/util/memory/small_block_allocator.cpp
             )
 
@@ -144,6 +148,7 @@ add_subdirectory (tutorials/04_scenes)
 
 add_executable (rdge_test
                 tests/main.cpp
+                tests/assets/bmfont_test.cpp
                 tests/assets/spritesheet_test.cpp
                 tests/graphics/color_test.cpp
                 tests/physics/aabb_test.cpp

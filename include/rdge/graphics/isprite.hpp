@@ -12,7 +12,6 @@
 #include <rdge/math/vec3.hpp>
 
 #include <array>
-#include <ostream>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {

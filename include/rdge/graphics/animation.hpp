@@ -6,17 +6,12 @@
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/assets/spritesheet.hpp>
+#include <rdge/assets/texture_part.hpp>
 
 #include <vector>
-#include <string>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
-
-//!@{ Forward declarations
-struct texture_part;
-//!@}
 
 //! \class Animation
 //! \brief Storage and logic to represent an animated sequence
