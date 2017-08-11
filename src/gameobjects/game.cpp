@@ -1,10 +1,10 @@
 #include <rdge/gameobjects/game.hpp>
 #include <rdge/util/logger.hpp>
 #include <rdge/util/timer.hpp>
-
-#if RDGE_DEBUG
 #include <rdge/debug.hpp>
-#endif
+
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_rdge.h>
 
 #include <SDL_assert.h>
 
@@ -82,9 +82,7 @@ Game::Run (void)
     bool using_vsync = this->window->IsUsingVSYNC();
     uint32 frame_cap = 1000 / this->settings.target_fps;
 
-#if RDGE_DEBUG
     debug::InitializeRenderer();
-#endif
 
     m_running = true;
     timer.Start();
@@ -102,11 +100,24 @@ Game::Run (void)
         auto current_scene = m_sceneStack.back();
         while (PollEvent(&event))
         {
+            ImGui_ImplRDGE_ProcessEvent(&event.sdl_event);
             if (!(this->on_event_hook && this->on_event_hook(event)))
             {
                 current_scene->OnEvent(event);
             }
         }
+
+        ImGui_ImplRDGE_NewFrame(static_cast<SDL_Window*>(*this->window.get()));
+        //ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
+                    //1000.0f / ImGui::GetIO().Framerate,
+                    //ImGui::GetIO().Framerate);
+
+        //bool show_another_window = true;
+        //ImGui::Begin("Another Window", &show_another_window);
+        //ImGui::Text("Hello");
+        //ImGui::End();
+
+        ImGui::ShowTestWindow();
 
         delta_time dt(timer.TickDelta());
         if (!(this->on_update_hook && this->on_update_hook(dt)))
@@ -118,10 +129,10 @@ Game::Run (void)
         if (!(this->on_render_hook && this->on_render_hook()))
         {
             current_scene->OnRender();
-#if RDGE_DEBUG
             debug::FlushRenderer();
-#endif
         }
+
+        ImGui::Render();
         this->window->Present();
 
         if (m_pushDeferred)

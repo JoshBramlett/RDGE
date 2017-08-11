@@ -14,8 +14,6 @@
 
 #include <SDL.h>
 
-#include <string>
-
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
@@ -93,45 +91,34 @@ public:
 
     //! \brief Window dtor
     //! \details Destroy SDL objects
-    ~Window (void);
+    ~Window (void) noexcept;
 
-    //! \brief Window Copy ctor
-    //! \details Non-copyable
+    //!@{ Non-copyable, move enabled
     Window (const Window&) = delete;
-
-    //! \brief Window Move ctor
-    //! \details Transfers ownership
-    Window (Window&&) noexcept;
-
-    //! \brief Window Copy Assignment Operator
-    //! \details Non-copyable
     Window& operator= (const Window&) = delete;
-
-    //! \brief Window Move Assignment Operator
-    //! \details Transfers ownership
+    Window (Window&&) noexcept;
     Window& operator= (Window&&) noexcept;
+    //!@}
 
-    //! \brief Get the window title
-    //! \return Title of the window
+    //!@{
+    //! \brief User defined conversion to a raw SDL_Window pointer
+    //! \warning Pointer will be invalidated when parent object is destroyed
+    explicit operator const SDL_Window* (void) const noexcept { return m_window; }
+    explicit operator SDL_Window* (void) const noexcept { return m_window; }
+    //!@}
+
+    //!@{ Basic Surface properties
     std::string Title (void) const;
-
-    //! \brief Get the window size
-    //! \return Size structure
     math::uivec2 Size (void) const;
+    uint32 Width (void) const;
+    uint32 Height (void) const;
+    //!@}
 
     //! \brief Get the window's drawable size
     //! \details The drawable size can differ from the window size for platforms
     //!          which have high DPI support.
     //! \return Size structure
     math::uivec2 DrawableSize (void) const;
-
-    //! \brief Get the window width
-    //! \return Width of the window
-    uint32 Width (void) const;
-
-    //! \brief Get the window height
-    //! \return Height of the window
-    uint32 Height (void) const;
 
     //! \brief Get the target window width
     //! \return Target drawing width

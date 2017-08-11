@@ -6,6 +6,9 @@
 #include <rdge/internal/hints.hpp>
 #include <rdge/debug/sdl_dumper.hpp>
 
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_rdge.h>
+
 #include <GL/glew.h>
 
 #include <algorithm>
@@ -79,14 +82,12 @@ Window::Window (const app_settings& settings)
              settings.use_vsync)
 { }
 
-Window::Window (
-                    const std::string& title,
-                    rdge::uint32       target_width,
-                    rdge::uint32       target_height,
-                    bool               fullscreen,
-                    bool               resizable,
-                    bool               use_vsync
-                   )
+Window::Window (const std::string& title,
+                uint32             target_width,
+                uint32             target_height,
+                bool               fullscreen,
+                bool               resizable,
+                bool               use_vsync)
     : m_clearColor(math::vec4(0.0f, 0.0f, 0.0f, 0.0f))
     , m_targetWidth(target_width)
     , m_targetHeight(target_height)
@@ -238,8 +239,9 @@ Window::Window (
     // Query for the OpenGL error to clear the value for later lookup
     glGetError();
 
-    glEnable(GL_MULTISAMPLE);
+    ImGui_ImplRDGE_Init(m_window);
 
+    glEnable(GL_MULTISAMPLE);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
 
@@ -274,11 +276,12 @@ Window::Window (
     s_currentWindow = this;
 }
 
-Window::~Window (void)
+Window::~Window (void) noexcept
 {
     ILOG() << "Destroying Window";
 
     SDL_DelEventWatch(&OnWindowEvent, this);
+    ImGui_ImplRDGE_Shutdown();
 
     if (m_context != nullptr)
     {

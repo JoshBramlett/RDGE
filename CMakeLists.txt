@@ -70,10 +70,14 @@ include_directories (include)
 include_directories (internal)
 include_directories (lib)
 
+add_library (imgui STATIC
+             lib/imgui/imgui.cpp
+             lib/imgui/imgui_draw.cpp
+             lib/imgui/imgui_demo.cpp)
+
 # Consider adding headers into the project so they are included in IDEs
 # http://stackoverflow.com/questions/13703647/how-to-properly-add-include-directories-with-cmake
-add_library (
-             RDGE SHARED
+add_library (RDGE SHARED
              src/application.cpp
 
              src/assets/bmfont.cpp
@@ -83,6 +87,7 @@ add_library (
              src/assets/surface.cpp
              src/assets/texture_part.cpp
 
+             lib/imgui/imgui_impl_rdge.cpp
              src/debug/line_renderer.cpp
 
              src/events/event.cpp
@@ -130,10 +135,10 @@ add_library (
              src/util/logger.cpp
              src/util/timer.cpp
              src/util/io/rwops_base.cpp
-             src/util/memory/small_block_allocator.cpp
-            )
+             src/util/memory/small_block_allocator.cpp)
 
 target_link_libraries (RDGE
+                       imgui
                        ${SDL2_LIBRARY}
                        ${SDL2_TTF_LIBRARY}
                        ${GLEW_LIBRARIES}
@@ -159,6 +164,7 @@ add_executable (rdge_test
                 tests/util/dynamic_freelist_test.cpp
                 tests/util/intrusive_list_test.cpp
                 tests/util/intrusive_forward_list_test.cpp)
+
 target_link_libraries (rdge_test
                        RDGE
                        ${GTEST_BOTH_LIBRARIES})
