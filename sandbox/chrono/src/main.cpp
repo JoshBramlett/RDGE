@@ -29,7 +29,7 @@ int main ()
     DisableEvent(EventType::FingerUp);
     DisableEvent(EventType::FingerMotion);
     DisableEvent(EventType::MultiGesture);
-    DisableEvent(EventType::TextInput);
+    //DisableEvent(EventType::TextInput);
 
     // 2) Create game object
     Game game(settings);
@@ -41,8 +41,8 @@ int main ()
         }
         else if (event.IsKeyboardEvent())
         {
-            auto e = event.GetKeyboardEventArgs();
-            if (e.Key() == KeyCode::ESCAPE)
+            const auto& args = event.GetKeyboardEventArgs();
+            if (args.Key() == KeyCode::ESCAPE)
             {
                 game.Stop();
             }

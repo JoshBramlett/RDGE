@@ -203,7 +203,7 @@ SetMinLogLevel (LogLevel level)
 
 
 //! \class ScopeLogger
-//! \brief Logs when created and destroyed
+//! \brief Logs elapsed time when destroyed
 //! \details Used for profiling, a high resolution time point is recorded on
 //!          object creation and destruction, and creates a log entry showing
 //!          the execution time delta.

@@ -21,6 +21,8 @@ namespace rdge {
 class OrthographicCamera
 {
 public:
+    static constexpr float DEFAULT_ZOOM = 1.f;
+
     //! \brief OrthographicCamera default ctor
     //! \details Creates an orthographic camera using the width and height values
     //!          queried from the OpenGL viewport.
@@ -63,11 +65,19 @@ public:
     math::mat4 combined;         //!< Combined projection/view matrix (in that order)
     math::mat4 inverse_combined; //!< Inverse of the combined matrix
 
-    float near = 0.f;   //!< Near clipping plane
-    float far  = 100.f; //!< Far clipping plane
-    float zoom = 1.f;   //!< Projection zoom level
+    float near = 0.f;          //!< Near clipping plane
+    float far  = 3.f;          //!< Far clipping plane
+    float zoom = DEFAULT_ZOOM; //!< Projection zoom level
 
     math::vec2 viewport_size; //!< Cached viewport size
+
+#ifdef RDGE_DEBUG
+public:
+    void Debug_UpdateWidget (bool*);
+    void Debug_Draw (void);
+
+    bool debug_draw_viewport = false;
+#endif
 };
 
 } // namespace rdge

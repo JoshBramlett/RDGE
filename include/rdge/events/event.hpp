@@ -512,27 +512,33 @@ public:
                static_cast<EventType>(sdl_event.type) == EventType::KeyUp;
     }
 
-    //! \brief Check if the event is a mouse motion event
-    //! \returns True if mouse motion event, false otherwise
-    bool IsMouseMotionEvent (void) const
+    bool IsTextInputEvent (void) const noexcept
+    {
+        return static_cast<EventType>(sdl_event.type) == EventType::TextInput;
+    }
+
+    //!@{ Mouse Events
+    bool IsMouseMotionEvent (void) const noexcept
     {
         return static_cast<EventType>(sdl_event.type) == EventType::MouseMotion;
     }
 
-    //! \brief Check if the event is a mouse button event
-    //! \returns True if mouse button event, false otherwise
-    bool IsMouseButtonEvent (void) const
+    bool IsMouseButtonEvent (void) const noexcept
     {
         return static_cast<EventType>(sdl_event.type) == EventType::MouseButtonUp ||
                static_cast<EventType>(sdl_event.type) == EventType::MouseButtonDown;
     }
 
-    //! \brief Check if the event is a mouse wheel event
-    //! \returns True if mouse wheel event, false otherwise
-    bool IsMouseWheelEvent (void) const
+    bool IsMouseWheelEvent (void) const noexcept
     {
         return static_cast<EventType>(sdl_event.type) == EventType::MouseWheel;
     }
+
+    bool IsMouseEvent (void) const noexcept
+    {
+        return IsMouseMotionEvent() || IsMouseButtonEvent() || IsMouseWheelEvent();
+    }
+    //!@}
 
     //! \brief Check if the event is a custom event
     //! \returns True if custom event, false otherwise

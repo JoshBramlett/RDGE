@@ -6,6 +6,8 @@
 
 #include <exception>
 
+// TODO THIS IS UNTESTED
+
 namespace {
 
 using namespace rdge;

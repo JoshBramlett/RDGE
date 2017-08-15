@@ -45,7 +45,6 @@ TestScene::TestScene (void)
     camera.zoom = 0.05f;
 
     collision_graph.listener = &l;
-    collision_graph.debug_flags = CollisionGraph::DRAW_FIXTURES;
 
     rigid_body_profile bprof;
     fixture_profile fprof;
@@ -122,7 +121,7 @@ TestScene::OnUpdate (const delta_time& dt)
 void
 TestScene::OnRender (void)
 {
-    collision_graph.DebugDraw(1.f);
+    //collision_graph.DebugDraw(1.f);
 
 
 /*

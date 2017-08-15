@@ -221,7 +221,11 @@ constexpr vec3 operator* (const vec3& lhs, const vec3& rhs) noexcept
 }
 
 //! \brief vec3 stream output operator
-std::ostream& operator<< (std::ostream& os, const vec3& value);
+std::ostream& operator<< (std::ostream&, const vec3&);
 
 } // namespace math
+
+//! \brief vec3 to string
+std::string to_string (const math::vec3&);
+
 } // namespace rdge

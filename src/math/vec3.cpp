@@ -50,12 +50,19 @@ vec3::transform (const mat4& xf) const noexcept
 
 std::ostream& operator<< (std::ostream& os, const vec3& value)
 {
+    return os << rdge::to_string(value);
+}
+
+} // namespace math
+
+std::string
+to_string (const math::vec3& value)
+{
     std::ostringstream ss;
     ss << std::fixed << std::setprecision(6)
        << "[" << value.x << ", " << value.y << ", " << value.z << "]";
 
-    return os << ss.str();
+    return ss.str();
 }
 
-} // namespace math
 } // namespace rdge

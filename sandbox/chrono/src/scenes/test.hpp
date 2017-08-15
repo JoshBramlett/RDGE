@@ -82,6 +82,8 @@ public:
     void OnUpdate (const rdge::delta_time& dt) override;
     void OnRender (void) override;
 
+    void Debug_OnWidgetUpdate (rdge::debug::scene_widget_settings&) override;
+
 public:
     rdge::OrthographicCamera camera;
     rdge::physics::CollisionGraph collision_graph;

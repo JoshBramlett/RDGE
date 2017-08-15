@@ -9,6 +9,7 @@
 #include <rdge/math/intrinsics.hpp>
 
 #include <cassert>
+#include <sstream>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
@@ -400,4 +401,14 @@ using uivec2 = vec2_t<uint32>; //!< Unsigned (useful for size types)
 using ivec2  = vec2_t<int32>;  //!< Signed (useful for screen coordinates)
 
 } // namespace math
+
+inline std::string
+to_string(const math::vec2& value)
+{
+    std::ostringstream ss;
+    ss << "[" << value.x << ", " << value.y << "]";
+
+    return ss.str();
+}
+
 } // namespace rdge

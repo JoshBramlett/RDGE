@@ -73,7 +73,13 @@ include_directories (lib)
 add_library (imgui STATIC
              lib/imgui/imgui.cpp
              lib/imgui/imgui_draw.cpp
-             lib/imgui/imgui_demo.cpp)
+             lib/imgui/imgui_demo.cpp
+             lib/imgui/imgui_impl_rdge.cpp)
+
+target_link_libraries (imgui
+                       ${SDL2_LIBRARY}
+                       ${GLEW_LIBRARIES}
+                       ${OPENGL_LIBRARIES})
 
 # Consider adding headers into the project so they are included in IDEs
 # http://stackoverflow.com/questions/13703647/how-to-properly-add-include-directories-with-cmake
@@ -87,7 +93,6 @@ add_library (RDGE SHARED
              src/assets/surface.cpp
              src/assets/texture_part.cpp
 
-             lib/imgui/imgui_impl_rdge.cpp
              src/debug/line_renderer.cpp
 
              src/events/event.cpp

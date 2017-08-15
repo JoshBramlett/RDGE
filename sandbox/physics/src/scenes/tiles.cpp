@@ -17,7 +17,7 @@ TilesScene::TilesScene (void)
 {
     camera.zoom = 0.03f;
 
-    collision_graph.debug_flags = CollisionGraph::DRAW_FIXTURES;
+    //collision_graph.debug_flags = CollisionGraph::DRAW_FIXTURES;
 
     {
         float a = 0.5f;
@@ -87,7 +87,7 @@ TilesScene::OnUpdate (const delta_time& dt)
 void
 TilesScene::OnRender (void)
 {
-    collision_graph.DebugDraw(1.f);
+    //collision_graph.DebugDraw(1.f);
 
     camera.Translate({ 0.f, 0.f });
     camera.Update();

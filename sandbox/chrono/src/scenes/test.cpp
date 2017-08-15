@@ -102,9 +102,6 @@ TestScene::TestScene (void)
             }
         }
     }
-#else
-    //collision_graph.debug_flags = CollisionGraph::DRAW_ALL;
-    collision_graph.debug_flags = CollisionGraph::DRAW_FIXTURES;
 #endif
 
     rigid_body_profile bprof;
@@ -138,7 +135,7 @@ TestScene::TestScene (void)
     entities.AddSprite(player.sprite);
     entities.AddSprite(duck.sprite);
 
-    //camera.zoom = 1.5f;
+    camera.zoom = 1.5f;
 }
 
 void
@@ -174,18 +171,25 @@ TestScene::OnUpdate (const delta_time& dt)
 void
 TestScene::OnRender (void)
 {
-    debug::DrawWireFrame(aabb({ -960.f, -540.f}, { 960.f, 540.f }), color::RED);
-
-    math::vec2 t = { camera.position.x, camera.position.y };
-    camera.Translate((player.GetWorldCenter() * PIXELS_PER_METER) - t);
-
-    //camera.SetPosition(player.GetWorldCenter() * PIXELS_PER_METER);
+    camera.SetPosition(player.GetWorldCenter() * PIXELS_PER_METER);
     camera.Update();
 
     render_target->SetProjection(camera.combined);
-    debug::SetProjection(camera.combined);
 
     //background.Draw();
     entities.Draw();
-    collision_graph.DebugDraw(PIXELS_PER_METER);
+
+    // debug drawing
+    debug::SetProjection(camera.combined);
+
+    collision_graph.Debug_Draw(PIXELS_PER_METER);
+    camera.Debug_Draw();
+}
+
+void
+TestScene::Debug_OnWidgetUpdate (debug::scene_widget_settings& settings)
+{
+    camera.Debug_UpdateWidget(&settings.show_camera_widget);
+    collision_graph.Debug_UpdateWidget(&settings.show_physics_widget);
+    // TODO Add graphics module
 }

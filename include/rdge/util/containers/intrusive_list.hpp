@@ -164,6 +164,9 @@ struct intrusive_list
             cursor = cursor->next;
         }
     }
+
+    //! \returns Number of contained elements
+    size_t size (void) const noexcept { return this->count; }
 };
 
 //! \struct intrusive_forward_list_element
@@ -291,6 +294,9 @@ struct intrusive_forward_list
             cursor = cursor->next;
         }
     }
+
+    //! \returns Number of contained elements
+    size_t size (void) const noexcept { return this->count; }
 };
 
 } // namespace rdge

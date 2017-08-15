@@ -17,7 +17,7 @@ TumblerScene::TumblerScene (void)
 {
     camera.zoom = 0.03f;
 
-    collision_graph.debug_flags = CollisionGraph::DRAW_FIXTURES;
+    //collision_graph.debug_flags = CollisionGraph::DRAW_FIXTURES;
 
     rigid_body_profile bprof;
     bprof.type = RigidBodyType::DYNAMIC;
@@ -93,7 +93,7 @@ TumblerScene::OnUpdate (const delta_time& dt)
 void
 TumblerScene::OnRender (void)
 {
-    collision_graph.DebugDraw(1.f);
+    //collision_graph.DebugDraw(1.f);
 
     camera.Translate({ 0.f, 0.f });
     camera.Update();

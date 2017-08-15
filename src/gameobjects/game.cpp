@@ -1,10 +1,13 @@
 #include <rdge/gameobjects/game.hpp>
 #include <rdge/util/logger.hpp>
 #include <rdge/util/timer.hpp>
-#include <rdge/debug.hpp>
 
+#ifdef RDGE_DEBUG
+#include <rdge/debug.hpp>
+#include <rdge/debug/widgets.hpp>
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_rdge.h>
+#endif
 
 #include <SDL_assert.h>
 
@@ -82,7 +85,10 @@ Game::Run (void)
     bool using_vsync = this->window->IsUsingVSYNC();
     uint32 frame_cap = 1000 / this->settings.target_fps;
 
+#ifdef RDGE_DEBUG
     debug::InitializeRenderer();
+    bool display_debug_overlay = false;
+#endif
 
     m_running = true;
     timer.Start();
@@ -100,24 +106,85 @@ Game::Run (void)
         auto current_scene = m_sceneStack.back();
         while (PollEvent(&event))
         {
+#ifdef RDGE_DEBUG
             ImGui_ImplRDGE_ProcessEvent(&event.sdl_event);
+
+            if (event.IsKeyboardEvent())
+            {
+                const auto& args = event.GetKeyboardEventArgs();
+                if (args.PhysicalKey() == ScanCode::F1 && args.IsKeyPressed())
+                {
+                    display_debug_overlay = !display_debug_overlay;
+                }
+            }
+
+            ImGuiIO& io = ImGui::GetIO();
+            if ((io.WantCaptureKeyboard && event.IsKeyboardEvent()) ||
+                (io.WantCaptureMouse && event.IsMouseEvent()) ||
+                (io.WantTextInput && event.IsTextInputEvent()))
+            {
+                // Suppress events if ImGui wants them
+                continue;
+            }
+#endif
+
             if (!(this->on_event_hook && this->on_event_hook(event)))
             {
                 current_scene->OnEvent(event);
             }
         }
 
+#ifdef RDGE_DEBUG
         ImGui_ImplRDGE_NewFrame(static_cast<SDL_Window*>(*this->window.get()));
-        //ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-                    //1000.0f / ImGui::GetIO().Framerate,
-                    //ImGui::GetIO().Framerate);
 
-        //bool show_another_window = true;
-        //ImGui::Begin("Another Window", &show_another_window);
-        //ImGui::Text("Hello");
-        //ImGui::End();
+        if (display_debug_overlay)
+        {
+            // Overlay: Frame rate
+            ImGuiIO& io = ImGui::GetIO();
+            ImGui::SetNextWindowPos(ImVec2(0.f, 0.f));
+            ImGui::SetNextWindowSize(ImVec2(static_cast<float>(io.DisplaySize.x),
+                                            static_cast<float>(io.DisplaySize.y)));
 
-        ImGui::ShowTestWindow();
+            const auto overlay_flags = ImGuiWindowFlags_NoTitleBar |
+                                       ImGuiWindowFlags_NoInputs |
+                                       ImGuiWindowFlags_AlwaysAutoResize |
+                                       ImGuiWindowFlags_NoScrollbar;
+            ImGui::Begin("Overlay", nullptr, ImVec2(0.f, 0.f), 0.f, overlay_flags);
+
+            ImGui::SetCursorPos(ImVec2(10.f, static_cast<float>(io.DisplaySize.y) - 20.f));
+            ImGui::Text("%.3f frames/sec", io.Framerate);
+            ImGui::End();
+
+            // Main menu
+            static debug::scene_widget_settings scene_widgets;
+            static bool imgui_show_test_window = false;
+            if (ImGui::BeginMainMenuBar())
+            {
+                if (ImGui::BeginMenu("Scene"))
+                {
+                    ImGui::MenuItem("Camera", nullptr, &scene_widgets.show_camera_widget);
+                    ImGui::MenuItem("Physics", nullptr, &scene_widgets.show_physics_widget);
+                    ImGui::MenuItem("Graphics", nullptr, &scene_widgets.show_graphics_widget);
+                    ImGui::EndMenu();
+                }
+
+                if (ImGui::BeginMenu("ImGui"))
+                {
+                    ImGui::MenuItem("Show Test Window", nullptr, &imgui_show_test_window);
+                    ImGui::EndMenu();
+                }
+
+                ImGui::EndMainMenuBar();
+            }
+
+            current_scene->Debug_OnWidgetUpdate(scene_widgets);
+
+            if (imgui_show_test_window)
+            {
+                ImGui::ShowTestWindow();
+            }
+        }
+#endif
 
         delta_time dt(timer.TickDelta());
         if (!(this->on_update_hook && this->on_update_hook(dt)))
@@ -132,7 +199,10 @@ Game::Run (void)
             debug::FlushRenderer();
         }
 
+#ifdef RDGE_DEBUG
         ImGui::Render();
+#endif
+
         this->window->Present();
 
         if (m_pushDeferred)

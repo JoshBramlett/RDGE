@@ -3,6 +3,10 @@
 #ifdef RDGE_DEBUG
 #include <rdge/debug/renderer.hpp>
 #include <rdge/graphics/color.hpp>
+#include <rdge/physics/aabb.hpp>
+#include <rdge/util/profiling.hpp>
+
+#include <imgui/imgui.h>
 #endif
 
 #include <algorithm> // remove_if
@@ -83,6 +87,7 @@ CollisionGraph::Step (float dt)
         // find new contacts for any added proxies
         if (!m_dirtyProxies.empty())
         {
+            ScopeProfiler<> p(&debug_profile.create_contacts);
             auto pairs = m_tree.Query<fixture_proxy>(m_dirtyProxies);
             for (auto& p : pairs)
             {
@@ -93,22 +98,32 @@ CollisionGraph::Step (float dt)
         }
 
         // remove all contacts that are not colliding
+        ScopeProfiler<> p(&debug_profile.purge_contacts);
         PurgeContacts();
+    }
+
+    {
+        // NOTE: Island flags must be reset prior to solving.  To avoid another
+        //       iteration to reset the flags, they are performed at:
+        //   - bodies reset at the end of the step
+        //   - contacts reset during contact purging
+
+        // TODO Remove this when physics engine gets more mileage.
+
+#ifdef RDGE_DEBUG
+        m_bodies.for_each([](auto* body) {
+            SDL_assert((body->m_flags & RigidBody::ON_ISLAND) == 0);
+        });
+
+        m_contacts.for_each([](auto* contact) {
+            SDL_assert((contact->m_flags & Contact::ON_ISLAND) == 0);
+        });
+#endif
     }
 
     // 2) integration and contact solving
     {
-        // clear island flags
-
-        // TODO we iterate through the body list three times in this step.  Clean this up.
-        m_bodies.for_each([](auto* body) {
-            body->m_flags &= ~RigidBody::ON_ISLAND;
-        });
-
-        m_contacts.for_each([](auto* contact) {
-            contact->m_flags &= ~Contact::ON_ISLAND;
-        });
-
+        ScopeProfiler<> p(&debug_profile.solve);
         static std::vector<RigidBody*> body_stack;
         body_stack.reserve(m_bodies.count);
 
@@ -167,21 +182,27 @@ CollisionGraph::Step (float dt)
             m_solver.Solve();
             m_solver.ProcessPostSolve(*this);
         });
+    }
 
+    {
+        ScopeProfiler<> p(&debug_profile.synchronize);
         m_bodies.for_each([=](auto* body) {
             // If a body was not in an island then it did not move.
-            if (((body->m_flags & RigidBody::ON_ISLAND) == 0) ||
-                (body->m_type == RigidBodyType::STATIC))
+            if (body->m_flags & RigidBody::ON_ISLAND)
             {
-                return;
-            }
+                if (body->m_type != RigidBodyType::STATIC)
+                {
+                    body->SyncFixtures();
 
-            body->SyncFixtures();
+                    if (m_flags & CLEAR_FORCES)
+                    {
+                        body->linear.force = { 0.f, 0.f };
+                        body->angular.torque = 0.f;
+                    }
+                }
 
-            if (m_flags & CLEAR_FORCES)
-            {
-                body->linear.force = { 0.f, 0.f };
-                body->angular.torque = 0.f;
+                // Remove flag for the next iteration
+                body->m_flags &= ~RigidBody::ON_ISLAND;
             }
         });
     }
@@ -255,9 +276,10 @@ void
 CollisionGraph::PurgeContacts (void)
 {
     m_contacts.for_each([this](auto* contact) {
+        contact->m_flags &= ~Contact::ON_ISLAND;
+
         Fixture* a = contact->fixture_a;
         Fixture* b = contact->fixture_b;
-
         if (a->IsFilterDirty() || b->IsFilterDirty())
         {
             if (a->body->ShouldCollide(b->body) == false)
@@ -332,18 +354,98 @@ CollisionGraph::TouchProxy (const fixture_proxy* proxy)
 
 #ifdef RDGE_DEBUG
 void
-CollisionGraph::DebugDraw (float pixel_ratio)
+CollisionGraph::Debug_UpdateWidget (bool* p_open)
 {
-    if (debug_flags & DRAW_BVH_NODES)
+    if (p_open && !*p_open)
+    {
+        return;
+    }
+
+    ImGui::SetNextWindowSize(ImVec2(210.f, 410.f), ImGuiSetCond_FirstUseEver);
+    if (!ImGui::Begin("Physics", p_open))
+    {
+        ImGui::End();
+        return;
+    }
+
+    // TODO Add metrics for the tree and memory usage from the block allocator
+
+    ImGui::Text("Graph");
+    ImGui::Spacing();
+    ImGui::Indent(15.f);
+    ImGui::Text("bodies:   %zu", m_bodies.size());
+    ImGui::Text("contacts: %zu", m_contacts.size());
+    ImGui::Unindent(15.f);
+
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    ImGui::Text("Profiling (us)");
+    ImGui::Spacing();
+    ImGui::Indent(15.f);
+    ImGui::Text("create contacts: %lld", this->debug_profile.create_contacts);
+    ImGui::Text("purge contacts:  %lld", this->debug_profile.purge_contacts);
+    ImGui::Text("solve:           %lld", this->debug_profile.solve);
+    ImGui::Text("synchronize:     %lld", this->debug_profile.synchronize);
+    ImGui::Text("---------------------");
+    ImGui::Text("total:           %lld", this->debug_profile.create_contacts +
+                                         this->debug_profile.purge_contacts +
+                                         this->debug_profile.solve +
+                                         this->debug_profile.synchronize);
+    ImGui::Unindent(15.f);
+
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    bool prevent_sleep = IsSleepPrevented();
+    ImGui::Text("Properties");
+    ImGui::Spacing();
+    ImGui::Indent(15.f);
+    ImGui::Checkbox("Prevent Sleep", &prevent_sleep);
+    ImGui::Unindent(15.f);
+
+    if (prevent_sleep)
+    {
+        m_flags |= PREVENT_SLEEP;
+    }
+    else
+    {
+        m_flags &= ~PREVENT_SLEEP;
+    }
+
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    ImGui::Text("Debug Drawing");
+    ImGui::Spacing();
+    ImGui::Indent(15.f);
+    ImGui::Checkbox("Show Fixtures", &this->debug_draw_fixtures);
+    ImGui::Checkbox("Show Proxy AABBs", &this->debug_draw_proxy_aabbs);
+    ImGui::Checkbox("Show Center of Mass", &this->debug_draw_center_of_mass);
+    ImGui::Checkbox("Show BVH Nodes", &this->debug_draw_bvh_nodes);
+    ImGui::Unindent(15.f);
+
+    ImGui::End();
+}
+
+void
+CollisionGraph::Debug_Draw (float pixel_ratio)
+{
+    if (this->debug_draw_bvh_nodes)
     {
         m_tree.DebugDraw(pixel_ratio);
     }
 
-    if (debug_flags & DRAW_BODIES)
+    if (this->debug_draw_fixtures ||
+        this->debug_draw_proxy_aabbs ||
+        this->debug_draw_center_of_mass)
     {
         m_bodies.for_each([=](auto* body) {
             body->fixtures.for_each([=](auto* f) {
-                if (debug_flags & DRAW_FIXTURES)
+                if (this->debug_draw_fixtures)
                 {
                     if (!body->IsSimulating())
                     {
@@ -367,12 +469,12 @@ CollisionGraph::DebugDraw (float pixel_ratio)
                     }
                 }
 
-                if (debug_flags & DRAW_AABBS)
+                if (this->debug_draw_proxy_aabbs)
                 {
                     debug::DrawWireFrame(f->proxy->box, color(230, 76, 230), pixel_ratio);
                 }
 
-                if (debug_flags & DRAW_CENTER_OF_MASS)
+                if (this->debug_draw_center_of_mass)
                 {
 
                 }

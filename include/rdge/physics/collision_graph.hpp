@@ -76,30 +76,13 @@ public:
     void DisableForceClearing (void) noexcept { m_flags &= ~CLEAR_FORCES; }
     void ClearForces (void) noexcept;
 
-
     void Step (float dt);
 
     bool IsLocked (void) const noexcept { return m_flags & LOCKED; }
+
     bool IsSleepPrevented (void) const noexcept { return m_flags & PREVENT_SLEEP; }
-
-#ifdef RDGE_DEBUG
-    //! \brief Draw wireframes of the graph
-    //! \details What is drawn is determined by the \ref debug_flags
-    //! \param [in] pixel_ratio The number of pixels per meter
-    void DebugDraw (float pixel_ratio);
-
-    enum DebugFlags
-    {
-        DRAW_BVH_NODES      = 0x0001,
-        DRAW_FIXTURES       = 0x0002,
-        DRAW_AABBS          = 0x0004,
-        DRAW_CENTER_OF_MASS = 0x0008,
-        DRAW_BODIES         = DRAW_FIXTURES | DRAW_AABBS | DRAW_CENTER_OF_MASS,
-        DRAW_ALL            = 0xFFFF
-    };
-
-    uint16 debug_flags = 0;
-#endif
+    void PreventSleep (void) noexcept { m_flags |= PREVENT_SLEEP; }
+    void AllowSleep (void) noexcept { m_flags &= ~PREVENT_SLEEP; }
 
 private:
 
@@ -138,6 +121,25 @@ private:
     };
 
     uint16 m_flags = 0;
+
+#ifdef RDGE_DEBUG
+public:
+    void Debug_UpdateWidget (bool*);
+    void Debug_Draw (float pixel_ratio);
+
+    bool debug_draw_fixtures = false;
+    bool debug_draw_proxy_aabbs = false;
+    bool debug_draw_center_of_mass = false;
+    bool debug_draw_bvh_nodes = false;
+
+    struct profiler
+    {
+        int64_t create_contacts = 0;
+        int64_t purge_contacts = 0;
+        int64_t solve = 0;
+        int64_t synchronize = 0;
+    } debug_profile;
+#endif
 };
 
 } // namespace physics
