@@ -160,8 +160,11 @@ struct intrusive_list
         T* cursor = this->first;
         while (cursor)
         {
+            // store next element in case callee modifies it's element pointers
+            // (e.g. removes iteself from the list)
+            T* cached_cursor = cursor->next;
             fn(cursor);
-            cursor = cursor->next;
+            cursor = cached_cursor;
         }
     }
 
@@ -290,8 +293,11 @@ struct intrusive_forward_list
         T* cursor = this->first;
         while (cursor)
         {
+            // store next element in case callee modifies it's element pointers
+            // (e.g. removes iteself from the list)
+            T* cached_cursor = cursor->next;
             fn(cursor);
-            cursor = cursor->next;
+            cursor = cached_cursor;
         }
     }
 

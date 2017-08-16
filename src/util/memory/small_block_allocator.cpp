@@ -1,5 +1,7 @@
 #include <rdge/util/memory/small_block_allocator.hpp>
 #include <rdge/math/intrinsics.hpp>
+#include <rdge/internal/hints.hpp>
+#include <rdge/internal/exception_macros.hpp>
 
 #include <SDL_assert.h>
 
@@ -42,9 +44,15 @@ SmallBlockAllocator::SmallBlockAllocator (void)
     // allocate an array of empty heaps (chunks).  Each index will be allocated
     // on demand so on init the array contains pointers.
     m_chunks = (chunk*)calloc(CHUNK_ELEMENTS, sizeof(chunk));
+    if (UNLIKELY(!m_chunks))
+    {
+        RDGE_THROW("Failed to allocate memory");
+    }
+
     m_available.fill(nullptr);
 
 #ifdef RDGE_DEBUG
+    stats.resident = CHUNK_ELEMENTS * sizeof(chunk);
     stats.allocs.fill(0);
     stats.frees.fill(0);
 #endif
@@ -100,8 +108,15 @@ SmallBlockAllocator::Alloc (size_t size)
     {
 #ifdef RDGE_DEBUG
         stats.large_allocs++;
+        stats.resident += size;
 #endif
-        return malloc(size);
+        void* result = malloc(size);
+        if (UNLIKELY(!result))
+        {
+            RDGE_THROW("Failed to allocate memory");
+        }
+
+        return result;
     }
 
     size_t index = s_blockSizeLookup[size];
@@ -111,8 +126,8 @@ SmallBlockAllocator::Alloc (size_t size)
     {
 #ifdef RDGE_DEBUG
         stats.allocs[index]++;
-        stats.in_use += s_blockSizes[index];
-        stats.total_slack += s_blockSizes[index] - size;
+        stats.claimed += size;
+        stats.slack += s_blockSizes[index] - size;
 #endif
         // use already allocated block if available
         block_node* node = m_available[index];
@@ -123,14 +138,33 @@ SmallBlockAllocator::Alloc (size_t size)
     if (m_chunkCount == m_chunkCapacity)
     {
         // The number of heaps is exhausted - reallocate
+        free(m_chunks);
+        m_chunks = nullptr;
+
         m_chunkCapacity += CHUNK_ELEMENTS;
-        m_chunks = (chunk*)realloc(m_chunks, m_chunkCapacity * sizeof(chunk));
+        m_chunks = (chunk*)calloc(m_chunkCapacity, sizeof(chunk));
+        if (UNLIKELY(!m_chunks))
+        {
+            RDGE_THROW("Failed to allocate memory");
+        }
+
+#ifdef RDGE_DEBUG
+        stats.resident += CHUNK_ELEMENTS * sizeof(chunk);
+#endif
     }
 
     // No pre-allocated block is available - allocate a new heap
     chunk* c = m_chunks + m_chunkCount;
-    c->nodes = (block_node*)malloc(CHUNK_SIZE);
     c->block_size = s_blockSizes[index];
+    c->nodes = (block_node*)malloc(CHUNK_SIZE);
+    if (UNLIKELY(!c->nodes))
+    {
+        RDGE_THROW("Failed to allocate memory");
+    }
+
+#ifdef RDGE_DEBUG
+    stats.resident += CHUNK_SIZE;
+#endif
 
     // Break up the heap into block sized partitions
     size_t last_index = (CHUNK_SIZE / c->block_size) - 1; // aka (block_count - 1)
@@ -152,8 +186,8 @@ SmallBlockAllocator::Alloc (size_t size)
 
 #ifdef RDGE_DEBUG
     stats.allocs[index]++;
-    stats.in_use += c->block_size;
-    stats.total_slack += c->block_size - size;
+    stats.claimed += size;
+    stats.slack += c->block_size - size;
 #endif
 
     return c->nodes;
@@ -166,6 +200,9 @@ SmallBlockAllocator::Free (void* p, size_t size)
 
     if (size > MAX_BLOCK_SIZE)
     {
+#ifdef RDGE_DEBUG
+        stats.resident -= size;
+#endif
         free(p);
         return;
     }
@@ -193,7 +230,8 @@ SmallBlockAllocator::Free (void* p, size_t size)
     SDL_assert(found);
 
     stats.frees[index]++;
-    stats.in_use -= block_size;
+    stats.claimed -= size;
+    stats.slack -= block_size - size;
 #endif
 
     block_node* node = static_cast<block_node*>(p);
@@ -205,7 +243,13 @@ void
 SmallBlockAllocator::Clear (void)
 {
 #ifdef RDGE_DEBUG
-    stats.in_use = 0;
+    stats.resident -= m_chunkCount * CHUNK_SIZE;
+    stats.claimed = 0;
+    stats.slack = 0;
+
+    // resident should still report the memory allocated for m_chunks
+    // and any large allocations
+    SDL_assert(stats.resident >= m_chunkCapacity * sizeof(chunk));
 #endif
 
     for (size_t i = 0; i < m_chunkCount; ++i)
@@ -251,9 +295,10 @@ SmallBlockAllocator::PrintStats (std::ostream& os) const noexcept
     ss_f << " ]\n";
 
     os << ss_a.str() << ss_f.str();
-    os << "  total_slack:  " << stats.total_slack << " bytes\n"
-       << "  large_allocs: " << stats.large_allocs << "\n"
-       << "  in_use:       " << stats.in_use << " bytes\n";
+    os << "  large_allocs: " << stats.large_allocs << "\n"
+       << "  resident:     " << stats.resident << " bytes\n"
+       << "  claimed:      " << stats.claimed << " bytes\n"
+       << "  slack:        " << stats.slack << " bytes\n";
 }
 #endif
 

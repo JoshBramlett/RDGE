@@ -147,11 +147,12 @@ public:
         // aggregate usage
         std::array<uint64, NUM_BLOCK_SIZES> allocs; //!< Number of allocs per size
         std::array<uint64, NUM_BLOCK_SIZES> frees;  //!< Number of frees per size
-        uint64 total_slack = 0;  //!< Total unused space (block_size - request size)
         uint64 large_allocs = 0; //!< Number of allocs larger than supported size
 
         // stateful
-        uint64 in_use = 0; //!< Total memory claimed
+        uint64 resident = 0; //!< Total memory claimed
+        uint64 claimed = 0;  //!< Total memory claimed
+        uint64 slack = 0;    //!< Total memory claimed
     } stats;
 
     void PrintStats (std::ostream& os) const noexcept;

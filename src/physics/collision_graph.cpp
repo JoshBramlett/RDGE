@@ -368,13 +368,26 @@ CollisionGraph::Debug_UpdateWidget (bool* p_open)
         return;
     }
 
-    // TODO Add metrics for the tree and memory usage from the block allocator
+    // TODO Add metrics for the tree and further memory usage for all components
 
     ImGui::Text("Graph");
     ImGui::Spacing();
     ImGui::Indent(15.f);
     ImGui::Text("bodies:   %zu", m_bodies.size());
     ImGui::Text("contacts: %zu", m_contacts.size());
+    ImGui::Unindent(15.f);
+
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    ImGui::Text("Memory (bytes)");
+    ImGui::Spacing();
+    ImGui::Indent(15.f);
+    ImGui::Text("resident:        %llu", this->block_allocator.stats.resident);
+    ImGui::Text("claimed:         %llu", this->block_allocator.stats.claimed);
+    ImGui::Text("slack:           %llu", this->block_allocator.stats.slack);
+    ImGui::Text("large_allocs:    %llu", this->block_allocator.stats.large_allocs);
     ImGui::Unindent(15.f);
 
     ImGui::Spacing();
