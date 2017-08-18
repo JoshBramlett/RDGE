@@ -30,7 +30,7 @@ BVHTree::DestroyProxy (int32 handle)
     SDL_assert(m_nodes[handle].is_leaf());
 
     RemoveLeaf(handle);
-    m_nodes.Release(handle);
+    m_nodes.release(handle);
 }
 
 bool
@@ -74,7 +74,7 @@ BVHTree::MoveProxy (int32 handle, const aabb& box, const math::vec2& displacemen
 int32
 BVHTree::CreateNode (void)
 {
-    int32 handle = m_nodes.Reserve();
+    int32 handle = m_nodes.reserve();
 
     auto& node = m_nodes[handle];
     node.parent = bvh_node::NULL_NODE;
@@ -114,7 +114,7 @@ BVHTree::InsertLeaf (int32 leaf_handle)
         float right_cost = 0.f;
 
         // cost of decending into left child
-        auto& left_child = m_nodes[node.left];
+        const auto& left_child = m_nodes[node.left];
         if (left_child.is_leaf())
         {
             aabb temp = aabb::merge(left_child.fat_box, leaf_box);
@@ -129,7 +129,7 @@ BVHTree::InsertLeaf (int32 leaf_handle)
         }
 
         // cost of decending into right child
-        auto& right_child = m_nodes[node.right];
+        const auto& right_child = m_nodes[node.right];
         if (right_child.is_leaf())
         {
             aabb temp = aabb::merge(right_child.fat_box, leaf_box);
@@ -204,7 +204,9 @@ BVHTree::InsertLeaf (int32 leaf_handle)
         test_handle = test_node.parent;
     }
 
+#ifdef RDGE_DEBUG
     ValidateStructure(m_root);
+#endif
 }
 
 void
@@ -216,11 +218,11 @@ BVHTree::RemoveLeaf (int32 leaf_handle)
         return;
     }
 
-    auto& leaf_node = m_nodes[leaf_handle];
+    const auto& leaf_node = m_nodes[leaf_handle];
     SDL_assert(leaf_node.is_leaf());
 
     int32 parent_handle = leaf_node.parent;
-    auto& parent_node = m_nodes[parent_handle];
+    const auto& parent_node = m_nodes[parent_handle];
 
     int32 grandparent_handle = parent_node.parent;
     int32 sibling_handle = (parent_node.left == leaf_handle)
@@ -241,7 +243,7 @@ BVHTree::RemoveLeaf (int32 leaf_handle)
         }
 
         m_nodes[sibling_handle].parent = grandparent_handle;
-        m_nodes.Release(parent_handle);
+        m_nodes.release(parent_handle);
 
         // Adjust ancestor bounds
         int32 test_handle = grandparent_handle;
@@ -265,7 +267,7 @@ BVHTree::RemoveLeaf (int32 leaf_handle)
     {
         m_root = sibling_handle;
         m_nodes[sibling_handle].parent = bvh_node::NULL_NODE;
-        m_nodes.Release(parent_handle);
+        m_nodes.release(parent_handle);
     }
 
     ValidateStructure(m_root);
@@ -417,14 +419,14 @@ BVHTree::ValidateStructure (int32 index)
         return;
     }
 
-    SDL_assert(m_nodes.IsReserved(index));
+    SDL_assert(m_nodes.is_reserved(index));
 
     if (index == m_root)
     {
         SDL_assert(m_nodes[index].parent == bvh_node::NULL_NODE);
     }
 
-    auto& node = m_nodes[index];
+    const auto& node = m_nodes[index];
     if (node.is_leaf())
     {
         SDL_assert(node.left == bvh_node::NULL_NODE);
@@ -457,7 +459,7 @@ BVHTree::Dump (void)
             continue;
         }
 
-        auto& node = m_nodes[handle];
+        const auto& node = m_nodes[handle];
         ss << "[" << handle << "] " << node;
 
         if (!node.is_leaf())
@@ -486,7 +488,7 @@ BVHTree::DebugDraw (float pixel_ratio)
             continue;
         }
 
-        auto& node = m_nodes[handle];
+        const auto& node = m_nodes[handle];
         debug::DrawWireFrame(node.fat_box, color::WHITE, pixel_ratio);
 
         if (!node.is_leaf())

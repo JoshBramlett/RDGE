@@ -381,13 +381,34 @@ CollisionGraph::Debug_UpdateWidget (bool* p_open)
     ImGui::Separator();
     ImGui::Spacing();
 
-    ImGui::Text("Memory (bytes)");
+    ImGui::Text("SmallBlockAllocator");
     ImGui::Spacing();
+    ImGui::Text("Usage");
     ImGui::Indent(15.f);
-    ImGui::Text("resident:        %llu", this->block_allocator.stats.resident);
-    ImGui::Text("claimed:         %llu", this->block_allocator.stats.claimed);
-    ImGui::Text("slack:           %llu", this->block_allocator.stats.slack);
-    ImGui::Text("large_allocs:    %llu", this->block_allocator.stats.large_allocs);
+    ImGui::Text("claimed:         %llu", this->block_allocator.usage.claimed);
+    ImGui::Text("slack:           %llu", this->block_allocator.usage.slack);
+    ImGui::Text("large_allocs:    %zu", this->block_allocator.usage.large_allocs);
+    ImGui::Unindent(15.f);
+    ImGui::Text("Memory (bytes)");
+    ImGui::Indent(15.f);
+    ImGui::Text("resident:        %llu", this->block_allocator.mem_prof.resident);
+    ImGui::Text("allocs:          %zu", this->block_allocator.mem_prof.allocs);
+    ImGui::Text("frees:           %zu", this->block_allocator.mem_prof.frees);
+    ImGui::Text("reallocs:        %zu", this->block_allocator.mem_prof.reallocs);
+    ImGui::Unindent(15.f);
+
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    ImGui::Text("BVH Tree");
+    ImGui::Spacing();
+    ImGui::Text("Memory (bytes)");
+    ImGui::Indent(15.f);
+    ImGui::Text("resident:        %llu", m_tree.m_nodes.mem_prof.resident);
+    ImGui::Text("allocs:          %zu", m_tree.m_nodes.mem_prof.allocs);
+    ImGui::Text("frees:           %zu", m_tree.m_nodes.mem_prof.frees);
+    ImGui::Text("reallocs:        %zu", m_tree.m_nodes.mem_prof.reallocs);
     ImGui::Unindent(15.f);
 
     ImGui::Spacing();

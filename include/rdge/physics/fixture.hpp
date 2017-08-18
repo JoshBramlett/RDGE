@@ -10,6 +10,7 @@
 #include <rdge/physics/aabb.hpp>
 #include <rdge/physics/shapes/ishape.hpp>
 #include <rdge/util/containers/intrusive_list.hpp>
+#include <rdge/util/memory/small_block_allocator.hpp>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {

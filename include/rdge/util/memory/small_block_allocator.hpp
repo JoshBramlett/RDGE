@@ -6,6 +6,7 @@
 #pragma once
 
 #include <rdge/core.hpp>
+#include <rdge/util/memory/alloc.hpp>
 
 #include <array>
 #include <utility>
@@ -13,37 +14,38 @@
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
-//! \struct block_node
-//! \brief Points to a block of heap allocated memory
-//! \details Also behaves as a forward linked list node for keeping track
-//!          of the available/consumed blocks.
-struct block_node
-{
-    block_node* next = nullptr; //!< Next node in the forward list
-};
-
-//! \struct chunk
-//! \brief Chunk of heap-allocated memory
-//! \details The chunk is broken down into fixed-size blocks
-struct chunk
-{
-    size_t block_size = 0;       //!< Size of the block components
-    block_node* nodes = nullptr; //!< List of block nodes
-};
-
 //! \class SmallBlockAllocator
 //! \brief Dynamically allocates blocks of memory for small objects
-//! \details Provides heap allocation for smaller objects.  An object is
-//!          assigned a slot in an pre-allocated block, therefore like
-//!          types have the added benefit of cache locality.  If an
-//!          allocation request is larger than the maximum supported
-//!          it will default to using malloc.  Inspired by b2BlockAllocator
-//!          in Box2D.
+//! \details Attempts to limit the number of allocations by creating chunks
+//!          of memory upfront.  Memory released is not freed and will be used
+//!          to fulfill future requests.  Utility comes when requests are small,
+//!          but it can be used as a general purpose allocator as requests
+//!          larger than \ref MAX_BLOCK_SIZE are dynamically performed.
+//!
+//!          The allocator contains a predefined table of block sizes. When an
+//!          allocation request is made, if there is no chunk pre-allocated a
+//!          dynamic allocation of of \ref CHUNK_SIZE is performed.  That chunk
+//!          is then broken down into block sized pieces which may be assigned
+//!          to subsequent requests.  When the chunk has been exhausted a new
+//!          dynamic allocation will take place.
+//!
+//!          Cache locality is generally rather poor.  Drawbacks include:
+//!            1) Allocation requests are assigned to the smallest block that
+//!               can fill the request, but the difference between the block
+//!               size and request size is dead memory.
+//!            2) Because chunks are not shared by different block sizes it's
+//!               likely multiple requests of the same object may have cache
+//!               locality.  However, because preference is given to freed
+//!               blocks when fulfilling an allocation request, as more requests
+//!               are facilitated it becomes more and more likely multiple
+//!               requests for the same object will not be near one another
+//!               in memory, and may even span different chunks.
+//! \warning Memory may not be zero initialized
+//! \note Inspired by b2BlockAllocator in Box2D
 //! \see https://github.com/erincatto/Box2D
 class SmallBlockAllocator
 {
 public:
-
     // TODO If alignment requirements are needed, class could include a default
     //      template value (defaults to 16) specifying the alignment.
     //      windows: _aligned_malloc/_aligned_free
@@ -133,6 +135,24 @@ public:
 
 private:
 
+    //! \struct block_node
+    //! \brief Points to a block of heap allocated memory
+    //! \details Also behaves as a forward linked list node for keeping track
+    //!          of the available/consumed blocks.
+    struct block_node
+    {
+        block_node* next = nullptr; //!< Next node in the forward list
+    };
+
+    //! \struct chunk
+    //! \brief Chunk of heap-allocated memory
+    //! \details The chunk is broken down into fixed-size blocks
+    struct chunk
+    {
+        size_t block_size = 0;       //!< Size of the block components
+        block_node* nodes = nullptr; //!< List of block nodes
+    };
+
     chunk* m_chunks = nullptr;  //!< Chunk array
     size_t m_chunkCount = 0;    //!< Number of chunks consumed
     size_t m_chunkCapacity = 0; //!< Number of chunks allocated
@@ -142,22 +162,22 @@ private:
 #ifdef RDGE_DEBUG
 public:
 
-    struct statistics
-    {
-        // aggregate usage
-        std::array<uint64, NUM_BLOCK_SIZES> allocs; //!< Number of allocs per size
-        std::array<uint64, NUM_BLOCK_SIZES> frees;  //!< Number of frees per size
-        uint64 large_allocs = 0; //!< Number of allocs larger than supported size
+    memory_profile mem_prof;
 
+    struct usage_statistics
+    {
         // stateful
-        uint64 resident = 0; //!< Total memory claimed
         uint64 claimed = 0;  //!< Total memory claimed
-        uint64 slack = 0;    //!< Total memory claimed
-    } stats;
+        uint64 slack = 0;    //!< Total dead memory (block_size - claimed size)
+
+        // aggregate
+        size_t allocs[NUM_BLOCK_SIZES] = { }; //!< Number of allocs per block size
+        size_t frees[NUM_BLOCK_SIZES] = { };  //!< Number of frees per block size
+        size_t large_allocs = 0; //!< Number of allocs larger than supported size
+    } usage;
 
     void PrintStats (std::ostream& os) const noexcept;
 #endif
-
 };
 
 } // namespace rdge

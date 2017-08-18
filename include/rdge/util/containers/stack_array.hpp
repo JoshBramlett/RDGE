@@ -130,14 +130,11 @@ struct stack_array
         m_count = 0;
     }
 
-    //! \returns True iff no elements are contained
+    //!@{ Container properties
     bool empty (void) const noexcept { return (m_count == 0); }
-
-    //! \returns Number of contained elements
     size_t size (void) const noexcept { return m_count; }
-
-    //! \returns Number of allocated elements
     size_t capacity (void) const noexcept { return m_capacity; }
+    //!@}
 
     //!@{ Random access iterator support
     using iterator = detail::ra_iterator<T>;

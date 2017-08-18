@@ -1,88 +1,100 @@
-//! \headerfile <rdge/util/memory/freelist.hpp>
+//! \headerfile <rdge/util/containers/freelist.hpp>
 //! \author Josh Bramlett
 //! \version 0.0.10
-//! \date 05/26/2017
+//! \date 08/17/2017
 
 #pragma once
 
 #include <rdge/core.hpp>
+#include <rdge/util/memory/alloc.hpp>
 
 #include <SDL_assert.h>
 
-#include <cstdlib>
-#include <cstring>
 #include <utility>
+#include <stdexcept>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
-//! \class DynamicFreelist
+//! \struct freelist
 //! \brief Dynamically growing contiguous fixed-block allocator
 //! \details Pre-allocated block of memory where an element is accessed by an
 //!          integer handle.  The pool maintains a list of 'free' handles to
 //!          provide fast reservation/release.  When the pool is exhaused it
 //!          will automatically allocate more elements defined by the ChunkSize.
+//! \warning Accessing an element should have an extremely small scope.  If
+//!          a reallocation occurs while a reference is still in scope that
+//!          reference will become invalid.  It's recommended to assign to a
+//!          const reference variable whenever possible.
 //! \see http://stackoverflow.com/questions/19385853
 //! \see https://d3cw3dd2w32x2b.cloudfront.net/wp-content/uploads/2011/06/6-1-2010.pdf
 template <typename T, size_t ChunkSize = 128>
-class DynamicFreelist
+struct freelist
 {
 public:
-    // TODO Move to containers
-    // TODO Make sure move semantics work w/o the templated type provided.
-    //      Also, how should a move be done if they each have a different
-    //      ChunkSize
-
     // TODO Because of the realloc it's easy to have a use after free:
     //        1) Create reference to object
     //        2) Reserve a new spot in the list (realloc occurs)
     //        3) Write to the first object
-    //
     //      Bookkeeping could be added so previous allocated memory
-    //      is not freed up.  Until then any references retrieved for
-    //      writing should have a small scope and never be accessed
-    //      after a Reserve() call.  References retrieved for reads
-    //      should be const.
+    //      is not freed up.  See warning.
 
-    //! \brief DynamicFreelist ctor
+    //! \brief freelist ctor
     //! \details Allocates heap and initializes the handle list
     //! \param [in] capacity Initial capacity to allocate
-    explicit DynamicFreelist (size_t capacity = 0)
+    //! \throws std::runtime_error Memory allocation failed
+    explicit freelist (size_t capacity = 0)
+        : m_capacity((capacity == 0) ? ChunkSize : capacity)
     {
-        m_capacity = (capacity == 0) ? ChunkSize : capacity;
-        m_data = (T*)calloc(m_capacity, sizeof(T));
-        m_handles = (uint32*)calloc(m_capacity, sizeof(uint32));
+        TRACK_MEMORY(this->mem_prof);
+        if (!RDGE_CALLOC(m_data, m_capacity, &this->mem_prof))
+        {
+            throw std::runtime_error("Failed to allocate memory");
+        }
 
-        InitializeHandles();
+        if (!RDGE_CALLOC(m_handles, m_capacity, &this->mem_prof))
+        {
+            throw std::runtime_error("Failed to allocate memory");
+        }
+
+        create_handles();
     }
 
-    //! \brief DynamicFreelist dtor
+    //! \brief freelist dtor
     //! \details Frees all resources
-    ~DynamicFreelist (void) noexcept
+    ~freelist (void) noexcept
     {
-        free(m_data);
-        free(m_handles);
+        RDGE_FREE(m_data, &this->mem_prof);
+        RDGE_FREE(m_handles, &this->mem_prof);
+        UNTRACK_MEMORY(this->mem_prof);
     }
 
     //!@{ Non-copyable, move enabled
-    DynamicFreelist (const DynamicFreelist&) = delete;
-    DynamicFreelist& operator= (const DynamicFreelist&) = delete;
+    freelist (const freelist&) = delete;
+    freelist& operator= (const freelist&) = delete;
 
-    DynamicFreelist (DynamicFreelist&& rhs) noexcept
+    freelist (freelist&& rhs) noexcept
         : m_count(rhs.m_count)
         , m_capacity(rhs.m_capacity)
     {
         std::swap(m_data, rhs.m_data);
         std::swap(m_handles, rhs.m_handles);
+
+#ifdef RDGE_DEBUG
+        std::swap(mem_prof, rhs.mem_prof);
+#endif
     }
 
-    DynamicFreelist& operator= (DynamicFreelist&& rhs) noexcept
+    freelist& operator= (freelist&& rhs) noexcept
     {
         if (this != &rhs)
         {
             std::swap(m_data, rhs.m_data);
             std::swap(m_handles, rhs.m_handles);
 
+#ifdef RDGE_DEBUG
+            std::swap(mem_prof, rhs.mem_prof);
+#endif
             m_count = rhs.m_count;
             m_capacity = rhs.m_capacity;
         }
@@ -91,7 +103,7 @@ public:
     }
     //!@}
 
-    //! \brief DynamicFreelist Subscript Operator
+    //! \brief freelist Subscript Operator
     //! \details Retrieves the block of data associated to the handle.
     //! \param [in] handle Reserved handle
     //! \returns Reference to the data of the associated handle
@@ -99,22 +111,30 @@ public:
     {
         SDL_assert(m_count > 0);
         SDL_assert(handle < m_capacity);
-        SDL_assert(IsReserved(handle));
+        SDL_assert(is_reserved(handle));
 
         return m_data[handle];
     }
 
     //! \brief Reserve a block of memory
     //! \returns Handle to the reserved memory
-    uint32 Reserve (void)
+    //! \throws std::runtime_error Memory allocation failed
+    uint32 reserve (void)
     {
         if (m_count == m_capacity)
         {
             m_capacity += ChunkSize;
-            m_data = (T*)realloc(m_data, m_capacity * sizeof(T));
-            m_handles = (uint32*)realloc(m_handles, m_capacity * sizeof(uint32));
+            if (!RDGE_REALLOC(m_data, m_capacity, &this->mem_prof))
+            {
+                throw std::runtime_error("Failed to allocate memory");
+            }
 
-            InitializeHandles();
+            if (!RDGE_REALLOC(m_handles, m_capacity, &this->mem_prof))
+            {
+                throw std::runtime_error("Failed to allocate memory");
+            }
+
+            create_handles();
         }
 
         return m_handles[m_count++];
@@ -122,11 +142,11 @@ public:
 
     //! \brief Releases the block of memory back into the pool
     //! \param [in] handle Reserved handle
-    void Release (uint32 handle)
+    void release (uint32 handle)
     {
         SDL_assert(m_count > 0);
         SDL_assert(handle < m_capacity);
-        SDL_assert(IsReserved(handle));
+        SDL_assert(is_reserved(handle));
 
         memset(&m_data[handle], 0, sizeof(T));
         for (size_t i = 0; i < m_count; i++)
@@ -139,20 +159,8 @@ public:
         }
     }
 
-    //! \returns Number of elements reserved
-    size_t Size (void) const noexcept
-    {
-        return m_count;
-    }
-
-    //! \returns Capacity before reallocation
-    size_t Capacity (void) const noexcept
-    {
-        return m_capacity;
-    }
-
     //! \returns True iff handle is in the reserved list
-    bool IsReserved (uint32 handle) const noexcept
+    bool is_reserved (uint32 handle) const noexcept
     {
         for (size_t i = 0; i < m_count; i++)
         {
@@ -165,10 +173,16 @@ public:
         return false;
     }
 
+    //!@{ Container properties
+    bool empty (void) const noexcept { return (m_count == 0); }
+    size_t size (void) const noexcept { return m_count; }
+    size_t capacity (void) const noexcept { return m_capacity; }
+    //!@}
+
 private:
 
     //! \brief Create handles for newly allocated blocks
-    void InitializeHandles (void) noexcept
+    void create_handles (void) noexcept
     {
         for (size_t i = m_count; i < m_capacity; ++i)
         {
@@ -180,6 +194,11 @@ private:
     uint32* m_handles = nullptr; //!< Array of handles that map to indices of the data
     size_t m_count = 0;          //!< Number of stored elements
     size_t m_capacity = 0;       //!< Current array capacity
+
+#ifdef RDGE_DEBUG
+public:
+    memory_profile mem_prof;
+#endif
 };
 
 } // namespace rdge

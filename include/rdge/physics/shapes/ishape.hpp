@@ -9,7 +9,6 @@
 #include <rdge/physics/aabb.hpp>
 #include <rdge/physics/isometry.hpp>
 #include <rdge/math/vec2.hpp>
-#include <rdge/util/memory/small_block_allocator.hpp>
 
 #include <ostream>
 

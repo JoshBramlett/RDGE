@@ -140,6 +140,7 @@ add_library (RDGE SHARED
              src/util/logger.cpp
              src/util/timer.cpp
              src/util/io/rwops_base.cpp
+             src/util/memory/alloc.cpp
              src/util/memory/small_block_allocator.cpp)
 
 target_link_libraries (RDGE
@@ -166,7 +167,7 @@ add_executable (rdge_test
                 tests/physics/circle_test.cpp
                 tests/physics/polygon_test.cpp
                 tests/math/intrinsics_test.cpp
-                tests/util/dynamic_freelist_test.cpp
+                tests/util/freelist_test.cpp
                 tests/util/intrusive_list_test.cpp
                 tests/util/intrusive_forward_list_test.cpp)
 

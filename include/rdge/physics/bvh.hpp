@@ -7,7 +7,7 @@
 
 #include <rdge/core.hpp>
 #include <rdge/physics/aabb.hpp>
-#include <rdge/util/memory/freelist.hpp>
+#include <rdge/util/containers/freelist.hpp>
 
 #include <vector>
 #include <utility>
@@ -93,8 +93,8 @@ public:
         SDL_assert(handle_a != bvh_node::NULL_NODE);
         SDL_assert(handle_b != bvh_node::NULL_NODE);
 
-        auto& node_a = m_nodes[handle_a];
-        auto& node_b = m_nodes[handle_b];
+        const auto& node_a = m_nodes[handle_a];
+        const auto& node_b = m_nodes[handle_b];
 
         return node_a.fat_box.intersects_with(node_b.fat_box);
     }
@@ -110,6 +110,7 @@ public:
     void DebugDraw (float pixel_ratio);
 
 private:
+    friend class CollisionGraph;
 
     void ValidateStructure (int32 index);
 
@@ -118,7 +119,7 @@ private:
     void RemoveLeaf (int32 leaf_handle);
     int32 Balance (int32 handle);
 
-    DynamicFreelist<bvh_node> m_nodes;
+    freelist<bvh_node> m_nodes;
     int32 m_root = bvh_node::NULL_NODE;
 };
 
@@ -130,7 +131,7 @@ BVHTree::Query (const std::vector<int32>& handles) const
     std::vector<int32> stack;
     for (int32 handle_a : handles)
     {
-        auto& node_a = m_nodes[handle_a];
+        const auto& node_a = m_nodes[handle_a];
         SDL_assert(node_a.is_leaf());
 
         stack.push_back(m_root);
@@ -144,7 +145,7 @@ BVHTree::Query (const std::vector<int32>& handles) const
                 continue;
             }
 
-            auto& node_b = m_nodes[handle_b];
+            const auto& node_b = m_nodes[handle_b];
             if (node_a.fat_box.intersects_with(node_b.fat_box))
             {
                 if (node_b.is_leaf())
@@ -210,7 +211,7 @@ BVHTree::Query (const aabb& box) const
             continue;
         }
 
-        auto& node = m_nodes[handle];
+        const auto& node = m_nodes[handle];
         if (box.intersects_with(node.fat_box))
         {
             if (node.is_leaf())
