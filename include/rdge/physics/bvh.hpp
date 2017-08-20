@@ -127,6 +127,7 @@ template <typename T>
 inline std::vector<std::pair<T*, T*>>
 BVHTree::Query (const std::vector<int32>& handles) const
 {
+    // TODO Perf refactor.  Remove vectors.
     std::vector<std::pair<int32, int32>> pairs;
     std::vector<int32> stack;
     for (int32 handle_a : handles)
@@ -197,6 +198,7 @@ template <typename T>
 inline std::vector<T*>
 BVHTree::Query (const aabb& box) const
 {
+    // TODO Perf refactor.  Remove vectors.
     std::vector<T*> result;
     std::vector<int32> stack;
 

@@ -159,11 +159,10 @@ private:
 
     std::array<block_node*, NUM_BLOCK_SIZES> m_available; //!< Next available nodes
 
-#ifdef RDGE_DEBUG
 public:
+    MEMORY_PROFILE_MEMBER
 
-    memory_profile mem_prof;
-
+#ifdef RDGE_DEBUG
     struct usage_statistics
     {
         // stateful

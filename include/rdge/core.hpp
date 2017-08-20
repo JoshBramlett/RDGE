@@ -18,6 +18,12 @@
 #define RDGE_VERSION "0.0.10"
 
 /***********************************
+/        Debugging defines
+***********************************/
+
+#define RDGE_DEBUG_MEMORY_TRACKER
+
+/***********************************
 /    Compiler specific defines
 ***********************************/
 

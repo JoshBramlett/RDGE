@@ -7,13 +7,12 @@
 
 #include <rdge/core.hpp>
 #include <rdge/util/containers/iterators.hpp>
+#include <rdge/util/memory/alloc.hpp>
 
 #include <SDL_assert.h>
 
-#include <cstdlib>
-#include <cstring>
 #include <utility>
-#include <algorithm>
+#include <stdexcept>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
@@ -29,22 +28,28 @@ namespace rdge {
 template <typename T>
 struct stack_array
 {
-    static constexpr float NOISE_MULTIPLIER = 1.5f; //!< Amount to over-allocate
+    //! \brief Size multiplier when a realloc is required
+    static constexpr float OVER_ALLOC_RATIO = 1.5f;
 
     //! \brief stack_array default ctor
-    stack_array (void) = default;
-
-    //! \brief stack_array ctor
-    explicit stack_array (size_t capacity)
+    explicit stack_array (size_t capacity = 0)
         : m_capacity(capacity)
     {
-        m_data = (T*)malloc(m_capacity * sizeof(T));
+        TRACK_MEMORY_PROFILE();
+        if (m_capacity > 0)
+        {
+            if (!RDGE_MALLOC_N(m_data, m_capacity, &this->mem_prof))
+            {
+                throw std::runtime_error("Failed to allocate memory");
+            }
+        }
     }
 
     //! \brief stack_array dtor
     ~stack_array (void) noexcept
     {
-        free(m_data);
+        RDGE_FREE(m_data, &this->mem_prof);
+        UNTRACK_MEMORY_PROFILE();
     }
 
     //!@{
@@ -57,6 +62,7 @@ struct stack_array
         , m_capacity(rhs.m_capacity)
     {
         std::swap(m_data, rhs.m_data);
+        SWAP_MEMORY_PROFILE();
     }
 
     stack_array& operator= (stack_array&& rhs) noexcept
@@ -64,6 +70,7 @@ struct stack_array
         if (this != &rhs)
         {
             std::swap(m_data, rhs.m_data);
+            SWAP_MEMORY_PROFILE();
 
             m_count = rhs.m_count;
             m_capacity = rhs.m_capacity;
@@ -117,15 +124,18 @@ struct stack_array
     {
         if (new_cap > m_capacity)
         {
-            free(m_data);
+            RDGE_FREE(m_data, &this->mem_prof);
 
-            m_capacity = (static_cast<float>(new_cap) * NOISE_MULTIPLIER);
-            m_data = (T*)malloc(m_capacity * sizeof(T));
+            m_capacity = (static_cast<float>(new_cap) * OVER_ALLOC_RATIO);
+            if (!RDGE_MALLOC_N(m_data, m_capacity, &this->mem_prof))
+            {
+                throw std::runtime_error("Failed to allocate memory");
+            }
         }
     }
 
     //! \brief Clear contained elements
-    void clear (void)
+    void clear (void) noexcept
     {
         m_count = 0;
     }
@@ -146,6 +156,9 @@ private:
     T* m_data = nullptr;   //!< Data array
     size_t m_count = 0;    //!< Number of stored elements
     size_t m_capacity = 0; //!< Current array capacity
+
+public:
+    MEMORY_PROFILE_MEMBER
 };
 
 } // namespace rdge

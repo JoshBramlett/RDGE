@@ -5,6 +5,7 @@
 #include <rdge/graphics/color.hpp>
 #include <rdge/physics/aabb.hpp>
 #include <rdge/util/profiling.hpp>
+#include <rdge/util/memory/alloc.hpp>
 
 #include <imgui/imgui.h>
 #endif
@@ -368,8 +369,6 @@ CollisionGraph::Debug_UpdateWidget (bool* p_open)
         return;
     }
 
-    // TODO Add metrics for the tree and further memory usage for all components
-
     ImGui::Text("Graph");
     ImGui::Spacing();
     ImGui::Indent(15.f);
@@ -383,18 +382,10 @@ CollisionGraph::Debug_UpdateWidget (bool* p_open)
 
     ImGui::Text("SmallBlockAllocator");
     ImGui::Spacing();
-    ImGui::Text("Usage");
     ImGui::Indent(15.f);
-    ImGui::Text("claimed:         %llu", this->block_allocator.usage.claimed);
-    ImGui::Text("slack:           %llu", this->block_allocator.usage.slack);
+    ImGui::Text("claimed:         %llu b", this->block_allocator.usage.claimed);
+    ImGui::Text("slack:           %llu b", this->block_allocator.usage.slack);
     ImGui::Text("large_allocs:    %zu", this->block_allocator.usage.large_allocs);
-    ImGui::Unindent(15.f);
-    ImGui::Text("Memory (bytes)");
-    ImGui::Indent(15.f);
-    ImGui::Text("resident:        %llu", this->block_allocator.mem_prof.resident);
-    ImGui::Text("allocs:          %zu", this->block_allocator.mem_prof.allocs);
-    ImGui::Text("frees:           %zu", this->block_allocator.mem_prof.frees);
-    ImGui::Text("reallocs:        %zu", this->block_allocator.mem_prof.reallocs);
     ImGui::Unindent(15.f);
 
     ImGui::Spacing();
@@ -403,12 +394,9 @@ CollisionGraph::Debug_UpdateWidget (bool* p_open)
 
     ImGui::Text("BVH Tree");
     ImGui::Spacing();
-    ImGui::Text("Memory (bytes)");
     ImGui::Indent(15.f);
-    ImGui::Text("resident:        %llu", m_tree.m_nodes.mem_prof.resident);
-    ImGui::Text("allocs:          %zu", m_tree.m_nodes.mem_prof.allocs);
-    ImGui::Text("frees:           %zu", m_tree.m_nodes.mem_prof.frees);
-    ImGui::Text("reallocs:        %zu", m_tree.m_nodes.mem_prof.reallocs);
+    ImGui::Text("height:          %d", m_tree.Height());
+    ImGui::Text("nodes:           %zu", m_tree.m_nodes.size());
     ImGui::Unindent(15.f);
 
     ImGui::Spacing();

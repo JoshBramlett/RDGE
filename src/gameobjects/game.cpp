@@ -5,6 +5,7 @@
 #ifdef RDGE_DEBUG
 #include <rdge/debug.hpp>
 #include <rdge/debug/widgets.hpp>
+#include <rdge/util/memory/alloc.hpp>
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_rdge.h>
 #endif
@@ -151,13 +152,15 @@ Game::Run (void)
                                        ImGuiWindowFlags_NoScrollbar;
             ImGui::Begin("Overlay", nullptr, ImVec2(0.f, 0.f), 0.f, overlay_flags);
 
-            ImGui::SetCursorPos(ImVec2(10.f, static_cast<float>(io.DisplaySize.y) - 20.f));
+            ImGui::SetCursorPos(ImVec2(10.f, 30.f));
+            ImGui::Text("Memory Tracker: %s", (debug::MEMORY_TRACKING_ENABLED ? "Enabled" : "Disabled"));
             ImGui::Text("%.3f frames/sec", io.Framerate);
             ImGui::End();
 
             // Main menu
             static debug::scene_widget_settings scene_widgets;
             static bool imgui_show_test_window = false;
+            static bool imgui_show_memory_tracker = false;
             if (ImGui::BeginMainMenuBar())
             {
                 if (ImGui::BeginMenu("Scene"))
@@ -165,6 +168,12 @@ Game::Run (void)
                     ImGui::MenuItem("Camera", nullptr, &scene_widgets.show_camera_widget);
                     ImGui::MenuItem("Physics", nullptr, &scene_widgets.show_physics_widget);
                     ImGui::MenuItem("Graphics", nullptr, &scene_widgets.show_graphics_widget);
+                    ImGui::EndMenu();
+                }
+
+                if (ImGui::BeginMenu("Memory"))
+                {
+                    ImGui::MenuItem("Tracker", nullptr, &imgui_show_memory_tracker, debug::MEMORY_TRACKING_ENABLED);
                     ImGui::EndMenu();
                 }
 
@@ -182,6 +191,11 @@ Game::Run (void)
             if (imgui_show_test_window)
             {
                 ImGui::ShowTestWindow();
+            }
+
+            if (imgui_show_memory_tracker)
+            {
+                debug::ShowMemoryTracker(&imgui_show_memory_tracker);
             }
         }
 #endif

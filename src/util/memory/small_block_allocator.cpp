@@ -43,7 +43,7 @@ SmallBlockAllocator::SmallBlockAllocator (void)
         }
     });
 
-    TRACK_MEMORY(this->mem_prof);
+    TRACK_MEMORY_PROFILE();
     m_available.fill(nullptr);
 
     // Allocate the list used to point to chunks.  Each chunk will be allocated
@@ -62,7 +62,7 @@ SmallBlockAllocator::~SmallBlockAllocator (void) noexcept
     }
 
     RDGE_FREE(m_chunks, &this->mem_prof);
-    UNTRACK_MEMORY(this->mem_prof);
+    UNTRACK_MEMORY_PROFILE();
 }
 
 SmallBlockAllocator::SmallBlockAllocator (SmallBlockAllocator&& rhs) noexcept
@@ -71,9 +71,9 @@ SmallBlockAllocator::SmallBlockAllocator (SmallBlockAllocator&& rhs) noexcept
 {
     std::swap(m_chunks, rhs.m_chunks);
     std::swap(m_chunkCount, rhs.m_chunkCount);
+    SWAP_MEMORY_PROFILE();
 
 #ifdef RDGE_DEBUG
-    std::swap(mem_prof, rhs.mem_prof);
     usage = std::move(rhs.usage);
 #endif
 }
@@ -85,12 +85,12 @@ SmallBlockAllocator::operator= (SmallBlockAllocator&& rhs) noexcept
     {
         std::swap(m_chunks, rhs.m_chunks);
         std::swap(m_chunkCount, rhs.m_chunkCount);
+        SWAP_MEMORY_PROFILE();
 
         m_chunkCapacity = rhs.m_chunkCapacity;
         m_available = std::move(rhs.m_available);
 
 #ifdef RDGE_DEBUG
-        std::swap(mem_prof, rhs.mem_prof);
         usage = std::move(rhs.usage);
 #endif
     }

@@ -39,7 +39,10 @@ Math:
 Util:
   - Add proper logging across the library
   - Normalize and add support for normal print and pretty printing
-  - Implement global memory tracker
+  - Enhance global memory tracker
+    - Find an elegant way to categorize tracking.
+    - Improve ImGui memory tracking window.
+    - Find solution for properly aligning memory.
   - Build asset system to manage memory/loading/caching etc.
   - Support TextInput and TextEdit SDL events
 

@@ -1,7 +1,13 @@
 #include <rdge/util/memory/alloc.hpp>
 #include <rdge/internal/hints.hpp>
+#include <rdge/internal/hints.hpp>
+#include <rdge/util/logger.hpp>
 
 #include <SDL_assert.h>
+
+#ifdef RDGE_DEBUG
+#include <imgui/imgui.h>
+#endif
 
 #include <cstdlib>
 #include <errno.h>
@@ -12,16 +18,17 @@
 #define SAFE_ALLOC_OVERSIZED(n, s) \
   ((size_t) (sizeof (ptrdiff_t) <= sizeof (size_t) ? -1 : -2) / (s) < (n))
 
+namespace rdge {
+namespace detail {
+
 namespace {
 
-#ifdef RDGE_DEBUG
-rdge::intrusive_list<rdge::memory_profile> s_profiles;
-rdge::memory_profile s_anonymousProfile;
+#ifdef RDGE_DEBUG_MEMORY_TRACKER
+intrusive_list<memory_profile> s_profiles[memory_profile_subsystem_count];
+memory_profile s_anonymousProfile;
 #endif
 
 } // anonymous namespace
-
-namespace rdge {
 
 bool
 safe_alloc (void** p, size_t size, size_t num, bool clear, memory_profile* profile)
@@ -40,11 +47,7 @@ safe_alloc (void** p, size_t size, size_t num, bool clear, memory_profile* profi
         return false;
     }
 
-#ifdef RDGE_DEBUG
-    // TODO Size is prepended to the pointer to keep track of resident memory,
-    //      however, it's of type size_t so it has an 8 byte alignment.
-    //      Revisit when implementing SIMD
-
+#ifdef RDGE_DEBUG_MEMORY_TRACKER
     size_t total_size = (num * size) + sizeof(size_t);
     void* poffset = malloc(total_size);
     if (UNLIKELY(poffset == nullptr))
@@ -63,6 +66,12 @@ safe_alloc (void** p, size_t size, size_t num, bool clear, memory_profile* profi
     if (!profile)
     {
         profile = &s_anonymousProfile;
+        DLOG() << "MALLOC size=" << total_size;
+    }
+    else
+    {
+        DLOG() << "MALLOC memory_profile[" << (void*)profile << "]"
+               << " size=" << total_size;
     }
 
     profile->resident += total_size;
@@ -98,7 +107,7 @@ safe_realloc (void** p, size_t size, size_t num, memory_profile* profile)
         return false;
     }
 
-#ifdef RDGE_DEBUG
+#ifdef RDGE_DEBUG_MEMORY_TRACKER
     uint8* actual_p = ((uint8*)*p) - sizeof(size_t);
     size_t old_size = *(size_t*)actual_p;
 
@@ -115,6 +124,12 @@ safe_realloc (void** p, size_t size, size_t num, memory_profile* profile)
     if (!profile)
     {
         profile = &s_anonymousProfile;
+        DLOG() << "REALLOC size=" << new_size;
+    }
+    else
+    {
+        DLOG() << "REALLOC memory_profile[" << (void*)profile << "]"
+               << " size=" << new_size;
     }
 
     profile->resident += new_size - old_size;
@@ -133,10 +148,15 @@ safe_realloc (void** p, size_t size, size_t num, memory_profile* profile)
     return true;
 }
 
-#ifdef RDGE_DEBUG
+#ifdef RDGE_DEBUG_MEMORY_TRACKER
 void
 debug_free (void** p, memory_profile* profile)
 {
+    if (*p == nullptr)
+    {
+        return;
+    }
+
     uint8* actual_p = ((uint8*)*p) - sizeof(size_t);
     size_t size = *(size_t*)actual_p;
 
@@ -153,16 +173,91 @@ debug_free (void** p, memory_profile* profile)
 }
 
 void
-register_memory_profile (memory_profile& profile)
+register_memory_profile (memory_profile& profile, const char* name)
 {
-    s_profiles.push_back(&profile);
+    profile.name = name;
+    s_profiles[memory_profile_subsystem_none].push_back(&profile);
 }
 
 void
 unregister_memory_profile (memory_profile& profile)
 {
-    s_profiles.remove(&profile);
+    s_profiles[memory_profile_subsystem_none].remove(&profile);
 }
+#endif
+
+} // namespace detail
+
+#ifdef RDGE_DEBUG
+namespace debug {
+
+void
+ShowMemoryTracker (bool* p_open)
+{
+#ifdef RDGE_DEBUG_MEMORY_TRACKER
+    using namespace rdge::detail;
+
+    ImGui::SetNextWindowSize(ImVec2(550,680), ImGuiSetCond_FirstUseEver);
+    if (!ImGui::Begin("Memory Tracker", p_open))
+    {
+        ImGui::End();
+        return;
+    }
+
+    if (ImGui::CollapsingHeader("Anonymous"))
+    {
+        ImGui::Columns(4, "anonymous_memory");
+        ImGui::Separator();
+        ImGui::Text("resident"); ImGui::NextColumn();
+        ImGui::Text("allocs"); ImGui::NextColumn();
+        ImGui::Text("frees"); ImGui::NextColumn();
+        ImGui::Text("reallocs"); ImGui::NextColumn();
+        ImGui::Separator();
+
+        ImGui::Text("%llu", s_anonymousProfile.resident); ImGui::NextColumn();
+        ImGui::Text("%zu", s_anonymousProfile.allocs); ImGui::NextColumn();
+        ImGui::Text("%zu", s_anonymousProfile.frees); ImGui::NextColumn();
+        ImGui::Text("%zu", s_anonymousProfile.reallocs); ImGui::NextColumn();
+        ImGui::Columns(1);
+    }
+
+    memory_profile_subsystem ss = memory_profile_subsystem_none;
+    size_t size = s_profiles[ss].size();
+    if (size > 0 && ImGui::CollapsingHeader("Tracked"))
+    {
+        ImGui::Columns(5, "tracked_memory");
+        ImGui::Separator();
+        ImGui::Text("name"); ImGui::NextColumn();
+        ImGui::Text("resident"); ImGui::NextColumn();
+        ImGui::Text("allocs"); ImGui::NextColumn();
+        ImGui::Text("frees"); ImGui::NextColumn();
+        ImGui::Text("reallocs"); ImGui::NextColumn();
+        ImGui::Separator();
+
+        s_profiles[ss].for_each([](auto* p) {
+            ImGui::Text("%s", p->name); ImGui::NextColumn();
+            ImGui::Text("%llu", p->resident); ImGui::NextColumn();
+            ImGui::Text("%zu", p->allocs); ImGui::NextColumn();
+            ImGui::Text("%zu", p->frees); ImGui::NextColumn();
+            ImGui::Text("%zu", p->reallocs); ImGui::NextColumn();
+        });
+        ImGui::Columns(1);
+    }
+
+    ss = memory_profile_subsystem_graphics;
+    size = s_profiles[ss].size();
+    if (size > 0 && ImGui::CollapsingHeader("Graphics"))
+    {
+        ImGui::Text("Nothing yet.");
+    }
+
+    ImGui::End();
+#else
+    rdge::Unused(p_open);
+#endif
+}
+
+} // namespace debug
 #endif
 
 } // namespace rdge

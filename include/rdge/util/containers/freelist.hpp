@@ -46,7 +46,8 @@ public:
     explicit freelist (size_t capacity = 0)
         : m_capacity((capacity == 0) ? ChunkSize : capacity)
     {
-        TRACK_MEMORY(this->mem_prof);
+        TRACK_MEMORY_PROFILE();
+
         if (!RDGE_CALLOC(m_data, m_capacity, &this->mem_prof))
         {
             throw std::runtime_error("Failed to allocate memory");
@@ -66,7 +67,7 @@ public:
     {
         RDGE_FREE(m_data, &this->mem_prof);
         RDGE_FREE(m_handles, &this->mem_prof);
-        UNTRACK_MEMORY(this->mem_prof);
+        UNTRACK_MEMORY_PROFILE();
     }
 
     //!@{ Non-copyable, move enabled
@@ -79,10 +80,7 @@ public:
     {
         std::swap(m_data, rhs.m_data);
         std::swap(m_handles, rhs.m_handles);
-
-#ifdef RDGE_DEBUG
-        std::swap(mem_prof, rhs.mem_prof);
-#endif
+        SWAP_MEMORY_PROFILE();
     }
 
     freelist& operator= (freelist&& rhs) noexcept
@@ -91,10 +89,8 @@ public:
         {
             std::swap(m_data, rhs.m_data);
             std::swap(m_handles, rhs.m_handles);
+            SWAP_MEMORY_PROFILE();
 
-#ifdef RDGE_DEBUG
-            std::swap(mem_prof, rhs.mem_prof);
-#endif
             m_count = rhs.m_count;
             m_capacity = rhs.m_capacity;
         }
@@ -195,10 +191,8 @@ private:
     size_t m_count = 0;          //!< Number of stored elements
     size_t m_capacity = 0;       //!< Current array capacity
 
-#ifdef RDGE_DEBUG
 public:
-    memory_profile mem_prof;
-#endif
+    MEMORY_PROFILE_MEMBER
 };
 
 } // namespace rdge
