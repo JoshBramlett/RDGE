@@ -179,18 +179,6 @@ public:
     //! \returns Surface screenshot
     //RDGE::Surface Screenshot (void);
 
-    //! \brief Get the avarge frame rate
-    //! \details It's imperative this be called every frame or the values
-    //!          returned will not be accurate.  The frame rate is
-    //!          calculated using a simple moving average of the duration
-    //!          between when this method is called.  All values reported
-    //!          until the threshold set in MAX_FRAME_SAMPLES has been hit
-    //!          can be discarded.
-    //! \note The calculations are self contained so not calling this method
-    //!       has no performance impact elsewhere in the class
-    //! \returns Frame rate
-    double FrameRate (void) const;
-
     //! \brief Get the current window with focus
     //! \returns const reference to the current window
     static const Window& Current (void);

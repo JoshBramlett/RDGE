@@ -33,43 +33,29 @@ namespace {
 constexpr int32 MIN_GL_CONTEXT_MAJOR = 3;
 constexpr int32 MIN_GL_CONTEXT_MINOR = 3;
 
+Window* s_currentWindow = nullptr;
 
-    Window* s_currentWindow = nullptr;
+/*
+ * Event Listener
+ */
 
-    /*
-     * Frame rate timer
-     */
-
-    // Number of frames stored to calculate the moving average
-    // TODO Move this to a self contained struct
-    constexpr rdge::uint32 FRAME_SAMPLES = 100;
-
-    rdge::Timer  s_frameTimer;
-    rdge::uint32 s_tickIndex;
-    rdge::uint32 s_tickSum;
-    rdge::uint32 s_tickSamples[FRAME_SAMPLES];
-
-    /*
-     * Event Listener
-     */
-
-    int
-    OnWindowEvent (void* user_data, SDL_Event* event)
+int
+OnWindowEvent (void* user_data, SDL_Event* event)
+{
+    if (event->type == SDL_WINDOWEVENT)
     {
-        if (event->type == SDL_WINDOWEVENT)
+        if (event->window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
         {
-            if (event->window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
-            {
-                auto w = reinterpret_cast<Window*>(user_data);
-                w->ResetViewport();
-            }
-
-            // TODO: When multiple windows are supported, s_currentWindow must be set
-            //       when a window receives focus
+            auto w = reinterpret_cast<Window*>(user_data);
+            w->ResetViewport();
         }
 
-        return 1;
+        // TODO: When multiple windows are supported, s_currentWindow must be set
+        //       when a window receives focus
     }
+
+    return 1;
+}
 
 } // anonymouse namespace
 
@@ -489,29 +475,6 @@ Window::Screenshot (void)
     delete [] pixels;
 }
 */
-
-double
-Window::FrameRate (void) const
-{
-    if (s_frameTimer.IsRunning() == false)
-    {
-        // make sure all values are set to zero before starting
-        std::fill(s_tickSamples, s_tickSamples + FRAME_SAMPLES, 0);
-        s_frameTimer.Start();
-    }
-
-    // calculate moving average
-    auto new_tick = s_frameTimer.TickDelta();
-    s_tickSum -= s_tickSamples[s_tickIndex];
-    s_tickSum += new_tick;
-    s_tickSamples[s_tickIndex] = new_tick;
-    if (++s_tickIndex == FRAME_SAMPLES)
-    {
-        s_tickIndex = 0;
-    }
-
-    return 1000.0f / (static_cast<double>(s_tickSum) / static_cast<double>(FRAME_SAMPLES));
-}
 
 /* static */ const Window&
 Window::Current (void)
