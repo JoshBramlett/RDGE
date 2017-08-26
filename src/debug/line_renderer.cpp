@@ -337,8 +337,10 @@ DrawWireFrame (const Fixture* fixture, const color& c, float ratio)
     {
     case ShapeType::CIRCLE:
         DrawWireFrame(*static_cast<const circle*>(fixture->shape.world), c, ratio);
+        break;
     case ShapeType::POLYGON:
         DrawWireFrame(*static_cast<const polygon*>(fixture->shape.world), c, ratio);
+        break;
     }
 }
 

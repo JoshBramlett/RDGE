@@ -123,6 +123,7 @@ add_library (RDGE SHARED
 
              src/physics/aabb.cpp
              src/physics/bvh.cpp
+             src/physics/collision.cpp
              src/physics/collision_graph.cpp
              src/physics/contact.cpp
              src/physics/fixture.cpp

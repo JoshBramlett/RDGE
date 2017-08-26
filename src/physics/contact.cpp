@@ -57,6 +57,14 @@ Contact::Update (GraphListener* listener)
         is_touching = shape_a->intersects_with(shape_b, manifold);
         if (is_touching)
         {
+            // TODO This needs to be cleaned up.  Box2D does all collision processing
+            //      in local space, but I had set it up to process in global space.
+            //      The solver however does an iterative method for position correction
+            //      with a new transform computed each step, so solving in local
+            //      coordinates seems the right way to go.  The following is just a
+            //      hack so the solver can do it's thing.
+            //
+            // TODO make sure circle/polygon collision is correct.
             iso_transform* ref;
             iso_transform* inc;
 

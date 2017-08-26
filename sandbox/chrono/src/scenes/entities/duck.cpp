@@ -45,12 +45,19 @@ Duck::InitPhysics (CollisionGraph& graph, float inv_ratio)
     bprof.prevent_sleep = true;
     body = graph.CreateBody(bprof);
 
+#if 0
     polygon::PolygonData data;
     data[0] = { sprite->vertices[0].pos.x * inv_ratio, sprite->vertices[0].pos.y * inv_ratio };
     data[1] = { sprite->vertices[1].pos.x * inv_ratio, sprite->vertices[1].pos.y * inv_ratio };
     data[2] = { sprite->vertices[2].pos.x * inv_ratio, sprite->vertices[2].pos.y * inv_ratio };
     data[3] = { sprite->vertices[3].pos.x * inv_ratio, sprite->vertices[3].pos.y * inv_ratio };
     auto p = polygon(data, 4);
+#else
+    const auto pos = vops::GetPosition(sprite->vertices) * inv_ratio;
+    const auto size = vops::GetSize(sprite->vertices) * inv_ratio;
+
+    auto p = circle({pos.x, pos.y}, size.w * 0.5f);
+#endif
 
     fixture_profile fprof;
     fprof.shape = &p;

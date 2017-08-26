@@ -43,7 +43,7 @@ struct circle : public ishape
     math::vec2 get_centroid (void) const override { return pos; }
     //!@}
 
-    //! \brief Converts the polygon to world space
+    //! \brief Converts the circle to world space
     //! \param [in] xf Transform
     void to_world (const iso_transform& xf) override
     {
@@ -62,16 +62,7 @@ struct circle : public ishape
     //! \param [in] other Other shape to test
     //! \warning Before calling ensure both shapes are in the same coordinate space
     //! \returns True iff shapes intersect
-    bool intersects_with (const ishape* other) const override
-    {
-        if (other->type() == ShapeType::CIRCLE)
-        {
-            return intersects_with(*static_cast<const circle*>(other));
-        }
-
-        gjk test(this, other);
-        return test.intersects();
-    }
+    bool intersects_with (const ishape* other) const override;
 
     //! \brief Check if the circle intersects with another shape
     //! \details The provided \ref collision_manifold will be populated with details
@@ -81,16 +72,7 @@ struct circle : public ishape
     //! \param [out] mf Manifold containing resolution
     //! \warning Before calling ensure both shapes are in the same coordinate space
     //! \returns True iff intersecting
-    bool intersects_with (const ishape* other, collision_manifold& mf) const override
-    {
-        if (other->type() == ShapeType::CIRCLE)
-        {
-            return intersects_with(*static_cast<const circle*>(other), mf);
-        }
-
-        throw "not yet implemented";
-        return false;
-    }
+    bool intersects_with (const ishape* other, collision_manifold& mf) const override;
 
     //! \brief Compute an aabb surrounding the circle
     //! \warning Resultant value may still need to be converted to world space

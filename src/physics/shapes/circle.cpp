@@ -1,9 +1,34 @@
 #include <rdge/physics/shapes/circle.hpp>
+#include <rdge/physics/shapes/polygon.hpp>
 
 namespace rdge {
 namespace physics {
 
 using namespace rdge::math;
+
+bool
+circle::intersects_with (const ishape* other) const
+{
+    if (other->type() == ShapeType::CIRCLE)
+    {
+        return intersects_with(*static_cast<const circle*>(other));
+    }
+
+    gjk test(this, other);
+    return test.intersects();
+}
+
+bool
+circle::intersects_with (const ishape* other, collision_manifold& mf) const
+{
+    if (other->type() == ShapeType::CIRCLE)
+    {
+        return intersects_with(*static_cast<const circle*>(other), mf);
+    }
+
+    mf.flip = true;
+    return rdge::physics::intersects_with(*static_cast<const polygon*>(other), *this, mf);
+}
 
 bool
 circle::intersects_with (const circle& other, collision_manifold& mf) const noexcept

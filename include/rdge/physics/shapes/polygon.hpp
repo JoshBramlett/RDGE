@@ -109,11 +109,7 @@ struct polygon : public ishape
     //! \param [in] other Other shape to test
     //! \warning Before calling ensure both shapes are in the same coordinate space
     //! \returns True iff shapes intersect
-    bool intersects_with (const ishape* other) const override
-    {
-        gjk test(this, other);
-        return test.intersects();
-    }
+    bool intersects_with (const ishape* other) const override;
 
     //! \brief Check if the polygon intersects with another shape
     //! \details The provided \ref collision_manifold will be populated with details
@@ -123,16 +119,7 @@ struct polygon : public ishape
     //! \param [out] mf Manifold containing resolution
     //! \warning Before calling ensure both shapes are in the same coordinate space
     //! \returns True iff intersecting
-    bool intersects_with (const ishape* other, collision_manifold& mf) const override
-    {
-        if (other->type() == ShapeType::POLYGON)
-        {
-            return intersects_with(*static_cast<const polygon*>(other), mf);
-        }
-
-        throw "not yet implemented";
-        return false;
-    }
+    bool intersects_with (const ishape* other, collision_manifold& mf) const override;
 
     //! \brief Compute an aabb surrounding the polygon
     //! \note aabb edges will be padded by \ref AABB_PADDING

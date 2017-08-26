@@ -1,4 +1,5 @@
 #include <rdge/physics/shapes/polygon.hpp>
+#include <rdge/physics/shapes/circle.hpp>
 #include <rdge/util/logger.hpp>
 
 #include <SDL_assert.h>
@@ -283,6 +284,24 @@ polygon::compute_mass (float density) const
     result.mass = density * area;
 
     return result;
+}
+
+bool
+polygon::intersects_with (const ishape* other) const
+{
+    gjk test(this, other);
+    return test.intersects();
+}
+
+bool
+polygon::intersects_with (const ishape* other, collision_manifold& mf) const
+{
+    if (other->type() == ShapeType::POLYGON)
+    {
+        return intersects_with(*static_cast<const polygon*>(other), mf);
+    }
+
+    return rdge::physics::intersects_with(*this, *static_cast<const circle*>(other), mf);
 }
 
 bool
