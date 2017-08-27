@@ -301,7 +301,7 @@ polygon::intersects_with (const ishape* other, collision_manifold& mf) const
         return intersects_with(*static_cast<const polygon*>(other), mf);
     }
 
-    return rdge::physics::intersects_with(*this, *static_cast<const circle*>(other), mf);
+    return intersects(*this, *static_cast<const circle*>(other), mf);
 }
 
 bool
@@ -441,7 +441,7 @@ polygon::intersects_with (const polygon& other, collision_manifold& mf) const no
 
     mf.count = num_points;
     mf.normal = penetration_plane.normal;
-    mf.local_plane = (ref_vertices[0] + ref_vertices[1]) * 0.5f;
+    mf.plane = (ref_vertices[0] + ref_vertices[1]) * 0.5f;
     return true;
 }
 

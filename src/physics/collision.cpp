@@ -11,7 +11,7 @@ namespace physics {
 using namespace rdge::math;
 
 bool
-intersects_with (const polygon& p, const circle& c, collision_manifold& mf)
+intersects (const polygon& p, const circle& c, collision_manifold& mf)
 {
     mf.count = 0;
 
@@ -39,51 +39,43 @@ intersects_with (const polygon& p, const circle& c, collision_manifold& mf)
     if (sep_max <= 0.f)
     {
         // Circle center is inside the polygon
-
-        // plane is the max separating vertex, in the direction of it's normal.
-        // the point of contact is the circle centroid projected onto that plane.
-        half_plane hp = {
-            p.normals[index_a],
-            math::dot(p.normals[index_a], face_a)
-        };
-
         mf.count = 1;
-        mf.contacts[0] = project(hp, c.pos);
+        mf.contacts[0] = c.pos;
         mf.depths[0] = sep_max;
         mf.normal = p.normals[index_a];
-        mf.local_plane = (face_a + face_b) * 0.5f;
+        mf.plane = (face_a + face_b) * 0.5f;
     }
     else if (math::dot(c.pos - face_a, face_b - face_a) <= 0.f)
     {
-        if (math::dot(c.pos, face_a) > math::square(c.radius))
+        const auto& normal = c.pos - face_a;
+        if (normal.self_dot() > math::square(c.radius))
         {
             return false;
         }
 
         // Circle center outside of polygon, and the edge AB and A0 (closest
         // point to circle centroid) point in the same direction
-        const auto& normal = c.pos - face_a;
         mf.count = 1;
         mf.contacts[0] = c.pos;
         mf.depths[0] = c.radius - normal.length();
         mf.normal = normal.normalize();
-        mf.local_plane = (face_a + face_b) * 0.5f;
+        mf.plane = face_a;
     }
     else if (math::dot(c.pos - face_b, face_a - face_b) <= 0.f)
     {
-        if (math::dot(c.pos, face_b) > math::square(c.radius))
+        const auto& normal = c.pos - face_b;
+        if (normal.self_dot() > math::square(c.radius))
         {
             return false;
         }
 
         // Circle center outside of polygon, and the edge AB and A0 (closest
         // point to circle centroid) point in the same direction
-        const auto& normal = c.pos - face_b;
         mf.count = 1;
         mf.contacts[0] = c.pos;
         mf.depths[0] = c.radius - normal.length();
         mf.normal = normal.normalize();
-        mf.local_plane = (face_a + face_b) * 0.5f;
+        mf.plane = face_b;
     }
     else
     {
@@ -98,7 +90,7 @@ intersects_with (const polygon& p, const circle& c, collision_manifold& mf)
         mf.contacts[0] = c.pos;
         mf.depths[0] = math::dot(c.pos - face_center, p.normals[index_a]);
         mf.normal = p.normals[index_a];
-        mf.local_plane = face_center;
+        mf.plane = face_center;
     }
 
     return true;
@@ -114,6 +106,7 @@ std::ostream& operator<< (std::ostream& os, const collision_manifold& mf)
     os << "manifold: ["
        << "\n  count=" << mf.count
        << "\n  normal=" << mf.normal
+       << "\n  plane=" << mf.plane
        << "\n  flip=" << std::boolalpha << mf.flip;
 
     for (size_t i = 0; i < mf.count; i++)

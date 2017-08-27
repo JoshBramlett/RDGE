@@ -26,8 +26,11 @@ circle::intersects_with (const ishape* other, collision_manifold& mf) const
         return intersects_with(*static_cast<const circle*>(other), mf);
     }
 
+    auto result = intersects(*static_cast<const polygon*>(other), *this, mf);
     mf.flip = true;
-    return rdge::physics::intersects_with(*static_cast<const polygon*>(other), *this, mf);
+    mf.normal = -mf.normal;
+
+    return result;
 }
 
 bool
@@ -44,6 +47,7 @@ circle::intersects_with (const circle& other, collision_manifold& mf) const noex
         mf.depths[0] = r - l;
         mf.contacts[0] = (pos + other.pos) * 0.5f;
         mf.normal = (l != 0.f) ? d * (1.f / l) : vec2(0.f, 1.f);
+        mf.plane = pos;
 
         return true;
     }

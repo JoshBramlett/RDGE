@@ -42,10 +42,10 @@ Solver::Add (RigidBody* b)
 
     auto& data = m_bodies.next();
     data.body = b;
-    data.pos = b->sweep.pos_n;
+    data.pos = { 0.f, 0.f };
     data.local_center = b->sweep.local_center;
     data.linear_vel = b->linear.velocity;
-    data.angle = b->sweep.angle_n;
+    data.angle = 0.f;
     data.angular_vel = b->angular.velocity;
     data.inv_mass = b->linear.inv_mass;
     data.inv_mmoi = b->angular.inv_mmoi;
@@ -183,8 +183,8 @@ Solver::Solve (void)
     for (auto& data : m_bodies)
     {
         auto body = data.body;
-        body->sweep.pos_n = data.pos;
-        body->sweep.angle_n = data.angle;
+        body->sweep.pos_n += data.pos;
+        body->sweep.angle_n += data.angle;
         body->linear.velocity = data.linear_vel;
         body->angular.velocity = data.angular_vel;
 
@@ -366,13 +366,8 @@ Solver::CorrectPositions (void)
 
         for (size_t i = 0; i < mf.count; i++)
         {
-            // world centers of mass
-            iso_transform xf_a;
-            xf_a.set_angle(bdata_a.angle);
-            xf_a.pos = bdata_a.pos - xf_a.rot.rotate(bdata_a.local_center);
-            iso_transform xf_b;
-            xf_b.set_angle(bdata_b.angle);
-            xf_b.pos = bdata_b.pos - xf_b.rot.rotate(bdata_b.local_center);
+            iso_transform xf_a(bdata_a.pos, bdata_a.angle);
+            iso_transform xf_b(bdata_b.pos, bdata_b.angle);
 
             math::vec2 normal;
             math::vec2 point;
@@ -380,17 +375,17 @@ Solver::CorrectPositions (void)
 
             if (mf.flip == false)
             {
-                normal = xf_a.rot.rotate(mf.local_normal);
-                math::vec2 plane_point = xf_a.to_world(mf.local_plane);
-                math::vec2 clip_point = xf_b.to_world(mf.local_contacts[i]);
+                normal = xf_a.rot.rotate(mf.normal);
+                math::vec2 plane_point = xf_a.to_world(mf.plane);
+                math::vec2 clip_point = xf_b.to_world(mf.contacts[i]);
                 separation = math::dot(clip_point - plane_point, normal);
                 point = clip_point;
             }
             else
             {
-                normal = xf_b.rot.rotate(mf.local_normal);
-                math::vec2 plane_point = xf_b.to_world(mf.local_plane);
-                math::vec2 clip_point = xf_a.to_world(mf.local_contacts[i]);
+                normal = xf_b.rot.rotate(mf.normal);
+                math::vec2 plane_point = xf_b.to_world(mf.plane);
+                math::vec2 clip_point = xf_a.to_world(mf.contacts[i]);
                 separation = math::dot(clip_point - plane_point, normal);
                 point = clip_point;
 

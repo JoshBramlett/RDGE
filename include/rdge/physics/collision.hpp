@@ -29,22 +29,17 @@ static constexpr float LINEAR_SLOP = 0.005f; //!< Collision tolerance
 
 //! \struct collision_manifold
 //! \brief Container for collision resolution details
+//! \details Manifold data is represented in world space.  Reference/incident naming
+//!          convention is used to signify which shapes transform is used by the solver.
 struct collision_manifold
 {
+    float depths[2] = { 0.f, 0.f }; //!< Penetration depths
+    math::vec2 plane;               //!< (ref) Collision plane
+    math::vec2 normal;              //!< (ref) Vector of resolution, or collision normal
+    math::vec2 contacts[2];         //!< (inc) Clipping points
     size_t count = 0;               //!< Number of collision points
 
-    //!@{ World space
-    float depths[2] = { 0.f, 0.f }; //!< Penetration depths
-    math::vec2 contacts[2];         //!< Contact points
-    math::vec2 normal;              //!< Vector of resolution, or collision normal
-    //!@}
-
-    //!@{ Local space
-    math::vec2 local_plane;         //!< Reference shape half plane
-    math::vec2 local_normal;        //!< Reference shape local normal
-    math::vec2 local_contacts[2];   //!< Incident shape local edge points
     bool flip = false;              //!< Flip reference/incident shapes
-    //!@}
 };
 
 //! \struct contact_impulse
@@ -211,7 +206,15 @@ struct gjk
     }
 };
 
-bool intersects_with (const polygon& p, const circle& c, collision_manifold& mf);
+//! \brief Check polygon/circle intersection and build manifold
+//! \details The provided \ref collision_manifold will be populated with details
+//!          on how the collision could be resolved.  If there was no collision
+//!          the manifold count will be set to zero.
+//! \param [in] p Polygon shape
+//! \param [in] c Circle shape
+//! \param [out] mf Manifold containing resolution
+//! \returns True iff intersecting
+bool intersects (const polygon& p, const circle& c, collision_manifold& mf);
 
 //! \brief collision_manifold stream output operator
 std::ostream& operator<< (std::ostream& os, const collision_manifold& mf);
