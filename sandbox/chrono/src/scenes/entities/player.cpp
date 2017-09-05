@@ -90,8 +90,22 @@ Player::InitPhysics (CollisionGraph& graph, float inv_ratio)
     fprof.shape = &p;
     fprof.density = 1.f;
     fprof.restitution = 0.8f;
-
     hitbox = body->CreateFixture(fprof);
+
+    bprof.prevent_rotation = false;
+    sword = graph.CreateBody(bprof);
+
+    // players sword
+    polygon s(0.5f, 1.f);
+    fprof.shape = &s;
+    fprof.density = 1.f;
+    fprof.restitution = 0.8f;
+    sword_hitbox = sword->CreateFixture(fprof);
+
+    auto j = graph.CreateRevoluteJoint(body, sword, vec2(0.f, 0.f));
+    j->SetMotorSpeed(1.14f);
+    j->SetMaxMotorTorque(10000.f);
+    j->EnableMotor();
 }
 
 void

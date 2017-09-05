@@ -13,8 +13,9 @@
 namespace rdge {
 namespace math {
 
-// Forward declaration
+//!@{ Forward declarations
 struct mat4;
+//!@}
 
 //! \struct vec3
 //! \brief Three dimensional floating point vector
@@ -218,6 +219,12 @@ constexpr vec3 operator- (const vec3& lhs, const vec3& rhs) noexcept
 constexpr vec3 operator* (const vec3& lhs, const vec3& rhs) noexcept
 {
     return vec3(lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z);
+}
+
+//! \brief vec3 dot specialization
+constexpr float dot (const vec3& lhs, const vec3& rhs) noexcept
+{
+    return (lhs.x * rhs.x) + (lhs.y * rhs.y) + (lhs.z * rhs.z);
 }
 
 //! \brief vec3 stream output operator

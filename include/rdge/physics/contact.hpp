@@ -7,17 +7,25 @@
 
 #include <rdge/core.hpp>
 #include <rdge/physics/collision.hpp>
-#include <rdge/physics/shapes/ishape.hpp>
 #include <rdge/util/containers/intrusive_list.hpp>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
+
+//!@{ Forward declarations
+class SmallBlockAllocator;
+//!@}
+
 namespace physics {
 
+//!@{ Forward declarations
 class Contact;
+class CollisionGraph;
 class GraphListener;
-class Fixture;
+class Solver;
 class RigidBody;
+class Fixture;
+//!@}
 
 //! \struct contact_edge
 //! \brief Represents contact between two bodies
@@ -33,22 +41,25 @@ struct contact_edge : public intrusive_list_element<contact_edge>
 class Contact : public intrusive_list_element<Contact>
 {
 public:
-    explicit Contact (Fixture* a, Fixture* b);
-    ~Contact (void) noexcept = default;
-
+    //!@{ Non-copyable, Non-movable
     Contact (const Contact&) = delete;
     Contact (Contact&&) = delete;
     Contact& operator= (const Contact&) = delete;
     Contact& operator= (Contact&&) = delete;
+    //!@}
 
     bool IsTouching (void) const noexcept { return m_flags & TOUCHING; }
     bool IsEnabled (void) const noexcept { return m_flags & ENABLED; }
 
+    //!@{ \ref Fixture nodes linked by this contact
     Fixture* fixture_a = nullptr;
     Fixture* fixture_b = nullptr;
+    //!@}
 
+    //!@{ Pointers to edges stored by each \ref RigidBody
     contact_edge edge_a;
     contact_edge edge_b;
+    //!@}
 
     float friction = 0.f;
     float restitution = 0.f;
@@ -61,6 +72,10 @@ private:
 
     friend class CollisionGraph;
     friend class Solver;
+    friend class rdge::SmallBlockAllocator;
+
+    explicit Contact (Fixture* a, Fixture* b);
+    ~Contact (void) noexcept = default;
 
     //! \brief Narrow phase contact evaluation
     //! \details Performs narrow phase intersection tests and manifold generation.

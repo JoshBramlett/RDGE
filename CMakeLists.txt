@@ -117,6 +117,8 @@ add_library (RDGE SHARED
              #src/controls/button.cpp  --> src/graphics/ui/button.cpp
 
              src/math/random.cpp
+             src/math/mat2.cpp
+             src/math/mat3.cpp
              src/math/mat4.cpp
              src/math/vec3.cpp
              src/math/vec4.cpp
@@ -129,6 +131,7 @@ add_library (RDGE SHARED
              src/physics/fixture.cpp
              src/physics/rigid_body.cpp
              src/physics/solver.cpp
+             src/physics/joints/revolute_joint.cpp
              src/physics/shapes/ishape.cpp
              src/physics/shapes/circle.cpp
              src/physics/shapes/polygon.cpp

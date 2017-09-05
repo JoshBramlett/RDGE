@@ -1,0 +1,22 @@
+
+//!@{ Forward declarations
+class Surface;
+class Texture;
+//!@}
+
+//!@{ Non-copyable, move enabled
+BitmapFont (const BitmapFont&) = delete;
+BitmapFont& operator= (const BitmapFont&) = delete;
+BitmapFont (BitmapFont&&) noexcept = default;
+BitmapFont& operator= (BitmapFont&&) noexcept = default;
+//!@}
+
+//!@{ Non-copyable, Non-movable
+Contact (const Contact&) = delete;
+Contact (Contact&&) = delete;
+Contact& operator= (const Contact&) = delete;
+Contact& operator= (Contact&&) = delete;
+//!@}
+
+//! \brief tex_coords stream output operator
+std::ostream& operator<< (std::ostream& os, const tex_coords& value);

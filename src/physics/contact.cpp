@@ -5,6 +5,8 @@
 #include <rdge/physics/shapes/circle.hpp>
 #include <rdge/math/intrinsics.hpp>
 
+#include <SDL_assert.h>
+
 namespace rdge {
 namespace physics {
 
@@ -28,10 +30,14 @@ Contact::Contact (Fixture* a, Fixture* b)
     , friction(mix_friction(a->friction, b->friction))
     , restitution(mix_restitution(a->restitution, b->restitution))
 {
+    SDL_assert(fixture_a);
+    SDL_assert(fixture_b);
+    SDL_assert(fixture_a != fixture_b);
+
     edge_a.contact = this;
     edge_b.contact = this;
-    edge_a.other = b->body;
-    edge_b.other = a->body;
+    edge_a.other = fixture_b->body;
+    edge_b.other = fixture_a->body;
 }
 
 void

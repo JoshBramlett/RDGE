@@ -40,7 +40,7 @@ struct mat4
 
 #pragma GCC diagnostic pop
 
-    //! \brief mat4 ctor
+    //! \brief mat4 default ctor
     //! \details Zero initialization
     mat4 (void);
 

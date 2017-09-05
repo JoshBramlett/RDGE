@@ -53,9 +53,9 @@ int main ()
         return false;
     };
 
-    //game.PushScene(std::make_shared<TestScene>());
+    game.PushScene(std::make_shared<TestScene>());
     //game.PushScene(std::make_shared<TilesScene>());
-    game.PushScene(std::make_shared<TumblerScene>());
+    //game.PushScene(std::make_shared<TumblerScene>());
     game.Run();
 
     return 0;

@@ -66,6 +66,18 @@ struct fixture_proxy
 class Fixture : public intrusive_forward_list_element<Fixture>
 {
 public:
+    bool IsFilterDirty (void) const noexcept { return m_flags & FILTER_DIRTY; }
+
+    void FlagFilterClean (void) noexcept
+    {
+        m_flags &= ~FILTER_DIRTY;
+    }
+
+    void FlagFilterDirty (void) noexcept
+    {
+        m_flags |= FILTER_DIRTY;
+    }
+
     void SetFilter (const collision_filter& f)
     {
         this->filter = f;
@@ -84,15 +96,8 @@ public:
         //       Still need to implement a better solution for point 3.
     }
 
-    void FlagFilterClean (void) noexcept
-    {
-        m_flags &= ~FILTER_DIRTY;
-    }
-
     void SetSensor (bool value) noexcept;
-
     bool IsSensor (void) const noexcept { return m_flags & SENSOR; }
-    bool IsFilterDirty (void) const noexcept { return m_flags & FILTER_DIRTY; }
 
     mass_data ComputeMass (void) const noexcept
     {

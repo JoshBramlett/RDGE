@@ -10,6 +10,7 @@
 #include <rdge/physics/contact.hpp>
 #include <rdge/physics/fixture.hpp>
 #include <rdge/physics/rigid_body.hpp>
+#include <rdge/physics/joints/base_joint.hpp>
 #include <rdge/physics/solver.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/util/containers/intrusive_list.hpp>
@@ -20,6 +21,8 @@
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 namespace physics {
+
+class RevoluteJoint;
 
 //! \class ContactFilter
 //! \brief Abstract class defining a ruleset for fixture collision
@@ -64,6 +67,20 @@ public:
     virtual void OnDestroyed (Fixture*) { }
 };
 
+//! \struct time_step
+//! \brief Container for time step data
+//! \details Maintained by the \ref CollisionGraph, and includes support for
+//!          handling variable time steps.
+struct time_step
+{
+    float dt_0 = 0.f;  //!< Last step elapsed time
+    float inv_0 = 0.f; //!< Last step inverse elapsed time
+
+    float dt = 0.f;    //!< Elapsed time
+    float inv = 0.f;   //!< Inverse elapsed time
+    float ratio = 0.f; //!< Ratio from the last step to the current
+};
+
 class CollisionGraph
 {
 public:
@@ -72,6 +89,9 @@ public:
 
     RigidBody* CreateBody (const rigid_body_profile& profile);
     void DestroyBody (RigidBody* body);
+
+    RevoluteJoint* CreateRevoluteJoint (RigidBody* a, RigidBody* b, math::vec2 anchor);
+    void DestroyJoint (BaseJoint* joint);
 
     void DisableForceClearing (void) noexcept { m_flags &= ~CLEAR_FORCES; }
     void ClearForces (void) noexcept;
@@ -112,6 +132,9 @@ private:
     std::vector<int32> m_dirtyProxies;
     intrusive_list<RigidBody> m_bodies;
     intrusive_list<Contact> m_contacts;
+    intrusive_list<BaseJoint> m_joints;
+
+    time_step m_step;
 
     enum StateFlags
     {
@@ -129,6 +152,7 @@ public:
 
     bool debug_draw_fixtures = false;
     bool debug_draw_proxy_aabbs = false;
+    bool debug_draw_joints = false;
     bool debug_draw_center_of_mass = false;
     bool debug_draw_bvh_nodes = false;
 

@@ -3,6 +3,7 @@
 #include <rdge/physics/contact.hpp>
 #include <rdge/physics/collision.hpp>
 #include <rdge/physics/collision_graph.hpp>
+#include <rdge/physics/joints/base_joint.hpp>
 
 #include <limits>
 
@@ -20,12 +21,16 @@ constexpr float ANGULAR_SLEEP_TOLERANCE_SQUARED = math::square(Solver::ANGULAR_S
 
 } // anonymous namespace
 
+Solver::Solver (const time_step* step)
+    : m_step(step)
+{ }
+
 void
-Solver::Initialize (float delta_time, size_t body_count, size_t contact_count)
+Solver::Initialize (size_t body_count, size_t contact_count, size_t joint_count)
 {
-    m_dt = delta_time;
     m_bodies.reserve(body_count);
     m_contacts.reserve(contact_count);
+    m_joints.reserve(joint_count);
 }
 
 void
@@ -43,9 +48,8 @@ Solver::Add (RigidBody* b)
     auto& data = m_bodies.next();
     data.body = b;
     data.pos = { 0.f, 0.f };
-    data.local_center = b->sweep.local_center;
-    data.linear_vel = b->linear.velocity;
     data.angle = 0.f;
+    data.linear_vel = b->linear.velocity;
     data.angular_vel = b->angular.velocity;
     data.inv_mass = b->linear.inv_mass;
     data.inv_mmoi = b->angular.inv_mmoi;
@@ -57,8 +61,8 @@ Solver::Add (RigidBody* b)
                           (b->linear.force * b->linear.inv_mass);
         auto angular_acc = (b->angular.torque * b->angular.inv_mmoi);
 
-        data.linear_vel += linear_acc * m_dt;
-        data.angular_vel += angular_acc * m_dt;
+        data.linear_vel += linear_acc * m_step->dt;
+        data.angular_vel += angular_acc * m_step->dt;
 
         // From Box2D regarding damping:
         // ODE: dv/dt + c * v = 0
@@ -69,8 +73,8 @@ Solver::Add (RigidBody* b)
         // v2 = exp(-c * dt) * v1
         // Pade approximation:
         // v2 = v1 * 1 / (1 + c * dt)
-        data.linear_vel *= 1.f / (1.f + m_dt * b->linear.damping);
-        data.angular_vel *= 1.f / (1.f + m_dt * b->angular.damping);
+        data.linear_vel *= 1.f / (1.f + m_step->dt * b->linear.damping);
+        data.angular_vel *= 1.f / (1.f + m_step->dt * b->angular.damping);
     }
 }
 
@@ -82,10 +86,18 @@ Solver::Add (Contact* c)
 }
 
 void
+Solver::Add (BaseJoint* j)
+{
+    auto& data = m_joints.next();
+    data = j;
+}
+
+void
 Solver::Clear (void)
 {
     m_bodies.clear();
     m_contacts.clear();
+    m_joints.clear();
 }
 
 void
@@ -113,10 +125,11 @@ Solver::Solve (void)
         {
             auto& vcp = data.points[i];
 
-            vcp.rel_point[0] = mf.contacts[i] - bdata_a.pos;
-            vcp.rel_point[1] = mf.contacts[i] - bdata_b.pos;
+            // bodies position relative to the contact points
+            vcp.rel_point[0] = mf.contacts[i] - body_a->sweep.pos_n;
+            vcp.rel_point[1] = mf.contacts[i] - body_b->sweep.pos_n;
 
-            // effective mass on the normal
+            // two body effective mass relative to the normal
             float radius_normal_a = math::perp_dot(vcp.rel_point[0], mf.normal);
             float radius_normal_b = math::perp_dot(vcp.rel_point[1], mf.normal);
             float enm = data.combined_inv_mass +
@@ -124,7 +137,7 @@ Solver::Solve (void)
                         (bdata_b.inv_mmoi * math::square(radius_normal_b));
             vcp.normal_mass = (enm > 0.f) ? (1.f / enm) : 0.f;
 
-            // effective mass on the tangent
+            // two body effective mass relative to the tangent
             float radius_tangent_a = math::perp_dot(vcp.rel_point[0], tangent);
             float radius_tangent_b = math::perp_dot(vcp.rel_point[1], tangent);
             float etm = data.combined_inv_mass +
@@ -147,6 +160,14 @@ Solver::Solve (void)
         }
     }
 
+    for (auto& j : m_joints)
+    {
+        auto& bdata_a = m_bodies[j->body_a->solver_index];
+        auto& bdata_b = m_bodies[j->body_b->solver_index];
+        j->InitializeSolver(*m_step, bdata_a, bdata_b);
+        j->SolveVelocityConstraints(*m_step, bdata_a, bdata_b);
+    }
+
     for (size_t iter = 0; iter < velocity_iterations; iter++)
     {
         SolveVelocityConstraints();
@@ -154,27 +175,36 @@ Solver::Solve (void)
 
     for (auto& data : m_bodies)
     {
-        auto t = data.linear_vel * m_dt;
+        auto t = data.linear_vel * m_step->dt;
         if (t.self_dot() > MAX_TRANSLATION_SQAURED)
         {
             data.linear_vel *= MAX_TRANSLATION / t.length();
         }
 
-        auto r = data.angular_vel * m_dt;
+        auto r = data.angular_vel * m_step->dt;
         if (math::square(r) > MAX_ROTATION_SQUARED)
         {
             data.angular_vel *= MAX_ROTATION / math::abs(r);
         }
 
-        data.pos += data.linear_vel * m_dt;
-        data.angle += data.angular_vel * m_dt;
+        data.pos += data.linear_vel * m_step->dt;
+        data.angle += data.angular_vel * m_step->dt;
     }
 
     m_positionsSolved = false;
     for (size_t iter = 0; iter < position_iterations; iter++)
     {
         m_positionsSolved = CorrectPositions();
-        if (m_positionsSolved)
+
+        bool joints_solved = true;
+        for (auto& j : m_joints)
+        {
+            auto& bdata_a = m_bodies[j->body_a->solver_index];
+            auto& bdata_b = m_bodies[j->body_b->solver_index];
+            joints_solved = joints_solved && j->SolvePositionConstraints(bdata_a, bdata_b);
+        }
+
+        if (m_positionsSolved && joints_solved)
         {
             break;
         }
@@ -231,7 +261,7 @@ Solver::ProcessPostSolve (const CollisionGraph& graph)
             }
             else
             {
-                body->m_sleepTime += m_dt;
+                body->m_sleepTime += m_step->dt;
                 min_sleep_time = std::min(min_sleep_time, body->m_sleepTime);
             }
         }

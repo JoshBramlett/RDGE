@@ -12,7 +12,7 @@ namespace rdge {
 
 //!@{ Forward declarations
 namespace debug {
-    struct scene_widget_settings;
+struct scene_widget_settings;
 }
 //!@}
 

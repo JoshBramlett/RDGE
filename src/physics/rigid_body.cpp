@@ -8,42 +8,42 @@ namespace physics {
 
 using namespace rdge::math;
 
-RigidBody::RigidBody (const rigid_body_profile& profile, CollisionGraph* parent)
+RigidBody::RigidBody (const rigid_body_profile& prof, CollisionGraph* parent)
     : graph(parent)
-    , user_data(profile.user_data)
-    , world_transform(profile.position, profile.angle)
-    , gravity_scale(profile.gravity_scale)
-    , m_type(profile.type)
+    , user_data(prof.user_data)
+    , world_transform(prof.position, prof.angle)
+    , gravity_scale(prof.gravity_scale)
+    , m_type(prof.type)
 {
-    linear.velocity = profile.linear_velocity;
-    linear.damping = profile.linear_damping;
-    angular.velocity = profile.angular_velocity;
-    angular.damping = profile.angular_damping;
+    linear.velocity = prof.linear_velocity;
+    linear.damping = prof.linear_damping;
+    angular.velocity = prof.angular_velocity;
+    angular.damping = prof.angular_damping;
 
-    if (profile.simulate)
+    if (prof.simulate)
     {
         m_flags |= SIMULATE;
     }
 
-    if (profile.awake)
+    if (prof.awake)
     {
         m_flags |= AWAKE;
     }
 
-    if (profile.prevent_rotation)
+    if (prof.prevent_rotation)
     {
         m_flags |= PREVENT_ROTATION;
     }
 
-    if (profile.prevent_sleep)
+    if (prof.prevent_sleep)
     {
         m_flags |= PREVENT_SLEEP;
     }
 
     sweep.pos_0 = world_transform.pos;
     sweep.pos_n = world_transform.pos;
-    sweep.angle_0 = profile.angle;
-    sweep.angle_n = profile.angle;
+    sweep.angle_0 = prof.angle;
+    sweep.angle_n = prof.angle;
 
     if (m_type == RigidBodyType::DYNAMIC)
     {

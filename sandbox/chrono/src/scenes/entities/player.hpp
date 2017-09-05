@@ -7,7 +7,6 @@
 #include <rdge/graphics.hpp>
 #include <rdge/math.hpp>
 #include <rdge/physics.hpp>
-#include <rdge/physics/motion.hpp>
 
 #include "cardinal_direction_animation.hpp"
 
@@ -36,7 +35,9 @@ public:
 
     std::shared_ptr<rdge::Sprite> sprite;
     rdge::physics::RigidBody* body;
+    rdge::physics::RigidBody* sword;
     rdge::physics::Fixture* hitbox;
+    rdge::physics::Fixture* sword_hitbox;
 
 private:
     // input handling

@@ -1,4 +1,5 @@
 #include <rdge/physics/collision_graph.hpp>
+#include <rdge/physics/joints/revolute_joint.hpp>
 
 #ifdef RDGE_DEBUG
 #include <rdge/debug/renderer.hpp>
@@ -25,6 +26,7 @@ GraphListener s_defaultGraphListener;
 CollisionGraph::CollisionGraph (const math::vec2& g)
     : custom_filter(&s_defaultContactFilter)
     , listener(&s_defaultGraphListener)
+    , m_solver(&m_step)
     , m_flags(CLEAR_FORCES)
 {
     m_dirtyProxies.reserve(128);
@@ -66,22 +68,82 @@ CollisionGraph::DestroyBody (RigidBody* body)
         return;
     }
 
-    body->fixtures.for_each([=](auto* f) {
-        body->DestroyFixture(f);
+    body->joint_edges.for_each([=](auto* edge) {
+        DestroyJoint(edge->joint);
     });
 
     body->contact_edges.for_each([=](auto* edge) {
         DestroyContact(edge->contact);
     });
 
+    body->fixtures.for_each([=](auto* f) {
+        body->DestroyFixture(f);
+    });
+
     m_bodies.remove(body);
     block_allocator.Delete<RigidBody>(body);
+}
+
+RevoluteJoint*
+CollisionGraph::CreateRevoluteJoint (RigidBody* a, RigidBody* b, math::vec2 anchor)
+{
+    if (IsLocked())
+    {
+        SDL_assert(false);
+        return nullptr;
+    }
+
+    RevoluteJoint* result = block_allocator.New<RevoluteJoint>(a, b, anchor);
+    m_joints.push_back(result);
+    a->joint_edges.push_back(&result->edge_a);
+    b->joint_edges.push_back(&result->edge_b);
+
+    return result;
+}
+
+void
+CollisionGraph::DestroyJoint (BaseJoint* joint)
+{
+    if (IsLocked())
+    {
+        SDL_assert(false);
+    }
+
+    RigidBody* body_a = joint->body_a;
+    RigidBody* body_b = joint->body_b;
+
+    body_a->WakeUp();
+    body_b->WakeUp();
+
+    // If the joint was preventing collisions, flag fixtures for filtering
+    if (!joint->ShouldCollide())
+    {
+        body_a->contact_edges.for_each([=](auto* edge) {
+            if (edge->other == body_b)
+            {
+                edge->contact->fixture_a->FlagFilterDirty();
+                edge->contact->fixture_b->FlagFilterDirty();
+            }
+        });
+    }
+
+    m_joints.remove(joint);
+    body_a->joint_edges.remove(&joint->edge_a);
+    body_b->joint_edges.remove(&joint->edge_b);
+
+    // TODO update once more joints are added
+    block_allocator.Delete<RevoluteJoint>(static_cast<RevoluteJoint*>(joint));
 }
 
 void
 CollisionGraph::Step (float dt)
 {
     m_flags |= LOCKED;
+
+    SDL_assert(dt > 0.f);
+    m_step.dt = dt;
+    m_step.inv = 1.f / dt;
+    m_step.ratio = m_step.inv_0 * dt;
 
     // 1) update contact list
     {
@@ -108,6 +170,7 @@ CollisionGraph::Step (float dt)
         //       iteration to reset the flags, they are performed at:
         //   - bodies reset at the end of the step
         //   - contacts reset during contact purging
+        //   - joints done here
 
         // TODO Remove this when physics engine gets more mileage.
 
@@ -120,6 +183,10 @@ CollisionGraph::Step (float dt)
             SDL_assert((contact->m_flags & Contact::ON_ISLAND) == 0);
         });
 #endif
+
+        m_joints.for_each([](auto* joint) {
+            joint->m_flags &= ~BaseJoint::ON_ISLAND;
+        });
     }
 
     // 2) integration and contact solving
@@ -128,7 +195,7 @@ CollisionGraph::Step (float dt)
         static std::vector<RigidBody*> body_stack;
         body_stack.reserve(m_bodies.count);
 
-        m_solver.Initialize(dt, m_bodies.count, m_contacts.count);
+        m_solver.Initialize(m_bodies.count, m_contacts.count, m_joints.count);
         m_bodies.for_each([&](auto* body) {
             if ((body->m_flags & RigidBody::ON_ISLAND) ||
                 !body->IsSimulating() ||
@@ -178,6 +245,32 @@ CollisionGraph::Step (float dt)
                         body_stack.push_back(edge->other);
                     }
                 });
+
+                b->joint_edges.for_each([&](auto* edge) {
+                    BaseJoint* j = edge->joint;
+
+                    // TODO could be simplified to m_flags != 0 (except sensor test),
+                    //      but for future proofing should remain as is.  Look into
+                    //      IsTouching to see where it's used.
+                    if (j->m_flags & BaseJoint::ON_ISLAND)
+                    {
+                        return;
+                    }
+
+                    if (!j->body_a->IsSimulating() || !j->body_b->IsSimulating())
+                    {
+                        return;
+                    }
+
+                    j->m_flags |= BaseJoint::ON_ISLAND;
+                    m_solver.Add(j);
+
+                    if ((edge->other->m_flags & RigidBody::ON_ISLAND) == 0)
+                    {
+                        edge->other->m_flags |= RigidBody::ON_ISLAND;
+                        body_stack.push_back(edge->other);
+                    }
+                });
             }
 
             m_solver.Solve();
@@ -207,6 +300,9 @@ CollisionGraph::Step (float dt)
             }
         });
     }
+
+    m_step.dt_0 = m_step.dt;
+    m_step.inv_0 = m_step.inv;
 
     m_flags &= ~LOCKED;
 }
@@ -446,6 +542,7 @@ CollisionGraph::Debug_UpdateWidget (bool* p_open)
     ImGui::Indent(15.f);
     ImGui::Checkbox("Show Fixtures", &this->debug_draw_fixtures);
     ImGui::Checkbox("Show Proxy AABBs", &this->debug_draw_proxy_aabbs);
+    ImGui::Checkbox("Show Joints", &this->debug_draw_joints);
     ImGui::Checkbox("Show Center of Mass", &this->debug_draw_center_of_mass);
     ImGui::Checkbox("Show BVH Nodes", &this->debug_draw_bvh_nodes);
     ImGui::Unindent(15.f);
@@ -502,6 +599,14 @@ CollisionGraph::Debug_Draw (float pixel_ratio)
                 }
             });
         });
+
+        if (this->debug_draw_joints)
+        {
+            m_joints.for_each([=](auto* joint) {
+                debug::DrawLine(joint->body_a->GetPosition(), joint->Anchor());
+                debug::DrawLine(joint->body_b->GetPosition(), joint->Anchor());
+            });
+        }
     }
 }
 #endif

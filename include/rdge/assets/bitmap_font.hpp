@@ -43,7 +43,7 @@ public:
     //! \brief BitmapFont dtor
     ~BitmapFont (void) noexcept = default;
 
-    //!@{ Non-copyable and move enabled
+    //!@{ Non-copyable, move enabled
     BitmapFont (const BitmapFont&) = delete;
     BitmapFont& operator= (const BitmapFont&) = delete;
     BitmapFont (BitmapFont&&) noexcept = default;

@@ -6,9 +6,12 @@
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/physics/contact.hpp>
+#include <rdge/math/vec2.hpp>
 #include <rdge/physics/collision.hpp>
+#include <rdge/physics/contact.hpp>
 #include <rdge/physics/fixture.hpp>
+#include <rdge/physics/isometry.hpp>
+#include <rdge/physics/joints/base_joint.hpp>
 #include <rdge/util/containers/intrusive_list.hpp>
 
 //! \namespace rdge Rainbow Drop Game Engine
@@ -20,7 +23,6 @@ namespace physics {
 
 class RigidBody;
 class CollisionGraph;
-class Contact;
 
 //! \struct sweep_step
 //! \brief Describes the motion of a body/shape during the time step
@@ -119,7 +121,6 @@ struct rigid_body_profile
 class RigidBody : public intrusive_list_element<RigidBody>
 {
 public:
-
     //! \brief Create a fixture and attach it to this body
     //! \details Initializes a fixture from the provided profile.  If the
     //!          body is simulating contacts will be added during the next
@@ -298,13 +299,19 @@ public:
     //void SetFixedRotation(bool flag);
 
     RigidBodyType GetType (void) const noexcept { return m_type; }
-    // world position of the body origin
-    const math::vec2& GetPosition (void) const noexcept { return world_transform.pos; }
-    float GetAngle (void) const noexcept { return sweep.angle_n; }
-    // world position of the body center of mass
-    const math::vec2& GetWorldCenter (void) const noexcept { return sweep.pos_n; }
-    const math::vec2& GetLocalCenter (void) const noexcept { return sweep.local_center; }
 
+    // world position of the body origin
+    math::vec2 GetPosition (void) const noexcept { return world_transform.pos; }
+    float GetAngle (void) const noexcept { return sweep.angle_n; }
+
+    // world position of the body center of mass
+    math::vec2 GetWorldCenter (void) const noexcept { return sweep.pos_n; }
+    math::vec2 GetLocalCenter (void) const noexcept { return sweep.local_center; }
+
+    math::vec2 GetLocalPoint (const math::vec2 world_point) const noexcept
+    {
+        return world_transform.to_local(world_point);
+    }
 
 
     //! \brief Check if body is participating in the physics simulation
@@ -349,10 +356,23 @@ public:
 
     bool IsFixedRotation (void) const noexcept { return m_flags & PREVENT_ROTATION; }
 
-    bool ShouldCollide (RigidBody* other) const noexcept
+    bool ShouldCollide (RigidBody* other) noexcept
     {
-        return (this != other) &&
-               (m_type == RigidBodyType::DYNAMIC || other->m_type == RigidBodyType::DYNAMIC);
+        if (m_type != RigidBodyType::DYNAMIC && other->m_type != RigidBodyType::DYNAMIC)
+        {
+            return false;
+        }
+
+        bool result = true;
+        joint_edges.for_each([&](auto* edge) {
+            if (edge->other == other)
+            {
+                result = edge->joint->ShouldCollide();
+                return;
+            }
+        });
+
+        return result;
     }
 
 private:
@@ -383,6 +403,7 @@ public:
 
     intrusive_forward_list<Fixture> fixtures;
     intrusive_list<contact_edge> contact_edges;
+    intrusive_list<joint_edge> joint_edges;
 
     //! \brief Collection of elements defining the linear motion
     struct linear_motion

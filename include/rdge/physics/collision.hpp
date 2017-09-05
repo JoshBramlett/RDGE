@@ -25,7 +25,11 @@ namespace physics {
 struct circle;
 struct polygon;
 
-static constexpr float LINEAR_SLOP = 0.005f; //!< Collision tolerance
+//! \var Linear constraint and collision tolerance
+static constexpr float LINEAR_SLOP = 0.005f;
+
+//! \var Angular constraint and collision tolerance
+static constexpr float ANGULAR_SLOP = (2.f / 180.f * math::PI);
 
 //! \struct collision_manifold
 //! \brief Container for collision resolution details

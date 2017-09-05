@@ -83,7 +83,7 @@ public:
     //! \brief SpriteSheet dtor
     ~SpriteSheet (void) noexcept = default;
 
-    //!@{ Non-copyable and move enabled
+    //!@{ Non-copyable, move enabled
     SpriteSheet (const SpriteSheet&) = delete;
     SpriteSheet& operator= (const SpriteSheet&) = delete;
     SpriteSheet (SpriteSheet&&) noexcept = default;
