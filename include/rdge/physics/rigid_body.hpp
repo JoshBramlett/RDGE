@@ -313,6 +313,10 @@ public:
         return world_transform.to_local(world_point);
     }
 
+    math::vec2 GetWorldPoint (const math::vec2 local_point) const noexcept
+    {
+        return world_transform.to_world(local_point);
+    }
 
     //! \brief Check if body is participating in the physics simulation
     bool IsSimulating (void) const noexcept { return m_flags & SIMULATE; }

@@ -44,7 +44,10 @@ public:
     //! \returns Type of the joint
     JointType Type (void) const noexcept override { return JointType::REVOLUTE; }
 
-    math::vec2 Anchor (void) const noexcept override { return m_anchor; }
+    //!@{ Anchors in world coordinates
+    math::vec2 AnchorA (void) const noexcept override;
+    math::vec2 AnchorB (void) const noexcept override;
+    //!@}
 
     //! \returns Relative angle between the two rotating bodies
     float JointAngle (void) const noexcept;
@@ -81,9 +84,9 @@ private:
     bool SolvePositionConstraints (solver_body_data& bdata_a,
                                    solver_body_data& bdata_b) override;
 
-    math::vec2 m_anchor;             //!< Global anchor shared by bodies
+    math::vec2 m_anchor[2];          //!< Anchors local to the respective bodies
     math::mat3 m_mass;               //!< Effective mass for point-to-point constraint
-    float m_motorMass = 0.f;         //!< Effective mass for motor/limit angular constraint
+    float      m_motorMass = 0.f;    //!< Effective mass for motor/limit angular constraint
     math::vec3 m_impulse;            //!< Includes reaction force (x,y), and torque (z)
     float      m_motorImpulse = 0.f;
 
@@ -97,6 +100,11 @@ private:
 	float m_referenceAngle = 0.f;
 	float m_lowerAngle = 0.f;
 	float m_upperAngle = 0.f;
+    //!@}
+
+    //!@{ Cached for solver
+    math::vec2 m_localCenterA;
+    math::vec2 m_localCenterB;
     //!@}
 
     enum StateFlags

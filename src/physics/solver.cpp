@@ -47,6 +47,8 @@ Solver::Add (RigidBody* b)
 
     auto& data = m_bodies.next();
     data.body = b;
+    data.world_center = b->sweep.pos_n;
+    data.rotation = b->sweep.angle_n;
     data.pos = { 0.f, 0.f };
     data.angle = 0.f;
     data.linear_vel = b->linear.velocity;
@@ -126,8 +128,8 @@ Solver::Solve (void)
             auto& vcp = data.points[i];
 
             // bodies position relative to the contact points
-            vcp.rel_point[0] = mf.contacts[i] - body_a->sweep.pos_n;
-            vcp.rel_point[1] = mf.contacts[i] - body_b->sweep.pos_n;
+            vcp.rel_point[0] = mf.contacts[i] - bdata_a.world_center;
+            vcp.rel_point[1] = mf.contacts[i] - bdata_b.world_center;
 
             // two body effective mass relative to the normal
             float radius_normal_a = math::perp_dot(vcp.rel_point[0], mf.normal);
@@ -427,8 +429,8 @@ Solver::CorrectPositions (void)
                                            -MAX_LINEAR_CORRECTION, 0.f);
 
             // vectors from the centers of mass to a common point
-            auto r_a = point - bdata_a.pos;
-            auto r_b = point - bdata_b.pos;
+            auto r_a = point - (bdata_a.world_center + bdata_a.pos);
+            auto r_b = point - (bdata_b.world_center + bdata_b.pos);
 
             float radius_normal_a = math::perp_dot(r_a, normal);
             float radius_normal_b = math::perp_dot(r_b, normal);
@@ -441,7 +443,6 @@ Solver::CorrectPositions (void)
             bdata_a.pos -= bdata_a.inv_mass * impulse;
             bdata_a.angle -= bdata_a.inv_mmoi *
                              math::perp_dot(r_a, impulse);
-
             bdata_b.pos += bdata_b.inv_mass * impulse;
             bdata_b.angle += bdata_b.inv_mmoi *
                              math::perp_dot(r_b, impulse);

@@ -603,8 +603,8 @@ CollisionGraph::Debug_Draw (float pixel_ratio)
         if (this->debug_draw_joints)
         {
             m_joints.for_each([=](auto* joint) {
-                debug::DrawLine(joint->body_a->GetPosition(), joint->Anchor());
-                debug::DrawLine(joint->body_b->GetPosition(), joint->Anchor());
+                debug::DrawLine(joint->body_a->GetPosition(), joint->AnchorA());
+                debug::DrawLine(joint->body_b->GetPosition(), joint->AnchorB());
             });
         }
     }

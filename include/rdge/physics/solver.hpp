@@ -17,23 +17,33 @@
 namespace rdge {
 namespace physics {
 
+//!@{ Forward declarations
 class CollisionGraph;
 class RigidBody;
 class Contact;
 class BaseJoint;
 struct time_step;
+//!@}
 
 //! \struct solver_body_data
 //! \brief Cache-friendly body relevant data
 struct solver_body_data
 {
     RigidBody* body;
-    math::vec2 pos;          //!< maps to sweep.pos_n
-    math::vec2 linear_vel;   //!< maps to linear.velocity
-    float      angle;        //!< maps to sweep.angle_n
-    float      angular_vel;  //!< maps to angular.velocity
-    float      inv_mass;     //!< maps to linear.inv_mass
-    float      inv_mmoi;     //!< maps to angular.inv_mmoi
+
+    //!@{ Immutable \ref RigidBody properties at solver initialization
+    math::vec2 world_center; //!< cache of sweep.pos_n
+    float      rotation;     //!< cache of sweep.angle_n
+    float      inv_mass;     //!< cache of linear.inv_mass
+    float      inv_mmoi;     //!< cache of angular.inv_mmoi
+    //!@}
+
+    //!@{ Continuously updated by constraint solvers
+    math::vec2 pos;          //!< zero initialized, delta to be applied to sweep.pos_n
+    float      angle;        //!< zero initialized, delta to be applied to sweep.angle_n
+    math::vec2 linear_vel;   //!< initialized to linear.velocity
+    float      angular_vel;  //!< initialized to angular.velocity
+    //!@}
 };
 
 //! \struct solver_contact_data
@@ -46,18 +56,17 @@ struct solver_contact_data
 
     struct velocity_constraint_point
     {
-        math::vec2 rel_point[2];     //!< (manifold.point - body.sweep.pos_n)
-        float normal_impulse = 0.f;
-        float tangent_impulse = 0.f;
-        float normal_mass;           //!< two body effective mass relative to the normal
-        float tangent_mass;          //!< two body effective mass relative to the tangent
+        math::vec2 rel_point[2]; //!< (manifold.point - body.sweep.pos_n)
+        float normal_impulse;
+        float tangent_impulse;
+        float normal_mass;       //!< two body effective mass relative to the normal
+        float tangent_mass;      //!< two body effective mass relative to the tangent
         float velocity_bias;
-    };
-
-    velocity_constraint_point points[2];
+    } points[2];
 };
 
-//! \class Solver //! \brief Performs impulse resolution for contacting bodies
+//! \class Solver
+//! \brief Performs impulse resolution for contacting bodies
 //! \details Performed every simulation step, contacting bodies are added and
 //!          impulses are generated and applied to separate them.
 class Solver

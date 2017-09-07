@@ -62,24 +62,20 @@ TestScene::TestScene (void)
 
     polygon floor({ -10.f, -10.f }, { -10.f, -11.f },
                   { 10.f, -11.f, }, { 10.f, -10.f });
-    //polygon floor({ -100.f, -100.f }, { -100.f, -110.f },
-                  //{ 100.f, -110.f, }, { 100.f, -100.f });
     fprof.shape = &floor;
+    fprof.density = 1.f;
+    fprof.restitution = 0.5f;
     fixture_c = body_c->CreateFixture(fprof);
 
     //polygon tri_a({ 2.f, 7.f }, { 4.f, 2.f }, { 8.f, 7.f });
     //polygon tri_a({ 20.f, 70.f }, { 40.f, 20.f }, { 80.f, 70.f });
     polygon tri_a({ 2.f, 2.f }, { 2.f, 8.f }, { 8.f, 2.f }, { 8.f, 8.f });
-    //polygon tri_a({ 20.f, 20.f }, { 20.f, 80.f }, { 80.f, 20.f }, { 80.f, 80.f });
     fprof.shape = &tri_a;
-    fprof.density = 1.f;
-    fprof.restitution = 0.5f;
     fixture_a = body_a->CreateFixture(fprof);
 
     //polygon tri_b({ -2.f, 7.f }, { -4.f, 2.f }, { -8.f, 7.f });
     //polygon tri_b({ -20.f, 70.f }, { -40.f, 20.f }, { -80.f, 70.f });
     polygon tri_b({ -2.f, 2.f }, { -2.f, 8.f }, { -8.f, 2.f }, { -8.f, 8.f });
-    //polygon tri_b({ -20.f, 20.f }, { -20.f, 80.f }, { -80.f, 20.f }, { -80.f, 80.f });
     fprof.shape = &tri_b;
     fixture_b = body_b->CreateFixture(fprof);
 }
@@ -116,6 +112,7 @@ TestScene::OnUpdate (const delta_time& dt)
 
     //collision_graph.Step(dt.seconds);
     collision_graph.Step(1.f / 60.f);
+    //collision_graph.Step(1.f / 60.f);
 }
 
 void

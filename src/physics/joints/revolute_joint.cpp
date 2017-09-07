@@ -23,7 +23,6 @@ namespace physics {
 // K = invI1 + invI2
 
 RevoluteJoint::RevoluteJoint (RigidBody* a, RigidBody* b, const math::vec2& anchor)
-    : m_anchor(anchor)
 {
     this->body_a = a;
     this->body_b = b;
@@ -37,7 +36,21 @@ RevoluteJoint::RevoluteJoint (RigidBody* a, RigidBody* b, const math::vec2& anch
     edge_a.other = body_b;
     edge_b.other = body_a;
 
+    m_anchor[0] = body_a->GetLocalPoint(anchor);
+    m_anchor[1] = body_b->GetLocalPoint(anchor);
     m_referenceAngle = body_b->GetAngle() - body_a->GetAngle();
+}
+
+math::vec2
+RevoluteJoint::AnchorA (void) const noexcept
+{
+    return body_a->GetWorldPoint(m_anchor[0]);
+}
+
+math::vec2
+RevoluteJoint::AnchorB (void) const noexcept
+{
+    return body_b->GetWorldPoint(m_anchor[1]);
 }
 
 float
@@ -149,25 +162,25 @@ RevoluteJoint::InitializeSolver (const time_step&  step,
 	//     [  -r1y*iA*r1x-r2y*iB*r2x, mA+r1x^2*iA+mB+r2x^2*iB,           r1x*iA+r2x*iB]
 	//     [          -r1y*iA-r2y*iB,           r1x*iA+r2x*iB,                   iA+iB]
 
+    m_localCenterA = body_a->GetLocalCenter();
+    m_localCenterB = body_b->GetLocalCenter();
+
     // bodies position relative to the anchor
-    math::vec2 rel_point[2];
-    rel_point[0] = m_anchor - body_a->GetWorldCenter();
-    rel_point[1] = m_anchor - body_b->GetWorldCenter();
+    auto r_a = m_anchor[0] - m_localCenterA;
+    auto r_b = m_anchor[1] - m_localCenterB;
 
     m_mass[0].x = (bdata_a.inv_mass + bdata_b.inv_mass) +
-                  (bdata_a.inv_mmoi * math::square(rel_point[0].y)) +
-                  (bdata_b.inv_mmoi * math::square(rel_point[1].y));
-    m_mass[1].x = (-rel_point[0].y * rel_point[0].x * bdata_a.inv_mmoi) +
-                  (-rel_point[1].y * rel_point[1].x * bdata_b.inv_mmoi);
-    m_mass[2].x = (-rel_point[0].y * bdata_a.inv_mmoi) +
-                  (-rel_point[1].y * bdata_b.inv_mmoi);
+                  (bdata_a.inv_mmoi * math::square(r_a.y)) +
+                  (bdata_b.inv_mmoi * math::square(r_b.y));
+    m_mass[1].x = (-r_a.y * r_a.x * bdata_a.inv_mmoi) +
+                  (-r_b.y * r_b.x * bdata_b.inv_mmoi);
+    m_mass[2].x = (-r_a.y * bdata_a.inv_mmoi) + (-r_b.y * bdata_b.inv_mmoi);
 
     m_mass[0].y = m_mass[1].x;
     m_mass[1].y = (bdata_a.inv_mass + bdata_b.inv_mass) +
-                  (bdata_a.inv_mmoi * math::square(rel_point[0].x)) +
-                  (bdata_b.inv_mmoi * math::square(rel_point[1].x));
-    m_mass[2].y = (rel_point[0].x * bdata_a.inv_mmoi) +
-                  (rel_point[1].x * bdata_b.inv_mmoi);
+                  (bdata_a.inv_mmoi * math::square(r_a.x)) +
+                  (bdata_b.inv_mmoi * math::square(r_b.x));
+    m_mass[2].y = (r_a.x * bdata_a.inv_mmoi) + (r_b.x * bdata_b.inv_mmoi);
 
     m_mass[0].z = m_mass[2].x;
     m_mass[1].z = m_mass[2].y;
@@ -191,7 +204,7 @@ RevoluteJoint::InitializeSolver (const time_step&  step,
 
     if (m_flags & LIMIT_ENABLED)
     {
-        float angle = body_b->GetAngle() - body_a->GetAngle() - m_referenceAngle;
+        float angle = bdata_b.rotation - bdata_a.rotation - m_referenceAngle;
 		if (math::abs(m_upperAngle - m_lowerAngle) < (2.f * ANGULAR_SLOP))
         {
             m_limitState = LimitState::EQUAL;
@@ -237,10 +250,10 @@ RevoluteJoint::InitializeSolver (const time_step&  step,
 
     bdata_a.linear_vel -= bdata_a.inv_mass * impulse;
     bdata_a.angular_vel -= bdata_a.inv_mmoi *
-                           (math::perp_dot(rel_point[0], impulse) + constraint_impulse);
+                           (math::perp_dot(r_a, impulse) + constraint_impulse);
     bdata_b.linear_vel += bdata_b.inv_mass * impulse;
     bdata_b.angular_vel += bdata_b.inv_mmoi *
-                           (math::perp_dot(rel_point[1], impulse) + constraint_impulse);
+                           (math::perp_dot(r_b, impulse) + constraint_impulse);
 }
 
 void
@@ -269,12 +282,11 @@ RevoluteJoint::SolveVelocityConstraints (const time_step&  step,
         bdata_b.angular_vel += bdata_b.inv_mmoi * impulse;
     }
 
-    math::vec2 rel_point[2];
-    rel_point[0] = m_anchor - body_a->GetWorldCenter();
-    rel_point[1] = m_anchor - body_b->GetWorldCenter();
+    auto r_a = m_anchor[0] - m_localCenterA;
+    auto r_b = m_anchor[1] - m_localCenterB;
 
-    math::vec2 vel_a = bdata_a.linear_vel + (rel_point[0].perp() * bdata_a.angular_vel);
-    math::vec2 vel_b = bdata_b.linear_vel + (rel_point[1].perp() * bdata_b.angular_vel);
+    math::vec2 vel_a = bdata_a.linear_vel + (r_a.perp() * bdata_a.angular_vel);
+    math::vec2 vel_b = bdata_b.linear_vel + (r_b.perp() * bdata_b.angular_vel);
 
     // the 2x2 version of Jv + b
     math::vec2 jvb2 = vel_b - vel_a;
@@ -342,10 +354,10 @@ RevoluteJoint::SolveVelocityConstraints (const time_step&  step,
         math::vec2 xy = impulse.xy();
         bdata_a.linear_vel -= bdata_a.inv_mass * xy;
         bdata_a.angular_vel -= bdata_a.inv_mmoi *
-                               math::perp_dot(rel_point[0], xy) + impulse.z;
+                               math::perp_dot(r_a, xy) + impulse.z;
         bdata_b.linear_vel += bdata_b.inv_mass * xy;
         bdata_b.angular_vel += bdata_b.inv_mmoi *
-                               math::perp_dot(rel_point[1], xy) + impulse.z;
+                               math::perp_dot(r_b, xy) + impulse.z;
     }
 	else
 	{
@@ -356,10 +368,10 @@ RevoluteJoint::SolveVelocityConstraints (const time_step&  step,
 
         bdata_a.linear_vel -= bdata_a.inv_mass * impulse;
         bdata_a.angular_vel -= bdata_a.inv_mmoi *
-                               math::perp_dot(rel_point[0], impulse);
+                               math::perp_dot(r_a, impulse);
         bdata_b.linear_vel += bdata_b.inv_mass * impulse;
         bdata_b.angular_vel += bdata_b.inv_mmoi *
-                               math::perp_dot(rel_point[1], impulse);
+                               math::perp_dot(r_b, impulse);
 	}
 }
 
@@ -371,8 +383,8 @@ RevoluteJoint::SolvePositionConstraints (solver_body_data& bdata_a, solver_body_
 
     if (m_flags & LIMIT_ENABLED && m_limitState != LimitState::INACTIVE)
     {
-        float angle = (body_b->GetAngle() + bdata_b.angle) -
-                      (body_a->GetAngle() + bdata_a.angle) -
+        float angle = (bdata_b.rotation + bdata_b.angle) -
+                      (bdata_a.rotation + bdata_a.angle) -
                       m_referenceAngle;
         float limit_impulse = 0.f;
 
@@ -406,15 +418,13 @@ RevoluteJoint::SolvePositionConstraints (solver_body_data& bdata_a, solver_body_
     }
 
 	// Solve point-to-point constraint.
-    auto pos_a = body_a->GetWorldCenter();
-    auto pos_b = body_b->GetWorldCenter();
+    rotation rot_a(bdata_a.rotation + bdata_a.angle);
+    rotation rot_b(bdata_b.rotation + bdata_b.angle);
+    auto r_a = rot_a.rotate(m_anchor[0] - m_localCenterA);
+    auto r_b = rot_b.rotate(m_anchor[1] - m_localCenterB);
 
-    rotation rot_a(bdata_a.angle);
-    rotation rot_b(bdata_b.angle);
-    auto r_a = rot_a.rotate(m_anchor - pos_a);
-    auto r_b = rot_b.rotate(m_anchor - pos_b);
-
-    auto p = (pos_b + bdata_b.pos + r_b) - (pos_a + bdata_a.pos + r_a);
+    auto p = (m_localCenterB + bdata_b.pos + r_b) -
+             (m_localCenterA + bdata_a.pos + r_a);
     linear_error = p.length();
 
     math::mat2 k;

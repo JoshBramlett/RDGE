@@ -61,8 +61,10 @@ public:
     //! \returns Type of the joint
     virtual JointType Type (void) const noexcept = 0;
 
-    //! \returns Shared anchor in world space
-    virtual math::vec2 Anchor (void) const noexcept = 0;
+    //!@{ Anchors in world coordinates
+    virtual math::vec2 AnchorA (void) const noexcept = 0;
+    virtual math::vec2 AnchorB (void) const noexcept = 0;
+    //!@}
 
     //! \returns If bodies should collide with one another
     bool ShouldCollide (void) const noexcept { return m_flags & BODIES_COLLIDABLE; }
