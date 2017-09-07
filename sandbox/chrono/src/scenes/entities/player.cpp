@@ -96,16 +96,19 @@ Player::InitPhysics (CollisionGraph& graph, float inv_ratio)
     sword = graph.CreateBody(bprof);
 
     // players sword
-    polygon s(0.5f, 1.f);
+    polygon s(0.125f, 2.f);
     fprof.shape = &s;
     fprof.density = 1.f;
     fprof.restitution = 0.8f;
     sword_hitbox = sword->CreateFixture(fprof);
 
     auto j = graph.CreateRevoluteJoint(body, sword, vec2(0.f, 0.f));
-    j->SetMotorSpeed(1.14f);
+    j->SetMotorSpeed(3 * 3.14f);
     j->SetMaxMotorTorque(10000.f);
     j->EnableMotor();
+
+    //j->SetLimits(-90.f, 90.f);
+    //j->EnableLimits();
 }
 
 void

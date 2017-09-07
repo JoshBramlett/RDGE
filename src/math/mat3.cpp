@@ -45,22 +45,22 @@ mat3::solve (const vec3& b) const noexcept
     }
 
     mat3 inv;
-    inv[0] = elements[4] * elements[8] - elements[5] * elements[7];
-    inv[1] = -elements[1] * elements[8] + elements[7] * elements[2];
-    inv[2] = elements[1] * elements[5] + elements[4] * elements[2];
+    inv[0].x = elements[4] * elements[8] - elements[5] * elements[7];
+    inv[0].y = -elements[1] * elements[8] + elements[7] * elements[2];
+    inv[0].z = elements[1] * elements[5] + elements[4] * elements[2];
 
-    inv[3] = -elements[3] * elements[8] + elements[6] * elements[5];
-    inv[4] = elements[0] * elements[8] - elements[6] * elements[2];
-    inv[5] = -elements[0] * elements[5] + elements[3] * elements[2];
+    inv[1].x = -elements[3] * elements[8] + elements[6] * elements[5];
+    inv[1].y = elements[0] * elements[8] - elements[6] * elements[2];
+    inv[1].z = -elements[0] * elements[5] + elements[3] * elements[2];
 
-    inv[6] = elements[3] * elements[7] - elements[6] * elements[4];
-    inv[7] = -elements[0] * elements[7] + elements[6] * elements[1];
-    inv[8] = elements[0] * elements[4] - elements[3] * elements[1];
+    inv[2].x = elements[3] * elements[7] - elements[6] * elements[4];
+    inv[2].y = -elements[0] * elements[7] + elements[6] * elements[1];
+    inv[2].z = elements[0] * elements[4] - elements[3] * elements[1];
 
     vec3 result;
-    result.x = math::dot(inv.columns[0], b) * det;
-    result.y = math::dot(inv.columns[1], b) * det;
-    result.z = math::dot(inv.columns[2], b) * det;
+    result.x = math::dot(inv[0], b) * det;
+    result.y = math::dot(inv[1], b) * det;
+    result.z = math::dot(inv[2], b) * det;
 
     return result;
 }

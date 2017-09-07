@@ -150,9 +150,9 @@ public:
     void Debug_UpdateWidget (bool*);
     void Debug_Draw (float pixel_ratio);
 
-    bool debug_draw_fixtures = false;
+    bool debug_draw_fixtures = true;
     bool debug_draw_proxy_aabbs = false;
-    bool debug_draw_joints = false;
+    bool debug_draw_joints = true;
     bool debug_draw_center_of_mass = false;
     bool debug_draw_bvh_nodes = false;
 
