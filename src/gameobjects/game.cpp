@@ -38,43 +38,69 @@ Game::~Game (void) noexcept
 void
 Game::PushScene (std::shared_ptr<IScene> scene)
 {
-    SDL_assert(!m_pushDeferred && !m_popDeferred);
+    SDL_assert((m_flags & PUSH_DEFERRED) == 0);
+    SDL_assert((m_flags & POP_DEFERRED) == 0);
 
-    if (!m_running)
+    if (m_flags & RUNNING)
+    {
+        // Defer current_scene hibernation till end of game loop
+        m_flags |= PUSH_DEFERRED;
+    }
+    else
     {
         if (!m_sceneStack.empty())
         {
             auto& current_scene = m_sceneStack.back();
+            if (current_scene == scene)
+            {
+                DLOG() << "Push scene ignored.  Scene already current";
+                return;
+            }
+
             current_scene->Hibernate();
         }
     }
-    else
-    {
-        // Defer current_scene hibernation till end of game loop
-        m_pushDeferred = true;
-        m_sceneStack.push_back(scene);
-    }
 
     scene->Initialize();
-    m_sceneStack.push_back(scene);
+    m_sceneStack.emplace_back(std::move(scene));
 }
 
 void
 Game::PopScene (void)
 {
-    SDL_assert(m_running);
+    SDL_assert(m_flags & RUNNING);
+    SDL_assert((m_flags & PUSH_DEFERRED) == 0);
+    SDL_assert((m_flags & POP_DEFERRED) == 0);
     SDL_assert(!m_sceneStack.empty());
-    SDL_assert(!m_pushDeferred && !m_popDeferred);
 
     // Defer current_scene termination till end of game loop
-    m_popDeferred = true;
+    m_flags |= POP_DEFERRED;
     m_sceneStack.pop_back();
 
-    if (!m_sceneStack.empty())
+    auto& new_current_scene = m_sceneStack.back();
+    new_current_scene->Activate();
+}
+
+void
+Game::SwapScene (std::shared_ptr<IScene> scene)
+{
+    SDL_assert(m_flags & RUNNING);
+    SDL_assert((m_flags & PUSH_DEFERRED) == 0);
+    SDL_assert((m_flags & POP_DEFERRED) == 0);
+    SDL_assert(!m_sceneStack.empty());
+
+    if (m_sceneStack.back() == scene)
     {
-        auto& new_current_scene = m_sceneStack.back();
-        new_current_scene->Activate();
+        DLOG() << "Swap scene ignored.  Scene already current";
+        return;
     }
+
+    // Defer current_scene termination till end of game loop
+    m_flags |= POP_DEFERRED;
+    m_sceneStack.pop_back();
+
+    scene->Initialize();
+    m_sceneStack.emplace_back(std::move(scene));
 }
 
 void
@@ -91,14 +117,14 @@ Game::Run (void)
     bool display_debug_overlay = false;
 #endif
 
-    m_running = true;
+    m_flags |= RUNNING;
     timer.Start();
-    while (m_running)
+    while (m_flags & RUNNING)
     {
         uint32 frame_start = timer.Ticks();
         if (m_sceneStack.empty())
         {
-            m_running = false;
+            m_flags &= ~RUNNING;
             break;
         }
 
@@ -219,13 +245,15 @@ Game::Run (void)
 
         this->window->Present();
 
-        if (m_pushDeferred)
+        if (m_flags & PUSH_DEFERRED)
         {
             current_scene->Hibernate();
+            m_flags &= ~PUSH_DEFERRED;
         }
-        else if (m_popDeferred)
+        else if (m_flags & POP_DEFERRED)
         {
             current_scene->Terminate();
+            m_flags &= ~POP_DEFERRED;
         }
 
         if (!using_vsync)
@@ -242,7 +270,7 @@ Game::Run (void)
 void
 Game::Stop (void)
 {
-    m_running = false;
+    m_flags &= ~RUNNING;
 }
 
 } // namespace rdge

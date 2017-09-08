@@ -67,6 +67,7 @@ public:
     BVHTree& operator= (BVHTree&&) = default;
     //!@}
 
+    void ClearProxies (void) noexcept;
     int32 CreateProxy (const aabb& box, void* user_data);
     void DestroyProxy (int32 handle);
     bool MoveProxy (int32 handle, const aabb& box, const math::vec2& displacement);

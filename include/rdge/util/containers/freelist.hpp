@@ -112,6 +112,13 @@ public:
         return m_data[handle];
     }
 
+    //! \brief Clear the container contents
+    void clear (void) noexcept
+    {
+        m_count = 0;
+        create_handles();
+    }
+
     //! \brief Reserve a block of memory
     //! \returns Handle to the reserved memory
     //! \throws std::runtime_error Memory allocation failed

@@ -10,6 +10,13 @@
 namespace rdge {
 namespace physics {
 
+void
+BVHTree::ClearProxies (void) noexcept
+{
+    m_nodes.clear();
+    m_root = bvh_node::NULL_NODE;
+}
+
 int32
 BVHTree::CreateProxy (const aabb& box, void* user_data)
 {

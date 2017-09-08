@@ -112,6 +112,8 @@ protected:
         ON_ISLAND         = 0x0002
     };
 
+    // Flags are shared with the derived classes.  First 8 bytes reserved for the
+    // base class, last 8 available to the derived class.
     uint16 m_flags = 0;
 };
 

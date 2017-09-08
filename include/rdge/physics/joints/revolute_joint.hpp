@@ -107,6 +107,7 @@ private:
     math::vec2 m_localCenterB;
     //!@}
 
+    // IMPORTANT First 8 bytes reserved by the base class
     enum StateFlags
     {
         LIMIT_ENABLED = 0x0010,

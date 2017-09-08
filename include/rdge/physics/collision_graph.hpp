@@ -86,6 +86,7 @@ class CollisionGraph
 public:
     explicit CollisionGraph (const math::vec2& g);
     ~CollisionGraph (void) noexcept;
+    void ClearGraph (void) noexcept;
 
     RigidBody* CreateBody (const rigid_body_profile& profile);
     void DestroyBody (RigidBody* body);

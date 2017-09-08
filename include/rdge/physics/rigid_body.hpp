@@ -362,7 +362,8 @@ public:
 
     bool ShouldCollide (RigidBody* other) noexcept
     {
-        if (m_type != RigidBodyType::DYNAMIC && other->m_type != RigidBodyType::DYNAMIC)
+        if ((this == other) ||
+            (m_type != RigidBodyType::DYNAMIC && other->m_type != RigidBodyType::DYNAMIC))
         {
             return false;
         }

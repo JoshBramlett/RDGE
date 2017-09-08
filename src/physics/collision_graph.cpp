@@ -35,13 +35,22 @@ CollisionGraph::CollisionGraph (const math::vec2& g)
 
 CollisionGraph::~CollisionGraph (void) noexcept
 {
+    ClearGraph();
+}
+
+void
+CollisionGraph::ClearGraph (void) noexcept
+{
     m_bodies.for_each([=](auto* b) {
-        block_allocator.Delete<RigidBody>(b);
+        DestroyBody(b);
     });
 
-    m_contacts.for_each([=](auto* c) {
-        block_allocator.Delete<Contact>(c);
-    });
+    m_dirtyProxies.clear();
+    m_tree.ClearProxies();
+
+    SDL_assert(m_bodies.count == 0);
+    SDL_assert(m_contacts.count == 0);
+    SDL_assert(m_joints.count == 0);
 }
 
 RigidBody*
@@ -72,10 +81,7 @@ CollisionGraph::DestroyBody (RigidBody* body)
         DestroyJoint(edge->joint);
     });
 
-    body->contact_edges.for_each([=](auto* edge) {
-        DestroyContact(edge->contact);
-    });
-
+    // NOTE Contacts destroyed by DestroyFixture
     body->fixtures.for_each([=](auto* f) {
         body->DestroyFixture(f);
     });
@@ -433,7 +439,8 @@ CollisionGraph::UnregisterProxy (const fixture_proxy* proxy)
     m_tree.DestroyProxy(handle);
     m_dirtyProxies.erase(std::remove_if(m_dirtyProxies.begin(),
                                         m_dirtyProxies.end(),
-                                        [=](int32 h) { return h == handle; }));
+                                        [=](int32 h) { return h == handle; }),
+                                        m_dirtyProxies.end());
 }
 
 void
@@ -470,6 +477,7 @@ CollisionGraph::Debug_UpdateWidget (bool* p_open)
     ImGui::Indent(15.f);
     ImGui::Text("bodies:   %zu", m_bodies.size());
     ImGui::Text("contacts: %zu", m_contacts.size());
+    ImGui::Text("joints:   %zu", m_joints.size());
     ImGui::Unindent(15.f);
 
     ImGui::Spacing();

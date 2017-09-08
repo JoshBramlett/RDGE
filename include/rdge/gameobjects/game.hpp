@@ -53,11 +53,15 @@ public:
     //!@}
 
     //! \brief Push a new scene on the stack
-    //! \param [in] scene Shared pointer of the new scene
+    //! \param [in] scene New active scene
     void PushScene (std::shared_ptr<IScene> scene);
 
     //! \brief Pop the current scene of the stack
     void PopScene (void);
+
+    //! \brief Replace the current scene
+    //! \param [in] scene New active scene
+    void SwapScene (std::shared_ptr<IScene> scene);
 
     //! \brief Run the game loop
     //! \details Game loop is broken down to three phases which includes event
@@ -83,9 +87,14 @@ public:
 private:
     std::vector<std::shared_ptr<IScene>> m_sceneStack; //!< Scene stack
 
-    bool m_running      = false; //!< Flag for running the game loop
-    bool m_pushDeferred = false; //!< Scene push deferred until loop iteration completes
-    bool m_popDeferred  = false; //!< Scene pop deferred until loop iteration completes
+    enum StateFlags
+    {
+        RUNNING       = 0x0001, //!< Flag for running the game loop
+        PUSH_DEFERRED = 0x0002, //!< Scene push deferred until loop iteration completes
+        POP_DEFERRED  = 0x0004  //!< Scene pop deferred until loop iteration completes
+    };
+
+    uint8 m_flags = 0;
 };
 
 } // namespace rdge

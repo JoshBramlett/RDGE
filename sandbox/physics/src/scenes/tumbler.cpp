@@ -14,10 +14,15 @@ using namespace rdge::physics;
 
 TumblerScene::TumblerScene (void)
     : collision_graph({ 0.f, -9.8f })
-{
-    camera.zoom = 0.03f;
+{ }
 
-    //collision_graph.debug_flags = CollisionGraph::DRAW_FIXTURES;
+void
+TumblerScene::Initialize (void)
+{
+    m_count = 0;
+
+    camera.zoom = 0.03f;
+    collision_graph.debug_draw_fixtures = true;
 
     rigid_body_profile bprof;
     bprof.type = RigidBodyType::DYNAMIC;
@@ -36,12 +41,10 @@ TumblerScene::TumblerScene (void)
 }
 
 void
-TumblerScene::Initialize (void)
-{ }
-
-void
 TumblerScene::Terminate (void)
-{ }
+{
+    collision_graph.ClearGraph();
+}
 
 void
 TumblerScene::Hibernate (void)
@@ -60,40 +63,34 @@ TumblerScene::OnEvent (const Event& event)
 void
 TumblerScene::OnUpdate (const delta_time& dt)
 {
-    Unused(dt);
     tumbler->angular.velocity = 0.05f * math::PI;
     tumbler->linear.velocity = { 0.f, 0.f };
 
     rigid_body_profile bprof;
     bprof.type = RigidBodyType::DYNAMIC;
-    if ((m_count++ % 10 == 0) && m_count < 100)
+    if (m_count < 100)
     {
-        auto body = collision_graph.CreateBody(bprof);
+        static int32 spawn_timer = 0;
+        spawn_timer += dt.ticks;
+        if (spawn_timer > 100)
+        {
+            auto body = collision_graph.CreateBody(bprof);
 
-        polygon box(0.625f, 0.625f);
-        body->CreateFixture(&box, 1.f);
+            polygon box(0.125f, 0.125f);
+            body->CreateFixture(&box, 1.f);
 
-        std::cout << m_count / 10 << std::endl;
-
-        //for (size_t i = 0; i < 25; i++)
-        //{
-            //bprof.position = { s_rand.Sample() * 3.f, s_rand.Sample() * 3.f };
-            //auto body = collision_graph.CreateBody(bprof);
-
-            //polygon box(0.125f, 0.125f);
-            //body->CreateFixture(&box, 1.f);
-            //m_count++;
-        //}
+            spawn_timer = 0;
+            m_count++;
+        }
     }
 
-    collision_graph.Step(1.f / 60.f);
     collision_graph.Step(1.f / 60.f);
 }
 
 void
 TumblerScene::OnRender (void)
 {
-    //collision_graph.DebugDraw(1.f);
+    collision_graph.Debug_Draw(1.f);
 
     camera.Translate({ 0.f, 0.f });
     camera.Update();
