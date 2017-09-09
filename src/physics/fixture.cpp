@@ -44,8 +44,10 @@ Fixture::Fixture (const fixture_profile& profile, RigidBody* parent)
     }
 
     shape.world->to_world(body->world_transform);
+
     proxy = allocator.Alloc<fixture_proxy>();
     proxy->fixture = this;
+    proxy->box = shape.world->compute_aabb();
     proxy->handle = fixture_proxy::INVALID_HANDLE;
 }
 

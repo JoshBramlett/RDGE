@@ -104,11 +104,6 @@ public:
         return shape.local->compute_mass(density);
     }
 
-    aabb ComputeAABB (void) const noexcept
-    {
-        return shape.world->compute_aabb();
-    }
-
     math::vec2 GetWorldCenter (void) const noexcept
     {
         return shape.world->get_centroid();

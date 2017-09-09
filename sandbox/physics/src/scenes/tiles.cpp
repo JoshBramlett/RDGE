@@ -50,9 +50,9 @@ TilesScene::Initialize (void)
 
 #if 1
     {
-        int32 e_count = 5;
+        int32 e_count = 2;
         float a = 0.5f;
-        //polygon shape(a, a);
+        polygon shape(a, a);
 
         math::vec2 x(-7.0f, 0.75f);
         math::vec2 y;
@@ -67,22 +67,10 @@ TilesScene::Initialize (void)
             {
                 rigid_body_profile bprof;
                 bprof.type = RigidBodyType::DYNAMIC;
-                //bprof.position = y;
-                // TODO position isn't working correctly when set to the body.  fix this
-
-                //if (i == 0 && j == 0)
-                //{
-                //  bd.allowSleep = false;
-                //}
-                //else
-                //{
-                //  bd.allowSleep = true;
-                //}
+                bprof.position = y;
 
                 RigidBody* body = collision_graph.CreateBody(bprof);
-                //body->CreateFixture(&shape, 5.0f);
-                polygon p(a, a, y);
-                body->CreateFixture(&p, 5.0f);
+                body->CreateFixture(&shape, 5.0f);
                 y += deltaY;
             }
 

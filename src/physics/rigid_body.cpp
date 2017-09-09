@@ -73,7 +73,6 @@ RigidBody::CreateFixture (const fixture_profile& profile)
 
     if (IsSimulating())
     {
-        result->proxy->box = world_transform.to_world(result->ComputeAABB());
         result->proxy->handle = graph->RegisterProxy(result->proxy);
     }
 
@@ -133,6 +132,7 @@ RigidBody::HasEdge (const Fixture* a, const Fixture* b) noexcept
 {
     SDL_assert(a && b);
     SDL_assert(a->body == this || b->body == this);
+
     if (b->body == this)
     {
         std::swap(a, b);
@@ -161,7 +161,10 @@ RigidBody::SyncFixtures (void)
     // world transform has been updated.  the fixtures need to reset their
     // world shape and proxies (set to the swept shape over the time step)
 
-    auto sweep_start = sweep.lerp_transform(0.f);
+    iso_transform sweep_start;
+    sweep_start.set_angle(sweep.angle_0);
+    sweep_start.pos = sweep.pos_0 - sweep_start.rot.rotate(sweep.local_center);
+
     auto displacement = world_transform.pos - sweep_start.pos;
     fixtures.for_each([&](auto* f) {
         f->Syncronize();
@@ -215,7 +218,7 @@ RigidBody::ComputeMass (void)
 
     if (angular.mmoi > 0.f && !IsFixedRotation())
     {
-        // NOTE: mmoi is NOT stored relative to the center
+        // Adjust mmoi to the bodies center of mass
         angular.mmoi -= linear.mass * local_center.self_dot();
         SDL_assert(angular.mmoi > 0.f);
         angular.inv_mmoi = 1.f / angular.mmoi;
@@ -228,10 +231,10 @@ RigidBody::ComputeMass (void)
 
     math::vec2 old_center = sweep.pos_n;
     sweep.local_center = local_center;
-    sweep.pos_n = world_transform.rot.rotate(sweep.local_center);
+    sweep.pos_n = world_transform.to_world(sweep.local_center);
     sweep.pos_0 = sweep.pos_n;
 
-    // TODO ??? Don't really understand this
+    // Update velocity to the new center of mass
     linear.velocity += (sweep.pos_n - old_center).perp() * angular.velocity;
 }
 
