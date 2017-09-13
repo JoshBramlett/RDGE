@@ -10,12 +10,6 @@
 
 namespace rdge {
 
-//!@{ Forward declarations
-namespace debug {
-struct scene_widget_settings;
-}
-//!@}
-
 //! \struct delta_time
 //! \brief Container representing a time period
 //! \details Passed through the update phase
@@ -80,12 +74,6 @@ public:
     virtual void OnEvent (const Event&) = 0;
     virtual void OnUpdate (const delta_time&) = 0;
     virtual void OnRender (void) = 0;
-    //!@}
-
-    //!@{
-    //! \brief Process updates from the debug widgets
-    //! \details Provided to the scene between \ref OnEvent and \ref OnUpdate events.
-    virtual void Debug_OnWidgetUpdate (debug::scene_widget_settings&) { }
     //!@}
 };
 

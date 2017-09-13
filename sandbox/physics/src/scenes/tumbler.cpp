@@ -14,15 +14,18 @@ using namespace rdge::physics;
 
 TumblerScene::TumblerScene (void)
     : collision_graph({ 0.f, -9.8f })
-{ }
+{
+    debug::settings::draw_physics_fixtures = true;
+}
 
 void
 TumblerScene::Initialize (void)
 {
-    m_count = 0;
-
+    debug::RegisterCamera(&camera);
+    debug::RegisterPhysics(&collision_graph);
     camera.zoom = 0.03f;
-    collision_graph.debug_draw_fixtures = true;
+
+    m_count = 0;
 
     rigid_body_profile bprof;
     bprof.type = RigidBodyType::DYNAMIC;
@@ -43,16 +46,25 @@ TumblerScene::Initialize (void)
 void
 TumblerScene::Terminate (void)
 {
+    debug::RegisterCamera(nullptr);
+    debug::RegisterPhysics(nullptr);
+
     collision_graph.ClearGraph();
 }
 
 void
-TumblerScene::Hibernate (void)
-{ }
+TumblerScene::Activate (void)
+{
+    debug::RegisterCamera(&camera);
+    debug::RegisterPhysics(&collision_graph);
+}
 
 void
-TumblerScene::Activate (void)
-{ }
+TumblerScene::Hibernate (void)
+{
+    debug::RegisterCamera(nullptr);
+    debug::RegisterPhysics(nullptr);
+}
 
 void
 TumblerScene::OnEvent (const Event& event)
@@ -90,8 +102,6 @@ TumblerScene::OnUpdate (const delta_time& dt)
 void
 TumblerScene::OnRender (void)
 {
-    collision_graph.Debug_Draw(1.f);
-
     camera.Translate({ 0.f, 0.f });
     camera.Update();
     debug::SetProjection(camera.combined);

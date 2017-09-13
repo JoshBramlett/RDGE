@@ -70,14 +70,6 @@ public:
     float zoom = DEFAULT_ZOOM; //!< Projection zoom level
 
     math::vec2 viewport_size; //!< Cached viewport size
-
-#ifdef RDGE_DEBUG
-public:
-    void Debug_UpdateWidget (bool*);
-    void Debug_Draw (void);
-
-    bool debug_draw_viewport = false;
-#endif
 };
 
 } // namespace rdge

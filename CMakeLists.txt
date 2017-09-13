@@ -94,6 +94,8 @@ add_library (RDGE SHARED
              src/assets/texture_part.cpp
 
              src/debug/line_renderer.cpp
+             src/debug/widgets/camera_widget.cpp
+             src/debug/widgets/physics_widget.cpp
 
              src/events/event.cpp
 

@@ -44,8 +44,7 @@ public:
     //! \brief Game dtor
     ~Game (void) noexcept;
 
-    //!@{
-    //! \brief Copy and move disabled
+    //!@{ Non-copyable, Non-movable
     Game (const Game&) = delete;
     Game (Game&&) = delete;
     Game& operator= (const Game) = delete;
@@ -91,7 +90,9 @@ private:
     {
         RUNNING       = 0x0001, //!< Flag for running the game loop
         PUSH_DEFERRED = 0x0002, //!< Scene push deferred until loop iteration completes
-        POP_DEFERRED  = 0x0004  //!< Scene pop deferred until loop iteration completes
+        POP_DEFERRED  = 0x0004, //!< Scene pop deferred until loop iteration completes
+        SWAP_DEFERRED = 0x0008, //!< Scene swap deferred until loop iteration completes
+        ANY_DEFERRED  = PUSH_DEFERRED | POP_DEFERRED | SWAP_DEFERRED
     };
 
     uint8 m_flags = 0;

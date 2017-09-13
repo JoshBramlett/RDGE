@@ -43,13 +43,15 @@ TestScene::TestScene (void)
     : collision_graph({ 0.f, -9.8f })
 {
     collision_graph.listener = &l;
+    debug::settings::draw_physics_fixtures = true;
 }
 
 void
 TestScene::Initialize (void)
 {
+    debug::RegisterCamera(&camera);
+    debug::RegisterPhysics(&collision_graph);
     camera.zoom = 0.05f;
-    collision_graph.debug_draw_fixtures = true;
 
     // bodies
     rigid_body_profile bprof;
@@ -86,16 +88,25 @@ TestScene::Initialize (void)
 void
 TestScene::Terminate (void)
 {
+    debug::RegisterCamera(nullptr);
+    debug::RegisterPhysics(nullptr);
+
     collision_graph.ClearGraph();
 }
 
 void
-TestScene::Hibernate (void)
-{ }
+TestScene::Activate (void)
+{
+    debug::RegisterCamera(&camera);
+    debug::RegisterPhysics(&collision_graph);
+}
 
 void
-TestScene::Activate (void)
-{ }
+TestScene::Hibernate (void)
+{
+    debug::RegisterCamera(nullptr);
+    debug::RegisterPhysics(nullptr);
+}
 
 void
 TestScene::OnEvent (const Event& event)
@@ -114,8 +125,6 @@ TestScene::OnUpdate (const delta_time& dt)
 void
 TestScene::OnRender (void)
 {
-    collision_graph.Debug_Draw(1.f);
-
     camera.Translate({ 0.f, 0.f });
     camera.Update();
     debug::SetProjection(camera.combined);

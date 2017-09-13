@@ -20,6 +20,13 @@
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
+
+//!@{ Forward declarations
+namespace debug {
+class PhysicsWidget;
+}
+//!@}
+
 namespace physics {
 
 class RevoluteJoint;
@@ -127,6 +134,8 @@ public:
 
 private:
 
+    friend class rdge::debug::PhysicsWidget;
+
     BVHTree m_tree;
     Solver m_solver;
 
@@ -148,15 +157,6 @@ private:
 
 #ifdef RDGE_DEBUG
 public:
-    void Debug_UpdateWidget (bool*);
-    void Debug_Draw (float pixel_ratio);
-
-    bool debug_draw_fixtures = true;
-    bool debug_draw_proxy_aabbs = false;
-    bool debug_draw_joints = true;
-    bool debug_draw_center_of_mass = false;
-    bool debug_draw_bvh_nodes = false;
-
     struct profiler
     {
         int64_t create_contacts = 0;

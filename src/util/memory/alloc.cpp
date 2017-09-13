@@ -191,6 +191,7 @@ unregister_memory_profile (memory_profile& profile)
 #ifdef RDGE_DEBUG
 namespace debug {
 
+// TODO Move to debug
 void
 ShowMemoryTracker (bool* p_open)
 {

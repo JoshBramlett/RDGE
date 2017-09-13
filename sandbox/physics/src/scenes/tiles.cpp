@@ -14,13 +14,16 @@ using namespace rdge::physics;
 
 TilesScene::TilesScene (void)
     : collision_graph({ 0.f, -9.8f })
-{ }
+{
+    debug::settings::draw_physics_fixtures = true;
+}
 
 void
 TilesScene::Initialize (void)
 {
+    debug::RegisterCamera(&camera);
+    debug::RegisterPhysics(&collision_graph);
     camera.zoom = 0.03f;
-    collision_graph.debug_draw_fixtures = true;
 
     {
         float a = 0.5f;
@@ -83,16 +86,25 @@ TilesScene::Initialize (void)
 void
 TilesScene::Terminate (void)
 {
+    debug::RegisterCamera(nullptr);
+    debug::RegisterPhysics(nullptr);
+
     collision_graph.ClearGraph();
 }
 
 void
-TilesScene::Hibernate (void)
-{ }
+TilesScene::Activate (void)
+{
+    debug::RegisterCamera(&camera);
+    debug::RegisterPhysics(&collision_graph);
+}
 
 void
-TilesScene::Activate (void)
-{ }
+TilesScene::Hibernate (void)
+{
+    debug::RegisterCamera(nullptr);
+    debug::RegisterPhysics(nullptr);
+}
 
 void
 TilesScene::OnEvent (const Event& event)
@@ -111,8 +123,6 @@ TilesScene::OnUpdate (const delta_time& dt)
 void
 TilesScene::OnRender (void)
 {
-    collision_graph.Debug_Draw(1.f);
-
     camera.Translate({ 0.f, 0.f });
     camera.Update();
     debug::SetProjection(camera.combined);

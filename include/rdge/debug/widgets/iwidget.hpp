@@ -18,13 +18,17 @@ namespace debug {
 class IWidget
 {
 public:
-    static constexpr float MARGIN = 10.f; //!< Default widget margin
-
-    //! \brief IScene dtor
+    //! \brief IWidget dtor
     virtual ~IWidget (void) noexcept = default;
 
-    //! \brief Renders the widget on screen
-    virtual void Draw (void) = 0;
+    //! \brief Update widget state, potentially rendering the widget on screen
+    virtual void Update (void) = 0;
+
+    //! \brief Allows the widget to do any custom rendering
+    //! \details Called during the OnRender phase, the widget can perform any custom
+    //!          debug drawing.  For example, the physics system would render the
+    //!          the fixture wireframes here.
+    virtual void OnCustomRender (void) = 0;
 };
 
 } // namespace debug

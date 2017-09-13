@@ -3,7 +3,7 @@
 #include <rdge/graphics/texture.hpp>
 #include <rdge/graphics/vops.hpp>
 
-#include <rdge/debug.hpp>
+#include <rdge/debug/renderer.hpp>
 
 #include <SDL_assert.h>
 

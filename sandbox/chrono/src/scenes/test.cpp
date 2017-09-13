@@ -58,6 +58,7 @@ TestScene::TestScene (void)
     , entities(render_target)
 {
     collision_graph.listener = &l;
+    camera.zoom = 1.5f;
 
     SpriteSheet sheet("res/environment.json", Window::Current().IsHighDPI());
 
@@ -134,25 +135,35 @@ TestScene::TestScene (void)
 
     entities.AddSprite(player.sprite);
     entities.AddSprite(duck.sprite);
-
-    camera.zoom = 1.5f;
 }
 
 void
 TestScene::Initialize (void)
-{ }
+{
+    debug::RegisterCamera(&camera);
+    debug::RegisterPhysics(&collision_graph, PIXELS_PER_METER);
+}
 
 void
 TestScene::Terminate (void)
-{ }
-
-void
-TestScene::Hibernate (void)
-{ }
+{
+    debug::RegisterCamera(nullptr);
+    debug::RegisterPhysics(nullptr);
+}
 
 void
 TestScene::Activate (void)
-{ }
+{
+    debug::RegisterCamera(&camera);
+    debug::RegisterPhysics(&collision_graph, PIXELS_PER_METER);
+}
+
+void
+TestScene::Hibernate (void)
+{
+    debug::RegisterCamera(nullptr);
+    debug::RegisterPhysics(nullptr);
+}
 
 void
 TestScene::OnEvent (const Event& event)
@@ -181,15 +192,4 @@ TestScene::OnRender (void)
 
     // debug drawing
     debug::SetProjection(camera.combined);
-
-    collision_graph.Debug_Draw(PIXELS_PER_METER);
-    camera.Debug_Draw();
-}
-
-void
-TestScene::Debug_OnWidgetUpdate (debug::scene_widget_settings& settings)
-{
-    camera.Debug_UpdateWidget(&settings.show_camera_widget);
-    collision_graph.Debug_UpdateWidget(&settings.show_physics_widget);
-    // TODO Add graphics module
 }

@@ -105,6 +105,11 @@ public:
         return (m_root == bvh_node::NULL_NODE) ? 0 : m_nodes[m_root].height;
     }
 
+    size_t Size (void) const noexcept
+    {
+        return m_nodes.size();
+    }
+
     // TODO Normalize debug printing.
     std::string Dump (void);
 

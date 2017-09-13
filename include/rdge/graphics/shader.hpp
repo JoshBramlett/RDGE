@@ -104,9 +104,6 @@ private:
 };
 
 //! \brief ShaderType stream output operator
-//! \param [in] os Output stream
-//! \param [in] type ShaderType to write to the stream
-//! \returns Output stream
 std::ostream& operator<< (std::ostream& os, ShaderType type);
 
 } // namespace rdge
