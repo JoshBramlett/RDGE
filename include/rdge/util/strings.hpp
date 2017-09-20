@@ -53,10 +53,34 @@ starts_with (const std::string& source, const std::string& prefix)
     return source.rfind(prefix, 0) == 0;
 }
 
+inline bool
+ends_with (const std::string& source, const std::string& suffix)
+{
+    int32 pos = source.length() - suffix.length();
+    if (pos < 0)
+    {
+        return false;
+    }
+
+    return source.rfind(suffix, static_cast<size_t>(pos)) == static_cast<size_t>(pos);
+}
+
 inline void
 remove_all (std::string& source, char c)
 {
     source.erase(std::remove(source.begin(), source.end(), c), source.end());
+}
+
+inline std::string
+remove_extension (const std::string& filename)
+{
+    auto index = filename.find_last_of(".");
+    if (index != std::string::npos)
+    {
+        return filename.substr(0, index);
+    }
+
+    return filename;
 }
 
 template <typename T>

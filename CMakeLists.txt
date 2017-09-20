@@ -34,11 +34,11 @@ set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DRDGE_DEBUG")
 
 # Set compiler flags
 if (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang") # Matches for "Clang" and "AppleClang"
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -std=c++14")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -std=c++1z")
     set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${ASAN_FLAGS}")
 
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -std=c++14")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -std=c++17")
     set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${ASAN_FLAGS}")
 
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
@@ -156,6 +156,7 @@ target_link_libraries (RDGE
                        ${GLEW_LIBRARIES}
                        ${OPENGL_LIBRARIES})
 
+add_subdirectory (tools/asset_packer)
 add_subdirectory (sandbox/chrono)
 add_subdirectory (sandbox/physics)
 add_subdirectory (tutorials/01_textures)

@@ -168,13 +168,8 @@ Surface::operator= (Surface&& rhs) noexcept
 {
     if (this != &rhs)
     {
-        SDL_FreeSurface(m_surface);
-        stbi_image_free(m_data);
-
-        m_surface = rhs.m_surface;
-        m_data = rhs.m_data;
-        rhs.m_surface = nullptr;
-        rhs.m_data = nullptr;
+        std::swap(m_surface, rhs.m_surface);
+        std::swap(m_data, rhs.m_data);
     }
 
     return *this;
