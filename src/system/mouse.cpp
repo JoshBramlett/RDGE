@@ -4,6 +4,7 @@
 #include <rdge/internal/hints.hpp>
 
 #include <SDL_assert.h>
+#include <SDL_events.h>
 
 #include <sstream>
 

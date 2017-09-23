@@ -22,7 +22,7 @@ message (STATUS "Compiler:    ${CMAKE_CXX_COMPILER_ID}")
 message (STATUS "Build type:  ${CMAKE_BUILD_TYPE}")
 
 # Flags for AddressSanitizer
-set(ASAN_FLAGS "-fsanitize=address -fno-omit-frame-pointer")
+#set(ASAN_FLAGS "-fsanitize=address -fno-omit-frame-pointer")
 
 # Add custom debug flag
 set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DRDGE_DEBUG")
@@ -86,6 +86,7 @@ target_link_libraries (imgui
 add_library (RDGE SHARED
              src/application.cpp
 
+             src/assets/asset_pack.cpp
              src/assets/bmfont.cpp
              src/assets/bitmap_font.cpp
              src/assets/font.cpp

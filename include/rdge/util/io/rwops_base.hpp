@@ -64,20 +64,18 @@ public:
     //!          native SDL_RWops object.  Derived classes must set those
     //!          function pointers for proper behavior.
     //! \note All functions are based on their corresponding stdio functions
-    int64 size (void);
+    //! \throws rdge::SDLException Failed to read or write
+    uint64 size (void);
     int64 seek (int64 offset, seekdir whence);
-    size_t read (void* ptr, size_t size, size_t count);
-    size_t write (void* ptr, size_t size, size_t count);
+    int64 tell (void) const noexcept;
+    size_t read (void* ptr, size_t size, size_t count = 1);
+    size_t write (void* ptr, size_t size, size_t count = 1);
     int32 close (void);
     //!@}
 
-    //! \brief Current cursor position
-    //! \details Shortcut behavior for calling seek from the cursor position
-    //!          with an offset of zero.
-    //! \returns Cursor position, or -1 if unavailable
-    int64 tell (void) const noexcept;
-
-    //!@{ Static constructors
+    //!@{
+    //! \brief Static constructors
+    //! \throws rdge::SDLException Failed to construct object
 	static rwops_base from_file (const char* file, const char* mode);
 	static rwops_base from_fp (FILE* file, bool autoclose);
 	static rwops_base from_memory (void* mem, int32 size);

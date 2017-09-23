@@ -30,22 +30,22 @@ rwops_base::operator= (rwops_base&& rhs) noexcept
 {
     if (this != &rhs)
     {
-        if (m_rwops)
-        {
-            SDL_RWclose(m_rwops);
-        }
-
-        m_rwops = rhs.m_rwops;
-        rhs.m_rwops = nullptr;
+        std::swap(m_rwops, rhs.m_rwops);
     }
 
     return *this;
 }
 
-int64
+uint64
 rwops_base::size (void)
 {
-    return SDL_RWsize(m_rwops);
+    int64 sz = SDL_RWsize(m_rwops);
+    if (UNLIKELY(sz < 0))
+    {
+        SDL_THROW("Failed to get file size", "SDL_RWsize");
+    }
+
+    return static_cast<uint64>(sz);
 }
 
 int64
@@ -57,13 +57,25 @@ rwops_base::seek (int64 offset, seekdir whence)
 size_t
 rwops_base::read (void* ptr, size_t size, size_t count)
 {
-    return SDL_RWread(m_rwops, ptr, size, count);
+    size_t result = SDL_RWread(m_rwops, ptr, size, count);
+    if (UNLIKELY(result == 0))
+    {
+        SDL_THROW("Failed to read from file", "SDL_RWread");
+    }
+
+    return result;
 }
 
 size_t
 rwops_base::write (void* ptr, size_t size, size_t count)
 {
-    return SDL_RWwrite(m_rwops, ptr, size, count);
+    size_t result = SDL_RWwrite(m_rwops, ptr, size, count);
+    if (UNLIKELY(result != count))
+    {
+        SDL_THROW("Failed to write to file", "SDL_RWread");
+    }
+
+    return result;
 }
 
 int32

@@ -9,7 +9,7 @@
 #include <rdge/math/vec2.hpp>
 #include <rdge/system/types.hpp>
 
-#include <SDL.h>
+#include <SDL_surface.h>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
@@ -31,8 +31,8 @@ inline auto CreateManagedSDLSurface (SDL_Surface* surface) -> SDLSurfaceUniquePt
 enum class PixelDepth : int32
 {
     UNKNOWN = 0,
-    BPP_24 = 24, //!< 24 bytes per pixel (RGB)
-    BPP_32 = 32  //!< 32 bytes per pixel (RBGA)
+    BPP_24 = 24, //!< 24 bits per pixel (RGB)
+    BPP_32 = 32  //!< 32 bits per pixel (RBGA)
 };
 
 //! \class Surface
@@ -40,11 +40,11 @@ enum class PixelDepth : int32
 //! \details A surface provides a mechanism for loading images from disk.
 //!          Surfaces are used for caching the image data, but cannot be used
 //!          for rendering.  To render, Surfaces are used to build a
-//!          \ref Texture object.
+//!          \ref Texture object.  Maintains a non-atomic refcount making it
+//!          able to be a shared resource.
 class Surface
 {
 public:
-    //! \brief Surface ctor
     //! \details Take ownership of an existing SDL_Surface.
     //! \param [in] sdl_surface Native SDL_Surface
     explicit Surface (SDL_Surface* sdl_surface);
@@ -52,17 +52,31 @@ public:
     //! \brief Surface ctor
     //! \details Create a Surface from an image on disk.  If image depth is not
     //!          overridden the depth will be determined by the file.
-    //! \param [in] path File path of the image to load
+    //! \param [in] filepath File path of the image to load
     //! \param [in] depth Optional requested depth
     //! \throws rdge::Exception Image initialization failed
-    explicit Surface (const std::string& path, PixelDepth depth = PixelDepth::UNKNOWN);
+    //! \throws rdge::SDLException SDL failed to create surface
+    Surface (const std::string& filepath, PixelDepth depth = PixelDepth::UNKNOWN);
+
+    //! \brief Surface ctor
+    //! \details Create a Surface from preallocated pixel data.
+    //! \param [in] pixel_data Pointer to raw pixel data
+    //! \param [in] width Image width
+    //! \param [in] height Image height
+    //! \param [in] channels Number of color channels per pixel
+    //! \throws rdge::Exception Image initialization failed
+    //! \throws rdge::SDLException SDL failed to create surface
+    Surface (void* pixel_data, int32 width, int32 height, int32 channels);
 
     //! \brief Surface dtor
     ~Surface (void) noexcept;
 
-    //!@{ Non-copyable, move enabled
-    Surface (const Surface&) = delete;
-    Surface& operator= (const Surface&) = delete;
+    //!@{
+    //! \brief Copy and move enabled
+    //! \details SDL_Surface has a refcount property which is incremented on copy,
+    //!          effectively making the Surface wrapper a shared pointer.
+    Surface (const Surface&);
+    Surface& operator= (const Surface&);
     Surface (Surface&&) noexcept;
     Surface& operator= (Surface&&) noexcept;
     //!@}
@@ -102,8 +116,10 @@ public:
     Surface CreateSubSurface (const screen_rect& clip);
 
 private:
-    uint8*       m_data = nullptr;
     SDL_Surface* m_surface = nullptr;
 };
+
+//! \brief PixelDepth stream output operator
+std::ostream& operator<< (std::ostream&, PixelDepth);
 
 } // namespace rdge

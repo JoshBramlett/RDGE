@@ -1,6 +1,7 @@
 #include <rdge/assets/surface.hpp>
 #include <rdge/math/intrinsics.hpp>
 #include <rdge/util/logger.hpp>
+#include <rdge/type_traits.hpp>
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/hints.hpp>
 
@@ -24,7 +25,7 @@ struct byte_order_masks
 };
 
 byte_order_masks
-GetMasksFromDepth (PixelDepth depth)
+GetMasks (PixelDepth depth)
 {
     // 24bpp depth represents an RGB image, so the byte order is shifted
     // by one byte to remove the alpha channel
@@ -46,6 +47,24 @@ GetMasksFromDepth (PixelDepth depth)
     return masks;
 }
 
+int32
+GetFormat (PixelDepth depth)
+{
+    // TODO Format is hard-coded.  When adding 24BPP support make sure to query
+    //      the windows pixel format (SDL_GetWindowPixelFormat)
+
+    if (depth == PixelDepth::BPP_24)
+    {
+        return SDL_PIXELFORMAT_BGR24;
+    }
+    else if (depth == PixelDepth::BPP_32)
+    {
+        return SDL_PIXELFORMAT_ABGR8888;
+    }
+
+    return SDL_PIXELFORMAT_UNKNOWN;
+}
+
 } // anonymous namespace
 
 namespace rdge {
@@ -53,97 +72,121 @@ namespace rdge {
 Surface::Surface (SDL_Surface* surface)
     : m_surface(surface)
 {
-    // TODO This wrapper could be smarter (and safer from double frees) if
-    //      support is added for using the SDL_Surface refcount property.
+    SDL_assert(m_surface);
+    SDL_assert(m_surface->refcount == 1);
+    SDL_assert(m_surface->userdata == nullptr);
 }
 
-Surface::Surface (const std::string& path, PixelDepth depth)
+Surface::Surface (const std::string& filepath, PixelDepth depth)
 {
-    int32 req_format = 0;
+    // use number of channels from the file if no override is provided
+    int32 channels = 0;
     if (depth == PixelDepth::BPP_24)
     {
-        req_format = STBI_rgb;
+        channels = STBI_rgb;
     }
     else if (depth == PixelDepth::BPP_32)
     {
-        req_format = STBI_rgb_alpha;
+        channels = STBI_rgb_alpha;
     }
 
     // TODO when implementing a memory tracker, stbi has a define rule to use
     //      a custom allocator.  Look into the same for SDL.
 
-    int32 w, h, orig_format;
-    m_data = stbi_load(path.c_str(), &w, &h, &orig_format, req_format);
-    if (UNLIKELY(!m_data))
+    int32 w, h, file_channels;
+    void* pixel_data = stbi_load(filepath.c_str(), &w, &h, &file_channels, channels);
+    if (UNLIKELY(!pixel_data))
     {
         std::ostringstream ss;
         ss << "Surface load failed."
            << " what=" << stbi_failure_reason()
-           << " path=" << path;
+           << " path=" << filepath;
 
         RDGE_THROW(ss.str());
     }
 
-    if (req_format == 0)
+    if (channels == 0)
     {
-        req_format = orig_format;
+        channels = file_channels;
     }
-    else if (orig_format != req_format)
+    else if (file_channels != channels)
     {
         ILOG() << "Surface format overridden."
-               << " orig=" << orig_format
-               << " req=" << req_format
-               << " path=" << path;
+               << " file_channels=" << file_channels
+               << " channels=" << channels
+               << " path=" << filepath;
     }
 
-    // TODO Format is hard-coded.  When adding 24BPP support make sure to query
-    //      the windows pixel format (SDL_GetWindowPixelFormat)
-
-    int32 sdl_pixel_format;
-    int32 pitch; // length of a row of pixels in bytes
-    if (req_format == STBI_rgb)
+    if (channels == STBI_rgb)
     {
         depth = PixelDepth::BPP_24;
-        sdl_pixel_format = SDL_PIXELFORMAT_BGR24;
-        pitch = 3 * w;
     }
-    else if (req_format == STBI_rgb_alpha)
+    else if (channels == STBI_rgb_alpha)
     {
         depth = PixelDepth::BPP_32;
-        sdl_pixel_format = SDL_PIXELFORMAT_ABGR8888;
-        pitch = 4 * w;
     }
     else
     {
         std::ostringstream ss;
         ss << "Surface format invalid."
-           << " req=" << req_format
-           << " depth=" << static_cast<int32>(depth)
-           << " path=" << path;
+           << " channels=" << channels
+           << " depth=" << depth
+           << " path=" << filepath;
 
-        stbi_image_free(m_data);
+        stbi_image_free(pixel_data);
         RDGE_THROW(ss.str());
     }
 
-    m_surface = SDL_CreateRGBSurfaceWithFormatFrom((void*)m_data,
+    int32 pitch = channels * w; // length of a row of pixels in bytes
+    m_surface = SDL_CreateRGBSurfaceWithFormatFrom(pixel_data,
                                                    w, h,
                                                    static_cast<int32>(depth),
                                                    pitch,
-                                                   sdl_pixel_format);
+                                                   GetFormat(depth));
     if (UNLIKELY(!m_surface))
     {
-        stbi_image_free(m_data);
+        stbi_image_free(pixel_data);
         SDL_THROW("Failed to create surface from pixel data",
                   "SDL_CreateRGBSurfaceWithFormatFrom");
     }
 
-    if (!math::is_pot(m_surface->w) || !math::is_pot(m_surface->h))
+    m_surface->userdata = pixel_data;
+}
+
+Surface::Surface (void* pixel_data, int32 w, int32 h, int32 channels)
+{
+    PixelDepth depth = PixelDepth::UNKNOWN;
+    if (channels == STBI_rgb)
     {
-        WLOG() << "Surface loaded has NPOT dimensions."
-               << " w=" << m_surface->w
-               << " h=" << m_surface->h
-               << " path=" << path;
+        depth = PixelDepth::BPP_24;
     }
+    else if (channels == STBI_rgb_alpha)
+    {
+        depth = PixelDepth::BPP_32;
+    }
+    else
+    {
+        std::ostringstream ss;
+        ss << "Surface format invalid."
+           << " channels=" << channels
+           << " depth=" << depth;
+
+        RDGE_THROW(ss.str());
+    }
+
+    int32 pitch = channels * w; // length of a row of pixels in bytes
+    m_surface = SDL_CreateRGBSurfaceWithFormatFrom(pixel_data,
+                                                   w, h,
+                                                   static_cast<int32>(depth),
+                                                   pitch,
+                                                   GetFormat(depth));
+    if (UNLIKELY(!m_surface))
+    {
+        SDL_THROW("Failed to create surface from pixel data",
+                  "SDL_CreateRGBSurfaceWithFormatFrom");
+    }
+
+    m_surface->userdata = pixel_data;
 }
 
 Surface::~Surface (void) noexcept
@@ -151,16 +194,43 @@ Surface::~Surface (void) noexcept
     // From SDL docs: https://wiki.libsdl.org/SDL_CreateRGBSurfaceFrom
     // Underlying pixel data is unmanaged and must be freed after the surface.
 
-    SDL_FreeSurface(m_surface);
-    stbi_image_free(m_data);
+    if (m_surface)
+    {
+        m_surface->refcount--;
+        if (m_surface->refcount == 0)
+        {
+            void* pixel_data = m_surface->userdata;
+            SDL_FreeSurface(m_surface);
+            free(pixel_data);
+        }
+    }
 }
 
-Surface::Surface (Surface&& rhs) noexcept
-    : m_data(rhs.m_data)
-    , m_surface(rhs.m_surface)
+Surface::Surface (const Surface& other)
+    : m_surface(other.m_surface)
 {
-    rhs.m_surface = nullptr;
-    rhs.m_data = nullptr;
+    if (m_surface)
+    {
+        m_surface->refcount++;
+    }
+}
+
+Surface&
+Surface::operator= (const Surface& rhs)
+{
+    m_surface = rhs.m_surface;
+    if (m_surface)
+    {
+        m_surface->refcount++;
+    }
+
+    return *this;
+}
+
+Surface::Surface (Surface&& other) noexcept
+    : m_surface(other.m_surface)
+{
+    other.m_surface = nullptr;
 }
 
 Surface&
@@ -169,7 +239,6 @@ Surface::operator= (Surface&& rhs) noexcept
     if (this != &rhs)
     {
         std::swap(m_surface, rhs.m_surface);
-        std::swap(m_data, rhs.m_data);
     }
 
     return *this;
@@ -245,7 +314,7 @@ Surface
 Surface::CreateSubSurface (const screen_rect& clip)
 {
     auto depth = Depth();
-    auto masks = GetMasksFromDepth(depth);
+    auto masks = GetMasks(depth);
     auto s = SDL_CreateRGBSurface(0, // flags (SDL docs say param is unused)
                                   static_cast<int32>(clip.w),
                                   static_cast<int32>(clip.h),
@@ -265,6 +334,20 @@ Surface::CreateSubSurface (const screen_rect& clip)
     }
 
     return Surface(s);
+}
+
+std::ostream& operator<< (std::ostream& os, PixelDepth value)
+{
+    if (value == PixelDepth::UNKNOWN)
+    {
+        os << "unknown";
+    }
+    else
+    {
+        os << to_underlying(value) << "bpp";
+    }
+
+    return os;
 }
 
 } // namespace rdge

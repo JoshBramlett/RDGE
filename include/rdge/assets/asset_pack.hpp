@@ -1,37 +1,17 @@
-//! \headerfile <rdge/assets/file_format.hpp>
+//! \headerfile <rdge/assets/asset_pack.hpp>
 //! \author Josh Bramlett
 //! \version 0.0.10
-//! \date 09/13/2017
+//! \date 09/20/2017
 
 #pragma once
 
 #include <rdge/core.hpp>
+#include <rdge/assets/surface.hpp>
+#include <rdge/util/io/rwops_base.hpp>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 namespace asset_pack {
-
-//! {
-//!     "image_path": "textures/image.png",
-//!     "image_scale": 4,
-//!     "texture_parts": [ {
-//!         "name": "part_name",
-//!         "x": 0,
-//!         "y": 0,
-//!         "width": 32,
-//!         "height": 32,
-//!         "origin": [ 16, 16 ]
-//!     } ],
-//!     "animations": [ {
-//!         "name": "animation_name",
-//!         "mode": "normal",
-//!         "interval": 100,
-//!         "frames": [ {
-//!             "name": "part_name",
-//!             "flip": "horizontal"
-//!         } ]
-//!     } ]
-//! }
 
 #define MAGIC_VALUE_CODE(a, b, c, d) (((uint32)(a) << 0) |  \
                                       ((uint32)(b) << 8) |  \
@@ -52,6 +32,7 @@ enum asset_type
 };
 
 #pragma pack(push, 1)
+
 struct header
 {
     uint32 magic_value;
@@ -65,7 +46,7 @@ struct surface_info
 {
     int32 width;
     int32 height;
-    int32 format;
+    int32 channels;
 };
 
 struct spritesheet_info
@@ -80,7 +61,8 @@ struct tilemap_info
 
 struct asset_info
 {
-    uint64 offset;
+    int64 offset;
+    uint32 size;
     asset_type type;
 
     union
@@ -93,6 +75,35 @@ struct asset_info
 
 #pragma pack(pop)
 
-
 } // namespace asset_pack
+
+class PackFile
+{
+public:
+    //! \brief PackFile ctor
+    //! \details Open an asset pack file for reading
+    //! \param [in] filepath Path to pack file
+    //! \throws rdge::Exception Invalid file
+    //! \throws rdge::SDLException File cannot be loaded
+    explicit PackFile (const char* filepath);
+
+    //! \brief PackFile dtor
+    ~PackFile (void) noexcept;
+
+    //!@{ Non-copyable, move enabled
+    PackFile (const PackFile&) = delete;
+    PackFile& operator= (const PackFile&) = delete;
+    PackFile (PackFile&&) noexcept;
+    PackFile& operator= (PackFile&&) noexcept;
+    //!@}
+
+    Surface GetSurface (int32 asset_id);
+
+private:
+    rwops_base m_file;
+
+    asset_pack::header      m_header;
+    asset_pack::asset_info* m_table = nullptr;
+};
+
 } // namespace rdge

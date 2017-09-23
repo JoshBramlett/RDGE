@@ -72,12 +72,24 @@ remove_all (std::string& source, char c)
 }
 
 inline std::string
+remove_path (const std::string& filepath)
+{
+    auto pos = filepath.find_last_of("/\\");
+    if (pos != std::string::npos)
+    {
+        return filepath.substr(pos + 1);
+    }
+
+    return filepath;
+}
+
+inline std::string
 remove_extension (const std::string& filename)
 {
-    auto index = filename.find_last_of(".");
-    if (index != std::string::npos)
+    auto pos = filename.find_last_of(".");
+    if (pos != std::string::npos)
     {
-        return filename.substr(0, index);
+        return filename.substr(0, pos);
     }
 
     return filename;

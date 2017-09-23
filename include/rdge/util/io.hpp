@@ -54,18 +54,13 @@ read_text_file (const char* filepath)
 {
     auto rwops = rwops_base::from_file(filepath, "rt");
     auto size = rwops.size();
-    if (size >= 0)
-    {
-        char* data = (char*)malloc(size+1);
-        data[size] = 0;
-        rwops.read(data, size, 1);
+    char* data = (char*)malloc(size+1);
+    data[size] = 0;
+    rwops.read(data, size, 1);
 
-        std::string result(data);
-        free(data);
-        return result;
-    }
-
-    return std::string();
+    std::string result(data);
+    free(data);
+    return result;
 
     // TODO: Make smart, should check std::string::max_size to make
     //       sure that the file is not too big.  Also, look into
