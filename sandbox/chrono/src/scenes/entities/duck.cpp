@@ -2,6 +2,7 @@
 
 #include "../test.hpp"
 #include "player.hpp"
+#include "../../chrono.hpp"
 
 #include <rdge/assets.hpp>
 #include <rdge/math.hpp>
@@ -18,18 +19,18 @@ using namespace rdge::physics;
 Duck::Duck (TestScene* parent, const math::vec3& position)
     : m_parent(parent)
 {
-    SpriteSheet sheet("res/enemies.json", Window::Current().IsHighDPI());
+    PackFile pack("res/chrono.data");
+    auto sheet = pack.GetSpriteSheet(chrono_asset_spritesheet_enemies);
 
     //////////////////
     // walking animation
     //////////////////
-    cd_anim_walk[Direction::UP]    = sheet.GetAnimation("duck_back");
-    cd_anim_walk[Direction::RIGHT] = sheet.GetAnimation("duck_right");
-    cd_anim_walk[Direction::DOWN]  = sheet.GetAnimation("duck_front");
-    cd_anim_walk[Direction::LEFT]  = sheet.GetAnimation("duck_left");
+    cd_anim_walk[Direction::UP]    = sheet.GetAnimation(enemies_animation_duck_back);
+    cd_anim_walk[Direction::RIGHT] = sheet.GetAnimation(enemies_animation_duck_right);
+    cd_anim_walk[Direction::DOWN]  = sheet.GetAnimation(enemies_animation_duck_front);
+    cd_anim_walk[Direction::LEFT]  = sheet.GetAnimation(enemies_animation_duck_left);
 
-    this->sprite = sheet.CreateSprite("duck_front_1", position);
-    //this->sprite->debug_bounds.show = true;
+    this->sprite = std::make_shared<Sprite>(position, vec2(64.f, 64.f), sheet.texture);
 
     facing = Direction::SOUTH;
     current_animation = &cd_anim_walk[facing];

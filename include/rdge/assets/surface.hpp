@@ -45,9 +45,10 @@ enum class PixelDepth : int32
 class Surface
 {
 public:
+    //! \brief Surface default ctor
     //! \details Take ownership of an existing SDL_Surface.
     //! \param [in] sdl_surface Native SDL_Surface
-    explicit Surface (SDL_Surface* sdl_surface);
+    explicit Surface (SDL_Surface* sdl_surface = nullptr);
 
     //! \brief Surface ctor
     //! \details Create a Surface from an image on disk.  If image depth is not

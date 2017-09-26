@@ -7,6 +7,7 @@
 
 #include <rdge/core.hpp>
 #include <rdge/assets/surface.hpp>
+#include <rdge/assets/spritesheet.hpp>
 #include <rdge/util/io/rwops_base.hpp>
 
 //! \namespace rdge Rainbow Drop Game Engine
@@ -97,7 +98,9 @@ public:
     PackFile& operator= (PackFile&&) noexcept;
     //!@}
 
+    // TODO Cache these
     Surface GetSurface (int32 asset_id);
+    SpriteSheet GetSpriteSheet (int32 asset_id);
 
 private:
     rwops_base m_file;

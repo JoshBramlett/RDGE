@@ -69,17 +69,33 @@ PackFile::operator= (PackFile&& rhs) noexcept
 Surface
 PackFile::GetSurface (int32 asset_id)
 {
-    SDL_assert(asset_id > 0 && (uint32)asset_id <= m_header.asset_count);
+    SDL_assert(asset_id >= 0 && (uint32)asset_id < m_header.asset_count);
 
     auto& info = m_table[asset_id];
     SDL_assert(info.type == asset_type_surface);
 
-    void* pixel_data;
-    RDGE_MALLOC(pixel_data, info.size, nullptr);
+    void* pixel_data = malloc(info.size);
+    // TODO replace when stb_image uses RDGE_MALLOC
+    //RDGE_MALLOC(pixel_data, info.size, nullptr);
     m_file.seek(info.offset, rwops_base::seekdir::beg);
     m_file.read(pixel_data, info.size);
 
     return Surface(pixel_data, info.surface.width, info.surface.height, info.surface.channels);
+}
+
+SpriteSheet
+PackFile::GetSpriteSheet (int32 asset_id)
+{
+    SDL_assert(asset_id >= 0 && (uint32)asset_id < m_header.asset_count);
+
+    auto& info = m_table[asset_id];
+    SDL_assert(info.type == asset_type_spritesheet);
+
+    std::vector<std::uint8_t> msgpack(info.size);
+    m_file.seek(info.offset, rwops_base::seekdir::beg);
+    m_file.read(msgpack.data(), info.size);
+
+    return SpriteSheet(msgpack, GetSurface(info.spritesheet.surface_id));
 }
 
 } // namespace rdge

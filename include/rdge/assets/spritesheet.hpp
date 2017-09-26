@@ -79,13 +79,15 @@ public:
     //! \param [in] scale_for_hidpi Scale original image size for hi-resolution display
     //! \throws rdge::Exception Unable to parse config
     explicit SpriteSheet (const std::string& filepath, bool scale_for_hidpi = false);
+    explicit SpriteSheet (const std::vector<uint8>& msgpack, Surface surface);
 
     //! \brief SpriteSheet dtor
-    ~SpriteSheet (void) noexcept = default;
+    ~SpriteSheet (void) noexcept;
 
     //!@{ Non-copyable, move enabled
     SpriteSheet (const SpriteSheet&) = delete;
     SpriteSheet& operator= (const SpriteSheet&) = delete;
+    // TODO
     SpriteSheet (SpriteSheet&&) noexcept = default;
     SpriteSheet& operator= (SpriteSheet&&) noexcept = default;
     //!@}
@@ -102,6 +104,11 @@ public:
     //! \returns Associated \ref Animation
     //! \throws rdge::Exception Lookup failed
     const Animation& GetAnimation (const std::string& name) const;
+
+    const Animation& GetAnimation (int32 animation_id) const
+    {
+        return animations[animation_id];
+    }
 
     //! \brief Create a sprite from the sub-texture element
     //! \details Uses the provided position and size along with the associated
@@ -132,8 +139,15 @@ public:
     std::string image_path;      //!< Image path specified in the config
     uint32      image_scale = 1; //!< Image scale specified in the config
 
-    std::shared_ptr<Surface> surface; //!< Surface created from image
+    //std::shared_ptr<Surface> surface; //!< Surface created from image
+    Surface surface;
     std::shared_ptr<Texture> texture; //!< Texture generated from the surface
+
+    texture_part* regions = nullptr;
+    size_t        region_count = 0;
+
+    Animation* animations = nullptr;
+    size_t     animation_count = 0;
 
 private:
     std::unordered_map<std::string, texture_part> m_parts;   //!< Collection of texture parts

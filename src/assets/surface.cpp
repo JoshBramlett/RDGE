@@ -72,9 +72,7 @@ namespace rdge {
 Surface::Surface (SDL_Surface* surface)
     : m_surface(surface)
 {
-    SDL_assert(m_surface);
-    SDL_assert(m_surface->refcount == 1);
-    SDL_assert(m_surface->userdata == nullptr);
+    SDL_assert(!m_surface || m_surface->userdata == nullptr);
 }
 
 Surface::Surface (const std::string& filepath, PixelDepth depth)

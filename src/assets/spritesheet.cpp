@@ -6,6 +6,7 @@
 #include <rdge/math/intrinsics.hpp>
 #include <rdge/util/io.hpp>
 #include <rdge/util/strings.hpp>
+#include <rdge/util/memory/alloc.hpp>
 #include <rdge/internal/exception_macros.hpp>
 
 #include <SDL_assert.h>
@@ -25,6 +26,137 @@ using namespace rdge;
 constexpr float normalize (uint64 point, uint64 dimension)
 {
     return static_cast<float>(point) / static_cast<float>(dimension);
+}
+
+// Process and validate a single region
+void
+ProcessRegion (texture_part& region, const json& j, const math::uivec2& surface_size, uint32 scale)
+{
+    auto name = j["name"].get<std::string>();
+
+    // Validate for unsigned to prevent overflow issues
+    if (!j["x"].is_number_unsigned() || !j["y"].is_number_unsigned() ||
+        !j["width"].is_number_unsigned() || !j["height"].is_number_unsigned())
+    {
+        throw std::invalid_argument("region \"" + name + "\" expects unsigned");
+    }
+
+    auto x = j["x"].get<uint32>();
+    auto y = j["y"].get<uint32>();
+    auto w = j["width"].get<uint32>();
+    auto h = j["height"].get<uint32>();
+
+    // Validate values are within range
+    if ((x + w > surface_size.w) || (y + h > surface_size.h))
+    {
+        throw std::invalid_argument("region \"" + name + "\" has invalid dimensions");
+    }
+
+    // Optional origin
+    math::vec2 origin;
+    if (j.count("origin") > 0 && j["origin"].is_array())
+    {
+        const auto& values = j["origin"];
+        if (!values[0].is_number_unsigned() || !values[1].is_number_unsigned())
+        {
+            throw std::invalid_argument("region \"" + name + "\" origin expects unsigned");
+        }
+
+        origin.x = values[0].get<uint32>();
+        origin.y = values[1].get<uint32>();
+
+        if (origin.x > w || origin.y > h)
+        {
+            throw std::invalid_argument("region \"" + name + "\" invalid origin");
+        }
+    }
+    else
+    {
+        origin.x = static_cast<float>(w) * 0.5f;
+        origin.y = static_cast<float>(h) * 0.5f;
+    }
+
+    region.name = name;
+    region.clip = { static_cast<int32>(x), static_cast<int32>(y),
+                    static_cast<int32>(w), static_cast<int32>(h) };
+    region.size = { w * scale, h * scale };
+    region.origin = origin * scale;
+    region.coords.bottom_left  = math::vec2(::normalize(x, surface_size.w),
+                                            ::normalize(y, surface_size.h));
+    region.coords.bottom_right = math::vec2(::normalize(x + w, surface_size.w),
+                                            ::normalize(y, surface_size.h));
+    region.coords.top_left     = math::vec2(::normalize(x, surface_size.w),
+                                            ::normalize(y + h, surface_size.h));
+    region.coords.top_right    = math::vec2(::normalize(x + w, surface_size.w),
+                                            ::normalize(y + h, surface_size.h));
+}
+
+void
+ProcessAnimation (Animation& animation, const json& j, const texture_part* regions, size_t region_count)
+{
+    auto name = j["name"].get<std::string>();
+
+    // Validate for unsigned to prevent overflow issues
+    if (!j["interval"].is_number_unsigned())
+    {
+        throw std::invalid_argument("animation \"" + name + "\" expects unsigned");
+    }
+
+    if (!from_string(j["mode"].get<std::string>(), animation.mode))
+    {
+        throw std::invalid_argument("animation \"" + name + "\" mode invalid");
+    }
+
+    animation.interval = j["interval"].get<uint32>();
+
+    const auto& frames = j["frames"];
+    for (const auto& frame : frames)
+    {
+        auto frame_name = frame["name"].get<std::string>();
+
+        bool found = false;
+        for (size_t i = 0; i < region_count; i++)
+        {
+            const auto& region = regions[i];
+            if (region.name == frame_name)
+            {
+                if (frame.count("flip") > 0 && frame["flip"].is_string())
+                {
+                    auto flip = to_lower(frame["flip"].get<std::string>());
+                    if (flip == "horizontal")
+                    {
+                        animation.frames.emplace_back(region.flip_horizontal());
+                    }
+                    else if (flip == "vertical")
+                    {
+                        animation.frames.emplace_back(region.flip_vertical());
+                    }
+                    else
+                    {
+                        std::ostringstream ss;
+                        ss << "animation \"" << name << "\" at "
+                           << "frame \"" << frame_name << "\" has invalid flip value";
+                        throw std::invalid_argument(ss.str());
+                    }
+                }
+                else
+                {
+                    animation.frames.emplace_back(region);
+                }
+
+                found = true;
+                break;
+            }
+        }
+
+        if (!found)
+        {
+            std::ostringstream ss;
+            ss << "animation \"" << name << "\" cannot find "
+               << "frame \"" << frame_name << "\" in texture_part list";
+            throw std::invalid_argument(ss.str());
+        }
+    }
 }
 
 // Process and validate a single texture_part
@@ -92,6 +224,48 @@ ProcessTexturePart (const json& part, const math::uivec2& surface_size, uint32 s
 
 namespace rdge {
 
+SpriteSheet::SpriteSheet (const std::vector<uint8>& msgpack, Surface surface)
+    : surface(surface)
+    , texture(std::make_shared<Texture>(this->surface))
+{
+    try
+    {
+        json j = json::from_msgpack(msgpack);
+
+        this->region_count = j["texture_parts"].size();
+        if (this->region_count > 0)
+        {
+            RDGE_CALLOC(this->regions, this->region_count, nullptr);
+
+            auto surface_size = this->surface.Size();
+            const auto& json_regions = j["texture_parts"];
+            for (size_t i = 0; i < this->region_count; i++)
+            {
+                ProcessRegion(this->regions[i], json_regions[i], surface_size, 1);
+            }
+        }
+
+        this->animation_count = j["animations"].size();
+        if (this->animation_count > 0)
+        {
+            RDGE_CALLOC(this->animations, this->animation_count, nullptr);
+
+            const auto& json_animations = j["animations"];
+            for (size_t i = 0; i < this->animation_count; i++)
+            {
+                ProcessAnimation(this->animations[i],
+                                 json_animations[i],
+                                 this->regions,
+                                 this->region_count);
+            }
+        }
+    }
+    catch (const std::exception& ex)
+    {
+        RDGE_THROW(ex.what());
+    }
+}
+
 SpriteSheet::SpriteSheet (const std::string& filepath, bool scale_for_hidpi)
 {
     try
@@ -119,9 +293,9 @@ SpriteSheet::SpriteSheet (const std::string& filepath, bool scale_for_hidpi)
             SDL_assert(math::is_pot(this->image_scale));
         }
 
-        this->surface = std::make_shared<Surface>(this->image_path);  // Will throw if failed
-        this->texture = std::make_shared<Texture>(*this->surface);
-        auto surface_size = this->surface->Size();
+        this->surface = Surface(this->image_path);
+        this->texture = std::make_shared<Texture>(this->surface);
+        auto surface_size = this->surface.Size();
 
         const auto& texture_parts = j["texture_parts"];
         for (const auto& part : texture_parts)
@@ -211,6 +385,12 @@ SpriteSheet::SpriteSheet (const std::string& filepath, bool scale_for_hidpi)
 
         RDGE_THROW(ex.what());
     }
+}
+
+SpriteSheet::~SpriteSheet (void) noexcept
+{
+    RDGE_FREE(this->regions, nullptr);
+    RDGE_FREE(this->animations, nullptr);
 }
 
 const texture_part&

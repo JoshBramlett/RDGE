@@ -58,7 +58,7 @@ TestScene::TestScene (void)
     , entities(render_target)
 {
     collision_graph.listener = &l;
-    camera.zoom = 1.5f;
+    //camera.zoom = 1.5f;
 
     SpriteSheet sheet("res/environment.json", Window::Current().IsHighDPI());
 
@@ -80,7 +80,7 @@ TestScene::TestScene (void)
     //          coordinates, having each entity (simulation or no) handle their
     //          own rendering?
 
-#if 0
+#if 1
     background.AddSprite(sheet.CreateSpriteChain("dirt",
                                                  vec3(-half_width, -half_height, 0.f),
                                                  vec2(window_width, window_height)));
@@ -187,7 +187,7 @@ TestScene::OnRender (void)
 
     render_target->SetProjection(camera.combined);
 
-    //background.Draw();
+    background.Draw();
     entities.Draw();
 
     // debug drawing

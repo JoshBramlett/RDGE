@@ -73,9 +73,6 @@ public:
 };
 
 //! \brief Animation::PlayMode stream output operator
-//! \param [in] os Output stream
-//! \param [in] mode Play mode
-//! \returns Output stream
 std::ostream& operator<< (std::ostream& os, Animation::PlayMode mode);
 
 //! \brief Convert string to Animation::PlayMode
