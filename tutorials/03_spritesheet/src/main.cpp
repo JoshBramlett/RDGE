@@ -34,7 +34,7 @@ int main ()
     Window window(settings);
 
     // 3) Load assets
-    SpriteSheet stall_sheet("res/spritesheet_stall.json", window.IsHighDPI());
+    SpriteSheet stall_sheet("res/spritesheet_stall.json");
     auto counter = std::make_shared<Texture>("res/counter.png");
 
     SpriteLayer stall_layer;

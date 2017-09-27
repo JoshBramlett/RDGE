@@ -44,7 +44,6 @@ class Texture;
 //! \code{.json}
 //! {
 //!     "image_path": "textures/image.png",
-//!     "image_scale": 4,
 //!     "texture_parts": [ {
 //!         "name": "part_name",
 //!         "x": 0,
@@ -71,14 +70,17 @@ public:
     SpriteSheet (void) = default;
 
     //! \brief SpriteSheet ctor
-    //! \details Loads and parses the config file.  If the sprite sheet was designed
-    //!          for use with a standard display and ran using (and configured for)
-    //!          a hi-res display, setting the scale_for_hires flag to true will scale
-    //!          the texture_part.size value by a multiple of 2.
+    //! \details Loads and parses the json file.
     //! \param [in] filepath Path to the config file
-    //! \param [in] scale_for_hidpi Scale original image size for hi-resolution display
     //! \throws rdge::Exception Unable to parse config
-    explicit SpriteSheet (const std::string& filepath, bool scale_for_hidpi = false);
+    explicit SpriteSheet (const std::string& filepath);
+
+    //! \brief SpriteSheet ctor
+    //! \details Loads and parses the packed json (used with \ref PackFile)
+    //! \param [in] msgpack Packed json data
+    //! \param [in] surface Associated surface
+    //! \throws rdge::Exception Unable to parse config
+    //! \see http://msgpack.org/
     explicit SpriteSheet (const std::vector<uint8>& msgpack, Surface surface);
 
     //! \brief SpriteSheet dtor
@@ -107,7 +109,7 @@ public:
 
     const Animation& GetAnimation (int32 animation_id) const
     {
-        return animations[animation_id];
+        return animations[animation_id].value;
     }
 
     //! \brief Create a sprite from the sub-texture element
@@ -117,7 +119,8 @@ public:
     //! \param [in] pos Sprite position
     //! \returns Sprite unique pointer
     //! \throws rdge::Exception Lookup failed
-    std::unique_ptr<Sprite> CreateSprite (const std::string& name, const math::vec3& pos) const;
+    std::unique_ptr<Sprite> CreateSprite (const std::string& name,
+                                          const math::vec3& pos) const;
 
     //! \brief Create a chain of sprites from the sub-texture element
     //! \details Similar to \ref CreateSprite, but will create a \ref SpriteGroup
@@ -136,22 +139,34 @@ public:
                                                     const math::vec2&  to_fill) const;
 
 public:
-    std::string image_path;      //!< Image path specified in the config
-    uint32      image_scale = 1; //!< Image scale specified in the config
-
-    //std::shared_ptr<Surface> surface; //!< Surface created from image
-    Surface surface;
+    Surface                  surface; //!< Surface specified in the file input
     std::shared_ptr<Texture> texture; //!< Texture generated from the surface
 
-    texture_part* regions = nullptr;
-    size_t        region_count = 0;
+    //! \struct region_data
+    //! \brief Internally used for keying off the name string
+    struct region_data
+    {
+        std::string  name;
+        texture_part value;
+    };
 
-    Animation* animations = nullptr;
-    size_t     animation_count = 0;
+    //! \struct animation_data
+    //! \brief Internally used for keying off the name string
+    struct animation_data
+    {
+        std::string name;
+        Animation   value;
+    };
 
-private:
-    std::unordered_map<std::string, texture_part> m_parts;   //!< Collection of texture parts
-    std::unordered_map<std::string, Animation> m_animations; //!< Collection of animations
+    //!@{ Region container
+    region_data* regions = nullptr;
+    size_t       region_count = 0;
+    //!@}
+
+    //!@{ Animation container
+    animation_data* animations = nullptr;
+    size_t          animation_count = 0;
+    //!@}
 };
 
 } // namespace rdge

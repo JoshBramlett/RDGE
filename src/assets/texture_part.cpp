@@ -37,7 +37,6 @@ texture_part::flip_vertical (void) const noexcept
 std::ostream& operator<< (std::ostream& os, const texture_part& p)
 {
     os << "texture_part: ["
-       << "\n  name=" << p.name
        << "\n  clip=" << p.clip
        << "\n  coords=" << p.coords
        << "\n  size=" << p.size

@@ -16,6 +16,5 @@
             "origin": [ 16, 32 ]
         }
     ],
-    "image_path": "../tests/testdata/assets/spritesheet.png",
-    "image_scale": 2
+    "image_path": "../tests/testdata/assets/spritesheet.png"
 }

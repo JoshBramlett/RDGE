@@ -16,11 +16,43 @@
 #include <exception>
 #include <sstream>
 
+namespace rdge {
+
+using namespace rdge::math;
 using json = nlohmann::json;
 
 namespace {
 
-using namespace rdge;
+struct parsed_region_data
+{
+    std::string name;
+    uint32 x;
+    uint32 y;
+    uint32 width;
+    uint32 height;
+    math::vec2 origin;
+};
+
+enum flip_state
+{
+    flip_none = 0,
+    flip_horizontal,
+    flip_vertical
+};
+
+struct parsed_frame
+{
+    std::string name;
+    flip_state flip;
+};
+
+struct parsed_animation_data
+{
+    std::string name;
+    Animation::PlayMode mode;
+    uint32 interval;
+    std::vector<parsed_frame> frames;
+};
 
 // Normalize the point to a float clamped to [0, 1]
 constexpr float normalize (uint64 point, uint64 dimension)
@@ -28,201 +60,227 @@ constexpr float normalize (uint64 point, uint64 dimension)
     return static_cast<float>(point) / static_cast<float>(dimension);
 }
 
-// Process and validate a single region
-void
-ProcessRegion (texture_part& region, const json& j, const math::uivec2& surface_size, uint32 scale)
+// Parse and validate a single region
+parsed_region_data
+ParseRegion (const json& j)
 {
-    auto name = j["name"].get<std::string>();
+    if (j.count("name") == 0 || !j["name"].is_string())
+    {
+        std::string msg("region name is missing or is an invalid type");
+        throw std::invalid_argument(msg);
+    }
+
+    parsed_region_data result;
+    result.name = j["name"].get<std::string>();
 
     // Validate for unsigned to prevent overflow issues
     if (!j["x"].is_number_unsigned() || !j["y"].is_number_unsigned() ||
         !j["width"].is_number_unsigned() || !j["height"].is_number_unsigned())
     {
-        throw std::invalid_argument("region \"" + name + "\" expects unsigned");
+        std::string msg("region \"" + result.name + "\" dimensions expect unsigned values");
+        throw std::invalid_argument(msg);
     }
 
-    auto x = j["x"].get<uint32>();
-    auto y = j["y"].get<uint32>();
-    auto w = j["width"].get<uint32>();
-    auto h = j["height"].get<uint32>();
+    result.x = j["x"].get<uint32>();
+    result.y = j["y"].get<uint32>();
+    result.width = j["width"].get<uint32>();
+    result.height = j["height"].get<uint32>();
 
-    // Validate values are within range
-    if ((x + w > surface_size.w) || (y + h > surface_size.h))
+    // NOTE: For optional params we must prepend type checking with counting
+    //       the elements because the nlohmann/json library didn't feel the
+    //       need to implement an exists() method.  Accessing an element by
+    //       a key that does not exist has a side effect of constructing a
+    //       null object in-place.
+    if (j.count("origin") > 0)
     {
-        throw std::invalid_argument("region \"" + name + "\" has invalid dimensions");
-    }
-
-    // Optional origin
-    math::vec2 origin;
-    if (j.count("origin") > 0 && j["origin"].is_array())
-    {
-        const auto& values = j["origin"];
-        if (!values[0].is_number_unsigned() || !values[1].is_number_unsigned())
+        if (!j["origin"].is_array())
         {
-            throw std::invalid_argument("region \"" + name + "\" origin expects unsigned");
+            std::string msg("region \"" + result.name + "\" origin expects an array");
+            throw std::invalid_argument(msg);
         }
 
-        origin.x = values[0].get<uint32>();
-        origin.y = values[1].get<uint32>();
-
-        if (origin.x > w || origin.y > h)
+        const auto& origin = j["origin"];
+        if (!origin[0].is_number_unsigned() || !origin[1].is_number_unsigned())
         {
-            throw std::invalid_argument("region \"" + name + "\" invalid origin");
+            std::string msg("region \"" + result.name + "\" origin expects unsigned values");
+            throw std::invalid_argument(msg);
         }
+
+        auto tmp_x = origin[0].get<uint32>();
+        auto tmp_y = origin[1].get<uint32>();
+        if (tmp_x > result.width || tmp_y > result.height)
+        {
+            std::string msg("region \"" + result.name + "\" origin outside valid range");
+            throw std::invalid_argument(msg);
+        }
+
+        result.origin.x = static_cast<float>(tmp_x);
+        result.origin.y = static_cast<float>(tmp_y);
     }
     else
     {
-        origin.x = static_cast<float>(w) * 0.5f;
-        origin.y = static_cast<float>(h) * 0.5f;
+        result.origin.x = static_cast<float>(result.width) * 0.5f;
+        result.origin.y = static_cast<float>(result.height) * 0.5f;
     }
 
-    region.name = name;
-    region.clip = { static_cast<int32>(x), static_cast<int32>(y),
-                    static_cast<int32>(w), static_cast<int32>(h) };
-    region.size = { w * scale, h * scale };
-    region.origin = origin * scale;
-    region.coords.bottom_left  = math::vec2(::normalize(x, surface_size.w),
-                                            ::normalize(y, surface_size.h));
-    region.coords.bottom_right = math::vec2(::normalize(x + w, surface_size.w),
-                                            ::normalize(y, surface_size.h));
-    region.coords.top_left     = math::vec2(::normalize(x, surface_size.w),
-                                            ::normalize(y + h, surface_size.h));
-    region.coords.top_right    = math::vec2(::normalize(x + w, surface_size.w),
-                                            ::normalize(y + h, surface_size.h));
+    return result;
 }
 
-void
-ProcessAnimation (Animation& animation, const json& j, const texture_part* regions, size_t region_count)
+parsed_animation_data
+ParseAnimation (const json& j)
 {
-    auto name = j["name"].get<std::string>();
+    if (j.count("name") == 0 || !j["name"].is_string())
+    {
+        std::string msg("animation name is missing or is an invalid type");
+        throw std::invalid_argument(msg);
+    }
 
-    // Validate for unsigned to prevent overflow issues
+    parsed_animation_data result;
+    result.name = j["name"].get<std::string>();
+
     if (!j["interval"].is_number_unsigned())
     {
-        throw std::invalid_argument("animation \"" + name + "\" expects unsigned");
+        std::string msg("animation \"" + result.name + "\" interval expects unsigned values");
+        throw std::invalid_argument(msg);
     }
 
-    if (!from_string(j["mode"].get<std::string>(), animation.mode))
+    result.interval = j["interval"].get<uint32>();
+
+    if (!from_string(j["mode"].get<std::string>(), result.mode))
     {
-        throw std::invalid_argument("animation \"" + name + "\" mode invalid");
+        std::string msg("animation \"" + result.name + "\" mode invalid");
+        throw std::invalid_argument(msg);
     }
-
-    animation.interval = j["interval"].get<uint32>();
 
     const auto& frames = j["frames"];
     for (const auto& frame : frames)
     {
-        auto frame_name = frame["name"].get<std::string>();
+        parsed_frame result_frame;
+        result_frame.name = frame["name"].get<std::string>();
+        result_frame.flip = flip_none;
 
-        bool found = false;
-        for (size_t i = 0; i < region_count; i++)
+        if (frame.count("flip") > 0)
         {
-            const auto& region = regions[i];
-            if (region.name == frame_name)
+            auto flip_str = to_lower(frame["flip"].get<std::string>());
+            if (flip_str == "horizontal")
             {
-                if (frame.count("flip") > 0 && frame["flip"].is_string())
-                {
-                    auto flip = to_lower(frame["flip"].get<std::string>());
-                    if (flip == "horizontal")
-                    {
-                        animation.frames.emplace_back(region.flip_horizontal());
-                    }
-                    else if (flip == "vertical")
-                    {
-                        animation.frames.emplace_back(region.flip_vertical());
-                    }
-                    else
-                    {
-                        std::ostringstream ss;
-                        ss << "animation \"" << name << "\" at "
-                           << "frame \"" << frame_name << "\" has invalid flip value";
-                        throw std::invalid_argument(ss.str());
-                    }
-                }
-                else
-                {
-                    animation.frames.emplace_back(region);
-                }
-
-                found = true;
-                break;
+                result_frame.flip = flip_horizontal;
+            }
+            else if (flip_str == "vertical")
+            {
+                result_frame.flip = flip_vertical;
+            }
+            else
+            {
+                std::ostringstream ss;
+                ss << "animation \"" << result.name << "\" at "
+                   << "frame \"" << result_frame.name << "\" has invalid flip value";
+                throw std::invalid_argument(ss.str());
             }
         }
 
-        if (!found)
+        result.frames.push_back(result_frame);
+    }
+
+    return result;
+}
+
+void
+ProcessJson (const json& j, SpriteSheet& sheet)
+{
+    sheet.region_count = (j.count("texture_parts") > 0) ? j["texture_parts"].size() : 0;
+    if (sheet.region_count > 0)
+    {
+        RDGE_CALLOC(sheet.regions, sheet.region_count, nullptr);
+
+        auto surface_size = sheet.surface.Size();
+        const auto& json_regions = j["texture_parts"];
+        for (size_t i = 0; i < sheet.region_count; i++)
         {
-            std::ostringstream ss;
-            ss << "animation \"" << name << "\" cannot find "
-               << "frame \"" << frame_name << "\" in texture_part list";
-            throw std::invalid_argument(ss.str());
+            auto parsed = ParseRegion(json_regions[i]);
+
+            // Validate values are within range
+            if ((parsed.x + parsed.width > surface_size.w) ||
+                (parsed.y + parsed.height > surface_size.h))
+            {
+                std::string msg("region \"" + parsed.name + "\" outside valid range");
+                throw std::invalid_argument(msg);
+            }
+
+            auto& region = sheet.regions[i];
+            region.name = parsed.name;
+            region.value.clip = { static_cast<int32>(parsed.x),
+                                  static_cast<int32>(parsed.y),
+                                  static_cast<int32>(parsed.width),
+                                  static_cast<int32>(parsed.height) };
+            region.value.size = vec2(parsed.width, parsed.height);
+            region.value.origin = parsed.origin;
+
+            float x1 = normalize(parsed.x, surface_size.w);
+            float x2 = normalize(parsed.x + parsed.width, surface_size.w);
+            float y1 = normalize(parsed.y, surface_size.h);
+            float y2 = normalize(parsed.y + parsed.height, surface_size.h);
+            region.value.coords.bottom_left  = vec2(x1, y1);
+            region.value.coords.bottom_right = vec2(x2, y1);
+            region.value.coords.top_left     = vec2(x1, y2);
+            region.value.coords.top_right    = vec2(x2, y2);
+        }
+    }
+
+    sheet.animation_count = (j.count("animations") > 0) ? j["animations"].size() : 0;
+    if (sheet.animation_count > 0)
+    {
+        RDGE_CALLOC(sheet.animations, sheet.animation_count, nullptr);
+
+        const auto& json_animations = j["animations"];
+        for (size_t i = 0; i < sheet.animation_count; i++)
+        {
+            auto parsed = ParseAnimation(json_animations[i]);
+
+            auto& animation = sheet.animations[i];
+            animation.name = parsed.name;
+            animation.value.mode = parsed.mode;
+            animation.value.interval = parsed.interval;
+
+            for (const auto& parsed_frame : parsed.frames)
+            {
+                bool found = false;
+                for (size_t ii = 0; ii < sheet.region_count; ii++)
+                {
+                    const auto& region = sheet.regions[ii];
+                    if (region.name == parsed_frame.name)
+                    {
+                        if (parsed_frame.flip == flip_horizontal)
+                        {
+                            animation.value.frames.emplace_back(region.value.flip_horizontal());
+                        }
+                        else if (parsed_frame.flip == flip_vertical)
+                        {
+                            animation.value.frames.emplace_back(region.value.flip_vertical());
+                        }
+                        else
+                        {
+                            animation.value.frames.emplace_back(region.value);
+                        }
+
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    std::ostringstream ss;
+                    ss << "animation \"" << parsed.name << "\" cannot find "
+                       << "frame \"" << parsed_frame.name << "\" in region list";
+                    throw std::invalid_argument(ss.str());
+                }
+            }
         }
     }
 }
 
-// Process and validate a single texture_part
-std::pair<std::string, texture_part>
-ProcessTexturePart (const json& part, const math::uivec2& surface_size, uint32 scale)
-{
-    auto name = part["name"].get<std::string>();
-
-    // Validate for unsigned to prevent overflow issues
-    if (!part["x"].is_number_unsigned() || !part["y"].is_number_unsigned() ||
-        !part["width"].is_number_unsigned() || !part["height"].is_number_unsigned())
-    {
-        throw std::invalid_argument("texture_part \"" + name + "\" expects unsigned");
-    }
-
-    auto x = part["x"].get<uint32>();
-    auto y = part["y"].get<uint32>();
-    auto w = part["width"].get<uint32>();
-    auto h = part["height"].get<uint32>();
-
-    // Validate values are within range
-    if ((x + w > surface_size.w) || (y + h > surface_size.h))
-    {
-        throw std::invalid_argument("texture_part \"" + name + "\" has invalid dimensions");
-    }
-
-    // Optional origin
-    math::vec2 origin;
-    if (part.count("origin") > 0 && part["origin"].is_array())
-    {
-        const auto& values = part["origin"];
-        SDL_assert(values[0].is_number_unsigned());
-        SDL_assert(values[1].is_number_unsigned());
-
-        origin.x = values[0].get<uint32>();
-        origin.y = values[1].get<uint32>();
-
-        SDL_assert(origin.x <= w && origin.y <= h);
-    }
-    else
-    {
-        origin.x = static_cast<float>(w) * 0.5f;
-        origin.y = static_cast<float>(h) * 0.5f;
-    }
-
-    texture_part result;
-    result.name = name;
-    result.clip = { static_cast<int32>(x), static_cast<int32>(y),
-                    static_cast<int32>(w), static_cast<int32>(h) };
-    result.size = { w * scale, h * scale };
-    result.origin = origin * scale;
-    result.coords.bottom_left  = math::vec2(::normalize(x, surface_size.w),
-                                            ::normalize(y, surface_size.h));
-    result.coords.bottom_right = math::vec2(::normalize(x + w, surface_size.w),
-                                            ::normalize(y, surface_size.h));
-    result.coords.top_left     = math::vec2(::normalize(x, surface_size.w),
-                                            ::normalize(y + h, surface_size.h));
-    result.coords.top_right    = math::vec2(::normalize(x + w, surface_size.w),
-                                            ::normalize(y + h, surface_size.h));
-
-    return std::make_pair(name, result);
-}
-
 } // anonymous namespace
-
-namespace rdge {
 
 SpriteSheet::SpriteSheet (const std::vector<uint8>& msgpack, Surface surface)
     : surface(surface)
@@ -231,34 +289,7 @@ SpriteSheet::SpriteSheet (const std::vector<uint8>& msgpack, Surface surface)
     try
     {
         json j = json::from_msgpack(msgpack);
-
-        this->region_count = j["texture_parts"].size();
-        if (this->region_count > 0)
-        {
-            RDGE_CALLOC(this->regions, this->region_count, nullptr);
-
-            auto surface_size = this->surface.Size();
-            const auto& json_regions = j["texture_parts"];
-            for (size_t i = 0; i < this->region_count; i++)
-            {
-                ProcessRegion(this->regions[i], json_regions[i], surface_size, 1);
-            }
-        }
-
-        this->animation_count = j["animations"].size();
-        if (this->animation_count > 0)
-        {
-            RDGE_CALLOC(this->animations, this->animation_count, nullptr);
-
-            const auto& json_animations = j["animations"];
-            for (size_t i = 0; i < this->animation_count; i++)
-            {
-                ProcessAnimation(this->animations[i],
-                                 json_animations[i],
-                                 this->regions,
-                                 this->region_count);
-            }
-        }
+        ProcessJson(j, *this);
     }
     catch (const std::exception& ex)
     {
@@ -266,7 +297,7 @@ SpriteSheet::SpriteSheet (const std::vector<uint8>& msgpack, Surface surface)
     }
 }
 
-SpriteSheet::SpriteSheet (const std::string& filepath, bool scale_for_hidpi)
+SpriteSheet::SpriteSheet (const std::string& filepath)
 {
     try
     {
@@ -277,111 +308,17 @@ SpriteSheet::SpriteSheet (const std::string& filepath, bool scale_for_hidpi)
         }
 
         const auto j = json::parse(config);
-        this->image_path = j["image_path"].get<std::string>();
 
-        // NOTE: For optional params we must prepend type checking with counting
-        //       the elements because the nlohmann/json library didn't feel the
-        //       need to implement an exists() method.  Accessing an element by
-        //       a key that does not exist has a side effect of constructing a
-        //       null object in-place.
-        uint32 scale = scale_for_hidpi ? 2 : 1;
-        if (j.count("image_scale") > 0 && j["image_scale"].is_number_unsigned())
-        {
-            this->image_scale = j["image_scale"].get<uint32>();
-            scale *= this->image_scale;
-
-            SDL_assert(math::is_pot(this->image_scale));
-        }
-
-        this->surface = Surface(this->image_path);
+        auto image_path = j["image_path"].get<std::string>();
+        this->surface = Surface(image_path);
         this->texture = std::make_shared<Texture>(this->surface);
-        auto surface_size = this->surface.Size();
 
-        const auto& texture_parts = j["texture_parts"];
-        for (const auto& part : texture_parts)
-        {
-            auto inserted = m_parts.emplace(ProcessTexturePart(part, surface_size, scale));
-            if (inserted.second == false)
-            {
-                std::ostringstream ss;
-                ss << "Part could not be added to the collection. "
-                   << "check to see if there are duplicate keys. "
-                   << "key=" << inserted.first->first;
-
-                throw std::invalid_argument(ss.str());
-            }
-        }
-
-        // TODO This could be moved to it's own method
-        // TODO Add test cases
-        if (j.count("animations") > 0)
-        {
-            const auto& animations = j["animations"];
-            for (const auto& animation : animations)
-            {
-                auto name = animation["name"].get<std::string>();
-
-                // Validate for unsigned to prevent overflow issues
-                if (!animation["interval"].is_number_unsigned())
-                {
-                    throw std::invalid_argument("animation \"" + name + "\" expects unsigned");
-                }
-
-                Animation::PlayMode mode;
-                if (!from_string(animation["mode"].get<std::string>(), mode))
-                {
-                    throw std::invalid_argument("animation \"" + name + "\" mode invalid");
-                }
-
-                Animation value(mode, animation["interval"].get<uint32>());
-
-                const auto& frames = animation["frames"];
-                for (const auto& frame : frames)
-                {
-                    auto frame_name = frame["name"].get<std::string>();
-                    auto search = m_parts.find(frame_name);
-                    if (search == m_parts.end())
-                    {
-                        std::ostringstream ss;
-                        ss << "animation \"" << name << "\" cannot find "
-                           << "frame \"" << frame_name << "\" in texture_part list";
-                        throw std::invalid_argument(ss.str());
-                    }
-
-                    const auto& frame_part = search->second;
-                    if (frame.count("flip") > 0 && frame["flip"].is_string())
-                    {
-                        auto flip = to_lower(frame["flip"].get<std::string>());
-                        if (flip == "horizontal")
-                        {
-                            value.frames.emplace_back(frame_part.flip_horizontal());
-                        }
-                        else if (flip == "vertical")
-                        {
-                            value.frames.emplace_back(frame_part.flip_vertical());
-                        }
-                        else
-                        {
-                            std::ostringstream ss;
-                            ss << "animation \"" << name << "\" at "
-                               << "frame \"" << frame_name << "\" has invalid flip value";
-                            throw std::invalid_argument(ss.str());
-                        }
-                    }
-                    else
-                    {
-                        value.frames.emplace_back(frame_part);
-                    }
-                }
-
-                m_animations.emplace(name, value);
-            }
-        }
+        ProcessJson(j, *this);
     }
     catch (const std::logic_error& ex)
     {
-        // Catches domain_error, out_of_range, invalid_argument.  No need to handle
-        // them differently at this time.
+        // Catches domain_error, out_of_range, invalid_argument.
+        // No need to handle them differently at this time.
 
         RDGE_THROW(ex.what());
     }
@@ -396,33 +333,31 @@ SpriteSheet::~SpriteSheet (void) noexcept
 const texture_part&
 SpriteSheet::operator[] (const std::string& name) const
 {
-    try
+    for (size_t i = 0; i < this->region_count; i++)
     {
-        return m_parts.at(name);
+        const auto& region = this->regions[i];
+        if (region.name == name)
+        {
+            return region.value;
+        }
     }
-    catch (const std::out_of_range& ex)
-    {
-        std::ostringstream ss;
-        ss << "SpriteSheet lookup failed. key=" << name;
 
-        RDGE_THROW(ss.str());
-    }
+    RDGE_THROW("SpriteSheet region lookup failed. key=" + name);
 }
 
 const Animation&
 SpriteSheet::GetAnimation (const std::string& name) const
 {
-    try
+    for (size_t i = 0; i < this->animation_count; i++)
     {
-        return m_animations.at(name);
+        const auto& animation = this->animations[i];
+        if (animation.name == name)
+        {
+            return animation.value;
+        }
     }
-    catch (const std::out_of_range& ex)
-    {
-        std::ostringstream ss;
-        ss << "SpriteSheet animation lookup failed. key=" << name;
 
-        RDGE_THROW(ss.str());
-    }
+    RDGE_THROW("SpriteSheet animation lookup failed. key=" + name);
 }
 
 std::unique_ptr<Sprite>
@@ -431,10 +366,7 @@ SpriteSheet::CreateSprite (const std::string& name, const math::vec3& pos) const
     SDL_assert(this->texture != nullptr);
 
     const auto& part = (*this)[name]; // Can throw if lookup fails
-    return std::make_unique<Sprite>(pos,
-                                    static_cast<math::vec2>(part.size),
-                                    this->texture,
-                                    part.coords);
+    return std::make_unique<Sprite>(pos, part.size, this->texture, part.coords);
 }
 
 std::unique_ptr<SpriteGroup>
@@ -445,7 +377,7 @@ SpriteSheet::CreateSpriteChain (const std::string& name,
     SDL_assert(this->texture != nullptr);
 
     const auto& part = (*this)[name]; // Can throw if lookup fails
-    auto size = static_cast<math::vec2>(part.size);
+    auto size = part.size;
     auto group = std::make_unique<SpriteGroup>();
 
     uint32 rows = (to_fill.h > size.h) ? static_cast<uint32>(to_fill.h / size.h) + 1 : 1;

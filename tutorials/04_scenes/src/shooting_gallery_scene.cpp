@@ -3,6 +3,7 @@
 #include <rdge/assets.hpp>
 #include <rdge/graphics.hpp>
 #include <rdge/math.hpp>
+#include <rdge/debug.hpp>
 
 using namespace rdge;
 using namespace rdge::math;
@@ -37,8 +38,8 @@ ShootingGalleryScene::ShootingGalleryScene (void)
     , p1_layer(render_target)
     , curtain_layer(render_target)
 {
-    SpriteSheet hud_sheet("res/spritesheet_hud.json", true);
-    SpriteSheet stall_sheet("res/spritesheet_stall.json", true);
+    SpriteSheet hud_sheet("res/spritesheet_hud.json");
+    SpriteSheet stall_sheet("res/spritesheet_stall.json");
 
     // Load and set custom cursor
     const auto& clip = hud_sheet["crosshair_blue_large.png"].clip;
@@ -175,19 +176,27 @@ ShootingGalleryScene::ShootingGalleryScene (void)
 
 void
 ShootingGalleryScene::Initialize (void)
-{ }
+{
+    debug::RegisterCamera(&camera);
+}
 
 void
 ShootingGalleryScene::Terminate (void)
-{ }
-
-void
-ShootingGalleryScene::Hibernate (void)
-{ }
+{
+    debug::RegisterCamera(nullptr);
+}
 
 void
 ShootingGalleryScene::Activate (void)
-{ }
+{
+    debug::RegisterCamera(&camera);
+}
+
+void
+ShootingGalleryScene::Hibernate (void)
+{
+    debug::RegisterCamera(nullptr);
+}
 
 void
 ShootingGalleryScene::OnEvent (const Event&)
@@ -218,6 +227,7 @@ ShootingGalleryScene::OnRender (void)
 {
     camera.Update();
     render_target->SetProjection(camera.combined);
+    debug::SetProjection(camera.combined);
 
     bg_layer.Draw();
     p3_layer.Draw();

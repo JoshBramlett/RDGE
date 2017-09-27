@@ -16,33 +16,34 @@ namespace rdge {
 //! \class texture_part
 //! \brief Represents an individual section of the \ref SpriteSheet
 //! \details Container includes the data the client can use for rendering and
-//!          commonly represents a sprite texture or alternatively a single
-//!          animation frame.
+//!          commonly represents a sprite texture or animation frame.
 //! \note The size and origin values may be modified from the config to
 //!       accommodate the scale multiplication.
 struct texture_part
 {
-    std::string  name;   //!< Unique name
-    screen_rect  clip;   //!< Unmodified clipping rectangle
-    tex_coords   coords; //!< Normalized texture coordinates
-    math::uivec2 size;   //!< Size in pixels (scaled)
+    //! \brief Surface clipping rectangle
+    //! \details Should remain unmodified from the import.  Used for blitting
+    //!          from the associated surface.
+    screen_rect clip;
 
-    //! \brief Origin used for drawing offsets (scaled)
-    //! \details Optional field used to align frames, and to generate sprite
-    //!          vertices from a world center point.  Value is defaulted to
-    //!          the centroid if unset.
+    //! \brief Normalized texture coordinates
+    //! \details UV coordinates normalized to the associated surface.
+    tex_coords coords;
+
+    //! \brief Size (possibly scaled) of the texture region
+    //! \details Used as a cache for rendering operations to prevent having to
+    //!          compute a scaled size every frame.
+    math::vec2 size;
+
+    //! \brief Origin (possibly scaled) used for drawing offsets
+    //! \details Optional field for aligning similar frames.  The origin
+    //!          represents the center point when generating sprite vertices.
+    //! \note Defaults to the centroid.
     math::vec2 origin;
 
-    //!@{
-    //! \brief Basic tex_coords transforms
-    //! \returns Reference to self
+    //!@{ Basic texture_part transforms
     texture_part& flip_horizontal (void) noexcept;
     texture_part& flip_vertical (void) noexcept;
-    //!@}
-
-    //!@{
-    //! \brief Basic tex_coords transforms
-    //! \returns Value after transform
     texture_part flip_horizontal (void) const noexcept;
     texture_part flip_vertical (void) const noexcept;
     //!@}

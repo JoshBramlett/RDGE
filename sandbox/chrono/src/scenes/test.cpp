@@ -60,7 +60,7 @@ TestScene::TestScene (void)
     collision_graph.listener = &l;
     //camera.zoom = 1.5f;
 
-    SpriteSheet sheet("res/environment.json", Window::Current().IsHighDPI());
+    SpriteSheet sheet("res/environment.json");
 
     ///////////////////
     // Background layer
@@ -87,6 +87,12 @@ TestScene::TestScene (void)
 
     // 1920.f -> 30
     // 1080.f -> 16.875
+
+    vec2 debris_size(16.f, 16.f);
+    //vec2 debris_size(64.f, 64.f);
+    auto& weed_uv = sheet["weed1"].coords;
+    auto& rock_uv = sheet["rock1"].coords;
+
     Random rng;
     for (float y = -half_height; y < half_height; y += PIXELS_PER_METER)
     {
@@ -95,11 +101,17 @@ TestScene::TestScene (void)
             auto random = rng.Next(15);
             if (random == 0)
             {
-                background.AddSprite(sheet.CreateSprite("weed1", vec3(x, y, 0.f)));
+                background.AddSprite(std::make_shared<Sprite>(vec3(x, y),
+                                                              debris_size,
+                                                              sheet.texture,
+                                                              weed_uv));
             }
             else if (random == 1)
             {
-                background.AddSprite(sheet.CreateSprite("rock1", vec3(x, y, 0.f)));
+                background.AddSprite(std::make_shared<Sprite>(vec3(x, y),
+                                                              debris_size,
+                                                              sheet.texture,
+                                                              rock_uv));
             }
         }
     }
