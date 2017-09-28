@@ -1,5 +1,5 @@
 #include <rdge/application.hpp>
-#include <rdge/util/io.hpp>
+#include <rdge/util/io/rwops_base.hpp>
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/hints.hpp>
 
@@ -14,8 +14,8 @@ using json = nlohmann::json;
 
 namespace rdge {
 
-Application::Application (const std::string& path)
-    : Application(LoadAppSettings(path))
+Application::Application (const char* filepath)
+    : Application(LoadAppSettings(filepath))
 { }
 
 Application::Application (const app_settings& settings)
@@ -147,19 +147,19 @@ Application::MessageBox (MessageBoxType     type,
 }
 
 app_settings
-LoadAppSettings (const std::string& path)
+LoadAppSettings (const char* filepath)
 {
     app_settings settings;
 
     try
     {
-        auto config = rdge::util::read_text_file(path.c_str());
-        if (config.empty())
-        {
-            return settings;
-        }
+        auto rwops = rwops_base::from_file(filepath, "rt");
+        auto sz = rwops.size();
 
-        auto j = json::parse(config);
+        std::string file_data(sz + 1, '\0');
+        rwops.read(file_data.data(), sizeof(char), sz);
+
+        const auto j = json::parse(file_data);
         if (!j.is_object())
         {
             return settings;

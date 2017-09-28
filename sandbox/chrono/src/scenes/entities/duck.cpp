@@ -85,9 +85,9 @@ Duck::OnUpdate (const delta_time& dt)
     auto& frame = current_animation->GetFrame(dt.ticks);
 
     math::vec2 pos = body->GetWorldCenter() * 64.f;
-    pos.x -= frame.size.w * 0.5f;
-    pos.y -= frame.size.h * 0.5f;
-    vops::SetPosition(sprite->vertices, pos);
+    pos.x -= frame.size.w * 4.f * 0.5f;
+    pos.y -= frame.size.h * 4.f * 0.5f;
+    vops::SetPosition(sprite->vertices, pos, frame.size * 4.f);
 
     vops::SetTexCoords(this->sprite->vertices, frame.coords);
 }

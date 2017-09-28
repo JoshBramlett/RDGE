@@ -90,10 +90,10 @@ public:
     //! \brief Application ctor
     //! \details Loads app settings from the provided configuration file
     //!          path and performs all initialization.
-    //! \param [in] path Path to settings config file
+    //! \param [in] filepath Path to settings config file
     //! \throws rdge::Exception Configuration file parsing failed
     //! \throws rdge::SDLException SDL Initialization failed
-    explicit Application (const std::string& path);
+    explicit Application (const char* filepath);
 
     //! \brief Application dtor
     //! \details Calls SDL_Quit
@@ -138,10 +138,10 @@ public:
 //! \details The configuration file must be a json object with the app_settings
 //!          variables representing keys.  All fields are optional, and if no file
 //!          is found a default \ref app_settings struct will be returned.
-//! \param [in] path Configuration file path
+//! \param [in] filepath Configuration file path
 //! \returns Populated app_settings struct
 //! \throws rdge::Exception Configuration file parsing failed
 app_settings
-LoadAppSettings (const std::string& path);
+LoadAppSettings (const char* filepath);
 
 } // namespace rdge

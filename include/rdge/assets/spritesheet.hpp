@@ -10,7 +10,6 @@
 #include <rdge/graphics/animation.hpp>
 
 #include <memory>
-#include <unordered_map>
 #include <vector>
 
 //! \namespace rdge Rainbow Drop Game Engine
@@ -30,11 +29,9 @@ class Texture;
 //!          up the parts.  Coordinates are required to be zero index pixel
 //!          perfect unsigned integers with the origin being set to the top
 //!          left corner and will be normalized to inverted floating point
-//!          texture coordinates.  The image_scale is an optional parameter
-//!          which is a scale multiplier applied to all texture parts.  This
-//!          is useful for small pixel art.  Specifying a origin is optional
-//!          whose coordinates should be set relative to the texture_part,
-//!          not the spritesheet.
+//!          texture coordinates.  Origin is an optional field that if set can
+//!          be used during rendering to override the logical center of the
+//!          texture region.
 //!          Animations are optional and will create an \ref Animation object
 //!          with the frames made up of the texture_part definitions in the
 //!          same file.
@@ -73,7 +70,7 @@ public:
     //! \details Loads and parses the json file.
     //! \param [in] filepath Path to the config file
     //! \throws rdge::Exception Unable to parse config
-    explicit SpriteSheet (const std::string& filepath);
+    explicit SpriteSheet (const char* filepath);
 
     //! \brief SpriteSheet ctor
     //! \details Loads and parses the packed json (used with \ref PackFile)
@@ -89,9 +86,8 @@ public:
     //!@{ Non-copyable, move enabled
     SpriteSheet (const SpriteSheet&) = delete;
     SpriteSheet& operator= (const SpriteSheet&) = delete;
-    // TODO
-    SpriteSheet (SpriteSheet&&) noexcept = default;
-    SpriteSheet& operator= (SpriteSheet&&) noexcept = default;
+    SpriteSheet (SpriteSheet&&) noexcept;
+    SpriteSheet& operator= (SpriteSheet&&) noexcept;
     //!@}
 
     //! \brief SpriteSheet Subscript Operator
@@ -107,33 +103,21 @@ public:
     //! \throws rdge::Exception Lookup failed
     const Animation& GetAnimation (const std::string& name) const;
 
+    // TODO
+    // - Add getter for the texture_part
+    // - Rename texture_part to texture_region
+    // - Support scaling?
+    // - Check for duplicate keys during import?
     const Animation& GetAnimation (int32 animation_id) const
     {
         return animations[animation_id].value;
     }
 
-    //! \brief Create a sprite from the sub-texture element
-    //! \details Uses the provided position and size along with the associated
-    //!          uv data from the name lookup to construct a sprite.
-    //! \param [in] name Name of the element
-    //! \param [in] pos Sprite position
-    //! \returns Sprite unique pointer
-    //! \throws rdge::Exception Lookup failed
+    // TODO Remove
     std::unique_ptr<Sprite> CreateSprite (const std::string& name,
                                           const math::vec3& pos) const;
 
-    //! \brief Create a chain of sprites from the sub-texture element
-    //! \details Similar to \ref CreateSprite, but will create a \ref SpriteGroup
-    //!          by chaining together the same sprite.  The intended purpose is to
-    //!          overcome the limitation imposed by OpenGL where texture wrapping
-    //!          cannot be done when specifying sub-texture uv coordinates.
-    //! \note If only a single dimension of the intended final size is known a
-    //!       value of zero can be passed for the other dimension.
-    //! \param [in] name Name of the element
-    //! \param [in] pos Sprite position
-    //! \param [in] to_fill The intended final size
-    //! \returns SpriteGroup unique pointer
-    //! \throws rdge::Exception Lookup failed
+    // TODO Remove
     std::unique_ptr<SpriteGroup> CreateSpriteChain (const std::string& name,
                                                     const math::vec3&  pos,
                                                     const math::vec2&  to_fill) const;

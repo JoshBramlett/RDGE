@@ -4,7 +4,7 @@
 #include <rdge/assets/surface.hpp>
 #include <rdge/graphics/texture.hpp>
 #include <rdge/math/intrinsics.hpp>
-#include <rdge/util/io.hpp>
+#include <rdge/util/io/rwops_base.hpp>
 #include <rdge/util/strings.hpp>
 #include <rdge/util/memory/alloc.hpp>
 #include <rdge/internal/exception_macros.hpp>
@@ -297,17 +297,17 @@ SpriteSheet::SpriteSheet (const std::vector<uint8>& msgpack, Surface surface)
     }
 }
 
-SpriteSheet::SpriteSheet (const std::string& filepath)
+SpriteSheet::SpriteSheet (const char* filepath)
 {
     try
     {
-        auto config = rdge::util::read_text_file(filepath.c_str());
-        if (config.empty())
-        {
-            throw std::invalid_argument("File does not exist.");
-        }
+        auto rwops = rwops_base::from_file(filepath, "rt");
+        auto sz = rwops.size();
 
-        const auto j = json::parse(config);
+        std::string file_data(sz + 1, '\0');
+        rwops.read(file_data.data(), sizeof(char), sz);
+
+        const auto j = json::parse(file_data);
 
         auto image_path = j["image_path"].get<std::string>();
         this->surface = Surface(image_path);
@@ -328,6 +328,35 @@ SpriteSheet::~SpriteSheet (void) noexcept
 {
     RDGE_FREE(this->regions, nullptr);
     RDGE_FREE(this->animations, nullptr);
+}
+
+SpriteSheet::SpriteSheet (SpriteSheet&& other) noexcept
+    : surface(std::move(other.surface))
+    , texture(std::move(other.texture))
+    , regions(other.regions)
+    , animations(other.animations)
+{
+    other.regions = nullptr;
+    other.animations = nullptr;
+    other.region_count = 0;
+    other.animation_count = 0;
+}
+
+SpriteSheet&
+SpriteSheet::operator= (SpriteSheet&& rhs) noexcept
+{
+    if (this != &rhs)
+    {
+        std::swap(this->surface, rhs.surface);
+        std::swap(this->texture, rhs.texture);
+        std::swap(this->regions, rhs.regions);
+        std::swap(this->animations, rhs.animations);
+
+        rhs.region_count = 0;
+        rhs.animation_count = 0;
+    }
+
+    return *this;
 }
 
 const texture_part&
