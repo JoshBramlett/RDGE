@@ -1,5 +1,6 @@
 #include <rdge/assets/bitmap_font.hpp>
 #include <rdge/assets/bmfont.hpp>
+#include <rdge/assets/surface.hpp>
 #include <rdge/internal/exception_macros.hpp>
 
 #include <SDL_assert.h>

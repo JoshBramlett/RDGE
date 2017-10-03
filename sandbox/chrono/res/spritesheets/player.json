@@ -1,5 +1,5 @@
 {
-  "texture_parts": [
+  "regions": [
     {
       "name": "idle_front_1",
       "x": 0,
@@ -786,5 +786,5 @@
   	}
   ],
   "image_path": "res/player.png",
-  "image_scale": 2
+  "type": "spritesheet"
 }

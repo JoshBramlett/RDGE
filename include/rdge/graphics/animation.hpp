@@ -6,7 +6,7 @@
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/assets/texture_part.hpp>
+#include <rdge/assets/spritesheet_region.hpp>
 
 #include <vector>
 
@@ -15,7 +15,7 @@ namespace rdge {
 
 //! \class Animation
 //! \brief Storage and logic to represent an animated sequence
-//! \details Stores a collection of \ref texture_part objects which represent
+//! \details Stores a collection of \ref spritesheet_region objects that are
 //!          the individual frames in the animation.  Elapsed ticks are
 //!          accumulated in a local cache and the resultant frame will be
 //!          provided based upon that and the specified \ref PlayMode.
@@ -47,10 +47,10 @@ public:
     //! \returns Index of the current frame
     uint32 GetFrameIndex (uint32 ticks) noexcept;
 
-    //! \brief Get the \ref texture_part of the current frame
+    //! \brief Get the \ref spritesheet_region of the current frame
     //! \param [in] ticks Elapsed ticks since last call
     //! \returns Current frame
-    const texture_part& GetFrame (uint32 ticks) noexcept;
+    const spritesheet_region& GetFrame (uint32 ticks) noexcept;
 
     //! \brief Reset the animation sequence
     void Reset (void) noexcept;
@@ -69,7 +69,7 @@ public:
     uint32 interval = 0; //!< Interval between frames
     uint32 elapsed = 0;  //!< Elapsed time since the start of the animation
 
-    std::vector<texture_part> frames; //!< Collection of the frames
+    std::vector<spritesheet_region> frames; //!< Collection of the frames
 };
 
 //! \brief Animation::PlayMode stream output operator

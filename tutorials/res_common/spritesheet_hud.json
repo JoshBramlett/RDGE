@@ -1,5 +1,5 @@
 {
-  "texture_parts": [
+  "regions": [
     {
       "name": "crosshair_blue_large.png",
       "x": 169,
@@ -337,5 +337,6 @@
       "height": 69
     }
   ],
-  "image_path": "res/spritesheet_hud.png"
+  "image_path": "res/spritesheet_hud.png",
+  "type": "spritesheet"
 }

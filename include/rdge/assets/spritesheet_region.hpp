@@ -1,4 +1,4 @@
-//! \headerfile <rdge/assets/texture_part.hpp>
+//! \headerfile <rdge/assets/spritesheet_region.hpp>
 //! \author Josh Bramlett
 //! \version 0.0.10
 //! \date 08/09/2017
@@ -13,13 +13,13 @@
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
-//! \class texture_part
+//! \struct spritesheet_region
 //! \brief Represents an individual section of the \ref SpriteSheet
 //! \details Container includes the data the client can use for rendering and
 //!          commonly represents a sprite texture or animation frame.
 //! \note The size and origin values may be modified from the config to
 //!       accommodate the scale multiplication.
-struct texture_part
+struct spritesheet_region
 {
     //! \brief Surface clipping rectangle
     //! \details Should remain unmodified from the import.  Used for blitting
@@ -41,15 +41,15 @@ struct texture_part
     //! \note Defaults to the centroid.
     math::vec2 origin;
 
-    //!@{ Basic texture_part transforms
-    texture_part& flip_horizontal (void) noexcept;
-    texture_part& flip_vertical (void) noexcept;
-    texture_part flip_horizontal (void) const noexcept;
-    texture_part flip_vertical (void) const noexcept;
+    //!@{ Basic spritesheet_region transforms
+    spritesheet_region& flip_horizontal (void) noexcept;
+    spritesheet_region& flip_vertical (void) noexcept;
+    spritesheet_region flip_horizontal (void) const noexcept;
+    spritesheet_region flip_vertical (void) const noexcept;
     //!@}
 };
 
-//! \brief texture_part stream output operator
-std::ostream& operator<< (std::ostream&, const texture_part&);
+//! \brief spritesheet_region stream output operator
+std::ostream& operator<< (std::ostream&, const spritesheet_region&);
 
 } // namespace rdge

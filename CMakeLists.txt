@@ -91,8 +91,8 @@ add_library (RDGE SHARED
              src/assets/bitmap_font.cpp
              src/assets/font.cpp
              src/assets/spritesheet.cpp
+             src/assets/spritesheet_region.cpp
              src/assets/surface.cpp
-             src/assets/texture_part.cpp
 
              src/debug/line_renderer.cpp
              src/debug/widgets/camera_widget.cpp

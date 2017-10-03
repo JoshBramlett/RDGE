@@ -1,5 +1,8 @@
 #include <rdge/graphics/texture.hpp>
 #include <rdge/graphics/shader.hpp>
+#include <rdge/assets/surface.hpp>
+#include <rdge/math/intrinsics.hpp>
+#include <rdge/util/logger.hpp>
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
 
@@ -22,6 +25,14 @@ Texture::Texture (Surface&& surface)
 
 Texture::Texture (Surface& surface)
 {
+    auto surface_ptr = static_cast<const SDL_Surface*>(surface);
+    if (!math::is_pot(surface_ptr->w) || !math::is_pot(surface_ptr->h))
+    {
+        WLOG() << "Texture loaded has NPOT dimensions."
+               << " w=" << surface_ptr->w
+               << " h=" << surface_ptr->h;
+    }
+
     m_handle = opengl::CreateTexture();
     Reload(surface);
 }

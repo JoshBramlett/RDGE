@@ -6,7 +6,8 @@
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/assets/texture_part.hpp>
+#include <rdge/assets/surface.hpp>
+#include <rdge/assets/spritesheet_region.hpp>
 #include <rdge/graphics/animation.hpp>
 
 #include <memory>
@@ -18,31 +19,31 @@ namespace rdge {
 //!@{ Forward declarations
 class Sprite;
 class SpriteGroup;
-class Surface;
 class Texture;
 //!@}
 
 //! \class SpriteSheet
-//! \brief Load sprite sheet from a json formatted config file
-//! \details Config file contains the make up for the sprite sheet, which
-//!          includes the image path to load and the coordinates that will make
-//!          up the parts.  Coordinates are required to be zero index pixel
-//!          perfect unsigned integers with the origin being set to the top
-//!          left corner and will be normalized to inverted floating point
-//!          texture coordinates.  Origin is an optional field that if set can
-//!          be used during rendering to override the logical center of the
-//!          texture region.
-//!          Animations are optional and will create an \ref Animation object
-//!          with the frames made up of the texture_part definitions in the
-//!          same file.
-//! \note No checking is done to ensure parts are unique or do not overlap.
-//! \warning No type conversions are performed, so numeric values wrapped in
-//!          quotes are treated as strings and the parsing will fail.
+//! \brief Load sprite sheet from a json config
+//! \details SpriteSheet (aka TextureAtlas) represents the definition of how
+//!          pixel data is broken down to individual sprites.  The definition
+//!          is parsed from an external json resource, and includes support
+//!          for defining the texture regions (with optional support to define
+//!          animations), and tile maps.
+//!
+//!          The root level field "type" is required to define how the json
+//!          resource is formatted.  Types include:
+//!            - "spritesheet"
+//!            - "tilemap"
+//!
+//!          A "spritesheet" resource defines the regions and has optional
+//!          support for defining animations.
+//!
 //! \code{.json}
 //! {
 //!     "image_path": "textures/image.png",
-//!     "texture_parts": [ {
-//!         "name": "part_name",
+//!     "type": "spritesheet",
+//!     "regions": [ {
+//!         "name": "region_name",
 //!         "x": 0,
 //!         "y": 0,
 //!         "width": 32,
@@ -60,10 +61,40 @@ class Texture;
 //!     } ]
 //! }
 //! \endcode
+//!
+//!          A "tilemap" resource generates the region data from the tile
+//!          definition.  The mapping is also parsed and cached.
+//!
+//! \code{.json}
+//! {
+//!     "image_path": "textures/image.png",
+//!     "type": "tilemap",
+//!     "tileswide": 30,
+//!     "tileshigh": 30,
+//!     "tilewidth": 16,
+//!     "tileheight": 16,
+//!     "layers": [ {
+//!         "name": "Layer 0",
+//!         "number": 0,
+//!         "tiles": [ {
+//!             "x": 29,
+//!             "y": 29,
+//!             "flipX": false,
+//!             "rot": 0,
+//!             "index": 899,
+//!             "tile": 29
+//!         } ],
+//!     } ]
+//! }
+//! \endcode
+//!
+//! \note Type checking is done on all fields, and logical checks are performed
+//!       where applicable (e.g. Region cannot exceed surface size), but no
+//!       checking is done to ensure parts are unique or do not overlap.
 class SpriteSheet
 {
 public:
-    //! \brief SpriteSheet ctor
+    //! \brief SpriteSheet default ctor
     SpriteSheet (void) = default;
 
     //! \brief SpriteSheet ctor
@@ -95,7 +126,7 @@ public:
     //! \param [in] name Name of the element
     //! \returns Associated tex_coords
     //! \throws rdge::Exception Lookup failed
-    const texture_part& operator[] (const std::string& name) const;
+    const spritesheet_region& operator[] (const std::string& name) const;
 
     //! \brief Retrive an animation by name
     //! \param [in] name Name of the animation
@@ -104,8 +135,7 @@ public:
     const Animation& GetAnimation (const std::string& name) const;
 
     // TODO
-    // - Add getter for the texture_part
-    // - Rename texture_part to texture_region
+    // - Add getter for the spritesheet_region
     // - Support scaling?
     // - Check for duplicate keys during import?
     const Animation& GetAnimation (int32 animation_id) const
@@ -123,7 +153,9 @@ public:
                                                     const math::vec2&  to_fill) const;
 
 public:
-    Surface                  surface; //!< Surface specified in the file input
+    Surface surface; //!< Pixel data of the sprite sheet
+
+    // TODO Consider remove
     std::shared_ptr<Texture> texture; //!< Texture generated from the surface
 
     //! \struct region_data
@@ -131,7 +163,7 @@ public:
     struct region_data
     {
         std::string  name;
-        texture_part value;
+        spritesheet_region value;
     };
 
     //! \struct animation_data
@@ -151,6 +183,16 @@ public:
     animation_data* animations = nullptr;
     size_t          animation_count = 0;
     //!@}
+
+    //! \struct tilemap_data
+    //! \brief Defines the map size dimensions and mapping to texture coordinates
+    struct tilemap_data
+    {
+        uint32 pitch = 0;       //!< Number of tiles in a row
+
+        int32* tiles = nullptr; //!< Map indices that point to the region
+        size_t count = 0;
+    } tilemap;
 };
 
 } // namespace rdge

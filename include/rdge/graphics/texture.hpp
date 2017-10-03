@@ -6,13 +6,15 @@
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/assets/surface.hpp>
 
-#include <string>
 #include <limits>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
+
+//!@{ Forward declarations
+class Surface;
+//!@}
 
 //! \class Texture
 //! \brief OpenGL texture object
@@ -24,8 +26,7 @@ public:
     //! \var INVALID_UNIT_ID Constant defining the texture unit id is not set
     static constexpr uint32 INVALID_UNIT_ID = std::numeric_limits<uint32>::max();
 
-    //! \brief Texture ctor
-    //! \details Default ctor.
+    //! \brief Texture default ctor
     Texture (void);
 
     //! \brief Texture ctor
@@ -56,7 +57,7 @@ public:
     //!@}
 
     //! \brief Activate and binds the texture to the OpenGL context
-    //! \throws RDGE::Exception Invalid sampler unit id
+    //! \throws rdge::Exception Invalid sampler unit id
     void Activate (void) const;
 
     //! \brief Reset the pixel data of the texture

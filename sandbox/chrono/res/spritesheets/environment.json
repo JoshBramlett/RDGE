@@ -1,5 +1,5 @@
 {
-  "texture_parts": [
+  "regions": [
     {
       "name": "dirt",
       "x": 0,
@@ -23,5 +23,5 @@
     }
   ],
   "image_path": "res/environment.png",
-  "image_scale": 2
+  "type": "spritesheet"
 }

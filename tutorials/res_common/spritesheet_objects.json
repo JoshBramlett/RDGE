@@ -1,5 +1,5 @@
 {
-  "texture_parts": [
+  "regions": [
     {
       "name": "duck_back.png",
       "x": 534,
@@ -323,5 +323,6 @@
       "height": 142
     }
   ],
-  "image_path": "res/spritesheet_objects.png"
+  "image_path": "res/spritesheet_objects.png",
+  "type": "spritesheet"
 }

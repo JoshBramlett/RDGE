@@ -59,7 +59,7 @@ Animation::GetFrameIndex (uint32 ticks) noexcept
     return frame;
 }
 
-const texture_part&
+const spritesheet_region&
 Animation::GetFrame (uint32 ticks) noexcept
 {
     return this->frames[GetFrameIndex(ticks)];
