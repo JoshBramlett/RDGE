@@ -43,10 +43,10 @@ tex_coords&
 tex_coords::rotate_left (void) noexcept
 {
     math::vec2 temp = this->top_left;
-    this->top_left     = this->top_right;
-    this->top_right    = this->bottom_right;
-    this->bottom_right = this->bottom_left;
-    this->bottom_left  = temp;
+    this->top_left     = this->bottom_left;
+    this->bottom_left  = this->bottom_right;
+    this->bottom_right = this->top_right;
+    this->top_right    = temp;
 
     return *this;
 }
@@ -55,10 +55,10 @@ tex_coords&
 tex_coords::rotate_right (void) noexcept
 {
     math::vec2 temp = this->top_left;
-    this->top_left     = this->bottom_left;
-    this->bottom_left  = this->bottom_right;
-    this->bottom_right = this->top_right;
-    this->top_right    = temp;
+    this->top_left     = this->top_right;
+    this->top_right    = this->bottom_right;
+    this->bottom_right = this->bottom_left;
+    this->bottom_left  = temp;
 
     return *this;
 }

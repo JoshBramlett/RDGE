@@ -1,4 +1,7 @@
 #include <rdge/graphics/layers/sprite_layer.hpp>
+#include <rdge/graphics/isprite.hpp>
+#include <rdge/graphics/shader.hpp>
+#include <rdge/graphics/sprite_batch.hpp>
 #include <rdge/internal/hints.hpp>
 
 #include <SDL_assert.h>

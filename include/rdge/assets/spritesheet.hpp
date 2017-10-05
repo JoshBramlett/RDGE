@@ -8,7 +8,6 @@
 #include <rdge/core.hpp>
 #include <rdge/assets/surface.hpp>
 #include <rdge/assets/spritesheet_region.hpp>
-#include <rdge/graphics/animation.hpp>
 
 #include <memory>
 #include <vector>
@@ -20,7 +19,19 @@ namespace rdge {
 class Sprite;
 class SpriteGroup;
 class Texture;
+class Animation;
+struct region_data;
+struct animation_data;
+struct tile_data;
 //!@}
+
+//! \struct tilemap_tile
+//! \brief Container for a tile in the tilemap
+struct tilemap_tile
+{
+    math::uivec2       location; //!< Coordinates of the tile in the map
+    spritesheet_region region;   //!< Region data, which may be flipped/rotated
+};
 
 //! \class SpriteSheet
 //! \brief Load sprite sheet from a json config
@@ -128,20 +139,22 @@ public:
     //! \throws rdge::Exception Lookup failed
     const spritesheet_region& operator[] (const std::string& name) const;
 
-    //! \brief Retrive an animation by name
-    //! \param [in] name Name of the animation
-    //! \returns Associated \ref Animation
+    //!@{
+    //! \brief Retrive an \ref Animation
     //! \throws rdge::Exception Lookup failed
     const Animation& GetAnimation (const std::string& name) const;
+    const Animation& GetAnimation (int32 animation_id) const;
+    //!@}
+
+    //! \brief Retrive a tile from the tilemap
+    tilemap_tile GetTile (size_t index);
+
+
 
     // TODO
     // - Add getter for the spritesheet_region
     // - Support scaling?
     // - Check for duplicate keys during import?
-    const Animation& GetAnimation (int32 animation_id) const
-    {
-        return animations[animation_id].value;
-    }
 
     // TODO Remove
     std::unique_ptr<Sprite> CreateSprite (const std::string& name,
@@ -158,22 +171,6 @@ public:
     // TODO Consider remove
     std::shared_ptr<Texture> texture; //!< Texture generated from the surface
 
-    //! \struct region_data
-    //! \brief Internally used for keying off the name string
-    struct region_data
-    {
-        std::string  name;
-        spritesheet_region value;
-    };
-
-    //! \struct animation_data
-    //! \brief Internally used for keying off the name string
-    struct animation_data
-    {
-        std::string name;
-        Animation   value;
-    };
-
     //!@{ Region container
     region_data* regions = nullptr;
     size_t       region_count = 0;
@@ -184,15 +181,11 @@ public:
     size_t          animation_count = 0;
     //!@}
 
-    //! \struct tilemap_data
-    //! \brief Defines the map size dimensions and mapping to texture coordinates
-    struct tilemap_data
-    {
-        uint32 pitch = 0;       //!< Number of tiles in a row
-
-        int32* tiles = nullptr; //!< Map indices that point to the region
-        size_t count = 0;
-    } tilemap;
+    //!@{ Tilemap container
+    tile_data* tiles = nullptr;
+    size_t     tile_pitch = 0;
+    size_t     tile_count = 0;
+    //!@}
 };
 
 } // namespace rdge

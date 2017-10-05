@@ -7,6 +7,7 @@
 #include <rdge/util/strings.hpp>
 #include <rdge/util/memory/alloc.hpp>
 #include <rdge/internal/exception_macros.hpp>
+#include <rdge/graphics/animation.hpp>
 
 #include <SDL_assert.h>
 #include <nlohmann/json.hpp>
@@ -35,6 +36,44 @@ namespace rdge {
 using namespace rdge::math;
 using json = nlohmann::json;
 
+enum region_flip
+{
+    region_flip_none = 0,
+    region_flip_horizontal,
+    region_flip_vertical
+};
+
+enum region_rotation
+{
+    region_rotate_none = 0,
+    region_rotate_90 = 1,
+    region_rotate_180 = 2,
+    region_rotate_270 = 3,
+
+    region_rotate_count = 4
+};
+
+struct region_data
+{
+    std::string  name;
+    spritesheet_region value;
+};
+
+struct animation_data
+{
+    std::string name;
+    Animation   value;
+};
+
+struct tile_data
+{
+    uint32 region;
+    uint32 x;
+    uint32 y;
+    region_flip flip;
+    region_rotation rot;
+};
+
 namespace {
 
 struct parsed_region_data
@@ -47,17 +86,10 @@ struct parsed_region_data
     math::vec2 origin;
 };
 
-enum flip_state
-{
-    flip_none = 0,
-    flip_horizontal,
-    flip_vertical
-};
-
 struct parsed_frame
 {
     std::string name;
-    flip_state flip;
+    region_flip flip;
 };
 
 struct parsed_animation_data
@@ -68,24 +100,14 @@ struct parsed_animation_data
     std::vector<parsed_frame> frames;
 };
 
-enum pyxel_edit_tile_rotation
-{
-    pyxel_edit_tile_rotate_none = 0,
-    pyxel_edit_tile_rotate_90 = 1,
-    pyxel_edit_tile_rotate_180 = 2,
-    pyxel_edit_tile_rotate_270 = 3,
-
-    pyxel_edit_tile_rotate_count = 4
-};
-
 struct pyxel_edit_tile_data
 {
     uint32 x;
     uint32 y;
-    flip_state flip;
+    region_flip flip;
     uint32 index;
     uint32 tile;
-    pyxel_edit_tile_rotation rot;
+    region_rotation rot;
 };
 
 // Normalize the point to a float clamped to [0, 1]
@@ -172,18 +194,18 @@ ParseAnimation (const json& j)
 
         parsed_frame result_frame;
         result_frame.name = frame["name"].get<std::string>();
-        result_frame.flip = flip_none;
+        result_frame.flip = region_flip_none;
 
         if (frame.count("flip") > 0)
         {
             auto flip_str = to_lower(frame["flip"].get<std::string>());
             if (flip_str == "horizontal")
             {
-                result_frame.flip = flip_horizontal;
+                result_frame.flip = region_flip_horizontal;
             }
             else if (flip_str == "vertical")
             {
-                result_frame.flip = flip_vertical;
+                result_frame.flip = region_flip_vertical;
             }
             else
             {
@@ -215,16 +237,16 @@ ParsePyxelEditTile (const json& j)
     result.y = j["y"].get<uint32>();
     result.index = j["index"].get<uint32>();
     result.tile = j["tile"].get<uint32>();
-    result.flip = (j["flipX"].get<bool>()) ? flip_horizontal : flip_none;
+    result.flip = (j["flipX"].get<bool>()) ? region_flip_horizontal : region_flip_none;
 
     auto rot_val = j["rot"].get<int32>();
-    if (rot_val < 0 || rot_val >= pyxel_edit_tile_rotate_count)
+    if (rot_val < 0 || rot_val >= region_rotate_count)
     {
         std::string msg("tile \"rot\" has an invalid enum.  value=" + std::to_string(rot_val));
         throw std::invalid_argument(msg);
     }
 
-    result.rot = static_cast<pyxel_edit_tile_rotation>(rot_val);
+    result.rot = static_cast<region_rotation>(rot_val);
 
     return result;
 }
@@ -238,10 +260,10 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
         RDGE_CALLOC(sheet.regions, sheet.region_count, nullptr);
 
         auto surface_size = sheet.surface.Size();
-        const auto& json_regions = j["regions"];
+        const auto& j_regions = j["regions"];
         for (size_t i = 0; i < sheet.region_count; i++)
         {
-            auto parsed = ParseRegion(json_regions[i]);
+            auto parsed = ParseRegion(j_regions[i]);
 
             // Validate values are within range
             if ((parsed.x + parsed.width > surface_size.w) ||
@@ -276,10 +298,10 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
     {
         RDGE_CALLOC(sheet.animations, sheet.animation_count, nullptr);
 
-        const auto& json_animations = j["animations"];
+        const auto& j_animations = j["animations"];
         for (size_t i = 0; i < sheet.animation_count; i++)
         {
-            auto parsed = ParseAnimation(json_animations[i]);
+            auto parsed = ParseAnimation(j_animations[i]);
 
             auto& animation = sheet.animations[i];
             animation.name = parsed.name;
@@ -294,11 +316,11 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
                     const auto& region = sheet.regions[ii];
                     if (region.name == parsed_frame.name)
                     {
-                        if (parsed_frame.flip == flip_horizontal)
+                        if (parsed_frame.flip == region_flip_horizontal)
                         {
                             animation.value.frames.emplace_back(region.value.flip_horizontal());
                         }
-                        else if (parsed_frame.flip == flip_vertical)
+                        else if (parsed_frame.flip == region_flip_vertical)
                         {
                             animation.value.frames.emplace_back(region.value.flip_vertical());
                         }
@@ -360,7 +382,7 @@ ProcessTilemap (const json& j, SpriteSheet& sheet)
     {
         for (size_t col = 0; col < region_cols; col++)
         {
-            auto& region = sheet.regions[(row * tileswide) + col];
+            auto& region = sheet.regions[(row * region_cols) + col];
 
             std::ostringstream ss;
             ss << "tile_" << row << "_" << col;
@@ -387,55 +409,40 @@ ProcessTilemap (const json& j, SpriteSheet& sheet)
         }
     }
 
-    const auto& json_layers = j["layers"];
-    if (json_layers.size() != 1)
+    const auto& j_layers = j["layers"];
+    if (j_layers.size() != 1)
     {
         std::string msg("tilemap multiple layers not currently supported");
         throw std::invalid_argument(msg);
     }
 
-    const auto& layer = json_layers[0];
-    const auto& json_tiles = layer["tiles"];
+    const auto& j_layer = j_layers[0];
+    const auto& j_tiles = j_layer["tiles"];
 
-    sheet.tilemap.pitch = tileswide;
-    sheet.tilemap.count = tileswide * tileshigh;
-    if (json_tiles.size() != sheet.tilemap.count)
+    sheet.tile_pitch = tileswide;
+    sheet.tile_count = tileswide * tileshigh;
+    if (j_tiles.size() != sheet.tile_count)
     {
         std::string msg("tilemap tile entry count does not match definition");
         throw std::invalid_argument(msg);
     }
 
-    RDGE_CALLOC(sheet.tilemap.tiles, sheet.tilemap.count, nullptr);
-    for (const auto& tile : json_tiles)
+    RDGE_CALLOC(sheet.tiles, sheet.tile_count, nullptr);
+    for (const auto& j_tile : j_tiles)
     {
-        auto parsed = ParsePyxelEditTile(tile);
-
+        auto parsed = ParsePyxelEditTile(j_tile);
         if (parsed.tile >= sheet.region_count)
         {
             std::string msg("tile region out of bounds. value=" + std::to_string(parsed.tile));
             throw std::invalid_argument(msg);
         }
 
-        sheet.tilemap.tiles[parsed.index] = static_cast<int32>(parsed.tile);
-
-#if 0
-        if (parsed.flip == flip_horizontal)
-        {
-            auto& region = sheet.regions[parsed.tile];
-            region.value.flip_horizontal();
-        }
-
-        if (parsed.rot != pyxel_edit_tile_rotate_none)
-        {
-            // TODO Add rotate(deg)
-            // not a fan of this implementation, make sure it works
-            auto& region = sheet.regions[parsed.tile];
-            for (int32 i = 0; i < static_cast<int32>(parsed.rot); i++)
-            {
-                region.value.coords.rotate_right();
-            }
-        }
-#endif
+        auto& tile = sheet.tiles[parsed.index];
+        tile.region = parsed.tile;
+        tile.x = parsed.x;
+        tile.y = parsed.y;
+        tile.rot = parsed.rot;
+        tile.flip = parsed.flip;
     }
 }
 
@@ -468,7 +475,7 @@ SpriteSheet::SpriteSheet (const std::vector<uint8>& msgpack, Surface surface)
     {
         RDGE_FREE(this->regions, nullptr);
         RDGE_FREE(this->animations, nullptr);
-        RDGE_FREE(this->tilemap.tiles, nullptr);
+        RDGE_FREE(this->tiles, nullptr);
         RDGE_THROW(ex.what());
     }
 }
@@ -512,7 +519,7 @@ SpriteSheet::SpriteSheet (const char* filepath)
 
         RDGE_FREE(this->regions, nullptr);
         RDGE_FREE(this->animations, nullptr);
-        RDGE_FREE(this->tilemap.tiles, nullptr);
+        RDGE_FREE(this->tiles, nullptr);
         RDGE_THROW(ex.what());
     }
 }
@@ -521,7 +528,7 @@ SpriteSheet::~SpriteSheet (void) noexcept
 {
     RDGE_FREE(this->regions, nullptr);
     RDGE_FREE(this->animations, nullptr);
-    RDGE_FREE(this->tilemap.tiles, nullptr);
+    RDGE_FREE(this->tiles, nullptr);
 }
 
 SpriteSheet::SpriteSheet (SpriteSheet&& other) noexcept
@@ -529,11 +536,14 @@ SpriteSheet::SpriteSheet (SpriteSheet&& other) noexcept
     , texture(std::move(other.texture))
     , regions(other.regions)
     , animations(other.animations)
+    , tiles(other.tiles)
 {
     other.regions = nullptr;
     other.animations = nullptr;
+    other.tiles = nullptr;
     other.region_count = 0;
     other.animation_count = 0;
+    other.tile_count = 0;
 }
 
 SpriteSheet&
@@ -545,9 +555,11 @@ SpriteSheet::operator= (SpriteSheet&& rhs) noexcept
         std::swap(this->texture, rhs.texture);
         std::swap(this->regions, rhs.regions);
         std::swap(this->animations, rhs.animations);
+        std::swap(this->tiles, rhs.tiles);
 
         rhs.region_count = 0;
         rhs.animation_count = 0;
+        rhs.tile_count = 0;
     }
 
     return *this;
@@ -581,6 +593,50 @@ SpriteSheet::GetAnimation (const std::string& name) const
     }
 
     RDGE_THROW("SpriteSheet animation lookup failed. key=" + name);
+}
+
+const Animation&
+SpriteSheet::GetAnimation (int32 animation_id) const
+{
+    SDL_assert(animation_id >= 0);
+    SDL_assert(animation_id < (int32)this->animation_count);
+
+    return this->animations[animation_id].value;
+}
+
+tilemap_tile
+SpriteSheet::GetTile (size_t index)
+{
+    SDL_assert(index < this->tile_count);
+
+    auto& tile = this->tiles[index];
+
+    tilemap_tile result;
+    result.location = { tile.x, tile.y };
+    result.region = this->regions[tile.region].value;
+
+    if (tile.flip == region_flip_horizontal)
+    {
+        result.region.flip_horizontal();
+    }
+
+    if (tile.rot != region_rotate_none)
+    {
+        // TODO Add rotate(deg)
+        // not a fan of this implementation, make sure it works
+        for (int32 i = 0; i < static_cast<int32>(tile.rot); i++)
+        {
+            // IMPORTANT - implement rotations on spritesheet_regions.
+            //             the origin must be updated as well.
+            //
+            //             Leaving assert here so I don't forget
+            SDL_assert(false);
+
+            result.region.coords.rotate_right();
+        }
+    }
+
+    return result;
 }
 
 std::unique_ptr<Sprite>

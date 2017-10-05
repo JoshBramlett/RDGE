@@ -8,6 +8,8 @@
 
 #include <SDL_assert.h>
 
+#define CHRONO_ADD_WALLS 0
+
 using namespace rdge;
 using namespace rdge::math;
 using namespace rdge::physics;
@@ -60,8 +62,6 @@ TestScene::TestScene (void)
     collision_graph.listener = &l;
     //camera.zoom = 1.5f;
 
-    SpriteSheet sheet("res/environment.json");
-
     ///////////////////
     // Background layer
     ///////////////////
@@ -79,6 +79,22 @@ TestScene::TestScene (void)
     //        - Should only entities in the simulation be defined in simulation
     //          coordinates, having each entity (simulation or no) handle their
     //          own rendering?
+
+    SpriteSheet sheet("res/overworld.json");
+
+    vec2 tile_size(64.f, 64.f);
+    for (size_t i = 0; i < sheet.tile_count; i++)
+    {
+        auto tile = sheet.GetTile(i);
+
+        float x = -half_width + (tile.location.x * PIXELS_PER_METER);
+        float y = half_height - (tile.location.y * PIXELS_PER_METER);
+
+        background.AddSprite(std::make_shared<Sprite>(vec3(x, y),
+                                                      tile_size,
+                                                      sheet.texture,
+                                                      tile.region.coords));
+    }
 
 #if 0
     background.AddSprite(sheet.CreateSpriteChain("dirt",
@@ -117,6 +133,7 @@ TestScene::TestScene (void)
     }
 #endif
 
+#if (CHRONO_ADD_WALLS)
     rigid_body_profile bprof;
     bprof.type = RigidBodyType::STATIC;
     auto walls = collision_graph.CreateBody(bprof);
@@ -124,7 +141,6 @@ TestScene::TestScene (void)
     float pad = 0.05f;
     float sim_half_width = half_width * INV_PIXELS_PER_METER;
     float sim_half_height = half_height * INV_PIXELS_PER_METER;
-
 
     polygon left_wall(pad, sim_half_height + pad + pad,
                       { -(sim_half_width + pad), 0.f });
@@ -141,6 +157,7 @@ TestScene::TestScene (void)
     polygon bottom_wall(sim_half_width + pad + pad, pad,
                         { 0.f, -(sim_half_height + pad) });
     walls->CreateFixture(&bottom_wall, 0.f);
+#endif
 
     player.InitPhysics(collision_graph, INV_PIXELS_PER_METER);
     duck.InitPhysics(collision_graph, INV_PIXELS_PER_METER);
@@ -199,7 +216,7 @@ TestScene::OnRender (void)
 
     render_target->SetProjection(camera.combined);
 
-    //background.Draw();
+    background.Draw();
     entities.Draw();
 
     // debug drawing

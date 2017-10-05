@@ -6,16 +6,18 @@
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/graphics/isprite.hpp>
-#include <rdge/graphics/shader.hpp>
-#include <rdge/graphics/sprite_batch.hpp>
-#include <rdge/math/mat4.hpp>
 
 #include <memory>
 #include <vector>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
+
+//!@{ Forward declarations
+class ISprite;
+class Shader;
+class SpriteBatch;
+//!@}
 
 //! \class SpriteLayer
 //! \brief Layer of ISprite objects
@@ -27,7 +29,7 @@ namespace rdge {
 class SpriteLayer
 {
 public:
-    //! \brief SpriteLayer ctor
+    //! \brief SpriteLayer default ctor
     //! \details Creates a new instance of the render target.
     //! \param [in] num_sprites Max number of sprites that can be submitted
     //! \param [in] shader Shader to pass to the render target
@@ -44,8 +46,7 @@ public:
     //! \brief SpriteLayer dtor
     ~SpriteLayer (void) noexcept = default;
 
-    //!@{
-    //! \brief Non-copyable, move enabled
+    //!@{ Non-copyable, move enabled
     SpriteLayer (const SpriteLayer&) = delete;
     SpriteLayer& operator= (const SpriteLayer&) = delete;
     SpriteLayer (SpriteLayer&&) noexcept = default;

@@ -9,6 +9,8 @@
 
 #include <SDL_assert.h>
 
+#define CHRONO_ADD_SWORD 0
+
 using namespace rdge;
 using namespace rdge::math;
 using namespace rdge::physics;
@@ -93,6 +95,7 @@ Player::InitPhysics (CollisionGraph& graph, float inv_ratio)
     fprof.restitution = 0.8f;
     hitbox = body->CreateFixture(fprof);
 
+#if (CHRONO_ADD_SWORD)
     bprof.prevent_rotation = false;
     bprof.position = { 0.f, 0.f };
     sword = graph.CreateBody(bprof);
@@ -116,6 +119,7 @@ Player::InitPhysics (CollisionGraph& graph, float inv_ratio)
 
     //j->SetLimits(-90.f, 90.f);
     //j->EnableLimits();
+#endif
 }
 
 void
