@@ -84,12 +84,23 @@ struct total_import_result
                   << "  success: " << std::right << std::setw(3) << spritesheets.success
                   << "  failed:  " << std::right << std::setw(3) << spritesheets.failed
                   << "  skipped: " << std::right << std::setw(3) << spritesheets.skipped
+                  << std::endl
+                  << "Tilemaps:    "
+                  << "  success: " << std::right << std::setw(3) << tilemaps.success
+                  << "  failed:  " << std::right << std::setw(3) << tilemaps.failed
+                  << "  skipped: " << std::right << std::setw(3) << tilemaps.skipped
                   << std::endl;
 
         system_import_result totals;
-        totals.success = surfaces.success + spritesheets.success;
-        totals.failed = surfaces.failed + spritesheets.failed;
-        totals.skipped = surfaces.skipped + spritesheets.skipped;
+        totals.success = surfaces.success +
+                         spritesheets.success +
+                         tilemaps.success;
+        totals.failed = surfaces.failed +
+                        spritesheets.failed +
+                        tilemaps.failed;
+        totals.skipped = surfaces.skipped +
+                         spritesheets.skipped +
+                         tilemaps.skipped;
 
         std::cout << "-------------------------------------------------------\n"
                   << "Total:       "
@@ -263,6 +274,12 @@ ImportSpritesheets (void)
                     rwops.read(text_data, text_size);
 
                     const auto j = json::parse(text_data);
+                    if (j["type"].get<std::string>() != "spritesheet")
+                    {
+                        free(text_data);
+                        throw std::runtime_error("spritesheet has invalid type property");
+                    }
+
                     auto sp = j["image_path"].get<std::string>();
                     auto surface_name = rdge::remove_path(rdge::remove_extension(sp));
                     int index = -1;
@@ -296,13 +313,13 @@ ImportSpritesheets (void)
                     memcpy(import.data, msgpack.data(), msgpack.size());
                     import.info.size = msgpack.size();
 
-                    if (j.count("texture_parts") > 0)
+                    if (j.count("regions") > 0)
                     {
                         std::ostringstream ss;
                         ss << "enum " << import.name << "_spritesheet_regions\n"
                            << "{\n";
 
-                        const auto& regions = j["texture_parts"];
+                        const auto& regions = j["regions"];
                         int v = 0;
                         for (const auto& region : regions)
                         {
@@ -349,18 +366,18 @@ ImportSpritesheets (void)
                 {
                     std::cout << " FAILED on exception"
                               << " reason=" << ex.what() << std::endl;
-                    import_results.surfaces.failed++;
+                    import_results.spritesheets.failed++;
                 }
                 catch (...)
                 {
                     std::cout << " FAILED on unknown exception" << std::endl;
-                    import_results.surfaces.failed++;
+                    import_results.spritesheets.failed++;
                 }
             }
             else
             {
                 std::cout << "  Skipping [" << file.name << "] unsupported type\n";
-                import_results.surfaces.skipped++;
+                import_results.spritesheets.skipped++;
             }
 
             tfDirNext(&dir);
@@ -370,7 +387,130 @@ ImportSpritesheets (void)
     }
     else
     {
-        std::cout << "  Subdirectory " << IMAGE_DIR << " not found" << std::endl;
+        std::cout << "  Subdirectory " << SPRITESHEET_DIR << " not found" << std::endl;
+    }
+}
+
+void
+ImportTilemaps (void)
+{
+    std::string path = globals.parent_dir + TILEMAP_DIR;
+    std::cout << "ImportTilemaps from " << path << std::endl;
+
+	tfDIR dir;
+	if (tfDirOpen(&dir, path.c_str()))
+    {
+        while (dir.has_next)
+        {
+            tfFILE file;
+            tfReadFile(&dir, &file);
+
+            if (file.is_dir)
+            {
+                tfDirNext(&dir);
+                continue;
+            }
+
+            if (file.is_reg && rdge::ends_with(file.name, "json"))
+            {
+                std::cout << "  Processing [" << file.name << "]";
+
+                imported_asset import;
+                import.info.type = rdge::asset_pack::asset_type_tilemap;
+                import.info.offset = globals.running_offset;
+                import.name = rdge::remove_extension(file.name);
+                import.table_id = globals.running_count;
+
+                try
+                {
+                    auto rwops = rwops_base::from_file(file.path, "rt");
+                    auto text_size = rwops.size();
+                    char* text_data = (char*)calloc(text_size + 1, sizeof(char));
+                    if (!text_data)
+                    {
+                        free(text_data);
+                        throw std::runtime_error("failed memory allocation");
+                    }
+
+                    rwops.read(text_data, text_size);
+
+                    const auto j = json::parse(text_data);
+                    if (j["type"].get<std::string>() != "tilemap")
+                    {
+                        free(text_data);
+                        throw std::runtime_error("tilemap has invalid type property");
+                    }
+
+                    auto sp = j["image_path"].get<std::string>();
+                    auto surface_name = rdge::remove_path(rdge::remove_extension(sp));
+                    int index = -1;
+                    for (size_t i = 0; i < imported_assets.size(); i++)
+                    {
+                        const auto& test = imported_assets[i];
+                        if (test.info.type == rdge::asset_pack::asset_type_surface &&
+                            test.name == surface_name)
+                        {
+                            index = static_cast<int>(i);
+                            break;
+                        }
+                    }
+
+                    if (index < 0)
+                    {
+                        free(text_data);
+                        throw std::runtime_error("tilemap cannot map to surface");
+                    }
+
+                    import.info.tilemap.surface_id = index;
+                    std::vector<uint8> msgpack = json::to_msgpack(j);
+
+                    free(text_data);
+                    import.data = malloc(msgpack.size());
+                    if (!import.data)
+                    {
+                        throw std::runtime_error("failed memory allocation");
+                    }
+
+                    memcpy(import.data, msgpack.data(), msgpack.size());
+                    import.info.size = msgpack.size();
+
+                    std::cout << " SUCCESS"
+                              << " surface_id=" << import.info.tilemap.surface_id
+                              << " file_size=" << file.size
+                              << " import_size=" << import.info.size << std::endl;
+
+                    imported_assets.push_back(import);
+                    import_results.tilemaps.success++;
+
+                    globals.running_count++;
+                    globals.running_offset += import.info.size;
+                }
+                catch (const std::exception& ex)
+                {
+                    std::cout << " FAILED on exception"
+                              << " reason=" << ex.what() << std::endl;
+                    import_results.tilemaps.failed++;
+                }
+                catch (...)
+                {
+                    std::cout << " FAILED on unknown exception" << std::endl;
+                    import_results.tilemaps.failed++;
+                }
+            }
+            else
+            {
+                std::cout << "  Skipping [" << file.name << "] unsupported type\n";
+                import_results.tilemaps.skipped++;
+            }
+
+            tfDirNext(&dir);
+        }
+
+        tfDirClose(&dir);
+    }
+    else
+    {
+        std::cout << "  Subdirectory " << TILEMAP_DIR << " not found" << std::endl;
     }
 }
 
@@ -475,6 +615,7 @@ main (int argc, char** argv)
 
     ImportImages();
     ImportSpritesheets();
+    ImportTilemaps();
 
     import_results.print();
 

@@ -1,4 +1,5 @@
 #include "test.hpp"
+#include "../chrono.hpp"
 
 #include <rdge/assets.hpp>
 #include <rdge/system.hpp>
@@ -80,7 +81,8 @@ TestScene::TestScene (void)
     //          coordinates, having each entity (simulation or no) handle their
     //          own rendering?
 
-    SpriteSheet sheet("res/overworld.json");
+    PackFile pack("res/chrono.data");
+    auto sheet = pack.GetSpriteSheet(chrono_asset_tilemap_overworld);
 
     vec2 tile_size(64.f, 64.f);
     for (size_t i = 0; i < sheet.tile_count; i++)
