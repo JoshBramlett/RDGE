@@ -31,6 +31,13 @@ struct circle : public ishape
     { }
 
     //! \brief circle ctor
+    //! \details Initialize circle at origin
+    //! \param [in] r Radius
+    constexpr circle (float r)
+        : pos(0.f, 0.f), radius(r)
+    { }
+
+    //! \brief circle ctor
     //! \details Initialize circle from position and radius
     //! \param [in] px Position
     //! \param [in] r Radius

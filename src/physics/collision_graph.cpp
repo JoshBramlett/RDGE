@@ -38,6 +38,7 @@ CollisionGraph::ClearGraph (void) noexcept
 
     m_dirtyProxies.clear();
     m_tree.ClearProxies();
+    block_allocator.Clear();
 
     SDL_assert(m_bodies.count == 0);
     SDL_assert(m_contacts.count == 0);

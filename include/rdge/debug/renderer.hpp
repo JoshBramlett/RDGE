@@ -18,6 +18,10 @@ class OrthographicCamera;
 class Event;
 struct delta_time;
 
+namespace debug {
+class IWidget;
+}
+
 namespace math {
 struct vec3;
 struct mat4;
@@ -93,6 +97,7 @@ void SetProjection (const math::mat4& projection);
 //!@}
 
 //!@{ Registers objects with the overlay dialogs
+void AddWidget (IWidget* widget);
 void RegisterCamera (OrthographicCamera* camera);
 void RegisterPhysics (physics::CollisionGraph* graph, float scale = 1.f);
 //!@}

@@ -505,6 +505,11 @@ public:
             camera_widget.Update();
             physics_widget.Update();
 
+            for (auto widget : widgets)
+            {
+                widget->Update();
+            }
+
             if (settings::show_imgui_test_window)
             {
                 ImGui::ShowTestWindow(&settings::show_imgui_test_window);
@@ -522,11 +527,19 @@ public:
     {
         camera_widget.OnCustomRender();
         physics_widget.OnCustomRender();
+
+        for (auto widget : widgets)
+        {
+            widget->OnCustomRender();
+        }
+
         ImGui::Render();
     }
 
     CameraWidget camera_widget;
     PhysicsWidget physics_widget;
+
+    std::vector<IWidget*> widgets;
 };
 
 Overlay s_overlay;
@@ -559,6 +572,12 @@ ProcessOnRender (void)
 
     LineRenderer::Instance().Flush();
     PointRenderer::Instance().Flush();
+}
+
+void
+AddWidget (IWidget* widget)
+{
+    s_overlay.widgets.push_back(widget);
 }
 
 void

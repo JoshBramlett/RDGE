@@ -84,6 +84,7 @@ BVHTree::CreateNode (void)
     int32 handle = m_nodes.reserve();
 
     auto& node = m_nodes[handle];
+    node.height = 0;
     node.parent = bvh_node::NULL_NODE;
     node.left = bvh_node::NULL_NODE;
     node.right = bvh_node::NULL_NODE;

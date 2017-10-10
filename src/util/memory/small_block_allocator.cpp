@@ -154,10 +154,10 @@ SmallBlockAllocator::Alloc (size_t size)
     // Break up the heap into block sized partitions
     size_t last_index = (CHUNK_SIZE / c->block_size) - 1; // aka (block_count - 1)
     auto cursor = reinterpret_cast<uint8*>(c->nodes);
-    for (size_t i = 1; i < last_index; ++i)
+    for (size_t i = 0; i < last_index; ++i)
     {
-        auto b = reinterpret_cast<block_node*>(cursor + (c->block_size * (i - 1)));
-        b->next = reinterpret_cast<block_node*>(cursor + (c->block_size * i));
+        auto b = reinterpret_cast<block_node*>(cursor + (c->block_size * i));
+        b->next = reinterpret_cast<block_node*>(cursor + (c->block_size * (i + 1)));
 
         SDL_assert((ptrdiff_t(b->next) - ptrdiff_t(b)) == ptrdiff_t(c->block_size));
     }
