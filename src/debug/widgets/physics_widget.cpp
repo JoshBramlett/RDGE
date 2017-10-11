@@ -161,7 +161,7 @@ PhysicsWidget::OnCustomRender (void)
                     {
                         debug::DrawWireFrame(f, colors.kinematic_body, scale);
                     }
-                    if (!body->IsAwake())
+                    else if (!body->IsAwake())
                     {
                         debug::DrawWireFrame(f, colors.sleeping_body, scale);
                     }

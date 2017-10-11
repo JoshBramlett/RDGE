@@ -71,6 +71,7 @@ private:
     friend class CollisionGraph;
     friend class Solver;
     friend class rdge::SmallBlockAllocator;
+    friend std::ostream& operator<< (std::ostream&, const RevoluteJoint&);
 
     explicit RevoluteJoint (RigidBody* a, RigidBody* b, const math::vec2& anchor);
     ~RevoluteJoint (void) noexcept = default;
@@ -86,6 +87,7 @@ private:
 
     math::vec2 m_anchor[2];          //!< Anchors local to the respective bodies
     math::mat3 m_mass;               //!< Effective mass for point-to-point constraint
+	float      m_referenceAngle = 0.f;
     float      m_motorMass = 0.f;    //!< Effective mass for motor/limit angular constraint
     math::vec3 m_impulse;            //!< Includes reaction force (x,y), and torque (z)
     float      m_motorImpulse = 0.f;
@@ -97,7 +99,6 @@ private:
 
     //!@{ Angle limit properties
     LimitState m_limitState = LimitState::INACTIVE;
-	float m_referenceAngle = 0.f;
 	float m_lowerAngle = 0.f;
 	float m_upperAngle = 0.f;
     //!@}
@@ -114,6 +115,9 @@ private:
         MOTOR_ENABLED = 0x0020
     };
 };
+
+//! \brief RevoluteJoint stream output operator
+std::ostream& operator<< (std::ostream& os, const RevoluteJoint& value);
 
 } // namespace physics
 } // namespace rdge

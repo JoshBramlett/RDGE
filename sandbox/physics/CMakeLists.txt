@@ -13,6 +13,7 @@ include_directories (${RDGE_INCLUDE_DIR})
 
 add_executable (physics
                 src/main.cpp
+                src/scenes/revolute.cpp
                 src/scenes/test.cpp
                 src/scenes/tiles.cpp
                 src/scenes/tumbler.cpp)

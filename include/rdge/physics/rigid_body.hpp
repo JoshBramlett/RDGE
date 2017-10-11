@@ -459,5 +459,11 @@ private:
     RigidBodyType m_type;
 };
 
+//! \brief RigidBodyType stream output operator
+std::ostream& operator<< (std::ostream& os, RigidBodyType value);
+
+//! \brief RigidBody stream output operator
+std::ostream& operator<< (std::ostream& os, const RigidBody& value);
+
 } // namespace physics
 } // namespace rdge

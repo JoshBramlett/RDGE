@@ -10,10 +10,10 @@
 
 #include <memory>
 
-class TestScene : public rdge::IScene
+class RevoluteScene : public rdge::IScene
 {
 public:
-    TestScene (void);
+    RevoluteScene (void);
 
     void Initialize (void) override;
     void Terminate (void) override;
@@ -30,5 +30,5 @@ public:
     rdge::physics::CollisionGraph collision_graph;
 
     rdge::physics::RigidBody* ball;
-    rdge::physics::Fixture* joint;
+    rdge::physics::RevoluteJoint* joint;
 };

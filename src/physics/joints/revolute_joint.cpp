@@ -5,6 +5,7 @@
 #include <rdge/physics/isometry.hpp>
 #include <rdge/math/intrinsics.hpp>
 #include <rdge/math/mat2.hpp>
+#include <rdge/util/logger.hpp>
 
 namespace rdge {
 namespace physics {
@@ -166,8 +167,10 @@ RevoluteJoint::InitializeSolver (const time_step&  step,
     m_localCenterB = body_b->GetLocalCenter();
 
     // bodies position relative to the anchor
-    auto r_a = m_anchor[0] - m_localCenterA;
-    auto r_b = m_anchor[1] - m_localCenterB;
+    rotation rot_a(bdata_a.rotation + bdata_a.angle);
+    rotation rot_b(bdata_b.rotation + bdata_b.angle);
+    auto r_a = rot_a.rotate(m_anchor[0] - m_localCenterA);
+    auto r_b = rot_b.rotate(m_anchor[1] - m_localCenterB);
 
     m_mass[0].x = (bdata_a.inv_mass + bdata_b.inv_mass) +
                   (bdata_a.inv_mmoi * math::square(r_a.y)) +
@@ -204,7 +207,9 @@ RevoluteJoint::InitializeSolver (const time_step&  step,
 
     if (m_flags & LIMIT_ENABLED)
     {
-        float angle = bdata_b.rotation - bdata_a.rotation - m_referenceAngle;
+        float angle = (bdata_b.rotation + bdata_b.angle) -
+                      (bdata_a.rotation + bdata_a.angle) -
+                      m_referenceAngle;
 		if (math::abs(m_upperAngle - m_lowerAngle) < (2.f * ANGULAR_SLOP))
         {
             m_limitState = LimitState::EQUAL;
@@ -282,8 +287,10 @@ RevoluteJoint::SolveVelocityConstraints (const time_step&  step,
         bdata_b.angular_vel += bdata_b.inv_mmoi * impulse;
     }
 
-    auto r_a = m_anchor[0] - m_localCenterA;
-    auto r_b = m_anchor[1] - m_localCenterB;
+    rotation rot_a(bdata_a.rotation + bdata_a.angle);
+    rotation rot_b(bdata_b.rotation + bdata_b.angle);
+    auto r_a = rot_a.rotate(m_anchor[0] - m_localCenterA);
+    auto r_b = rot_b.rotate(m_anchor[1] - m_localCenterB);
 
     math::vec2 vel_a = bdata_a.linear_vel + (r_a.perp() * bdata_a.angular_vel);
     math::vec2 vel_b = bdata_b.linear_vel + (r_b.perp() * bdata_b.angular_vel);
@@ -363,8 +370,8 @@ RevoluteJoint::SolveVelocityConstraints (const time_step&  step,
 	{
 		// Solve point-to-point constraint
         math::vec2 impulse = -m_mass.solve(jvb2);
-		m_impulse.x += impulse.x;
-		m_impulse.y += impulse.y;
+        m_impulse.x += impulse.x;
+        m_impulse.y += impulse.y;
 
         bdata_a.linear_vel -= bdata_a.inv_mass * impulse;
         bdata_a.angular_vel -= bdata_a.inv_mmoi *
@@ -423,8 +430,8 @@ RevoluteJoint::SolvePositionConstraints (solver_body_data& bdata_a, solver_body_
     auto r_a = rot_a.rotate(m_anchor[0] - m_localCenterA);
     auto r_b = rot_b.rotate(m_anchor[1] - m_localCenterB);
 
-    auto p = (m_localCenterB + bdata_b.pos + r_b) -
-             (m_localCenterA + bdata_a.pos + r_a);
+    auto p = (bdata_b.world_center + bdata_b.pos + r_b) -
+             (bdata_a.world_center + bdata_a.pos + r_a);
     linear_error = p.length();
 
     math::mat2 k;
@@ -445,6 +452,29 @@ RevoluteJoint::SolvePositionConstraints (solver_body_data& bdata_a, solver_body_
     bdata_b.angle += bdata_b.inv_mmoi * math::perp_dot(r_b, impulse);
 
 	return (linear_error <= LINEAR_SLOP) && (angular_error <= ANGULAR_SLOP);
+}
+
+std::ostream& operator<< (std::ostream& os, const RevoluteJoint& j)
+{
+    os << "RevoluteJoint: {"
+       << "\n  anchor[0]=" << j.m_anchor[0]
+       << "\n  anchor[1]=" << j.m_anchor[1]
+       << "\n  mass=" << j.m_mass
+       << "\n  impulse=" << j.m_impulse
+       << "\n  ref_angle=" << j.m_referenceAngle
+       << "\n  motor:"
+       << "\n    enabled=" << std::boolalpha << j.IsMotorEnabled()
+       << "\n    mass=" << j.m_motorMass
+       << "\n    impulse=" << j.m_motorImpulse
+       << "\n    max_torque=" << j.m_maxMotorTorque
+       << "\n    speed=" << j.m_motorSpeed
+       << "\n  limits:"
+       << "\n    enabled=" << std::boolalpha << j.IsLimitsEnabled()
+       << "\n    lower=" << j.m_lowerAngle
+       << "\n    upper=" << j.m_upperAngle
+       << "\n}\n";
+
+    return os;
 }
 
 } // namespace physics

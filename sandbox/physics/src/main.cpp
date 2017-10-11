@@ -10,6 +10,7 @@
 
 #include <imgui/imgui.h>
 
+#include "scenes/revolute.hpp"
 #include "scenes/test.hpp"
 #include "scenes/tiles.hpp"
 #include "scenes/tumbler.hpp"
@@ -103,6 +104,7 @@ int main ()
 
     // 2) Create game object
     SceneSwapWidget widget(settings);
+    widget.AddScene("Revolute", std::make_shared<RevoluteScene>());
     widget.AddScene("Test", std::make_shared<TestScene>());
     widget.AddScene("Tiles", std::make_shared<TilesScene>());
     widget.AddScene("Tumbler", std::make_shared<TumblerScene>());

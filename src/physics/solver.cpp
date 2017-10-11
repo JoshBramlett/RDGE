@@ -167,11 +167,17 @@ Solver::Solve (void)
         auto& bdata_a = m_bodies[j->body_a->solver_index];
         auto& bdata_b = m_bodies[j->body_b->solver_index];
         j->InitializeSolver(*m_step, bdata_a, bdata_b);
-        j->SolveVelocityConstraints(*m_step, bdata_a, bdata_b);
     }
 
     for (size_t iter = 0; iter < velocity_iterations; iter++)
     {
+        for (auto& j : m_joints)
+        {
+            auto& bdata_a = m_bodies[j->body_a->solver_index];
+            auto& bdata_b = m_bodies[j->body_b->solver_index];
+            j->SolveVelocityConstraints(*m_step, bdata_a, bdata_b);
+        }
+
         SolveVelocityConstraints();
     }
 

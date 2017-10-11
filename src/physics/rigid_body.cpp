@@ -2,6 +2,7 @@
 #include <rdge/physics/collision_graph.hpp>
 #include <rdge/physics/aabb.hpp>
 #include <rdge/util/memory/small_block_allocator.hpp>
+#include <rdge/util/logger.hpp>
 
 namespace rdge {
 namespace physics {
@@ -236,6 +237,60 @@ RigidBody::ComputeMass (void)
 
     // Update velocity to the new center of mass
     linear.velocity += (sweep.pos_n - old_center).perp() * angular.velocity;
+}
+
+std::ostream& operator<< (std::ostream& os, RigidBodyType value)
+{
+    switch (value)
+    {
+    case RigidBodyType::STATIC:
+        return os << "STATIC";
+    case RigidBodyType::KINEMATIC:
+        return os << "KINEMATIC";
+    case RigidBodyType::DYNAMIC:
+        return os << "DYNAMIC";
+    default:
+        break;
+    }
+
+    return os << "UNKNOWN";
+}
+
+std::ostream& operator<< (std::ostream& os, const RigidBody& b)
+{
+    os << "RigidBody: {"
+       << "\n  type=" << b.GetType()
+       << "\n  gravity_scale=" << b.gravity_scale
+       << "\n  flags:"
+       << "\n    simulating=" << std::boolalpha << b.IsSimulating()
+       << "\n    awake=" << std::boolalpha << b.IsAwake()
+       << "\n    sleep_prevented=" << std::boolalpha << b.IsSleepPrevented()
+       << "\n    fixed_rotation=" << std::boolalpha << b.IsFixedRotation()
+       << "\n  collections:"
+       << "\n    fixtures=" << b.fixtures.count
+       << "\n    contacts=" << b.contact_edges.count
+       << "\n    joints=" << b.joint_edges.count
+       << "\n  sweep:"
+       << "\n    local_center=" << b.sweep.local_center
+       << "\n    pos_0=" << b.sweep.pos_0
+       << "\n    pos_n=" << b.sweep.pos_n
+       << "\n    angle_0=" << b.sweep.angle_0
+       << "\n    angle_n=" << b.sweep.angle_n
+       << "\n  linear_motion:"
+       << "\n    velocity=" << b.linear.velocity
+       << "\n    force=" << b.linear.force
+       << "\n    damping=" << b.linear.damping
+       << "\n    mass=" << b.linear.mass
+       << "\n    inv_mass=" << b.linear.inv_mass
+       << "\n  angular_motion:"
+       << "\n    velocity=" << b.angular.velocity
+       << "\n    torque=" << b.angular.torque
+       << "\n    damping=" << b.angular.damping
+       << "\n    mmoi=" << b.angular.mmoi
+       << "\n    inv_mmoi=" << b.angular.inv_mmoi
+       << "\n}\n";
+
+    return os;
 }
 
 } // namespace physics
