@@ -66,16 +66,12 @@ RevoluteScene::Initialize (void)
         ball->linear.velocity = math::vec2(-8.f * w, 0.f);
         ball->angular.velocity = w;
 
-        joint = collision_graph.CreateRevoluteJoint(ball, ground, vec2(-10.f, 12.f));
+        joint = collision_graph.CreateRevoluteJoint(ground, ball, vec2(-10.f, 12.f));
         joint->SetMotorSpeed(1 * math::PI);
         joint->SetMaxMotorTorque(10000.f);
         joint->SetLimits(-0.25f * math::PI, 0.5f * math::PI);
 
-        // does not work
-        //joint->EnableLimits();
-
-        // works
-        //joint->EnableMotor();
+        joint->EnableLimits();
     }
 
     ILOG() << *ball;
@@ -108,7 +104,38 @@ RevoluteScene::Hibernate (void)
 void
 RevoluteScene::OnEvent (const Event& event)
 {
-    Unused(event);
+    if (event.IsKeyboardEvent())
+    {
+        auto args = event.GetKeyboardEventArgs();
+        if (args.IsRepeating() || !args.IsKeyPressed())
+        {
+            return;
+        }
+
+        if (args.PhysicalKey() == ScanCode::L)
+        {
+            // note: limits are broken
+            if (joint->IsLimitsEnabled())
+            {
+                joint->DisableLimits();
+            }
+            else
+            {
+                joint->EnableLimits();
+            }
+        }
+        else if (args.PhysicalKey() == ScanCode::M)
+        {
+            if (joint->IsMotorEnabled())
+            {
+                joint->DisableMotor();
+            }
+            else
+            {
+                joint->EnableMotor();
+            }
+        }
+    }
 }
 
 void

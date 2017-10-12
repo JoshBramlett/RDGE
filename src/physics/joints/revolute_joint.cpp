@@ -250,7 +250,7 @@ RevoluteJoint::InitializeSolver (const time_step&  step,
     m_motorImpulse *= step.ratio;
 
     // warm start
-    auto impulse = m_impulse.xy();
+    math::vec2 impulse = m_impulse.xy();
     float constraint_impulse = m_motorImpulse + m_impulse.z;
 
     bdata_a.linear_vel -= bdata_a.inv_mass * impulse;
@@ -403,7 +403,7 @@ RevoluteJoint::SolvePositionConstraints (solver_body_data& bdata_a, solver_body_
             limit_impulse = -m_motorMass * c;
             angular_error = math::abs(c);
         }
-        else if (m_limitState == LimitState::AT_UPPER)
+        else if (m_limitState == LimitState::AT_LOWER)
         {
             float c = angle - m_lowerAngle;
             angular_error = -c;
@@ -411,7 +411,7 @@ RevoluteJoint::SolvePositionConstraints (solver_body_data& bdata_a, solver_body_
             c = math::clamp(c + ANGULAR_SLOP, -Solver::MAX_ANGULAR_CORRECTION, 0.f);
             limit_impulse = -m_motorMass * c;
         }
-        else if (m_limitState == LimitState::AT_LOWER)
+        else if (m_limitState == LimitState::AT_UPPER)
         {
             float c = angle - m_upperAngle;
             angular_error = c;

@@ -47,7 +47,7 @@ mat3::solve (const vec3& b) const noexcept
     mat3 inv;
     inv[0].x = elements[4] * elements[8] - elements[5] * elements[7];
     inv[0].y = -elements[1] * elements[8] + elements[7] * elements[2];
-    inv[0].z = elements[1] * elements[5] + elements[4] * elements[2];
+    inv[0].z = elements[1] * elements[5] - elements[4] * elements[2];
 
     inv[1].x = -elements[3] * elements[8] + elements[6] * elements[5];
     inv[1].y = elements[0] * elements[8] - elements[6] * elements[2];

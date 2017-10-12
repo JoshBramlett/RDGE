@@ -35,7 +35,14 @@ public:
             return;
         }
 
-        ImGui::SetNextWindowSize(ImVec2(210.f, 410.f), ImGuiSetCond_FirstUseEver);
+        ImGuiIO& io = ImGui::GetIO();
+        float fb_width = static_cast<float>(io.DisplaySize.x);
+        float fb_height = static_cast<float>(io.DisplaySize.y);
+        float menu_width = 200.f;
+
+        ImGui::SetNextWindowPos(ImVec2(fb_width - (menu_width + 20.f), 25.f));
+        ImGui::SetNextWindowSize(ImVec2(menu_width, fb_height - 50.f),
+                                 ImGuiSetCond_FirstUseEver);
         if (!ImGui::Begin("Scene", &this->show))
         {
             ImGui::End();
@@ -120,13 +127,13 @@ int main ()
         }
         else if (event.IsKeyboardEvent())
         {
-            auto e = event.GetKeyboardEventArgs();
-            if (e.IsRepeating() || !e.IsKeyPressed())
+            auto args = event.GetKeyboardEventArgs();
+            if (args.IsRepeating() || !args.IsKeyPressed())
             {
                 return false;
             }
 
-            if (e.Key() == KeyCode::ESCAPE)
+            if (args.Key() == KeyCode::ESCAPE)
             {
                 widget.game.Stop();
             }
