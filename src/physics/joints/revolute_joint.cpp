@@ -57,13 +57,13 @@ RevoluteJoint::AnchorB (void) const noexcept
 float
 RevoluteJoint::JointAngle (void) const noexcept
 {
-	return body_b->GetAngle() - body_a->GetAngle() - m_referenceAngle;
+    return body_b->GetAngle() - body_a->GetAngle() - m_referenceAngle;
 }
 
 float
 RevoluteJoint::JointSpeed (void) const noexcept
 {
-	return body_b->angular.velocity - body_a->angular.velocity;
+    return body_b->angular.velocity - body_a->angular.velocity;
 }
 
 void
@@ -71,8 +71,8 @@ RevoluteJoint::EnableMotor (void) noexcept
 {
     if ((m_flags & MOTOR_ENABLED) == 0)
     {
-		body_a->WakeUp();
-		body_a->WakeUp();
+        body_a->WakeUp();
+        body_a->WakeUp();
         m_flags |= MOTOR_ENABLED;
     }
 }
@@ -82,8 +82,8 @@ RevoluteJoint::DisableMotor (void) noexcept
 {
     if (m_flags & MOTOR_ENABLED)
     {
-		body_a->WakeUp();
-		body_a->WakeUp();
+        body_a->WakeUp();
+        body_a->WakeUp();
         m_flags &= ~MOTOR_ENABLED;
     }
 }
@@ -91,23 +91,23 @@ RevoluteJoint::DisableMotor (void) noexcept
 void
 RevoluteJoint::SetMotorSpeed (float speed) noexcept
 {
-	if (speed != m_motorSpeed)
-	{
-		body_a->WakeUp();
-		body_a->WakeUp();
-		m_motorSpeed = speed;
-	}
+    if (speed != m_motorSpeed)
+    {
+        body_a->WakeUp();
+        body_a->WakeUp();
+        m_motorSpeed = speed;
+    }
 }
 
 void
 RevoluteJoint::SetMaxMotorTorque (float torque) noexcept
 {
-	if (torque != m_maxMotorTorque)
-	{
-		body_a->WakeUp();
-		body_a->WakeUp();
-		m_maxMotorTorque = torque;
-	}
+    if (torque != m_maxMotorTorque)
+    {
+        body_a->WakeUp();
+        body_a->WakeUp();
+        m_maxMotorTorque = torque;
+    }
 }
 
 void
@@ -115,9 +115,9 @@ RevoluteJoint::EnableLimits (void) noexcept
 {
     if ((m_flags & LIMIT_ENABLED) == 0)
     {
-		body_a->WakeUp();
-		body_a->WakeUp();
-		m_impulse.z = 0.0f;
+        body_a->WakeUp();
+        body_a->WakeUp();
+        m_impulse.z = 0.0f;
         m_flags |= LIMIT_ENABLED;
     }
 }
@@ -127,9 +127,9 @@ RevoluteJoint::DisableLimits (void) noexcept
 {
     if (m_flags & LIMIT_ENABLED)
     {
-		body_a->WakeUp();
-		body_a->WakeUp();
-		m_impulse.z = 0.0f;
+        body_a->WakeUp();
+        body_a->WakeUp();
+        m_impulse.z = 0.0f;
         m_flags &= ~LIMIT_ENABLED;
     }
 }
@@ -137,16 +137,16 @@ RevoluteJoint::DisableLimits (void) noexcept
 void
 RevoluteJoint::SetLimits (float lower, float upper) noexcept
 {
-	SDL_assert(lower <= upper);
+    SDL_assert(lower <= upper);
 
-	if (lower != m_lowerAngle || upper != m_upperAngle)
-	{
-		body_a->WakeUp();
-		body_a->WakeUp();
-		m_impulse.z = 0.f;
-		m_lowerAngle = lower;
-		m_upperAngle = upper;
-	}
+    if (lower != m_lowerAngle || upper != m_upperAngle)
+    {
+        body_a->WakeUp();
+        body_a->WakeUp();
+        m_impulse.z = 0.f;
+        m_lowerAngle = lower;
+        m_upperAngle = upper;
+    }
 }
 
 void
@@ -154,14 +154,14 @@ RevoluteJoint::InitializeSolver (const time_step&  step,
                                  solver_body_data& bdata_a,
                                  solver_body_data& bdata_b)
 {
-	// J = [-I -r1_skew I r2_skew]
-	//     [ 0       -1 0       1]
-	// r_skew = [-ry; rx]
+    // J = [-I -r1_skew I r2_skew]
+    //     [ 0       -1 0       1]
+    // r_skew = [-ry; rx]
 
-	// Matlab
-	// K = [ mA+r1y^2*iA+mB+r2y^2*iB,  -r1y*iA*r1x-r2y*iB*r2x,          -r1y*iA-r2y*iB]
-	//     [  -r1y*iA*r1x-r2y*iB*r2x, mA+r1x^2*iA+mB+r2x^2*iB,           r1x*iA+r2x*iB]
-	//     [          -r1y*iA-r2y*iB,           r1x*iA+r2x*iB,                   iA+iB]
+    // Matlab
+    // K = [ mA+r1y^2*iA+mB+r2y^2*iB,  -r1y*iA*r1x-r2y*iB*r2x,          -r1y*iA-r2y*iB]
+    //     [  -r1y*iA*r1x-r2y*iB*r2x, mA+r1x^2*iA+mB+r2x^2*iB,           r1x*iA+r2x*iB]
+    //     [          -r1y*iA-r2y*iB,           r1x*iA+r2x*iB,                   iA+iB]
 
     m_localCenterA = body_a->GetLocalCenter();
     m_localCenterB = body_b->GetLocalCenter();
@@ -191,7 +191,7 @@ RevoluteJoint::InitializeSolver (const time_step&  step,
 
     if ((m_flags & MOTOR_ENABLED) == 0)
     {
-		m_motorImpulse = 0.0f;
+        m_motorImpulse = 0.0f;
     }
     else
     {
@@ -199,18 +199,18 @@ RevoluteJoint::InitializeSolver (const time_step&  step,
         SDL_assert(bdata_a.inv_mmoi > 0.f || bdata_b.inv_mmoi > 0.f);
     }
 
-	m_motorMass = (bdata_a.inv_mmoi + bdata_b.inv_mmoi);
-	if (m_motorMass > 0.f)
-	{
-		m_motorMass = 1.f / m_motorMass;
-	}
+    m_motorMass = (bdata_a.inv_mmoi + bdata_b.inv_mmoi);
+    if (m_motorMass > 0.f)
+    {
+        m_motorMass = 1.f / m_motorMass;
+    }
 
     if (m_flags & LIMIT_ENABLED)
     {
         float angle = (bdata_b.rotation + bdata_b.angle) -
                       (bdata_a.rotation + bdata_a.angle) -
                       m_referenceAngle;
-		if (math::abs(m_upperAngle - m_lowerAngle) < (2.f * ANGULAR_SLOP))
+        if (math::abs(m_upperAngle - m_lowerAngle) < (2.f * ANGULAR_SLOP))
         {
             m_limitState = LimitState::EQUAL;
         }
@@ -266,7 +266,7 @@ RevoluteJoint::SolveVelocityConstraints (const time_step&  step,
                                          solver_body_data& bdata_a,
                                          solver_body_data& bdata_b)
 {
-	// Solve motor constraint
+    // Solve motor constraint
     if (m_flags & MOTOR_ENABLED && m_limitState != LimitState::EQUAL)
     {
         // get the relative velocity - the target motor speed
@@ -298,7 +298,7 @@ RevoluteJoint::SolveVelocityConstraints (const time_step&  step,
     // the 2x2 version of Jv + b
     math::vec2 jvb2 = vel_b - vel_a;
 
-	// Solve limit constraint
+    // Solve limit constraint
     if (m_flags & LIMIT_ENABLED && m_limitState != LimitState::INACTIVE)
     {
         // solve the point to point constraint including the limit constraint
@@ -319,43 +319,43 @@ RevoluteJoint::SolveVelocityConstraints (const time_step&  step,
         {
             // clamp the rotational impulse and solve the point-to-point
             // constraint alone
-			float new_impulse = m_impulse.z + impulse.z;
-			if (new_impulse < 0.f)
-			{
+            float new_impulse = m_impulse.z + impulse.z;
+            if (new_impulse < 0.f)
+            {
                 math::vec2 rhs = -jvb2 + math::vec2(m_mass[2].x, m_mass[2].y) * m_impulse.z;
                 math::vec2 reduced = m_mass.solve(rhs);
-				impulse.x = reduced.x;
-				impulse.y = reduced.y;
-				impulse.z = -m_impulse.z;
-				m_impulse.x += reduced.x;
-				m_impulse.y += reduced.y;
-				m_impulse.z = 0.f;
-			}
-			else
-			{
-				m_impulse += impulse;
-			}
+                impulse.x = reduced.x;
+                impulse.y = reduced.y;
+                impulse.z = -m_impulse.z;
+                m_impulse.x += reduced.x;
+                m_impulse.y += reduced.y;
+                m_impulse.z = 0.f;
+            }
+            else
+            {
+                m_impulse += impulse;
+            }
         }
         else if (m_limitState == LimitState::AT_UPPER)
         {
             // clamp the rotational impulse and solve the point-to-point
             // constraint alone
-			float new_impulse = m_impulse.z + impulse.z;
-			if (new_impulse > 0.f)
-			{
+            float new_impulse = m_impulse.z + impulse.z;
+            if (new_impulse > 0.f)
+            {
                 math::vec2 rhs = -jvb2 + math::vec2(m_mass[2].x, m_mass[2].y) * m_impulse.z;
                 math::vec2 reduced = m_mass.solve(rhs);
-				impulse.x = reduced.x;
-				impulse.y = reduced.y;
-				impulse.z = -m_impulse.z;
-				m_impulse.x += reduced.x;
-				m_impulse.y += reduced.y;
-				m_impulse.z = 0.f;
-			}
-			else
-			{
-				m_impulse += impulse;
-			}
+                impulse.x = reduced.x;
+                impulse.y = reduced.y;
+                impulse.z = -m_impulse.z;
+                m_impulse.x += reduced.x;
+                m_impulse.y += reduced.y;
+                m_impulse.z = 0.f;
+            }
+            else
+            {
+                m_impulse += impulse;
+            }
         }
 
         math::vec2 xy = impulse.xy();
@@ -366,9 +366,9 @@ RevoluteJoint::SolveVelocityConstraints (const time_step&  step,
         bdata_b.angular_vel += bdata_b.inv_mmoi *
                                math::perp_dot(r_b, xy) + impulse.z;
     }
-	else
-	{
-		// Solve point-to-point constraint
+    else
+    {
+        // Solve point-to-point constraint
         math::vec2 impulse = -m_mass.solve(jvb2);
         m_impulse.x += impulse.x;
         m_impulse.y += impulse.y;
@@ -379,7 +379,7 @@ RevoluteJoint::SolveVelocityConstraints (const time_step&  step,
         bdata_b.linear_vel += bdata_b.inv_mass * impulse;
         bdata_b.angular_vel += bdata_b.inv_mmoi *
                                math::perp_dot(r_b, impulse);
-	}
+    }
 }
 
 bool
@@ -424,7 +424,7 @@ RevoluteJoint::SolvePositionConstraints (solver_body_data& bdata_a, solver_body_
         bdata_b.angle += bdata_b.inv_mmoi * limit_impulse;
     }
 
-	// Solve point-to-point constraint.
+    // Solve point-to-point constraint.
     rotation rot_a(bdata_a.rotation + bdata_a.angle);
     rotation rot_b(bdata_b.rotation + bdata_b.angle);
     auto r_a = rot_a.rotate(m_anchor[0] - m_localCenterA);
@@ -451,7 +451,7 @@ RevoluteJoint::SolvePositionConstraints (solver_body_data& bdata_a, solver_body_
     bdata_b.pos += bdata_b.inv_mass * impulse;
     bdata_b.angle += bdata_b.inv_mmoi * math::perp_dot(r_b, impulse);
 
-	return (linear_error <= LINEAR_SLOP) && (angular_error <= ANGULAR_SLOP);
+    return (linear_error <= LINEAR_SLOP) && (angular_error <= ANGULAR_SLOP);
 }
 
 std::ostream& operator<< (std::ostream& os, const RevoluteJoint& j)
