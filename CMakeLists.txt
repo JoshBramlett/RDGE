@@ -22,7 +22,7 @@ message (STATUS "Compiler:    ${CMAKE_CXX_COMPILER_ID}")
 message (STATUS "Build type:  ${CMAKE_BUILD_TYPE}")
 
 # Flags for AddressSanitizer
-#set(ASAN_FLAGS "-fsanitize=address -fno-omit-frame-pointer")
+set(ASAN_FLAGS "-fsanitize=address -fno-omit-frame-pointer")
 
 # Add custom debug flag
 set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DRDGE_DEBUG")

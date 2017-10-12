@@ -417,23 +417,25 @@ Window::ResetViewport (void)
     if (current_ratio < target_ratio)
     {
         // Will display upper and lower letterbox
-        auto sorted = std::minmax(m_targetWidth, static_cast<rdge::uint32>(draw_width));
-        auto width_ratio = sorted.second / static_cast<float>(sorted.first);
+        float width_ratio = (static_cast<int32>(m_targetWidth) > draw_width)
+            ? m_targetWidth / static_cast<float>(draw_width)
+            : draw_width / static_cast<float>(m_targetWidth);
 
-        m_viewport.w = static_cast<rdge::uint32>(draw_width);
-        m_viewport.h = static_cast<rdge::uint32>(m_targetHeight * width_ratio);
+        m_viewport.w = static_cast<uint32>(draw_width);
+        m_viewport.h = static_cast<uint32>(m_targetHeight * width_ratio);
         m_viewport.x = 0;
-        m_viewport.y = static_cast<rdge::int32>((draw_height - m_viewport.h) / 2);
+        m_viewport.y = static_cast<int32>((draw_height - m_viewport.h) / 2);
     }
     else
     {
         // Will display left and right letterbox
-        auto sorted = std::minmax(m_targetHeight, static_cast<rdge::uint32>(draw_height));
-        auto height_ratio = sorted.second / static_cast<float>(sorted.first);
+        float height_ratio = (static_cast<int32>(m_targetHeight) > draw_height)
+            ? m_targetHeight / static_cast<float>(draw_height)
+            : draw_height / static_cast<float>(m_targetHeight);
 
-        m_viewport.w = static_cast<rdge::uint32>(m_targetWidth * height_ratio);
-        m_viewport.h = static_cast<rdge::uint32>(draw_height);
-        m_viewport.x = static_cast<rdge::int32>((draw_width - m_viewport.w) / 2);
+        m_viewport.w = static_cast<uint32>(m_targetWidth * height_ratio);
+        m_viewport.h = static_cast<uint32>(draw_height);
+        m_viewport.x = static_cast<int32>((draw_width - m_viewport.w) / 2);
         m_viewport.y = 0;
     }
 }
