@@ -1,5 +1,4 @@
 #include "player.hpp"
-#include "../../chrono.hpp"
 
 #include <rdge/assets.hpp>
 #include <rdge/math.hpp>
@@ -9,6 +8,9 @@
 
 #include <SDL_assert.h>
 
+#include "../../asset_enums.hpp"
+#include "../../globals.hpp"
+
 #define CHRONO_ADD_SWORD 0
 
 using namespace rdge;
@@ -17,8 +19,7 @@ using namespace rdge::physics;
 
 Player::Player (void)
 {
-    PackFile pack("res/chrono.data");
-    auto sheet = pack.GetSpriteSheet(chrono_asset_spritesheet_player);
+    auto sheet = g_game.pack->GetSpriteSheet(chrono_asset_spritesheet_player);
 
     //////////////////
     // idle animation
@@ -96,24 +97,19 @@ Player::InitPhysics (CollisionGraph& graph, float inv_ratio)
     hitbox = body->CreateFixture(fprof);
 
 #if (CHRONO_ADD_SWORD)
+    // players sword
     bprof.prevent_rotation = false;
-    bprof.position = { 0.f, 0.f };
+    bprof.position = { 0.f, 0.75f };
     sword = graph.CreateBody(bprof);
 
-    // players sword
-    //vertices[0]=[-0.125, -2] normals[0]=[0, -1]
-    //vertices[1]=[0.125, -2] normals[1]=[1, 0]
-    //vertices[2]=[0.125, 2] normals[2]=[0, 1]
-    //vertices[3]=[-0.125, 2] normals[3]=[-1, 0]
-
-    polygon s(0.125f, 2.f);
+    polygon s(0.125f, 0.75f);
     fprof.shape = &s;
     fprof.density = 1.f;
     fprof.restitution = 0.8f;
     sword_hitbox = sword->CreateFixture(fprof);
 
     auto j = graph.CreateRevoluteJoint(body, sword, vec2(0.f, 0.f));
-    j->SetMotorSpeed(1 * 3.14f);
+    j->SetMotorSpeed(3 * 3.14f);
     j->SetMaxMotorTorque(10000.f);
     j->EnableMotor();
 

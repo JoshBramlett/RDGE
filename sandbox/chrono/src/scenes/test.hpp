@@ -28,11 +28,6 @@
 //   This obviously only applies to entities that are part of the physics simulation.
 //   It doesn't make sense to force conversion for entities that aren't.
 //
-// 2. Figure out how I want to render a tiled background.  Fixes "padding" issue.
-//   a) Implement texture wrapping for sprite chains
-//   b) Render sprite chains by themselves with their own custom IBO
-//   c) Don't.  Do like HMH which is layer a bunch of semi-transparent textures
-//
 //
 // ** GRAPHICS **
 // 1. Create an Entity/Actor interface or POD struct?

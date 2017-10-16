@@ -71,7 +71,7 @@ RevoluteScene::Initialize (void)
         joint->SetMaxMotorTorque(10000.f);
         joint->SetLimits(-0.25f * math::PI, 0.5f * math::PI);
 
-        joint->EnableLimits();
+        //joint->EnableLimits();
     }
 
     ILOG() << *ball;

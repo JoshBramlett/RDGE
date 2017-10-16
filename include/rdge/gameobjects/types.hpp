@@ -7,6 +7,7 @@
 
 #include <rdge/core.hpp>
 #include <rdge/type_traits.hpp>
+#include <rdge/math/vec2.hpp>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
@@ -37,5 +38,34 @@ enum class Direction : uint8
 //! \brief Enable Direction enum for bitmask operations
 template<>
 struct rdge::is_enum_bitmask<Direction> : public std::true_type { };
+
+inline Direction
+GetDirection (const math::vec2& ab)
+{
+    Direction result = Direction::NORTH;
+    float best = math::dot(ab, math::vec2(0.f, 1.f));
+
+    float len_east = math::dot(ab, math::vec2(1.f, 0.f));
+    if (len_east > best)
+    {
+        best = len_east;
+        result = Direction::EAST;
+    }
+
+    float len_south = math::dot(ab, math::vec2(0.f, -1.f));
+    if (len_south > best)
+    {
+        best = len_south;
+        result = Direction::SOUTH;
+    }
+
+    float len_west = math::dot(ab, math::vec2(-1.f, 0.f));
+    if (len_west > best)
+    {
+        result = Direction::WEST;
+    }
+
+    return result;
+}
 
 } // namespace rdge

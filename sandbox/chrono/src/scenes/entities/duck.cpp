@@ -1,9 +1,5 @@
 #include "duck.hpp"
 
-#include "../test.hpp"
-#include "player.hpp"
-#include "../../chrono.hpp"
-
 #include <rdge/assets.hpp>
 #include <rdge/math.hpp>
 #include <rdge/physics.hpp>
@@ -12,6 +8,11 @@
 
 #include <SDL_assert.h>
 
+#include "player.hpp"
+#include "../test.hpp"
+#include "../../asset_enums.hpp"
+#include "../../globals.hpp"
+
 using namespace rdge;
 using namespace rdge::math;
 using namespace rdge::physics;
@@ -19,8 +20,7 @@ using namespace rdge::physics;
 Duck::Duck (TestScene* parent, const math::vec3& position)
     : m_parent(parent)
 {
-    PackFile pack("res/chrono.data");
-    auto sheet = pack.GetSpriteSheet(chrono_asset_spritesheet_enemies);
+    auto sheet = g_game.pack->GetSpriteSheet(chrono_asset_spritesheet_enemies);
 
     //////////////////
     // walking animation
@@ -72,6 +72,8 @@ void
 Duck::OnUpdate (const delta_time& dt)
 {
     auto d = m_parent->player.GetWorldCenter() - body->GetWorldCenter();
+    current_animation = &cd_anim_walk[GetDirection(d)];
+
     if (d.self_dot() > math::square(2.5f))
     {
         math::vec2 d_normal = d.normalize();

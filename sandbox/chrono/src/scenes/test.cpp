@@ -1,13 +1,14 @@
 #include "test.hpp"
-#include "../chrono.hpp"
 
 #include <rdge/assets.hpp>
 #include <rdge/system.hpp>
 #include <rdge/util.hpp>
-
 #include <rdge/debug.hpp>
 
 #include <SDL_assert.h>
+
+#include "../asset_enums.hpp"
+#include "../globals.hpp"
 
 #define CHRONO_ADD_WALLS 0
 
@@ -61,7 +62,7 @@ TestScene::TestScene (void)
     , entities(render_target)
 {
     collision_graph.listener = &l;
-    //camera.zoom = 1.5f;
+    debug::settings::show_overlay = true;
 
     ///////////////////
     // Background layer
@@ -81,8 +82,7 @@ TestScene::TestScene (void)
     //          coordinates, having each entity (simulation or no) handle their
     //          own rendering?
 
-    PackFile pack("res/chrono.data");
-    auto sheet = pack.GetSpriteSheet(chrono_asset_tilemap_overworld);
+    auto sheet = g_game.pack->GetSpriteSheet(chrono_asset_tilemap_crossroads);
 
     vec2 tile_size(64.f, 64.f);
     for (size_t i = 0; i < sheet.tile_count; i++)
@@ -97,43 +97,6 @@ TestScene::TestScene (void)
                                                       sheet.texture,
                                                       tile.region.coords));
     }
-
-#if 0
-    background.AddSprite(sheet.CreateSpriteChain("dirt",
-                                                 vec3(-half_width, -half_height, 0.f),
-                                                 vec2(window_width, window_height)));
-
-    // 1920.f -> 30
-    // 1080.f -> 16.875
-
-    vec2 debris_size(16.f, 16.f);
-    //vec2 debris_size(64.f, 64.f);
-    auto& weed_uv = sheet["weed1"].coords;
-    auto& rock_uv = sheet["rock1"].coords;
-
-    Random rng;
-    for (float y = -half_height; y < half_height; y += PIXELS_PER_METER)
-    {
-        for (float x = -half_width; x < half_width; x += PIXELS_PER_METER)
-        {
-            auto random = rng.Next(15);
-            if (random == 0)
-            {
-                background.AddSprite(std::make_shared<Sprite>(vec3(x, y),
-                                                              debris_size,
-                                                              sheet.texture,
-                                                              weed_uv));
-            }
-            else if (random == 1)
-            {
-                background.AddSprite(std::make_shared<Sprite>(vec3(x, y),
-                                                              debris_size,
-                                                              sheet.texture,
-                                                              rock_uv));
-            }
-        }
-    }
-#endif
 
 #if (CHRONO_ADD_WALLS)
     rigid_body_profile bprof;

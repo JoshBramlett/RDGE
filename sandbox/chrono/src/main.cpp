@@ -8,8 +8,11 @@
 #include <rdge/system.hpp>
 
 #include "scenes/test.hpp"
+#include "globals.hpp"
 
 #include <memory>
+
+chrono_globals g_game;
 
 using namespace rdge;
 
@@ -50,6 +53,10 @@ int main ()
 
         return false;
     };
+
+    PackFile pack("res/chrono.data");
+    g_game.game = &game;
+    g_game.pack = &pack;
 
     game.PushScene(std::make_shared<TestScene>());
     game.Run();

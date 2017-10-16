@@ -148,8 +148,8 @@ ImportImages (void)
     std::string path = globals.parent_dir + IMAGE_DIR;
     std::cout << "ImportImages from " << path << std::endl;
 
-	tfDIR dir;
-	if (tfDirOpen(&dir, path.c_str()))
+    tfDIR dir;
+    if (tfDirOpen(&dir, path.c_str()))
     {
         while (dir.has_next)
         {
@@ -236,8 +236,8 @@ ImportSpritesheets (void)
     std::string path = globals.parent_dir + SPRITESHEET_DIR;
     std::cout << "ImportSpritesheets from " << path << std::endl;
 
-	tfDIR dir;
-	if (tfDirOpen(&dir, path.c_str()))
+    tfDIR dir;
+    if (tfDirOpen(&dir, path.c_str()))
     {
         while (dir.has_next)
         {
@@ -397,8 +397,8 @@ ImportTilemaps (void)
     std::string path = globals.parent_dir + TILEMAP_DIR;
     std::cout << "ImportTilemaps from " << path << std::endl;
 
-	tfDIR dir;
-	if (tfDirOpen(&dir, path.c_str()))
+    tfDIR dir;
+    if (tfDirOpen(&dir, path.c_str()))
     {
         while (dir.has_next)
         {
