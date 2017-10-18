@@ -94,7 +94,7 @@ add_library (RDGE SHARED
              src/assets/spritesheet_region.cpp
              src/assets/surface.cpp
 
-             src/debug/line_renderer.cpp
+             src/debug/renderer.cpp
              src/debug/widgets/camera_widget.cpp
              src/debug/widgets/physics_widget.cpp
 
@@ -112,6 +112,7 @@ add_library (RDGE SHARED
              src/graphics/sprite_group.cpp
              src/graphics/shader.cpp
              src/graphics/sprite.cpp
+             src/graphics/tex_coords.cpp
              src/graphics/text.cpp
              src/graphics/texture.cpp
              src/graphics/layers/sprite_layer.cpp

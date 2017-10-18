@@ -6,7 +6,7 @@
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/graphics/isprite.hpp>
+#include <rdge/graphics/tex_coords.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/system/types.hpp>
 
@@ -42,10 +42,8 @@ struct spritesheet_region
     math::vec2 origin;
 
     //!@{ Basic spritesheet_region transforms
-    spritesheet_region& flip_horizontal (void) noexcept;
-    spritesheet_region& flip_vertical (void) noexcept;
-    spritesheet_region flip_horizontal (void) const noexcept;
-    spritesheet_region flip_vertical (void) const noexcept;
+    void flip (TexCoordsFlip) noexcept;
+    void rotate (TexCoordsRotation) noexcept;
     //!@}
 };
 

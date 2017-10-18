@@ -33,41 +33,6 @@ struct sprite_vertex
 //! \typedef Array of sprite vertex attributes
 using SpriteVertices = std::array<sprite_vertex, 4>;
 
-//! \struct tex_coords
-//! \brief Texture coordinate (UV) data for a sprite
-//! \details Default values are set to fill the entire texture.
-struct tex_coords
-{
-    math::vec2 top_left     = { 0.f, 1.f };
-    math::vec2 bottom_left  = { 0.f, 0.f };
-    math::vec2 bottom_right = { 1.f, 0.f };
-    math::vec2 top_right    = { 1.f, 1.f };
-
-    //!@{
-    //! \brief Subscript operators to access an element by index
-    math::vec2& operator[] (uint32 index) noexcept;
-    const math::vec2& operator[] (uint32 index) const noexcept;
-    //!@}
-
-    //!@{
-    //! \brief Basic tex_coords transforms
-    //! \returns Reference to self
-    tex_coords& flip_horizontal (void) noexcept;
-    tex_coords& flip_vertical (void) noexcept;
-    tex_coords& rotate_left (void) noexcept;
-    tex_coords& rotate_right (void) noexcept;
-    //!@}
-
-    //!@{
-    //! \brief Basic const tex_coords transforms
-    //! \returns Value after transform
-    tex_coords flip_horizontal (void) const noexcept;
-    tex_coords flip_vertical (void) const noexcept;
-    tex_coords rotate_left (void) const noexcept;
-    tex_coords rotate_right (void) const noexcept;
-    //!@}
-};
-
 //! \class ISprite
 //! \brief Interface for 2D sprites
 class ISprite
@@ -88,9 +53,6 @@ public:
     //! \param [in] depth Depth (z-index) value
     virtual void SetDepth (float depth) = 0;
 };
-
-//! \brief tex_coords stream output operator
-std::ostream& operator<< (std::ostream& os, const tex_coords& value);
 
 //! \brief SpriteVertices stream output operator
 std::ostream& operator<< (std::ostream& os, const SpriteVertices& value);

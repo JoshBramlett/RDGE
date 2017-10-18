@@ -8,6 +8,7 @@
 #include <rdge/core.hpp>
 #include <rdge/graphics/isprite.hpp>
 #include <rdge/graphics/color.hpp>
+#include <rdge/graphics/tex_coords.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/math/vec3.hpp>
 

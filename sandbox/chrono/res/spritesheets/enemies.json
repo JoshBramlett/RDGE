@@ -125,8 +125,8 @@
   	  "mode": "loop",
   	  "interval": 175,
   	  "frames": [
-  	    { "name": "duck_side_1", "flip": "horizontal" },
-  	    { "name": "duck_side_2", "flip": "horizontal" }
+  	    { "name": "duck_side_1", "flip": 1 },
+  	    { "name": "duck_side_2", "flip": 1 }
   	  ]
   	},
   	{
@@ -148,13 +148,13 @@
   	  "mode": "loop",
   	  "interval": 100,
   	  "frames": [
-  	    { "name": "seagull_side_1", "flip": "horizontal" },
-  	    { "name": "seagull_side_2", "flip": "horizontal" },
-  	    { "name": "seagull_side_3", "flip": "horizontal" },
-  	    { "name": "seagull_side_4", "flip": "horizontal" },
-  	    { "name": "seagull_side_5", "flip": "horizontal" },
-  	    { "name": "seagull_side_6", "flip": "horizontal" },
-  	    { "name": "seagull_side_7", "flip": "horizontal" }
+  	    { "name": "seagull_side_1", "flip": 1 },
+  	    { "name": "seagull_side_2", "flip": 1 },
+  	    { "name": "seagull_side_3", "flip": 1 },
+  	    { "name": "seagull_side_4", "flip": 1 },
+  	    { "name": "seagull_side_5", "flip": 1 },
+  	    { "name": "seagull_side_6", "flip": 1 },
+  	    { "name": "seagull_side_7", "flip": 1 }
   	  ]
   	}
   ],

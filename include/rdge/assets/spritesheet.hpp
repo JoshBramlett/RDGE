@@ -8,6 +8,9 @@
 #include <rdge/core.hpp>
 #include <rdge/assets/surface.hpp>
 #include <rdge/assets/spritesheet_region.hpp>
+#include <rdge/graphics/tex_coords.hpp>
+#include <rdge/math/vec2.hpp>
+#include <rdge/math/vec3.hpp>
 
 #include <memory>
 #include <vector>
@@ -22,15 +25,41 @@ class Texture;
 class Animation;
 struct region_data;
 struct animation_data;
-struct tile_data;
 //!@}
 
-//! \struct tilemap_tile
-//! \brief Container for a tile in the tilemap
-struct tilemap_tile
+//! \struct tilemap_data
+//! \brief Contains the definition of a map of texture coordinates which will
+//!        be rendered as a contiguous image.
+struct tilemap_data
 {
-    math::uivec2       location; //!< Coordinates of the tile in the map
-    spritesheet_region region;   //!< Region data, which may be flipped/rotated
+    static constexpr size_t MAX_LAYER_COUNT = 4; //!< Maximum amount of layers
+
+    //! \brief Denotes that a tile should not be rendered
+    //! \details Common with multi-layered tile maps, where higher layers could
+    //!          have sparse tile placement
+    static constexpr int32 INVALID_TILE = -1;
+
+    //! \struct tile
+    //! \brief Individual tile in the map
+    struct tile
+    {
+        int32 index = INVALID_TILE; //!< Layer index, or \ref INVALID_TILE
+        math::uivec2 location;      //!< Coordinates of the tile in the map
+        tex_coords coords;          //!< UV data for the texture
+    };
+
+    //! \struct layer
+    //! \brief Layer of tiles, which should be rendered bottom to top
+    struct layer
+    {
+        tile* tiles = nullptr; //!< Array of tile_count tiles
+    };
+
+    layer layers[MAX_LAYER_COUNT];
+    size_t layer_count = 0;
+
+    size_t tile_count = 0; //!< Number of tiles per layer
+    size_t tile_pitch = 0; //!< Number of tiles in a row
 };
 
 //! \class SpriteSheet
@@ -146,9 +175,6 @@ public:
     const Animation& GetAnimation (int32 animation_id) const;
     //!@}
 
-    //! \brief Retrive a tile from the tilemap
-    tilemap_tile GetTile (size_t index);
-
 
 
     // TODO
@@ -182,9 +208,7 @@ public:
     //!@}
 
     //!@{ Tilemap container
-    tile_data* tiles = nullptr;
-    size_t     tile_pitch = 0;
-    size_t     tile_count = 0;
+    tilemap_data tilemap;
     //!@}
 };
 

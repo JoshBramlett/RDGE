@@ -2,36 +2,46 @@
 
 namespace rdge {
 
-spritesheet_region&
-spritesheet_region::flip_horizontal (void) noexcept
+void
+spritesheet_region::flip (TexCoordsFlip f) noexcept
 {
-    this->coords.flip_horizontal();
-    this->origin.x = this->size.w - this->origin.x;
+    coords.flip(f);
 
-    return *this;
+    if (f == TexCoordsFlip::HORIZONTAL)
+    {
+        origin.x = size.w - origin.x;
+    }
+    else if (f == TexCoordsFlip::VERTICAL)
+    {
+        origin.y = size.h - origin.y;
+    }
 }
 
-spritesheet_region&
-spritesheet_region::flip_vertical (void) noexcept
+void
+spritesheet_region::rotate (TexCoordsRotation r) noexcept
 {
-    this->coords.flip_vertical();
-    this->origin.y = this->size.h - this->origin.y;
+    coords.rotate(r);
 
-    return *this;
-}
+    switch (r)
+    {
+    case TexCoordsRotation::ROTATE_90:
+        origin = math::vec2(origin.y, size.w - origin.x);
+        size = math::vec2(size.h, size.w);
 
-spritesheet_region
-spritesheet_region::flip_horizontal (void) const noexcept
-{
-    spritesheet_region result = *this;
-    return result.flip_horizontal();
-}
+        break;
+    case TexCoordsRotation::ROTATE_180:
+        origin = math::vec2(size.w - origin.x, size.h - origin.y);
 
-spritesheet_region
-spritesheet_region::flip_vertical (void) const noexcept
-{
-    spritesheet_region result = *this;
-    return result.flip_vertical();
+        break;
+    case TexCoordsRotation::ROTATE_270:
+        origin = math::vec2(size.h - origin.y, origin.x);
+        size = math::vec2(size.h, size.w);
+
+        break;
+    case TexCoordsRotation::NONE:
+    default:
+        break;
+    }
 }
 
 std::ostream& operator<< (std::ostream& os, const spritesheet_region& p)

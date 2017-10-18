@@ -143,10 +143,12 @@ ShootingGalleryScene::ShootingGalleryScene (void)
                                                          size,
                                                          stall_sheet.texture,
                                                          part.coords));
+        auto flipped = part.coords;
+        flipped.flip(TexCoordsFlip::HORIZONTAL);
         curtain_layer.AddSprite(std::make_shared<Sprite>(vec3(970.f - size.w, -430.f, 0.f),
                                                          size,
                                                          stall_sheet.texture,
-                                                         part.coords.flip_horizontal()));
+                                                         flipped));
     }
 
     {
@@ -157,10 +159,12 @@ ShootingGalleryScene::ShootingGalleryScene (void)
                                                          size,
                                                          stall_sheet.texture,
                                                          part.coords));
+        auto flipped = part.coords;
+        flipped.flip(TexCoordsFlip::HORIZONTAL);
         curtain_layer.AddSprite(std::make_shared<Sprite>(vec3(980.f - size.w, -35.f, 0.f),
                                                          size,
                                                          stall_sheet.texture,
-                                                         part.coords.flip_horizontal()));
+                                                         flipped));
     }
 
     curtain_layer.AddSprite(stall_sheet.CreateSpriteChain("curtain_straight.png",

@@ -198,10 +198,11 @@ int main ()
                                                        stall_sheet.texture,
                                                        part.coords));
         tex_coords flipped = part.coords;
+        flipped.flip(TexCoordsFlip::HORIZONTAL);
         stall_layer.AddSprite(std::make_shared<Sprite>(math::vec3(970.f - size.w, -430.f, DEPTH),
                                                        size,
                                                        stall_sheet.texture,
-                                                       flipped.flip_horizontal()));
+                                                       flipped));
     }
 
     {

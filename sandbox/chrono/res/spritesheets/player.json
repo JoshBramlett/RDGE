@@ -547,9 +547,9 @@
   	  "mode": "normal",
   	  "interval": 25,
   	  "frames": [
-  	    { "name": "idle_side_1", "flip": "horizontal" },
-  	    { "name": "idle_side_2", "flip": "horizontal" },
-  	    { "name": "idle_side_3", "flip": "horizontal" }
+  	    { "name": "idle_side_1", "flip": 1 },
+  	    { "name": "idle_side_2", "flip": 1 },
+  	    { "name": "idle_side_3", "flip": 1 }
   	  ]
   	},
   	{
@@ -596,12 +596,12 @@
   	  "mode": "loop",
   	  "interval": 175,
   	  "frames": [
-  	    { "name": "walk_side_1", "flip": "horizontal" },
-  	    { "name": "walk_side_2", "flip": "horizontal" },
-  	    { "name": "walk_side_3", "flip": "horizontal" },
-  	    { "name": "walk_side_4", "flip": "horizontal" },
-  	    { "name": "walk_side_5", "flip": "horizontal" },
-  	    { "name": "walk_side_6", "flip": "horizontal" }
+  	    { "name": "walk_side_1", "flip": 1 },
+  	    { "name": "walk_side_2", "flip": 1 },
+  	    { "name": "walk_side_3", "flip": 1 },
+  	    { "name": "walk_side_4", "flip": 1 },
+  	    { "name": "walk_side_5", "flip": 1 },
+  	    { "name": "walk_side_6", "flip": 1 }
   	  ]
   	},
   	{
@@ -648,12 +648,12 @@
   	  "mode": "loop",
   	  "interval": 100,
   	  "frames": [
-  	    { "name": "run_side_2", "flip": "horizontal" },
-  	    { "name": "walk_side_2", "flip": "horizontal" },
-  	    { "name": "walk_side_3", "flip": "horizontal" },
-  	    { "name": "run_side_1", "flip": "horizontal" },
-  	    { "name": "walk_side_5", "flip": "horizontal" },
-  	    { "name": "walk_side_6", "flip": "horizontal" }
+  	    { "name": "run_side_2", "flip": 1 },
+  	    { "name": "walk_side_2", "flip": 1 },
+  	    { "name": "walk_side_3", "flip": 1 },
+  	    { "name": "run_side_1", "flip": 1 },
+  	    { "name": "walk_side_5", "flip": 1 },
+  	    { "name": "walk_side_6", "flip": 1 }
   	  ]
   	},
   	{
@@ -691,9 +691,9 @@
   	  "mode": "normal",
   	  "interval": 100,
   	  "frames": [
-  	    { "name": "sheathe_side_1", "flip": "horizontal" },
-  	    { "name": "sheathe_side_2", "flip": "horizontal" },
-  	    { "name": "sheathe_side_3", "flip": "horizontal" }
+  	    { "name": "sheathe_side_1", "flip": 1 },
+  	    { "name": "sheathe_side_2", "flip": 1 },
+  	    { "name": "sheathe_side_3", "flip": 1 }
   	  ]
   	},
   	{
@@ -731,9 +731,9 @@
   	  "mode": "looppingpong",
   	  "interval": 180,
   	  "frames": [
-  	    { "name": "fight_stance_side_1", "flip": "horizontal" },
-  	    { "name": "fight_stance_side_2", "flip": "horizontal" },
-  	    { "name": "fight_stance_side_3", "flip": "horizontal" }
+  	    { "name": "fight_stance_side_1", "flip": 1 },
+  	    { "name": "fight_stance_side_2", "flip": 1 },
+  	    { "name": "fight_stance_side_3", "flip": 1 }
   	  ]
   	},
   	{
@@ -777,11 +777,11 @@
   	  "mode": "normal",
   	  "interval": 150,
   	  "frames": [
-  	    { "name": "attack_side_1", "flip": "horizontal" },
-  	    { "name": "attack_side_2", "flip": "horizontal" },
-  	    { "name": "attack_side_3", "flip": "horizontal" },
-  	    { "name": "attack_side_4", "flip": "horizontal" },
-  	    { "name": "attack_side_5", "flip": "horizontal" }
+  	    { "name": "attack_side_1", "flip": 1 },
+  	    { "name": "attack_side_2", "flip": 1 },
+  	    { "name": "attack_side_3", "flip": 1 },
+  	    { "name": "attack_side_4", "flip": 1 },
+  	    { "name": "attack_side_5", "flip": 1 }
   	  ]
   	}
   ],

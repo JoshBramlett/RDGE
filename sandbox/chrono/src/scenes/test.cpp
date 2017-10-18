@@ -85,17 +85,21 @@ TestScene::TestScene (void)
     auto sheet = g_game.pack->GetSpriteSheet(chrono_asset_tilemap_crossroads);
 
     vec2 tile_size(64.f, 64.f);
-    for (size_t i = 0; i < sheet.tile_count; i++)
+    for (size_t layer_index = 0; layer_index < sheet.tilemap.layer_count; layer_index++)
     {
-        auto tile = sheet.GetTile(i);
+        auto& layer = sheet.tilemap.layers[layer_index];
+        for (size_t i = 0; i < sheet.tilemap.tile_count; i++)
+        {
+            auto& tile = layer.tiles[i];
 
-        float x = -half_width + (tile.location.x * PIXELS_PER_METER);
-        float y = half_height - (tile.location.y * PIXELS_PER_METER);
+            float x = -half_width + (tile.location.x * PIXELS_PER_METER);
+            float y = half_height - (tile.location.y * PIXELS_PER_METER);
 
-        background.AddSprite(std::make_shared<Sprite>(vec3(x, y),
-                                                      tile_size,
-                                                      sheet.texture,
-                                                      tile.region.coords));
+            background.AddSprite(std::make_shared<Sprite>(vec3(x, y),
+                                                          tile_size,
+                                                          sheet.texture,
+                                                          tile.coords));
+        }
     }
 
 #if (CHRONO_ADD_WALLS)
