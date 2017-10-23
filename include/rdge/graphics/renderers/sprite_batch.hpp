@@ -1,4 +1,4 @@
-//! \headerfile <rdge/graphics/sprite_batch.hpp>
+//! \headerfile <rdge/graphics/renderers/sprite_batch.hpp>
 //! \author Josh Bramlett
 //! \version 0.0.10
 //! \date 12/17/2016
@@ -138,7 +138,6 @@ private:
     uint32         m_submissions = 0;  //!< Submissions count between draw calls
     uint32         m_capacity = 0;     //!< Max number of submissions per draw
 
-    std::unique_ptr<uint32[]> m_iboData;    //!< Data storage for the index buffer
     std::shared_ptr<Shader>   m_shader;     //!< Shader program
     math::mat4                m_projection; //!< Projection matrix provided to shader
 

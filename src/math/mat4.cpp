@@ -205,12 +205,12 @@ mat4::identity (void)
 mat4::orthographic (float left, float right, float bottom, float top, float near, float far)
 {
     auto result = mat4::identity();
-    result[0][0] = 2.0f / (right - left);
-    result[1][1] = 2.0f / (top - bottom);
-    result[2][2] = 2.0f / (near - far);
-    result[3][0] = (left + right) / (left - right);
-    result[3][1] = (bottom + top) / (bottom - top);
-    result[3][2] = (far + near) / (far - near);
+    result[0][0] = 2.f / (right - left);
+    result[1][1] = 2.f / (top - bottom);
+    result[2][2] = -2.f / (far - near);
+    result[3][0] = -((right + left) / (right - left));
+    result[3][1] = -((top + bottom) / (top - bottom));
+    result[3][2] = -((far + near) / (far - near));
 
     return result;
 }

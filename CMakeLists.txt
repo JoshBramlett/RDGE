@@ -108,7 +108,6 @@ add_library (RDGE SHARED
              src/graphics/color.cpp
              src/graphics/isprite.cpp
              src/graphics/orthographic_camera.cpp
-             src/graphics/sprite_batch.cpp
              src/graphics/sprite_group.cpp
              src/graphics/shader.cpp
              src/graphics/sprite.cpp
@@ -116,6 +115,8 @@ add_library (RDGE SHARED
              src/graphics/text.cpp
              src/graphics/texture.cpp
              src/graphics/layers/sprite_layer.cpp
+             src/graphics/renderers/sprite_batch.cpp
+             src/graphics/renderers/tilemap_batch.cpp
 
              #src/controls/control.cpp --> src/graphics/ui/widget.cpp
              #src/controls/button.cpp  --> src/graphics/ui/button.cpp

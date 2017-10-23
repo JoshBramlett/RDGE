@@ -1,4 +1,5 @@
 #include <rdge/graphics/sprite_group.hpp>
+#include <rdge/graphics/renderers/sprite_batch.hpp>
 #include <rdge/math/intrinsics.hpp>
 
 #include <SDL_assert.h>

@@ -7,7 +7,6 @@
 
 #include <rdge/core.hpp>
 #include <rdge/graphics/isprite.hpp>
-#include <rdge/graphics/sprite_batch.hpp>
 #include <rdge/math/mat4.hpp>
 
 #include <memory>
@@ -16,6 +15,10 @@
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
+//!@{ Forward declarations
+class SpriteBatch;
+//!@}
+
 //! \class SpriteGroup
 //! \brief Represents a group of \ref ISprite objects
 //! \details Used for logical grouping and performing a similar transformation
@@ -23,7 +26,7 @@ namespace rdge {
 class SpriteGroup : public ISprite
 {
 public:
-    //! \brief SpriteGroup ctor
+    //! \brief SpriteGroup default ctor
     //! \details The transformation is defaulted to an indentity matrix to
     //!          allow for logical ordering without processing a transformation.
     //! \param [in] transform Transformation to apply
@@ -32,8 +35,7 @@ public:
     //! \brief SpriteGroup dtor
     ~SpriteGroup (void) noexcept = default;
 
-    //!@{
-    //! \brief Non-copyable and move enabled
+    //!@{ Non-copyable, move enabled
     SpriteGroup (const SpriteGroup&) = delete;
     SpriteGroup& operator= (const SpriteGroup&) = delete;
     SpriteGroup (SpriteGroup&&) noexcept = default;

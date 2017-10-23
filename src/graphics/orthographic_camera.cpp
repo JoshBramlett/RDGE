@@ -10,7 +10,7 @@ OrthographicCamera::OrthographicCamera (void)
 {
     auto vp = opengl::GetViewport();
     this->viewport_size = { vp[2], vp[3] };
-    DLOG() << "Camera viewport: " << this->viewport_size;
+    DLOG() << "Camera default viewport: " << this->viewport_size;
 
     Update();
 }
@@ -18,16 +18,18 @@ OrthographicCamera::OrthographicCamera (void)
 OrthographicCamera::OrthographicCamera (float width, float height)
     : viewport_size(width, height)
 {
+    DLOG() << "Camera custom viewport: " << this->viewport_size;
+
     Update();
 }
 
 void
 OrthographicCamera::Update (void)
 {
-    this->projection = mat4::orthographic(this->zoom * -(this->viewport_size.w / 2.f),
-                                          this->zoom * (this->viewport_size.w / 2.f),
-                                          this->zoom * -(this->viewport_size.h / 2.f),
-                                          this->zoom * (this->viewport_size.h / 2.f),
+    this->projection = mat4::orthographic(this->zoom * -(this->viewport_size.w * 0.5f),
+                                          this->zoom * (this->viewport_size.w * 0.5f),
+                                          this->zoom * -(this->viewport_size.h * 0.5f),
+                                          this->zoom * (this->viewport_size.h * 0.5f),
                                           this->near,
                                           this->far);
     this->view = mat4::look_at(this->position,                   // camera eye

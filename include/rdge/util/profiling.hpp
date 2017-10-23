@@ -39,7 +39,7 @@ public:
         *m_store = std::chrono::duration_cast<Duration>(end - m_start).count();
     }
 
-    //!@{ Copy/Move disabled
+    //!@{ Non-copyable, Non-movable
     ScopeProfiler (const ScopeProfiler&) = delete;
     ScopeProfiler& operator= (const ScopeProfiler&) = delete;
     ScopeProfiler (ScopeProfiler&&) = delete;

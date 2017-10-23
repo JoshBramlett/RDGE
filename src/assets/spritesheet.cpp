@@ -355,6 +355,7 @@ ProcessTilemap (const json& j, SpriteSheet& sheet)
     sheet.tilemap.layer_count = j_layers.size();
     sheet.tilemap.tile_pitch = tileswide;
     sheet.tilemap.tile_count = tileswide * tileshigh;
+    sheet.tilemap.tile_size = vec2(tilewidth, tileheight);
 
     if (sheet.tilemap.layer_count > tilemap_data::MAX_LAYER_COUNT)
     {
@@ -423,6 +424,114 @@ ProcessTilemap (const json& j, SpriteSheet& sheet)
 
 } // anonymous namespace
 
+tilemap_data::~tilemap_data (void) noexcept
+{
+    for (size_t i = 0; i < this->layer_count; i++)
+    {
+        RDGE_FREE(this->layers[i].tiles, nullptr);
+    }
+}
+
+tilemap_data::tilemap_data (const tilemap_data& other)
+    : layer_count(other.layer_count)
+    , tile_count(other.tile_count)
+    , tile_pitch(other.tile_pitch)
+    , tile_size(other.tile_size)
+{
+    for (size_t i = 0; i < other.layer_count; i++)
+    {
+        const auto& src = other.layers[i];
+        auto& dest = this->layers[i];
+
+        RDGE_MALLOC_N(dest.tiles, other.tile_count, nullptr);
+        memcpy(dest.tiles, src.tiles, sizeof(tile) * other.tile_count);
+    }
+}
+
+tilemap_data::tilemap_data (tilemap_data&& other) noexcept
+    : layer_count(other.layer_count)
+    , tile_count(other.tile_count)
+    , tile_pitch(other.tile_pitch)
+    , tile_size(other.tile_size)
+{
+    for (size_t i = 0; i < this->layer_count; i++)
+    {
+        this->layers[i].tiles = other.layers[i].tiles;
+        other.layers[i].tiles = nullptr;
+    }
+
+    other.layer_count = 0;
+}
+
+tilemap_data&
+tilemap_data::operator= (const tilemap_data& rhs)
+{
+    if (this != &rhs)
+    {
+        for (size_t i = 0; i < MAX_LAYER_COUNT; i++)
+        {
+            const auto& src = rhs.layers[i];
+            auto& dest = this->layers[i];
+
+            if (dest.tiles)
+            {
+                SDL_assert(i < this->layer_count);
+
+                if (src.tiles)
+                {
+                    SDL_assert(i < rhs.layer_count);
+
+                    RDGE_REALLOC(dest.tiles, rhs.tile_count, nullptr);
+                    memcpy(dest.tiles, src.tiles, sizeof(tile) * rhs.tile_count);
+                }
+                else
+                {
+                    RDGE_FREE(dest.tiles, nullptr);
+                    dest.tiles = nullptr;
+                }
+            }
+            else
+            {
+                SDL_assert(i >= this->layer_count);
+
+                if (src.tiles)
+                {
+                    SDL_assert(i < rhs.layer_count);
+
+                    RDGE_MALLOC_N(dest.tiles, rhs.tile_count, nullptr);
+                    memcpy(dest.tiles, src.tiles, sizeof(tile) * rhs.tile_count);
+                }
+            }
+        }
+
+        this->layer_count = rhs.layer_count;
+        this->tile_count = rhs.tile_count;
+        this->tile_pitch = rhs.tile_pitch;
+        this->tile_size = rhs.tile_size;
+    }
+
+    return *this;
+}
+
+tilemap_data&
+tilemap_data::operator= (tilemap_data&& rhs) noexcept
+{
+    if (this != &rhs)
+    {
+        for (size_t i = 0; i < MAX_LAYER_COUNT; i++)
+        {
+            std::swap(this->layers[i].tiles, rhs.layers[i].tiles);
+        }
+
+        std::swap(this->layer_count, rhs.layer_count);
+        std::swap(this->tile_count, rhs.tile_count);
+        std::swap(this->tile_pitch, rhs.tile_pitch);
+        std::swap(this->tile_size, rhs.tile_size);
+    }
+
+    return *this;
+}
+
 SpriteSheet::SpriteSheet (const std::vector<uint8>& msgpack, Surface surface)
     : surface(surface)
     , texture(std::make_shared<Texture>(this->surface))
@@ -450,10 +559,6 @@ SpriteSheet::SpriteSheet (const std::vector<uint8>& msgpack, Surface surface)
     {
         RDGE_FREE(this->regions, nullptr);
         RDGE_FREE(this->animations, nullptr);
-        for (size_t i = 0; i < this->tilemap.layer_count; i++)
-        {
-            RDGE_FREE(this->tilemap.layers[i].tiles, nullptr);
-        }
 
         RDGE_THROW(ex.what());
     }
@@ -498,10 +603,6 @@ SpriteSheet::SpriteSheet (const char* filepath)
 
         RDGE_FREE(this->regions, nullptr);
         RDGE_FREE(this->animations, nullptr);
-        for (size_t i = 0; i < this->tilemap.layer_count; i++)
-        {
-            RDGE_FREE(this->tilemap.layers[i].tiles, nullptr);
-        }
 
         RDGE_THROW(ex.what());
     }
@@ -511,10 +612,6 @@ SpriteSheet::~SpriteSheet (void) noexcept
 {
     RDGE_FREE(this->regions, nullptr);
     RDGE_FREE(this->animations, nullptr);
-    for (size_t i = 0; i < this->tilemap.layer_count; i++)
-    {
-        RDGE_FREE(this->tilemap.layers[i].tiles, nullptr);
-    }
 }
 
 SpriteSheet::SpriteSheet (SpriteSheet&& other) noexcept
@@ -522,18 +619,13 @@ SpriteSheet::SpriteSheet (SpriteSheet&& other) noexcept
     , texture(std::move(other.texture))
     , regions(other.regions)
     , animations(other.animations)
-    , tilemap(other.tilemap)
+    , tilemap(std::move(other.tilemap))
 {
     other.regions = nullptr;
     other.animations = nullptr;
-    for (size_t i = 0; i < other.tilemap.layer_count; i++)
-    {
-        other.tilemap.layers[i].tiles = nullptr;
-    }
 
     other.region_count = 0;
     other.animation_count = 0;
-    other.tilemap.layer_count = 0;
 }
 
 SpriteSheet&
@@ -545,7 +637,7 @@ SpriteSheet::operator= (SpriteSheet&& rhs) noexcept
         std::swap(this->texture, rhs.texture);
         std::swap(this->regions, rhs.regions);
         std::swap(this->animations, rhs.animations);
-        std::swap(this->tilemap, rhs.tilemap);
+        this->tilemap = std::move(rhs.tilemap);
 
         rhs.region_count = 0;
         rhs.animation_count = 0;

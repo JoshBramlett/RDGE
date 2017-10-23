@@ -43,8 +43,8 @@ class Contact : public intrusive_list_element<Contact>
 public:
     //!@{ Non-copyable, Non-movable
     Contact (const Contact&) = delete;
-    Contact (Contact&&) = delete;
     Contact& operator= (const Contact&) = delete;
+    Contact (Contact&&) = delete;
     Contact& operator= (Contact&&) = delete;
     //!@}
 

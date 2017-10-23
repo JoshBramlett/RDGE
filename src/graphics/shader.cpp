@@ -104,10 +104,10 @@ Shader::~Shader (void) noexcept
     glDeleteProgram(m_programId);
 }
 
-Shader::Shader (Shader&& rhs) noexcept
-    : m_uniforms(std::move(rhs.m_uniforms))
+Shader::Shader (Shader&& other) noexcept
+    : m_uniforms(std::move(other.m_uniforms))
 {
-    std::swap(m_programId, rhs.m_programId);
+    std::swap(m_programId, other.m_programId);
 }
 
 Shader&

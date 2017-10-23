@@ -58,7 +58,6 @@ TestScene::TestScene (void)
     : collision_graph({ 0.f, -9.8f })
     , duck(this, vec3(300.f, 300.f, 0.f)) //vec3::ZERO)
     , render_target(std::make_shared<SpriteBatch>(10'000))
-    , background(render_target)
     , entities(render_target)
 {
     collision_graph.listener = &l;
@@ -69,10 +68,10 @@ TestScene::TestScene (void)
     ///////////////////
 
     // TODO config file?
-    float window_height = 1080.f;
-    float window_width  = 1920.f;
-    float half_height   = window_height * 0.5f;
-    float half_width    = window_width * 0.5f;
+    //float window_height = 1080.f;
+    //float window_width  = 1920.f;
+    //float half_height   = window_height * 0.5f;
+    //float half_width    = window_width * 0.5f;
 
     // TODO Think about how to properly handle conversion from physics simulation
     //      coordinates to rendering coordinates.
@@ -83,24 +82,7 @@ TestScene::TestScene (void)
     //          own rendering?
 
     auto sheet = g_game.pack->GetSpriteSheet(chrono_asset_tilemap_crossroads);
-
-    vec2 tile_size(64.f, 64.f);
-    for (size_t layer_index = 0; layer_index < sheet.tilemap.layer_count; layer_index++)
-    {
-        auto& layer = sheet.tilemap.layers[layer_index];
-        for (size_t i = 0; i < sheet.tilemap.tile_count; i++)
-        {
-            auto& tile = layer.tiles[i];
-
-            float x = -half_width + (tile.location.x * PIXELS_PER_METER);
-            float y = half_height - (tile.location.y * PIXELS_PER_METER);
-
-            background.AddSprite(std::make_shared<Sprite>(vec3(x, y),
-                                                          tile_size,
-                                                          sheet.texture,
-                                                          tile.coords));
-        }
-    }
+    background = TilemapBatch(sheet, 4.f);
 
 #if (CHRONO_ADD_WALLS)
     rigid_body_profile bprof;
@@ -184,6 +166,7 @@ TestScene::OnRender (void)
     camera.Update();
 
     render_target->SetProjection(camera.combined);
+    background.SetView(camera);
 
     background.Draw();
     entities.Draw();

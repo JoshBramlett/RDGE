@@ -1,5 +1,5 @@
 #include <rdge/graphics/sprite.hpp>
-#include <rdge/graphics/sprite_batch.hpp>
+#include <rdge/graphics/renderers/sprite_batch.hpp>
 #include <rdge/graphics/texture.hpp>
 #include <rdge/graphics/vops.hpp>
 

@@ -4,19 +4,26 @@ class Surface;
 class Texture;
 //!@}
 
-//!@{ Non-copyable, move enabled
-BitmapFont (const BitmapFont&) = delete;
-BitmapFont& operator= (const BitmapFont&) = delete;
-BitmapFont (BitmapFont&&) noexcept = default;
-BitmapFont& operator= (BitmapFont&&) noexcept = default;
-//!@}
+    //!@{ Copy and move enabled
+    BitmapFont (const BitmapFont&);
+    BitmapFont& operator= (const BitmapFont&);
+    BitmapFont (BitmapFont&&) noexcept;
+    BitmapFont& operator= (BitmapFont&&) noexcept;
+    //!@}
 
-//!@{ Non-copyable, Non-movable
-Contact (const Contact&) = delete;
-Contact (Contact&&) = delete;
-Contact& operator= (const Contact&) = delete;
-Contact& operator= (Contact&&) = delete;
-//!@}
+    //!@{ Non-copyable, move enabled
+    BitmapFont (const BitmapFont&) = delete;
+    BitmapFont& operator= (const BitmapFont&) = delete;
+    BitmapFont (BitmapFont&&) noexcept = default;
+    BitmapFont& operator= (BitmapFont&&) noexcept = default;
+    //!@}
+
+    //!@{ Non-copyable, non-movable
+    BitmapFont (const BitmapFont&) = delete;
+    BitmapFont& operator= (const BitmapFont&) = delete;
+    BitmapFont (BitmapFont&&) = delete;
+    BitmapFont& operator= (BitmapFont&&) = delete;
+    //!@}
 
 //! \brief tex_coords stream output operator
 std::ostream& operator<< (std::ostream& os, const tex_coords& value);

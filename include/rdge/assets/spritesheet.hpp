@@ -39,6 +39,16 @@ struct tilemap_data
     //!          have sparse tile placement
     static constexpr int32 INVALID_TILE = -1;
 
+    tilemap_data (void) = default;
+    ~tilemap_data (void) noexcept;
+
+    //!@{ Copy and move enabled
+    tilemap_data (const tilemap_data&);
+    tilemap_data& operator= (const tilemap_data&);
+    tilemap_data (tilemap_data&&) noexcept;
+    tilemap_data& operator= (tilemap_data&&) noexcept;
+    //!@}
+
     //! \struct tile
     //! \brief Individual tile in the map
     struct tile
@@ -60,6 +70,7 @@ struct tilemap_data
 
     size_t tile_count = 0; //!< Number of tiles per layer
     size_t tile_pitch = 0; //!< Number of tiles in a row
+    math::vec2 tile_size;  //!< Tile dimensions
 };
 
 //! \class SpriteSheet

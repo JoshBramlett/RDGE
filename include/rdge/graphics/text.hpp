@@ -7,7 +7,6 @@
 
 #include <rdge/core.hpp>
 #include <rdge/graphics/isprite.hpp>
-#include <rdge/graphics/sprite_batch.hpp>
 #include <rdge/graphics/texture.hpp>
 #include <rdge/graphics/color.hpp>
 #include <rdge/assets/font.hpp>
@@ -18,6 +17,10 @@
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
+
+//!@{ Forward declarations
+class SpriteBatch;
+//!@}
 
 //! \class Text
 //! \brief Renderable text (label)

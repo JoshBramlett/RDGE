@@ -85,6 +85,6 @@ public:
     Duck duck;
 
     std::shared_ptr<rdge::SpriteBatch> render_target;
-    rdge::SpriteLayer background;
+    rdge::TilemapBatch background;
     rdge::SpriteLayer entities;
 };

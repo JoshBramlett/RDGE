@@ -16,15 +16,16 @@
 #include <rdge/math/vec2.hpp>
 
 #include <SDL_assert.h>
-#include <cassert>
 
-#include <algorithm>
+#include <algorithm> // min, max
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 namespace physics {
 
+//!@{ Forward declarations
 struct collision_manifold;
+//!@}
 
 //! \struct aabb
 //! \brief Floating point structure defining an axis aligned bounding box
@@ -212,9 +213,9 @@ constexpr bool operator!= (const aabb& lhs, const aabb& rhs) noexcept
 }
 
 //! \brief aabb stream output operator
-inline std::ostream& operator<< (std::ostream& os, const aabb& rect)
+inline std::ostream& operator<< (std::ostream& os, const aabb& value)
 {
-    return os << "[ " << rect.lo << ", " << rect.hi << " ]";
+    return os << "[ " << value.lo << ", " << value.hi << " ]";
 }
 
 } // namespace physics

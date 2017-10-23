@@ -1,7 +1,8 @@
-#include <rdge/graphics/sprite_batch.hpp>
+#include <rdge/graphics/renderers/sprite_batch.hpp>
 #include <rdge/graphics/color.hpp>
 #include <rdge/assets/surface.hpp>
 #include <rdge/util/logger.hpp>
+#include <rdge/util/memory/alloc.hpp>
 #include <rdge/internal/hints.hpp>
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
@@ -141,33 +142,34 @@ SpriteBatch::SpriteBatch (uint16 capacity, std::shared_ptr<Shader> shader, bool 
     opengl::UnbindBuffers(GL_ARRAY_BUFFER);
 
     // IBO
-    uint32 ibo_count = static_cast<uint32>(m_capacity) * 6;
-    uint32 ibo_size  = ibo_count * sizeof(uint32);
-
     m_ibo = opengl::CreateBuffer();
     opengl::BindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
 
-    m_iboData = std::make_unique<uint32[]>(ibo_count);
-    if (UNLIKELY(!m_iboData))
+    uint32 ibo_count = static_cast<uint32>(m_capacity) * 6;
+    uint32 ibo_size = ibo_count * sizeof(uint32);
+
+    uint32* ibo_data;
+    if (UNLIKELY(!RDGE_MALLOC(ibo_data, ibo_size, nullptr)))
     {
-        RDGE_THROW("Memory allocation failed");
+        RDGE_THROW("Failed to allocate memory");
     }
 
     for (uint32 i = 0, idx = 0, offset = 0;
          i < m_capacity;
          i++, idx = i * 6, offset = i * 4)
     {
-        m_iboData[idx]     = offset;
-        m_iboData[idx + 1] = offset + 1;
-        m_iboData[idx + 2] = offset + 2;
+        ibo_data[idx]     = offset;
+        ibo_data[idx + 1] = offset + 1;
+        ibo_data[idx + 2] = offset + 2;
 
-        m_iboData[idx + 3] = offset + 2;
-        m_iboData[idx + 4] = offset + 3;
-        m_iboData[idx + 5] = offset;
+        ibo_data[idx + 3] = offset + 2;
+        ibo_data[idx + 4] = offset + 3;
+        ibo_data[idx + 5] = offset;
     }
 
-    opengl::SetBufferData(GL_ELEMENT_ARRAY_BUFFER, ibo_size, m_iboData.get(), GL_STATIC_DRAW);
+    opengl::SetBufferData(GL_ELEMENT_ARRAY_BUFFER, ibo_size, ibo_data, GL_STATIC_DRAW);
     opengl::UnbindBuffers(GL_ELEMENT_ARRAY_BUFFER);
+    RDGE_FREE(ibo_data, nullptr);
 
     opengl::UnbindVertexArrays();
 
@@ -222,26 +224,25 @@ SpriteBatch::~SpriteBatch (void) noexcept
     glDeleteVertexArrays(1, &m_vao);
 }
 
-SpriteBatch::SpriteBatch (SpriteBatch&& rhs) noexcept
-    : m_cursor(rhs.m_cursor)
-    , m_submissions(rhs.m_submissions)
-    , m_capacity(rhs.m_capacity)
-    , m_iboData(std::move(rhs.m_iboData))
-    , m_shader(std::move(rhs.m_shader))
-    , m_projection(rhs.m_projection)
-    , m_transformStack(std::move(rhs.m_transformStack))
-    , m_transform(rhs.m_transform)
-    , m_textures(std::move(rhs.m_textures))
+SpriteBatch::SpriteBatch (SpriteBatch&& other) noexcept
+    : m_cursor(other.m_cursor)
+    , m_submissions(other.m_submissions)
+    , m_capacity(other.m_capacity)
+    , m_shader(std::move(other.m_shader))
+    , m_projection(other.m_projection)
+    , m_transformStack(std::move(other.m_transformStack))
+    , m_transform(other.m_transform)
+    , m_textures(std::move(other.m_textures))
 {
     // Swap used so moved-from object dtor can cleanup
-    std::swap(m_vao, rhs.m_vao);
-    std::swap(m_vbo, rhs.m_vbo);
-    std::swap(m_ibo, rhs.m_ibo);
+    std::swap(m_vao, other.m_vao);
+    std::swap(m_vbo, other.m_vbo);
+    std::swap(m_ibo, other.m_ibo);
 
-    rhs.m_cursor = nullptr;
-    rhs.m_submissions = 0;
-    rhs.m_capacity = 0;
-    rhs.m_transform = nullptr;
+    other.m_cursor = nullptr;
+    other.m_submissions = 0;
+    other.m_capacity = 0;
+    other.m_transform = nullptr;
 }
 
 SpriteBatch&
@@ -252,7 +253,6 @@ SpriteBatch::operator= (SpriteBatch&& rhs) noexcept
         m_cursor = rhs.m_cursor;
         m_submissions = rhs.m_submissions;
         m_capacity = rhs.m_capacity;
-        m_iboData = std::move(rhs.m_iboData);
         m_shader = std::move(rhs.m_shader);
         m_projection = rhs.m_projection;
         m_transformStack = std::move(rhs.m_transformStack);

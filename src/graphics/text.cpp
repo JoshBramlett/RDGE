@@ -1,4 +1,5 @@
 #include <rdge/graphics/text.hpp>
+#include <rdge/graphics/renderers/sprite_batch.hpp>
 #include <rdge/graphics/vops.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
