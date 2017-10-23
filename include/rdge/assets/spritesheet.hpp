@@ -93,6 +93,7 @@ struct tilemap_data
 //! {
 //!     "image_path": "textures/image.png",
 //!     "type": "spritesheet",
+//!     "margin": 1,
 //!     "regions": [ {
 //!         "name": "region_name",
 //!         "x": 0,
@@ -120,6 +121,7 @@ struct tilemap_data
 //! {
 //!     "image_path": "textures/image.png",
 //!     "type": "tilemap",
+//!     "margin": 1,
 //!     "tileswide": 30,
 //!     "tileshigh": 30,
 //!     "tilewidth": 16,

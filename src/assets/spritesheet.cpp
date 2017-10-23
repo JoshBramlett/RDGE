@@ -205,43 +205,49 @@ ParsePyxelEditTile (const json& j)
 void
 ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
 {
-    sheet.region_count = (j.count("regions") > 0) ? j["regions"].size() : 0;
-    if (sheet.region_count > 0)
+    CHECK_REQ(j, regions, is_array);
+    CHECK_OPT(j, animations, is_array);
+    CHECK_OPT(j, margin, is_number_unsigned);
+
+    uint32 margin = (j.count("margin") > 0) ? j["margin"].get<uint32>() : 0;
+
+    sheet.region_count = j["regions"].size();
+    RDGE_CALLOC(sheet.regions, sheet.region_count, nullptr);
+
+    auto surface_size = sheet.surface.Size();
+    const auto& j_regions = j["regions"];
+    for (size_t i = 0; i < sheet.region_count; i++)
     {
-        RDGE_CALLOC(sheet.regions, sheet.region_count, nullptr);
+        auto parsed = ParseRegion(j_regions[i]);
 
-        auto surface_size = sheet.surface.Size();
-        const auto& j_regions = j["regions"];
-        for (size_t i = 0; i < sheet.region_count; i++)
+        // Validate values are within range
+        if ((parsed.x + parsed.width > surface_size.w) ||
+            (parsed.y + parsed.height > surface_size.h))
         {
-            auto parsed = ParseRegion(j_regions[i]);
-
-            // Validate values are within range
-            if ((parsed.x + parsed.width > surface_size.w) ||
-                (parsed.y + parsed.height > surface_size.h))
-            {
-                std::string msg("region \"" + parsed.name + "\" outside valid range");
-                throw std::invalid_argument(msg);
-            }
-
-            auto& region = sheet.regions[i];
-            region.name = parsed.name;
-            region.value.clip = { static_cast<int32>(parsed.x),
-                                  static_cast<int32>(parsed.y),
-                                  static_cast<int32>(parsed.width),
-                                  static_cast<int32>(parsed.height) };
-            region.value.size = vec2(parsed.width, parsed.height);
-            region.value.origin = parsed.origin;
-
-            float x1 = normalize(parsed.x, surface_size.w);
-            float x2 = normalize(parsed.x + parsed.width, surface_size.w);
-            float y1 = normalize(parsed.y, surface_size.h);
-            float y2 = normalize(parsed.y + parsed.height, surface_size.h);
-            region.value.coords.bottom_left  = vec2(x1, y1);
-            region.value.coords.bottom_right = vec2(x2, y1);
-            region.value.coords.top_left     = vec2(x1, y2);
-            region.value.coords.top_right    = vec2(x2, y2);
+            std::string msg("region \"" + parsed.name + "\" outside valid range");
+            throw std::invalid_argument(msg);
         }
+
+        uint32 offset_x = margin + parsed.x;
+        uint32 offset_y = margin + parsed.y;
+
+        auto& region = sheet.regions[i];
+        region.name = parsed.name;
+        region.value.clip = { static_cast<int32>(offset_x),
+                              static_cast<int32>(offset_y),
+                              static_cast<int32>(parsed.width),
+                              static_cast<int32>(parsed.height) };
+        region.value.size = vec2(parsed.width, parsed.height);
+        region.value.origin = parsed.origin;
+
+        float x1 = normalize(offset_x, surface_size.w);
+        float x2 = normalize(offset_x + parsed.width, surface_size.w);
+        float y1 = normalize(offset_y, surface_size.h);
+        float y2 = normalize(offset_y + parsed.height, surface_size.h);
+        region.value.coords.bottom_left  = vec2(x1, y1);
+        region.value.coords.bottom_right = vec2(x2, y1);
+        region.value.coords.top_left     = vec2(x1, y2);
+        region.value.coords.top_right    = vec2(x2, y2);
     }
 
     sheet.animation_count = (j.count("animations") > 0) ? j["animations"].size() : 0;
@@ -296,19 +302,15 @@ ProcessTilemap (const json& j, SpriteSheet& sheet)
     CHECK_REQ(j, tilewidth, is_number_unsigned);
     CHECK_REQ(j, tileheight, is_number_unsigned);
     CHECK_REQ(j, layers, is_array);
+    CHECK_OPT(j, margin, is_number_unsigned);
 
     auto tileswide = j["tileswide"].get<uint32>();
     auto tileshigh = j["tileshigh"].get<uint32>();
     auto tilewidth = j["tilewidth"].get<uint32>();
     auto tileheight = j["tileheight"].get<uint32>();
+    uint32 margin = (j.count("margin") > 0) ? j["margin"].get<uint32>() : 0;
 
     auto surface_size = sheet.surface.Size();
-    if ((surface_size.w % tilewidth > 0) || (surface_size.h % tileheight > 0))
-    {
-        std::string msg("tilemap expects no surface padding");
-        throw std::invalid_argument(msg);
-    }
-
     uint32 region_rows = surface_size.h / tileheight;
     uint32 region_cols = surface_size.w / tilewidth;
     sheet.region_count = region_rows * region_cols;
@@ -330,8 +332,8 @@ ProcessTilemap (const json& j, SpriteSheet& sheet)
             ss << "tile_" << row << "_" << col;
             region.name = ss.str();
 
-            auto x = col * tilewidth;
-            auto y = row * tileheight;
+            auto x = margin + (col * tilewidth);
+            auto y = margin + (row * tileheight);
             region.value.clip = { static_cast<int32>(x),
                                   static_cast<int32>(y),
                                   static_cast<int32>(tilewidth),

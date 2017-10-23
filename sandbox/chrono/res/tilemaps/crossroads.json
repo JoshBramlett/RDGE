@@ -1,6 +1,7 @@
 {
 	"image_path": "res/overworld.png",
     "type": "tilemap",
+    "margin": 1,
     "tileheight": 16,
     "tileshigh": 60,
     "layers": [
