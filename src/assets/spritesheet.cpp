@@ -12,7 +12,6 @@
 #include <SDL_assert.h>
 #include <nlohmann/json.hpp>
 
-#include <utility>   // std::pair
 #include <exception>
 #include <sstream>
 

@@ -267,7 +267,6 @@ ImportSpritesheets (void)
                     char* text_data = (char*)calloc(text_size + 1, sizeof(char));
                     if (!text_data)
                     {
-                        free(text_data);
                         throw std::runtime_error("failed memory allocation");
                     }
 

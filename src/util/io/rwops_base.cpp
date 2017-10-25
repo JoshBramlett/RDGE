@@ -81,7 +81,10 @@ rwops_base::write (void* ptr, size_t size, size_t count)
 int32
 rwops_base::close (void)
 {
-    return SDL_RWclose(m_rwops);
+    int32 result = SDL_RWclose(m_rwops);
+    m_rwops = nullptr;
+
+    return result;
 }
 
 int64

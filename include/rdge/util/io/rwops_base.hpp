@@ -39,7 +39,7 @@ public:
     //! \brief rwops_base ctor
     //! \details Take ownership of an existing SDL_RWops.
     //! \param [in] sdl_rwops Native SDL_RWops
-	explicit rwops_base (SDL_RWops* sdl_rwops);
+    explicit rwops_base (SDL_RWops* sdl_rwops);
 
     //! \brief rwops_base ctor
     virtual ~rwops_base (void) noexcept;
@@ -76,10 +76,10 @@ public:
     //!@{
     //! \brief Static constructors
     //! \throws rdge::SDLException Failed to construct object
-	static rwops_base from_file (const char* file, const char* mode);
-	static rwops_base from_fp (FILE* file, bool autoclose);
-	static rwops_base from_memory (void* mem, int32 size);
-	static rwops_base from_const_memory (const void* mem, int32 size);
+    static rwops_base from_file (const char* file, const char* mode);
+    static rwops_base from_fp (FILE* file, bool autoclose);
+    static rwops_base from_memory (void* mem, int32 size);
+    static rwops_base from_const_memory (const void* mem, int32 size);
     //!@}
 
 protected:

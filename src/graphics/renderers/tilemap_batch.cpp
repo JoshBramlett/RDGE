@@ -9,11 +9,9 @@
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
 
-#include <SDL.h>
+#include <SDL_assert.h>
 #include <GL/glew.h>
 
-#include <algorithm> // std::generate
-#include <utility> // std::pair
 #include <sstream>
 
 namespace rdge {

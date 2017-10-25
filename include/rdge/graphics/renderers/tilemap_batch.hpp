@@ -66,7 +66,7 @@ public:
     void Draw (void);
 
     // TODO
-    // Limit rendering to boundaries
+    // Limit rendering to camera boundaries
     // ImGui support to list drawn tiles per frame
     // Global color - tint all tiles
     // Blending on above layers

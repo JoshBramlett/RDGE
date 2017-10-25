@@ -160,6 +160,7 @@ target_link_libraries (RDGE
                        ${OPENGL_LIBRARIES})
 
 add_subdirectory (tools/asset_packer)
+add_subdirectory (tools/pyxel2tiled)
 add_subdirectory (sandbox/chrono)
 add_subdirectory (sandbox/physics)
 add_subdirectory (tutorials/01_textures)
