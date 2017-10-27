@@ -1,4 +1,5 @@
 #include <rdge/assets/spritesheet.hpp>
+#include <rdge/assets/import/formats.hpp>
 #include <rdge/graphics/sprite.hpp>
 #include <rdge/graphics/sprite_group.hpp>
 #include <rdge/graphics/texture.hpp>
@@ -14,21 +15,6 @@
 
 #include <exception>
 #include <sstream>
-
-#define CHECK_REQ(j, field, type) do {                                          \
-    if (j.count(#field) == 0) {                                                 \
-        throw std::invalid_argument("missing required field \"" #field "\"");   \
-    } else if (!j[#field].type()) {                                             \
-        throw std::invalid_argument("\"" #field "\" failed " #type "() check"); \
-    }                                                                           \
-} while (false)
-
-#define CHECK_OPT(j, field, type) do {                                          \
-    if ((j.count(#field) > 0) && (!j[#field].type())) {                         \
-        throw std::invalid_argument("\"" #field "\" failed " #type "() check"); \
-    }                                                                           \
-} while (false)
-
 
 namespace rdge {
 
@@ -73,16 +59,6 @@ struct parsed_animation_data
     std::vector<parsed_frame> frames;
 };
 
-struct pyxel_edit_tile_data
-{
-    int32 index;
-    uint32 x;
-    uint32 y;
-    uint32 flip;
-    uint32 tile;
-    uint32 rot;
-};
-
 // Normalize the point to a float clamped to [0, 1]
 constexpr float normalize (uint64 point, uint64 dimension)
 {
@@ -93,12 +69,12 @@ constexpr float normalize (uint64 point, uint64 dimension)
 parsed_region_data
 ParseRegion (const json& j)
 {
-    CHECK_REQ(j, name, is_string);
-    CHECK_REQ(j, x, is_number_unsigned);
-    CHECK_REQ(j, y, is_number_unsigned);
-    CHECK_REQ(j, width, is_number_unsigned);
-    CHECK_REQ(j, height, is_number_unsigned);
-    CHECK_OPT(j, origin, is_array);
+    JSON_VALIDATE_REQUIRED(j, name, is_string);
+    JSON_VALIDATE_REQUIRED(j, x, is_number_unsigned);
+    JSON_VALIDATE_REQUIRED(j, y, is_number_unsigned);
+    JSON_VALIDATE_REQUIRED(j, width, is_number_unsigned);
+    JSON_VALIDATE_REQUIRED(j, height, is_number_unsigned);
+    JSON_VALIDATE_OPTIONAL(j, origin, is_array);
 
     parsed_region_data result;
     result.name = j["name"].get<std::string>();
@@ -144,10 +120,10 @@ ParseRegion (const json& j)
 parsed_animation_data
 ParseAnimation (const json& j)
 {
-    CHECK_REQ(j, name, is_string);
-    CHECK_REQ(j, interval, is_number_unsigned);
-    CHECK_REQ(j, mode, is_string);
-    CHECK_REQ(j, frames, is_array);
+    JSON_VALIDATE_REQUIRED(j, name, is_string);
+    JSON_VALIDATE_REQUIRED(j, interval, is_number_unsigned);
+    JSON_VALIDATE_REQUIRED(j, mode, is_string);
+    JSON_VALIDATE_REQUIRED(j, frames, is_array);
 
     parsed_animation_data result;
     result.name = j["name"].get<std::string>();
@@ -162,8 +138,8 @@ ParseAnimation (const json& j)
     const auto& frames = j["frames"];
     for (const auto& frame : frames)
     {
-        CHECK_REQ(frame, name, is_string);
-        CHECK_OPT(frame, flip, is_number_unsigned);
+        JSON_VALIDATE_REQUIRED(frame, name, is_string);
+        JSON_VALIDATE_OPTIONAL(frame, flip, is_number_unsigned);
 
         parsed_frame result_frame;
         result_frame.name = frame["name"].get<std::string>();
@@ -180,33 +156,12 @@ ParseAnimation (const json& j)
     return result;
 }
 
-pyxel_edit_tile_data
-ParsePyxelEditTile (const json& j)
-{
-    CHECK_REQ(j, x, is_number_unsigned);
-    CHECK_REQ(j, y, is_number_unsigned);
-    CHECK_REQ(j, index, is_number);
-    CHECK_REQ(j, tile, is_number_unsigned);
-    CHECK_REQ(j, flipX, is_boolean);
-    CHECK_REQ(j, rot, is_number);
-
-    pyxel_edit_tile_data result;
-    result.x = j["x"].get<uint32>();
-    result.y = j["y"].get<uint32>();
-    result.index = j["index"].get<uint32>();
-    result.tile = j["tile"].get<uint32>();
-    result.flip = (j["flipX"].get<bool>()) ? 1 : 0;
-    result.rot = j["rot"].get<int32>();
-
-    return result;
-}
-
 void
 ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
 {
-    CHECK_REQ(j, regions, is_array);
-    CHECK_OPT(j, animations, is_array);
-    CHECK_OPT(j, margin, is_number_unsigned);
+    JSON_VALIDATE_REQUIRED(j, regions, is_array);
+    JSON_VALIDATE_OPTIONAL(j, animations, is_array);
+    JSON_VALIDATE_OPTIONAL(j, margin, is_number_unsigned);
 
     uint32 margin = (j.count("margin") > 0) ? j["margin"].get<uint32>() : 0;
 
@@ -296,22 +251,14 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
 void
 ProcessTilemap (const json& j, SpriteSheet& sheet)
 {
-    CHECK_REQ(j, tileswide, is_number_unsigned);
-    CHECK_REQ(j, tileshigh, is_number_unsigned);
-    CHECK_REQ(j, tilewidth, is_number_unsigned);
-    CHECK_REQ(j, tileheight, is_number_unsigned);
-    CHECK_REQ(j, layers, is_array);
-    CHECK_OPT(j, margin, is_number_unsigned);
-
-    auto tileswide = j["tileswide"].get<uint32>();
-    auto tileshigh = j["tileshigh"].get<uint32>();
-    auto tilewidth = j["tilewidth"].get<uint32>();
-    auto tileheight = j["tileheight"].get<uint32>();
+    JSON_VALIDATE_OPTIONAL(j, margin, is_number_unsigned);
     uint32 margin = (j.count("margin") > 0) ? j["margin"].get<uint32>() : 0;
 
+    pyxel_edit::tilemap parsed = j;
+
     auto surface_size = sheet.surface.Size();
-    uint32 region_rows = surface_size.h / tileheight;
-    uint32 region_cols = surface_size.w / tilewidth;
+    uint32 region_rows = surface_size.h / parsed.tileheight;
+    uint32 region_cols = surface_size.w / parsed.tilewidth;
     sheet.region_count = region_rows * region_cols;
 
     if (sheet.region_count == 0)
@@ -331,20 +278,20 @@ ProcessTilemap (const json& j, SpriteSheet& sheet)
             ss << "tile_" << row << "_" << col;
             region.name = ss.str();
 
-            auto x = margin + (col * tilewidth);
-            auto y = margin + (row * tileheight);
+            auto x = margin + (col * parsed.tilewidth);
+            auto y = margin + (row * parsed.tileheight);
             region.value.clip = { static_cast<int32>(x),
                                   static_cast<int32>(y),
-                                  static_cast<int32>(tilewidth),
-                                  static_cast<int32>(tileheight) };
-            region.value.size = vec2(tilewidth, tileheight);
+                                  static_cast<int32>(parsed.tilewidth),
+                                  static_cast<int32>(parsed.tileheight) };
+            region.value.size = vec2(parsed.tilewidth, parsed.tileheight);
             region.value.origin.x = region.value.size.w * 0.5f;
             region.value.origin.y = region.value.size.h * 0.5f;
 
             float x1 = normalize(x, surface_size.w);
-            float x2 = normalize(x + tilewidth, surface_size.w);
+            float x2 = normalize(x + parsed.tilewidth, surface_size.w);
             float y1 = normalize(y, surface_size.h);
-            float y2 = normalize(y + tileheight, surface_size.h);
+            float y2 = normalize(y + parsed.tileheight, surface_size.h);
             region.value.coords.bottom_left  = vec2(x1, y1);
             region.value.coords.bottom_right = vec2(x2, y1);
             region.value.coords.top_left     = vec2(x1, y2);
@@ -352,11 +299,10 @@ ProcessTilemap (const json& j, SpriteSheet& sheet)
         }
     }
 
-    const auto& j_layers = j["layers"];
-    sheet.tilemap.layer_count = j_layers.size();
-    sheet.tilemap.tile_pitch = tileswide;
-    sheet.tilemap.tile_count = tileswide * tileshigh;
-    sheet.tilemap.tile_size = vec2(tilewidth, tileheight);
+    sheet.tilemap.tile_pitch = parsed.tileswide;
+    sheet.tilemap.tile_count = parsed.tileswide * parsed.tileshigh;
+    sheet.tilemap.tile_size = vec2(parsed.tilewidth, parsed.tileheight);
+    sheet.tilemap.layer_count = parsed.layers.size();
 
     if (sheet.tilemap.layer_count > tilemap_data::MAX_LAYER_COUNT)
     {
@@ -369,55 +315,54 @@ ProcessTilemap (const json& j, SpriteSheet& sheet)
 
     for (size_t i = 0; i < sheet.tilemap.layer_count; i++)
     {
-        const auto& j_layer = j_layers[0];
+        const auto& parsed_layer = parsed.layers[i];
 
-        CHECK_REQ(j_layer, number, is_number_unsigned);
-        CHECK_REQ(j_layer, tiles, is_array);
-
-        auto layer_index = j_layer["number"].get<uint32>();
-        if (layer_index >= sheet.tilemap.layer_count)
+        if (parsed_layer.number >= sheet.tilemap.layer_count)
         {
             std::string msg("tilemap layer index out of range");
             throw std::invalid_argument(msg);
         }
 
-        const auto& j_tiles = j_layer["tiles"];
-        if (j_tiles.size() != sheet.tilemap.tile_count)
+        if (parsed_layer.tiles.size() != sheet.tilemap.tile_count)
         {
             std::string msg("tilemap tile entry count does not match definition");
             throw std::invalid_argument(msg);
         }
 
-        auto& layer = sheet.tilemap.layers[layer_index];
+        auto& layer = sheet.tilemap.layers[parsed_layer.number];
         RDGE_CALLOC(layer.tiles, sheet.tilemap.tile_count, nullptr);
-        for (const auto& j_tile : j_tiles)
+        for (const auto& parsed_tile : parsed_layer.tiles)
         {
-            auto parsed = ParsePyxelEditTile(j_tile);
-            if (parsed.tile >= sheet.region_count)
+            if (parsed_tile.tile >= 0 &&
+                static_cast<size_t>(parsed_tile.tile) >= sheet.region_count)
             {
-                std::string msg("tile region out of bounds. value=" +
-                                std::to_string(parsed.tile));
+                std::string msg("tile region index out of bounds. value=" +
+                                std::to_string(parsed_tile.tile));
                 throw std::invalid_argument(msg);
             }
 
-            auto& tile = layer.tiles[parsed.index];
-            tile.index = parsed.index;
-            tile.location = { parsed.x, parsed.y };
+            auto& tile = layer.tiles[parsed_tile.index];
+            tile.index = parsed_tile.index;
+            tile.location = { parsed_tile.x, parsed_tile.y };
 
             if (tile.index < 0)
             {
                 tile.index = tilemap_data::INVALID_TILE;
-                tile.coords.top_left     = { 0.f, 0.f };
-                tile.coords.bottom_left  = { 0.f, 0.f };
-                tile.coords.bottom_right = { 0.f, 0.f };
-                tile.coords.top_right    = { 0.f, 0.f };
+                tile.coords[0] = { 0.f, 0.f };
+                tile.coords[1] = { 0.f, 0.f };
+                tile.coords[2] = { 0.f, 0.f };
+                tile.coords[3] = { 0.f, 0.f };
             }
             else
             {
-                tile.coords = sheet.regions[parsed.tile].value.coords;
+                tile.coords = sheet.regions[parsed_tile.tile].value.coords;
 
-                tile.coords.flip(static_cast<TexCoordsFlip>(parsed.flip));
-                tile.coords.rotate(static_cast<TexCoordsRotation>(parsed.rot));
+                if (parsed_tile.flipX)
+                {
+                    tile.coords.flip(TexCoordsFlip::HORIZONTAL);
+                }
+
+                tile.coords.rotate(static_cast<TexCoordsRotation>(parsed_tile.rot));
             }
         }
     }
@@ -540,7 +485,7 @@ SpriteSheet::SpriteSheet (const std::vector<uint8>& msgpack, Surface surface)
     try
     {
         json j = json::from_msgpack(msgpack);
-        CHECK_REQ(j, type, is_string);
+        JSON_VALIDATE_REQUIRED(j, type, is_string);
 
         auto sheet_type = j["type"].get<std::string>();
         if (sheet_type == "spritesheet")
@@ -576,8 +521,8 @@ SpriteSheet::SpriteSheet (const char* filepath)
         rwops.read(file_data.data(), sizeof(char), sz);
 
         const auto j = json::parse(file_data);
-        CHECK_REQ(j, image_path, is_string);
-        CHECK_REQ(j, type, is_string);
+        JSON_VALIDATE_REQUIRED(j, image_path, is_string);
+        JSON_VALIDATE_REQUIRED(j, type, is_string);
 
         auto image_path = j["image_path"].get<std::string>();
         this->surface = Surface(image_path);

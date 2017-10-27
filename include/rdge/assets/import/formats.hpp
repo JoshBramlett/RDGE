@@ -8,9 +8,24 @@
 #include <rdge/core.hpp>
 #include <nlohmann/json.hpp>
 
+#define JSON_VALIDATE_REQUIRED(j, field, type) do {                             \
+    if (j.count(#field) == 0) {                                                 \
+        throw std::invalid_argument("missing required field \"" #field "\"");   \
+    } else if (!j[#field].type()) {                                             \
+        throw std::invalid_argument("\"" #field "\" failed " #type "() check"); \
+    }                                                                           \
+} while (false)
+
+#define JSON_VALIDATE_OPTIONAL(j, field, type) do {                             \
+    if ((j.count(#field) > 0) && (!j[#field].type())) {                         \
+        throw std::invalid_argument("\"" #field "\" failed " #type "() check"); \
+    }                                                                           \
+} while (false)
+
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
+//! \namespace pyxel_edit Pyxel Edit Beta 1.4.4
 namespace pyxel_edit {
 
 struct tile
@@ -39,6 +54,13 @@ to_json (nlohmann::json& j, const tile& t)
 inline void
 from_json (const nlohmann::json& j, tile& t)
 {
+    JSON_VALIDATE_REQUIRED(j, index, is_number);
+    JSON_VALIDATE_REQUIRED(j, x, is_number_unsigned);
+    JSON_VALIDATE_REQUIRED(j, y, is_number_unsigned);
+    JSON_VALIDATE_REQUIRED(j, tile, is_number_unsigned);
+    JSON_VALIDATE_REQUIRED(j, flipX, is_boolean);
+    JSON_VALIDATE_REQUIRED(j, rot, is_number);
+
     t.index = j["index"].get<uint32>();
     t.x = j["x"].get<uint32>();
     t.y = j["y"].get<uint32>();
@@ -68,6 +90,10 @@ to_json (nlohmann::json& j, const layer& l)
 inline void
 from_json (const nlohmann::json& j, layer& l)
 {
+    JSON_VALIDATE_REQUIRED(j, name, is_string);
+    JSON_VALIDATE_REQUIRED(j, number, is_number_unsigned);
+    JSON_VALIDATE_REQUIRED(j, tiles, is_array);
+
     l.name = j["name"].get<std::string>();
     l.number = j["number"].get<uint32>();
     l.tiles = j["tiles"].get<std::vector<tile>>();
@@ -98,6 +124,12 @@ to_json (nlohmann::json& j, const tilemap& t)
 inline void
 from_json (const nlohmann::json& j, tilemap& t)
 {
+    JSON_VALIDATE_REQUIRED(j, tileswide, is_number_unsigned);
+    JSON_VALIDATE_REQUIRED(j, tileshigh, is_number_unsigned);
+    JSON_VALIDATE_REQUIRED(j, tilewidth, is_number_unsigned);
+    JSON_VALIDATE_REQUIRED(j, tileheight, is_number_unsigned);
+    JSON_VALIDATE_REQUIRED(j, layers, is_array);
+
     t.tileswide = j["tileswide"].get<uint32>();
     t.tileshigh = j["tileshigh"].get<uint32>();
     t.tilewidth = j["tilewidth"].get<uint32>();
@@ -107,6 +139,7 @@ from_json (const nlohmann::json& j, tilemap& t)
 
 } // namespace pyxel_edit
 
+//! \namespace tiled Tiled Map Editor v1.0.3
 namespace tiled {
 
 struct layer
