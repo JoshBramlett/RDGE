@@ -1,10 +1,11 @@
 #include <rdge/assets/spritesheet.hpp>
-#include <rdge/assets/import/formats.hpp>
+#include <rdge/assets/file_formats/pyxel_edit.hpp>
 #include <rdge/graphics/sprite.hpp>
 #include <rdge/graphics/sprite_group.hpp>
 #include <rdge/graphics/texture.hpp>
 #include <rdge/math/intrinsics.hpp>
 #include <rdge/util/io/rwops_base.hpp>
+#include <rdge/util/json.hpp>
 #include <rdge/util/strings.hpp>
 #include <rdge/util/memory/alloc.hpp>
 #include <rdge/internal/exception_macros.hpp>

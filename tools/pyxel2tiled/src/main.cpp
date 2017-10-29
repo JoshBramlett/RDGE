@@ -1,5 +1,5 @@
 #include <rdge/util.hpp>
-#include <rdge/assets/import/formats.hpp>
+#include <rdge/assets.hpp>
 
 #include <nlohmann/json.hpp>
 
