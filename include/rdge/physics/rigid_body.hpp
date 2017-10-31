@@ -303,6 +303,7 @@ public:
     // world position of the body origin
     math::vec2 GetPosition (void) const noexcept { return world_transform.pos; }
     float GetAngle (void) const noexcept { return sweep.angle_n; }
+    void SetPosition (math::vec2 pos);
 
     // world position of the body center of mass
     math::vec2 GetWorldCenter (void) const noexcept { return sweep.pos_n; }
@@ -320,6 +321,8 @@ public:
 
     //! \brief Check if body is participating in the physics simulation
     bool IsSimulating (void) const noexcept { return m_flags & SIMULATE; }
+    void Enable (void);
+    void Disable (void);
 
     //! \brief Check if body is awake
     //! \note Static bodies are always in a sleeping state

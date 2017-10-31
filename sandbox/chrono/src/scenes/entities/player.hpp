@@ -18,7 +18,7 @@ class Player
 public:
     Player (void);
 
-    void InitPhysics (rdge::physics::CollisionGraph& graph, float inv_ratio);
+    void InitPhysics (rdge::physics::CollisionGraph& graph, const rdge::math::vec2& pos);
     void OnEvent (const rdge::Event& event);
     void OnUpdate (const rdge::delta_time& dt);
 

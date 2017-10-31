@@ -7,9 +7,6 @@
 
 #include <rdge/core.hpp>
 #include <rdge/application.hpp>
-#include <rdge/system/window.hpp>
-#include <rdge/events/event.hpp>
-#include <rdge/gameobjects/iscene.hpp>
 
 #include <functional>
 #include <memory>
@@ -17,6 +14,13 @@
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
+
+//!@{ Forward declarations
+class Event;
+class Window;
+class IScene;
+struct delta_time;
+//!@}
 
 //! \class Game
 //! \brief Game loop and scene stack

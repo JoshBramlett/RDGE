@@ -44,6 +44,7 @@ struct spritesheet_region
     //!@{ Basic spritesheet_region transforms
     void flip (TexCoordsFlip) noexcept;
     void rotate (TexCoordsRotation) noexcept;
+    void scale (float) noexcept;
     //!@}
 };
 

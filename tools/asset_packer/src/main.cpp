@@ -11,6 +11,8 @@
 #include <fstream>
 #include <stdexcept>
 
+#include "flags.h"
+
 #define TINYFILES_IMPL
 #include <tinyheaders/tinyfiles.h>
 
@@ -598,6 +600,10 @@ struct generated_header_file
 int
 main (int argc, char** argv)
 {
+    const flags::args args(argc, argv);
+    const auto silent = args.get<bool>("silent", false);
+
+    // TODO use flags library with other params
     if (argc > 1)
     {
         globals.parent_dir = argv[1];
@@ -618,18 +624,21 @@ main (int argc, char** argv)
 
     import_results.print();
 
-    std::cout << "\nContinue and write files? (y/n)\n";
-    char cont;
-    while (std::cin >> cont)
+    if (!silent)
     {
-        if (cont == 'y')
+        std::cout << "\nContinue and write files? (y/n)\n";
+        char cont;
+        while (std::cin >> cont)
         {
-            break;
-        }
-        else if (cont == 'n')
-        {
-            std::cout << "\nAborted\n";
-            return EXIT_SUCCESS;
+            if (cont == 'y')
+            {
+                break;
+            }
+            else if (cont == 'n')
+            {
+                std::cout << "\nAborted\n";
+                return EXIT_SUCCESS;
+            }
         }
     }
 

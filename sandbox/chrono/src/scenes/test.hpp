@@ -10,6 +10,7 @@
 
 #include "entities/player.hpp"
 #include "entities/duck.hpp"
+#include "entities/dove.hpp"
 
 #include <memory>
 
@@ -83,6 +84,7 @@ public:
 
     Player player;
     Duck duck;
+    Dove dove;
 
     std::shared_ptr<rdge::SpriteBatch> render_target;
     rdge::TilemapBatch background;

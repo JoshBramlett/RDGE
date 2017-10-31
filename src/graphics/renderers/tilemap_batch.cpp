@@ -211,13 +211,7 @@ TilemapBatch::SetView (const OrthographicCamera& camera)
     m_shader.SetUniformValue(UNI_PROJ_MATRIX, camera.combined);
     m_shader.Disable();
 
-    float width = camera.viewport_size.w * camera.zoom;
-    float height = camera.viewport_size.h * camera.zoom;
-    float w = width * math::abs(camera.up.y) + height * math::abs(camera.up.x);
-    float h = height * math::abs(camera.up.y) + width * math::abs(camera.up.x);
-
-    math::vec2 origin(camera.position.x - (w * 0.5f), camera.position.y - (h * 0.5f));
-    m_bounds = physics::aabb(origin, w, h);
+    m_bounds = camera.bounds;
     m_far = -camera.far;
 }
 

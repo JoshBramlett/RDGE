@@ -15,6 +15,7 @@ add_executable (chrono
                 src/main.cpp
                 src/scenes/test.cpp
                 src/scenes/entities/duck.cpp
+                src/scenes/entities/dove.cpp
                 src/scenes/entities/player.cpp)
 
 target_link_libraries (chrono

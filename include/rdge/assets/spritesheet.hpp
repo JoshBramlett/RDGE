@@ -184,8 +184,8 @@ public:
     //!@{
     //! \brief Retrive an \ref Animation
     //! \throws rdge::Exception Lookup failed
-    const Animation& GetAnimation (const std::string& name) const;
-    const Animation& GetAnimation (int32 animation_id) const;
+    Animation GetAnimation (const std::string& name, float scale = 1.f) const;
+    Animation GetAnimation (int32 animation_id, float scale = 1.f) const;
     //!@}
 
 

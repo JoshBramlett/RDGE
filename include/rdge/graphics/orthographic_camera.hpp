@@ -9,6 +9,7 @@
 #include <rdge/math/vec2.hpp>
 #include <rdge/math/vec3.hpp>
 #include <rdge/math/mat4.hpp>
+#include <rdge/physics/aabb.hpp>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
@@ -64,6 +65,7 @@ public:
     math::mat4 view;             //!< View matrix
     math::mat4 combined;         //!< Combined projection/view matrix (in that order)
     math::mat4 inverse_combined; //!< Inverse of the combined matrix
+    physics::aabb bounds;        //!< Region of the visible area (for culling)
 
     float near = 0.f;          //!< Near clipping plane
     float far  = 3.f;          //!< Far clipping plane

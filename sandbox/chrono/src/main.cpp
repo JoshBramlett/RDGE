@@ -57,6 +57,8 @@ int main ()
     PackFile pack("res/chrono.data");
     g_game.game = &game;
     g_game.pack = &pack;
+    g_game.ppm = 32.f * ((game.window->IsHighDPI()) ? 2.f : 1.f);
+    g_game.inv_ppm = 1.f / g_game.ppm;
 
     game.PushScene(std::make_shared<TestScene>());
     game.Run();

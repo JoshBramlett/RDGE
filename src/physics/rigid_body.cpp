@@ -128,6 +128,41 @@ RigidBody::DestroyFixture (Fixture* fixture)
     ComputeMass();
 }
 
+void
+RigidBody::Enable (void)
+{
+    SDL_assert(!graph->IsLocked());
+
+    if (!IsSimulating())
+    {
+        m_flags |= SIMULATE;
+
+        fixtures.for_each([=](auto* f) {
+            f->proxy->handle = graph->RegisterProxy(f->proxy);
+        });
+    }
+}
+
+void
+RigidBody::Disable (void)
+{
+    SDL_assert(!graph->IsLocked());
+
+    if (IsSimulating())
+    {
+        m_flags &= ~SIMULATE;
+
+        fixtures.for_each([=](auto* f) {
+            graph->UnregisterProxy(f->proxy);
+            f->proxy->handle = fixture_proxy::INVALID_HANDLE;
+        });
+
+        contact_edges.for_each([=](auto* edge) {
+            graph->DestroyContact(edge->contact);
+        });
+    }
+}
+
 bool
 RigidBody::HasEdge (const Fixture* a, const Fixture* b) noexcept
 {
@@ -154,6 +189,16 @@ RigidBody::HasEdge (const Fixture* a, const Fixture* b) noexcept
     });
 
     return result;
+}
+
+void
+RigidBody::SetPosition (math::vec2 pos)
+{
+    world_transform.pos = pos;
+    sweep.pos_n = world_transform.to_world(sweep.local_center);
+    sweep.pos_0 = sweep.pos_n;
+
+    SyncFixtures();
 }
 
 void

@@ -608,28 +608,40 @@ SpriteSheet::operator[] (const std::string& name) const
     RDGE_THROW("SpriteSheet region lookup failed. key=" + name);
 }
 
-const Animation&
-SpriteSheet::GetAnimation (const std::string& name) const
+Animation
+SpriteSheet::GetAnimation (const std::string& name, float scale) const
 {
     for (size_t i = 0; i < this->animation_count; i++)
     {
         const auto& animation = this->animations[i];
         if (animation.name == name)
         {
-            return animation.value;
+            auto result = animation.value;
+            for (auto& frame : result.frames)
+            {
+                frame.scale(scale);
+            }
+
+            return result;
         }
     }
 
     RDGE_THROW("SpriteSheet animation lookup failed. key=" + name);
 }
 
-const Animation&
-SpriteSheet::GetAnimation (int32 animation_id) const
+Animation
+SpriteSheet::GetAnimation (int32 animation_id, float scale) const
 {
     SDL_assert(animation_id >= 0);
     SDL_assert(animation_id < (int32)this->animation_count);
 
-    return this->animations[animation_id].value;
+    auto result = this->animations[animation_id].value;
+    for (auto& frame : result.frames)
+    {
+        frame.scale(scale);
+    }
+
+    return result;
 }
 
 std::unique_ptr<Sprite>

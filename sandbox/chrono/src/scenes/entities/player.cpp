@@ -17,71 +17,77 @@ using namespace rdge;
 using namespace rdge::math;
 using namespace rdge::physics;
 
+namespace {
+
+    float base_asset_ppm = 16.f;
+
+} // anonymous namespace
+
 Player::Player (void)
 {
     auto sheet = g_game.pack->GetSpriteSheet(chrono_asset_spritesheet_player);
+    float scale = g_game.ppm / base_asset_ppm;
 
     //////////////////
     // idle animation
     //////////////////
-    cd_anim_blink[Direction::UP]    = sheet.GetAnimation(player_animation_idle_back);
-    cd_anim_blink[Direction::RIGHT] = sheet.GetAnimation(player_animation_idle_right);
-    cd_anim_blink[Direction::DOWN]  = sheet.GetAnimation(player_animation_idle_front);
-    cd_anim_blink[Direction::LEFT]  = sheet.GetAnimation(player_animation_idle_left);
+    cd_anim_blink[Direction::UP]    = sheet.GetAnimation(player_animation_idle_back, scale);
+    cd_anim_blink[Direction::RIGHT] = sheet.GetAnimation(player_animation_idle_right, scale);
+    cd_anim_blink[Direction::DOWN]  = sheet.GetAnimation(player_animation_idle_front, scale);
+    cd_anim_blink[Direction::LEFT]  = sheet.GetAnimation(player_animation_idle_left, scale);
 
     //////////////////
     // walking animation
     //////////////////
-    cd_anim_walk[Direction::UP]    = sheet.GetAnimation(player_animation_walk_back);
-    cd_anim_walk[Direction::RIGHT] = sheet.GetAnimation(player_animation_walk_right);
-    cd_anim_walk[Direction::DOWN]  = sheet.GetAnimation(player_animation_walk_front);
-    cd_anim_walk[Direction::LEFT]  = sheet.GetAnimation(player_animation_walk_left);
+    cd_anim_walk[Direction::UP]    = sheet.GetAnimation(player_animation_walk_back, scale);
+    cd_anim_walk[Direction::RIGHT] = sheet.GetAnimation(player_animation_walk_right, scale);
+    cd_anim_walk[Direction::DOWN]  = sheet.GetAnimation(player_animation_walk_front, scale);
+    cd_anim_walk[Direction::LEFT]  = sheet.GetAnimation(player_animation_walk_left, scale);
 
     //////////////////
     // running animation
     //////////////////
-    cd_anim_run[Direction::UP]    = sheet.GetAnimation(player_animation_run_back);
-    cd_anim_run[Direction::RIGHT] = sheet.GetAnimation(player_animation_run_right);
-    cd_anim_run[Direction::DOWN]  = sheet.GetAnimation(player_animation_run_front);
-    cd_anim_run[Direction::LEFT]  = sheet.GetAnimation(player_animation_run_left);
+    cd_anim_run[Direction::UP]    = sheet.GetAnimation(player_animation_run_back, scale);
+    cd_anim_run[Direction::RIGHT] = sheet.GetAnimation(player_animation_run_right, scale);
+    cd_anim_run[Direction::DOWN]  = sheet.GetAnimation(player_animation_run_front, scale);
+    cd_anim_run[Direction::LEFT]  = sheet.GetAnimation(player_animation_run_left, scale);
 
     //////////////////
     // sheathe animation
     //////////////////
-    cd_anim_sheathe[Direction::UP]    = sheet.GetAnimation(player_animation_sheathe_back);
-    cd_anim_sheathe[Direction::RIGHT] = sheet.GetAnimation(player_animation_sheathe_right);
-    cd_anim_sheathe[Direction::DOWN]  = sheet.GetAnimation(player_animation_sheathe_front);
-    cd_anim_sheathe[Direction::LEFT]  = sheet.GetAnimation(player_animation_sheathe_left);
+    cd_anim_sheathe[Direction::UP]    = sheet.GetAnimation(player_animation_sheathe_back, scale);
+    cd_anim_sheathe[Direction::RIGHT] = sheet.GetAnimation(player_animation_sheathe_right, scale);
+    cd_anim_sheathe[Direction::DOWN]  = sheet.GetAnimation(player_animation_sheathe_front, scale);
+    cd_anim_sheathe[Direction::LEFT]  = sheet.GetAnimation(player_animation_sheathe_left, scale);
 
     //////////////////
     // fight stance animation
     //////////////////
-    cd_anim_fight[Direction::UP]    = sheet.GetAnimation(player_animation_fight_stance_back);
-    cd_anim_fight[Direction::RIGHT] = sheet.GetAnimation(player_animation_fight_stance_right);
-    cd_anim_fight[Direction::DOWN]  = sheet.GetAnimation(player_animation_fight_stance_front);
-    cd_anim_fight[Direction::LEFT]  = sheet.GetAnimation(player_animation_fight_stance_left);
+    cd_anim_fight[Direction::UP]    = sheet.GetAnimation(player_animation_fight_stance_back, scale);
+    cd_anim_fight[Direction::RIGHT] = sheet.GetAnimation(player_animation_fight_stance_right, scale);
+    cd_anim_fight[Direction::DOWN]  = sheet.GetAnimation(player_animation_fight_stance_front, scale);
+    cd_anim_fight[Direction::LEFT]  = sheet.GetAnimation(player_animation_fight_stance_left, scale);
 
     //////////////////
     // attack animation
     //////////////////
-    cd_anim_attack[Direction::UP]    = sheet.GetAnimation(player_animation_attack_back);
-    cd_anim_attack[Direction::RIGHT] = sheet.GetAnimation(player_animation_attack_right);
-    cd_anim_attack[Direction::DOWN]  = sheet.GetAnimation(player_animation_attack_front);
-    cd_anim_attack[Direction::LEFT]  = sheet.GetAnimation(player_animation_attack_left);
+    cd_anim_attack[Direction::UP]    = sheet.GetAnimation(player_animation_attack_back, scale);
+    cd_anim_attack[Direction::RIGHT] = sheet.GetAnimation(player_animation_attack_right, scale);
+    cd_anim_attack[Direction::DOWN]  = sheet.GetAnimation(player_animation_attack_front, scale);
+    cd_anim_attack[Direction::LEFT]  = sheet.GetAnimation(player_animation_attack_left, scale);
 
-    this->sprite = std::make_shared<Sprite>(vec3(), vec2(64.f, 128.f), sheet.texture);
+    this->sprite = std::make_shared<Sprite>(vec3(), vec2(), sheet.texture);
 
     m_facing = Direction::SOUTH;
     current_animation = &cd_anim_blink[m_facing];
 }
 
 void
-Player::InitPhysics (CollisionGraph& graph, float inv_ratio)
+Player::InitPhysics (CollisionGraph& graph, const math::vec2& pos)
 {
-    inv_ratio *= 0.5f;
-
     rigid_body_profile bprof;
     bprof.type = RigidBodyType::DYNAMIC;
+    bprof.position = pos;
     bprof.gravity_scale = 0.f;
     bprof.prevent_rotation = true;
     bprof.prevent_sleep = true;
@@ -99,7 +105,7 @@ Player::InitPhysics (CollisionGraph& graph, float inv_ratio)
 #if (CHRONO_ADD_SWORD)
     // players sword
     bprof.prevent_rotation = false;
-    bprof.position = { 0.f, 0.75f };
+    bprof.position += { 0.f, 0.75f };
     sword = graph.CreateBody(bprof);
 
     polygon s(0.125f, 0.75f);
@@ -219,15 +225,12 @@ Player::OnUpdate (const delta_time& dt)
     body->ApplyForce(impulse);
     //body->linear.velocity = desired_velocity;
 
-    auto& frame = current_animation->GetFrame(ticks);
-
-    math::vec2 pos = hitbox->GetWorldCenter() * 64.f;
-    pos.x -= frame.origin.x * 4.f;
-    pos.y -= frame.origin.y * 4.f;
+    auto& frame = this->current_animation->GetFrame(ticks);
+    math::vec2 pos((this->hitbox->GetWorldCenter() * g_game.ppm) - frame.origin);
 
     // TODO SetPosition should really only take a vec2.  Logically I should
     //      separate the location from the depth.
-    vops::SetPosition(sprite->vertices, pos, frame.size * 4.f);
+    vops::SetPosition(this->sprite->vertices, pos, frame.size);
     vops::SetTexCoords(this->sprite->vertices, frame.coords);
 }
 

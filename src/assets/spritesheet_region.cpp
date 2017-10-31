@@ -44,6 +44,13 @@ spritesheet_region::rotate (TexCoordsRotation r) noexcept
     }
 }
 
+void
+spritesheet_region::scale (float scale) noexcept
+{
+    size *= scale;
+    origin *= scale;
+}
+
 std::ostream& operator<< (std::ostream& os, const spritesheet_region& p)
 {
     os << "spritesheet_region: ["

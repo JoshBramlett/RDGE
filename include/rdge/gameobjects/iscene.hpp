@@ -6,9 +6,13 @@
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/events/event.hpp>
 
+//! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
+
+//!@{ Forward declarations
+class Event;
+//!@}
 
 //! \struct delta_time
 //! \brief Container representing a time period

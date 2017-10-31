@@ -17,48 +17,45 @@ using namespace rdge;
 using namespace rdge::math;
 using namespace rdge::physics;
 
-Duck::Duck (TestScene* parent, const math::vec3& position)
+namespace {
+
+    float base_asset_ppm = 16.f;
+
+} // anonymous namespace
+
+Duck::Duck (TestScene* parent)
     : m_parent(parent)
 {
     auto sheet = g_game.pack->GetSpriteSheet(chrono_asset_spritesheet_enemies);
+    float scale = g_game.ppm / base_asset_ppm;
 
     //////////////////
     // walking animation
     //////////////////
-    cd_anim_walk[Direction::UP]    = sheet.GetAnimation(enemies_animation_duck_back);
-    cd_anim_walk[Direction::RIGHT] = sheet.GetAnimation(enemies_animation_duck_right);
-    cd_anim_walk[Direction::DOWN]  = sheet.GetAnimation(enemies_animation_duck_front);
-    cd_anim_walk[Direction::LEFT]  = sheet.GetAnimation(enemies_animation_duck_left);
+    cd_anim_walk[Direction::UP]    = sheet.GetAnimation(enemies_animation_duck_back, scale);
+    cd_anim_walk[Direction::RIGHT] = sheet.GetAnimation(enemies_animation_duck_right, scale);
+    cd_anim_walk[Direction::DOWN]  = sheet.GetAnimation(enemies_animation_duck_front, scale);
+    cd_anim_walk[Direction::LEFT]  = sheet.GetAnimation(enemies_animation_duck_left, scale);
 
-    this->sprite = std::make_shared<Sprite>(position, vec2(64.f, 64.f), sheet.texture);
+    this->sprite = std::make_shared<Sprite>(vec3(), vec2(), sheet.texture);
 
     facing = Direction::SOUTH;
     current_animation = &cd_anim_walk[facing];
 }
 
 void
-Duck::InitPhysics (CollisionGraph& graph, float inv_ratio)
+Duck::InitPhysics (CollisionGraph& graph, const math::vec2& pos)
 {
     rigid_body_profile bprof;
     bprof.type = RigidBodyType::DYNAMIC;
+    bprof.position = pos;
     bprof.gravity_scale = 0.f;
     bprof.prevent_rotation = true;
     bprof.prevent_sleep = true;
     body = graph.CreateBody(bprof);
 
-#if 0
-    polygon::PolygonData data;
-    data[0] = { sprite->vertices[0].pos.x * inv_ratio, sprite->vertices[0].pos.y * inv_ratio };
-    data[1] = { sprite->vertices[1].pos.x * inv_ratio, sprite->vertices[1].pos.y * inv_ratio };
-    data[2] = { sprite->vertices[2].pos.x * inv_ratio, sprite->vertices[2].pos.y * inv_ratio };
-    data[3] = { sprite->vertices[3].pos.x * inv_ratio, sprite->vertices[3].pos.y * inv_ratio };
-    auto p = polygon(data, 4);
-#else
-    const auto pos = vops::GetPosition(sprite->vertices) * inv_ratio;
-    const auto size = vops::GetSize(sprite->vertices) * inv_ratio;
-
-    auto p = circle({pos.x, pos.y}, size.w * 0.5f);
-#endif
+    // TODO update spawn point
+    auto p = circle(0.5f);
 
     fixture_profile fprof;
     fprof.shape = &p;
@@ -86,10 +83,7 @@ Duck::OnUpdate (const delta_time& dt)
 
     auto& frame = current_animation->GetFrame(dt.ticks);
 
-    math::vec2 pos = body->GetWorldCenter() * 64.f;
-    pos.x -= frame.size.w * 4.f * 0.5f;
-    pos.y -= frame.size.h * 4.f * 0.5f;
-    vops::SetPosition(sprite->vertices, pos, frame.size * 4.f);
-
+    math::vec2 pos((this->body->GetWorldCenter() * g_game.ppm) - frame.origin);
+    vops::SetPosition(this->sprite->vertices, pos, frame.size);
     vops::SetTexCoords(this->sprite->vertices, frame.coords);
 }

@@ -56,30 +56,17 @@ namespace {
 
 TestScene::TestScene (void)
     : collision_graph({ 0.f, -9.8f })
-    , duck(this, vec3(300.f, 300.f, 0.f)) //vec3::ZERO)
+    , duck(this)
     , render_target(std::make_shared<SpriteBatch>(10'000))
     , entities(render_target)
 {
     collision_graph.listener = &l;
     debug::settings::show_overlay = true;
+    debug::settings::draw_physics_fixtures = true;
 
     ///////////////////
     // Background layer
     ///////////////////
-
-    // TODO config file?
-    //float window_height = 1080.f;
-    //float window_width  = 1920.f;
-    //float half_height   = window_height * 0.5f;
-    //float half_width    = window_width * 0.5f;
-
-    // TODO Think about how to properly handle conversion from physics simulation
-    //      coordinates to rendering coordinates.
-    //        - Should everything be defined in simulation coordinates, then do the
-    //          conversion at the render phase?
-    //        - Should only entities in the simulation be defined in simulation
-    //          coordinates, having each entity (simulation or no) handle their
-    //          own rendering?
 
     auto sheet = g_game.pack->GetSpriteSheet(chrono_asset_tilemap_crossroads);
     background = TilemapBatch(sheet, 4.f);
@@ -110,18 +97,20 @@ TestScene::TestScene (void)
     walls->CreateFixture(&bottom_wall, 0.f);
 #endif
 
-    player.InitPhysics(collision_graph, INV_PIXELS_PER_METER);
-    duck.InitPhysics(collision_graph, INV_PIXELS_PER_METER);
+    player.InitPhysics(collision_graph, math::vec2(30.f, -30.f));
+    duck.InitPhysics(collision_graph, math::vec2(3.f, 3.f));
+    dove.InitPhysics(collision_graph, math::vec2(0.f, 0.f));
 
     entities.AddSprite(player.sprite);
     entities.AddSprite(duck.sprite);
+    entities.AddSprite(dove.sprite);
 }
 
 void
 TestScene::Initialize (void)
 {
     debug::RegisterCamera(&camera);
-    debug::RegisterPhysics(&collision_graph, PIXELS_PER_METER);
+    debug::RegisterPhysics(&collision_graph, g_game.ppm);
 }
 
 void
@@ -135,7 +124,7 @@ void
 TestScene::Activate (void)
 {
     debug::RegisterCamera(&camera);
-    debug::RegisterPhysics(&collision_graph, PIXELS_PER_METER);
+    debug::RegisterPhysics(&collision_graph, g_game.ppm);
 }
 
 void
@@ -154,15 +143,40 @@ TestScene::OnEvent (const Event& event)
 void
 TestScene::OnUpdate (const delta_time& dt)
 {
+    auto bounds = camera.bounds;
+    bounds.lo *= INV_PIXELS_PER_METER;
+    bounds.hi *= INV_PIXELS_PER_METER;
+
+    if (!dove.is_flying)
+    {
+        static Random rand;
+        if (rand.Next(600) == 0) // approx every 10 seconds
+        {
+            float x = bounds.right() + 2.f;
+            float y = bounds.top() - (bounds.height() * rand.Sample());
+            dove.Spawn(math::vec2(x, y));
+        }
+    }
+    else
+    {
+        // bounds must be larger than the spawn point
+        bounds.fatten(3.f);
+        if (!bounds.contains(dove.GetWorldCenter()))
+        {
+            dove.Disable();
+        }
+    }
+
     collision_graph.Step(1.f / 60.f);
     player.OnUpdate(dt);
     duck.OnUpdate(dt);
+    dove.OnUpdate(dt);
 }
 
 void
 TestScene::OnRender (void)
 {
-    camera.SetPosition(player.GetWorldCenter() * PIXELS_PER_METER);
+    camera.SetPosition(player.GetWorldCenter() * g_game.ppm);
     camera.Update();
 
     render_target->SetProjection(camera.combined);
