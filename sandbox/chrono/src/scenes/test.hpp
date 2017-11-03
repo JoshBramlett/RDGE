@@ -16,20 +16,6 @@
 
 // TODO Immediate
 //
-// ** ISSUES/QUESTIONS **
-// 1. How should the entity be aware of the scene's pixels to meters conversion?
-//   a) Should the entity not be aware of it at all?
-//   b) Pass the values on every render event so they can update their sprite verts?
-//   c) Have every entity cache the conversion during construction?
-//
-//   The problem with creating a cardinal interface is there is no one size fits all
-//   solution.  Some entities have both a sprite and body.  Others may only have a
-//   sprite, or only have a body.
-//
-//   This obviously only applies to entities that are part of the physics simulation.
-//   It doesn't make sense to force conversion for entities that aren't.
-//
-//
 // ** GRAPHICS **
 // 1. Create an Entity/Actor interface or POD struct?
 //   - struct would include a Sprite and a RigidBody.
@@ -37,21 +23,12 @@
 //   - Both should be raw pointers to block allocated objects to have better
 //     cache locality.
 //
-// 2. Each scene must hold ratio for meters to pixels
-//   - The physics simulation should be responsible for updating the position,
-//     which will be sent to the renderer.
-//   - Each scene should hold the ratio for meters to pixels, and either pass
-//     that to the entities so they can do the conversion, or iterate through
-//     every renderable and perform the conversion.
+// 2. Refactor how Sprite is used across code base (from shared_ptr to raw)
 //
-// 3. Refactor how Sprite is used across code base (from shared_ptr to raw)
-//
-// 4. Refactor SpriteBatch to use a custom allocator
+// 3. Refactor SpriteBatch to use a custom allocator
 
 // TODO (ongoing thoughts and interface improvements)
 // - No clear way to pass update/input events to an entity.
-// - Add 'hit box' to the spritesheet.  Similar to the hotspot, but each frame
-//   could be have a different size sprite.
 // - Idle animation is a single ping pong, but that's not supported so I added
 //   each frame in reverse order.
 
@@ -60,23 +37,29 @@
 //   a keyboard modifier it'd make sense not to start the animation over and
 //   instead smoothly transition to the next frame
 
-class TestScene : public rdge::IScene
+class TestScene : public rdge::IScene, public rdge::physics::GraphListener
 {
 public:
-    static constexpr float PIXELS_PER_METER = 64.f;
-    static constexpr float INV_PIXELS_PER_METER = 1.f / 64.f; // 0.015625
-
     TestScene (void);
+    ~TestScene (void) noexcept = default;
 
+    // scene transitions
     void Initialize (void) override;
     void Terminate (void) override;
-
     void Hibernate (void) override;
     void Activate (void) override;
 
+    // scene game loop events
     void OnEvent (const rdge::Event& event) override;
     void OnUpdate (const rdge::delta_time& dt) override;
     void OnRender (void) override;
+
+    // physics events
+    void OnContactStart (rdge::physics::Contact*) override;
+    void OnContactEnd (rdge::physics::Contact*) override;
+    void OnPreSolve (rdge::physics::Contact*, const rdge::physics::collision_manifold&) override;
+    void OnPostSolve (rdge::physics::Contact*) override;
+    void OnDestroyed (rdge::physics::Fixture*) override;
 
 public:
     rdge::OrthographicCamera camera;
@@ -84,6 +67,7 @@ public:
 
     Player player;
     Duck duck;
+    Duck duck2;
     Dove dove;
 
     std::shared_ptr<rdge::SpriteBatch> render_target;

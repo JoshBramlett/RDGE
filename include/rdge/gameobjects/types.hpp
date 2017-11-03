@@ -68,4 +68,16 @@ GetDirection (const math::vec2& ab)
     return result;
 }
 
+template <typename T>
+class CardinalDirectionArray
+{
+public:
+    T& operator[] (rdge::Direction dir)
+    {
+        return elements[rdge::math::lsb(rdge::to_underlying(dir)) - 1];
+    }
+
+    T elements[4];
+};
+
 } // namespace rdge

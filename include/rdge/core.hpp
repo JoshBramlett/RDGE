@@ -59,6 +59,12 @@
                               : __FILE__)
 #endif
 
+/***********************************
+/              Misc
+***********************************/
+
+#define SET_FLAG(_cond, _var, _flag) if (_cond) { _var |= _flag; } else { _var &= ~_flag; }
+
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
@@ -66,7 +72,7 @@ namespace rdge {
 /  Ignore unused variable warnings
 ***********************************/
 
-// TODO Move to internal
+// Ignore unused variable warnings
 template<class... T>
 void Unused (T&&...) { }
 

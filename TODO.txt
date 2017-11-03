@@ -6,19 +6,26 @@ Graphics:
   - Create a more cohesive way to represent sprites
     - Allocation should be done through a block allocator
     - Tie in with physics system (via entity).  Note: SpriteGroup/RigidBody
+    - Logically separate position from depth - use vec2 when setting position
+  - TilemapBatch
+    - Add culling
+    - Add blending for upper layers
+    - ImGui support (rendering statistics)
+    - [maybe] Global color (for tinting)
   - Add shader support for distance field fonts
-  - Add support for 24bpp images (surface and texture)
   - Better support for texture based filter, blending & wrapping (look to LibGDX)
+  - Add support for 24bpp images (surface and texture)
   - Remove glew dependency in favor of glLoadGen
   - Add viewport class
-  - Create TileMap layer / static background renderer
   - Shader hot reload
   - OpenGL context settings configuration variables
+  - Add texture sorting for properly rendering semi-transparent sprites
+
+Graphics (low priority);
   - Add rich text support
-  - Ability to pad NPOT textures
   - Implement "focus" system for UI controls
   - Create a perspective camera
-  - Add texture sorting for properly rendering semi-transparent sprites
+  - Ability to pad NPOT textures
 
 Physics:
   - Move GJK and all itersects methods out of the shapes and into collision.cpp
@@ -27,13 +34,13 @@ Physics:
     - Warm starting (seems to cut down processing time considerably)
     - Box2D "Box Solver" LCP (Linear complementarity problem)
     - TOI solver
-  - Joints
   - Circle/Polygon manifold generation
   - Change GraphListener to lambdas.  Implement destruction listener.
   - RigidBody has a lot of unimplemented methods
   - Clean up and finish documenting
   - Stats
   - Add way to step at a set interval defined through the ctor
+  - [maybe] More joint support
 
 Math:
 
@@ -76,51 +83,3 @@ Low Priority
   - Create Parallax layer
   - Support for custom config values (possibly with hot reload)
   - Create a better sqrt
-
-
-
-
-
-RDGE CppCoreGuidelines to follow:
-
-I.11: Never transfer ownership by a raw pointer (T*)
-I.12: Declare a pointer that must not be null as not_null
-I.13: Do not pass an array as a single pointer
-I.24: Avoid adjacent unrelated parameters of the same type
-
-F.7: For general use, take T* or T& arguments rather than smart pointers
-F.18: For "consume" parameters, pass by X&& and std::move the parameter
-
-
-Raw Pointers
-    - Use owner<T*> as a return type to signify the caller should own the object
-    - Use not_null<T*> to signify that dereference checking needn't be done
-    - Consider changing char* to zstring
-    - Use span<> instead of passing an array as a pointer
-
-OO
-    - Prefer interfaces to abstract base classes
-
-Functions
-    - Use noexcept where possible.  Not necessary for functions marked constexpr
-    - Don't take smart pointers as parameters, use T& instead.
-
-classes
-    - C.43: Ensure that a class has a default constructor (
-        - that way it can be used with std::vector, etc
-    - C.45: Don't define a default constructor that only initializes data members; use
-            in-class member initializers instead
-        - So you don't forget to initialize a variable in the member initialization list,
-          which can cause UB if used
-    - C.46: By default, declare single-argument constructors explicit
-        - Prevents problems from implicit statements (e.g. MyClass c = 4;, when MyClass
-          should take a std::string)
-    - C.51: Use delegating constructors to represent common actions for all constructors of a class
-        - Avoids repetitiveness (e.g. ctor(int month, int day, int year) and ctor(Time t).
-          The first could do : ctor(Time(m, d, y))
-    - C.83: For value-like types, consider providing a noexcept swap function
-        - Look into this further, also reference Scott Meyers bit about copy and swap
-    - C.86: Make == symmetric with respect to operand types and noexcept
-        - Specifically noexcept - make sure all overloads have that keyword
-    - C.89: Make a hash noexcept
-        - See above.  Not sure I'll ever create a hash function in RDGE, but rule of thumb

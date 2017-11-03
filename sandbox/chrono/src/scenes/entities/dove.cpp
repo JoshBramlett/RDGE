@@ -17,7 +17,11 @@ using namespace rdge::physics;
 
 namespace {
 
-    float base_asset_ppm = 16.f;
+// image pixels/meter
+float base_asset_ppm = 16.f;
+
+// sprite animations
+CardinalDirectionArray<Animation> s_fly;
 
 } // anonymous namespace
 
@@ -25,12 +29,16 @@ Dove::Dove (void)
 {
     auto sheet = g_game.pack->GetSpriteSheet(chrono_asset_spritesheet_enemies);
 
-    float scale = g_game.ppm / base_asset_ppm;
-    this->anim_fly_left = sheet.GetAnimation(enemies_animation_dove_left, scale);
-    this->anim_fly_right = sheet.GetAnimation(enemies_animation_dove_right, scale);
-    this->current_animation = &this->anim_fly_left;
+    static bool once [[gnu::unused]] = [&sheet](void) {
+        float scale = g_game.ppm / base_asset_ppm;
+        s_fly[Direction::RIGHT] = sheet.GetAnimation(enemies_animation_dove_right, scale);
+        s_fly[Direction::LEFT]  = sheet.GetAnimation(enemies_animation_dove_left, scale);
+        return true;
+    }();
 
     this->sprite = std::make_shared<Sprite>(vec3(), vec2(), sheet.texture);
+    this->facing = Direction::LEFT;
+    m_currentAnimation = &s_fly[this->facing];
 }
 
 void
@@ -41,23 +49,20 @@ Dove::InitPhysics (CollisionGraph& graph, const math::vec2& pos)
     bprof.position = pos;
     bprof.gravity_scale = 0.f;
     bprof.prevent_rotation = true;
-    bprof.prevent_sleep = true;
     bprof.simulate = false;
-    body = graph.CreateBody(bprof);
+    this->body = graph.CreateBody(bprof);
 
-    auto p = circle(0.5f);
+    {
+        // body
+        fixture_profile fprof;
+        fprof.filter.group = -1;
+        fprof.filter.category = chrono_collision_category_none;
+        fprof.filter.mask = chrono_collision_category_none;
 
-    fixture_profile fprof;
-    fprof.shape = &p;
-    fprof.density = 1.f;
-    fprof.restitution = 0.9f;
-
-    // collides with nothing
-    fprof.filter.group = -1;
-    fprof.filter.category = 0;
-    fprof.filter.mask = 0;
-
-    body->CreateFixture(fprof);
+        auto c = circle(0.5f);
+        fprof.shape = &c;
+        body->CreateFixture(fprof);
+    }
 }
 
 void
@@ -83,7 +88,7 @@ Dove::OnUpdate (const delta_time& dt)
         math::vec2 desired_velocity(-5.f, 0.f);
         this->body->ApplyLinearImpulse(desired_velocity - this->body->linear.velocity);
 
-        const auto& frame = this->current_animation->GetFrame(dt.ticks);
+        const auto& frame = m_currentAnimation->GetFrame(dt.ticks);
         math::vec2 pos((this->body->GetWorldCenter() * g_game.ppm) - frame.origin);
 
         vops::SetPosition(this->sprite->vertices, pos, frame.size);

@@ -8,9 +8,6 @@
 #include <rdge/math.hpp>
 #include <rdge/physics.hpp>
 
-#include "cardinal_direction_animation.hpp"
-
-#include <vector>
 #include <memory>
 
 class TestScene;
@@ -20,18 +17,23 @@ class Duck
 public:
     Duck (TestScene* parent);
 
+    void InitPhysics (rdge::physics::CollisionGraph& graph, const rdge::math::vec2& pos);
     void OnUpdate (const rdge::delta_time& dt);
 
-    void InitPhysics (rdge::physics::CollisionGraph& graph, const rdge::math::vec2& pos);
+    rdge::math::vec2 GetWorldCenter (void) const noexcept;
 
 public:
-    rdge::Animation* current_animation = nullptr;
-    CardinalDirectionAnimation cd_anim_walk;
 
-    rdge::Direction facing = rdge::Direction::NONE;
+    rdge::Direction facing = rdge::Direction::SOUTH;
 
     std::shared_ptr<rdge::Sprite> sprite;
-    rdge::physics::RigidBody* body;
+    rdge::physics::RigidBody* body = nullptr;
+    rdge::physics::Fixture* hitbox = nullptr;
 
+private:
+
+    // TODO remove
     TestScene* m_parent;
+
+    rdge::Animation* m_currentAnimation = nullptr;
 };

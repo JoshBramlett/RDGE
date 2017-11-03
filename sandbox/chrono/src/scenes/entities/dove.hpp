@@ -29,12 +29,11 @@ public:
 public:
     // TODO bird only flies one way
     bool is_flying = false;
-    rdge::Direction facing = rdge::Direction::NONE;
-
-    rdge::Animation* current_animation = nullptr;
-    rdge::Animation anim_fly_left;
-    rdge::Animation anim_fly_right;
+    rdge::Direction facing = rdge::Direction::LEFT;
 
     std::shared_ptr<rdge::Sprite> sprite;
-    rdge::physics::RigidBody* body;
+    rdge::physics::RigidBody* body = nullptr;
+
+private:
+    rdge::Animation* m_currentAnimation = nullptr;
 };

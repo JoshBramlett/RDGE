@@ -8,8 +8,6 @@
 #include <rdge/math.hpp>
 #include <rdge/physics.hpp>
 
-#include "cardinal_direction_animation.hpp"
-
 #include <vector>
 #include <memory>
 
@@ -25,25 +23,22 @@ public:
     rdge::math::vec2 GetWorldCenter (void) const noexcept;
 
 public:
-    rdge::Animation* current_animation = nullptr;
-    CardinalDirectionAnimation cd_anim_blink;
-    CardinalDirectionAnimation cd_anim_walk;
-    CardinalDirectionAnimation cd_anim_run;
-    CardinalDirectionAnimation cd_anim_sheathe;
-    CardinalDirectionAnimation cd_anim_fight;
-    CardinalDirectionAnimation cd_anim_attack;
+
+    rdge::Direction facing = rdge::Direction::SOUTH;
 
     std::shared_ptr<rdge::Sprite> sprite;
-    rdge::physics::RigidBody* body;
+    rdge::physics::RigidBody* body = nullptr;
+    rdge::physics::Fixture* hitbox = nullptr;
+    rdge::CardinalDirectionArray<rdge::physics::Fixture*> dir_sensors;
+
     rdge::physics::RigidBody* sword;
-    rdge::physics::Fixture* hitbox;
     rdge::physics::Fixture* sword_hitbox;
 
 private:
     // input handling
     rdge::KeyboardDirectionalInputHandler m_handler;
     rdge::math::vec2 m_direction;
-    rdge::Direction m_facing = rdge::Direction::NONE;
+    rdge::Animation* m_currentAnimation = nullptr;
 
     enum StateFlags
     {

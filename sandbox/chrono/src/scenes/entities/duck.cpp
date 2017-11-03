@@ -19,7 +19,11 @@ using namespace rdge::physics;
 
 namespace {
 
-    float base_asset_ppm = 16.f;
+// image pixels/meter
+float base_asset_ppm = 16.f;
+
+// sprite animations
+CardinalDirectionArray<Animation> s_walk;
 
 } // anonymous namespace
 
@@ -27,20 +31,19 @@ Duck::Duck (TestScene* parent)
     : m_parent(parent)
 {
     auto sheet = g_game.pack->GetSpriteSheet(chrono_asset_spritesheet_enemies);
-    float scale = g_game.ppm / base_asset_ppm;
 
-    //////////////////
-    // walking animation
-    //////////////////
-    cd_anim_walk[Direction::UP]    = sheet.GetAnimation(enemies_animation_duck_back, scale);
-    cd_anim_walk[Direction::RIGHT] = sheet.GetAnimation(enemies_animation_duck_right, scale);
-    cd_anim_walk[Direction::DOWN]  = sheet.GetAnimation(enemies_animation_duck_front, scale);
-    cd_anim_walk[Direction::LEFT]  = sheet.GetAnimation(enemies_animation_duck_left, scale);
+    static bool once [[gnu::unused]] = [&sheet](void) {
+        float scale = g_game.ppm / base_asset_ppm;
+        s_walk[Direction::UP]    = sheet.GetAnimation(enemies_animation_duck_back, scale);
+        s_walk[Direction::RIGHT] = sheet.GetAnimation(enemies_animation_duck_right, scale);
+        s_walk[Direction::DOWN]  = sheet.GetAnimation(enemies_animation_duck_front, scale);
+        s_walk[Direction::LEFT]  = sheet.GetAnimation(enemies_animation_duck_left, scale);
+        return true;
+    }();
 
     this->sprite = std::make_shared<Sprite>(vec3(), vec2(), sheet.texture);
-
-    facing = Direction::SOUTH;
-    current_animation = &cd_anim_walk[facing];
+    this->facing = Direction::SOUTH;
+    m_currentAnimation = &s_walk[this->facing];
 }
 
 void
@@ -52,24 +55,30 @@ Duck::InitPhysics (CollisionGraph& graph, const math::vec2& pos)
     bprof.gravity_scale = 0.f;
     bprof.prevent_rotation = true;
     bprof.prevent_sleep = true;
-    body = graph.CreateBody(bprof);
+    bprof.linear_damping = 0.5f;
+    this->body = graph.CreateBody(bprof);
 
-    // TODO update spawn point
-    auto p = circle(0.5f);
+    {
+        // hitbox
+        fixture_profile fprof;
+        fprof.density = 1.f;
+        fprof.restitution = 0.9f;
+        fprof.filter.category = chrono_collision_category_enemy_hitbox;
+        fprof.filter.mask = chrono_collision_category_player_hitbox |
+                            chrono_collision_category_enemy_hitbox |
+                            chrono_collision_category_environment_static;
 
-    fixture_profile fprof;
-    fprof.shape = &p;
-    fprof.density = 1.f;
-    fprof.restitution = 0.9f;
-
-    body->CreateFixture(fprof);
+        auto c = circle(0.5f);
+        fprof.shape = &c;
+        this->hitbox = body->CreateFixture(fprof);
+    }
 }
 
 void
 Duck::OnUpdate (const delta_time& dt)
 {
     auto d = m_parent->player.GetWorldCenter() - body->GetWorldCenter();
-    current_animation = &cd_anim_walk[GetDirection(d)];
+    m_currentAnimation = &s_walk[GetDirection(d)];
 
     if (d.self_dot() > math::square(2.5f))
     {
@@ -81,9 +90,15 @@ Duck::OnUpdate (const delta_time& dt)
         body->ApplyForce(impulse);
     }
 
-    auto& frame = current_animation->GetFrame(dt.ticks);
-
+    auto& frame = m_currentAnimation->GetFrame(dt.ticks);
     math::vec2 pos((this->body->GetWorldCenter() * g_game.ppm) - frame.origin);
+
     vops::SetPosition(this->sprite->vertices, pos, frame.size);
     vops::SetTexCoords(this->sprite->vertices, frame.coords);
+}
+
+math::vec2
+Duck::GetWorldCenter (void) const noexcept
+{
+    return hitbox->GetWorldCenter();
 }

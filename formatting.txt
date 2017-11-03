@@ -27,3 +27,51 @@ class Texture;
 
 //! \brief tex_coords stream output operator
 std::ostream& operator<< (std::ostream& os, const tex_coords& value);
+
+
+
+
+
+RDGE CppCoreGuidelines to follow:
+
+I.11: Never transfer ownership by a raw pointer (T*)
+I.12: Declare a pointer that must not be null as not_null
+I.13: Do not pass an array as a single pointer
+I.24: Avoid adjacent unrelated parameters of the same type
+
+F.7: For general use, take T* or T& arguments rather than smart pointers
+F.18: For "consume" parameters, pass by X&& and std::move the parameter
+
+
+Raw Pointers
+    - Use owner<T*> as a return type to signify the caller should own the object
+    - Use not_null<T*> to signify that dereference checking needn't be done
+    - Consider changing char* to zstring
+    - Use span<> instead of passing an array as a pointer
+
+OO
+    - Prefer interfaces to abstract base classes
+
+Functions
+    - Use noexcept where possible.  Not necessary for functions marked constexpr
+    - Don't take smart pointers as parameters, use T& instead.
+
+classes
+    - C.43: Ensure that a class has a default constructor (
+        - that way it can be used with std::vector, etc
+    - C.45: Don't define a default constructor that only initializes data members; use
+            in-class member initializers instead
+        - So you don't forget to initialize a variable in the member initialization list,
+          which can cause UB if used
+    - C.46: By default, declare single-argument constructors explicit
+        - Prevents problems from implicit statements (e.g. MyClass c = 4;, when MyClass
+          should take a std::string)
+    - C.51: Use delegating constructors to represent common actions for all constructors of a class
+        - Avoids repetitiveness (e.g. ctor(int month, int day, int year) and ctor(Time t).
+          The first could do : ctor(Time(m, d, y))
+    - C.83: For value-like types, consider providing a noexcept swap function
+        - Look into this further, also reference Scott Meyers bit about copy and swap
+    - C.86: Make == symmetric with respect to operand types and noexcept
+        - Specifically noexcept - make sure all overloads have that keyword
+    - C.89: Make a hash noexcept
+        - See above.  Not sure I'll ever create a hash function in RDGE, but rule of thumb

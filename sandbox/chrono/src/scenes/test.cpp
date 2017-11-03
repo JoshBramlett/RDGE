@@ -16,51 +16,14 @@ using namespace rdge;
 using namespace rdge::math;
 using namespace rdge::physics;
 
-class TestSceneListener : public GraphListener
-{
-public:
-
-    ~TestSceneListener (void) noexcept = default;
-
-    void OnContactStart (Contact*) override
-    {
-        //std::cout << "OnContactStart" << std::endl;
-    }
-
-    void OnContactEnd (Contact*) override
-    {
-        //std::cout << "OnContactEnd" << std::endl;
-    }
-
-    void OnPreSolve (Contact*, const collision_manifold&) override
-    {
-        //std::cout << "OnPreSolve" << std::endl;
-    }
-
-    void OnPostSolve (Contact* c) override
-    {
-        rdge::Unused(c);
-        //std::cout << "OnPostSolve" << std::endl
-                  //<< c->manifold << std::endl
-                  //<< c->impulse << std::endl;
-    }
-
-    void OnDestroyed (Fixture*) override { }
-};
-
-namespace {
-
-    TestSceneListener l;
-
-} // anonymous namespace
-
 TestScene::TestScene (void)
     : collision_graph({ 0.f, -9.8f })
     , duck(this)
+    , duck2(this)
     , render_target(std::make_shared<SpriteBatch>(10'000))
     , entities(render_target)
 {
-    collision_graph.listener = &l;
+    collision_graph.listener = this;
     debug::settings::show_overlay = true;
     debug::settings::draw_physics_fixtures = true;
 
@@ -77,8 +40,8 @@ TestScene::TestScene (void)
     auto walls = collision_graph.CreateBody(bprof);
 
     float pad = 0.05f;
-    float sim_half_width = half_width * INV_PIXELS_PER_METER;
-    float sim_half_height = half_height * INV_PIXELS_PER_METER;
+    float sim_half_width = half_width * g_game.inv_ppm;
+    float sim_half_height = half_height * g_game.inv_ppm;
 
     polygon left_wall(pad, sim_half_height + pad + pad,
                       { -(sim_half_width + pad), 0.f });
@@ -98,11 +61,13 @@ TestScene::TestScene (void)
 #endif
 
     player.InitPhysics(collision_graph, math::vec2(30.f, -30.f));
-    duck.InitPhysics(collision_graph, math::vec2(3.f, 3.f));
+    duck.InitPhysics(collision_graph, math::vec2(30.f, -33.f));
+    duck2.InitPhysics(collision_graph, math::vec2(33.f, -30.f));
     dove.InitPhysics(collision_graph, math::vec2(0.f, 0.f));
 
     entities.AddSprite(player.sprite);
     entities.AddSprite(duck.sprite);
+    entities.AddSprite(duck2.sprite);
     entities.AddSprite(dove.sprite);
 }
 
@@ -144,8 +109,8 @@ void
 TestScene::OnUpdate (const delta_time& dt)
 {
     auto bounds = camera.bounds;
-    bounds.lo *= INV_PIXELS_PER_METER;
-    bounds.hi *= INV_PIXELS_PER_METER;
+    bounds.lo *= g_game.inv_ppm;
+    bounds.hi *= g_game.inv_ppm;
 
     if (!dove.is_flying)
     {
@@ -170,6 +135,7 @@ TestScene::OnUpdate (const delta_time& dt)
     collision_graph.Step(1.f / 60.f);
     player.OnUpdate(dt);
     duck.OnUpdate(dt);
+    duck2.OnUpdate(dt);
     dove.OnUpdate(dt);
 }
 
@@ -182,9 +148,40 @@ TestScene::OnRender (void)
     render_target->SetProjection(camera.combined);
     background.SetView(camera);
 
-    background.Draw();
+    //background.Draw();
     entities.Draw();
 
     // debug drawing
     debug::SetProjection(camera.combined);
 }
+
+void
+TestScene::OnContactStart (Contact*)
+{
+    //std::cout << "OnContactStart" << std::endl;
+}
+
+void
+TestScene::OnContactEnd (Contact*)
+{
+    //std::cout << "OnContactEnd" << std::endl;
+}
+
+void
+TestScene::OnPreSolve (Contact*, const collision_manifold&)
+{
+    //std::cout << "OnPreSolve" << std::endl;
+}
+
+void
+TestScene::OnPostSolve (Contact* c)
+{
+    rdge::Unused(c);
+    //std::cout << "OnPostSolve" << std::endl
+              //<< c->manifold << std::endl
+              //<< c->impulse << std::endl;
+}
+
+void
+TestScene::OnDestroyed (Fixture*)
+{ }
