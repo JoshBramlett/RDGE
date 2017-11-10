@@ -28,7 +28,7 @@ public:
 
     ~SceneSwapWidget (void) noexcept = default;
 
-    void Update (void) override
+    void UpdateWidget (void) override
     {
         if (!this->show)
         {
@@ -51,8 +51,8 @@ public:
 
         ImGui::Text("Simulations:");
         if (ImGui::Combo("##Test",
-						 &this->selected_index,
-						 [](void* p, int index, const char** name) {
+                         &this->selected_index,
+                         [](void* p, int index, const char** name) {
                             auto& scenes = *static_cast<SceneMap*>(p);
                             *name = scenes[index].first.c_str();
                             return true;
@@ -74,7 +74,7 @@ public:
         ImGui::End();
     }
 
-    void OnCustomRender (void) override { };
+    void OnWidgetCustomRender (void) override { };
 
     void AddScene (std::string name, std::shared_ptr<rdge::IScene> scene)
     {
@@ -82,8 +82,8 @@ public:
     }
 
     bool show = true;
-	int scene_index = 0;
-	int selected_index = 0;
+    int scene_index = 0;
+    int selected_index = 0;
 
     Game game;
 

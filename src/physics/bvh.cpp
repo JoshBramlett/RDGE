@@ -23,8 +23,9 @@ BVHTree::CreateProxy (const aabb& box, void* user_data)
     int32 handle = CreateNode();
 
     auto& node = m_nodes[handle];
-    node.fat_box = box.fatten(FATTEN_AMOUNT);
     node.user_data = user_data;
+    node.fat_box = box;
+    node.fat_box.fatten(FATTEN_AMOUNT);
 
     InsertLeaf(handle);
     return handle;
@@ -53,7 +54,8 @@ BVHTree::MoveProxy (int32 handle, const aabb& box, const math::vec2& displacemen
 
     RemoveLeaf(handle);
 
-    node.fat_box = box.fatten(FATTEN_AMOUNT);
+    node.fat_box = box;
+    node.fat_box.fatten(FATTEN_AMOUNT);
     math::vec2 expansion = displacement * DISP_MULTIPLIER;
 
     if (expansion.x < 0.f)

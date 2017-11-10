@@ -24,8 +24,10 @@ TestScene::TestScene (void)
     , entities(render_target)
 {
     collision_graph.listener = this;
+
+    debug::AddWidget(this);
     debug::settings::show_overlay = true;
-    debug::settings::draw_physics_fixtures = true;
+    //debug::settings::draw_physics_fixtures = true;
 
     ///////////////////
     // Background layer
@@ -62,12 +64,12 @@ TestScene::TestScene (void)
 
     player.InitPhysics(collision_graph, math::vec2(30.f, -30.f));
     duck.InitPhysics(collision_graph, math::vec2(30.f, -33.f));
-    duck2.InitPhysics(collision_graph, math::vec2(33.f, -30.f));
+    //duck2.InitPhysics(collision_graph, math::vec2(33.f, -30.f));
     dove.InitPhysics(collision_graph, math::vec2(0.f, 0.f));
 
     entities.AddSprite(player.sprite);
     entities.AddSprite(duck.sprite);
-    entities.AddSprite(duck2.sprite);
+    //entities.AddSprite(duck2.sprite);
     entities.AddSprite(dove.sprite);
 }
 
@@ -109,8 +111,7 @@ void
 TestScene::OnUpdate (const delta_time& dt)
 {
     auto bounds = camera.bounds;
-    bounds.lo *= g_game.inv_ppm;
-    bounds.hi *= g_game.inv_ppm;
+    bounds.scale(g_game.inv_ppm);
 
     if (!dove.is_flying)
     {
@@ -125,18 +126,17 @@ TestScene::OnUpdate (const delta_time& dt)
     else
     {
         // bounds must be larger than the spawn point
-        bounds.fatten(3.f);
-        if (!bounds.contains(dove.GetWorldCenter()))
+        if (dove.GetWorldCenter().x < bounds.left() - 5.f)
         {
             dove.Disable();
         }
     }
 
-    collision_graph.Step(1.f / 60.f);
     player.OnUpdate(dt);
     duck.OnUpdate(dt);
-    duck2.OnUpdate(dt);
+    //duck2.OnUpdate(dt);
     dove.OnUpdate(dt);
+    collision_graph.Step(1.f / 60.f);
 }
 
 void
@@ -148,7 +148,7 @@ TestScene::OnRender (void)
     render_target->SetProjection(camera.combined);
     background.SetView(camera);
 
-    //background.Draw();
+    background.Draw();
     entities.Draw();
 
     // debug drawing
@@ -156,20 +156,24 @@ TestScene::OnRender (void)
 }
 
 void
-TestScene::OnContactStart (Contact*)
+TestScene::OnContactStart (Contact* c)
 {
+    rdge::Unused(c);
     //std::cout << "OnContactStart" << std::endl;
 }
 
 void
-TestScene::OnContactEnd (Contact*)
+TestScene::OnContactEnd (Contact* c)
 {
+    rdge::Unused(c);
     //std::cout << "OnContactEnd" << std::endl;
 }
 
 void
-TestScene::OnPreSolve (Contact*, const collision_manifold&)
+TestScene::OnPreSolve (Contact* c, const collision_manifold& mf)
 {
+    rdge::Unused(c);
+    rdge::Unused(mf);
     //std::cout << "OnPreSolve" << std::endl;
 }
 
@@ -184,4 +188,66 @@ TestScene::OnPostSolve (Contact* c)
 
 void
 TestScene::OnDestroyed (Fixture*)
+{ }
+
+void
+TestScene::UpdateWidget (void)
+{
+    if (!this->show)
+    {
+        return;
+    }
+
+    ImGuiIO& io = ImGui::GetIO();
+    float fb_width = static_cast<float>(io.DisplaySize.x);
+    float fb_height = static_cast<float>(io.DisplaySize.y);
+    float menu_width = 200.f;
+
+    ImGui::SetNextWindowPos(ImVec2(fb_width - (menu_width + 20.f), 25.f));
+    ImGui::SetNextWindowSize(ImVec2(menu_width, fb_height - 50.f),
+                             ImGuiSetCond_FirstUseEver);
+    if (!ImGui::Begin("TestScene", &this->show))
+    {
+        ImGui::End();
+        return;
+    }
+
+    ImGui::Text("Player");
+    ImGui::Spacing();
+    ImGui::Indent(15.f);
+    ImGui::Text("pos: %s", rdge::to_string(player.GetWorldCenter()).c_str());
+    ImGui::Text("vel: %s", rdge::to_string(player.body->linear.velocity).c_str());
+    ImGui::Unindent(15.f);
+    ImGui::Separator();
+
+    ImGui::Text("Duck");
+    ImGui::Spacing();
+    ImGui::Indent(15.f);
+    ImGui::Text("pos: %s", rdge::to_string(duck.GetWorldCenter()).c_str());
+    ImGui::Text("vel: %s", rdge::to_string(duck.body->linear.velocity).c_str());
+    ImGui::SliderFloat("#one", &duck.kb_impulse, 5.f, 100.f, "impulse = %.3f");
+    ImGui::SliderFloat("#two", &duck.kb_damping, 5.f, 100.f, "damping = %.3f");
+    ImGui::Unindent(15.f);
+    ImGui::Separator();
+
+    auto ab = player.GetWorldCenter() - duck.GetWorldCenter();
+    float dot = math::dot(ab, duck.body->linear.velocity);
+
+    float dot_normal_vel = math::dot(player.normal, player.body->linear.velocity);
+
+    ImGui::Text("Misc");
+    ImGui::Spacing();
+    ImGui::Indent(15.f);
+    ImGui::Text("dot: %f", dot);
+    ImGui::Text("dnv: %f", dot_normal_vel);
+    ImGui::Unindent(15.f);
+    ImGui::Separator();
+
+
+
+    ImGui::End();
+}
+
+void
+TestScene::OnWidgetCustomRender (void)
 { }

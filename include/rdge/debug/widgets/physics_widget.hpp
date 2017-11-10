@@ -28,8 +28,8 @@ class PhysicsWidget : public IWidget
 public:
     ~PhysicsWidget (void) noexcept = default;
 
-    void Update (void) override;
-    void OnCustomRender (void) override;
+    void UpdateWidget (void) override;
+    void OnWidgetCustomRender (void) override;
 
     physics::CollisionGraph* graph = nullptr;
     float scale = 1.f;

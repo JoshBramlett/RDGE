@@ -502,12 +502,12 @@ public:
                 ImGui::EndMainMenuBar();
             }
 
-            camera_widget.Update();
-            physics_widget.Update();
+            camera_widget.UpdateWidget();
+            physics_widget.UpdateWidget();
 
             for (auto widget : widgets)
             {
-                widget->Update();
+                widget->UpdateWidget();
             }
 
             if (settings::show_imgui_test_window)
@@ -525,12 +525,12 @@ public:
     void
     OnRender (void)
     {
-        camera_widget.OnCustomRender();
-        physics_widget.OnCustomRender();
+        camera_widget.OnWidgetCustomRender();
+        physics_widget.OnWidgetCustomRender();
 
         for (auto widget : widgets)
         {
-            widget->OnCustomRender();
+            widget->OnWidgetCustomRender();
         }
 
         ImGui::Render();

@@ -84,7 +84,7 @@ Player::InitPhysics (CollisionGraph& graph, const math::vec2& pos)
     bprof.gravity_scale = 0.f;
     bprof.prevent_rotation = true;
     bprof.prevent_sleep = true;
-    bprof.linear_damping = 0.5f;
+    bprof.linear_damping = 0.0f;
     this->body = graph.CreateBody(bprof);
 
     {
@@ -109,11 +109,11 @@ Player::InitPhysics (CollisionGraph& graph, const math::vec2& pos)
         fprof.filter.mask = chrono_collision_category_enemy_hitbox |
                             chrono_collision_category_environment_triggers;
 
-        circle c(math::vec2(-0.5f, 0.f), 1.f);
+        circle c(math::vec2(-0.5f, 0.f), 0.95f);
         fprof.shape = &c;
         this->dir_sensors[Direction::LEFT] = body->CreateFixture(fprof);
 
-        c = circle(math::vec2(0.5f, 0.f), 1.f);
+        c = circle(math::vec2(0.5f, 0.f), 0.95f);
         fprof.shape = &c;
         this->dir_sensors[Direction::RIGHT] = body->CreateFixture(fprof);
 
@@ -176,70 +176,116 @@ Player::OnEvent (const Event& event)
 void
 Player::OnUpdate (const delta_time& dt)
 {
-    uint32 ticks = dt.ticks;
+    float velocity_scale = 0.f;
 
-    math::vec2 desired_velocity = m_direction;
-    if (m_flags & ATTACKING)
+    if (m_flags & INPUT_LOCKED)
     {
-        desired_velocity *= 30.f;
-
-        if (m_currentAnimation->IsFinished())
+        if (m_flags & ATTACKING)
         {
-            m_currentAnimation->Reset();
-            m_flags &= ~ATTACKING;
+            velocity_scale = m_lockedVelocity;
+
+            if (m_currentAnimation->IsFinished())
+            {
+                m_currentAnimation->Reset();
+                m_flags &= ~(ATTACKING | INPUT_LOCKED);
+            }
+            else
+            {
+                Fixture* sensor = dir_sensors[this->facing];
+                body->contact_edges.for_each([=](auto* edge) {
+                    Contact* c = edge->contact;
+                    Fixture* other = nullptr;
+                    if (sensor == c->fixture_a)
+                    {
+                        other = c->fixture_b;
+                    }
+                    else if (sensor == c->fixture_b)
+                    {
+                        other = c->fixture_a;
+                    }
+
+                    if (other && c->IsTouching())
+                    {
+                        auto actor = static_cast<IActor*>(other->body->user_data);
+                        actor->OnMeleeAttack(1.f, sensor->GetWorldCenter());
+                    }
+                });
+            }
         }
     }
-    else
+
+    if ((m_flags & INPUT_LOCKED) == 0)
     {
         auto p = m_handler.Calculate();
-        m_direction = p.first;
+        this->normal = p.first;
         this->facing = p.second;
 
-        bool is_moving = !m_direction.is_zero();
         if (m_flags & ATTACK_BUTTON_PRESSED)
         {
-            m_currentAnimation = &s_attack[this->facing];
-            desired_velocity *= 30.f;
-
-            m_flags |= ATTACKING;
+            BeginAttack();
         }
-        else if (is_moving)
+        else if (!this->normal.is_zero())
         {
             if (m_flags & RUN_BUTTON_PRESSED)
             {
                 m_currentAnimation = &s_run[this->facing];
-                desired_velocity *= 20.f;
+                velocity_scale = 12.5f;
             }
             else
             {
                 m_currentAnimation = &s_walk[this->facing];
-                desired_velocity *= 10.f;
+                velocity_scale = 5.5f;
             }
         }
         else
         {
-            ticks = 0;
             m_currentAnimation = &s_idle[this->facing];
         }
     }
 
-    math::vec2 delta = desired_velocity - body->linear.velocity;
+#if 1
+    // high damping if directional normal is different than the linear velocity
+    body->linear.damping = (math::dot(this->normal, body->linear.velocity) > 0.f) ? 0.f : 9.f;
+
+    math::vec2 delta = (this->normal * velocity_scale) - body->linear.velocity;
     math::vec2 impulse = delta * body->linear.mass;
-
-    if (ticks == 0)
-    {
-        // abrupt stop
-        impulse *= 9.5f;
-    }
-
     body->ApplyForce(impulse);
-    //body->linear.velocity = desired_velocity;
+#else
+    body->linear.velocity = (this->normal * velocity_scale);;
+#endif
 
-    auto& frame = this->m_currentAnimation->GetFrame(ticks);
+    auto& frame = this->m_currentAnimation->GetFrame(dt.ticks);
     math::vec2 pos((this->hitbox->GetWorldCenter() * g_game.ppm) - frame.origin);
 
     vops::SetPosition(this->sprite->vertices, pos, frame.size);
     vops::SetTexCoords(this->sprite->vertices, frame.coords);
+}
+
+void
+Player::BeginAttack (void)
+{
+    m_currentAnimation = &s_attack[this->facing];
+    m_flags |= (ATTACKING | INPUT_LOCKED);
+
+    m_lockedVelocity = 0.f;
+    if (!this->normal.is_zero())
+    {
+        if (m_flags & RUN_BUTTON_PRESSED)
+        {
+            m_lockedVelocity = 8.f;
+        }
+        else
+        {
+            m_lockedVelocity = 3.f;
+        }
+    }
+}
+
+void
+Player::OnMeleeAttack (float damage, const rdge::math::vec2& pos)
+{
+    rdge::Unused(damage);
+    rdge::Unused(pos);
 }
 
 math::vec2

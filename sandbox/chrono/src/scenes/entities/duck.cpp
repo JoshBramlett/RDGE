@@ -55,7 +55,8 @@ Duck::InitPhysics (CollisionGraph& graph, const math::vec2& pos)
     bprof.gravity_scale = 0.f;
     bprof.prevent_rotation = true;
     bprof.prevent_sleep = true;
-    bprof.linear_damping = 0.5f;
+    bprof.linear_damping = 0.f;
+    bprof.user_data = this;
     this->body = graph.CreateBody(bprof);
 
     {
@@ -65,6 +66,7 @@ Duck::InitPhysics (CollisionGraph& graph, const math::vec2& pos)
         fprof.restitution = 0.9f;
         fprof.filter.category = chrono_collision_category_enemy_hitbox;
         fprof.filter.mask = chrono_collision_category_player_hitbox |
+                            chrono_collision_category_player_sensor_directional |
                             chrono_collision_category_enemy_hitbox |
                             chrono_collision_category_environment_static;
 
@@ -79,6 +81,21 @@ Duck::OnUpdate (const delta_time& dt)
 {
     auto d = m_parent->player.GetWorldCenter() - body->GetWorldCenter();
     m_currentAnimation = &s_walk[GetDirection(d)];
+
+    if (m_flags & ATTACKED)
+    {
+        this->sprite->visible = !this->sprite->visible;
+        if (m_delay > 1000)
+        {
+            this->sprite->visible = true;
+            body->linear.damping = 0.f;
+            m_flags &= ~ATTACKED;
+        }
+        else
+        {
+            m_delay += dt.ticks;
+        }
+    }
 
     if (d.self_dot() > math::square(2.5f))
     {
@@ -95,6 +112,22 @@ Duck::OnUpdate (const delta_time& dt)
 
     vops::SetPosition(this->sprite->vertices, pos, frame.size);
     vops::SetTexCoords(this->sprite->vertices, frame.coords);
+}
+
+void
+Duck::OnMeleeAttack (float damage, const rdge::math::vec2& pos)
+{
+    if ((m_flags & ATTACKED) == 0)
+    {
+        auto d = pos - hitbox->GetWorldCenter();
+        body->linear.damping = kb_damping;
+        body->ApplyLinearImpulse(-d * kb_impulse);
+
+        m_flags |= ATTACKED;
+        m_delay = 0;
+    }
+
+    rdge::Unused(damage);
 }
 
 math::vec2

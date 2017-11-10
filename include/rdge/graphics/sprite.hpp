@@ -67,6 +67,7 @@ public:
     void SetDepth (float depth) override;
 
 public:
+    bool visible = true;
     SpriteVertices vertices; //!< Array of vertex attribute data
 
 #if RDGE_DEBUG

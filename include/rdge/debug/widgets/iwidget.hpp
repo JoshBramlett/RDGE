@@ -22,13 +22,13 @@ public:
     virtual ~IWidget (void) noexcept = default;
 
     //! \brief Update widget state, potentially rendering the widget on screen
-    virtual void Update (void) = 0;
+    virtual void UpdateWidget (void) = 0;
 
     //! \brief Allows the widget to do any custom rendering
     //! \details Called during the OnRender phase, the widget can perform any custom
     //!          debug drawing.  For example, the physics system would render the
     //!          the fixture wireframes here.
-    virtual void OnCustomRender (void) = 0;
+    virtual void OnWidgetCustomRender (void) = 0;
 };
 
 } // namespace debug

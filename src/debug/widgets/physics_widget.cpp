@@ -10,7 +10,7 @@ namespace debug {
 using namespace rdge::physics;
 
 void
-PhysicsWidget::Update (void)
+PhysicsWidget::UpdateWidget (void)
 {
     if (!settings::show_physics_widget)
     {
@@ -121,7 +121,7 @@ PhysicsWidget::Update (void)
 }
 
 void
-PhysicsWidget::OnCustomRender (void)
+PhysicsWidget::OnWidgetCustomRender (void)
 {
     if (!graph)
     {

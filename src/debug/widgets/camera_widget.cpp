@@ -8,7 +8,7 @@ namespace rdge {
 namespace debug {
 
 void
-CameraWidget::Update (void)
+CameraWidget::UpdateWidget (void)
 {
     if (!settings::show_camera_widget)
     {
@@ -72,7 +72,7 @@ CameraWidget::Update (void)
 }
 
 void
-CameraWidget::OnCustomRender (void)
+CameraWidget::OnWidgetCustomRender (void)
 {
     if (camera && settings::draw_camera_viewport)
     {

@@ -7,6 +7,7 @@
 #include <rdge/graphics.hpp>
 #include <rdge/math.hpp>
 #include <rdge/physics.hpp>
+#include <rdge/debug.hpp>
 
 #include "entities/player.hpp"
 #include "entities/duck.hpp"
@@ -37,29 +38,36 @@
 //   a keyboard modifier it'd make sense not to start the animation over and
 //   instead smoothly transition to the next frame
 
-class TestScene : public rdge::IScene, public rdge::physics::GraphListener
+class TestScene
+    : public rdge::IScene
+    , public rdge::physics::GraphListener
+    , public rdge::debug::IWidget
 {
 public:
     TestScene (void);
     ~TestScene (void) noexcept = default;
 
-    // scene transitions
+    // IScene: transitions
     void Initialize (void) override;
     void Terminate (void) override;
     void Hibernate (void) override;
     void Activate (void) override;
 
-    // scene game loop events
+    // IScene: game loop events
     void OnEvent (const rdge::Event& event) override;
     void OnUpdate (const rdge::delta_time& dt) override;
     void OnRender (void) override;
 
-    // physics events
+    // GraphListener
     void OnContactStart (rdge::physics::Contact*) override;
     void OnContactEnd (rdge::physics::Contact*) override;
     void OnPreSolve (rdge::physics::Contact*, const rdge::physics::collision_manifold&) override;
     void OnPostSolve (rdge::physics::Contact*) override;
     void OnDestroyed (rdge::physics::Fixture*) override;
+
+    // IWidget
+    void UpdateWidget (void) override;
+    void OnWidgetCustomRender (void) override;
 
 public:
     rdge::OrthographicCamera camera;
@@ -73,4 +81,6 @@ public:
     std::shared_ptr<rdge::SpriteBatch> render_target;
     rdge::TilemapBatch background;
     rdge::SpriteLayer entities;
+
+    bool show = true;
 };

@@ -21,8 +21,8 @@ class CameraWidget : public IWidget
 public:
     ~CameraWidget (void) noexcept = default;
 
-    void Update (void) override;
-    void OnCustomRender (void) override;
+    void UpdateWidget (void) override;
+    void OnWidgetCustomRender (void) override;
 
     OrthographicCamera* camera = nullptr;
 

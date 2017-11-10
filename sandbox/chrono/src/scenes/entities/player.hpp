@@ -8,10 +8,12 @@
 #include <rdge/math.hpp>
 #include <rdge/physics.hpp>
 
+#include "../iactor.hpp"
+
 #include <vector>
 #include <memory>
 
-class Player
+class Player : public IActor
 {
 public:
     Player (void);
@@ -20,11 +22,20 @@ public:
     void OnEvent (const rdge::Event& event);
     void OnUpdate (const rdge::delta_time& dt);
 
-    rdge::math::vec2 GetWorldCenter (void) const noexcept;
+    bool IsAttacking (void) const noexcept { return m_flags & ATTACKING; }
+
+    // IActor
+    void OnMeleeAttack (float damage, const rdge::math::vec2& pos) override;
+    rdge::math::vec2 GetWorldCenter (void) const noexcept override;
+
+private:
+
+    void BeginAttack (void);
 
 public:
 
     rdge::Direction facing = rdge::Direction::SOUTH;
+    rdge::math::vec2 normal;
 
     std::shared_ptr<rdge::Sprite> sprite;
     rdge::physics::RigidBody* body = nullptr;
@@ -37,14 +48,17 @@ public:
 private:
     // input handling
     rdge::KeyboardDirectionalInputHandler m_handler;
-    rdge::math::vec2 m_direction;
     rdge::Animation* m_currentAnimation = nullptr;
+
+    float m_lockedVelocity = 0.f;
+
 
     enum StateFlags
     {
         RUN_BUTTON_PRESSED    = 0x0001,
         ATTACK_BUTTON_PRESSED = 0x0002,
-        ATTACKING             = 0x0004
+        INPUT_LOCKED          = 0x0004,
+        ATTACKING             = 0x0010
     };
 
     rdge::uint16 m_flags = 0;

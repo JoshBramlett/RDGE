@@ -61,7 +61,9 @@ Sprite::Draw (SpriteBatch& renderer)
     // makes sure the texture ids match.
     SDL_assert(!m_texture || this->vertices[0].tid == m_texture->unit_id);
 
-    renderer.Submit(this->vertices);
+    if (visible)
+    {
+        renderer.Submit(this->vertices);
 
 #if RDGE_DEBUG
     if (this->debug_bounds.show)
@@ -69,6 +71,7 @@ Sprite::Draw (SpriteBatch& renderer)
         debug::DrawWireFrame(this->vertices, this->debug_bounds.draw_color);
     }
 #endif
+    }
 }
 
 void
