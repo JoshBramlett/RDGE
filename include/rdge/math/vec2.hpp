@@ -403,7 +403,7 @@ using ivec2  = vec2_t<int32>;  //!< Signed (useful for screen coordinates)
 } // namespace math
 
 inline std::string
-to_string(const math::vec2& value)
+to_string (const math::vec2& value)
 {
     std::ostringstream ss;
     ss << "[" << value.x << ", " << value.y << "]";

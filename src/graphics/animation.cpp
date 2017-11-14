@@ -109,26 +109,22 @@ bool from_string (const std::string& value, Animation::PlayMode& mode)
         mode = Animation::PlayMode::Normal;
         return true;
     }
-
-    if (lc == "reverse")
+    else if (lc == "reverse")
     {
         mode = Animation::PlayMode::Reverse;
         return true;
     }
-
-    if (lc == "loop")
+    else if (lc == "loop")
     {
         mode = Animation::PlayMode::Loop;
         return true;
     }
-
-    if (lc == "loopreverse")
+    else if (lc == "loopreverse")
     {
         mode = Animation::PlayMode::LoopReverse;
         return true;
     }
-
-    if (lc == "looppingpong")
+    else if (lc == "looppingpong")
     {
         mode = Animation::PlayMode::LoopPingPong;
         return true;

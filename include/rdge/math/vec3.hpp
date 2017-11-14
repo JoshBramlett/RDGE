@@ -232,7 +232,7 @@ std::ostream& operator<< (std::ostream&, const vec3&);
 
 } // namespace math
 
-//! \brief vec3 to string
+//! \brief vec3 string conversion
 std::string to_string (const math::vec3&);
 
 } // namespace rdge

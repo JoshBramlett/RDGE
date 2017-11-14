@@ -7,16 +7,16 @@
 
 #include <nlohmann/json.hpp>
 
-#define JSON_VALIDATE_REQUIRED(j, field, type) do {                             \
-    if (j.count(#field) == 0) {                                                 \
-        throw std::invalid_argument("missing required field \"" #field "\"");   \
-    } else if (!j[#field].type()) {                                             \
-        throw std::invalid_argument("\"" #field "\" failed " #type "() check"); \
-    }                                                                           \
+#define JSON_VALIDATE_REQUIRED(j, field, eval_fn) do {                             \
+    if (j.count(#field) == 0) {                                                    \
+        throw std::invalid_argument("missing required field \"" #field "\"");      \
+    } else if (!j[#field].eval_fn()) {                                             \
+        throw std::invalid_argument("\"" #field "\" failed " #eval_fn "() check"); \
+    }                                                                              \
 } while (false)
 
-#define JSON_VALIDATE_OPTIONAL(j, field, type) do {                             \
-    if ((j.count(#field) > 0) && (!j[#field].type())) {                         \
-        throw std::invalid_argument("\"" #field "\" failed " #type "() check"); \
-    }                                                                           \
+#define JSON_VALIDATE_OPTIONAL(j, field, eval_fn) do {                             \
+    if ((j.count(#field) > 0) && (!j[#field].eval_fn())) {                         \
+        throw std::invalid_argument("\"" #field "\" failed " #eval_fn "() check"); \
+    }                                                                              \
 } while (false)

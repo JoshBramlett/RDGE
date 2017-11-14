@@ -6,28 +6,442 @@
 #pragma once
 
 #include <rdge/core.hpp>
+#include <rdge/graphics/color.hpp>
 #include <rdge/util/json.hpp>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
-//! \namespace tiled Tiled Map Editor v1.0.3
+//! \namespace tiled Tiled Map Editor v1.1.0
 namespace tiled {
+
+// Holy fuck is this poorly implemented.  Seriously, wtf guys?
+//
+//  - Values and types are separated and require name lookups to resolve,
+//    meaning I cannot use standard to_json/from_json serialization methods.
+//
+//  - They're represented as key/value pairs rather than an array, so
+//    there's basically no way to represent that in c++.
+
+//"properties":
+//{
+ //"cust_prop_bool":true,
+ //"cust_prop_color":"#ffec9cc6",
+ //"cust_prop_file":"overworld_obj.json",
+ //"cust_prop_float":3.14,
+ //"cust_prop_int":5,
+ //"cust_prop_string":"asdf"
+//},
+//"propertytypes":
+//{
+ //"cust_prop_bool":"bool",
+ //"cust_prop_color":"color",
+ //"cust_prop_file":"file",
+ //"cust_prop_float":"float",
+ //"cust_prop_int":"int",
+ //"cust_prop_string":"string"
+//},
+//
+
+// Would this have been so hard?
+//
+// "properties": [
+//   {
+//     "name": "fuck you",
+//     "type": "bool",
+//     "value": true
+//   }
+// ]
+
+enum property_type
+{
+    property_type_bool,
+    property_type_color,
+    property_type_file,
+    property_type_float,
+    property_type_int,
+    property_type_string
+};
+
+std::string to_string (property_type);
+bool from_string (const std::string&, property_type&);
+
+struct property
+{
+    static constexpr size_t MAX_SIZE = 64;
+
+    std::string name;
+    property_type type;
+
+    union
+    {
+        bool  bool_value;
+        float float_value;
+        int32 int_value;
+        char  string_value[MAX_SIZE];
+    };
+};
+
+inline void
+serialize (nlohmann::json& j, const std::vector<property>& plist)
+{
+    if (plist.empty())
+    {
+        return;
+    }
+
+    j = nlohmann::json {
+        { "properties", nlohmann::json::object() },
+        { "propertytypes", nlohmann::json::object() }
+    };
+
+    auto& j_props = j["properties"];
+    auto& j_types = j["propertytypes"];
+    for (const auto& p : plist)
+    {
+        j_types[p.name] = to_string(p.type);
+
+        switch (p.type)
+        {
+        case property_type_bool:
+            j_props[p.name] = p.bool_value;
+            break;
+        case property_type_float:
+            j_props[p.name] = p.float_value;
+            break;
+        case property_type_int:
+            j_props[p.name] = p.int_value;
+            break;
+        case property_type_color:
+        case property_type_file:
+        case property_type_string:
+            j_props[p.name] = p.string_value;
+            break;
+        }
+    }
+}
+
+inline void
+deserialize (const nlohmann::json& j, std::vector<property>& plist)
+{
+    const auto& o = j["properties"];
+    for (auto it = o.begin(); it != o.end(); ++it)
+    {
+        property p;
+        p.name = it.key();
+        from_string(j["propertytypes"][p.name].get<std::string>(), p.type);
+
+        switch (p.type)
+        {
+        case property_type_bool:
+            p.bool_value = j["properties"][p.name].get<bool>();
+            break;
+        case property_type_float:
+            p.float_value = j["properties"][p.name].get<float>();
+            break;
+        case property_type_int:
+            p.int_value = j["properties"][p.name].get<int32>();
+            break;
+        case property_type_color:
+        case property_type_file:
+        case property_type_string:
+            {
+                auto pval = j["properties"][p.name].get<std::string>();
+                strncpy(p.string_value, pval.c_str(), pval.length());
+
+                size_t len = (pval.length() < 64) ? pval.length() : 63;
+                p.string_value[len] = '\0';
+            }
+            break;
+        }
+
+        plist.push_back(p);
+    }
+}
+
+//! \enum object_type
+//! \brief Interally used only
+//! \details Used to track the object type because the way Tiled determines
+//!          it is utter garbage.  They check for the existence of fields
+//!          (i.e. point, ellipse, polygon, etc.) which makes serialization
+//!          stupidly more difficult.
+enum class object_type
+{
+    unknown,
+    point,
+    ellipse,
+    polygon,
+    polyline,
+    text
+};
+
+struct coordinate
+{
+    int32 x;
+    int32 y;
+};
+
+inline void
+to_json (nlohmann::json& j, const coordinate& c)
+{
+    j = nlohmann::json {
+        { "x", c.x },
+        { "y", c.y }
+    };
+}
+
+inline void
+from_json (const nlohmann::json& j, coordinate& c)
+{
+    JSON_VALIDATE_REQUIRED(j, x, is_number);
+    JSON_VALIDATE_REQUIRED(j, y, is_number);
+
+    c.x = j["x"].get<int32>();
+    c.y = j["y"].get<int32>();
+}
+
+struct object_text
+{
+    std::string text;
+    bool wrap;
+};
+
+inline void
+to_json (nlohmann::json& j, const object_text& t)
+{
+    j = nlohmann::json {
+        { "text", t.text },
+        { "wrap", t.wrap }
+    };
+}
+
+inline void
+from_json (const nlohmann::json& j, object_text& t)
+{
+    JSON_VALIDATE_REQUIRED(j, text, is_string);
+    JSON_VALIDATE_REQUIRED(j, wrap, is_boolean);
+
+    t.text = j["text"].get<std::string>();
+    t.wrap = j["wrap"].get<bool>();
+}
+
+struct object
+{
+    //!@{ Required
+    int32 id;         //!< Unique id
+    std::string name; //!< String assigned to name field in editor
+    std::string type; //!< String assigned to type field in editor
+    int32 x;          //!< x-coordinate in pixels
+    int32 y;          //!< y-coordinate in pixels
+    int32 width;      //!< Width in pixels (ignored if using a gid)
+    int32 height;     //!< Height in pixels (ignored if using a gid)
+    bool visible;     //!< Whether object is shown in editor
+    float rotation;   //!< Angle in degrees clockwise
+    //!@}
+
+    //!@{ Optional
+    int32 gid = 0;                    //!< GID, only if object comes from a Tilemap
+    std::vector<property> properties; //!< Custom properties
+    //!@}
+
+    //!@{ Object type
+    object_type otype = object_type::unknown; //!< Internal
+    std::vector<coordinate> coords;           //!< Coordinate list in pixels
+    object_text text;                         //!< String key/value pairs
+
+    // NOTE: Original implementation
+    //bool point;                       //!< Used to mark an object as a point
+    //bool ellipse;                     //!< Used to mark an object as an ellipse
+    //std::vector<coordinate> polygon;  //!< Coordinate list in pixels
+    //std::vector<coordinate> polyline; //!< Coordinate list in pixels
+    //object_text text;                 //!< String key/value pairs
+    //!@}
+};
+
+inline void
+to_json (nlohmann::json& j, const object& o)
+{
+    j = nlohmann::json {
+        { "id", o.id },
+        { "name", o.name },
+        { "type", o.type },
+        { "x", o.x },
+        { "y", o.y },
+        { "width", o.width },
+        { "height", o.height },
+        { "visible", o.visible },
+        { "rotation", o.rotation }
+    };
+
+    if (o.gid > 0)
+    {
+        j["gid"] = o.gid;
+    }
+
+    serialize(j, o.properties);
+
+    switch (o.otype)
+    {
+    case object_type::point:
+        j["point"] = true;
+        break;
+    case object_type::ellipse:
+        j["ellipse"] = true;
+        break;
+    case object_type::polygon:
+        j["polygon"] = o.coords;
+        break;
+    case object_type::polyline:
+        j["polyline"] = o.coords;
+        break;
+    case object_type::text:
+        j["text"] = o.text;
+        break;
+    default:
+        throw std::invalid_argument("serializing tiled object with no type");
+    }
+}
+
+inline void
+from_json (const nlohmann::json& j, object& o)
+{
+    JSON_VALIDATE_REQUIRED(j, id, is_number);
+    JSON_VALIDATE_REQUIRED(j, name, is_string);
+    JSON_VALIDATE_REQUIRED(j, type, is_string);
+    JSON_VALIDATE_REQUIRED(j, x, is_number);
+    JSON_VALIDATE_REQUIRED(j, y, is_number);
+    JSON_VALIDATE_REQUIRED(j, width, is_number);
+    JSON_VALIDATE_REQUIRED(j, height, is_number);
+    JSON_VALIDATE_REQUIRED(j, visible, is_boolean);
+    JSON_VALIDATE_REQUIRED(j, rotation, is_number_float);
+
+    JSON_VALIDATE_OPTIONAL(j, properties, is_object);
+    JSON_VALIDATE_OPTIONAL(j, propertytypes, is_object);
+
+    JSON_VALIDATE_OPTIONAL(j, point, is_boolean);
+    JSON_VALIDATE_OPTIONAL(j, ellipse, is_boolean);
+    JSON_VALIDATE_OPTIONAL(j, polygon, is_array);
+    JSON_VALIDATE_OPTIONAL(j, polyline, is_array);
+    JSON_VALIDATE_OPTIONAL(j, text, is_string);
+
+    o.id = j["id"].get<int32>();
+    o.name = j["name"].get<std::string>();
+    o.type = j["type"].get<std::string>();
+    o.x = j["x"].get<int32>();
+    o.y = j["y"].get<int32>();
+    o.width = j["width"].get<int32>();
+    o.height = j["height"].get<int32>();
+    o.visible = j["visible"].get<bool>();
+    o.rotation = j["rotation"].get<float>();
+
+    o.gid = (j.count("gid")) ? j["gid"].get<int32>() : 0;
+    deserialize(j, o.properties);
+
+    o.otype = object_type::unknown;
+    if (j.count("point") && j["point"].get<bool>())
+    {
+        o.otype = object_type::point;
+    }
+
+    if (j.count("ellipse") && j["ellipse"].get<bool>())
+    {
+        if (o.otype != object_type::unknown)
+        {
+            throw std::invalid_argument("tiled object has multiple types");
+        }
+
+        o.otype = object_type::ellipse;
+    }
+
+    if (j.count("polygon"))
+    {
+        if (o.otype != object_type::unknown)
+        {
+            throw std::invalid_argument("tiled object has multiple types");
+        }
+
+        o.otype = object_type::polygon;
+        o.coords = j["polygon"].get<std::vector<coordinate>>();
+    }
+
+    if (j.count("polyline"))
+    {
+        if (o.otype != object_type::unknown)
+        {
+            throw std::invalid_argument("tiled object has multiple types");
+        }
+
+        o.otype = object_type::polyline;
+        o.coords = j["polyline"].get<std::vector<coordinate>>();
+    }
+
+    if (j.count("text"))
+    {
+        if (o.otype != object_type::unknown)
+        {
+            throw std::invalid_argument("tiled object has multiple types");
+        }
+
+        o.otype = object_type::text;
+        o.text = j["text"].get<object_text>();
+    }
+
+    if (o.otype == object_type::unknown)
+    {
+        throw std::invalid_argument("tiled object has no type");
+    }
+}
+
+enum class layer_type
+{
+    tilelayer,
+    objectgroup,
+    imagelayer
+};
+
+std::string to_string (layer_type);
+bool from_string (const std::string&, layer_type&);
+
+enum class layer_draworder
+{
+    topdown, //!< Objects drawn sorted by y-coordinate
+    index    //!< Objects drawn in order of appearance
+};
+
+std::string to_string (layer_draworder order);
+bool from_string (const std::string& test, layer_draworder& out);
 
 struct layer
 {
-    std::string name;
-    std::string type = "tilelayer";
-    uint32 x = 0;
-    uint32 y = 0;
-    uint32 width = 0;
-    uint32 height = 0;
-    float opacity = 1.f;
-    bool visible = true;
-    uint32 offsetx = 0;
-    uint32 offsety = 0;
+    //!@{ Required
+    std::string name;    //!< Name assigned to this layer
+    layer_type type;     //!<
+    bool visible = true; //!< Whether layer is shown or hidden in editor
+    float opacity = 1.f; //!< Layer opacity (normalized)
+    int32 x = 0;         //!< Horizontal layer offset in tiles (always zero)
+    int32 y = 0;         //!< Vertical layer offset in tiles (always zero)
+    //!@}
 
-    std::vector<uint32> data;
+    //!@{ Optional
+    float offsetx = 0.f;              //!< Rendering x-offset in pixels
+    float offsety = 0.f;              //!< Rendering y-offset in pixels
+    std::vector<property> properties; //!< Custom properties
+    //!@}
+
+    //!@{ type == tilelayer
+    std::vector<uint32> data; //!< Array of GIDs
+    int32 width = 0;          //!< Column count
+    int32 height = 0;         //!< Row count
+    //!@}
+
+    //!@{ type == objectgroup
+    std::vector<object> objects; //!< Array of objects
+    layer_draworder draworder;   //!< Order objects are drawn
+    //!@}
+
+    //!@{ type == imagelayer
+    std::string image; //!< path to image
+    //!@}
 };
 
 inline void
@@ -35,24 +449,45 @@ to_json (nlohmann::json& j, const layer& l)
 {
     j = nlohmann::json {
         { "name", l.name },
-        { "type", l.type },
-        { "x", l.x },
-        { "y", l.y },
-        { "width", l.width },
-        { "height", l.height },
-        { "opacity", l.opacity },
+        { "type", to_string(l.type) },
         { "visible", l.visible },
-        { "offsetx", l.offsetx },
-        { "offsety", l.offsety },
-        { "data", l.data }
+        { "opacity", l.opacity },
+        { "x", l.x },
+        { "y", l.y }
     };
+
+    if (l.offsetx != 0.f || l.offsety != 0.f)
+    {
+        j["offsetx"] = l.offsetx;
+        j["offsety"] = l.offsety;
+    }
+
+    serialize(j, l.properties);
+
+    switch (l.type)
+    {
+    case layer_type::tilelayer:
+        j["width"] = l.width;
+        j["height"] = l.height;
+        j["data"] = l.data;
+        break;
+    case layer_type::objectgroup:
+        j["objects"] = l.objects;
+        j["draworder"] = to_string(l.draworder);
+        break;
+    case layer_type::imagelayer:
+        j["image"] = l.image;
+        break;
+    }
 }
 
 inline void
 from_json (const nlohmann::json& j, layer& l)
 {
+    //l.type = j["type"].get<std::string>();
+    from_string(j["type"].get<std::string>(), l.type);
+
     l.name = j["name"].get<std::string>();
-    l.type = j["type"].get<std::string>();
     l.x = j["x"].get<uint32>();
     l.y = j["y"].get<uint32>();
     l.width = j["width"].get<uint32>();
@@ -62,6 +497,8 @@ from_json (const nlohmann::json& j, layer& l)
     l.offsetx = j["offsetx"].get<uint32>();
     l.offsety = j["offsety"].get<uint32>();
     l.data = j["data"].get<std::vector<uint32>>();
+
+    deserialize(j, l.properties);
 }
 
 struct tileset
@@ -155,6 +592,7 @@ struct tilemap
     std::string orientation = "orthogonal";
     std::string renderorder = "right-down";
 
+    bool infinite = false;
     uint32 width = 0;
     uint32 height = 0;
     uint32 tilewidth = 0;
@@ -174,6 +612,7 @@ to_json (nlohmann::json& j, const tilemap& t)
         { "tiledversion", t.tiledversion },
         { "orientation", t.orientation },
         { "renderorder", t.renderorder },
+        { "infinite", t.infinite },
         { "width", t.width },
         { "height", t.height },
         { "tilewidth", t.tilewidth },
@@ -192,6 +631,7 @@ from_json (const nlohmann::json& j, tilemap& t)
     t.tiledversion = j["tiledversion"].get<std::string>();
     t.orientation = j["orientation"].get<std::string>();
     t.renderorder = j["renderorder"].get<std::string>();
+    t.infinite = j["infinite"].get<bool>();
     t.width = j["width"].get<uint32>();
     t.height = j["height"].get<uint32>();
     t.tilewidth = j["tilewidth"].get<uint32>();
@@ -202,5 +642,4 @@ from_json (const nlohmann::json& j, tilemap& t)
 }
 
 } // namespace tiled
-
 } // namespace rdge

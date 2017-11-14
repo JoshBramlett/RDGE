@@ -1,5 +1,5 @@
 {
-    "texture_parts": [
+    "regions": [
         {
             "name": "uv_1",
             "x": 0,
@@ -15,5 +15,6 @@
             "height": 128
         }
     ],
-    "image_path": "../tests/testdata/assets/spritesheet.png"
+    "image_path": "../tests/testdata/assets/spritesheet.png",
+    "type": "spritesheet"
 }

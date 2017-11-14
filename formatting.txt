@@ -1,8 +1,16 @@
 
+****************************************************************
+                     Forward Declarations
+****************************************************************
+
 //!@{ Forward declarations
 class Surface;
 class Texture;
 //!@}
+
+****************************************************************
+                        Move Semantics
+****************************************************************
 
     //!@{ Copy and move enabled
     BitmapFont (const BitmapFont&);
@@ -25,9 +33,15 @@ class Texture;
     BitmapFont& operator= (BitmapFont&&) = delete;
     //!@}
 
-//! \brief tex_coords stream output operator
-std::ostream& operator<< (std::ostream& os, const tex_coords& value);
+****************************************************************
+                       String Support
+****************************************************************
 
+//! \brief vec3 stream output operator
+std::ostream& operator<< (std::ostream&, const vec3&);
+
+//! \brief vec3 string conversion
+std::string to_string (const math::vec3&);
 
 
 

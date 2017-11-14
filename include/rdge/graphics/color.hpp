@@ -19,14 +19,14 @@ namespace rdge {
 //!          defined conversions to other relevant types.
 struct color : public SDL_Color
 {
-    static const color BLACK;   //!< Pre-defined Black color
-    static const color WHITE;   //!< Pre-defined White color
-    static const color RED;     //!< Pre-defined Red color
-    static const color GREEN;   //!< Pre-defined Green color
-    static const color BLUE;    //!< Pre-defined Blue color
-    static const color YELLOW;  //!< Pre-defined Yellow color
-    static const color CYAN;    //!< Pre-defined Cyan color
-    static const color MAGENTA; //!< Pre-defined Magenta color
+    static const color BLACK;   //!< RGBA #000000FF
+    static const color WHITE;   //!< RGBA #FFFFFFFF
+    static const color RED;     //!< RGBA #FF0000FF
+    static const color GREEN;   //!< RGBA #00FF00FF
+    static const color BLUE;    //!< RGBA #0000FFFF
+    static const color YELLOW;  //!< RGBA #FFFF00FF
+    static const color CYAN;    //!< RGBA #00FFFFFF
+    static const color MAGENTA; //!< RGBA #FF00FFFF
 
     //! \brief color ctor
     //! \details Zero initialization
@@ -69,50 +69,56 @@ struct color : public SDL_Color
     //! \details The values will be normalized to [0.f, 1.f].
     //! \note The conversion is explicit so it must be used with direct
     //!       initialization or explicit conversions.
-    //! \returns Vector of clamped floats
+    //! \returns Vector of normalized values
     explicit constexpr operator math::vec4 (void) const noexcept
     {
         return math::vec4(r / 255.f, g / 255.f, b / 255.f, a / 255.f);
     }
 
-    //! \brief Build color from a case insensitive RGB string
-    //! \details A valid format is a six digit hex string (optionally seven
-    //!          with a preceding '#')  e.g. "FF00CC" or "#ff00cc".
-    //! \param [in] value Hex color string
-    //! \returns color structure
-    //! \throws std::runtime_error Unable to parse string
-    static color FromRGB (const std::string& value);
+    //!@{
+    //! \brief Convert color to hex string
+    //! \details Hex strings are upper case and contain a preceding '#'.
+    //! \returns Hex string
+    std::string to_rgb (void) const noexcept;
+    std::string to_rgba (void) const noexcept;
+    std::string to_argb (void) const noexcept;
+    //!@}
 
-    //! \brief Build color from a case insensitive RGBA string
-    //! \details A valid format is an eight digit hex string (optionally nine
-    //!          with a preceding '#')  e.g. "FF00CCAA" or "#ff00ccaa".
+    //!@{
+    //! \brief Convert hex string to color
+    //! \details Hex string can contain a preceding '#' and is not case
+    //!          sensitive (i.e. "FF00CC" and "#ff00cc" are both valid).
+    //!          Alpha channel is optional for functions that accept an
+    //!          explicit value and if omitted will default to 0xFF.
     //! \param [in] value Hex color string
     //! \returns color structure
-    //! \throws std::runtime_error Unable to parse string
-    static color FromRGBA (const std::string& value);
+    //! \throws std::runtime_error Unable to perform conversion
+    static color from_rgb (const std::string& value);
+    static color from_rgba (const std::string& value);
+    static color from_argb (const std::string& value);
+    //!@}
 };
 
 //! \brief color equality operator
-//! \returns True iff identical
 constexpr bool operator== (const color& lhs, const color& rhs) noexcept
 {
     return (lhs.r == rhs.r) && (lhs.g == rhs.g) && (lhs.b == rhs.b) && (lhs.a == rhs.a);
 }
 
 //! \brief color inequality operator
-//! \returns True iff not identical
 constexpr bool operator!= (const color& lhs, const color& rhs) noexcept
 {
     return !(lhs == rhs);
 }
 
 //! \brief color stream output operator
-//! \returns Output stream
-std::ostream& operator<< (std::ostream& os, const color& value);
+//! \note Formatted as an RGBA hex string
+//! \see color::to_rgba
+std::ostream& operator<< (std::ostream&, const color&);
 
-//! \brief color conversion to string
-//! \param [in] value color to convert
-//! \returns std::string representation
-std::string to_string (const color& value);
+//! \brief color string conversion
+//! \note Formatted as an RGBA hex string
+//! \see color::to_rgba
+std::string to_string (const color&);
 
 } // namespace rdge

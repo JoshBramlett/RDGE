@@ -86,6 +86,7 @@ target_link_libraries (imgui
 add_library (RDGE SHARED
              src/application.cpp
 
+             src/assets/file_formats/tiled.cpp
              src/assets/asset_pack.cpp
              src/assets/bmfont.cpp
              src/assets/bitmap_font.cpp
@@ -94,15 +95,18 @@ add_library (RDGE SHARED
              src/assets/spritesheet_region.cpp
              src/assets/surface.cpp
 
-             src/debug/renderer.cpp
              src/debug/widgets/camera_widget.cpp
              src/debug/widgets/physics_widget.cpp
+             src/debug/renderer.cpp
 
              src/events/event.cpp
 
-             src/gameobjects/game.cpp
              src/gameobjects/input/keyboard_directional_input_handler.cpp
+             src/gameobjects/game.cpp
 
+             src/graphics/layers/sprite_layer.cpp
+             src/graphics/renderers/sprite_batch.cpp
+             src/graphics/renderers/tilemap_batch.cpp
              src/graphics/animation.cpp
              src/graphics/blend.cpp
              src/graphics/color.cpp
@@ -114,9 +118,6 @@ add_library (RDGE SHARED
              src/graphics/tex_coords.cpp
              src/graphics/text.cpp
              src/graphics/texture.cpp
-             src/graphics/layers/sprite_layer.cpp
-             src/graphics/renderers/sprite_batch.cpp
-             src/graphics/renderers/tilemap_batch.cpp
 
              #src/controls/control.cpp --> src/graphics/ui/widget.cpp
              #src/controls/button.cpp  --> src/graphics/ui/button.cpp
@@ -128,6 +129,10 @@ add_library (RDGE SHARED
              src/math/vec3.cpp
              src/math/vec4.cpp
 
+             src/physics/joints/revolute_joint.cpp
+             src/physics/shapes/ishape.cpp
+             src/physics/shapes/circle.cpp
+             src/physics/shapes/polygon.cpp
              src/physics/aabb.cpp
              src/physics/bvh.cpp
              src/physics/collision.cpp
@@ -136,21 +141,17 @@ add_library (RDGE SHARED
              src/physics/fixture.cpp
              src/physics/rigid_body.cpp
              src/physics/solver.cpp
-             src/physics/joints/revolute_joint.cpp
-             src/physics/shapes/ishape.cpp
-             src/physics/shapes/circle.cpp
-             src/physics/shapes/polygon.cpp
 
              src/system/keyboard.cpp
              src/system/mouse.cpp
              src/system/window.cpp
 
-             src/util/exception.cpp
-             src/util/logger.cpp
-             src/util/timer.cpp
              src/util/io/rwops_base.cpp
              src/util/memory/alloc.cpp
-             src/util/memory/small_block_allocator.cpp)
+             src/util/memory/small_block_allocator.cpp
+             src/util/exception.cpp
+             src/util/logger.cpp
+             src/util/timer.cpp)
 
 target_link_libraries (RDGE
                        imgui
