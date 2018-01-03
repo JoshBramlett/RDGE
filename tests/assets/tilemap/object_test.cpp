@@ -259,14 +259,13 @@ TEST(ObjectTest, VerifyObjectProperties)
         "height":6,
         "id":1,
         "name":"aabb_name",
-        "properties":
-        {
-          "cust_prop_int":5
-        },
-        "propertytypes":
-        {
-          "cust_prop_int":"int"
-        },
+        "properties": [
+          {
+            "type":"int",
+            "name":"cust_prop_int",
+            "value":5
+          }
+        ],
         "rotation":0,
         "type":"aabb_type",
         "visible":true,

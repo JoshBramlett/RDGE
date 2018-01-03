@@ -38,14 +38,32 @@ TEST(PropertyTest, VerifyConstruction)
 
 TEST(PropertyTest, VerifyEmptyConstruction)
 {
-    json j = json::object();
+    json j = json::array();
     tilemap::PropertyCollection properties(j);
     EXPECT_EQ(properties.Size(), 0);
 }
 
+TEST(PropertyTest, HandleInvalidConstruction)
+{
+    auto j = R"(
+      {
+        "properties": [
+          {
+            "type":"int",
+            "name":"cust_prop_int",
+            "value":5
+          }
+        ]
+      }
+    )"_json;
+
+    EXPECT_THROW(tilemap::PropertyCollection { j }, std::runtime_error);
+    EXPECT_THROW(tilemap::PropertyCollection { json::object() }, std::runtime_error);
+}
+
 TEST(PropertyTest, HandleInvalidKey)
 {
-    json j = json::object();
+    json j = json::array();
     tilemap::PropertyCollection properties(j);
     EXPECT_EQ(properties.Size(), 0);
     EXPECT_THROW(properties.GetString("bad"), std::runtime_error);
@@ -55,18 +73,17 @@ TEST(PropertyTest, HandleTypeMismatch)
 {
     auto j = R"(
       {
-        "properties":
-        {
-          "cust_prop_int":5
-        },
-        "propertytypes":
-        {
-          "cust_prop_int":"int"
-        }
+        "properties": [
+          {
+            "type":"int",
+            "name":"cust_prop_int",
+            "value":5
+          }
+        ]
       }
     )"_json;
 
-    tilemap::PropertyCollection properties(j);
+    tilemap::PropertyCollection properties(j["properties"]);
     EXPECT_EQ(properties.Size(), 1);
     EXPECT_EQ(properties.GetInt("cust_prop_int"), 5);
     EXPECT_THROW(properties.GetString("cust_prop_int"), std::runtime_error);

@@ -54,16 +54,13 @@ def translate_properties(parent):
                 raise Exception('Property/PropertyType mismatch')
             parent['properties'].append({ 'name': key, 'value': value, 'type': types[key] })
 
-def rotate_point(c, angle, p):
+def rotate_point(p, angle):
     sin = math.sin(math.radians(angle))
     cos = math.cos(math.radians(angle))
-
-    cx = float(c['x'])
-    cy = float(c['y'])
     px = float(p['x'])
     py = float(p['y'])
-    return { 'x': cos * (px - cx) - sin * (py - cy) + cx,
-             'y': sin * (px - cx) + cos * (py - cy) + cy }
+
+    return { 'x': cos * px - sin * py, 'y': sin * px + cos * py }
 
 # Translates Tiled objects to a clear universal format, removes all unused values,
 # and throws for any unsupported configurations
@@ -75,7 +72,7 @@ def translate_object(obj):
         if obj['width'] != obj['height']:
             raise Exception('width/height mismatch: ellipse only supports circles')
 
-        obj['obj_type'] = 'ellipse'
+        obj['obj_type'] = 'circle'
         obj['radius'] = obj['width']
 
         obj.pop('ellipse')
@@ -90,14 +87,10 @@ def translate_object(obj):
         obj['obj_type'] = 'polygon'
         obj['coords'] = []
         for coord in obj['polygon']:
-            coord['x'] += obj['x']
-            coord['y'] += obj['y']
-            obj['coords'].append(rotate_point(obj, obj['rotation'], coord))
+            obj['coords'].append(rotate_point(coord, obj['rotation']))
 
         obj.pop('polygon')
         obj.pop('rotation')
-        obj.pop('x')
-        obj.pop('y')
         obj.pop('width')
         obj.pop('height')
 
@@ -117,18 +110,16 @@ def translate_object(obj):
 
     else: # rectangle
         obj['obj_type'] = 'polygon'
-        p1 = { 'x': obj['x'], 'y': obj['y'] }
-        p2 = { 'x': obj['x'] + obj['width'], 'y': obj['y'] }
-        p3 = { 'x': obj['x'], 'y': obj['y'] + obj['height'] }
-        p4 = { 'x': obj['x'] + obj['width'], 'y': obj['y'] + obj['height'] }
-        obj['coords'] = [ rotate_point(obj, obj['rotation'], p1),
-                          rotate_point(obj, obj['rotation'], p2),
-                          rotate_point(obj, obj['rotation'], p3),
-                          rotate_point(obj, obj['rotation'], p4) ]
+        p1 = { 'x': 0, 'y': 0 }
+        p2 = { 'x': obj['width'], 'y': 0 }
+        p3 = { 'x': 0, 'y': obj['height'] }
+        p4 = { 'x': obj['width'], 'y': obj['height'] }
+        obj['coords'] = [ rotate_point(p1, obj['rotation']),
+                          rotate_point(p2, obj['rotation']),
+                          rotate_point(p3, obj['rotation']),
+                          rotate_point(p4, obj['rotation']) ]
 
         obj.pop('rotation')
-        obj.pop('x')
-        obj.pop('y')
         obj.pop('width')
         obj.pop('height')
 

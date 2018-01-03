@@ -8,7 +8,6 @@
 #include <rdge/core.hpp>
 #include <rdge/assets/tilemap/property.hpp>
 #include <rdge/math/vec2.hpp>
-#include <rdge/physics/aabb.hpp>
 #include <rdge/physics/shapes/circle.hpp>
 #include <rdge/physics/shapes/polygon.hpp>
 
@@ -30,7 +29,6 @@ enum class ObjectType
     INVALID = -1,
     SPRITE,
     POINT,
-    AABB,
     CIRCLE,
     POLYGON,
     POLYLINE,
@@ -39,6 +37,69 @@ enum class ObjectType
 
 //! \class Object
 //! \brief Generic tilemap object
+//! \details A tilemap object can be of any supported \ref ObjectType, generally
+//!          representing sprites or collision shapes.  All types share certain
+//!          properties, but each type has a distinct proprietary json format:
+//!
+//! - Properties common to all objects
+//! \code{.json}
+//! {
+//!   "id": 36,
+//!   "name": "my_name",
+//!   "type": "my_type",
+//!   "x": 952.894,
+//!   "y": 648.108,
+//!   "visible": true,
+//!   "properties": [ ... ]
+//! }
+//! \endcode
+//!
+//! - \ref ObjectType::SPRITE
+//! \code{.json}
+//! {
+//!   "obj_type": "sprite",
+//!   "gid": 5,
+//!   "width": 32,
+//!   "height": 32,
+//!   "rotation": 0.0
+//! }
+//! \endcode
+//!
+//! - \ref ObjectType::POINT
+//! \code{.json}
+//! {
+//!   "obj_type": "point"
+//! }
+//! \endcode
+//!
+//! - \ref ObjectType::CIRCLE
+//! \code{.json}
+//! {
+//!   "obj_type": "circle",
+//!   "radius": 15.5
+//! }
+//! \endcode
+//!
+//! - \ref ObjectType::POLYGON
+//! \code{.json}
+//! {
+//!   "obj_type": "polygon",
+//!   "coords": [
+//!     {
+//!       "x": 0.0,
+//!       "y": 0.0
+//!     },
+//!     ...
+//!   ]
+//! }
+//! \endcode
+//!
+//! - \ref ObjectType::POLYLINE
+//!   - Currently unsupported
+//!
+//! - \ref ObjectType::TEXT
+//!   - Currently unsupported
+//!
 class Object
 {
 public:
@@ -61,7 +122,6 @@ public:
 
     //!@{ Base type accessors
     math::vec2 GetPoint (void) const;
-    physics::aabb GetAABB (void) const;
     physics::circle GetCircle (void) const;
     physics::polygon GetPolygon (void) const;
     //!@}
@@ -77,20 +137,26 @@ public:
 
     //!@{ Rendering/physics properties
     math::vec2 position; //!< Position relative to parent
-    float      rotation; //!< Angle in degrees clockwise
     bool       visible;  //!< Object is shown in editor
     //!@}
 
     PropertyCollection properties; //!< Custom variable type property collection
 
 private:
-    int32      m_gid = 0;
-    math::vec2 m_size;
+    //!@{ Sprite properties
+    int32      m_gid = 0;        //!< Tilemap texture region Id
+    math::vec2 m_size;           //!< Sprite size
+    float      m_rotation = 0.f; //!< Angle in degrees clockwise
+    //!@}
 
+    //!@{ Polygon properties
+    float m_radius = 0.f;
+    //!@}
+
+    //!@{ Polygon properties
     physics::polygon::PolygonData m_vertices;
     size_t                        m_numVerts = 0;
-
-    // TODO text support
+    //!@}
 };
 
 //! \brief ObjectType stream output operator
@@ -98,7 +164,9 @@ std::ostream& operator<< (std::ostream&, ObjectType);
 
 } // namespace tilemap
 
-//! \brief ObjectType string conversion
+//!@{ ObjectType string conversions
+bool try_parse (const std::string&, tilemap::ObjectType&);
 std::string to_string (tilemap::ObjectType);
+//!@}
 
 } // namespace rdge

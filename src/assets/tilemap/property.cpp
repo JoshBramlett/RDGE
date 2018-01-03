@@ -8,73 +8,52 @@ using json = nlohmann::json;
 
 PropertyCollection::PropertyCollection (const nlohmann::json& j)
 {
-    // Tiled format
-    //
-    //"properties":
-    //{
-     //"cust_prop_bool":true,
-     //"cust_prop_color":"#ffec9cc6",
-     //"cust_prop_file":"overworld_obj.json",
-     //"cust_prop_float":3.14,
-     //"cust_prop_int":5,
-     //"cust_prop_string":"asdf"
-    //},
-    //"propertytypes":
-    //{
-     //"cust_prop_bool":"bool",
-     //"cust_prop_color":"color",
-     //"cust_prop_file":"file",
-     //"cust_prop_float":"float",
-     //"cust_prop_int":"int",
-     //"cust_prop_string":"string"
-    //},
-
     try
     {
-        JSON_VALIDATE_OPTIONAL(j, properties, is_object);
-        JSON_VALIDATE_OPTIONAL(j, propertytypes, is_object);
-
-        if (j.find("properties") != j.end())
+        m_properties.reserve(j.size());
+        for (const auto& j_prop : j)
         {
-            const auto& o = j["properties"];
-            for (auto it = o.begin(); it != o.end(); ++it)
+            JSON_VALIDATE_REQUIRED(j_prop, name, is_string);
+            JSON_VALIDATE_REQUIRED(j_prop, type, is_string);
+
+            property p;
+            p.name = j_prop["name"].get<std::string>();
+            p.type = property_type_invalid;
+
+            auto t = j_prop["type"].get<std::string>();
+            if      (t == "bool")   { p.type = property_type_bool; }
+            else if (t == "color")  { p.type = property_type_color; }
+            else if (t == "file")   { p.type = property_type_file; }
+            else if (t == "float")  { p.type = property_type_float; }
+            else if (t == "int")    { p.type = property_type_int; }
+            else if (t == "string") { p.type = property_type_string; }
+
+            switch (p.type)
             {
-                property p;
-                p.name = it.key();
-                p.type = property_type_invalid;
-
-                auto t = j["propertytypes"][p.name].get<std::string>();
-                if      (t == "bool")   { p.type = property_type_bool; }
-                else if (t == "color")  { p.type = property_type_color; }
-                else if (t == "file")   { p.type = property_type_file; }
-                else if (t == "float")  { p.type = property_type_float; }
-                else if (t == "int")    { p.type = property_type_int; }
-                else if (t == "string") { p.type = property_type_string; }
-
-                switch (p.type)
-                {
-                case property_type_bool:
-                    p.i = static_cast<int32>(it.value().get<bool>());
-                    break;
-                case property_type_float:
-                    p.f = it.value().get<float>();
-                    break;
-                case property_type_int:
-                    p.i = it.value().get<int32>();
-                    break;
-                case property_type_color:
-                case property_type_file:
-                case property_type_string:
-                    p.s = it.value().get<std::string>();
-                    break;
-                case property_type_invalid:
-                default:
-                    throw std::invalid_argument("PropertyCollection invalid type. key=" +
-                                                p.name);
-                }
-
-                m_properties.push_back(p);
+            case property_type_bool:
+                JSON_VALIDATE_REQUIRED(j_prop, value, is_boolean);
+                p.i = static_cast<int32>(j_prop["value"].get<bool>());
+                break;
+            case property_type_float:
+                JSON_VALIDATE_REQUIRED(j_prop, value, is_number_float);
+                p.f = j_prop["value"].get<float>();
+                break;
+            case property_type_int:
+                JSON_VALIDATE_REQUIRED(j_prop, value, is_number);
+                p.i = j_prop["value"].get<int32>();
+                break;
+            case property_type_color:
+            case property_type_file:
+            case property_type_string:
+                JSON_VALIDATE_REQUIRED(j_prop, value, is_string);
+                p.s = j_prop["value"].get<std::string>();
+                break;
+            case property_type_invalid:
+            default:
+                throw std::invalid_argument("PropertyCollection invalid type. key=" + p.name);
             }
+
+            m_properties.push_back(p);
         }
     }
     catch (const std::exception& ex)

@@ -1,20 +1,29 @@
 {
-  "properties":
-  {
-    "cust_prop_bool":true,
-    "cust_prop_color":"#ffec9cc6",
-    "cust_prop_file":"../tests/testdata/assets/tilemap/property_01.json",
-    "cust_prop_float":3.14,
-    "cust_prop_int":5,
-    "cust_prop_string":"asdf"
-  },
-  "propertytypes":
-  {
-    "cust_prop_bool":"bool",
-    "cust_prop_color":"color",
-    "cust_prop_file":"file",
-    "cust_prop_float":"float",
-    "cust_prop_int":"int",
-    "cust_prop_string":"string"
-  }
+  "properties": [
+    {
+      "type":"bool",
+      "name":"cust_prop_bool",
+      "value":true
+    },
+    {
+      "type":"color",
+      "name":"cust_prop_color",
+      "value":"#ffec9cc6"
+    },
+    {
+      "type":"file",
+      "name":"cust_prop_file",
+      "value":"../tests/testdata/assets/tilemap/property_01.json"
+    },
+    {
+      "type":"float",
+      "name":"cust_prop_float",
+      "value":3.14
+    },
+    {
+      "type":"string",
+      "name":"cust_prop_string",
+      "value":"asdf"
+    }
+  ]
 }

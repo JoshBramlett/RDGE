@@ -22,6 +22,20 @@ namespace tilemap {
 
 //! \class PropertyCollection
 //! \brief Container for name lookups of variant types
+//! \details The tilemap and other related objects may contain a list of custom
+//!          properties for further customization.  The proprietary json format
+//!          collection is as follows:
+//! \code{.json}
+//! {
+//!   ...
+//!   "properties": [ {
+//!     "type": "string",
+//!     "name": "my_string",
+//!     "value": "some_value"
+//!   } ],
+//!   ...
+//! }
+//! \endcode
 class PropertyCollection
 {
 public:
