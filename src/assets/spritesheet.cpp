@@ -26,6 +26,22 @@ struct region_data
 {
     std::string  name;
     spritesheet_region value;
+
+    struct collision_fixture_data
+    {
+    SmallBlockAllocator block_allocator;    //!< Allocator for all simulation
+        shape.local = allocator.New<circle>(*static_cast<const circle*>(profile.shape));
+        physics::ShapeType shape;
+
+        std::string name;
+        std::string type;
+
+        math::vec2 pos;
+        float rotation;
+
+        PolygonData vertices;
+        float radius;
+    };
 };
 
 struct animation_data
@@ -70,12 +86,9 @@ constexpr float normalize (uint64 point, uint64 dimension)
 parsed_region_data
 ParseRegion (const json& j)
 {
-    JSON_VALIDATE_REQUIRED(j, name, is_string);
-    JSON_VALIDATE_REQUIRED(j, x, is_number_unsigned);
-    JSON_VALIDATE_REQUIRED(j, y, is_number_unsigned);
-    JSON_VALIDATE_REQUIRED(j, width, is_number_unsigned);
-    JSON_VALIDATE_REQUIRED(j, height, is_number_unsigned);
-    JSON_VALIDATE_OPTIONAL(j, origin, is_array);
+
+
+
 
     parsed_region_data result;
     result.name = j["name"].get<std::string>();
@@ -160,49 +173,90 @@ ParseAnimation (const json& j)
 void
 ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
 {
-    JSON_VALIDATE_REQUIRED(j, regions, is_array);
+    JSON_VALIDATE_REQUIRED(j, frames, is_array);
     JSON_VALIDATE_OPTIONAL(j, animations, is_array);
-    JSON_VALIDATE_OPTIONAL(j, margin, is_number_unsigned);
 
-    uint32 margin = (j.count("margin") > 0) ? j["margin"].get<uint32>() : 0;
-
-    sheet.region_count = j["regions"].size();
+    const auto& j_regions = j["frames"];
+    sheet.region_count = j_regions.size();
     RDGE_CALLOC(sheet.regions, sheet.region_count, nullptr);
 
     auto surface_size = sheet.surface.Size();
-    const auto& j_regions = j["regions"];
     for (size_t i = 0; i < sheet.region_count; i++)
     {
-        auto parsed = ParseRegion(j_regions[i]);
+        JSON_VALIDATE_REQUIRED(j_regions, filename, is_string);
+        JSON_VALIDATE_REQUIRED(j_regions, rotated, is_boolean);
+        JSON_VALIDATE_REQUIRED(j_regions, trimmed, is_boolean);
+        JSON_VALIDATE_REQUIRED(j_regions, frame, is_object);
+        JSON_VALIDATE_REQUIRED(j_regions, pivot, is_object);
+        JSON_VALIDATE_REQUIRED(j_regions, sourceSize, is_object);
+        JSON_VALIDATE_REQUIRED(j_regions, spriteSourceSize, is_object);
+
+        // objectsheet only
+        JSON_VALIDATE_OPTIONAL(j_regions, index, is_number_unsigned);
+        JSON_VALIDATE_OPTIONAL(j_regions, objects, is_array);
+
+        // override index if provided through the config
+        size_t index = (j_regions.count("index")) ? j_regions["index"].get<size_t>() : i;
+        auto& region = sheet.regions[index];
+        region.name = j_regions["filename"].get<std::string>();
+        region.value.is_rotated = j_regions["rotated"].get<bool>();
+
+        const auto& j_frame = j_regions["frame"];
+        JSON_VALIDATE_REQUIRED(j_frame, x, is_number_unsigned);
+        JSON_VALIDATE_REQUIRED(j_frame, y, is_number_unsigned);
+        JSON_VALIDATE_REQUIRED(j_frame, w, is_number_unsigned);
+        JSON_VALIDATE_REQUIRED(j_frame, h, is_number_unsigned);
+        region.value.clip = { j_frame["x"].get<int32>(),
+                              j_frame["y"].get<int32>(),
+                              j_frame["w"].get<int32>(),
+                              j_frame["h"].get<int32>() };
 
         // Validate values are within range
-        if ((parsed.x + parsed.width > surface_size.w) ||
-            (parsed.y + parsed.height > surface_size.h))
+        if ((region.value.clip.x + region.value.clip.w > surface_size.w) ||
+            (region.value.clip.y + region.value.clip.h > surface_size.h))
         {
-            std::string msg("region \"" + parsed.name + "\" outside valid range");
+            std::string msg("region \"" + region.name + "\" outside valid range");
             throw std::invalid_argument(msg);
         }
 
-        uint32 offset_x = margin + parsed.x;
-        uint32 offset_y = margin + parsed.y;
-
-        auto& region = sheet.regions[i];
-        region.name = parsed.name;
-        region.value.clip = { static_cast<int32>(offset_x),
-                              static_cast<int32>(offset_y),
-                              static_cast<int32>(parsed.width),
-                              static_cast<int32>(parsed.height) };
-        region.value.size = vec2(parsed.width, parsed.height);
-        region.value.origin = parsed.origin;
-
-        float x1 = normalize(offset_x, surface_size.w);
-        float x2 = normalize(offset_x + parsed.width, surface_size.w);
-        float y1 = normalize(offset_y, surface_size.h);
-        float y2 = normalize(offset_y + parsed.height, surface_size.h);
+        float x1 = normalize(region.value.clip.x, surface_size.w);
+        float x2 = normalize(region.value.clip.x + region.value.clip.w, surface_size.w);
+        float y1 = normalize(region.value.clip.y, surface_size.h);
+        float y2 = normalize(region.value.clip.y + region.value.clip.h, surface_size.h);
         region.value.coords.bottom_left  = vec2(x1, y1);
         region.value.coords.bottom_right = vec2(x2, y1);
         region.value.coords.top_left     = vec2(x1, y2);
         region.value.coords.top_right    = vec2(x2, y2);
+
+        if (region.value.is_rotated)
+        {
+            // rotation must be done prior to the size/pivot being set, as the
+            // values from the TexturePacker export are not updated post rotation
+            region.value.rotate(TexCoordsRotation::ROTATE_270);
+        }
+
+        const auto& j_size = j_regions["sourceSize"];
+        JSON_VALIDATE_REQUIRED(j_size, w, is_number_unsigned);
+        JSON_VALIDATE_REQUIRED(j_size, h, is_number_unsigned);
+        region.value.size.w = j_size["w"].get<float>();
+        region.value.size.h = j_size["h"].get<float>();
+
+        // convert pivot to pixels and y-is-up
+        const auto& j_pivot = j_regions["pivot"];
+        JSON_VALIDATE_REQUIRED(j_pivot, x, is_number_float);
+        JSON_VALIDATE_REQUIRED(j_pivot, y, is_number_float);
+        region.value.origin.x = region.value.size.w * j_pivot["x"].get<float>();
+        region.value.origin.y = region.value.size.h * (1.f - j_pivot["y"].get<float>());
+
+        if (j_regions.count("objects"))
+        {
+            for (const auto& j_obj : j_regions["objects"])
+            {
+                JSON_VALIDATE_REQUIRED(j_obj, shape, is_string);
+
+            }
+        shape.local = allocator.New<circle>(*static_cast<const circle*>(profile.shape));
+        }
     }
 
     sheet.animation_count = (j.count("animations") > 0) ? j["animations"].size() : 0;
@@ -486,7 +540,10 @@ SpriteSheet::SpriteSheet (const std::vector<uint8>& msgpack, Surface surface)
     try
     {
         json j = json::from_msgpack(msgpack);
-        JSON_VALIDATE_REQUIRED(j, type, is_string);
+        JSON_VALIDATE_REQUIRED(j, meta, is_object);
+
+        const auto& meta = j["meta"];
+
 
         auto sheet_type = j["type"].get<std::string>();
         if (sheet_type == "spritesheet")

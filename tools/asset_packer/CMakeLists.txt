@@ -12,6 +12,10 @@ link_directories (${RDGE_BINARY_DIR}/lib)
 include_directories (${RDGE_INCLUDE_DIR})
 
 add_executable (asset_packer
+                src/import_images.cpp
+                src/import_spritesheets.cpp
+                src/import_tilemaps.cpp
+                src/import_tilesets.cpp
                 src/main.cpp)
 
 target_link_libraries (asset_packer

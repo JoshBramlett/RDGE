@@ -40,8 +40,10 @@ class Texture;
 //! \brief vec3 stream output operator
 std::ostream& operator<< (std::ostream&, const vec3&);
 
-//! \brief vec3 string conversion
+//!@{ vec3 string conversions
 std::string to_string (const math::vec3&);
+bool try_parse (const std::string&, math::vec3&);
+//!@}
 
 
 

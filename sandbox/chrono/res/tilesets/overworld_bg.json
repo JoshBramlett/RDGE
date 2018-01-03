@@ -1,0 +1,12 @@
+{ "columns":20,
+ "image":"overworld_bg.png",
+ "imageheight":354,
+ "imagewidth":322,
+ "margin":1,
+ "name":"overworld_bg",
+ "spacing":0,
+ "tilecount":440,
+ "tileheight":16,
+ "tilewidth":16,
+ "type":"tileset"
+}

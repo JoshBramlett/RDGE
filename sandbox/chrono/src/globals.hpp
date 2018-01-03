@@ -18,6 +18,8 @@ enum chrono_collision_category
 
     chrono_collision_category_environment_static        = 0x0100,
     chrono_collision_category_environment_triggers      = 0x0200,
+
+    chrono_collision_category_all                       = 0xFFFF
 };
 
 struct chrono_globals

@@ -86,8 +86,12 @@ target_link_libraries (imgui
 add_library (RDGE SHARED
              src/application.cpp
 
+             src/assets/file_formats/asset_pack.cpp
              src/assets/file_formats/tiled.cpp
-             src/assets/asset_pack.cpp
+             src/assets/tilemap/layer.cpp
+             src/assets/tilemap/object.cpp
+             src/assets/tilemap/property.cpp
+             src/assets/pack_file.cpp
              src/assets/bmfont.cpp
              src/assets/bitmap_font.cpp
              src/assets/font.cpp
@@ -171,6 +175,9 @@ add_subdirectory (tutorials/04_scenes)
 
 add_executable (rdge_test
                 tests/main.cpp
+                tests/assets/tilemap/layer_test.cpp
+                tests/assets/tilemap/object_test.cpp
+                tests/assets/tilemap/property_test.cpp
                 tests/assets/bmfont_test.cpp
                 tests/assets/spritesheet_test.cpp
                 tests/graphics/color_test.cpp

@@ -1,0 +1,22 @@
+{
+  "cooker": {
+    "animations": [
+      "animations/animals.tps",
+      "animations/player.tps"
+    ],
+    "objectsheets": [
+      "objects/overworld/overworld_obj.json"
+    ],
+    "tilemaps": [
+      "tilemaps/overworld.tmx"
+    ],
+    "tilesets": [
+      "tilesets/overworld_bg.json"
+    ],
+    "export_dir": "/Users/jbramlett/Documents/Projects/RDGE/debug/sandbox/chrono/res/export/"
+  },
+  "packer": {
+    "data_file": "/Users/jbramlett/Documents/Projects/RDGE/debug/sandbox/chrono/res/assets.pack",
+    "header_file": "/Users/jbramlett/Documents/Projects/RDGE/sandbox/chrono/src/asset_table.hpp"
+  }
+}

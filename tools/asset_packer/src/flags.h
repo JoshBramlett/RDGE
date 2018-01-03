@@ -15,6 +15,8 @@ namespace detail {
 using argument_map =
     std::unordered_map<std::string_view, std::experimental::optional<std::string_view>>;
 
+// https://github.com/sailormoon/flags
+
 // Non-destructively parses the argv tokens.
 // * If the token begins with a -, it will be considered an option.
 // * If the token does not begin with a -, it will be considered a value for the

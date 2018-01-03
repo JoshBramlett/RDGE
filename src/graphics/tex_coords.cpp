@@ -4,6 +4,12 @@
 
 namespace rdge {
 
+const tex_coords tex_coords::DEFAULT = { { 0.f, 1.f },
+                                         { 0.f, 0.f },
+                                         { 1.f, 0.f },
+                                         { 1.f, 1.f } };
+const tex_coords tex_coords::EMPTY = { };
+
 math::vec2&
 tex_coords::operator[] (uint32 index) noexcept
 {
@@ -16,6 +22,18 @@ tex_coords::operator[] (uint32 index) const noexcept
 {
     SDL_assert(index < 4);
     return (&this->top_left)[index];
+}
+
+bool
+tex_coords::is_default (void) const noexcept
+{
+    return *this == tex_coords::DEFAULT;
+}
+
+bool
+tex_coords::is_empty (void) const noexcept
+{
+    return *this == tex_coords::EMPTY;
 }
 
 void

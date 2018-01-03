@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templategroup name="overworld_obj" nexttemplateid="1">
+ <tileset firstgid="1" source="../objects/overworld/overworld_obj.json"/>
+ <template name="tree" id="0">
+  <object name="tree" gid="1" width="80" height="96"/>
+ </template>
+</templategroup>

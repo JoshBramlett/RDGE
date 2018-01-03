@@ -11,6 +11,7 @@
 #include <rdge/graphics/tex_coords.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/math/vec3.hpp>
+#include <rdge/util/memory/small_block_allocator.hpp>
 
 #include <memory>
 #include <vector>
@@ -71,6 +72,27 @@ struct tilemap_data
     size_t tile_count = 0; //!< Number of tiles per layer
     size_t tile_pitch = 0; //!< Number of tiles in a row
     math::vec2 tile_size;  //!< Tile dimensions
+};
+
+//! \struct region_data
+//! \brief Expanded read-only \ref spritesheet_region container
+//! \details Provides further details about the imported region
+struct region_data
+{
+    std::string        name;  //!< Name as specified by import
+    spritesheet_region value; //!< Core region data, including size, uv coords, etc.
+
+    //! \struct collision_fixture_data
+    //! \brief Sprite collision data
+    //! \note Only available with object sheets
+    struct collision_fixture_data
+    {
+        std::string name;       //!< Name as specified by import
+        std::string type;       //!< User defined type specified by import
+        physics::ishape* shape; //!< Fixture shape
+    };
+
+    std::vector<collision_fixture_data> fixtures; //!< Collection of fixture shapes
 };
 
 //! \class SpriteSheet
@@ -181,6 +203,43 @@ public:
     //! \throws rdge::Exception Lookup failed
     const spritesheet_region& operator[] (const std::string& name) const;
 
+    //{
+      //"index": 0,
+      //"frame": {
+        //"y": 2,
+        //"x": 2,
+        //"w": 75,
+        //"h": 94
+      //},
+      //"rotated": false,
+      //"filename": "tree_01",
+      //"trimmed": true,
+      //"objects": [
+        //{
+          //"shape": "ellipse",
+          //"radius": 22.5177380294855,
+          //"y": 70.9521179419637,
+          //"x": 29.3155457365,
+          //"rotation": 0,
+          //"type": "environment_static"
+        //}
+      //],
+      //"pivot": {
+        //"y": 0.5,
+        //"x": 0.5
+      //},
+      //"sourceSize": {
+        //"h": 96,
+        //"w": 80
+      //},
+      //"spriteSourceSize": {
+        //"y": 2,
+        //"x": 2,
+        //"w": 75,
+        //"h": 94
+      //}
+    //}
+
     //!@{
     //! \brief Retrive an \ref Animation
     //! \throws rdge::Exception Lookup failed
@@ -223,6 +282,9 @@ public:
     //!@{ Tilemap container
     tilemap_data tilemap;
     //!@}
+
+private:
+    SmallBlockAllocator m_sballoc; //!< Allocator for import
 };
 
 } // namespace rdge

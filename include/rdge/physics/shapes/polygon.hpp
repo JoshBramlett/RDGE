@@ -70,7 +70,7 @@ struct polygon : public ishape
     //! \param [in] he_x x-axis half extent
     //! \param [in] he_y y-axis half extent
     //! \param [in] center Centroid position
-    //! \param [in] angle Rotation angle (in radians)
+    //! \param [in] angle Rotation angle (radians)
     explicit polygon (float he_x, float he_y, const math::vec2& center, float angle = 0.f);
 
     //!@{
@@ -88,12 +88,24 @@ struct polygon : public ishape
     math::vec2 get_centroid (void) const override { return centroid; }
     //!@}
 
+    //! \brief Rotate the polygon
+    //! \param [in] angle Rotation angle (radians)
+    void rotate (float angle)
+    {
+        iso_transform xf(centroid, angle);
+        for (size_t i = 0; i < count; i++)
+        {
+            vertices[i] = xf.to_world(vertices[i]);
+            normals[i] = xf.rot.rotate(normals[i]);
+        }
+    }
+
     //! \brief Converts the polygon to world space
     //! \param [in] xf Transform
     void to_world (const iso_transform& xf) override
     {
         centroid = xf.to_world(centroid);
-        for (size_t i = 0; i < count; ++i)
+        for (size_t i = 0; i < count; i++)
         {
             vertices[i] = xf.to_world(vertices[i]);
             normals[i] = xf.rot.rotate(normals[i]);

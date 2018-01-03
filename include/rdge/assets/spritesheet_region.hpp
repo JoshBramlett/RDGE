@@ -41,6 +41,8 @@ struct spritesheet_region
     //! \note Defaults to the centroid.
     math::vec2 origin;
 
+    bool is_rotated; //!< Whether the TexturePacker rotated the region 90 clockwise
+
     //!@{ Basic spritesheet_region transforms
     void flip (TexCoordsFlip) noexcept;
     void rotate (TexCoordsRotation) noexcept;

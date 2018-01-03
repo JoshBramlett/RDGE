@@ -1,5 +1,6 @@
 #include <rdge/assets/surface.hpp>
 #include <rdge/math/intrinsics.hpp>
+#include <rdge/system/types.hpp>
 #include <rdge/util/logger.hpp>
 #include <rdge/type_traits.hpp>
 #include <rdge/internal/exception_macros.hpp>
@@ -151,7 +152,8 @@ Surface::Surface (const std::string& filepath, PixelDepth depth)
     m_surface->userdata = pixel_data;
 }
 
-Surface::Surface (void* pixel_data, int32 w, int32 h, int32 channels)
+Surface::Surface (void* pixel_data, int32 w, int32 h, int32 channels, int32 asset_id)
+    : m_assetId(asset_id)
 {
     PixelDepth depth = PixelDepth::UNKNOWN;
     if (channels == STBI_rgb)
@@ -242,27 +244,30 @@ Surface::operator= (Surface&& rhs) noexcept
     return *this;
 }
 
-uint32
+bool
+Surface::IsEmpty (void) const noexcept
+{
+    return (m_surface == nullptr);
+}
+
+size_t
 Surface::Width (void) const noexcept
 {
     SDL_assert(m_surface != nullptr);
-
-    return static_cast<uint32>(m_surface->w);
+    return static_cast<size_t>(m_surface->w);
 }
 
-uint32
+size_t
 Surface::Height (void) const noexcept
 {
     SDL_assert(m_surface != nullptr);
-
-    return static_cast<uint32>(m_surface->h);
+    return static_cast<size_t>(m_surface->h);
 }
 
 math::uivec2
 Surface::Size (void) const noexcept
 {
     SDL_assert(m_surface != nullptr);
-
     return { static_cast<uint32>(m_surface->w), static_cast<uint32>(m_surface->h) };
 }
 
@@ -270,7 +275,6 @@ uint32
 Surface::PixelFormat (void) const noexcept
 {
     SDL_assert(m_surface != nullptr);
-
     return m_surface->format->format;
 }
 

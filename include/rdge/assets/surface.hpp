@@ -7,12 +7,15 @@
 
 #include <rdge/core.hpp>
 #include <rdge/math/vec2.hpp>
-#include <rdge/system/types.hpp>
 
 #include <SDL_surface.h>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
+
+//!@{ Forward declarations
+struct screen_rect;
+//!@}
 
 //! \typedef SDLSurfaceUniquePtr
 //! \details Encosing unique_ptr type that includes the SDL custom deleter
@@ -62,12 +65,13 @@ public:
     //! \brief Surface ctor
     //! \details Create a Surface from preallocated pixel data.
     //! \param [in] pixel_data Pointer to raw pixel data
-    //! \param [in] width Image width
-    //! \param [in] height Image height
+    //! \param [in] w Image width
+    //! \param [in] h Image height
     //! \param [in] channels Number of color channels per pixel
+    //! \param [in] asset_id Pack file id
     //! \throws rdge::Exception Image initialization failed
     //! \throws rdge::SDLException SDL failed to create surface
-    Surface (void* pixel_data, int32 width, int32 height, int32 channels);
+    Surface (void* pixel_data, int32 w, int32 h, int32 channels, int32 asset_id);
 
     //! \brief Surface dtor
     ~Surface (void) noexcept;
@@ -90,8 +94,9 @@ public:
     //!@}
 
     //!@{ Basic Surface properties
-    uint32 Width (void) const noexcept;
-    uint32 Height (void) const noexcept;
+    bool IsEmpty (void) const noexcept;
+    size_t Width (void) const noexcept;
+    size_t Height (void) const noexcept;
     math::uivec2 Size (void) const noexcept;
     PixelDepth Depth (void) const noexcept;
     //!@}
@@ -118,6 +123,7 @@ public:
 
 private:
     SDL_Surface* m_surface = nullptr;
+    int32 m_assetId = -1;
 };
 
 //! \brief PixelDepth stream output operator

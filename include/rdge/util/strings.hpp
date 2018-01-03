@@ -65,6 +65,12 @@ ends_with (const std::string& source, const std::string& suffix)
     return source.rfind(suffix, static_cast<size_t>(pos)) == static_cast<size_t>(pos);
 }
 
+inline bool
+contains (const std::string& source, const std::string& test)
+{
+    return source.find(test) != std::string::npos;
+}
+
 inline void
 remove_all (std::string& source, char c)
 {
@@ -72,7 +78,7 @@ remove_all (std::string& source, char c)
 }
 
 inline std::string
-remove_path (const std::string& filepath)
+basename (const std::string& filepath)
 {
     auto pos = filepath.find_last_of("/\\");
     if (pos != std::string::npos)

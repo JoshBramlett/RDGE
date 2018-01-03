@@ -1,0 +1,20 @@
+{
+  "properties":
+  {
+    "cust_prop_bool":true,
+    "cust_prop_color":"#ffec9cc6",
+    "cust_prop_file":"../tests/testdata/assets/tilemap/property_01.json",
+    "cust_prop_float":3.14,
+    "cust_prop_int":5,
+    "cust_prop_string":"asdf"
+  },
+  "propertytypes":
+  {
+    "cust_prop_bool":"bool",
+    "cust_prop_color":"color",
+    "cust_prop_file":"file",
+    "cust_prop_float":"float",
+    "cust_prop_int":"int",
+    "cust_prop_string":"string"
+  }
+}
