@@ -95,6 +95,7 @@ add_library (RDGE SHARED
              src/assets/bmfont.cpp
              src/assets/bitmap_font.cpp
              src/assets/font.cpp
+             src/assets/tileset.cpp
              src/assets/spritesheet.cpp
              src/assets/spritesheet_region.cpp
              src/assets/surface.cpp

@@ -99,6 +99,7 @@ ImportTilesets (global_import_state& global_state)
                     }
 
                     import.info.tileset.surface_id = table_id;
+                    j["image_table_id"] = table_id;
                     std::vector<uint8> msgpack = json::to_msgpack(j);
 
                     free(text_data);

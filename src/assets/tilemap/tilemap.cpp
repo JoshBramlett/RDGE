@@ -121,7 +121,9 @@ to_string (tilemap::Orientation value)
 #undef CASE
     }
 
-    return "UNKNOWN";
+    std::ostringstream ss;
+    ss << "UNKNOWN[" << static_cast<uint32>(value) << "]";
+    return ss.str();
 }
 
 std::string
@@ -139,7 +141,9 @@ to_string (tilemap::RenderOrder value)
 #undef CASE
     }
 
-    return "UNKNOWN";
+    std::ostringstream ss;
+    ss << "UNKNOWN[" << static_cast<uint32>(value) << "]";
+    return ss.str();
 }
 
 bool

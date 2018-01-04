@@ -178,7 +178,9 @@ to_string (tilemap::ObjectType value)
 #undef CASE
     }
 
-    return "UNKNOWN";
+    std::ostringstream ss;
+    ss << "UNKNOWN[" << static_cast<uint32>(value) << "]";
+    return ss.str();
 }
 
 bool

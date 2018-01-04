@@ -114,6 +114,7 @@ ImportSpritesheets (global_import_state& global_state)
                     meta.erase("size");
 
                     import.info.spritesheet.surface_id = table_id;
+                    meta["image_table_id"] = table_id;
                     std::vector<uint8> msgpack = json::to_msgpack(j);
 
                     free(text_data);

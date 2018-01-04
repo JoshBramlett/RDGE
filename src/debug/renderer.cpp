@@ -690,6 +690,9 @@ DrawWireFrame (const ishape* shape, const color& c, float scale)
     case ShapeType::POLYGON:
         DrawWireFrame(*static_cast<const polygon*>(shape), c, scale);
         break;
+    case ShapeType::INVALID:
+    default:
+        break;
     }
 }
 

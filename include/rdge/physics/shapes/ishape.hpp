@@ -91,8 +91,8 @@ std::ostream& operator<< (std::ostream&, ShapeType);
 } // namespace physics
 
 //!@{ ShapeType string conversions
-std::string to_string (ShapeType);
-bool try_parse (const std::string&, ShapeType);
+std::string to_string (physics::ShapeType);
+bool try_parse (const std::string&, physics::ShapeType);
 //!@}
 
 } // namespace rdge

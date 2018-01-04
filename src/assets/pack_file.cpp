@@ -80,11 +80,8 @@ PackFile::GetSurface (int32 asset_id)
     m_file.seek(info.offset, rwops_base::seekdir::beg);
     m_file.read(pixel_data, info.size);
 
-    return Surface(pixel_data,
-                   info.surface.width,
-                   info.surface.height,
-                   info.surface.channels,
-                   asset_id);
+    auto& s_info = info.surface;
+    return Surface(pixel_data, s_info.width, s_info.height, s_info.channels);
 }
 
 SpriteSheet
@@ -93,24 +90,13 @@ PackFile::GetSpriteSheet (int32 asset_id)
     SDL_assert(asset_id >= 0 && (uint32)asset_id < m_header.asset_count);
 
     auto& info = m_table[asset_id];
+    SDL_assert(info.type == asset_type_spritesheet);
+
     std::vector<std::uint8_t> msgpack(info.size);
     m_file.seek(info.offset, rwops_base::seekdir::beg);
     m_file.read(msgpack.data(), info.size);
 
-    if (info.type == asset_type_spritesheet)
-    {
-        return SpriteSheet(msgpack, GetSurface(info.spritesheet.surface_id));
-    }
-    //else if (info.type == asset_type_tilemap)
-    //{
-        //return SpriteSheet(msgpack, GetSurface(info.tilemap.surface_id));
-    //}
-    else
-    {
-        SDL_assert(false);
-    }
-
-    return SpriteSheet();
+    return SpriteSheet(msgpack, *this);
 }
 
 } // namespace rdge

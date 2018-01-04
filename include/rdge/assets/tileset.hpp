@@ -11,129 +11,71 @@
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
-{ "columns":12,
- "image":"overworld.png",
- "imageheight":194,
- "imagewidth":194,
- "margin":1,
- "name":"overworld_tileset",
- "spacing":0,
- "tilecount":144,
- "tileheight":16,
- "tiles":
-    {
-     "82":
-        {
-         "objectgroup":
-            {
-             "draworder":"index",
-             "name":"",
-             "objects":[
-                    {
-                     "height":6,
-                     "id":1,
-                     "name":"",
-                     "rotation":0,
-                     "type":"",
-                     "visible":true,
-                     "width":5,
-                     "x":5,
-                     "y":5
-                    }],
-             "opacity":1,
-             "type":"objectgroup",
-             "visible":true,
-             "x":0,
-             "y":0
-            }
-        }
-    },
- "tilewidth":16,
- "type":"tileset"
-}
-
-{
-  "name":"overworld_tileset",
-  "type":"tileset",
-  "image":"overworld.png",
-  "margin":1,
-  "spacing":0,
-  "tilecount":144,
-  "columns":12,
-  "tileheight":16,
-  "tilewidth":16,
-  "tiledata": [
-    {
-      "index": 82,
-      "name": "name_in_enum",
-      "objects": [
-        {
-          "name": "",
-          "type": "polygon",
-          "usertype": "hitbox",
-          "rotation":0,
-          "verts": [
-            {
-              "x": 5,
-              "y": 5,
-            },
-            {
-              "x": 5,
-              "y": 5,
-            }
-          ]
-        },
-        {
-          "name": "",
-          "type": "circle",
-          "usertype": "hitbox",
-          "x": 5,
-          "y": 5,
-          "radius":0
-        }
-      ],
-      "properties": [
-        {
-          "name": "myprop",
-          "type": "float",
-          "value": 3.14
-        }
-      ]
-    }
-  ]
-}
-
+//! \class Tileset
+//! \brief Load tileset from a json config
+//! \details Tileset represents the breakdown of the pixel data into individual
+//!          tiles.  The tiles all have the same size, and unlike the regions
+//!          of a sprite sheet, have no internal data stored for each tile.
+//!          A \ref Tilemap will contain a map of Tileset indices for rendering
+//!          a scene.
+//!
+//!          The json proprietary format is an expansion on the Tiled
+//!          default format.
+//!
+//! \code{.json}
+//! {
+//!   "type": "tileset",
+//!   "name": "overworld_bg",
+//!   "tileheight": 16,
+//!   "tilewidth": 16,
+//!   "image": "../images/overworld_bg.png",
+//!   "spacing": 0,
+//!   "tilecount": 440,
+//!   "imageheight": 354,
+//!   "imagewidth": 322,
+//!   "margin": 1,
+//!   "columns": 20
+//! }
+//! \endcode
 class Tileset
 {
 public:
+    //! \brief Tileset ctor
+    //! \details Loads and parses the json file.
+    //! \param [in] filepath Path to the config file
+    //! \throws rdge::Exception Unable to parse config
+    explicit Tileset (const char* filepath);
+
+    //! \brief Tileset ctor
+    //! \details Loads and parses the packed json (used with \ref PackFile).
+    //! \param [in] msgpack Packed json configuration
+    //! \param [in] packfile \ref PackFile reference (to load dependencies)
+    //! \throws rdge::Exception Unable to parse config
+    //! \see http://msgpack.org/
+    explicit Tileset (const std::vector<uint8>& msgpack, PackFile& pack);
+
+    //!@{ Tileset default ctor/dtor
+    Tileset (void) = default;
+    ~Tileset (void) noexcept = default;
+    //!@}
+
+    //!@{ Non-copyable, move enabled
+    Tileset (const Tileset&) = delete;
+    Tileset& operator= (const Tileset&) = delete;
+    Tileset (Tileset&&) noexcept = default;
+    Tileset& operator= (Tileset&&) noexcept = default;
+    //!@}
 
 public:
-    struct tileset_tile
-    {
-        std::string name;
-        screen_rect clip;
-        tex_coords uv;
-        math::vec2 size;
-        math::vec2 origin;
-
-        std::vector<tilemap::Object> objects;
-        tilemap::PropertyCollection properties; //!< Custom variable type property collection
-    };
-
-    std::string name;
-    int32 asset_id;
-
     size_t rows = 0;
     size_t cols = 0;
     size_t spacing = 0;
     size_t margin = 0;
 
-    math::uivec2 tile_size;
-    tileset_tile* tiles;
-    size_t count;
+    math::vec2 tile_size;
+    std::vector<tex_coords> tiles;
 
-    tilemap::PropertyCollection properties; //!< Custom variable type property collection
-    Surface surface; //!< Pixel data of the sprite sheet
+    Surface surface; //!< Pixel data of the tileset
 };
 
 } // namespace rdge

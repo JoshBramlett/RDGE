@@ -22,7 +22,7 @@ operator<< (std::ostream& os, asset_type value)
 #undef CASE
     }
 
-    return os << "unknown";
+    return os << "unknown[" << static_cast<uint32>(value) << "]";
 }
 
 } // namespace asset_pack

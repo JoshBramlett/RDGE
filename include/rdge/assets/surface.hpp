@@ -63,23 +63,21 @@ public:
     Surface (const std::string& filepath, PixelDepth depth = PixelDepth::UNKNOWN);
 
     //! \brief Surface ctor
-    //! \details Create a Surface from preallocated pixel data.
+    //! \details Create a Surface from preallocated pixel data (used with \ref PackFile).
     //! \param [in] pixel_data Pointer to raw pixel data
     //! \param [in] w Image width
     //! \param [in] h Image height
     //! \param [in] channels Number of color channels per pixel
-    //! \param [in] asset_id Pack file id
     //! \throws rdge::Exception Image initialization failed
     //! \throws rdge::SDLException SDL failed to create surface
-    Surface (void* pixel_data, int32 w, int32 h, int32 channels, int32 asset_id);
+    Surface (void* pixel_data, int32 w, int32 h, int32 channels);
 
     //! \brief Surface dtor
     ~Surface (void) noexcept;
 
     //!@{
     //! \brief Copy and move enabled
-    //! \details SDL_Surface has a refcount property which is incremented on copy,
-    //!          effectively making the Surface wrapper a shared pointer.
+    //! \details Copies are tracked by an internal refcount
     Surface (const Surface&);
     Surface& operator= (const Surface&);
     Surface (Surface&&) noexcept;
@@ -123,7 +121,6 @@ public:
 
 private:
     SDL_Surface* m_surface = nullptr;
-    int32 m_assetId = -1;
 };
 
 //! \brief PixelDepth stream output operator

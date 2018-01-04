@@ -152,8 +152,7 @@ Surface::Surface (const std::string& filepath, PixelDepth depth)
     m_surface->userdata = pixel_data;
 }
 
-Surface::Surface (void* pixel_data, int32 w, int32 h, int32 channels, int32 asset_id)
-    : m_assetId(asset_id)
+Surface::Surface (void* pixel_data, int32 w, int32 h, int32 channels)
 {
     PixelDepth depth = PixelDepth::UNKNOWN;
     if (channels == STBI_rgb)

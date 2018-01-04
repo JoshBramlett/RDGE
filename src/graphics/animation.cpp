@@ -4,23 +4,21 @@
 #include <SDL_assert.h>
 
 #include <algorithm> // std::min, std::max
+#include <sstream>
+#include <cstring>
 
 namespace rdge {
 
-Animation::Animation (PlayMode mode, uint32 interval)
+Animation::Animation (uint32 interval, PlayMode mode)
     : mode(mode)
     , interval(interval)
-{ }
-
-Animation::Animation (uint32 interval)
-    : interval(interval)
 { }
 
 uint32
 Animation::GetFrameIndex (uint32 ticks) noexcept
 {
-    SDL_assert(this->interval != 0);
-    SDL_assert(this->frames.size() != 0);
+    SDL_assert(this->interval > 0);
+    SDL_assert(this->frames.empty() == false);
 
     size_t frame_count = this->frames.size();
     if (frame_count == 1)
@@ -32,19 +30,19 @@ Animation::GetFrameIndex (uint32 ticks) noexcept
     uint32 frame = this->elapsed / this->interval;
     switch (this->mode)
     {
-    case PlayMode::Normal:
+    case PlayMode::NORMAL:
         frame = std::min(frame, static_cast<uint32>(frame_count - 1));
         break;
-    case PlayMode::Reverse:
+    case PlayMode::REVERSE:
         frame = std::max(((frame_count - 1) - frame), 0ul);
         break;
-    case PlayMode::Loop:
+    case PlayMode::LOOP:
         frame = frame % frame_count;
         break;
-    case PlayMode::LoopReverse:
+    case PlayMode::LOOPREVERSE:
         frame = (frame_count - 1) - (frame % frame_count);
         break;
-    case PlayMode::LoopPingPong:
+    case PlayMode::LOOPPINGPONG:
         frame = frame % ((frame_count * 2) - 2);
         if (frame >= frame_count)
         {
@@ -60,9 +58,10 @@ Animation::GetFrameIndex (uint32 ticks) noexcept
 }
 
 const spritesheet_region&
-Animation::GetFrame (uint32 ticks) noexcept
+Animation::GetFrame (uint32 ticks)
 {
-    return this->frames[GetFrameIndex(ticks)];
+    SDL_assert(this->frames.empty() == false);
+    return this->frames.at(GetFrameIndex(ticks));
 }
 
 void
@@ -83,52 +82,41 @@ Animation::IsFinished (void) const noexcept
     return this->elapsed > Duration();
 }
 
-std::ostream& operator<< (std::ostream& os, Animation::PlayMode mode)
+std::ostream&
+operator<< (std::ostream& os, Animation::PlayMode value)
 {
-    switch (mode)
-    {
-#define CASE(X) case X: os << (strrchr(#X, ':') + 1); break;
-        CASE(Animation::PlayMode::Normal)
-        CASE(Animation::PlayMode::Reverse)
-        CASE(Animation::PlayMode::Loop)
-        CASE(Animation::PlayMode::LoopReverse)
-        CASE(Animation::PlayMode::LoopPingPong)
-#undef CASE
-        default:
-            os << "NOT_FOUND[" << static_cast<uint32>(mode) << "]";
-    }
-
-    return os;
+    return os << rdge::to_string(value);
 }
 
-bool from_string (const std::string& value, Animation::PlayMode& mode)
+std::string
+to_string (Animation::PlayMode value)
 {
-    std::string lc = to_lower(value);
-    if (lc == "normal")
+    switch (value)
     {
-        mode = Animation::PlayMode::Normal;
-        return true;
+#define CASE(X) case X: return (strrchr(#X, ':') + 1); break;
+        CASE(Animation::PlayMode::NORMAL)
+        CASE(Animation::PlayMode::REVERSE)
+        CASE(Animation::PlayMode::LOOP)
+        CASE(Animation::PlayMode::LOOPREVERSE)
+        CASE(Animation::PlayMode::LOOPPINGPONG)
+        default: break;
+#undef CASE
     }
-    else if (lc == "reverse")
-    {
-        mode = Animation::PlayMode::Reverse;
-        return true;
-    }
-    else if (lc == "loop")
-    {
-        mode = Animation::PlayMode::Loop;
-        return true;
-    }
-    else if (lc == "loopreverse")
-    {
-        mode = Animation::PlayMode::LoopReverse;
-        return true;
-    }
-    else if (lc == "looppingpong")
-    {
-        mode = Animation::PlayMode::LoopPingPong;
-        return true;
-    }
+
+    std::ostringstream ss;
+    ss << "UNKNOWN[" << static_cast<uint32>(value) << "]";
+    return ss.str();
+}
+
+bool
+try_parse (const std::string& test, Animation::PlayMode& out)
+{
+    std::string s = rdge::to_lower(test);
+    if      (s == "normal")       { out = Animation::PlayMode::NORMAL;       return true; }
+    else if (s == "reverse")      { out = Animation::PlayMode::REVERSE;      return true; }
+    else if (s == "loop")         { out = Animation::PlayMode::LOOP;         return true; }
+    else if (s == "loopreverse")  { out = Animation::PlayMode::LOOPREVERSE;  return true; }
+    else if (s == "looppingpong") { out = Animation::PlayMode::LOOPPINGPONG; return true; }
 
     return false;
 }

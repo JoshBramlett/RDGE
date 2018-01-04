@@ -2,6 +2,7 @@
 #include <rdge/physics/shapes/circle.hpp>
 #include <rdge/physics/shapes/polygon.hpp>
 
+#include <sstream>
 #include <cstring>
 
 //! \namespace rdge Rainbow Drop Game Engine
@@ -37,7 +38,20 @@ to_string (physics::ShapeType value)
 #undef CASE
     }
 
-    return "UNKNOWN";
+    std::ostringstream ss;
+    ss << "UNKNOWN[" << static_cast<uint32>(value) << "]";
+    return ss.str();
+}
+
+bool
+try_parse (const std::string& test, physics::ShapeType& out)
+{
+    std::string s = rdge::to_lower(test);
+    if      (s == "invalid") { out = physics::ShapeType::INVALID; return true; }
+    else if (s == "circle")  { out = physics::ShapeType::CIRCLE;  return true; }
+    else if (s == "polygon") { out = physics::ShapeType::POLYGON; return true; }
+
+    return false;
 }
 
 } // namespace rdge
