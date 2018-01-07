@@ -99,4 +99,19 @@ PackFile::GetSpriteSheet (int32 asset_id)
     return SpriteSheet(msgpack, *this);
 }
 
+Tileset
+PackFile::GetTileset (int32 asset_id)
+{
+    SDL_assert(asset_id >= 0 && (uint32)asset_id < m_header.asset_count);
+
+    auto& info = m_table[asset_id];
+    SDL_assert(info.type == asset_type_tileset);
+
+    std::vector<std::uint8_t> msgpack(info.size);
+    m_file.seek(info.offset, rwops_base::seekdir::beg);
+    m_file.read(msgpack.data(), info.size);
+
+    return SpriteSheet(msgpack, *this);
+}
+
 } // namespace rdge

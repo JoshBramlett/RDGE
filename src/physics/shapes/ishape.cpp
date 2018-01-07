@@ -1,6 +1,7 @@
 #include <rdge/physics/shapes/ishape.hpp>
 #include <rdge/physics/shapes/circle.hpp>
 #include <rdge/physics/shapes/polygon.hpp>
+#include <rdge/util/strings.hpp>
 
 #include <sstream>
 #include <cstring>
@@ -47,8 +48,7 @@ bool
 try_parse (const std::string& test, physics::ShapeType& out)
 {
     std::string s = rdge::to_lower(test);
-    if      (s == "invalid") { out = physics::ShapeType::INVALID; return true; }
-    else if (s == "circle")  { out = physics::ShapeType::CIRCLE;  return true; }
+    if      (s == "circle")  { out = physics::ShapeType::CIRCLE;  return true; }
     else if (s == "polygon") { out = physics::ShapeType::POLYGON; return true; }
 
     return false;

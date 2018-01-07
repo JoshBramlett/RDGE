@@ -19,6 +19,15 @@ class Shader;
 class SpriteBatch;
 //!@}
 
+//! \enum DrawOrder
+//! \brief Options for how to render the \ref SpriteLayer
+enum class DrawOrder
+{
+    INVALID = -1,
+    TOPDOWN,      //!< Sorted by y-coordinate, drawing from top to bottom
+    INDEX         //!< Draws sprites in the order they are added to the layer
+};
+
 //! \class SpriteLayer
 //! \brief Layer of ISprite objects
 //! \details A layer represents a logical group of sprites that will be drawn
@@ -68,5 +77,13 @@ public:
     std::shared_ptr<SpriteBatch>          renderer; //!< Render target
     std::vector<std::shared_ptr<ISprite>> sprites;  //!< Collection of sprites
 };
+
+//! \brief DrawOrder stream output operator
+std::ostream& operator<< (std::ostream&, DrawOrder);
+
+//!@{ DrawOrder string conversions
+bool try_parse (const std::string&, DrawOrder&);
+std::string to_string (DrawOrder);
+//!@}
 
 } // namespace rdge

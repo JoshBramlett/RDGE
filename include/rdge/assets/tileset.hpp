@@ -7,9 +7,16 @@
 
 #include <rdge/core.hpp>
 #include <rdge/assets/surface.hpp>
+#include <rdge/graphics/tex_coords.hpp>
+
+#include <vector>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
+
+//!@{ Forward declarations
+class PackFile;
+//!@}
 
 //! \class Tileset
 //! \brief Load tileset from a json config
@@ -19,8 +26,7 @@ namespace rdge {
 //!          A \ref Tilemap will contain a map of Tileset indices for rendering
 //!          a scene.
 //!
-//!          The json proprietary format is an expansion on the Tiled
-//!          default format.
+//!          The proprietary json format expands on the Tiled default format.
 //!
 //! \code{.json}
 //! {

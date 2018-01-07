@@ -2,9 +2,12 @@
 #include <rdge/graphics/isprite.hpp>
 #include <rdge/graphics/shader.hpp>
 #include <rdge/graphics/renderers/sprite_batch.hpp>
+#include <rdge/util/strings.hpp>
 #include <rdge/internal/hints.hpp>
 
 #include <SDL_assert.h>
+
+#include <sstream>
 
 namespace rdge {
 
@@ -53,6 +56,40 @@ SpriteLayer::OverrideSpriteDepth (float depth)
     {
         sprite->SetDepth(depth);
     }
+}
+
+std::ostream&
+operator<< (std::ostream& os, DrawOrder value)
+{
+    return os << rdge::to_string(value);
+}
+
+std::string
+to_string (DrawOrder value)
+{
+    switch (value)
+    {
+#define CASE(X) case X: return (strrchr(#X, ':') + 1); break;
+        CASE(DrawOrder::INVALID)
+        CASE(DrawOrder::TOPDOWN)
+        CASE(DrawOrder::INDEX)
+        default: break;
+#undef CASE
+    }
+
+    std::ostringstream ss;
+    ss << "UNKNOWN[" << static_cast<uint32>(value) << "]";
+    return ss.str();
+}
+
+bool
+try_parse (const std::string& test, DrawOrder& out)
+{
+    std::string s = rdge::to_lower(test);
+    if      (s == "topdown") { out = DrawOrder::TOPDOWN; return true; }
+    else if (s == "index")   { out = DrawOrder::INDEX;   return true; }
+
+    return false;
 }
 
 } // namespace rdge

@@ -25,7 +25,7 @@ constexpr float normalize (uint64 point, uint64 dimension)
 }
 
 void
-ProcessTileset (const json& j, Tileset& sheet)
+ProcessTileset (const json& j, Tileset& tileset)
 {
     JSON_VALIDATE_REQUIRED(j, tileheight, is_number_unsigned);
     JSON_VALIDATE_REQUIRED(j, tilewidth, is_number_unsigned);
@@ -38,21 +38,26 @@ ProcessTileset (const json& j, Tileset& sheet)
     auto tile_width = j["tilewidth"].get<size_t>();
     auto tile_height = j["tileheight"].get<size_t>();
 
-    this->cols = j["columns"].get<size_t>();
-    this->rows = tile_count / this->cols;
-    this->spacing = j["spacing"].get<size_t>();
-    this->margin = j["margin"].get<size_t>();
-    this->tile_size = math::vec2(static_cast<float>(tile_width),
-                                 static_cast<float>(tile_height));
-    this->tiles.reserve(tile_count);
+    tileset.cols = j["columns"].get<size_t>();
+    tileset.rows = tile_count / tileset.cols;
+    tileset.spacing = j["spacing"].get<size_t>();
+    tileset.margin = j["margin"].get<size_t>();
+    tileset.tile_size = math::vec2(static_cast<float>(tile_width),
+                                   static_cast<float>(tile_height));
+    tileset.tiles.reserve(tile_count);
 
-    auto surface_size = sheet.surface.Size();
-    for (size_t row = 0; row < this->rows; row++)
+    if (tileset.spacing != 0)
     {
-        for (size_t col = 0; col < this->cols; col++)
+        throw std::invalid_argument("Tile spacing not currently supported");
+    }
+
+    auto surface_size = tileset.surface.Size();
+    for (size_t row = 0; row < tileset.rows; row++)
+    {
+        for (size_t col = 0; col < tileset.cols; col++)
         {
-            auto x = this->margin + (col * tile_width);
-            auto y = this->margin + (row * tile_height);
+            auto x = tileset.margin + (col * tile_width);
+            auto y = tileset.margin + (row * tile_height);
 
             float x1 = normalize(x, surface_size.w);
             float x2 = normalize(x + tile_width, surface_size.w);
@@ -65,7 +70,7 @@ ProcessTileset (const json& j, Tileset& sheet)
             coords.top_left     = vec2(x1, y2);
             coords.top_right    = vec2(x2, y2);
 
-            this->tiles.push_back(coords);
+            tileset.tiles.push_back(coords);
         }
     }
 }

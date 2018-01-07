@@ -9,14 +9,29 @@
 #include <rdge/math/vec2.hpp>
 
 #include <memory>
-#include <vector>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
 //!@{ Forward declarations
 class Texture;
+class Tileset;
+namespace tilemap { class Layer; }
 //!@}
+
+//! \enum RenderOrder
+//! \brief The order in which tiles are rendered
+//! \details Useful when tiles require a certain z-indexing.  Only available with
+//!          orthogonal maps.  In all cases, the map is drawn row-by-row
+//! \see https://github.com/bjorn/tiled/issues/455
+enum class TileRenderOrder
+{
+    INVALID = -1,
+    RIGHT_DOWN,   //!< left-to-right and top-to-bottom
+    RIGHT_UP,
+    LEFT_DOWN,
+    LEFT_UP
+};
 
 //! \class TileLayer
 //! \brief Layer of a tilemap
@@ -27,10 +42,8 @@ class Texture;
 class TileLayer
 {
 public:
-    //!@{ TileLayer default ctor/dtor
-    explicit TileLayer (layer_definition, tileset);
+    explicit TileLayer (const tilemap::Layer& def, const Tileset& tileset, float scale);
     ~TileLayer (void) noexcept;
-    //!@}
 
     //!@{ Non-copyable, move enabled
     TileLayer (const TileLayer&) = delete;
@@ -61,5 +74,13 @@ public:
 
     std::shared_ptr<Texture> texture; //!< Tileset texture
 };
+
+//! \brief RenderOrder stream output operator
+std::ostream& operator<< (std::ostream&, TileRenderOrder);
+
+//!@{ RenderOrder string conversions
+bool try_parse (const std::string&, TileRenderOrder&);
+std::string to_string (TileRenderOrder);
+//!@}
 
 } // namespace rdge

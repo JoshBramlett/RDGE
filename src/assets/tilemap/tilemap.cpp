@@ -1,4 +1,4 @@
-#include <rdge/assets/tilemap/layer.hpp>
+#include <rdge/assets/tilemap/tilemap.hpp>
 #include <rdge/math/intrinsics.hpp>
 #include <rdge/internal/exception_macros.hpp>
 
@@ -9,27 +9,8 @@ namespace tilemap {
 
 using json = nlohmann::json;
 
-Layer::Layer (const nlohmann::json& j)
+Tilemap::Tilemap (const nlohmann::json& j)
 {
-    // Tiled format
-
-    // map
-    //{
-      //"backgroundcolor":"#656667",
-      //"height":4,
-      //"layers":[ ],
-      //"nextobjectid":1,
-      //"orientation":"orthogonal",
-      //"properties": { },
-      //"renderorder":"right-down",
-      //"tileheight":32,
-      //"tilesets":[ ],
-      //"tilewidth":32,
-      //"version":1,
-      //"tiledversion":"1.0.3",
-      //"width":4
-    //}
-
     try
     {
         JSON_VALIDATE_REQUIRED(j, orientation, is_string);
@@ -58,7 +39,7 @@ Layer::Layer (const nlohmann::json& j)
         }
 
         if (this->orientation != Orientation::ORTHOGONAL ||
-            this->render_order != RenderOrder::RIGHT_DOWN)
+            this->render_order != TileRenderOrder::RIGHT_DOWN)
         {
             throw std::invalid_argument("Tilemap only supports orthogonal right-down");
         }
@@ -68,14 +49,24 @@ Layer::Layer (const nlohmann::json& j)
         this->cell_size = math::vec2(j["tilewidth"].get<float>(),
                                      j["tileheight"].get<float>());
 
-        for (auto& l : j["layers"])
+        const auto& j_tilesets = j["tilesets"];
+        this->sheets.reserve(j_tilesets.size());
+        for (const auto& j_tileset : j_tilesets)
         {
-            this->layers.emplace_back(Layer(l));
+            JSON_VALIDATE_REQUIRED(j_tileset, firstgid, is_number);
+            JSON_VALIDATE_REQUIRED(j_tileset, table_id, is_number);
+            JSON_VALIDATE_REQUIRED(j_tileset, type, is_number);
+
+            sheet_info sheet;
+            sheet.first_gid = j_tileset["firstgid"].get<int32>();
+            sheet.table_id = j_tileset["table_id"].get<int32>();
+            sheet.type = j_tileset["type"].get<asset_pack::asset_type>();
+            this->sheets.push_back(sheet);
         }
 
-        for (auto& t : j["tilesets"])
+        for (auto& j_layer : j["layers"])
         {
-            this->tilesets.emplace_back(Tileset(t));
+            this->layers.emplace_back(Layer(j_layer));
         }
 
         // optional
@@ -94,12 +85,6 @@ Layer::Layer (const nlohmann::json& j)
 
 std::ostream&
 operator<< (std::ostream& os, Orientation value)
-{
-    return os << rdge::to_string(value);
-}
-
-std::ostream&
-operator<< (std::ostream& os, RenderOrder value)
 {
     return os << rdge::to_string(value);
 }
@@ -126,26 +111,6 @@ to_string (tilemap::Orientation value)
     return ss.str();
 }
 
-std::string
-to_string (tilemap::RenderOrder value)
-{
-    switch (value)
-    {
-#define CASE(X) case X: return (strrchr(#X, ':') + 1); break;
-        CASE(tilemap::RenderOrder::INVALID)
-        CASE(tilemap::RenderOrder::RIGHT_DOWN)
-        CASE(tilemap::RenderOrder::RIGHT_UP)
-        CASE(tilemap::RenderOrder::LEFT_DOWN)
-        CASE(tilemap::RenderOrder::LEFT_UP)
-        default: break;
-#undef CASE
-    }
-
-    std::ostringstream ss;
-    ss << "UNKNOWN[" << static_cast<uint32>(value) << "]";
-    return ss.str();
-}
-
 bool
 try_parse (const std::string& s, tilemap::Orientation& out)
 {
@@ -153,17 +118,6 @@ try_parse (const std::string& s, tilemap::Orientation& out)
     else if (s == "isometric")  { out = tilemap::Orientation::ISOMETRIC;  return true; }
     else if (s == "staggered")  { out = tilemap::Orientation::STAGGERED;  return true; }
     else if (s == "hexagonal")  { out = tilemap::Orientation::HEXAGONAL;  return true; }
-
-    return false;
-}
-
-bool
-try_parse (const std::string& s, tilemap::RenderOrder& out)
-{
-    if      (s == "right-down") { out = tilemap::RenderOrder::RIGHT_DOWN; return true; }
-    else if (s == "right-up")   { out = tilemap::RenderOrder::RIGHT_UP;   return true; }
-    else if (s == "left-down")  { out = tilemap::RenderOrder::LEFT_DOWN;  return true; }
-    else if (s == "left-up")    { out = tilemap::RenderOrder::LEFT_UP;    return true; }
 
     return false;
 }
