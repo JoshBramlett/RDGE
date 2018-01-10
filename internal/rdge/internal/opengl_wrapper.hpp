@@ -71,7 +71,7 @@ do { \
 //! \param [in] pname Parameter name
 //! \see https://www.opengl.org/sdk/docs/man2/xhtml/glGet.xml
 inline bool
-GetBooleanValue (uint32 pname)
+GetBool (uint32 pname)
 {
     GLboolean value;
     GL_CHECK_ERROR(glGetBooleanv(pname, &value));
@@ -82,7 +82,7 @@ GetBooleanValue (uint32 pname)
 //! \param [in] pname Parameter name
 //! \see https://www.opengl.org/sdk/docs/man2/xhtml/glGet.xml
 inline float
-GetFloatValue (uint32 pname)
+GetFloat (uint32 pname)
 {
     GLfloat value;
     GL_CHECK_ERROR(glGetFloatv(pname, &value));
@@ -93,7 +93,7 @@ GetFloatValue (uint32 pname)
 //! \param [in] pname Parameter name
 //! \see https://www.opengl.org/sdk/docs/man2/xhtml/glGet.xml
 inline int32
-GetIntegerValue (uint32 pname)
+GetInt (uint32 pname)
 {
     GLint value;
     GL_CHECK_ERROR(glGetIntegerv(pname, &value));
@@ -104,7 +104,7 @@ GetIntegerValue (uint32 pname)
 //! \param [in] name Parameter name
 //! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glGetString.xml
 inline std::string
-GetStringValue (uint32 name)
+GetString (uint32 name)
 {
     const unsigned char* result;
     GL_CHECK_ERROR(result = glGetString(name));

@@ -397,8 +397,9 @@ inline std::ostream& operator<< (std::ostream& os, const vec2_t<T>& value)
 }
 
 using vec2   = vec2_t<float>;  //!< Default floating point type
-using uivec2 = vec2_t<uint32>; //!< Unsigned (useful for size types)
-using ivec2  = vec2_t<int32>;  //!< Signed (useful for screen coordinates)
+using uivec2 = vec2_t<uint32>;
+using ivec2  = vec2_t<int32>;
+using svec2  = vec2_t<size_t>;
 
 } // namespace math
 

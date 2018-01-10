@@ -6,7 +6,10 @@
 #pragma once
 
 #include <rdge/core.hpp>
+#include <rdge/graphics/color.hpp>
+#include <rdge/graphics/tex_coords.hpp>
 #include <rdge/math/vec2.hpp>
+#include <rdge/physics/aabb.hpp>
 
 #include <memory>
 
@@ -16,10 +19,12 @@ namespace rdge {
 //!@{ Forward declarations
 class Texture;
 class Tileset;
+class TilemapBatch;
+class OrthographicCamera;
 namespace tilemap { class Layer; }
 //!@}
 
-//! \enum RenderOrder
+//! \enum TileRenderOrder
 //! \brief The order in which tiles are rendered
 //! \details Useful when tiles require a certain z-indexing.  Only available with
 //!          orthogonal maps.  In all cases, the map is drawn row-by-row
@@ -31,6 +36,23 @@ enum class TileRenderOrder
     RIGHT_UP,
     LEFT_DOWN,
     LEFT_UP
+};
+
+//! \struct tile_cell
+//! \brief Renderable cell data of a tile map
+struct tile_cell
+{
+    math::vec2 pos; //!< Position in world coordinates
+    tex_coords uvs; //!< UV Coordinates
+};
+
+//! \struct tile_chunk
+//! \brief Chunk of cells in the global grid
+struct tile_cell_chunk
+{
+    math::svec2 location; //!< Chunk grid coordinates
+    tile_cell* cells;     //!< List of cells
+    size_t cell_count;    //!< Cell count per chunk
 };
 
 //! \class TileLayer
@@ -52,33 +74,69 @@ public:
     TileLayer& operator= (TileLayer&&) noexcept = default;
     //!@}
 
-    //! \brief Draw all cached sprites
-    void Draw (void);
+    //! \brief Draw all tiles within the camera bounds
+    void Draw (TilemapBatch& renderer, const OrthographicCamera& camera);
 
-public:
-    //! \struct tile_cell
-    //! \brief Renderable cell of a tile map
-    struct tile_cell
+private:
+
+    //! \struct cell_grid
+    //! \brief Quadrilateral grid of cell data
+    //! \details Contains all data to be rendered by the layer.  Cell data will
+    //!          be empty for any locations that omit tile data.
+    struct cell_grid
     {
-        math::vec2 pos;    //!< Position in world coordinates
-        tex_coords coords; //!< UV Coordinates
+        tile_cell* data = nullptr; //!< List of cell data
+        size_t count = 0;          //!< Cell count in the global grid
+        size_t pitch = 0;          //!< Cells per row in the global grid
+
+        math::vec2 size; //!< Cell size (in pixels)
     };
 
-    tile_cell* cells = nullptr;
-    size_t cell_count = 0;
-    size_t cell_pitch = 0;
+    //! \struct chunk_grid
+    //! \brief Quadrilateral grid of chunk data
+    //! \details Chunks further break down the global grid into fixed size
+    //!          containers, and therefore have their own coordinate system.
+    struct chunk_grid
+    {
+        tile_cell_chunk* data = nullptr; //!< List of chunk data
+        size_t count = 0;                //!< Chunk count in the global grid
+        size_t pitch = 0;                //!< Chunks per row in the global grid
 
-    math::vec2 cell_size;
-    math::vec2 offset;
-    float      opacity = 0.f;
+        math::svec2 size;  //!< Chunk size (in cells)
+    };
+
+    cell_grid m_cells;
+    chunk_grid m_chunks;
+
+    math::vec2 m_offset;           //!< Start offset (in pixels)
+    physics::aabb m_bounds;        //!< Layer boundary (in pixels)
+    color m_color = color::WHITE;  //!< Render color (to store opacity)
 
     std::shared_ptr<Texture> texture; //!< Tileset texture
+
+    //size_t m_rows = 0;   //!< Total row count (in cells)
+    //size_t m_cols = 0;   //!< Total column count (in cells)
+    //size_t m_startX = 0; //!< Top left x-coordinate accross all chunks
+    //size_t m_startY = 0; //!< Top left y-coordinate accross all chunks
+
+    //grid_chunk* m_chunks = nullptr; //!< List of chunks
+    //size_t m_chunkCount = 0;        //!< Chunk count
+    //size_t m_chunkRows = 0;         //!< Chunk row count (in cells)
+    //size_t m_chunkCols = 0;         //!< Chunk column count (in cells)
+    //tile_cell* m_cells = nullptr;
+
+    //physics::aabb m_bounds;        //!< Layer boundary (in pixels)
+    //math::vec2 m_cellSize;         //!< Cell size (in pixels)
+    //math::vec2 m_offset;           //!< Start offset (in pixels)
+    //color m_color = color::WHITE;  //!< Render color (to store opacity)
+
+    //std::shared_ptr<Texture> texture; //!< Tileset texture
 };
 
-//! \brief RenderOrder stream output operator
+//! \brief TileRenderOrder stream output operator
 std::ostream& operator<< (std::ostream&, TileRenderOrder);
 
-//!@{ RenderOrder string conversions
+//!@{ TileRenderOrder string conversions
 bool try_parse (const std::string&, TileRenderOrder&);
 std::string to_string (TileRenderOrder);
 //!@}

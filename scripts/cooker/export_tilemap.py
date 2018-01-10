@@ -66,11 +66,10 @@ def remove_gid_offset(data, first_gid):
     if not data:
         return
 
+    # zero value signifies no tile, valid tile indicies start at 1
     for index, gid in enumerate(data):
-        if gid == 0:
-            data[index] = -1
-        else:
-            data[index] -= first_gid
+        if gid != 0:
+            data[index] -= (first_gid - 1)
 
 def process(in_file, out_dir):
     if not os.path.isfile(in_file):
@@ -132,7 +131,7 @@ def process(in_file, out_dir):
             min_gid, max_gid = gid_min_max(data)
             ts_index, first_gid = layer_tileset_mapping(j['tilesets'], min_gid, max_gid)
             if ts_index is not None:
-                layer['tileset_id'] = ts_index
+                layer['tileset_index'] = ts_index
                 for obj in layer['objects']:
                     if 'gid' in obj:
                         obj['gid'] -= first_gid
@@ -140,19 +139,26 @@ def process(in_file, out_dir):
             if 'data' in layer and layer['data']:
                 min_gid, max_gid = gid_min_max(layer['data'])
                 ts_index, first_gid = layer_tileset_mapping(j['tilesets'], min_gid, max_gid)
-                layer['tileset_id'] = ts_index
+                layer['tileset_index'] = ts_index
                 remove_gid_offset(layer['data'], first_gid)
             elif 'chunks' in layer and layer['chunks']:
                 agg_max = 0
                 agg_min = sys.maxint
+                chunk_width = layer['chunks'][0]['width']
+                chunk_height = layer['chunks'][0]['height']
                 for chunk in layer['chunks']:
+                    # sanity check that the assumption that the chunk size is the same
+                    # accross all chunks holds true
+                    if chunk_width != chunk['width'] or chunk_height != chunk['height']:
+                        raise Exception('Chunk sizes differ')
+
                     min_gid, max_gid = gid_min_max(chunk['data'])
                     if min_gid is not None and min_gid < agg_min:
                         agg_min = min_gid
                     if max_gid is not None and max_gid > agg_max:
                         agg_max = max_gid
                 ts_index, first_gid = layer_tileset_mapping(j['tilesets'], agg_min, agg_max)
-                layer['tileset_id'] = ts_index
+                layer['tileset_index'] = ts_index
                 for chunk in layer['chunks']:
                     remove_gid_offset(chunk['data'], first_gid)
 

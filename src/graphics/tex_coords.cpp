@@ -8,7 +8,11 @@ const tex_coords tex_coords::DEFAULT = { { 0.f, 1.f },
                                          { 0.f, 0.f },
                                          { 1.f, 0.f },
                                          { 1.f, 1.f } };
-const tex_coords tex_coords::EMPTY = { };
+
+const tex_coords tex_coords::EMPTY = { { 0.f, 0.f },
+                                       { 0.f, 0.f },
+                                       { 0.f, 0.f },
+                                       { 0.f, 0.f } };
 
 math::vec2&
 tex_coords::operator[] (uint32 index) noexcept

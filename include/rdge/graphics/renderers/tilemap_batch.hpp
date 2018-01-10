@@ -6,18 +6,18 @@
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/assets/spritesheet.hpp>
+#include <rdge/math/vec2.hpp>
 #include <rdge/graphics/shader.hpp>
-#include <rdge/physics/aabb.hpp>
 
 #include <memory>
-#include <vector>
-#include <array>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
 //!@{ Forward declarations
+struct tile_cell_chunk;
+struct color;
+struct tile_vertex;
 class OrthographicCamera;
 class Texture;
 //!@}
@@ -42,10 +42,10 @@ public:
     //! \brief TilemapBatch ctor
     //! \details Creates a copy of the \ref tilemap_data from the provided \ref
     //!          SpriteSheet.  Setup for all OpenGL performed.
-    //! \param [in] sheet SpriteSheet owning the tile map and texture
-    //! \param [in] scale Factor to scale the tiles drawing size
+    //! \param [in] capacity Max number of tiles rendered per draw call
+    //! \param [in] texture Tileset texture
     //! \throws rdge::Exception Initialization failure
-    explicit TilemapBatch (const SpriteSheet& sheet, float scale = 1.f);
+    explicit TilemapBatch (uint16 capacity, const math::vec2& tile_size, std::shared_ptr<Texture> texture);
 
     //! \brief TilemapBatch dtor
     ~TilemapBatch (void) noexcept;
@@ -62,11 +62,14 @@ public:
     //! \param [in] camera Orthographic camera
     void SetView (const OrthographicCamera& camera);
 
+    void Prime (void);
+
     //! \brief Draw the tilemap contents
-    void Draw (void);
+    void Draw (const tile_cell_chunk& chunk, color c);
+
+    void Flush (void);
 
     // TODO
-    // Limit rendering to camera boundaries
     // ImGui support to list drawn tiles per frame
     // Global color - tint all tiles
     // Blending on above layers
@@ -76,11 +79,14 @@ private:
     uint32 m_vbo = 0; //!< Vertex buffer handle
     uint32 m_ibo = 0; //!< Index buffer handle
 
-    Shader        m_shader;    //!< Shader program
-    physics::aabb m_bounds;    //!< View bounds to render
-    float         m_far = 0.f; //!< Far clipping plane
+    Shader     m_shader;    //!< Shader program
+    math::vec2 m_tileSize;  //!< Tile size
+    float      m_far = 0.f; //!< Far clipping plane
 
-    tilemap_data             m_tilemap; //!< Tilemap to render
+    tile_vertex* m_cursor;          //!< VBO cursor
+    size_t       m_submissions = 0; //!< Tracks submissions per draw call
+    size_t       m_capacity = 0;    //!< Max number of submissions per draw
+
     std::shared_ptr<Texture> m_texture; //!< Tilemap texture
 };
 

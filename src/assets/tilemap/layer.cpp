@@ -21,7 +21,7 @@ Layer::Layer (const nlohmann::json& j)
 
         JSON_VALIDATE_OPTIONAL(j, offsetx, is_number);
         JSON_VALIDATE_OPTIONAL(j, offsety, is_number);
-        JSON_VALIDATE_OPTIONAL(j, tileset_id, is_number);
+        JSON_VALIDATE_OPTIONAL(j, tileset_index, is_number);
 
         // required
         this->name = j["name"].get<std::string>();
@@ -37,9 +37,9 @@ Layer::Layer (const nlohmann::json& j)
         this->properties = PropertyCollection(j);
         this->offset = math::vec2(j.count("offsetx") ? j["offsetx"].get<float>() : 0.f,
                                   j.count("offsety") ? j["offsety"].get<float>() : 0.f);
-        if (j.count("tileset_id"))
+        if (j.count("tileset_index"))
         {
-            this->tileset_index = j["tileset_id"].get<int32>();
+            this->tileset_index = j["tileset_index"].get<int32>();
         }
 
         // type specific
@@ -54,21 +54,29 @@ Layer::Layer (const nlohmann::json& j)
             this->rows = j["width"].get<size_t>();
             this->cols = j["height"].get<size_t>();
 
+            // fixed size map
             if (j.count("data"))
             {
-                // fixed size map
-                this->data = j["data"].get<std::vector<uint32>>();
+                this->chunks = std::vector<tile_chunk>(1);
+
+                auto& chunk = this->chunks[0];
+                chunk.x = 0;
+                chunk.y = 0;
+                chunk.rows = this->rows;
+                chunk.cols = this->cols;
+                chunk.data = j["data"].get<std::vector<uint32>>();
             }
+            // infinite size map
             else if (j.count("chunks"))
             {
-                // infinite size map
                 JSON_VALIDATE_REQUIRED(j, startx, is_number);
                 JSON_VALIDATE_REQUIRED(j, starty, is_number);
 
-                this->data.assign(this->rows * this->cols, 0);
                 this->start_x = j["startx"].get<size_t>();
                 this->start_y = j["starty"].get<size_t>();
+                this->chunks = std::vector<tile_chunk>(j.count("chunks"));
 
+                size_t index = 0;
                 for (const auto& j_chunk : j["chunks"])
                 {
                     JSON_VALIDATE_REQUIRED(j_chunk, x, is_number);
@@ -77,21 +85,12 @@ Layer::Layer (const nlohmann::json& j)
                     JSON_VALIDATE_REQUIRED(j_chunk, height, is_number);
                     JSON_VALIDATE_REQUIRED(j_chunk, data, is_array);
 
-                    size_t x = j_chunk["x"].get<size_t>() - this->start_x;
-                    size_t y = j_chunk["y"].get<size_t>() - this->start_y;
-                    size_t w = j_chunk["width"].get<size_t>();
-                    size_t h = j_chunk["height"].get<size_t>();
-
-                    const auto& chunk_data = j_chunk["data"];
-                    for (size_t row = 0; row < h, i++)
-                    {
-                        for (size_t col = 0; col < w, i++)
-                        {
-                            size_t data_idx = ((y + row) * this->rows) + (x + col);
-                            size_t chunk_idx = (row * h) + col;
-                            this->data[data_idx] = chunk_data[chunk_idx].get<uint32>();
-                        }
-                    }
+                    auto& chunk = this->chunks[index++];
+                    chunk.x = j_chunk["x"].get<size_t>();
+                    chunk.y = j_chunk["y"].get<size_t>();
+                    chunk.rows = j_chunk["width"].get<size_t>();
+                    chunk.cols = j_chunk["height"].get<size_t>();
+                    chunk.data = j_chunk["data"].get<std::vector<uint32>>();
                 }
             }
             else
@@ -131,12 +130,6 @@ Layer::Layer (const nlohmann::json& j)
     {
         RDGE_THROW(ex.what());
     }
-}
-
-TileLayer
-Layer::GenerateTileLayer (void) const
-{
-
 }
 
 std::ostream&

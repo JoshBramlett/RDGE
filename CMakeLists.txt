@@ -110,6 +110,7 @@ add_library (RDGE SHARED
              src/gameobjects/game.cpp
 
              src/graphics/layers/sprite_layer.cpp
+             src/graphics/layers/tile_layer.cpp
              src/graphics/renderers/sprite_batch.cpp
              src/graphics/renderers/tilemap_batch.cpp
              src/graphics/animation.cpp

@@ -200,7 +200,7 @@ Window::Window (const std::string& title,
         SDL_THROW("SDL failed to create an OpenGL context", "SDL_GL_CreateContext");
     }
 
-    ILOG() << "Created OpenGL context v" << opengl::GetStringValue(GL_VERSION);
+    ILOG() << "Created OpenGL context v" << opengl::GetString(GL_VERSION);
 
     // !!!  IMPORTANT  !!!
     // There are a couple issues with GLEW initialization (as far as 1.13).

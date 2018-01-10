@@ -1,13 +1,16 @@
 #include <rdge/graphics/layers/tile_layer.hpp>
-#include <rdge/graphics/isprite.hpp>
-#include <rdge/graphics/shader.hpp>
-#include <rdge/graphics/renderers/sprite_batch.hpp>
+#include <rdge/assets/tileset.hpp>
+#include <rdge/assets/tilemap/layer.hpp>
+#include <rdge/graphics/orthographic_camera.hpp>
+#include <rdge/graphics/texture.hpp>
+#include <rdge/graphics/renderers/tilemap_batch.hpp>
 #include <rdge/util/strings.hpp>
+#include <rdge/util/memory/alloc.hpp>
 #include <rdge/internal/hints.hpp>
 
 #include <SDL_assert.h>
 
-#include <algorithm>
+#include <sstream>
 
 namespace rdge {
 
@@ -20,50 +23,105 @@ constexpr uint32 FLIPPED_ANTIDIAGONALLY = 0x20000000;
 } // anonymous namespace
 
 TileLayer::TileLayer (const tilemap::Layer& def, const Tileset& tileset, float scale)
-    : cell_count(def.rows * def.cols)
-    , cell_pitch(def.cols)
-    , cell_size(tileset.tile_size * scale)
-    , offset(def.offset * scale)
-    , opacity(def.opacity)
+    : m_offset(def.offset * scale)
     , texture(std::make_shared<Texture>(tileset.surface))
 {
-    this->offset.x += this->cell_size.x * static_cast<float>(def.start_x);
-    this->offset.y += this->cell_size.y * static_cast<float>(def.start_y);
+    m_cells.count = def.rows * def.cols;
+    m_cells.pitch = def.cols;
+    m_cells.size = tileset.tile_size * scale;
 
-    // convert to y-is-up
-    this->offset.y = -this->offset.y;
+    // Two provided values make up the total offset.
+    //   1) Layer offset (in pixels)
+    //   2) start x/y - the tile coordinates of the top/left corner of the layer
+    //
+    // Coalesce the two, and convert them to y-is-up
+    m_offset.y *= -1.f;
+    m_offset.x += (m_cells.size.x * static_cast<float>(def.start_x));
+    m_offset.y -= (m_cells.size.y * static_cast<float>(def.start_y));
 
-    RDGE_CALLOC(this->cells, this->cell_count, nullptr);
-    for (size_t i = 0; i < this->cell_count; i++)
+    math::vec2 lo = m_offset;
+    math::vec2 hi = m_offset;
+    lo.y -= (m_cells.size.y * static_cast<float>(def.rows));
+    hi.x += (m_cells.size.x * static_cast<float>(def.cols));
+    m_bounds = physics::aabb(lo, hi);
+
+    m_color.a = 255.f * def.opacity;
+
+    if (def.chunks.size() == 1)
     {
-        auto& cell = this->cells[i];
-        cell.pos = this->offset;
-        cell.pos.x += this->cell_size.x * static_cast<float>(i % cell_pitch);
-        cell.pos.y -= this->cell_size.y * static_cast<float>(i / cell_pitch);
+        // For fixed size maps:
+        //   - Chunk row and column count may differ
+        m_chunks.size = math::svec2(def.rows, def.cols);
+        m_chunks.pitch = 1;
+        m_chunks.count = 1;
+    }
+    else
+    {
+        // For dynamically sized maps:
+        //   - Chunk row and column count are the same for every chunk
+        //   - If there is no data within a chunk it'll be omitted from the definition,
+        //     which means we cannot trust the number of chunks as the true count.
+        //     For example, say the chunk size is 16x16, and the layer size is 32x32.
+        //     If one of the chunks contains no gid references, only three of the
+        //     four chunks will be provided.
+        m_chunks.size = math::svec2(def.chunks[0].rows, def.chunks[0].cols);
+        m_chunks.pitch = def.cols / m_chunks.size.x;
+        m_chunks.count = m_chunks.pitch * (def.rows / m_chunks.size.y);
+    }
 
-        uint32 gid = def.data[i];
-        if (gid >= 0)
+    // The global grid is allocated in one contiguous block, but will be broken down
+    // as chunks and will not represent the global grid in memory.  For example,
+    // say the chunk size is 2x2, and the layer size is 4x4.  The first four cells
+    // will be from chunk[0], which on the global grid are indices 0, 1, 4, and 5.
+    RDGE_CALLOC(m_chunks.data, m_chunks.count, nullptr);
+    RDGE_CALLOC(m_cells.data, m_cells.count, nullptr);
+
+    for (const auto& def_chunk : def.chunks)
+    {
+        size_t x = (def_chunk.x - def.start_x) / m_chunks.size.x;
+        size_t y = (def_chunk.y - def.start_y) / m_chunks.size.y;
+        size_t chunk_index = (y * m_chunks.pitch) + x;
+        size_t grid_index = chunk_index * (m_chunks.size.w * m_chunks.size.h);
+
+        auto& chunk = m_chunks.data[chunk_index];
+        chunk.location = math::svec2(x, y);
+        chunk.cells = &m_cells.data[grid_index];
+        chunk.cell_count = m_chunks.size.w * m_chunks.size.h;
+
+        math::vec2 origin = m_offset;
+        origin.x += (m_cells.size.w * static_cast<float>(x * m_chunks.size.w));
+        origin.y -= (m_cells.size.h * static_cast<float>(y * m_chunks.size.h));
+        for (size_t i = 0; i < chunk.cell_count; i++)
         {
-            bool flip_x = (gid & FLIPPED_HORIZONTALLY);
-            bool flip_y = (gid & FLIPPED_VERTICALLY);
-            bool flip_d = (gid & FLIPPED_ANTIDIAGONALLY);
-            gid &= ~(FLIPPED_HORIZONTALLY | FLIPPED_VERTICALLY | FLIPPED_ANTIDIAGONALLY);
-
-            cell.coords = tileset.tiles[gid];
-            if (flip_x)
+            if (def_chunk.data[i])
             {
-                cell.coords.flip(TexCoordsFlip::HORIZONTAL);
-            }
+                auto& cell = chunk.cells[i];
+                cell.pos = origin;
+                cell.pos.x += m_cells.size.w * static_cast<float>(i % m_chunks.size.w);
+                cell.pos.y -= m_cells.size.h * static_cast<float>(i / m_chunks.size.w);
 
-            if (flip_y)
-            {
-                cell.coords.flip(TexCoordsFlip::VERTICAL);
-            }
+                uint32 gid = def_chunk.data[i] - 1;
+                bool flip_x = (gid & FLIPPED_HORIZONTALLY);
+                bool flip_y = (gid & FLIPPED_VERTICALLY);
+                bool flip_d = (gid & FLIPPED_ANTIDIAGONALLY);
+                gid &= ~(FLIPPED_HORIZONTALLY | FLIPPED_VERTICALLY | FLIPPED_ANTIDIAGONALLY);
 
-            if (flip_d)
-            {
-                cell.coords.rotate(TexCoordsRotation::ROTATE_90);
-                cell.coords.flip(TexCoordsFlip::VERTICAL);
+                cell.uvs = tileset.tiles[gid];
+                if (flip_x)
+                {
+                    cell.uvs.flip(TexCoordsFlip::HORIZONTAL);
+                }
+
+                if (flip_y)
+                {
+                    cell.uvs.flip(TexCoordsFlip::VERTICAL);
+                }
+
+                if (flip_d)
+                {
+                    cell.uvs.rotate(TexCoordsRotation::ROTATE_90);
+                    cell.uvs.flip(TexCoordsFlip::VERTICAL);
+                }
             }
         }
     }
@@ -71,39 +129,58 @@ TileLayer::TileLayer (const tilemap::Layer& def, const Tileset& tileset, float s
 
 TileLayer::~TileLayer (void) noexcept
 {
-    RDGE_FREE(this->cells, nullptr);
+    RDGE_FREE(m_cells.data, nullptr);
+    RDGE_FREE(m_chunks.data, nullptr);
 }
 
 void
-TileLayer::Draw (void)
+TileLayer::Draw (TilemapBatch& renderer, const OrthographicCamera& camera)
 {
-    this->renderer->PrepSubmit();
+    // buffer the camera bounds by 5 tiles
+    auto frame_bounds = camera.bounds;
+    frame_bounds.fatten(m_cells.size.w * 5);
 
-    for (const auto& sprite : this->sprites)
+    if (!frame_bounds.intersects_with(m_bounds))
     {
-        sprite->Draw(*this->renderer);
+        return;
     }
 
-    this->renderer->Flush();
+    renderer.SetView(camera);
+    renderer.Prime();
+
+    if (frame_bounds.contains(m_bounds))
+    {
+        // draw everything
+        for (size_t i = 0; i < m_chunks.count; i++)
+        {
+            renderer.Draw(m_chunks.data[i], m_color);
+        }
+    }
+    else
+    {
+
+    }
+
+    renderer.Flush();
 }
 
 std::ostream&
-operator<< (std::ostream& os, RenderOrder value)
+operator<< (std::ostream& os, TileRenderOrder value)
 {
     return os << rdge::to_string(value);
 }
 
 std::string
-to_string (tilemap::RenderOrder value)
+to_string (TileRenderOrder value)
 {
     switch (value)
     {
 #define CASE(X) case X: return (strrchr(#X, ':') + 1); break;
-        CASE(RenderOrder::INVALID)
-        CASE(RenderOrder::RIGHT_DOWN)
-        CASE(RenderOrder::RIGHT_UP)
-        CASE(RenderOrder::LEFT_DOWN)
-        CASE(RenderOrder::LEFT_UP)
+        CASE(TileRenderOrder::INVALID)
+        CASE(TileRenderOrder::RIGHT_DOWN)
+        CASE(TileRenderOrder::RIGHT_UP)
+        CASE(TileRenderOrder::LEFT_DOWN)
+        CASE(TileRenderOrder::LEFT_UP)
         default: break;
 #undef CASE
     }
@@ -114,14 +191,14 @@ to_string (tilemap::RenderOrder value)
 }
 
 bool
-try_parse (const std::string& test, RenderOrder& out)
+try_parse (const std::string& test, TileRenderOrder& out)
 {
     std::string s = rdge::to_lower(test);
     std::replace(s.begin(), s.end(), '-', '_');
-    if      (s == "right_down") { out = RenderOrder::RIGHT_DOWN; return true; }
-    else if (s == "right_up")   { out = RenderOrder::RIGHT_UP;   return true; }
-    else if (s == "left_down")  { out = RenderOrder::LEFT_DOWN;  return true; }
-    else if (s == "left_up")    { out = RenderOrder::LEFT_UP;    return true; }
+    if      (s == "right_down") { out = TileRenderOrder::RIGHT_DOWN; return true; }
+    else if (s == "right_up")   { out = TileRenderOrder::RIGHT_UP;   return true; }
+    else if (s == "left_down")  { out = TileRenderOrder::LEFT_DOWN;  return true; }
+    else if (s == "left_up")    { out = TileRenderOrder::LEFT_UP;    return true; }
 
     return false;
 }

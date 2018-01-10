@@ -200,7 +200,7 @@ Shader::MaxFragmentShaderUnits (void)
 
     if (max_units == 0)
     {
-        max_units = opengl::GetIntegerValue(GL_MAX_TEXTURE_IMAGE_UNITS);
+        max_units = opengl::GetInt(GL_MAX_TEXTURE_IMAGE_UNITS);
     }
 
     return max_units;

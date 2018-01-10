@@ -317,7 +317,7 @@ SpriteBatch::PrepSubmit (void)
 void
 SpriteBatch::Submit (const SpriteVertices& vertices)
 {
-    SDL_assert(m_vbo == static_cast<uint32>(opengl::GetIntegerValue(GL_ARRAY_BUFFER_BINDING)));
+    SDL_assert(m_vbo == static_cast<uint32>(opengl::GetInt(GL_ARRAY_BUFFER_BINDING)));
     SDL_assert(m_submissions <= m_capacity);
 
     for (const auto& vertex : vertices)
@@ -337,7 +337,7 @@ SpriteBatch::Flush (void)
 {
     // Sanity check our VBO is bound ensures noone else is binding a different VBO
     // during our submission process.
-    SDL_assert(m_vbo == static_cast<uint32>(opengl::GetIntegerValue(GL_ARRAY_BUFFER_BINDING)));
+    SDL_assert(m_vbo == static_cast<uint32>(opengl::GetInt(GL_ARRAY_BUFFER_BINDING)));
     SDL_assert(m_submissions != 0);
 
     opengl::ReleaseBufferPointer(GL_ARRAY_BUFFER);
@@ -349,6 +349,12 @@ SpriteBatch::Flush (void)
     //      how much of a cost enabling and activating a texture has.
     //      Keep in mind a limiting factor is that all textures must be assigned a
     //      unit id prior to activating.
+    //
+    //      Update: keep in mind multiple renderers will be used, so to work without
+    //              a hitch the ease route would be to activate  the textures every
+    //              draw call.  However, there's got to be a better way...base class
+    //              that holds a static that keeps track of the last used texture
+    //              and only activates if changed?
     for (auto& texture : m_textures)
     {
         texture->Activate();

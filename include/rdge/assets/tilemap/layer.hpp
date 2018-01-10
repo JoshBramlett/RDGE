@@ -113,17 +113,12 @@ public:
     Layer& operator= (Layer&&) noexcept = default;
     //!@}
 
-    //!@{ Renderable layer generation
-    TileLayer GenerateTileLayer (void) const;
-    //SpriteLayer GenerateSpriteLayer (void) const;
-    //!@}
-
 public:
     LayerType type = LayerType::INVALID; //!< Base type
+    int32 tileset_index = -1;            //!< Index of the tileset in the tilemap
 
     //!@{ Custom identifiers
     std::string name; //!< Name assigned in editor
-    int32 tileset_index = -1;
     //!@}
 
     //!@{ Rendering/physics properties
@@ -134,13 +129,21 @@ public:
 
     PropertyCollection properties; //!< Custom variable type property collection
 
-private:
     //!@{ LayerType::TILELAYER
-    std::vector<uint32> data; //!< Array of GIDs
-    size_t rows = 0;          //!< Row count (same as map for fixed-sized maps)
-    size_t cols = 0;          //!< Column count (same as map for fixed-sized maps)
-    size_t start_x = 0;       //!< x-coordinate start tile (infinite maps only)
-    size_t start_y = 0;       //!< y-coordinate start tile (infinite maps only)
+    struct tile_chunk
+    {
+        size_t x;                 //!< x-coordinate in the tile grid
+        size_t y;                 //!< y-coordinate in the tile grid
+        size_t rows;              //!< Row count (in tiles)
+        size_t cols;              //!< Column count (in tiles)
+        std::vector<uint32> data; //!< Array of GIDs
+    };
+
+    size_t rows = 0;                //!< Row count (in tiles)
+    size_t cols = 0;                //!< Column count (in tiles)
+    size_t start_x = 0;             //!< x-coordinate start tile
+    size_t start_y = 0;             //!< y-coordinate start tile
+    std::vector<tile_chunk> chunks; //!< List of chunks that make up the mapping
     //!@}
 
     //!@{ LayerType::OBJECTGROUP

@@ -2,6 +2,7 @@
 #include <rdge/graphics/color.hpp>
 #include <rdge/graphics/orthographic_camera.hpp>
 #include <rdge/graphics/texture.hpp>
+#include <rdge/graphics/layers/tile_layer.hpp>
 #include <rdge/math/intrinsics.hpp>
 #include <rdge/util/logger.hpp>
 #include <rdge/util/memory/alloc.hpp>
@@ -16,8 +17,6 @@
 
 namespace rdge {
 
-namespace {
-
 struct tile_vertex
 {
     math::vec3 pos;
@@ -25,17 +24,19 @@ struct tile_vertex
     uint32     color = 0xFFFFFFFF;
 };
 
+namespace {
+
 constexpr size_t VERTEX_SIZE = sizeof(tile_vertex);
 constexpr size_t TILE_SIZE = VERTEX_SIZE * 4;
 
 } // anonymous namespace
 
-TilemapBatch::TilemapBatch (const SpriteSheet& sheet, float scale)
-    : m_tilemap(sheet.tilemap)
-    , m_texture(sheet.texture)
+TilemapBatch::TilemapBatch (uint16 capacity,
+                            const math::vec2& tile_size,
+                            std::shared_ptr<Texture> texture)
+    : m_tileSize(tile_size)
+    , m_texture(std::move(texture))
 {
-    SDL_assert(scale > 0.f);
-    m_tilemap.tile_size *= scale;
     m_texture->unit_id = 0;
 
     std::ostringstream vert;
@@ -93,7 +94,7 @@ TilemapBatch::TilemapBatch (const SpriteSheet& sheet, float scale)
     m_vbo = opengl::CreateBuffer();
     opengl::BindBuffer(GL_ARRAY_BUFFER, m_vbo);
 
-    uint32 vbo_size = m_tilemap.tile_count * TILE_SIZE;
+    uint32 vbo_size = capacity * TILE_SIZE;
     opengl::SetBufferData(GL_ARRAY_BUFFER, vbo_size, nullptr, GL_DYNAMIC_DRAW);
 
     opengl::EnableVertexAttribute(VATTR_POS_INDEX);
@@ -126,7 +127,7 @@ TilemapBatch::TilemapBatch (const SpriteSheet& sheet, float scale)
     m_ibo = opengl::CreateBuffer();
     opengl::BindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
 
-    uint32 ibo_count = m_tilemap.tile_count * 6;
+    uint32 ibo_count = capacity * 6;
     uint32 ibo_size = ibo_count * sizeof(uint32);
 
     uint32* ibo_data;
@@ -136,7 +137,7 @@ TilemapBatch::TilemapBatch (const SpriteSheet& sheet, float scale)
     }
 
     for (uint32 i = 0, idx = 0, offset = 0;
-         i < m_tilemap.tile_count;
+         i < capacity;
          i++, idx = i * 6, offset = i * 4)
     {
         ibo_data[idx]     = offset;
@@ -158,7 +159,7 @@ TilemapBatch::TilemapBatch (const SpriteSheet& sheet, float scale)
     SetView(camera);
 
     DLOG() << "TilemapBatch[" << this << "]"
-           << " capacity=" << m_tilemap.tile_size
+           << " capacity=" << capacity
            << " vao[" << m_vao << "]"
            << " vbo[" << m_vbo << "].size=" << vbo_size
            << " ibo[" << m_ibo << "].size=" << ibo_size;
@@ -173,9 +174,8 @@ TilemapBatch::~TilemapBatch (void) noexcept
 
 TilemapBatch::TilemapBatch (TilemapBatch&& other) noexcept
     : m_shader(std::move(other.m_shader))
-    , m_bounds(other.m_bounds)
+    , m_tileSize(other.m_tileSize)
     , m_far(other.m_far)
-    , m_tilemap(std::move(other.m_tilemap))
     , m_texture(std::move(other.m_texture))
 {
     std::swap(m_vao, other.m_vao);
@@ -189,9 +189,8 @@ TilemapBatch::operator= (TilemapBatch&& rhs) noexcept
     if (this != &rhs)
     {
         m_shader = std::move(rhs.m_shader);
-        m_bounds = rhs.m_bounds;
+        m_tileSize = rhs.m_tileSize;
         m_far = rhs.m_far;
-        m_tilemap = std::move(rhs.m_tilemap);
         m_texture = std::move(rhs.m_texture);
 
         std::swap(m_vao, rhs.m_vao);
@@ -211,72 +210,81 @@ TilemapBatch::SetView (const OrthographicCamera& camera)
     m_shader.SetUniformValue(UNI_PROJ_MATRIX, camera.combined);
     m_shader.Disable();
 
-    m_bounds = camera.bounds;
     m_far = -camera.far;
 }
 
 void
-TilemapBatch::Draw (void)
+TilemapBatch::Prime (void)
 {
-    SDL_assert(m_vao != 0);
-
     m_shader.Enable();
     m_texture->Activate();
 
-    const auto& sz = m_tilemap.tile_size;
-    for (size_t i = 0; i < m_tilemap.layer_count; i++)
+    opengl::BindBuffer(GL_ARRAY_BUFFER, m_vbo);
+    void* buffer = opengl::GetBufferPointer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+
+    m_cursor = static_cast<tile_vertex*>(buffer);
+    m_submissions = 0;
+}
+
+void
+TilemapBatch::Draw (const tile_cell_chunk& chunk, color c)
+{
+    SDL_assert(m_vao != 0);
+    SDL_assert(m_vbo == static_cast<uint32>(opengl::GetInt(GL_ARRAY_BUFFER_BINDING)));
+    SDL_assert(m_submissions <= m_capacity);
+
+    const auto& sz = m_tileSize;
+    auto ic = static_cast<uint32>(c);
+
+    for (size_t i = 0; i < chunk.cell_count; i++)
     {
-        size_t submissions = 0;
-
-        opengl::BindBuffer(GL_ARRAY_BUFFER, m_vbo);
-        auto cursor = static_cast<tile_vertex*>(opengl::GetBufferPointer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
-
-        auto& layer = m_tilemap.layers[i];
-        for (size_t j = 0; j < m_tilemap.tile_count; j++)
+        auto& cell = chunk.cells[i];
+        if (!cell.uvs.is_empty())
         {
-            auto& tile = layer.tiles[j];
-            if (tile.index != tilemap_data::INVALID_TILE)
-            {
-                float x = (tile.location.x * sz.x);
-                float y = -(tile.location.y * sz.y);
+            m_cursor->pos   = math::vec3(cell.pos, m_far);
+            m_cursor->uv    = cell.uvs[0];
+            m_cursor->color = ic;
+            m_cursor++;
 
-                cursor->pos   = math::vec3(x, y, m_far);
-                cursor->uv    = tile.coords[0];
-                cursor->color = 0xFFFFFFFF;
-                cursor++;
+            m_cursor->pos   = math::vec3(cell.pos.x, cell.pos.y + sz.y, m_far);
+            m_cursor->uv    = cell.uvs[1];
+            m_cursor->color = ic;
+            m_cursor++;
 
-                cursor->pos   = math::vec3(x, y + sz.y, m_far);
-                cursor->uv    = tile.coords[1];
-                cursor->color = 0xFFFFFFFF;
-                cursor++;
+            m_cursor->pos   = math::vec3(cell.pos.x + sz.x, cell.pos.y + sz.y, m_far);
+            m_cursor->uv    = cell.uvs[2];
+            m_cursor->color = ic;
+            m_cursor++;
 
-                cursor->pos   = math::vec3(x + sz.x, y + sz.y, m_far);
-                cursor->uv    = tile.coords[2];
-                cursor->color = 0xFFFFFFFF;
-                cursor++;
+            m_cursor->pos   = math::vec3(cell.pos.x + sz.x, cell.pos.y, m_far);
+            m_cursor->uv    = cell.uvs[3];
+            m_cursor->color = ic;
+            m_cursor++;
 
-                cursor->pos   = math::vec3(x + sz.x, y, m_far);
-                cursor->uv    = tile.coords[3];
-                cursor->color = 0xFFFFFFFF;
-                cursor++;
-
-                submissions++;
-            }
+            m_submissions++;
         }
-
-        opengl::ReleaseBufferPointer(GL_ARRAY_BUFFER);
-        opengl::UnbindBuffers(GL_ARRAY_BUFFER);
-
-        //this->blend.Apply();
-
-        opengl::BindVertexArray(m_vao);
-        opengl::BindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
-
-        opengl::DrawElements(GL_TRIANGLES, (submissions * 6), GL_UNSIGNED_INT, nullptr);
-
-        opengl::UnbindBuffers(GL_ELEMENT_ARRAY_BUFFER);
-        opengl::UnbindVertexArrays();
     }
+}
+
+void
+TilemapBatch::Flush (void)
+{
+    // Sanity check the same VBO is bound throughout the draw call
+    SDL_assert(m_vbo == static_cast<uint32>(opengl::GetInt(GL_ARRAY_BUFFER_BINDING)));
+    SDL_assert(m_submissions != 0);
+
+    opengl::ReleaseBufferPointer(GL_ARRAY_BUFFER);
+    opengl::UnbindBuffers(GL_ARRAY_BUFFER);
+
+    //this->blend.Apply();
+
+    opengl::BindVertexArray(m_vao);
+    opengl::BindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
+
+    opengl::DrawElements(GL_TRIANGLES, (m_submissions * 6), GL_UNSIGNED_INT, nullptr);
+
+    opengl::UnbindBuffers(GL_ELEMENT_ARRAY_BUFFER);
+    opengl::UnbindVertexArrays();
 }
 
 } // namespace rdge

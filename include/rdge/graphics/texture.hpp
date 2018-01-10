@@ -36,14 +36,11 @@ public:
     //! \throws rdge::Exception Surface cannot be loaded
     explicit Texture (const std::string& path);
 
-    //!@{
     //! \brief Texture ctor
     //! \details Load the texture from an existing asset.
     //! \param [in] surface Underlying surface asset
     //! \note The surface pixel format may be changed to accommodate OpenGL
-    explicit Texture (Surface& surface);
-    explicit Texture (Surface&& surface);
-    //!@}
+    explicit Texture (Surface surface);
 
     //! \brief Texture dtor
     //! \details Deletes the texture from the OpenGL context
@@ -64,7 +61,7 @@ public:
     //! \details Update texture and discard the previous stored data.
     //! \param [in] surface Underlying surface asset
     //! \note The surface pixel format may be changed to accommodate OpenGL
-    void Reload (Surface& surface);
+    void Reload (Surface surface);
 
     //! \brief Check if object contains a texture
     //! \returns True if underlying texture is registered, false otherwise

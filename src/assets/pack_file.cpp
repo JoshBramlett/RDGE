@@ -111,7 +111,7 @@ PackFile::GetTileset (int32 asset_id)
     m_file.seek(info.offset, rwops_base::seekdir::beg);
     m_file.read(msgpack.data(), info.size);
 
-    return SpriteSheet(msgpack, *this);
+    return Tileset(msgpack, *this);
 }
 
 } // namespace rdge
