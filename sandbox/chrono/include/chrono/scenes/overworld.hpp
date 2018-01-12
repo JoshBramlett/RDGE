@@ -8,6 +8,7 @@
 #include <rdge/debug.hpp>
 
 #include <vector>
+#include <memory>
 
 class OverworldScene
     : public rdge::IScene
@@ -47,7 +48,7 @@ public:
 public:
     rdge::physics::CollisionGraph collision_graph;
     rdge::OrthographicCamera camera;
-    rdge::SpriteBatch sprite_batch;
+    std::shared_ptr<rdge::SpriteBatch> sprite_batch;
     rdge::TileBatch tile_batch;
     std::vector<rdge::SpriteLayer> sprite_layers;
     std::vector<rdge::TileLayer> tile_layers;

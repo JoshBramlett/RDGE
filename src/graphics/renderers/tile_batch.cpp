@@ -39,6 +39,7 @@ TileBatch::TileBatch (uint16 capacity,
     , m_texture(std::move(texture))
 {
     m_texture->unit_id = 0;
+    this->blend.enabled = true;
 
     std::ostringstream vert;
     vert << "#version 330 core\n"
@@ -174,7 +175,8 @@ TileBatch::~TileBatch (void) noexcept
 }
 
 TileBatch::TileBatch (TileBatch&& other) noexcept
-    : m_shader(std::move(other.m_shader))
+    : blend(other.blend)
+    , m_shader(std::move(other.m_shader))
     , m_tileSize(other.m_tileSize)
     , m_far(other.m_far)
     , m_cursor(other.m_cursor)
@@ -192,6 +194,7 @@ TileBatch::operator= (TileBatch&& rhs) noexcept
 {
     if (this != &rhs)
     {
+        this->blend = rhs.blend;
         m_shader = std::move(rhs.m_shader);
         m_tileSize = rhs.m_tileSize;
         m_far = rhs.m_far;
@@ -218,6 +221,7 @@ TileBatch::SetView (const OrthographicCamera& camera)
 
     m_shader.Enable();
     m_shader.SetUniformValue(UNI_PROJ_MATRIX, camera.combined);
+    m_shader.SetUniformValue("u_texture", 0);
     m_shader.Disable();
 
     m_far = -camera.far;
@@ -227,7 +231,6 @@ void
 TileBatch::Prime (void)
 {
     m_shader.Enable();
-    m_texture->Activate();
 
     opengl::BindBuffer(GL_ARRAY_BUFFER, m_vbo);
     void* buffer = opengl::GetBufferPointer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
@@ -286,7 +289,8 @@ TileBatch::Flush (void)
     opengl::ReleaseBufferPointer(GL_ARRAY_BUFFER);
     opengl::UnbindBuffers(GL_ARRAY_BUFFER);
 
-    //this->blend.Apply();
+    m_texture->Activate();
+    this->blend.Apply();
 
     opengl::BindVertexArray(m_vao);
     opengl::BindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);

@@ -8,6 +8,7 @@
 #include <rdge/core.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/graphics/shader.hpp>
+#include <rdge/graphics/blend.hpp>
 
 #include <memory>
 
@@ -73,6 +74,9 @@ public:
     // ImGui support to list drawn tiles per frame
     // Global color - tint all tiles
     // Blending on above layers
+
+public:
+    Blend blend = Blend::LerpSourceAlpha; //!< Blend function (set every draw call)
 
 private:
     uint32 m_vao = 0; //!< Vertex array handle

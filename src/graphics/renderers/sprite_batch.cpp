@@ -225,7 +225,8 @@ SpriteBatch::~SpriteBatch (void) noexcept
 }
 
 SpriteBatch::SpriteBatch (SpriteBatch&& other) noexcept
-    : m_cursor(other.m_cursor)
+    : blend(other.blend)
+    , m_cursor(other.m_cursor)
     , m_submissions(other.m_submissions)
     , m_capacity(other.m_capacity)
     , m_shader(std::move(other.m_shader))
@@ -250,6 +251,7 @@ SpriteBatch::operator= (SpriteBatch&& rhs) noexcept
 {
     if (this != &rhs)
     {
+        this->blend = rhs.blend;
         m_cursor = rhs.m_cursor;
         m_submissions = rhs.m_submissions;
         m_capacity = rhs.m_capacity;

@@ -68,6 +68,10 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
                               j_frame["y"].get<int32>(),
                               j_frame["w"].get<int32>(),
                               j_frame["h"].get<int32>() };
+        if (region.value.is_rotated)
+        {
+            std::swap(region.value.clip.w, region.value.clip.h);
+        }
 
         // Validate values are within range
         if ((region.value.clip.x + region.value.clip.w > (int32)surface_size.w) ||
