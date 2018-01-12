@@ -100,7 +100,7 @@ struct generated_header_file
                 << " = " << value["v"].get<int32>() << ",\n";
         }
 
-        ofs << "}\n\n";
+        ofs << "};\n\n";
     }
 
     void write (void)

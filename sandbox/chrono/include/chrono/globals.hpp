@@ -27,6 +27,7 @@ struct chrono_globals
     rdge::Game* game;
     rdge::PackFile* pack;
 
+    float asset_scale;
     float ppm;
     float inv_ppm;
 };

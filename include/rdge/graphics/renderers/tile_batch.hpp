@@ -1,4 +1,4 @@
-//! \headerfile <rdge/graphics/renderers/tilemap_batch.hpp>
+//! \headerfile <rdge/graphics/renderers/tile_batch.hpp>
 //! \author Josh Bramlett
 //! \version 0.0.10
 //! \date 10/18/2017
@@ -22,9 +22,9 @@ class OrthographicCamera;
 class Texture;
 //!@}
 
-//! \class TilemapBatch
+//! \class TileBatch
 //! \brief Renderer for a pre-defined tile map
-class TilemapBatch
+class TileBatch
 {
 public:
     //!@{
@@ -36,25 +36,25 @@ public:
     static constexpr const char* UNI_PROJ_MATRIX = "proj_matrix"; //!< Projection matrix uniform
     //!@}
 
-    //! \brief TilemapBatch default ctor
-    TilemapBatch (void) = default;
+    //! \brief TileBatch default ctor
+    TileBatch (void) = default;
 
-    //! \brief TilemapBatch ctor
+    //! \brief TileBatch ctor
     //! \details Creates a copy of the \ref tilemap_data from the provided \ref
     //!          SpriteSheet.  Setup for all OpenGL performed.
     //! \param [in] capacity Max number of tiles rendered per draw call
     //! \param [in] texture Tileset texture
     //! \throws rdge::Exception Initialization failure
-    explicit TilemapBatch (uint16 capacity, const math::vec2& tile_size, std::shared_ptr<Texture> texture);
+    explicit TileBatch (uint16 capacity, const math::vec2& tile_size, std::shared_ptr<Texture> texture);
 
-    //! \brief TilemapBatch dtor
-    ~TilemapBatch (void) noexcept;
+    //! \brief TileBatch dtor
+    ~TileBatch (void) noexcept;
 
     //!@{ Non-copyable, move enabled
-    TilemapBatch (const TilemapBatch&) = delete;
-    TilemapBatch& operator= (const TilemapBatch&) = delete;
-    TilemapBatch (TilemapBatch&&) noexcept;
-    TilemapBatch& operator= (TilemapBatch&&) noexcept;
+    TileBatch (const TileBatch&) = delete;
+    TileBatch& operator= (const TileBatch&) = delete;
+    TileBatch (TileBatch&&) noexcept;
+    TileBatch& operator= (TileBatch&&) noexcept;
     //!@}
 
     //! \brief Set the viewport that will be rendered

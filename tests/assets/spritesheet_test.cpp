@@ -31,18 +31,18 @@ protected:
 TEST_F(SpriteSheetTest, HandlesSuccess)
 {
     SpriteSheet sheet("../tests/testdata/assets/spritesheet_01.json");
+    EXPECT_EQ(sheet.regions.size(), 2);
 
-    // 1) texture_part value validation
-
+    // 1) frame value validation
     const auto& part1 = sheet["uv_1"];
-    EXPECT_FLOAT_EQ(part1.size.x, 64.f);
-    EXPECT_FLOAT_EQ(part1.size.y, 64.f);
+    EXPECT_FLOAT_EQ(part1.size.w, 64.f);
+    EXPECT_FLOAT_EQ(part1.size.h, 64.f);
 
     // origin not set (defaults to center)
     EXPECT_FLOAT_EQ(part1.origin.x, 32.f);
     EXPECT_FLOAT_EQ(part1.origin.y, 32.f);
 
-    // origin set (accomodates scale)
+    // origin set
     const auto& part2 = sheet["uv_2"];
     EXPECT_FLOAT_EQ(part2.origin.x, 16.f);
     EXPECT_FLOAT_EQ(part2.origin.y, 32.f);
@@ -70,16 +70,8 @@ TEST_F(SpriteSheetTest, HandlesSuccess)
     EXPECT_FLOAT_EQ(uv2.top_right.x, 1.f);
     EXPECT_FLOAT_EQ(uv2.top_right.y, 1.f);
 
-    // 3) Validate members
-    EXPECT_TRUE(sheet.texture != nullptr);
-
-    // 4) Check CreateSprite
-    auto sprite = sheet.CreateSprite("uv_1", vec3());
-    EXPECT_TRUE(sprite != nullptr);
-
-    // 5) Verify failed lookups throw
+    // 3) Verify failed lookups throw
     EXPECT_THROW(sheet["nokey"], std::runtime_error);
-    EXPECT_THROW(sheet.CreateSprite("nokey", vec3()), std::runtime_error);
 }
 
 TEST_F(SpriteSheetTest, HandlesFileDoesNotExist)
@@ -93,29 +85,9 @@ TEST_F(SpriteSheetTest, HandlesImageDoesNotExist)
                  std::runtime_error);
 }
 
-TEST_F(SpriteSheetTest, HandlesMissingArray)
-{
-    EXPECT_THROW(SpriteSheet s("../tests/testdata/assets/spritesheet_03.json"),
-                 std::runtime_error);
-}
-
-TEST_F(SpriteSheetTest, HandlesValueNotUnsigned)
-{
-    EXPECT_THROW(SpriteSheet s("../tests/testdata/assets/spritesheet_04.json"),
-                 std::runtime_error);
-}
-
-TEST_F(SpriteSheetTest, HandlesValueLargerThanSurfaceSize)
-{
-    EXPECT_THROW(SpriteSheet s("../tests/testdata/assets/spritesheet_05.json"),
-                 std::runtime_error);
-}
-
-// TODO fails - Support must be re-added to detect duplicate keys
-//TEST_F(SpriteSheetTest, HandlesDuplicateKeys)
-//{
-    //EXPECT_THROW(SpriteSheet s("../tests/testdata/assets/spritesheet_06.json"),
-                 //std::runtime_error);
-//}
+// TODO Add tests for:
+// - further exception handling
+// - animations
+// - objects
 
 } // anonymous namespace

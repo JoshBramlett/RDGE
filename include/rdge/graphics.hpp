@@ -1,8 +1,9 @@
 #pragma once
 
 #include <rdge/graphics/layers/sprite_layer.hpp>
+#include <rdge/graphics/layers/tile_layer.hpp>
 #include <rdge/graphics/renderers/sprite_batch.hpp>
-#include <rdge/graphics/renderers/tilemap_batch.hpp>
+#include <rdge/graphics/renderers/tile_batch.hpp>
 #include <rdge/graphics/animation.hpp>
 #include <rdge/graphics/blend.hpp>
 #include <rdge/graphics/color.hpp>

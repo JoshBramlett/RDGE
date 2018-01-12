@@ -137,9 +137,7 @@ ImportSpritesheets (global_import_state& global_state)
                         for (const auto& frame : j["frames"])
                         {
                             std::ostringstream ss;
-                            ss << import.name
-                               << "_frame_"
-                               << frame["filename"].get<std::string>();
+                            ss << "frame_" << frame["filename"].get<std::string>();
 
                             if (is_obj)
                             {
@@ -161,9 +159,7 @@ ImportSpritesheets (global_import_state& global_state)
                         for (const auto& animation : j["animations"])
                         {
                             std::ostringstream ss;
-                            ss << import.name
-                               << "_animation_"
-                               << animation["name"].get<std::string>();
+                            ss << "animation_" << animation["name"].get<std::string>();
 
                             j_enum["values"].push_back({{ "n", ss.str() }, { "v", index++ }});
                         }

@@ -8,7 +8,7 @@
 
 #include <SDL_assert.h>
 
-#include "../../asset_enums.hpp"
+#include "../../asset_table.hpp"
 #include "../../globals.hpp"
 
 #define CHRONO_ADD_SWORD 0
@@ -34,43 +34,43 @@ CardinalDirectionArray<Animation> s_attack;
 
 Player::Player (void)
 {
-    auto sheet = g_game.pack->GetSpriteSheet(chrono_asset_spritesheet_player);
+    auto sheet = g_game.pack->GetSpriteSheet(rdge_asset_spritesheet_player);
 
     static bool once [[gnu::unused]] = [&sheet](void) {
         float scale = g_game.ppm / base_asset_ppm;
-        s_idle[Direction::UP]    = sheet.GetAnimation(player_animation_idle_back, scale);
-        s_idle[Direction::RIGHT] = sheet.GetAnimation(player_animation_idle_right, scale);
-        s_idle[Direction::DOWN]  = sheet.GetAnimation(player_animation_idle_front, scale);
-        s_idle[Direction::LEFT]  = sheet.GetAnimation(player_animation_idle_left, scale);
+        s_idle[Direction::UP]    = sheet.GetAnimation(animation_player_idle_back, scale);
+        s_idle[Direction::RIGHT] = sheet.GetAnimation(animation_player_idle_right, scale);
+        s_idle[Direction::DOWN]  = sheet.GetAnimation(animation_player_idle_front, scale);
+        s_idle[Direction::LEFT]  = sheet.GetAnimation(animation_player_idle_left, scale);
 
-        s_walk[Direction::UP]    = sheet.GetAnimation(player_animation_walk_back, scale);
-        s_walk[Direction::RIGHT] = sheet.GetAnimation(player_animation_walk_right, scale);
-        s_walk[Direction::DOWN]  = sheet.GetAnimation(player_animation_walk_front, scale);
-        s_walk[Direction::LEFT]  = sheet.GetAnimation(player_animation_walk_left, scale);
+        s_walk[Direction::UP]    = sheet.GetAnimation(animation_player_walk_back, scale);
+        s_walk[Direction::RIGHT] = sheet.GetAnimation(animation_player_walk_right, scale);
+        s_walk[Direction::DOWN]  = sheet.GetAnimation(animation_player_walk_front, scale);
+        s_walk[Direction::LEFT]  = sheet.GetAnimation(animation_player_walk_left, scale);
 
-        s_run[Direction::UP]    = sheet.GetAnimation(player_animation_run_back, scale);
-        s_run[Direction::RIGHT] = sheet.GetAnimation(player_animation_run_right, scale);
-        s_run[Direction::DOWN]  = sheet.GetAnimation(player_animation_run_front, scale);
-        s_run[Direction::LEFT]  = sheet.GetAnimation(player_animation_run_left, scale);
+        s_run[Direction::UP]    = sheet.GetAnimation(animation_player_run_back, scale);
+        s_run[Direction::RIGHT] = sheet.GetAnimation(animation_player_run_right, scale);
+        s_run[Direction::DOWN]  = sheet.GetAnimation(animation_player_run_front, scale);
+        s_run[Direction::LEFT]  = sheet.GetAnimation(animation_player_run_left, scale);
 
-        s_sheathe[Direction::UP]    = sheet.GetAnimation(player_animation_sheathe_back, scale);
-        s_sheathe[Direction::RIGHT] = sheet.GetAnimation(player_animation_sheathe_right, scale);
-        s_sheathe[Direction::DOWN]  = sheet.GetAnimation(player_animation_sheathe_front, scale);
-        s_sheathe[Direction::LEFT]  = sheet.GetAnimation(player_animation_sheathe_left, scale);
+        s_sheathe[Direction::UP]    = sheet.GetAnimation(animation_player_sheathe_back, scale);
+        s_sheathe[Direction::RIGHT] = sheet.GetAnimation(animation_player_sheathe_right, scale);
+        s_sheathe[Direction::DOWN]  = sheet.GetAnimation(animation_player_sheathe_front, scale);
+        s_sheathe[Direction::LEFT]  = sheet.GetAnimation(animation_player_sheathe_left, scale);
 
-        s_fight[Direction::UP]    = sheet.GetAnimation(player_animation_fight_stance_back, scale);
-        s_fight[Direction::RIGHT] = sheet.GetAnimation(player_animation_fight_stance_right, scale);
-        s_fight[Direction::DOWN]  = sheet.GetAnimation(player_animation_fight_stance_front, scale);
-        s_fight[Direction::LEFT]  = sheet.GetAnimation(player_animation_fight_stance_left, scale);
+        s_fight[Direction::UP]    = sheet.GetAnimation(animation_player_fight_idle_back, scale);
+        s_fight[Direction::RIGHT] = sheet.GetAnimation(animation_player_fight_idle_right, scale);
+        s_fight[Direction::DOWN]  = sheet.GetAnimation(animation_player_fight_idle_front, scale);
+        s_fight[Direction::LEFT]  = sheet.GetAnimation(animation_player_fight_idle_left, scale);
 
-        s_attack[Direction::UP]    = sheet.GetAnimation(player_animation_attack_back, scale);
-        s_attack[Direction::RIGHT] = sheet.GetAnimation(player_animation_attack_right, scale);
-        s_attack[Direction::DOWN]  = sheet.GetAnimation(player_animation_attack_front, scale);
-        s_attack[Direction::LEFT]  = sheet.GetAnimation(player_animation_attack_left, scale);
+        s_attack[Direction::UP]    = sheet.GetAnimation(animation_player_attack_back, scale);
+        s_attack[Direction::RIGHT] = sheet.GetAnimation(animation_player_attack_right, scale);
+        s_attack[Direction::DOWN]  = sheet.GetAnimation(animation_player_attack_front, scale);
+        s_attack[Direction::LEFT]  = sheet.GetAnimation(animation_player_attack_left, scale);
         return true;
     }();
 
-    this->sprite = std::make_shared<Sprite>(vec3(), vec2(), sheet.texture);
+    //this->sprite = std::make_shared<Sprite>(vec3(), vec2(), sheet.texture);
     this->facing = Direction::SOUTH;
     m_currentAnimation = &s_idle[this->facing];
 }

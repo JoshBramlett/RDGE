@@ -7,7 +7,7 @@
 
 #include <SDL_assert.h>
 
-#include "../asset_enums.hpp"
+#include "../asset_table.hpp"
 #include "../globals.hpp"
 
 #define CHRONO_ADD_WALLS 0
@@ -33,7 +33,7 @@ TestScene::TestScene (void)
     // Background layer
     ///////////////////
 
-    auto sheet = g_game.pack->GetSpriteSheet(chrono_asset_tilemap_crossroads);
+    auto sheet = g_game.pack->GetTilemap(rdge_asset_tilemap_overworld);
     background = TilemapBatch(sheet, 4.f);
 
 #if (CHRONO_ADD_WALLS)

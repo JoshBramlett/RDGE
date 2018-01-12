@@ -16,7 +16,7 @@ Layer::Layer (const nlohmann::json& j)
     {
         JSON_VALIDATE_REQUIRED(j, name, is_string);
         JSON_VALIDATE_REQUIRED(j, type, is_string);
-        JSON_VALIDATE_REQUIRED(j, opacity, is_number_float);
+        JSON_VALIDATE_REQUIRED(j, opacity, is_number);
         JSON_VALIDATE_REQUIRED(j, visible, is_boolean);
 
         JSON_VALIDATE_OPTIONAL(j, offsetx, is_number);
@@ -51,8 +51,8 @@ Layer::Layer (const nlohmann::json& j)
             JSON_VALIDATE_OPTIONAL(j, data, is_array);
             JSON_VALIDATE_OPTIONAL(j, chunks, is_array);
 
-            this->rows = j["width"].get<size_t>();
-            this->cols = j["height"].get<size_t>();
+            this->rows = j["height"].get<size_t>();
+            this->cols = j["width"].get<size_t>();
 
             // fixed size map
             if (j.count("data"))
@@ -74,10 +74,12 @@ Layer::Layer (const nlohmann::json& j)
 
                 this->start_x = j["startx"].get<size_t>();
                 this->start_y = j["starty"].get<size_t>();
-                this->chunks = std::vector<tile_chunk>(j.count("chunks"));
+
+                const auto& j_chunks = j["chunks"];
+                this->chunks = std::vector<tile_chunk>(j_chunks.size());
 
                 size_t index = 0;
-                for (const auto& j_chunk : j["chunks"])
+                for (const auto& j_chunk : j_chunks)
                 {
                     JSON_VALIDATE_REQUIRED(j_chunk, x, is_number);
                     JSON_VALIDATE_REQUIRED(j_chunk, y, is_number);
@@ -88,8 +90,8 @@ Layer::Layer (const nlohmann::json& j)
                     auto& chunk = this->chunks[index++];
                     chunk.x = j_chunk["x"].get<size_t>();
                     chunk.y = j_chunk["y"].get<size_t>();
-                    chunk.rows = j_chunk["width"].get<size_t>();
-                    chunk.cols = j_chunk["height"].get<size_t>();
+                    chunk.rows = j_chunk["height"].get<size_t>();
+                    chunk.cols = j_chunk["width"].get<size_t>();
                     chunk.data = j_chunk["data"].get<std::vector<uint32>>();
                 }
             }

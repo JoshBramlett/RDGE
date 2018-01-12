@@ -1,4 +1,4 @@
-#include <rdge/graphics/renderers/tilemap_batch.hpp>
+#include <rdge/graphics/renderers/tile_batch.hpp>
 #include <rdge/graphics/color.hpp>
 #include <rdge/graphics/orthographic_camera.hpp>
 #include <rdge/graphics/texture.hpp>
@@ -31,10 +31,11 @@ constexpr size_t TILE_SIZE = VERTEX_SIZE * 4;
 
 } // anonymous namespace
 
-TilemapBatch::TilemapBatch (uint16 capacity,
-                            const math::vec2& tile_size,
-                            std::shared_ptr<Texture> texture)
+TileBatch::TileBatch (uint16 capacity,
+                      const math::vec2& tile_size,
+                      std::shared_ptr<Texture> texture)
     : m_tileSize(tile_size)
+    , m_capacity(capacity)
     , m_texture(std::move(texture))
 {
     m_texture->unit_id = 0;
@@ -81,7 +82,7 @@ TilemapBatch::TilemapBatch (uint16 capacity,
 
     m_shader = Shader(vert.str(), frag.str());
 
-    // TilemapBatch implements it's buffer object streaming using the orphaning
+    // TileBatch implements it's buffer object streaming using the orphaning
     // technique, which means for every frame we ask OpenGL to give us a new buffer.
     // Since we request the same size, it's likely (though not guaranteed) that
     // no allocation will take place.  The major drawback of this approach is
@@ -94,7 +95,7 @@ TilemapBatch::TilemapBatch (uint16 capacity,
     m_vbo = opengl::CreateBuffer();
     opengl::BindBuffer(GL_ARRAY_BUFFER, m_vbo);
 
-    uint32 vbo_size = capacity * TILE_SIZE;
+    uint32 vbo_size = m_capacity * TILE_SIZE;
     opengl::SetBufferData(GL_ARRAY_BUFFER, vbo_size, nullptr, GL_DYNAMIC_DRAW);
 
     opengl::EnableVertexAttribute(VATTR_POS_INDEX);
@@ -127,7 +128,7 @@ TilemapBatch::TilemapBatch (uint16 capacity,
     m_ibo = opengl::CreateBuffer();
     opengl::BindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
 
-    uint32 ibo_count = capacity * 6;
+    uint32 ibo_count = m_capacity * 6;
     uint32 ibo_size = ibo_count * sizeof(uint32);
 
     uint32* ibo_data;
@@ -137,7 +138,7 @@ TilemapBatch::TilemapBatch (uint16 capacity,
     }
 
     for (uint32 i = 0, idx = 0, offset = 0;
-         i < capacity;
+         i < m_capacity;
          i++, idx = i * 6, offset = i * 4)
     {
         ibo_data[idx]     = offset;
@@ -158,24 +159,27 @@ TilemapBatch::TilemapBatch (uint16 capacity,
     OrthographicCamera camera;
     SetView(camera);
 
-    DLOG() << "TilemapBatch[" << this << "]"
-           << " capacity=" << capacity
+    DLOG() << "TileBatch[" << this << "]"
+           << " capacity=" << m_capacity
            << " vao[" << m_vao << "]"
            << " vbo[" << m_vbo << "].size=" << vbo_size
            << " ibo[" << m_ibo << "].size=" << ibo_size;
 }
 
-TilemapBatch::~TilemapBatch (void) noexcept
+TileBatch::~TileBatch (void) noexcept
 {
     glDeleteBuffers(1, &m_ibo);
     glDeleteBuffers(1, &m_vbo);
     glDeleteVertexArrays(1, &m_vao);
 }
 
-TilemapBatch::TilemapBatch (TilemapBatch&& other) noexcept
+TileBatch::TileBatch (TileBatch&& other) noexcept
     : m_shader(std::move(other.m_shader))
     , m_tileSize(other.m_tileSize)
     , m_far(other.m_far)
+    , m_cursor(other.m_cursor)
+    , m_submissions(other.m_submissions)
+    , m_capacity(other.m_capacity)
     , m_texture(std::move(other.m_texture))
 {
     std::swap(m_vao, other.m_vao);
@@ -183,26 +187,32 @@ TilemapBatch::TilemapBatch (TilemapBatch&& other) noexcept
     std::swap(m_ibo, other.m_ibo);
 }
 
-TilemapBatch&
-TilemapBatch::operator= (TilemapBatch&& rhs) noexcept
+TileBatch&
+TileBatch::operator= (TileBatch&& rhs) noexcept
 {
     if (this != &rhs)
     {
         m_shader = std::move(rhs.m_shader);
         m_tileSize = rhs.m_tileSize;
         m_far = rhs.m_far;
+        m_cursor = rhs.m_cursor;
+        m_submissions = rhs.m_submissions;
+        m_capacity = rhs.m_capacity;
         m_texture = std::move(rhs.m_texture);
 
         std::swap(m_vao, rhs.m_vao);
         std::swap(m_vbo, rhs.m_vbo);
         std::swap(m_ibo, rhs.m_ibo);
+
+        rhs.m_cursor = nullptr;
+        rhs.m_capacity = 0;
     }
 
     return *this;
 }
 
 void
-TilemapBatch::SetView (const OrthographicCamera& camera)
+TileBatch::SetView (const OrthographicCamera& camera)
 {
     SDL_assert(m_vao != 0);
 
@@ -214,7 +224,7 @@ TilemapBatch::SetView (const OrthographicCamera& camera)
 }
 
 void
-TilemapBatch::Prime (void)
+TileBatch::Prime (void)
 {
     m_shader.Enable();
     m_texture->Activate();
@@ -227,7 +237,7 @@ TilemapBatch::Prime (void)
 }
 
 void
-TilemapBatch::Draw (const tile_cell_chunk& chunk, color c)
+TileBatch::Draw (const tile_cell_chunk& chunk, color c)
 {
     SDL_assert(m_vao != 0);
     SDL_assert(m_vbo == static_cast<uint32>(opengl::GetInt(GL_ARRAY_BUFFER_BINDING)));
@@ -267,7 +277,7 @@ TilemapBatch::Draw (const tile_cell_chunk& chunk, color c)
 }
 
 void
-TilemapBatch::Flush (void)
+TileBatch::Flush (void)
 {
     // Sanity check the same VBO is bound throughout the draw call
     SDL_assert(m_vbo == static_cast<uint32>(opengl::GetInt(GL_ARRAY_BUFFER_BINDING)));

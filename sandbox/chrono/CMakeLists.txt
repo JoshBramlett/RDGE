@@ -11,12 +11,12 @@ message (STATUS "RDGE include dir: ${RDGE_SOURCE_DIR}/include")
 link_directories (${RDGE_BINARY_DIR}/lib)
 include_directories (${RDGE_INCLUDE_DIR})
 
+# project includes
+include_directories (include)
+
 add_executable (chrono
                 src/main.cpp
-                src/scenes/test.cpp
-                src/scenes/entities/duck.cpp
-                src/scenes/entities/dove.cpp
-                src/scenes/entities/player.cpp)
+                src/scenes/overworld.cpp)
 
 target_link_libraries (chrono
                        RDGE)

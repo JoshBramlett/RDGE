@@ -1,5 +1,6 @@
 #include <rdge/assets/tilemap/tilemap.hpp>
 #include <rdge/math/intrinsics.hpp>
+#include <rdge/util/logger.hpp>
 #include <rdge/internal/exception_macros.hpp>
 
 #include <sstream>
@@ -66,7 +67,7 @@ Tilemap::Tilemap (const nlohmann::json& j)
 
         for (auto& j_layer : j["layers"])
         {
-            this->layers.emplace_back(Layer(j_layer));
+            this->layers.emplace_back(j_layer);
         }
 
         // optional

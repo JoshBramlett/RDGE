@@ -134,7 +134,7 @@ def process(in_file, out_dir):
                 layer['tileset_index'] = ts_index
                 for obj in layer['objects']:
                     if 'gid' in obj:
-                        obj['gid'] -= first_gid
+                        obj['gid'] -= (first_gid - 1)
         elif layer['type'] == 'tilelayer':
             if 'data' in layer and layer['data']:
                 min_gid, max_gid = gid_min_max(layer['data'])

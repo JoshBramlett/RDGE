@@ -91,6 +91,7 @@ add_library (RDGE SHARED
              src/assets/tilemap/layer.cpp
              src/assets/tilemap/object.cpp
              src/assets/tilemap/property.cpp
+             src/assets/tilemap/tilemap.cpp
              src/assets/pack_file.cpp
              src/assets/bmfont.cpp
              src/assets/bitmap_font.cpp
@@ -112,7 +113,7 @@ add_library (RDGE SHARED
              src/graphics/layers/sprite_layer.cpp
              src/graphics/layers/tile_layer.cpp
              src/graphics/renderers/sprite_batch.cpp
-             src/graphics/renderers/tilemap_batch.cpp
+             src/graphics/renderers/tile_batch.cpp
              src/graphics/animation.cpp
              src/graphics/blend.cpp
              src/graphics/color.cpp
@@ -170,10 +171,10 @@ add_subdirectory (tools/asset_packer)
 add_subdirectory (tools/pyxel2tiled)
 add_subdirectory (sandbox/chrono)
 add_subdirectory (sandbox/physics)
-add_subdirectory (tutorials/01_textures)
-add_subdirectory (tutorials/02_layers)
-add_subdirectory (tutorials/03_spritesheet)
-add_subdirectory (tutorials/04_scenes)
+#add_subdirectory (tutorials/01_textures)
+#add_subdirectory (tutorials/02_layers)
+#add_subdirectory (tutorials/03_spritesheet)
+#add_subdirectory (tutorials/04_scenes)
 
 add_executable (rdge_test
                 tests/main.cpp

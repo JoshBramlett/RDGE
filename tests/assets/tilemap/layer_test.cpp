@@ -33,7 +33,7 @@ TEST(LayerTest, VerifyTileLayerConstruction)
 
     // 1) Validate proper construction
     tilemap::Layer layer(j);
-    EXPECT_EQ(layer.type, tilemap::LayerType::TILE);
+    EXPECT_EQ(layer.type, tilemap::LayerType::TILELAYER);
     EXPECT_EQ(rdge::to_string(layer.type), "TILE");
     EXPECT_EQ(layer.name, "ground");
     EXPECT_FLOAT_EQ(layer.offset.x, 220.f);
@@ -64,7 +64,7 @@ TEST(LayerTest, VerifyObjectLayerConstruction)
 
     // 1) Validate proper construction
     tilemap::Layer layer(j);
-    EXPECT_EQ(layer.type, tilemap::LayerType::OBJECT);
+    EXPECT_EQ(layer.type, tilemap::LayerType::OBJECTGROUP);
     EXPECT_EQ(rdge::to_string(layer.type), "OBJECT");
     EXPECT_EQ(layer.name, "people");
     EXPECT_EQ(layer.visible, false);

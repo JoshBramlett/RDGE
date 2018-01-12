@@ -10,6 +10,7 @@
 #include <rdge/assets/surface.hpp>
 #include <rdge/assets/spritesheet.hpp>
 #include <rdge/assets/tileset.hpp>
+#include <rdge/assets/tilemap/tilemap.hpp>
 #include <rdge/util/io/rwops_base.hpp>
 
 //! \namespace rdge Rainbow Drop Game Engine
@@ -39,6 +40,7 @@ public:
     Surface GetSurface (int32 asset_id);
     SpriteSheet GetSpriteSheet (int32 asset_id);
     Tileset GetTileset (int32 asset_id);
+    tilemap::Tilemap GetTilemap (int32 asset_id);
 
 private:
     rwops_base m_file;

@@ -13,6 +13,7 @@ using json = nlohmann::json;
 
 // NOTE: No test for missing elements b/c the json lib has an assertion
 
+// TODO
 //TEST(ObjectTest, VerifySpriteConstruction)
 //{
 
@@ -22,14 +23,11 @@ TEST(ObjectTest, VerifyPointConstruction)
 {
     auto j = R"(
       {
-        "point":true,
-        "height":0,
         "id":20,
+        "obj_type":"point",
         "name":"point_name",
-        "rotation":0,
         "type":"point_type",
         "visible":true,
-        "width":0,
         "x":220,
         "y":350
       }
@@ -45,7 +43,6 @@ TEST(ObjectTest, VerifyPointConstruction)
     EXPECT_FLOAT_EQ(object.position.x, 220.f);
     EXPECT_FLOAT_EQ(object.position.y, 350.f);
     EXPECT_EQ(object.visible, true);
-    EXPECT_FLOAT_EQ(object.rotation, 0.f);
 
     // 2) Validate base object
     auto base = object.GetPoint();
@@ -57,14 +54,12 @@ TEST(ObjectTest, VerifyCircleConstruction)
 {
     auto j = R"(
       {
-        "ellipse":true,
-        "height":5,
         "id":13,
+        "obj_type":"circle",
         "name":"circle_name",
-        "rotation":0,
         "type":"circle_type",
         "visible":true,
-        "width":5,
+        "radius":5,
         "x":560,
         "y":808
       }
@@ -80,7 +75,6 @@ TEST(ObjectTest, VerifyCircleConstruction)
     EXPECT_FLOAT_EQ(object.position.x, 560.f);
     EXPECT_FLOAT_EQ(object.position.y, 808.f);
     EXPECT_EQ(object.visible, true);
-    EXPECT_FLOAT_EQ(object.rotation, 0.f);
 
     // 2) Validate base object
     auto base = object.GetCircle();
@@ -89,50 +83,15 @@ TEST(ObjectTest, VerifyCircleConstruction)
     EXPECT_FLOAT_EQ(base.radius, 5.f);
 }
 
-TEST(ObjectTest, VerifyAABBConstruction)
-{
-    auto j = R"(
-      {
-        "height":6,
-        "id":1,
-        "name":"aabb_name",
-        "rotation":0,
-        "type":"aabb_type",
-        "visible":true,
-        "width":5,
-        "x":5,
-        "y":5
-      }
-    )"_json;
-
-    // 1) Validate proper construction
-    tilemap::Object object(j);
-    EXPECT_EQ(object.type, tilemap::ObjectType::AABB);
-    EXPECT_EQ(rdge::to_string(object.type), "AABB");
-    EXPECT_EQ(object.id, 1);
-    EXPECT_EQ(object.name, "aabb_name");
-    EXPECT_EQ(object.custom_type, "aabb_type");
-    EXPECT_FLOAT_EQ(object.position.x, 5.f);
-    EXPECT_FLOAT_EQ(object.position.y, 5.f);
-    EXPECT_EQ(object.visible, true);
-    EXPECT_FLOAT_EQ(object.rotation, 0.f);
-
-    // 2) Validate base object
-    auto base = object.GetAABB();
-    EXPECT_FLOAT_EQ(base.lo.x, 2.5f);
-    EXPECT_FLOAT_EQ(base.lo.y, 2.f);
-    EXPECT_FLOAT_EQ(base.hi.x, 7.5f);
-    EXPECT_FLOAT_EQ(base.hi.y, 8.f);
-}
-
 TEST(ObjectTest, VerifyPolygonConstruction)
 {
     auto j = R"(
       {
-        "height":0,
         "id":15,
+        "obj_type": "polygon",
         "name":"polygon_name",
-        "polygon":[
+        "type":"polygon_type",
+        "coords":[
         {
           "x":0,
           "y":0
@@ -153,10 +112,7 @@ TEST(ObjectTest, VerifyPolygonConstruction)
           "x":16,
           "y":-288
         }],
-        "rotation":0,
-        "type":"polygon_type",
         "visible":true,
-        "width":0,
         "x":-176,
         "y":432
       }
@@ -172,7 +128,6 @@ TEST(ObjectTest, VerifyPolygonConstruction)
     EXPECT_FLOAT_EQ(object.position.x, -176.f);
     EXPECT_FLOAT_EQ(object.position.y, 432.f);
     EXPECT_EQ(object.visible, true);
-    EXPECT_FLOAT_EQ(object.rotation, 0.f);
 
     // 2) Validate base object
     auto base = object.GetPolygon();
@@ -186,10 +141,11 @@ TEST(ObjectTest, VerifyPolylineConstruction)
 {
     auto j = R"(
       {
-        "height":0,
         "id":16,
-        "name":"",
-        "polyline":[
+        "obj_type":"polyline",
+        "name":"polyline_name",
+        "type":"polyline_type",
+        "coords":[
         {
           "x":0,
           "y":0
@@ -214,10 +170,7 @@ TEST(ObjectTest, VerifyPolylineConstruction)
           "x":512,
           "y":0
         }],
-        "rotation":0,
-        "type":"",
         "visible":true,
-        "width":0,
         "x":240,
         "y":88
       }
@@ -231,20 +184,18 @@ TEST(ObjectTest, VerifyTextConstruction)
 {
     auto j = R"(
       {
-        "height":19,
-        "id":15,
-        "name":"",
+        "id":20,
+        "obj_type":"text",
+        "name":"text_name",
+        "type":"text_type",
+        "visible":true,
+        "x":220,
+        "y":350,
         "text":
         {
           "text":"Hello World",
           "wrap":true
-        },
-        "rotation":0,
-        "type":"",
-        "visible":true,
-        "width":248,
-        "x":48,
-        "y":136
+        }
       }
     )"_json;
 
@@ -256,28 +207,26 @@ TEST(ObjectTest, VerifyObjectProperties)
 {
     auto j = R"(
       {
-        "height":6,
-        "id":1,
-        "name":"aabb_name",
+        "id":20,
+        "obj_type":"point",
+        "name":"point_name",
+        "type":"point_type",
+        "visible":true,
+        "x":220,
+        "y":350,
         "properties": [
           {
             "type":"int",
             "name":"cust_prop_int",
             "value":5
           }
-        ],
-        "rotation":0,
-        "type":"aabb_type",
-        "visible":true,
-        "width":5,
-        "x":5,
-        "y":5
+        ]
       }
     )"_json;
 
     // 1) Validate proper construction
     tilemap::Object object(j);
-    EXPECT_EQ(object.type, tilemap::ObjectType::AABB);
+    EXPECT_EQ(object.type, tilemap::ObjectType::POINT);
 
     // 1) Validate proper construction
     EXPECT_EQ(object.properties.Size(), 1);

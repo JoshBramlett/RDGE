@@ -72,7 +72,7 @@ ImportTilesets (global_import_state& global_state)
                     }
 
                     rwops.read(text_data, text_size);
-                    const auto j = json::parse(text_data);
+                    auto j = json::parse(text_data);
                     if (j["type"].get<std::string>() != "tileset")
                     {
                         free(text_data);

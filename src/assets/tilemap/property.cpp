@@ -1,4 +1,5 @@
 #include <rdge/assets/tilemap/property.hpp>
+#include <rdge/util/logger.hpp>
 #include <rdge/internal/exception_macros.hpp>
 
 namespace rdge {
@@ -8,10 +9,16 @@ using json = nlohmann::json;
 
 PropertyCollection::PropertyCollection (const nlohmann::json& j)
 {
+    if (j.count("properties") == 0)
+    {
+        return;
+    }
+
     try
     {
-        m_properties.reserve(j.size());
-        for (const auto& j_prop : j)
+        const auto& j_properties = j["properties"];
+        m_properties.reserve(j_properties.size());
+        for (const auto& j_prop : j_properties)
         {
             JSON_VALIDATE_REQUIRED(j_prop, name, is_string);
             JSON_VALIDATE_REQUIRED(j_prop, type, is_string);

@@ -1,6 +1,7 @@
 #include <rdge/assets/pack_file.hpp>
 #include <rdge/assets/file_formats/asset_pack.hpp>
 #include <rdge/util/memory/alloc.hpp>
+#include <rdge/util/json.hpp>
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/hints.hpp>
 
@@ -11,6 +12,7 @@
 namespace rdge {
 
 using namespace rdge::asset_pack;
+using json = nlohmann::json;
 
 PackFile::PackFile (const char* filepath)
     : m_file(rwops_base::from_file(filepath, "rb"))
@@ -96,7 +98,9 @@ PackFile::GetSpriteSheet (int32 asset_id)
     m_file.seek(info.offset, rwops_base::seekdir::beg);
     m_file.read(msgpack.data(), info.size);
 
-    return SpriteSheet(msgpack, *this);
+    SpriteSheet result(msgpack, *this);
+    return result;
+    //return SpriteSheet(msgpack, *this);
 }
 
 Tileset
@@ -111,7 +115,24 @@ PackFile::GetTileset (int32 asset_id)
     m_file.seek(info.offset, rwops_base::seekdir::beg);
     m_file.read(msgpack.data(), info.size);
 
-    return Tileset(msgpack, *this);
+    Tileset result(msgpack, *this);
+    return result;
+    //return Tileset(msgpack, *this);
+}
+
+tilemap::Tilemap
+PackFile::GetTilemap (int32 asset_id)
+{
+    SDL_assert(asset_id >= 0 && (uint32)asset_id < m_header.asset_count);
+
+    auto& info = m_table[asset_id];
+    SDL_assert(info.type == asset_type_tilemap);
+
+    std::vector<std::uint8_t> msgpack(info.size);
+    m_file.seek(info.offset, rwops_base::seekdir::beg);
+    m_file.read(msgpack.data(), info.size);
+
+    return tilemap::Tilemap(json::from_msgpack(msgpack));
 }
 
 } // namespace rdge

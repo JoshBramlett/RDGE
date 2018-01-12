@@ -8,6 +8,7 @@
 #include <rdge/core.hpp>
 #include <rdge/assets/tilemap/layer.hpp>
 #include <rdge/assets/tilemap/property.hpp>
+#include <rdge/assets/file_formats/asset_pack.hpp>
 #include <rdge/graphics/color.hpp>
 #include <rdge/math/vec2.hpp>
 
@@ -95,7 +96,7 @@ public:
         int32 first_gid;             //!< First global tile id in the sheet
         int32 table_id;              //!< Sheet table id in the \ref PackFile
         asset_pack::asset_type type; //!< Sheet type (spritesheet or tileset)
-    }
+    };
 
     std::vector<Layer> layers;      //!< List of Tilemap layers
     std::vector<sheet_info> sheets; //!< List of Tilesets/Spritesheets dependencies

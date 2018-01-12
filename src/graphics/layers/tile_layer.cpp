@@ -3,8 +3,9 @@
 #include <rdge/assets/tilemap/layer.hpp>
 #include <rdge/graphics/orthographic_camera.hpp>
 #include <rdge/graphics/texture.hpp>
-#include <rdge/graphics/renderers/tilemap_batch.hpp>
+#include <rdge/graphics/renderers/tile_batch.hpp>
 #include <rdge/util/strings.hpp>
+#include <rdge/util/logger.hpp>
 #include <rdge/util/memory/alloc.hpp>
 #include <rdge/internal/hints.hpp>
 
@@ -125,6 +126,13 @@ TileLayer::TileLayer (const tilemap::Layer& def, const Tileset& tileset, float s
             }
         }
     }
+
+    ILOG() << "TileLayer created:"
+           << " tile_count=" << m_cells.count
+           << " tile_size=" << m_cells.size
+           << " chunk_count=" << m_chunks.count
+           << " chunk_size=" << m_chunks.size
+           << " offset=" << m_offset;
 }
 
 TileLayer::~TileLayer (void) noexcept
@@ -133,8 +141,35 @@ TileLayer::~TileLayer (void) noexcept
     RDGE_FREE(m_chunks.data, nullptr);
 }
 
+TileLayer::TileLayer (TileLayer&& other) noexcept
+    : m_cells(other.m_cells)
+    , m_chunks(other.m_chunks)
+    , m_offset(other.m_offset)
+    , m_bounds(other.m_bounds)
+    , m_color(other.m_color)
+{
+    other.m_cells.data = nullptr;
+    other.m_chunks.data = nullptr;
+}
+
+TileLayer&
+TileLayer::operator= (TileLayer&& rhs) noexcept
+{
+    if (this != &rhs)
+    {
+        m_offset = rhs.m_offset;
+        m_bounds = rhs.m_bounds;
+        m_color = rhs.m_color;
+
+        std::swap(m_cells, rhs.m_cells);
+        std::swap(m_chunks, rhs.m_chunks);
+    }
+
+    return *this;
+}
+
 void
-TileLayer::Draw (TilemapBatch& renderer, const OrthographicCamera& camera)
+TileLayer::Draw (TileBatch& renderer, const OrthographicCamera& camera)
 {
     // buffer the camera bounds by 5 tiles
     auto frame_bounds = camera.bounds;
@@ -148,7 +183,7 @@ TileLayer::Draw (TilemapBatch& renderer, const OrthographicCamera& camera)
     renderer.SetView(camera);
     renderer.Prime();
 
-    if (frame_bounds.contains(m_bounds))
+    //if (frame_bounds.contains(m_bounds))
     {
         // draw everything
         for (size_t i = 0; i < m_chunks.count; i++)
@@ -156,10 +191,17 @@ TileLayer::Draw (TilemapBatch& renderer, const OrthographicCamera& camera)
             renderer.Draw(m_chunks.data[i], m_color);
         }
     }
-    else
-    {
-
-    }
+    //else
+    //{
+        //auto top_left = camera.bounds.top_left() - m_offset;
+        //int32 x = top_left.x / m_chunks.size.w;
+        //int32 y = top_left.y / m_chunks.size.h;
+        //int32 chunk_index = (y * m_chunks.pitch) + x;
+        //if (chunk_index >= 0 && chunk_index < (int32)m_chunks.count)
+        //{
+            //renderer.Draw(m_chunks.data[chunk_index], m_color);
+        //}
+    //}
 
     renderer.Flush();
 }

@@ -19,7 +19,7 @@ namespace rdge {
 //!@{ Forward declarations
 class Texture;
 class Tileset;
-class TilemapBatch;
+class TileBatch;
 class OrthographicCamera;
 namespace tilemap { class Layer; }
 //!@}
@@ -70,15 +70,14 @@ public:
     //!@{ Non-copyable, move enabled
     TileLayer (const TileLayer&) = delete;
     TileLayer& operator= (const TileLayer&) = delete;
-    TileLayer (TileLayer&&) noexcept = default;
-    TileLayer& operator= (TileLayer&&) noexcept = default;
+    TileLayer (TileLayer&&) noexcept;
+    TileLayer& operator= (TileLayer&&) noexcept;
     //!@}
 
     //! \brief Draw all tiles within the camera bounds
-    void Draw (TilemapBatch& renderer, const OrthographicCamera& camera);
+    void Draw (TileBatch& renderer, const OrthographicCamera& camera);
 
 private:
-
     //! \struct cell_grid
     //! \brief Quadrilateral grid of cell data
     //! \details Contains all data to be rendered by the layer.  Cell data will
@@ -112,25 +111,8 @@ private:
     physics::aabb m_bounds;        //!< Layer boundary (in pixels)
     color m_color = color::WHITE;  //!< Render color (to store opacity)
 
+public:
     std::shared_ptr<Texture> texture; //!< Tileset texture
-
-    //size_t m_rows = 0;   //!< Total row count (in cells)
-    //size_t m_cols = 0;   //!< Total column count (in cells)
-    //size_t m_startX = 0; //!< Top left x-coordinate accross all chunks
-    //size_t m_startY = 0; //!< Top left y-coordinate accross all chunks
-
-    //grid_chunk* m_chunks = nullptr; //!< List of chunks
-    //size_t m_chunkCount = 0;        //!< Chunk count
-    //size_t m_chunkRows = 0;         //!< Chunk row count (in cells)
-    //size_t m_chunkCols = 0;         //!< Chunk column count (in cells)
-    //tile_cell* m_cells = nullptr;
-
-    //physics::aabb m_bounds;        //!< Layer boundary (in pixels)
-    //math::vec2 m_cellSize;         //!< Cell size (in pixels)
-    //math::vec2 m_offset;           //!< Start offset (in pixels)
-    //color m_color = color::WHITE;  //!< Render color (to store opacity)
-
-    //std::shared_ptr<Texture> texture; //!< Tileset texture
 };
 
 //! \brief TileRenderOrder stream output operator
