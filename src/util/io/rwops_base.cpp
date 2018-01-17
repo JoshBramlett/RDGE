@@ -1,7 +1,7 @@
 #include <rdge/util/io/rwops_base.hpp>
 #include <rdge/type_traits.hpp>
 #include <rdge/internal/exception_macros.hpp>
-#include <rdge/internal/hints.hpp>
+#include <rdge/util/compiler.hpp>
 
 #include <SDL_assert.h>
 
@@ -40,7 +40,7 @@ uint64
 rwops_base::size (void)
 {
     int64 sz = SDL_RWsize(m_rwops);
-    if (UNLIKELY(sz < 0))
+    if (RDGE_UNLIKELY(sz < 0))
     {
         SDL_THROW("Failed to get file size", "SDL_RWsize");
     }
@@ -58,7 +58,7 @@ size_t
 rwops_base::read (void* ptr, size_t size, size_t count)
 {
     size_t result = SDL_RWread(m_rwops, ptr, size, count);
-    if (UNLIKELY(result == 0))
+    if (RDGE_UNLIKELY(result == 0))
     {
         SDL_THROW("Failed to read from file", "SDL_RWread");
     }
@@ -70,7 +70,7 @@ size_t
 rwops_base::write (void* ptr, size_t size, size_t count)
 {
     size_t result = SDL_RWwrite(m_rwops, ptr, size, count);
-    if (UNLIKELY(result != count))
+    if (RDGE_UNLIKELY(result != count))
     {
         SDL_THROW("Failed to write to file", "SDL_RWread");
     }
@@ -100,7 +100,7 @@ rwops_base::from_file (const char* file, const char* mode)
     SDL_assert(mode != nullptr);
 
     SDL_RWops* sdl_rwops = SDL_RWFromFile(file, mode);
-    if (UNLIKELY(!sdl_rwops))
+    if (RDGE_UNLIKELY(!sdl_rwops))
     {
         SDL_THROW("Failed to create rwops from file", "SDL_RWFromFile");
     }
@@ -114,7 +114,7 @@ rwops_base::from_fp (FILE* file, bool autoclose)
     SDL_assert(file != nullptr);
 
     SDL_RWops* sdl_rwops = SDL_RWFromFP(file, autoclose ? SDL_TRUE : SDL_FALSE);
-    if (UNLIKELY(!sdl_rwops))
+    if (RDGE_UNLIKELY(!sdl_rwops))
     {
         SDL_THROW("Failed to create rwops from file pointer", "SDL_RWFromFP");
     }
@@ -129,7 +129,7 @@ rwops_base::from_memory (void* mem, int32 size)
     SDL_assert(size > 0);
 
     SDL_RWops* sdl_rwops = SDL_RWFromMem(mem, size);
-    if (UNLIKELY(!sdl_rwops))
+    if (RDGE_UNLIKELY(!sdl_rwops))
     {
         SDL_THROW("Failed to create rwops from memory buffer", "SDL_RWFromMem");
     }
@@ -144,7 +144,7 @@ rwops_base::from_const_memory (const void* mem, int32 size)
     SDL_assert(size > 0);
 
     SDL_RWops* sdl_rwops = SDL_RWFromConstMem(mem, size);
-    if (UNLIKELY(!sdl_rwops))
+    if (RDGE_UNLIKELY(!sdl_rwops))
     {
         SDL_THROW("Failed to create rwops from const memory buffer", "SDL_RWFromConstMem");
     }

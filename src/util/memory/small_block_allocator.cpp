@@ -1,6 +1,6 @@
 #include <rdge/util/memory/small_block_allocator.hpp>
 #include <rdge/math/intrinsics.hpp>
-#include <rdge/internal/hints.hpp>
+#include <rdge/util/compiler.hpp>
 #include <rdge/internal/exception_macros.hpp>
 
 #include <SDL_assert.h>
@@ -48,7 +48,7 @@ SmallBlockAllocator::SmallBlockAllocator (void)
 
     // Allocate the list used to point to chunks.  Each chunk will be allocated
     // on demand and assigned to this list.
-    if (UNLIKELY(!RDGE_CALLOC(m_chunks, CHUNK_ELEMENTS, &this->mem_prof)))
+    if (RDGE_UNLIKELY(!RDGE_CALLOC(m_chunks, CHUNK_ELEMENTS, &this->mem_prof)))
     {
         RDGE_THROW("Failed to allocate memory");
     }
@@ -109,7 +109,7 @@ SmallBlockAllocator::Alloc (size_t size)
         usage.large_allocs++;
 #endif
         void* result = nullptr;
-        if (UNLIKELY(!RDGE_MALLOC(result, size, &this->mem_prof)))
+        if (RDGE_UNLIKELY(!RDGE_MALLOC(result, size, &this->mem_prof)))
         {
             RDGE_THROW("Failed to allocate memory");
         }
@@ -137,7 +137,7 @@ SmallBlockAllocator::Alloc (size_t size)
     {
         // The number of heaps is exhausted - reallocate
         m_chunkCapacity += CHUNK_ELEMENTS;
-        if (UNLIKELY(!RDGE_REALLOC(m_chunks, m_chunkCapacity, &this->mem_prof)))
+        if (RDGE_UNLIKELY(!RDGE_REALLOC(m_chunks, m_chunkCapacity, &this->mem_prof)))
         {
             RDGE_THROW("Failed to allocate memory");
         }
@@ -146,7 +146,7 @@ SmallBlockAllocator::Alloc (size_t size)
     // No pre-allocated block is available - allocate a new heap
     chunk* c = m_chunks + m_chunkCount;
     c->block_size = s_blockSizes[index];
-    if (UNLIKELY(!RDGE_MALLOC(c->nodes, CHUNK_SIZE, &this->mem_prof)))
+    if (RDGE_UNLIKELY(!RDGE_MALLOC(c->nodes, CHUNK_SIZE, &this->mem_prof)))
     {
         RDGE_THROW("Failed to allocate memory");
     }

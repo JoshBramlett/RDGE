@@ -14,10 +14,10 @@
 #include <rdge/physics/shapes/circle.hpp>
 #include <rdge/physics/shapes/polygon.hpp>
 #include <rdge/physics/fixture.hpp>
+#include <rdge/util/compiler.hpp>
 #include <rdge/util/logger.hpp>
 #include <rdge/util/memory/alloc.hpp>
 
-#include <rdge/internal/hints.hpp>
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
 
@@ -163,7 +163,7 @@ private:
         opengl::BindBuffer(GL_ARRAY_BUFFER, m_vbo);
 
         uint32 vbo_size = static_cast<uint32>(m_capacity) * POINT_SIZE;
-        if (UNLIKELY(!RDGE_MALLOC(m_buffer, vbo_size, nullptr)))
+        if (RDGE_UNLIKELY(!RDGE_MALLOC(m_buffer, vbo_size, nullptr)))
         {
             RDGE_THROW("Failed to allocate memory");
         }
@@ -348,7 +348,7 @@ private:
         opengl::BindBuffer(GL_ARRAY_BUFFER, m_vbo);
 
         uint32 vbo_size = static_cast<uint32>(m_capacity) * LINE_SIZE;
-        if (UNLIKELY(!RDGE_MALLOC(m_buffer, vbo_size, nullptr)))
+        if (RDGE_UNLIKELY(!RDGE_MALLOC(m_buffer, vbo_size, nullptr)))
         {
             RDGE_THROW("Failed to allocate memory");
         }

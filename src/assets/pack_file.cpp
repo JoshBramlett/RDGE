@@ -3,7 +3,7 @@
 #include <rdge/util/memory/alloc.hpp>
 #include <rdge/util/json.hpp>
 #include <rdge/internal/exception_macros.hpp>
-#include <rdge/internal/hints.hpp>
+#include <rdge/util/compiler.hpp>
 
 #include <SDL_assert.h>
 
@@ -17,24 +17,24 @@ using json = nlohmann::json;
 PackFile::PackFile (const char* filepath)
     : m_file(rwops_base::from_file(filepath, "rb"))
 {
-    if (UNLIKELY(m_file.size() < sizeof(header)))
+    if (RDGE_UNLIKELY(m_file.size() < sizeof(header)))
     {
         RDGE_THROW("Invalid file");
     }
 
     m_file.seek(0, rwops_base::seekdir::beg);
     m_file.read(&m_header, sizeof(header));
-    if (UNLIKELY(m_header.magic_value != RDGE_MAGIC_VALUE))
+    if (RDGE_UNLIKELY(m_header.magic_value != RDGE_MAGIC_VALUE))
     {
         RDGE_THROW("Unrecognized file format");
     }
 
-    if (UNLIKELY(m_header.version > RDGE_ASSET_PACK_VERSION))
+    if (RDGE_UNLIKELY(m_header.version > RDGE_ASSET_PACK_VERSION))
     {
         RDGE_THROW("Pack file is newer than supported");
     }
 
-    if (UNLIKELY(m_header.asset_count == 0))
+    if (RDGE_UNLIKELY(m_header.asset_count == 0))
     {
         RDGE_THROW("Pack file asset table is empty");
     }

@@ -1,7 +1,7 @@
 #include <rdge/math/mat4.hpp>
 #include <rdge/math/intrinsics.hpp>
 #include <rdge/util/logger.hpp>
-#include <rdge/internal/hints.hpp>
+#include <rdge/util/compiler.hpp>
 
 #include <SDL_assert.h>
 
@@ -174,7 +174,7 @@ mat4::inverse (void)
                         elements[1] * result.elements[4] +
                         elements[2] * result.elements[8] +
                         elements[3] * result.elements[12];
-    if (UNLIKELY(fp_eq(determinant, 0.0f)))
+    if (RDGE_UNLIKELY(fp_eq(determinant, 0.0f)))
     {
         WLOG() << "Unable to create inverse matrix.  Determinant is zero.";
         return mat4();

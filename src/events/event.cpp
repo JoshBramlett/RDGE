@@ -1,7 +1,7 @@
 #include <rdge/events/event.hpp>
 #include <rdge/util/logger.hpp>
 #include <rdge/internal/exception_macros.hpp>
-#include <rdge/internal/hints.hpp>
+#include <rdge/util/compiler.hpp>
 
 #include <vector>
 #include <sstream>
@@ -35,7 +35,7 @@ ConvertWindowCoordsToNDC (uint32 windowID, int32 x, int32 y)
     //        in RDGE, although it definitely does have some utility.  Consider
     //        wrapping this function and returning an RDGE window.
     auto window = SDL_GetWindowFromID(windowID);
-    if (UNLIKELY(!window))
+    if (RDGE_UNLIKELY(!window))
     {
         return math::vec2();
     }
@@ -178,7 +178,7 @@ QueueCustomEvent (uint32 type, int32 code, void* data1, void* data2)
     event.user.data1 = data1;
     event.user.data2 = data2;
     auto result = SDL_PushEvent(&event);
-    if (UNLIKELY(result < 0))
+    if (RDGE_UNLIKELY(result < 0))
     {
         SDL_THROW("Failed to push custom event on queue.", "SDL_PushEvent");
     }

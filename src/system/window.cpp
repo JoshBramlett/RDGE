@@ -3,7 +3,7 @@
 #include <rdge/util/logger.hpp>
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
-#include <rdge/internal/hints.hpp>
+#include <rdge/util/compiler.hpp>
 #include <rdge/debug/sdl_dumper.hpp>
 
 #include <imgui/imgui.h>
@@ -84,7 +84,7 @@ Window::Window (const std::string& title,
     // class) is initialized automatically by initializing video
     if (SDL_WasInit(SDL_INIT_VIDEO) == 0)
     {
-        if (UNLIKELY(SDL_InitSubSystem(SDL_INIT_VIDEO) != 0))
+        if (RDGE_UNLIKELY(SDL_InitSubSystem(SDL_INIT_VIDEO) != 0))
         {
             SDL_THROW("SDL failed to initialize video subsystem", "SDL_InitSubSystem");
         }
@@ -189,13 +189,13 @@ Window::Window (const std::string& title,
                                 target_width,
                                 target_height,
                                 flags);
-    if (UNLIKELY(!m_window))
+    if (RDGE_UNLIKELY(!m_window))
     {
         SDL_THROW("SDL failed to create a Window", "SDL_CreateWindow");
     }
 
     m_context = SDL_GL_CreateContext(m_window);
-    if (UNLIKELY(!m_context))
+    if (RDGE_UNLIKELY(!m_context))
     {
         SDL_THROW("SDL failed to create an OpenGL context", "SDL_GL_CreateContext");
     }
@@ -216,7 +216,7 @@ Window::Window (const std::string& title,
     // Must be set to true for OpenGL 3.2+ contexts
     glewExperimental = GL_TRUE;
     GLenum glew_error = glewInit();
-    if (UNLIKELY(glew_error != GLEW_OK))
+    if (RDGE_UNLIKELY(glew_error != GLEW_OK))
     {
         std::string err_msg = reinterpret_cast<const char*>(glewGetErrorString(glew_error));
         RDGE_THROW("Failed to initialize GLEW.  error=" + err_msg);
@@ -242,7 +242,7 @@ Window::Window (const std::string& title,
         //      https://wiki.libsdl.org/SDL_GL_SetSwapInterval
 
         int32 interval = 1;
-        if (UNLIKELY(SDL_GL_SetSwapInterval(interval) != 0))
+        if (RDGE_UNLIKELY(SDL_GL_SetSwapInterval(interval) != 0))
         {
             WLOG() << "SDL failed to set swap interval "
                    << " interval=" << interval

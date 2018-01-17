@@ -1,6 +1,5 @@
 #include <rdge/util/memory/alloc.hpp>
-#include <rdge/internal/hints.hpp>
-#include <rdge/internal/hints.hpp>
+#include <rdge/util/compiler.hpp>
 #include <rdge/util/logger.hpp>
 
 #include <SDL_assert.h>
@@ -49,7 +48,7 @@ safe_alloc (void** p, size_t size, size_t num, bool clear, memory_profile* profi
         return true;
     }
 
-    if (UNLIKELY(SAFE_ALLOC_OVERSIZED(num, size)))
+    if (RDGE_UNLIKELY(SAFE_ALLOC_OVERSIZED(num, size)))
     {
         SDL_assert(false);
         errno = ENOMEM;
@@ -59,7 +58,7 @@ safe_alloc (void** p, size_t size, size_t num, bool clear, memory_profile* profi
 #ifdef RDGE_DEBUG_MEMORY_TRACKER
     size_t total_size = (num * size) + sizeof(size_t);
     void* poffset = malloc(total_size);
-    if (UNLIKELY(poffset == nullptr))
+    if (RDGE_UNLIKELY(poffset == nullptr))
     {
         return false;
     }
@@ -89,7 +88,7 @@ safe_alloc (void** p, size_t size, size_t num, bool clear, memory_profile* profi
     rdge::Unused(profile);
 
     *p = (clear) ? calloc(num, size) : malloc(num * size);
-    if (UNLIKELY(*p == nullptr))
+    if (RDGE_UNLIKELY(*p == nullptr))
     {
         return false;
     }
@@ -109,7 +108,7 @@ safe_realloc (void** p, size_t size, size_t num, memory_profile* profile)
         return true;
     }
 
-    if (UNLIKELY(SAFE_ALLOC_OVERSIZED(num, size)))
+    if (RDGE_UNLIKELY(SAFE_ALLOC_OVERSIZED(num, size)))
     {
         SDL_assert(false);
         errno = ENOMEM;
@@ -122,7 +121,7 @@ safe_realloc (void** p, size_t size, size_t num, memory_profile* profile)
 
     size_t new_size = (num * size) + sizeof(size_t);
     void* poffset = realloc(actual_p, new_size);
-    if (UNLIKELY(poffset == nullptr))
+    if (RDGE_UNLIKELY(poffset == nullptr))
     {
         return false;
     }
@@ -147,7 +146,7 @@ safe_realloc (void** p, size_t size, size_t num, memory_profile* profile)
     rdge::Unused(profile);
 
     void* tmp = realloc(*p, num * size);
-    if (UNLIKELY(tmp == nullptr))
+    if (RDGE_UNLIKELY(tmp == nullptr))
     {
         return false;
     }

@@ -7,7 +7,7 @@
 
 #include <rdge/core.hpp>
 #include <rdge/graphics/color.hpp>
-#include <rdge/internal/hints.hpp>
+#include <rdge/util/compiler.hpp>
 
 #include <SDL.h>
 
@@ -108,7 +108,7 @@ DumpRendererDriverInfo (void)
     SDL_RendererInfo info;
     for (int i = 0; i < count; ++i)
     {
-        if (UNLIKELY(SDL_GetRenderDriverInfo(0, &info) != 0))
+        if (RDGE_UNLIKELY(SDL_GetRenderDriverInfo(0, &info) != 0))
         {
             ss << "\nSDL_GetRenderDriverInfo[" << i << "]"
                << "\n  error=" << SDL_GetError();

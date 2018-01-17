@@ -8,7 +8,6 @@
 #include <rdge/util/strings.hpp>
 #include <rdge/util/logger.hpp>
 #include <rdge/util/memory/alloc.hpp>
-#include <rdge/internal/hints.hpp>
 
 #include <SDL_assert.h>
 

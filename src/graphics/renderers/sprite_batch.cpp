@@ -1,9 +1,9 @@
 #include <rdge/graphics/renderers/sprite_batch.hpp>
 #include <rdge/graphics/color.hpp>
 #include <rdge/assets/surface.hpp>
+#include <rdge/util/compiler.hpp>
 #include <rdge/util/logger.hpp>
 #include <rdge/util/memory/alloc.hpp>
-#include <rdge/internal/hints.hpp>
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
 
@@ -149,7 +149,7 @@ SpriteBatch::SpriteBatch (uint16 capacity, std::shared_ptr<Shader> shader, bool 
     uint32 ibo_size = ibo_count * sizeof(uint32);
 
     uint32* ibo_data;
-    if (UNLIKELY(!RDGE_MALLOC(ibo_data, ibo_size, nullptr)))
+    if (RDGE_UNLIKELY(!RDGE_MALLOC(ibo_data, ibo_size, nullptr)))
     {
         RDGE_THROW("Failed to allocate memory");
     }

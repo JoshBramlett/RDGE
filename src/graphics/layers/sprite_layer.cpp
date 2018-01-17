@@ -3,7 +3,6 @@
 #include <rdge/graphics/shader.hpp>
 #include <rdge/graphics/renderers/sprite_batch.hpp>
 #include <rdge/util/strings.hpp>
-#include <rdge/internal/hints.hpp>
 
 #include <SDL_assert.h>
 
