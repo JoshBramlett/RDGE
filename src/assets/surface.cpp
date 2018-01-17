@@ -5,9 +5,13 @@
 #include <rdge/type_traits.hpp>
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/hints.hpp>
+#include <rdge/util/memory/alloc.hpp>
 
 #include <SDL_assert.h>
 
+#define STBI_MALLOC(x) RDGE_MALLOC_SZ(x, nullptr)
+#define STBI_FREE(x) RDGE_FREE(x, nullptr)
+#define STBI_REALLOC(x, n) RDGE_REALLOC(x, n, nullptr)
 #define STB_IMAGE_IMPLEMENTATION
 #include <nothings/stb_image.h>
 
@@ -200,7 +204,7 @@ Surface::~Surface (void) noexcept
         {
             void* pixel_data = m_surface->userdata;
             SDL_FreeSurface(m_surface);
-            free(pixel_data);
+            RDGE_FREE(pixel_data, nullptr);
         }
     }
 }

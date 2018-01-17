@@ -512,7 +512,7 @@ public:
 
             if (settings::show_imgui_test_window)
             {
-                ImGui::ShowTestWindow(&settings::show_imgui_test_window);
+                ImGui::ShowTestWindow();
             }
 
             if (settings::show_memory_tracker)

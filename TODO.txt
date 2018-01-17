@@ -1,17 +1,30 @@
+Working
+
+    Assets:
+      - Build asset system to manage memory/loading/caching etc.
+    Graphics:
+      - Create a more cohesive way to represent sprites
+        - Allocation should be done through a block allocator
+        - Tie in with physics system (via entity).  Note: SpriteGroup/RigidBody
+        - Logically separate position from depth - use vec2 when setting position
+      - TileLayer
+        x Add culling
+        x Add blending for upper layers
+        - ImGui support (rendering statistics)
+        - [maybe] Global color (for tinting)
+        - Add support TileRenderOrder
+        - Investigate severing the global grid from the TileLayer.  Now that culling
+          is working I no longer think it's required to key off of a global x/y, so
+          the intersects_with test will actually mean something again when used with
+          a sparsely tiled layer.
+
+
+
 Assets:
   - Add bitmap font support
   - Remove SDL_ttf dependency
 
 Graphics:
-  - Create a more cohesive way to represent sprites
-    - Allocation should be done through a block allocator
-    - Tie in with physics system (via entity).  Note: SpriteGroup/RigidBody
-    - Logically separate position from depth - use vec2 when setting position
-  - TilemapBatch
-    - Add culling
-    - Add blending for upper layers
-    - ImGui support (rendering statistics)
-    - [maybe] Global color (for tinting)
   - Add shader support for distance field fonts
   - Better support for texture based filter, blending & wrapping (look to LibGDX)
   - Add support for 24bpp images (surface and texture)
@@ -29,12 +42,10 @@ Graphics (low priority);
 
 Physics:
   - Move GJK and all itersects methods out of the shapes and into collision.cpp
-    - Pass transforms and remove local manifold conversion from Contact.cpp
   - Solving:
     - Warm starting (seems to cut down processing time considerably)
     - Box2D "Box Solver" LCP (Linear complementarity problem)
     - TOI solver
-  - Circle/Polygon manifold generation
   - Change GraphListener to lambdas.  Implement destruction listener.
   - RigidBody has a lot of unimplemented methods
   - Clean up and finish documenting
@@ -45,13 +56,16 @@ Physics:
 Math:
 
 Util:
-  - Add proper logging across the library
-  - Normalize and add support for normal print and pretty printing
   - Enhance global memory tracker
     - Find an elegant way to categorize tracking.
+      - Idea: Remove all memory_profile references, and rather than passing the pointer
+        to the profile you just pass an enum.  Subsystems could be better tracked by creating
+        a stateful system (e.g. PUSH_TRACKED_MEMORY_SUBSYSTEM(xxx_physics)).  The enums
+        provided to the malloc call would be more specific, like xxx_freelist.
     - Improve ImGui memory tracking window.
     - Find solution for properly aligning memory.
-  - Build asset system to manage memory/loading/caching etc.
+  - Add proper logging across the library
+  - Normalize and add support for normal print and pretty printing
   - Support TextInput and TextEdit SDL events
 
 Debug:

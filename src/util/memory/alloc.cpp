@@ -30,6 +30,15 @@ memory_profile s_anonymousProfile;
 
 } // anonymous namespace
 
+void*
+safe_alloc (size_t size, memory_profile* profile)
+{
+    void* ptr = nullptr;
+    safe_alloc((void**)&(ptr), size, 1, false, profile);
+
+    return ptr;
+}
+
 bool
 safe_alloc (void** p, size_t size, size_t num, bool clear, memory_profile* profile)
 {
