@@ -21,8 +21,8 @@ def usage():
     print "export_tilemap.py -f <tilemap.tmx> -o <output_dir>"
 
 # get the min and max gid values in a list.
-# raw gid is extracted - the bits for flipping are removed
-def gid_min_max(data):
+# only the raw gid is compared - flipping bits are first extracted
+def get_gid_range(data):
     if not data:
         return None, None
 
@@ -30,7 +30,6 @@ def gid_min_max(data):
 
     maximum = 0
     minimum = sys.maxint
-
     for item in data:
         gid = int(item)
         if gid == 0:
@@ -43,8 +42,9 @@ def gid_min_max(data):
 
     return minimum, maximum
 
-# ensure that the min/max gid values from a layer map to a single tileset
-def layer_tileset_mapping(tilesets, min_gid, max_gid):
+# get the tileset index from a gid range.
+# ensures the min/max gid values from a layer reference a single tileset
+def get_tileset(tilesets, min_gid, max_gid):
     if min_gid is None or max_gid is None:
         return None, None
 
@@ -62,14 +62,75 @@ def layer_tileset_mapping(tilesets, min_gid, max_gid):
     raise Exception('Layer maps to multiple tilesets')
 
 # remove the firstgid offset from the values in the list.
+# performed after confirmation all cells within a layer use the same
+# tileset, this makes the gid values locally index said tileset.
+#
+# note: gid of zero signifies no mapping, therefore valid tile
+#       indicies start at 1
 def remove_gid_offset(data, first_gid):
     if not data:
         return
 
-    # zero value signifies no tile, valid tile indicies start at 1
     for index, gid in enumerate(data):
         if gid != 0:
             data[index] -= (first_gid - 1)
+
+# for infinite maps there is no clear way to decipher the global grid, as the
+# chunk data is sparse.  Making all layers relative to a global grid is easier
+# when culling the rendered cells to the camera bounds.
+def create_global_grid(tilemap):
+    left = sys.maxint
+    top = sys.maxint
+    right = 0
+    bottom = 0
+    chunk_width = 0
+    chunk_height = 0
+    if 'infinite' in tilemap and tilemap['infinite'] == True:
+        if 'layers' not in tilemap:
+            raise Exception('Tilemap has no layers')
+        for layer in tilemap['layers']:
+            if layer['type'] == 'tilelayer':
+                if 'chunks' not in layer:
+                    continue
+                if layer['startx'] < left:
+                    left = layer['startx']
+                    if (left + layer['width']) > right:
+                        right = left + layer['width']
+                if layer['starty'] < top:
+                    top = layer['starty']
+                    if (top + layer['height']) > bottom:
+                        bottom = top + layer['height']
+                for chunk in layer['chunks']:
+                    if chunk_width == 0 and chunk_height == 0:
+                        chunk_width = chunk['width']
+                        chunk_height = chunk['height']
+                    elif chunk_width != chunk['width'] or chunk_height != chunk['height']:
+                        raise Exception('Chunk sizes differ')
+                    chunk.pop('width')
+                    chunk.pop('height')
+    else:
+        left = 0
+        top = 0
+        right = tilemap['width']
+        bottom = tilemap['height']
+        chunk_width = right
+        chunk_height = bottom
+
+    grid = {}
+    grid['renderorder'] = tilemap['renderorder']
+    grid['x'] = left
+    grid['y'] = top
+    grid['width'] = right - left
+    grid['height'] = bottom - top
+    grid['cells'] = { 'width': tilemap['tilewidth'], 'height': tilemap['tileheight'] }
+    grid['chunks'] = { 'width': chunk_width, 'height': chunk_height }
+    tilemap['grid'] = grid
+
+    tilemap.pop('renderorder')
+    tilemap.pop('tilewidth')
+    tilemap.pop('tileheight')
+    tilemap.pop('width')
+    tilemap.pop('height')
 
 def process(in_file, out_dir):
     if not os.path.isfile(in_file):
@@ -97,39 +158,62 @@ def process(in_file, out_dir):
         raise Exception('Tiled export call failed.  code=%s' % str(code))
 
     with open(data_file) as json_data:
-        j = json.load(json_data)
+        tilemap = json.load(json_data)
 
-    if 'type' not in j or j['type'] != "map":
+    if 'type' not in tilemap or tilemap['type'] != "map":
         raise Exception('Invalid tilemap file format')
 
-    translate_properties(j)
+    translate_properties(tilemap)
+
+    # Remove unused
+    tilemap.pop('tiledversion')
+    tilemap.pop('nextobjectid')
+
+    # 2) Create a global grid for all tile layers
+    #
+    # Infinite maps have no clear way to decipher the global grid since the
+    # chunk data is sparse.  Making all tile layers relative to a global grid
+    # is easier when rendering, specifically when culling the rendered region
+    # to the camera bounds.  Changes include:
+    #
+    # - Coalesce all tile layer regions to a single global region
+    # - Ensure all chunks are the same size
+    # - Clean up all repetitive/unused data
+    #
+    # - The new grid definition will contain:
+    #   - The tile layer render order
+    #   - A bounding box of the global region
+    #   - cell size (in pixels)
+    #   - chunk size (in cells)
+    create_global_grid(tilemap)
 
     # 2) Normalize and validate layer data
-    for layer in j['layers']:
+    #
+    # Both an objectgroup and tilelayer may contain a list of gid's that map
+    # to a tile id of any tileset.  Changes include:
+    #
+    # - Ensure that a layer doesn't reference multiple tilesets
+    #   - Retreive the min/max gid values from a layer
+    #   - Using the min/max gid values, retrieve the tileset index and firstgid
+    #
+    # - The new layer definition will contain:
+    #   - A tileset index
+    #   - A data array with the firstgid offset removed from all entries
+    for layer in tilemap['layers']:
         translate_properties(layer)
 
-        # Tiled x/y values are unused
+        # Remove unused
         layer.pop('x')
         layer.pop('y')
 
-        # Both an objectgroup and tilelayer may contain a list of gid's that map
-        # to a tile id of any tileset.  Changes include:
-        #
-        # - Ensure that a layer doesn't reference multiple tilesets
-        #   - Retreive the min/max gid values from a layer
-        #   - Using the min/max gid values, retrieve the tileset index and firstgid
-        #
-        # - The new layer definition will contain:
-        #   - A tileset index
-        #   - A data array with the firstgid offset removed from all entries
         if layer['type'] == 'objectgroup':
             data = []
             for obj in layer['objects']:
                 translate_object(obj)
                 if 'gid' in obj:
                     data.append(obj['gid'])
-            min_gid, max_gid = gid_min_max(data)
-            ts_index, first_gid = layer_tileset_mapping(j['tilesets'], min_gid, max_gid)
+            min_gid, max_gid = get_gid_range(data)
+            ts_index, first_gid = get_tileset(tilemap['tilesets'], min_gid, max_gid)
             if ts_index is not None:
                 layer['tileset_index'] = ts_index
                 for obj in layer['objects']:
@@ -137,33 +221,27 @@ def process(in_file, out_dir):
                         obj['gid'] -= (first_gid - 1)
         elif layer['type'] == 'tilelayer':
             if 'data' in layer and layer['data']:
-                min_gid, max_gid = gid_min_max(layer['data'])
-                ts_index, first_gid = layer_tileset_mapping(j['tilesets'], min_gid, max_gid)
+                min_gid, max_gid = get_gid_range(layer['data'])
+                ts_index, first_gid = get_tileset(tilemap['tilesets'], min_gid, max_gid)
                 layer['tileset_index'] = ts_index
                 remove_gid_offset(layer['data'], first_gid)
             elif 'chunks' in layer and layer['chunks']:
                 agg_max = 0
                 agg_min = sys.maxint
-                chunk_width = layer['chunks'][0]['width']
-                chunk_height = layer['chunks'][0]['height']
                 for chunk in layer['chunks']:
-                    # sanity check that the assumption that the chunk size is the same
-                    # accross all chunks holds true
-                    if chunk_width != chunk['width'] or chunk_height != chunk['height']:
-                        raise Exception('Chunk sizes differ')
-
-                    min_gid, max_gid = gid_min_max(chunk['data'])
+                    min_gid, max_gid = get_gid_range(chunk['data'])
                     if min_gid is not None and min_gid < agg_min:
                         agg_min = min_gid
                     if max_gid is not None and max_gid > agg_max:
                         agg_max = max_gid
-                ts_index, first_gid = layer_tileset_mapping(j['tilesets'], agg_min, agg_max)
+
+                ts_index, first_gid = get_tileset(tilemap['tilesets'], agg_min, agg_max)
                 layer['tileset_index'] = ts_index
                 for chunk in layer['chunks']:
                     remove_gid_offset(chunk['data'], first_gid)
 
     # 3) Update tileset reference paths
-    for tileset in j['tilesets']:
+    for tileset in tilemap['tilesets']:
         if 'tilesets' in tileset['source']:
             source_file = os.path.basename(tileset['source'])
             tileset['source'] = os.path.join('..', TILESET_DIR, source_file)
@@ -172,7 +250,7 @@ def process(in_file, out_dir):
             tileset['source'] = os.path.join('..', SPRITESHEET_DIR, source_file)
 
     with open(data_file, 'w') as f:
-        f.write(json.dumps(j, indent=2, ensure_ascii=False))
+        f.write(json.dumps(tilemap, indent=2, ensure_ascii=False))
 
 def main():
     try:

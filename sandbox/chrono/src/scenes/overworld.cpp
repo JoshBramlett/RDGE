@@ -35,7 +35,7 @@ OverworldScene::OverworldScene (void)
         {
             const auto& info = tilemap.sheets[layer.tileset_index];
             auto tileset = g_game.pack->GetTileset(info.table_id);
-            tile_layers.emplace_back(layer, tileset, g_game.asset_scale);
+            tile_layers.emplace_back(tilemap.grid, layer, tileset, g_game.asset_scale);
 
             if (!same)
             {
@@ -123,6 +123,7 @@ OverworldScene::OnRender (void)
     //camera.Update();
 
     camera.SetPosition(math::vec2(2712, -2468));
+    //camera.SetPosition(math::vec2(-1024, 1024));
     camera.Update();
     for (auto& layer : this->tile_layers)
     {
@@ -137,7 +138,7 @@ OverworldScene::OnRender (void)
 
 
     // debug drawing
-    //debug::SetProjection(camera.combined);
+    debug::SetProjection(camera.combined);
 }
 
 void

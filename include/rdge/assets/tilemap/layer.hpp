@@ -8,7 +8,6 @@
 #include <rdge/core.hpp>
 #include <rdge/assets/tilemap/object.hpp>
 #include <rdge/assets/tilemap/property.hpp>
-#include <rdge/graphics/layers/tile_layer.hpp>
 #include <rdge/graphics/layers/sprite_layer.hpp>
 #include <rdge/math/vec2.hpp>
 
@@ -98,6 +97,7 @@ class Layer
 public:
     //! \brief Layer ctor
     //! \param [in] j json formatted layer
+    //! \param [in] grid Grid properties from the \ref Tilemap
     //! \throws rdge::Exception Parsing failed
     Layer (const nlohmann::json& j);
 
@@ -132,17 +132,11 @@ public:
     //!@{ LayerType::TILELAYER
     struct tile_chunk
     {
-        size_t x;                 //!< x-coordinate in the tile grid
-        size_t y;                 //!< y-coordinate in the tile grid
-        size_t rows;              //!< Row count (in tiles)
-        size_t cols;              //!< Column count (in tiles)
+        int32 x;                  //!< x-coordinate in the tile grid
+        int32 y;                  //!< y-coordinate in the tile grid
         std::vector<uint32> data; //!< Array of GIDs
     };
 
-    size_t rows = 0;                //!< Row count (in tiles)
-    size_t cols = 0;                //!< Column count (in tiles)
-    size_t start_x = 0;             //!< x-coordinate start tile
-    size_t start_y = 0;             //!< y-coordinate start tile
     std::vector<tile_chunk> chunks; //!< List of chunks that make up the mapping
     //!@}
 

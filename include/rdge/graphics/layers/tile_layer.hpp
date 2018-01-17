@@ -38,6 +38,22 @@ enum class TileRenderOrder
     LEFT_UP
 };
 
+//! \struct tilemap_grid
+//! \brief The global renderable range of the tilemap
+//! \details The global grid is in screen space which it breaks down into
+//!          individual cells, which tile layers may or may not map to a
+//!          renderable tile.  The grid is to be converted to world
+//!          coordinates for each layer.
+struct tilemap_grid
+{
+    TileRenderOrder render_order;
+    math::ivec2 pos;         //!< Grid starting location cell coordinates
+    math::uivec2 size;       //!< Grid size (in cells)
+
+    math::uivec2 cell_size;  //!< Cell size (in pixels)
+    math::uivec2 chunk_size; //!< Chunk size (in cells)
+};
+
 //! \struct tile_cell
 //! \brief Renderable cell data of a tile map
 struct tile_cell
@@ -50,7 +66,6 @@ struct tile_cell
 //! \brief Chunk of cells in the global grid
 struct tile_cell_chunk
 {
-    math::svec2 location; //!< Chunk grid coordinates
     tile_cell* cells;     //!< List of cells
     size_t cell_count;    //!< Cell count per chunk
 };
@@ -64,7 +79,10 @@ struct tile_cell_chunk
 class TileLayer
 {
 public:
-    explicit TileLayer (const tilemap::Layer& def, const Tileset& tileset, float scale);
+    explicit TileLayer (const tilemap_grid& grid,
+                        const tilemap::Layer& def,
+                        const Tileset& tileset,
+                        float scale);
     ~TileLayer (void) noexcept;
 
     //!@{ Non-copyable, move enabled
@@ -78,38 +96,26 @@ public:
     void Draw (TileBatch& renderer, const OrthographicCamera& camera);
 
 private:
-    //! \struct cell_grid
-    //! \brief Quadrilateral grid of cell data
-    //! \details Contains all data to be rendered by the layer.  Cell data will
-    //!          be empty for any locations that omit tile data.
-    struct cell_grid
-    {
-        tile_cell* data = nullptr; //!< List of cell data
-        size_t count = 0;          //!< Cell count in the global grid
-        size_t pitch = 0;          //!< Cells per row in the global grid
-
-        math::vec2 size; //!< Cell size (in pixels)
-    };
-
     //! \struct chunk_grid
-    //! \brief Quadrilateral grid of chunk data
+    //! \brief Quadrilateral subregion of the tilemap grid
     //! \details Chunks further break down the global grid into fixed size
     //!          containers, and therefore have their own coordinate system.
     struct chunk_grid
     {
         tile_cell_chunk* data = nullptr; //!< List of chunk data
         size_t count = 0;                //!< Chunk count in the global grid
-        size_t pitch = 0;                //!< Chunks per row in the global grid
-
-        math::svec2 size;  //!< Chunk size (in cells)
+        size_t rows = 0;                 //!< Chunk row count
+        size_t cols = 0;                 //!< Chunk column count
     };
 
-    cell_grid m_cells;
+    tilemap_grid m_grid;
+    tile_cell* m_cells = nullptr;
     chunk_grid m_chunks;
 
     math::vec2 m_offset;           //!< Start offset (in pixels)
     physics::aabb m_bounds;        //!< Layer boundary (in pixels)
     color m_color = color::WHITE;  //!< Render color (to store opacity)
+    math::vec2 m_inv;              //!< Inverse pixel to chunk ratio
 
 public:
     std::shared_ptr<Texture> texture; //!< Tileset texture

@@ -4,6 +4,7 @@
 #include <rdge/graphics/orthographic_camera.hpp>
 #include <rdge/graphics/texture.hpp>
 #include <rdge/graphics/renderers/tile_batch.hpp>
+#include <rdge/math/intrinsics.hpp>
 #include <rdge/util/strings.hpp>
 #include <rdge/util/logger.hpp>
 #include <rdge/util/memory/alloc.hpp>
@@ -12,6 +13,7 @@
 #include <SDL_assert.h>
 
 #include <sstream>
+#include <algorithm>
 
 namespace rdge {
 
@@ -23,83 +25,80 @@ constexpr uint32 FLIPPED_ANTIDIAGONALLY = 0x20000000;
 
 } // anonymous namespace
 
-TileLayer::TileLayer (const tilemap::Layer& def, const Tileset& tileset, float scale)
-    : m_offset(def.offset * scale)
+TileLayer::TileLayer (const tilemap_grid& grid,
+                      const tilemap::Layer& def,
+                      const Tileset& tileset,
+                      float scale)
+    : m_grid(grid)
+    , m_offset(def.offset * scale)
     , texture(std::make_shared<Texture>(tileset.surface))
 {
-    m_cells.count = def.rows * def.cols;
-    m_cells.pitch = def.cols;
-    m_cells.size = tileset.tile_size * scale;
-
-    // Two provided values make up the total offset.
-    //   1) Layer offset (in pixels)
-    //   2) start x/y - the tile coordinates of the top/left corner of the layer
-    //
-    // Coalesce the two, and convert them to y-is-up
+    // Convert to y-is-up
     m_offset.y *= -1.f;
-    m_offset.x += (m_cells.size.x * static_cast<float>(def.start_x));
-    m_offset.y -= (m_cells.size.y * static_cast<float>(def.start_y));
+    m_grid.pos.y *= -1;
+    m_grid.cell_size *= scale;
+
+    math::vec2 pixel_offset = m_offset;
+    m_offset.x += static_cast<float>(m_grid.cell_size.w) * m_grid.pos.x;
+    m_offset.y += static_cast<float>(m_grid.cell_size.h) * m_grid.pos.y;
 
     math::vec2 lo = m_offset;
     math::vec2 hi = m_offset;
-    lo.y -= (m_cells.size.y * static_cast<float>(def.rows));
-    hi.x += (m_cells.size.x * static_cast<float>(def.cols));
+    lo.y -= static_cast<float>(m_grid.cell_size.h) * m_grid.size.h;
+    hi.x += static_cast<float>(m_grid.cell_size.w) * m_grid.size.w;
     m_bounds = physics::aabb(lo, hi);
 
     m_color.a = 255.f * def.opacity;
 
-    if (def.chunks.size() == 1)
-    {
-        // For fixed size maps:
-        //   - Chunk row and column count may differ
-        m_chunks.size = math::svec2(def.rows, def.cols);
-        m_chunks.pitch = 1;
-        m_chunks.count = 1;
-    }
-    else
-    {
-        // For dynamically sized maps:
-        //   - Chunk row and column count are the same for every chunk
-        //   - If there is no data within a chunk it'll be omitted from the definition,
-        //     which means we cannot trust the number of chunks as the true count.
-        //     For example, say the chunk size is 16x16, and the layer size is 32x32.
-        //     If one of the chunks contains no gid references, only three of the
-        //     four chunks will be provided.
-        m_chunks.size = math::svec2(def.chunks[0].rows, def.chunks[0].cols);
-        m_chunks.pitch = def.cols / m_chunks.size.x;
-        m_chunks.count = m_chunks.pitch * (def.rows / m_chunks.size.y);
-    }
+    m_inv.w = 1.f / (m_grid.cell_size.w * m_grid.chunk_size.w);
+    m_inv.h = 1.f / (m_grid.cell_size.h * m_grid.chunk_size.h);
 
-    // The global grid is allocated in one contiguous block, but will be broken down
-    // as chunks and will not represent the global grid in memory.  For example,
-    // say the chunk size is 2x2, and the layer size is 4x4.  The first four cells
-    // will be from chunk[0], which on the global grid are indices 0, 1, 4, and 5.
+    m_chunks.rows = m_grid.size.h / m_grid.chunk_size.h;
+    m_chunks.cols = m_grid.size.w / m_grid.chunk_size.w;
+    m_chunks.count = m_chunks.rows * m_chunks.cols;
+
+    // The global grid is broken down into fixed sized chunks, but not all chunks
+    // may be represented in memory.  If there are no renderable tiles in a chunk
+    // it will be omitted in the definition.
+    //
+    // Therefore, rather than allocating space for all cells in the grid, we only
+    // allocate enough cells for the valid chunks.  The cells are allocated in one
+    // contiguous block, but simply assigned to the chunks for use.
+    //
+    // All chunks in the grid are allocated, but if there is no corresponding definition
+    // the cell data for that chunk will be null.
+    size_t cells_in_chunk = m_grid.chunk_size.w * m_grid.chunk_size.h;
     RDGE_CALLOC(m_chunks.data, m_chunks.count, nullptr);
-    RDGE_CALLOC(m_cells.data, m_cells.count, nullptr);
+    RDGE_CALLOC(m_cells, cells_in_chunk * def.chunks.size(), nullptr);
 
+    size_t cells_index = 0;
     for (const auto& def_chunk : def.chunks)
     {
-        size_t x = (def_chunk.x - def.start_x) / m_chunks.size.x;
-        size_t y = (def_chunk.y - def.start_y) / m_chunks.size.y;
-        size_t chunk_index = (y * m_chunks.pitch) + x;
-        size_t grid_index = chunk_index * (m_chunks.size.w * m_chunks.size.h);
+        SDL_assert(cells_in_chunk == def_chunk.data.size());
 
+        // x/y in local chunk coordinates
+        int32 chunk_x = (def_chunk.x - grid.pos.x) / m_grid.chunk_size.w;
+        int32 chunk_y = (def_chunk.y - grid.pos.y) / m_grid.chunk_size.h;
+        SDL_assert(chunk_x >= 0);
+        SDL_assert(chunk_y >= 0);
+
+        size_t chunk_index = (chunk_y * m_chunks.cols) + chunk_x;
         auto& chunk = m_chunks.data[chunk_index];
-        chunk.location = math::svec2(x, y);
-        chunk.cells = &m_cells.data[grid_index];
-        chunk.cell_count = m_chunks.size.w * m_chunks.size.h;
+        chunk.cell_count = cells_in_chunk;
+        chunk.cells = &m_cells[cells_index];
+        cells_index += cells_in_chunk;
 
-        math::vec2 origin = m_offset;
-        origin.x += (m_cells.size.w * static_cast<float>(x * m_chunks.size.w));
-        origin.y -= (m_cells.size.h * static_cast<float>(y * m_chunks.size.h));
+        math::vec2 origin = pixel_offset;
+        origin.x += static_cast<float>(m_grid.cell_size.w) * def_chunk.x;
+        origin.y -= static_cast<float>(m_grid.cell_size.h) * def_chunk.y;
         for (size_t i = 0; i < chunk.cell_count; i++)
         {
             if (def_chunk.data[i])
             {
                 auto& cell = chunk.cells[i];
                 cell.pos = origin;
-                cell.pos.x += m_cells.size.w * static_cast<float>(i % m_chunks.size.w);
-                cell.pos.y -= m_cells.size.h * static_cast<float>(i / m_chunks.size.w);
+                cell.pos.x += m_grid.cell_size.w * static_cast<float>(i % m_grid.chunk_size.w);
+                cell.pos.y -= m_grid.cell_size.h * static_cast<float>(i / m_grid.chunk_size.w);
 
                 uint32 gid = def_chunk.data[i] - 1;
                 bool flip_x = (gid & FLIPPED_HORIZONTALLY);
@@ -128,27 +127,27 @@ TileLayer::TileLayer (const tilemap::Layer& def, const Tileset& tileset, float s
     }
 
     ILOG() << "TileLayer created:"
-           << " tile_count=" << m_cells.count
-           << " tile_size=" << m_cells.size
-           << " chunk_count=" << m_chunks.count
-           << " chunk_size=" << m_chunks.size
+           << " chunks=" << m_chunks.count
+           << " pitch=" << m_chunks.cols
            << " offset=" << m_offset;
 }
 
 TileLayer::~TileLayer (void) noexcept
 {
-    RDGE_FREE(m_cells.data, nullptr);
+    RDGE_FREE(m_cells, nullptr);
     RDGE_FREE(m_chunks.data, nullptr);
 }
 
 TileLayer::TileLayer (TileLayer&& other) noexcept
-    : m_cells(other.m_cells)
+    : m_grid(other.m_grid)
+    , m_cells(other.m_cells)
     , m_chunks(other.m_chunks)
     , m_offset(other.m_offset)
     , m_bounds(other.m_bounds)
     , m_color(other.m_color)
+    , m_inv(other.m_inv)
 {
-    other.m_cells.data = nullptr;
+    other.m_cells = nullptr;
     other.m_chunks.data = nullptr;
 }
 
@@ -157,9 +156,11 @@ TileLayer::operator= (TileLayer&& rhs) noexcept
 {
     if (this != &rhs)
     {
+        m_grid = rhs.m_grid;
         m_offset = rhs.m_offset;
         m_bounds = rhs.m_bounds;
         m_color = rhs.m_color;
+        m_inv = rhs.m_inv;
 
         std::swap(m_cells, rhs.m_cells);
         std::swap(m_chunks, rhs.m_chunks);
@@ -173,7 +174,7 @@ TileLayer::Draw (TileBatch& renderer, const OrthographicCamera& camera)
 {
     // buffer the camera bounds by 5 tiles
     auto frame_bounds = camera.bounds;
-    frame_bounds.fatten(m_cells.size.w * 5);
+    frame_bounds.fatten(m_grid.cell_size.w * 2.f);
 
     if (!frame_bounds.intersects_with(m_bounds))
     {
@@ -183,25 +184,33 @@ TileLayer::Draw (TileBatch& renderer, const OrthographicCamera& camera)
     renderer.SetView(camera);
     renderer.Prime();
 
-    //if (frame_bounds.contains(m_bounds))
+    float left = (camera.bounds.left() - m_bounds.left());
+    float right = left + camera.bounds.width();
+    int32 x1 = std::max(static_cast<int32>(left * m_inv.w), 0);
+    int32 x2 = std::min(static_cast<int32>((right * m_inv.w) + 1.f),
+                        static_cast<int32>(m_chunks.cols));
+
+    float top = (m_bounds.top() - camera.bounds.top());
+    float bottom = top + camera.bounds.height();
+    int32 y1 = std::max(static_cast<int32>(top * m_inv.h), 0);
+    int32 y2 = std::min(static_cast<int32>((bottom * m_inv.h) + 1.f),
+                        static_cast<int32>(m_chunks.rows));
+
+    //size_t draw_calls = 0;
+    for (int32 col = x1; col < x2; col++)
     {
-        // draw everything
-        for (size_t i = 0; i < m_chunks.count; i++)
+        for (int32 row = y1; row < y2; row++)
         {
-            renderer.Draw(m_chunks.data[i], m_color);
+            size_t chunk_index = (row * m_chunks.cols) + col;
+            if (m_chunks.data[chunk_index].cells)
+            {
+                renderer.Draw(m_chunks.data[chunk_index], m_color);
+                //draw_calls++;
+            }
         }
     }
-    //else
-    //{
-        //auto top_left = camera.bounds.top_left() - m_offset;
-        //int32 x = top_left.x / m_chunks.size.w;
-        //int32 y = top_left.y / m_chunks.size.h;
-        //int32 chunk_index = (y * m_chunks.pitch) + x;
-        //if (chunk_index >= 0 && chunk_index < (int32)m_chunks.count)
-        //{
-            //renderer.Draw(m_chunks.data[chunk_index], m_color);
-        //}
-    //}
+
+    //ILOG() << "this=" << this << " draw calls: " << draw_calls;
 
     renderer.Flush();
 }

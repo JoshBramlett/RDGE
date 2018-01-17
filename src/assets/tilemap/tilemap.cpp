@@ -15,15 +15,11 @@ Tilemap::Tilemap (const nlohmann::json& j)
     try
     {
         JSON_VALIDATE_REQUIRED(j, orientation, is_string);
-        JSON_VALIDATE_REQUIRED(j, width, is_number);
-        JSON_VALIDATE_REQUIRED(j, height, is_number);
-        JSON_VALIDATE_REQUIRED(j, tilewidth, is_number);
-        JSON_VALIDATE_REQUIRED(j, tileheight, is_number);
+        JSON_VALIDATE_REQUIRED(j, grid, is_object);
         JSON_VALIDATE_REQUIRED(j, layers, is_array);
         JSON_VALIDATE_REQUIRED(j, tilesets, is_array);
 
         JSON_VALIDATE_OPTIONAL(j, backgroundcolor, is_string);
-        JSON_VALIDATE_OPTIONAL(j, renderorder, is_string);
 
         // required
         if (!try_parse(j["orientation"].get<std::string>(), this->orientation))
@@ -31,24 +27,40 @@ Tilemap::Tilemap (const nlohmann::json& j)
             throw std::invalid_argument("Tilemap invalid orientation");
         }
 
-        if (this->orientation == Orientation::ORTHOGONAL)
+        if (this->orientation != Orientation::ORTHOGONAL)
         {
-            if (!try_parse(j["renderorder"].get<std::string>(), this->render_order))
-            {
-                throw std::invalid_argument("Tilemap invalid render_order");
-            }
+            throw std::invalid_argument("Tilemap only supports orthogonal maps");
         }
 
-        if (this->orientation != Orientation::ORTHOGONAL ||
-            this->render_order != TileRenderOrder::RIGHT_DOWN)
+        const auto& j_grid = j["grid"];
+        JSON_VALIDATE_REQUIRED(j_grid, renderorder, is_string);
+        JSON_VALIDATE_REQUIRED(j_grid, x, is_number);
+        JSON_VALIDATE_REQUIRED(j_grid, y, is_number);
+        JSON_VALIDATE_REQUIRED(j_grid, width, is_number_unsigned);
+        JSON_VALIDATE_REQUIRED(j_grid, height, is_number_unsigned);
+        JSON_VALIDATE_REQUIRED(j_grid, cells, is_object);
+        JSON_VALIDATE_REQUIRED(j_grid, chunks, is_object);
+        this->grid.pos.x = j_grid["x"].get<int32>();
+        this->grid.pos.y = j_grid["y"].get<int32>();
+        this->grid.size.w = j_grid["width"].get<uint32>();
+        this->grid.size.h = j_grid["height"].get<uint32>();
+
+        if (!try_parse(j_grid["renderorder"].get<std::string>(), this->grid.render_order))
         {
-            throw std::invalid_argument("Tilemap only supports orthogonal right-down");
+            throw std::invalid_argument("Tilemap invalid render_order");
         }
 
-        this->rows = j["width"].get<int32>();
-        this->cols = j["height"].get<int32>();
-        this->cell_size = math::vec2(j["tilewidth"].get<float>(),
-                                     j["tileheight"].get<float>());
+        const auto& j_cells = j_grid["cells"];
+        JSON_VALIDATE_REQUIRED(j_cells, width, is_number_unsigned);
+        JSON_VALIDATE_REQUIRED(j_cells, height, is_number_unsigned);
+        this->grid.cell_size.w = j_cells["width"].get<uint32>();
+        this->grid.cell_size.h = j_cells["height"].get<uint32>();
+
+        const auto& j_chunks = j_grid["chunks"];
+        JSON_VALIDATE_REQUIRED(j_chunks, width, is_number_unsigned);
+        JSON_VALIDATE_REQUIRED(j_chunks, height, is_number_unsigned);
+        this->grid.chunk_size.w = j_chunks["width"].get<uint32>();
+        this->grid.chunk_size.h = j_chunks["height"].get<uint32>();
 
         const auto& j_tilesets = j["tilesets"];
         this->sheets.reserve(j_tilesets.size());
@@ -83,6 +95,26 @@ Tilemap::Tilemap (const nlohmann::json& j)
         RDGE_THROW(ex.what());
     }
 }
+
+//TileLayer
+//Tilemap::CreateTileLayer (int32 layer_id, float scale)
+//{
+    //try
+    //{
+        //const auto& layer = this->layers.at(layer_id);
+        //if (layer.type != LayerType::TILELAYER || layer.tileset_index < 0)
+        //{
+            //throw std::invalid_argument("Invalid TileLayer definition");
+        //}
+
+        //const auto& info = this->sheets[layer.tileset_index];
+        //auto tileset = g_game.pack->GetTileset(info.table_id);
+    //}
+    //catch (const std::exception& ex)
+    //{
+        //RDGE_THROW(ex.what());
+    //}
+//}
 
 std::ostream&
 operator<< (std::ostream& os, Orientation value)

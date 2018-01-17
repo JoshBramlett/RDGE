@@ -9,6 +9,7 @@
 #include <rdge/assets/tilemap/layer.hpp>
 #include <rdge/assets/tilemap/property.hpp>
 #include <rdge/assets/file_formats/asset_pack.hpp>
+#include <rdge/graphics/layers/tile_layer.hpp>
 #include <rdge/graphics/color.hpp>
 #include <rdge/math/vec2.hpp>
 
@@ -45,13 +46,23 @@ enum class Orientation
 //! {
 //!   "type": "map",
 //!   "backgroundcolor": "#656667",
-//!   "height": 4,
 //!   "orientation": "orthogonal",
-//!   "renderorder": "right-down",
-//!   "tileheight": 32,
-//!   "tilewidth": 32,
 //!   "version": 1,
-//!   "width": 4
+//!   "grid": {
+//!     "cells": {
+//!       "width": 16,
+//!       "height": 16
+//!     },
+//!     "height": 80,
+//!     "width": 96,
+//!     "renderorder": "right-down",
+//!     "y": -16,
+//!     "x": -16,
+//!     "chunks": {
+//!       "width": 16,
+//!       "height": 16
+//!     }
+//!   },
 //!   "layers": [ ... ],
 //!   "tilesets": [ ... ],
 //!   "properties": [ ... ]
@@ -77,18 +88,12 @@ public:
     Tilemap& operator= (Tilemap&&) noexcept = default;
     //!@}
 
+    //TileLayer CreateTileLayer (int32 layer_id, float scale);
 public:
 
     //!@{ Rendering properties
     color background = color::BLACK;
     Orientation orientation = Orientation::INVALID;
-    TileRenderOrder render_order = TileRenderOrder::INVALID;
-    //!@}
-
-    //!@{ Grid properties
-    math::vec2 cell_size; //!< Map grid cell size
-    size_t rows = 0;      //!< Number of rows in the grid
-    size_t cols = 0;      //!< Number of columns in the grid
     //!@}
 
     struct sheet_info
@@ -98,6 +103,7 @@ public:
         asset_pack::asset_type type; //!< Sheet type (spritesheet or tileset)
     };
 
+    tilemap_grid grid;              //!< Grid for the Tilemap
     std::vector<Layer> layers;      //!< List of Tilemap layers
     std::vector<sheet_info> sheets; //!< List of Tilesets/Spritesheets dependencies
     PropertyCollection properties;  //!< Custom variable type property collection

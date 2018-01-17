@@ -284,21 +284,23 @@ TileBatch::Flush (void)
 {
     // Sanity check the same VBO is bound throughout the draw call
     SDL_assert(m_vbo == static_cast<uint32>(opengl::GetInt(GL_ARRAY_BUFFER_BINDING)));
-    SDL_assert(m_submissions != 0);
 
     opengl::ReleaseBufferPointer(GL_ARRAY_BUFFER);
     opengl::UnbindBuffers(GL_ARRAY_BUFFER);
 
-    m_texture->Activate();
-    this->blend.Apply();
+    if (m_submissions > 0)
+    {
+        m_texture->Activate();
+        this->blend.Apply();
 
-    opengl::BindVertexArray(m_vao);
-    opengl::BindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
+        opengl::BindVertexArray(m_vao);
+        opengl::BindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
 
-    opengl::DrawElements(GL_TRIANGLES, (m_submissions * 6), GL_UNSIGNED_INT, nullptr);
+        opengl::DrawElements(GL_TRIANGLES, (m_submissions * 6), GL_UNSIGNED_INT, nullptr);
 
-    opengl::UnbindBuffers(GL_ELEMENT_ARRAY_BUFFER);
-    opengl::UnbindVertexArrays();
+        opengl::UnbindBuffers(GL_ELEMENT_ARRAY_BUFFER);
+        opengl::UnbindVertexArrays();
+    }
 }
 
 } // namespace rdge

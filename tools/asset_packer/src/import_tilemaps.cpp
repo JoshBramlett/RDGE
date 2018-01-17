@@ -122,6 +122,24 @@ ImportTilemaps (global_import_state& global_state)
 
                     memcpy(import.data, msgpack.data(), msgpack.size());
                     import.info.size = msgpack.size();
+                    import.enums = json::array();
+
+                    if (j.count("layers"))
+                    {
+                        json j_enum = { { "name", import.name + "_tilemap_layers" },
+                                        { "values", json::array() } };
+
+                        uint32 index = 0;
+                        for (const auto& layer : j["layers"])
+                        {
+                            std::ostringstream ss;
+                            ss << import.name << "_layer_" << layer["name"].get<std::string>();
+
+                            j_enum["values"].push_back({{ "n", ss.str() }, { "v", index++ }});
+                        }
+
+                        import.enums.push_back(j_enum);
+                    }
 
                     std::cout << " SUCCESS"
                               << " file_size=" << file.size
