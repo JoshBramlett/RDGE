@@ -6,6 +6,7 @@
 #pragma once
 
 #include <rdge/core.hpp>
+#include <rdge/assets/shared_asset.hpp>
 #include <rdge/assets/surface.hpp>
 #include <rdge/assets/spritesheet_region.hpp>
 #include <rdge/assets/tilemap/object.hpp>
@@ -152,7 +153,7 @@ public:
     std::vector<region_data> regions;       //!< Spritesheet region list
     std::vector<animation_data> animations; //!< Animation definition list
 
-    Surface surface; //!< Pixel data of the sprite sheet
+    shared_asset<Surface> surface; //!< Pixel data of the sprite sheet
 };
 
 } // namespace rdge

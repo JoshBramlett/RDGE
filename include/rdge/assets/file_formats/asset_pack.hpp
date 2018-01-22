@@ -84,4 +84,8 @@ struct asset_info
 std::ostream& operator<< (std::ostream&, asset_type);
 
 } // namespace asset_pack
+
+//! \brief asset_type string conversion
+std::string to_string (asset_pack::asset_type);
+
 } // namespace rdge

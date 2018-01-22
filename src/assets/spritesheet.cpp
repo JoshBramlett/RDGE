@@ -2,6 +2,8 @@
 #include <rdge/assets/pack_file.hpp>
 #include <rdge/math/intrinsics.hpp>
 #include <rdge/util/io/rwops_base.hpp>
+#include <rdge/util/memory/alloc.hpp>
+#include <rdge/util/compiler.hpp>
 #include <rdge/util/json.hpp>
 #include <rdge/util/strings.hpp>
 #include <rdge/internal/exception_macros.hpp>
@@ -33,7 +35,7 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
     const auto& j_regions = j["frames"];
     sheet.regions = std::vector<region_data>(j_regions.size());
 
-    auto surface_size = sheet.surface.Size();
+    auto surface_size = sheet.surface->Size();
     size_t index = 0;
     for (const auto& j_region : j_regions)
     {
@@ -200,7 +202,14 @@ SpriteSheet::SpriteSheet (const char* filepath)
         const auto& j_meta = j["meta"];
         JSON_VALIDATE_REQUIRED(j_meta, image, is_string);
 
-        this->surface = Surface(j_meta["image"].get<std::string>());
+        void* asset_memory = nullptr;
+        if (RDGE_UNLIKELY(!RDGE_MALLOC(asset_memory, sizeof(Surface), nullptr)))
+        {
+            throw std::invalid_argument("Memory allocation failed");
+        }
+
+        Surface* raw = new (asset_memory) Surface(j_meta["image"].get<std::string>());
+        this->surface = shared_asset<Surface>(raw);
         ProcessSpriteSheet(j, *this);
     }
     catch (const std::logic_error& ex)
@@ -219,7 +228,7 @@ SpriteSheet::SpriteSheet (const std::vector<uint8>& msgpack, PackFile& packfile)
         const auto& j_meta = j["meta"];
         JSON_VALIDATE_REQUIRED(j_meta, image_table_id, is_number);
 
-        this->surface = packfile.GetSurface(j_meta["image_table_id"].get<int32>());
+        this->surface = packfile.GetAsset<Surface>(j_meta["image_table_id"].get<int32>());
         ProcessSpriteSheet(j, *this);
     }
     catch (const std::exception& ex)

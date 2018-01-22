@@ -1,9 +1,10 @@
 #include <rdge/assets/tileset.hpp>
 #include <rdge/assets/pack_file.hpp>
-#include <rdge/math/intrinsics.hpp>
+#include <rdge/graphics/tex_coords.hpp>
 #include <rdge/util/io/rwops_base.hpp>
+#include <rdge/util/memory/alloc.hpp>
+#include <rdge/util/compiler.hpp>
 #include <rdge/util/json.hpp>
-#include <rdge/util/strings.hpp>
 #include <rdge/internal/exception_macros.hpp>
 
 #include <SDL_assert.h>
@@ -44,14 +45,18 @@ ProcessTileset (const json& j, Tileset& tileset)
     tileset.margin = j["margin"].get<size_t>();
     tileset.tile_size = math::vec2(static_cast<float>(tile_width),
                                    static_cast<float>(tile_height));
-    tileset.tiles.reserve(tile_count);
 
     if (tileset.spacing != 0)
     {
         throw std::invalid_argument("Tile spacing not currently supported");
     }
 
-    auto surface_size = tileset.surface.Size();
+    if (RDGE_UNLIKELY(!RDGE_CALLOC(tileset.tiles, tile_count, nullptr)))
+    {
+        throw std::runtime_error("Failed to allocate memory");
+    }
+
+    auto surface_size = tileset.surface->Size();
     for (size_t row = 0; row < tileset.rows; row++)
     {
         for (size_t col = 0; col < tileset.cols; col++)
@@ -64,13 +69,11 @@ ProcessTileset (const json& j, Tileset& tileset)
             float y1 = normalize(y, surface_size.h);
             float y2 = normalize(y + tile_height, surface_size.h);
 
-            tex_coords coords;
-            coords.bottom_left  = vec2(x1, y1);
-            coords.bottom_right = vec2(x2, y1);
-            coords.top_left     = vec2(x1, y2);
-            coords.top_right    = vec2(x2, y2);
-
-            tileset.tiles.push_back(coords);
+            auto& tile = tileset.tiles[(row * tileset.cols) + col];
+            tile.bottom_left  = vec2(x1, y1);
+            tile.bottom_right = vec2(x2, y1);
+            tile.top_left     = vec2(x1, y2);
+            tile.top_right    = vec2(x2, y2);
         }
     }
 }
@@ -92,11 +95,18 @@ Tileset::Tileset (const char* filepath)
         JSON_VALIDATE_REQUIRED(j, imageheight, is_number_unsigned);
         JSON_VALIDATE_REQUIRED(j, imagewidth, is_number_unsigned);
 
-        this->surface = Surface(j["image"].get<std::string>());
+        void* asset_memory = nullptr;
+        if (RDGE_UNLIKELY(!RDGE_MALLOC(asset_memory, sizeof(Surface), nullptr)))
+        {
+            throw std::invalid_argument("Memory allocation failed");
+        }
+
+        Surface* raw = new (asset_memory) Surface(j["image"].get<std::string>());
+        this->surface = shared_asset<Surface>(raw);
 
         // sanity check
-        if (this->surface.Width() != j["imagewidth"].get<size_t>() ||
-            this->surface.Height() != j["imageheight"].get<size_t>())
+        if (this->surface->Width() != j["imagewidth"].get<size_t>() ||
+            this->surface->Height() != j["imageheight"].get<size_t>())
         {
             throw std::invalid_argument("Surface size mismatch");
         }
@@ -118,11 +128,11 @@ Tileset::Tileset (const std::vector<uint8>& msgpack, PackFile& packfile)
         JSON_VALIDATE_REQUIRED(j, imageheight, is_number_unsigned);
         JSON_VALIDATE_REQUIRED(j, imagewidth, is_number_unsigned);
 
-        this->surface = packfile.GetSurface(j["image_table_id"].get<int32>());
+        this->surface = packfile.GetAsset<Surface>(j["image_table_id"].get<int32>());
 
         // sanity check
-        if (this->surface.Width() != j["imagewidth"].get<size_t>() ||
-            this->surface.Height() != j["imageheight"].get<size_t>())
+        if (this->surface->Width() != j["imagewidth"].get<size_t>() ||
+            this->surface->Height() != j["imageheight"].get<size_t>())
         {
             throw std::invalid_argument("Surface size mismatch");
         }
@@ -133,6 +143,46 @@ Tileset::Tileset (const std::vector<uint8>& msgpack, PackFile& packfile)
     {
         RDGE_THROW(ex.what());
     }
+}
+
+Tileset::~Tileset (void) noexcept
+{
+    if (this->tiles)
+    {
+        RDGE_FREE(this->tiles, nullptr);
+    }
+}
+
+Tileset::Tileset (Tileset&& other) noexcept
+    : rows(other.rows)
+    , cols(other.cols)
+    , spacing(other.spacing)
+    , margin(other.margin)
+    , tile_size(other.tile_size)
+    , tiles(other.tiles)
+    , tile_count(other.tile_count)
+    , surface(std::move(other.surface))
+{
+    other.tiles = nullptr;
+}
+
+Tileset&
+Tileset::operator= (Tileset&& rhs) noexcept
+{
+    if (this != &rhs)
+    {
+        this->rows = rhs.rows;
+        this->cols = rhs.cols;
+        this->spacing = rhs.spacing;
+        this->margin = rhs.margin;
+        this->tile_size = rhs.tile_size;
+        this->tile_count = rhs.tile_count;
+        this->surface = std::move(rhs.surface);
+
+        std::swap(this->tiles, rhs.tiles);
+    }
+
+    return *this;
 }
 
 } // namespace rdge

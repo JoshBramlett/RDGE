@@ -3,9 +3,9 @@
 #include <rdge/system/types.hpp>
 #include <rdge/util/logger.hpp>
 #include <rdge/type_traits.hpp>
-#include <rdge/internal/exception_macros.hpp>
 #include <rdge/util/compiler.hpp>
 #include <rdge/util/memory/alloc.hpp>
+#include <rdge/internal/exception_macros.hpp>
 
 #include <SDL_assert.h>
 
@@ -92,9 +92,6 @@ Surface::Surface (const std::string& filepath, PixelDepth depth)
     {
         channels = STBI_rgb_alpha;
     }
-
-    // TODO when implementing a memory tracker, stbi has a define rule to use
-    //      a custom allocator.  Look into the same for SDL.
 
     int32 w, h, file_channels;
     void* pixel_data = stbi_load(filepath.c_str(), &w, &h, &file_channels, channels);
@@ -199,52 +196,10 @@ Surface::~Surface (void) noexcept
 
     if (m_surface)
     {
-        m_surface->refcount--;
-        if (m_surface->refcount == 0)
-        {
-            void* pixel_data = m_surface->userdata;
-            SDL_FreeSurface(m_surface);
-            RDGE_FREE(pixel_data, nullptr);
-        }
+        void* pixel_data = m_surface->userdata;
+        SDL_FreeSurface(m_surface);
+        stbi_image_free(pixel_data);
     }
-}
-
-Surface::Surface (const Surface& other)
-    : m_surface(other.m_surface)
-{
-    if (m_surface)
-    {
-        m_surface->refcount++;
-    }
-}
-
-Surface&
-Surface::operator= (const Surface& rhs)
-{
-    m_surface = rhs.m_surface;
-    if (m_surface)
-    {
-        m_surface->refcount++;
-    }
-
-    return *this;
-}
-
-Surface::Surface (Surface&& other) noexcept
-    : m_surface(other.m_surface)
-{
-    other.m_surface = nullptr;
-}
-
-Surface&
-Surface::operator= (Surface&& rhs) noexcept
-{
-    if (this != &rhs)
-    {
-        std::swap(m_surface, rhs.m_surface);
-    }
-
-    return *this;
 }
 
 bool

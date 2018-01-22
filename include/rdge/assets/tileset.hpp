@@ -6,8 +6,9 @@
 #pragma once
 
 #include <rdge/core.hpp>
+#include <rdge/assets/shared_asset.hpp>
 #include <rdge/assets/surface.hpp>
-#include <rdge/graphics/tex_coords.hpp>
+#include <rdge/math/vec2.hpp>
 
 #include <vector>
 
@@ -16,6 +17,7 @@ namespace rdge {
 
 //!@{ Forward declarations
 class PackFile;
+struct tex_coords;
 //!@}
 
 //! \class Tileset
@@ -46,6 +48,9 @@ class PackFile;
 class Tileset
 {
 public:
+    //! \brief Tileset default ctor
+    Tileset (void) = default;
+
     //! \brief Tileset ctor
     //! \details Loads and parses the json file.
     //! \param [in] filepath Path to the config file
@@ -60,16 +65,14 @@ public:
     //! \see http://msgpack.org/
     explicit Tileset (const std::vector<uint8>& msgpack, PackFile& pack);
 
-    //!@{ Tileset default ctor/dtor
-    Tileset (void) = default;
-    ~Tileset (void) noexcept = default;
-    //!@}
+    //! \brief Tileset default dtor
+    ~Tileset (void) noexcept;
 
     //!@{ Non-copyable, move enabled
     Tileset (const Tileset&) = delete;
     Tileset& operator= (const Tileset&) = delete;
-    Tileset (Tileset&&) noexcept = default;
-    Tileset& operator= (Tileset&&) noexcept = default;
+    Tileset (Tileset&&) noexcept;
+    Tileset& operator= (Tileset&&) noexcept;
     //!@}
 
 public:
@@ -79,9 +82,10 @@ public:
     size_t margin = 0;
 
     math::vec2 tile_size;
-    std::vector<tex_coords> tiles;
+    tex_coords* tiles = nullptr;
+    size_t tile_count = 0;
 
-    Surface surface; //!< Pixel data of the tileset
+    shared_asset<Surface> surface; //!< Pixel data of the tileset
 };
 
 } // namespace rdge

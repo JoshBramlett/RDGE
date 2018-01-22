@@ -19,7 +19,11 @@ Texture::Texture (const std::string& path)
     : Texture(Surface(path))
 { }
 
-Texture::Texture (Surface surface)
+Texture::Texture (Surface&& surface)
+    : Texture(surface)
+{ }
+
+Texture::Texture (Surface& surface)
 {
     auto surface_ptr = static_cast<const SDL_Surface*>(surface);
     if (!math::is_pot(surface_ptr->w) || !math::is_pot(surface_ptr->h))
@@ -77,7 +81,7 @@ Texture::Activate (void) const
 }
 
 void
-Texture::Reload (Surface surface)
+Texture::Reload (Surface& surface)
 {
     // TODO: [00036] Add support for 24bpp (no alpha channel) images.  Gimp doesn't
     //       support it out of the box.  I believe the changes would be to convert

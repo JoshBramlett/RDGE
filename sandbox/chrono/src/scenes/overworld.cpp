@@ -34,8 +34,8 @@ OverworldScene::OverworldScene (void)
         if (layer.type == LayerType::TILELAYER && layer.tileset_index >= 0)
         {
             const auto& info = tilemap.sheets[layer.tileset_index];
-            auto tileset = g_game.pack->GetTileset(info.table_id);
-            tile_layers.emplace_back(tilemap.grid, layer, tileset, g_game.asset_scale);
+            auto tileset = g_game.pack->GetAsset<Tileset>(info.table_id);
+            tile_layers.emplace_back(tilemap.grid, layer, *tileset, g_game.asset_scale);
 
             if (!same)
             {
@@ -51,24 +51,25 @@ OverworldScene::OverworldScene (void)
         }
     }
 
-    auto sheet = g_game.pack->GetSpriteSheet(rdge_asset_spritesheet_player);
+    //auto sheet = g_game.pack->GetSpriteSheet(rdge_asset_spritesheet_player);
+    auto sheet = g_game.pack->GetAsset<SpriteSheet>(rdge_asset_spritesheet_player);
     sprite_batch = std::make_shared<SpriteBatch>();
     sprite_layers.emplace_back(sprite_batch);
     auto& layer = sprite_layers.back();
     {
     math::vec3 p(2712, -2468, 0.f);
-    auto t = std::make_shared<Texture>(sheet.surface);
-    auto& region = sheet.regions[frame_player_attack_back_2].value;
+    auto t = std::make_shared<Texture>(*sheet->surface);
+    auto& region = sheet->regions[frame_player_attack_back_2].value;
     auto sprite = std::make_shared<Sprite>(p, region.size * g_game.asset_scale, t, region.coords);
     layer.AddSprite(sprite);
     }
 
-    auto tileset = g_game.pack->GetTileset(rdge_asset_tileset_overworld_bg);
+    auto tileset = g_game.pack->GetAsset<Tileset>(rdge_asset_tileset_overworld_bg);
     {
     math::vec3 p(2612, -2468, 0.f);
-    auto t = std::make_shared<Texture>(tileset.surface);
-    auto& coords = tileset.tiles[29];
-    auto sprite = std::make_shared<Sprite>(p, tileset.tile_size * g_game.asset_scale, t, coords);
+    auto t = std::make_shared<Texture>(*tileset->surface);
+    auto& coords = tileset->tiles[29];
+    auto sprite = std::make_shared<Sprite>(p, tileset->tile_size * g_game.asset_scale, t, coords);
     layer.AddSprite(sprite);
     }
 

@@ -7,9 +7,7 @@
 
 #include <rdge/core.hpp>
 #include <rdge/assets/file_formats/asset_pack.hpp>
-#include <rdge/assets/surface.hpp>
-#include <rdge/assets/spritesheet.hpp>
-#include <rdge/assets/tileset.hpp>
+#include <rdge/assets/shared_asset.hpp>
 #include <rdge/assets/tilemap/tilemap.hpp>
 #include <rdge/util/io/rwops_base.hpp>
 
@@ -36,17 +34,20 @@ public:
     PackFile& operator= (PackFile&&) noexcept;
     //!@}
 
+    //void PreloadAsset (int32 asset_id, SharedAssetLifetime lifetime);
+
+    template <typename T>
+    shared_asset<T> GetAsset (int32 asset_id);
+
     // TODO Cache these
-    Surface GetSurface (int32 asset_id);
-    SpriteSheet GetSpriteSheet (int32 asset_id);
-    Tileset GetTileset (int32 asset_id);
     tilemap::Tilemap GetTilemap (int32 asset_id);
 
 private:
     rwops_base m_file;
 
-    asset_pack::header      m_header;
-    asset_pack::asset_info* m_table = nullptr;
+    asset_pack::header         m_header;
+    asset_pack::asset_info*    m_table = nullptr;
+    detail::shared_asset_data* m_cache = nullptr;
 };
 
 } // namespace rdge

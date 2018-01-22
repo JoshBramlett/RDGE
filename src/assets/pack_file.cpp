@@ -1,9 +1,12 @@
 #include <rdge/assets/pack_file.hpp>
 #include <rdge/assets/file_formats/asset_pack.hpp>
+#include <rdge/assets/spritesheet.hpp>
+#include <rdge/assets/surface.hpp>
+#include <rdge/assets/tileset.hpp>
 #include <rdge/util/memory/alloc.hpp>
+#include <rdge/util/compiler.hpp>
 #include <rdge/util/json.hpp>
 #include <rdge/internal/exception_macros.hpp>
-#include <rdge/util/compiler.hpp>
 
 #include <SDL_assert.h>
 
@@ -39,7 +42,16 @@ PackFile::PackFile (const char* filepath)
         RDGE_THROW("Pack file asset table is empty");
     }
 
-    RDGE_MALLOC_N(m_table, m_header.asset_count, nullptr);
+    if (RDGE_UNLIKELY(!RDGE_MALLOC_N(m_table, m_header.asset_count, nullptr)))
+    {
+        RDGE_THROW("Failed to allocate memory");
+    }
+
+    if (RDGE_UNLIKELY(!RDGE_CALLOC(m_cache, m_header.asset_count, nullptr)))
+    {
+        RDGE_THROW("Failed to allocate memory");
+    }
+
     m_file.seek(static_cast<int64>(m_header.assets), rwops_base::seekdir::beg);
     m_file.read(m_table, sizeof(asset_info), m_header.asset_count);
 }
@@ -47,12 +59,20 @@ PackFile::PackFile (const char* filepath)
 PackFile::~PackFile (void) noexcept
 {
     RDGE_FREE(m_table, nullptr);
+
+    for (uint32 i = 0; i < m_header.asset_count; i++)
+    {
+        RDGE_FREE(m_cache[i].asset, nullptr);
+    }
+
+    RDGE_FREE(m_cache, nullptr);
 }
 
 PackFile::PackFile (PackFile&& other) noexcept
     : m_file(std::move(other.m_file))
     , m_header(other.m_header)
     , m_table(other.m_table)
+    , m_cache(other.m_cache)
 { }
 
 PackFile&
@@ -63,60 +83,132 @@ PackFile::operator= (PackFile&& rhs) noexcept
         m_file = std::move(rhs.m_file);
         m_header = rhs.m_header;
         std::swap(m_table, rhs.m_table);
+        std::swap(m_cache, rhs.m_cache);
     }
 
     return *this;
 }
 
-Surface
-PackFile::GetSurface (int32 asset_id)
+template <>
+shared_asset<Surface>
+PackFile::GetAsset (int32 asset_id)
 {
     SDL_assert(asset_id >= 0 && (uint32)asset_id < m_header.asset_count);
 
-    auto& info = m_table[asset_id];
-    SDL_assert(info.type == asset_type_surface);
+    auto& data = m_cache[asset_id];
+    if (!data.asset)
+    {
+        auto& info = m_table[asset_id];
+        SDL_assert(info.type == asset_type_surface);
 
-    void* pixel_data = nullptr;
-    RDGE_MALLOC(pixel_data, info.size, nullptr);
-    m_file.seek(info.offset, rwops_base::seekdir::beg);
-    m_file.read(pixel_data, info.size);
+        void* pixel_data = nullptr;
+        if (RDGE_UNLIKELY(!RDGE_MALLOC(pixel_data, info.size, nullptr)))
+        {
+            RDGE_THROW("Memory allocation failed");
+        }
 
-    auto& s_info = info.surface;
-    return Surface(pixel_data, s_info.width, s_info.height, s_info.channels);
+        void* asset_memory = nullptr;
+        if (RDGE_UNLIKELY(!RDGE_MALLOC(asset_memory, sizeof(Surface), nullptr)))
+        {
+            RDGE_THROW("Memory allocation failed");
+        }
+
+        m_file.seek(info.offset, rwops_base::seekdir::beg);
+        m_file.read(pixel_data, info.size);
+
+        data.ref_count = 0;
+        data.asset_id = asset_id;
+        data.type = info.type;
+        data.lifetime = SharedAssetLifetime::REF_COUNT_MANAGED;
+        data.asset = new (asset_memory) Surface(pixel_data,
+                                                info.surface.width,
+                                                info.surface.height,
+                                                info.surface.channels);
+
+        ILOG() << "Asset Loaded:"
+               << " asset_id=" << data.asset_id
+               << " type=" << data.type
+               << " size=" << info.size;
+    }
+
+    SDL_assert(data.type == asset_type_surface);
+    return shared_asset<Surface>(static_cast<Surface*>(data.asset), &data);
 }
 
-SpriteSheet
-PackFile::GetSpriteSheet (int32 asset_id)
+template <>
+shared_asset<SpriteSheet>
+PackFile::GetAsset (int32 asset_id)
 {
     SDL_assert(asset_id >= 0 && (uint32)asset_id < m_header.asset_count);
 
-    auto& info = m_table[asset_id];
-    SDL_assert(info.type == asset_type_spritesheet);
+    auto& data = m_cache[asset_id];
+    if (!data.asset)
+    {
+        auto& info = m_table[asset_id];
+        SDL_assert(info.type == asset_type_spritesheet);
 
-    std::vector<std::uint8_t> msgpack(info.size);
-    m_file.seek(info.offset, rwops_base::seekdir::beg);
-    m_file.read(msgpack.data(), info.size);
+        void* asset_memory = nullptr;
+        if (RDGE_UNLIKELY(!RDGE_MALLOC(asset_memory, sizeof(SpriteSheet), nullptr)))
+        {
+            RDGE_THROW("Memory allocation failed");
+        }
 
-    SpriteSheet result(msgpack, *this);
-    return result;
-    //return SpriteSheet(msgpack, *this);
+        std::vector<std::uint8_t> msgpack(info.size);
+        m_file.seek(info.offset, rwops_base::seekdir::beg);
+        m_file.read(msgpack.data(), info.size);
+
+        data.ref_count = 0;
+        data.asset_id = asset_id;
+        data.type = info.type;
+        data.lifetime = SharedAssetLifetime::REF_COUNT_MANAGED;
+        data.asset = new (asset_memory) SpriteSheet(msgpack, *this);
+
+        ILOG() << "Asset Loaded:"
+               << " asset_id=" << data.asset_id
+               << " type=" << data.type
+               << " size=" << info.size;
+    }
+
+    SDL_assert(data.type == asset_type_spritesheet);
+    return shared_asset<SpriteSheet>(static_cast<SpriteSheet*>(data.asset), &data);
 }
 
-Tileset
-PackFile::GetTileset (int32 asset_id)
+template <>
+shared_asset<Tileset>
+PackFile::GetAsset (int32 asset_id)
 {
     SDL_assert(asset_id >= 0 && (uint32)asset_id < m_header.asset_count);
 
-    auto& info = m_table[asset_id];
-    SDL_assert(info.type == asset_type_tileset);
+    auto& data = m_cache[asset_id];
+    if (!data.asset)
+    {
+        auto& info = m_table[asset_id];
+        SDL_assert(info.type == asset_type_tileset);
 
-    std::vector<std::uint8_t> msgpack(info.size);
-    m_file.seek(info.offset, rwops_base::seekdir::beg);
-    m_file.read(msgpack.data(), info.size);
+        void* asset_memory = nullptr;
+        if (RDGE_UNLIKELY(!RDGE_MALLOC(asset_memory, sizeof(Tileset), nullptr)))
+        {
+            RDGE_THROW("Memory allocation failed");
+        }
 
-    Tileset result(msgpack, *this);
-    return result;
-    //return Tileset(msgpack, *this);
+        std::vector<std::uint8_t> msgpack(info.size);
+        m_file.seek(info.offset, rwops_base::seekdir::beg);
+        m_file.read(msgpack.data(), info.size);
+
+        data.ref_count = 0;
+        data.asset_id = asset_id;
+        data.type = info.type;
+        data.lifetime = SharedAssetLifetime::REF_COUNT_MANAGED;
+        data.asset = new (asset_memory) Tileset(msgpack, *this);
+
+        ILOG() << "Asset Loaded:"
+               << " asset_id=" << data.asset_id
+               << " type=" << data.type
+               << " size=" << info.size;
+    }
+
+    SDL_assert(data.type == asset_type_tileset);
+    return shared_asset<Tileset>(static_cast<Tileset*>(data.asset), &data);
 }
 
 tilemap::Tilemap

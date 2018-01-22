@@ -75,13 +75,11 @@ public:
     //! \brief Surface dtor
     ~Surface (void) noexcept;
 
-    //!@{
-    //! \brief Copy and move enabled
-    //! \details Copies are tracked by an internal refcount
-    Surface (const Surface&);
-    Surface& operator= (const Surface&);
-    Surface (Surface&&) noexcept;
-    Surface& operator= (Surface&&) noexcept;
+    //!@{ Non-copyable, non-movable
+    Surface (const Surface&) = delete;
+    Surface& operator= (const Surface&) = delete;
+    Surface (Surface&&) noexcept = default;
+    Surface& operator= (Surface&&) noexcept = default;
     //!@}
 
     //!@{

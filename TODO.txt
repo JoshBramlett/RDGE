@@ -1,8 +1,24 @@
 Working
 
     Assets:
-      - Build asset system to manage memory/loading/caching etc.
+      x Build asset system to manage memory/loading/caching etc.
+      x Create a SharedAsset wrapper (like shared_ptr)
+        x SharedAssets will be cached in a vector, and refcounted
+        x Whether the cached SharedAsset is destroyed is determined by refcount and
+          an override to keep alive
+      - Changes to Tilemap
+        - Move Tilemap to base namespace
+        - Move Tilemap objects, layers, etc, within Tilemap
+        - Remove global grid requirement
+      - Have assets load all dependencies
+        - Create unified json for dependency importing
+        - Alternatively specify all dependencies in the asset pack file
+      - Create an AssetBase type
+      - Create a CustomAllocator/SmallVector for caching
+      - So I don't forget:  Look into why specifying a swap method was recommended
     Graphics:
+      - Create texture manager to avoid texture duplication.
+        - Could be tied to a surface, or simply a static collection like libgdx
       - Create a more cohesive way to represent sprites
         - Allocation should be done through a block allocator
         - Tie in with physics system (via entity).  Note: SpriteGroup/RigidBody
@@ -64,6 +80,8 @@ Util:
         provided to the malloc call would be more specific, like xxx_freelist.
     - Improve ImGui memory tracking window.
     - Find solution for properly aligning memory.
+    - Investigate overriding SDL allocation for tracking (like STB is overridden in surface.cpp)
+
   - Add proper logging across the library
   - Normalize and add support for normal print and pretty printing
   - Support TextInput and TextEdit SDL events
@@ -84,11 +102,17 @@ Game
   - Anchoring system for entity placement
 
 Misc
+  - Remove internal
   - Support targeted builds
   - Verify delegating constructors across library
   - Init SDL on demand
   - Ensure Move semantics across library
   - Code conformity maintenence
+
+Resources
+  - Iterators
+    - https://github.com/llvm-mirror/llvm/blob/master/include/llvm/ADT/iterator.h
+    - https://github.com/electronicarts/EASTL/blob/master/include/EASTL/iterator.h
 
 Low Priority
   - Create scope guard

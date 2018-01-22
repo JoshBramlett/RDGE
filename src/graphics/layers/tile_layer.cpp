@@ -30,7 +30,7 @@ TileLayer::TileLayer (const tilemap_grid& grid,
                       float scale)
     : m_grid(grid)
     , m_offset(def.offset * scale)
-    , texture(std::make_shared<Texture>(tileset.surface))
+    , texture(std::make_shared<Texture>(*tileset.surface))
 {
     // Convert to y-is-up
     m_offset.y *= -1.f;
