@@ -39,7 +39,7 @@ Layer::Layer (const nlohmann::json& j)
                                   j.count("offsety") ? j["offsety"].get<float>() : 0.f);
         if (j.count("tileset_index"))
         {
-            this->tileset_index = j["tileset_index"].get<int32>();
+            this->tileset_index = j["tileset_index"].get<decltype(this->tileset_index)>();
         }
 
         // type specific
@@ -62,7 +62,7 @@ Layer::Layer (const nlohmann::json& j)
             {
                 std::vector<tile_chunk>(1).swap(this->chunks);
 
-                auto& chunk = this->chunks[0];
+                auto& chunk = this->chunks.at(0);
                 chunk.x = 0;
                 chunk.y = 0;
                 chunk.data = j["data"].get<decltype(chunk.data)>();
@@ -80,7 +80,7 @@ Layer::Layer (const nlohmann::json& j)
                     JSON_VALIDATE_REQUIRED(j_chunk, y, is_number);
                     JSON_VALIDATE_REQUIRED(j_chunk, data, is_array);
 
-                    auto& chunk = this->chunks[index++];
+                    auto& chunk = this->chunks.at(index++);
                     chunk.x = j_chunk["x"].get<decltype(chunk.x)>();
                     chunk.y = j_chunk["y"].get<decltype(chunk.y)>();
                     chunk.data = j_chunk["data"].get<decltype(chunk.data)>();
@@ -103,7 +103,7 @@ Layer::Layer (const nlohmann::json& j)
 
             for (const auto& j_obj : j["objects"])
             {
-                this->objects.emplace_back(Object(j_obj));
+                this->objects.emplace_back(j_obj);
             }
         }
         else if (this->type == LayerType::IMAGELAYER)

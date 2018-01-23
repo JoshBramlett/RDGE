@@ -7,8 +7,8 @@
 
 #include <rdge/core.hpp>
 #include <rdge/assets/shared_asset.hpp>
-#include <rdge/assets/surface.hpp>
 #include <rdge/assets/spritesheet_region.hpp>
+#include <rdge/assets/surface.hpp>
 #include <rdge/assets/tilemap/object.hpp>
 #include <rdge/graphics/animation.hpp>
 

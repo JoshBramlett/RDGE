@@ -1,19 +1,57 @@
 #include <rdge/assets/tilemap/tilemap.hpp>
+#include <rdge/assets/pack_file.hpp>
 #include <rdge/math/intrinsics.hpp>
+#include <rdge/util/json.hpp>
 #include <rdge/util/logger.hpp>
 #include <rdge/internal/exception_macros.hpp>
 
 #include <sstream>
 
 namespace rdge {
+
+void
+from_json (const nlohmann::json& j, tilemap_grid& grid)
+{
+    JSON_VALIDATE_REQUIRED(j, renderorder, is_string);
+    JSON_VALIDATE_REQUIRED(j, x, is_number);
+    JSON_VALIDATE_REQUIRED(j, y, is_number);
+    JSON_VALIDATE_REQUIRED(j, width, is_number_unsigned);
+    JSON_VALIDATE_REQUIRED(j, height, is_number_unsigned);
+    JSON_VALIDATE_REQUIRED(j, cells, is_object);
+    JSON_VALIDATE_REQUIRED(j, chunks, is_object);
+
+    grid.pos.x = j["x"].get<decltype(grid.pos.x)>();
+    grid.pos.y = j["y"].get<decltype(grid.pos.x)>();
+    grid.size.w = j["width"].get<decltype(grid.size.w)>();
+    grid.size.h = j["height"].get<decltype(grid.size.h)>();
+
+    if (!try_parse(j["renderorder"].get<std::string>(), grid.render_order))
+    {
+        throw std::invalid_argument("Tilemap invalid render_order");
+    }
+
+    const auto& j_cells = j["cells"];
+    JSON_VALIDATE_REQUIRED(j_cells, width, is_number_unsigned);
+    JSON_VALIDATE_REQUIRED(j_cells, height, is_number_unsigned);
+    grid.cell_size.w = j_cells["width"].get<decltype(grid.cell_size.w)>();
+    grid.cell_size.h = j_cells["height"].get<decltype(grid.cell_size.h)>();
+
+    const auto& j_chunks = j["chunks"];
+    JSON_VALIDATE_REQUIRED(j_chunks, width, is_number_unsigned);
+    JSON_VALIDATE_REQUIRED(j_chunks, height, is_number_unsigned);
+    grid.chunk_size.w = j_chunks["width"].get<decltype(grid.chunk_size.w)>();
+    grid.chunk_size.h = j_chunks["height"].get<decltype(grid.chunk_size.w)>();
+}
+
 namespace tilemap {
 
 using json = nlohmann::json;
 
-Tilemap::Tilemap (const nlohmann::json& j)
+Tilemap::Tilemap (const std::vector<uint8>& msgpack, PackFile& packfile)
 {
     try
     {
+        json j = json::from_msgpack(msgpack);
         JSON_VALIDATE_REQUIRED(j, orientation, is_string);
         JSON_VALIDATE_REQUIRED(j, grid, is_object);
         JSON_VALIDATE_REQUIRED(j, layers, is_array);
@@ -32,49 +70,31 @@ Tilemap::Tilemap (const nlohmann::json& j)
             throw std::invalid_argument("Tilemap only supports orthogonal maps");
         }
 
-        const auto& j_grid = j["grid"];
-        JSON_VALIDATE_REQUIRED(j_grid, renderorder, is_string);
-        JSON_VALIDATE_REQUIRED(j_grid, x, is_number);
-        JSON_VALIDATE_REQUIRED(j_grid, y, is_number);
-        JSON_VALIDATE_REQUIRED(j_grid, width, is_number_unsigned);
-        JSON_VALIDATE_REQUIRED(j_grid, height, is_number_unsigned);
-        JSON_VALIDATE_REQUIRED(j_grid, cells, is_object);
-        JSON_VALIDATE_REQUIRED(j_grid, chunks, is_object);
-        this->grid.pos.x = j_grid["x"].get<int32>();
-        this->grid.pos.y = j_grid["y"].get<int32>();
-        this->grid.size.w = j_grid["width"].get<uint32>();
-        this->grid.size.h = j_grid["height"].get<uint32>();
-
-        if (!try_parse(j_grid["renderorder"].get<std::string>(), this->grid.render_order))
-        {
-            throw std::invalid_argument("Tilemap invalid render_order");
-        }
-
-        const auto& j_cells = j_grid["cells"];
-        JSON_VALIDATE_REQUIRED(j_cells, width, is_number_unsigned);
-        JSON_VALIDATE_REQUIRED(j_cells, height, is_number_unsigned);
-        this->grid.cell_size.w = j_cells["width"].get<uint32>();
-        this->grid.cell_size.h = j_cells["height"].get<uint32>();
-
-        const auto& j_chunks = j_grid["chunks"];
-        JSON_VALIDATE_REQUIRED(j_chunks, width, is_number_unsigned);
-        JSON_VALIDATE_REQUIRED(j_chunks, height, is_number_unsigned);
-        this->grid.chunk_size.w = j_chunks["width"].get<uint32>();
-        this->grid.chunk_size.h = j_chunks["height"].get<uint32>();
+        this->grid = j["grid"].get<tilemap_grid>();
 
         const auto& j_tilesets = j["tilesets"];
-        this->sheets.reserve(j_tilesets.size());
+        std::vector<sheet_info>(j_tilesets.size()).swap(this->sheets);
+
+        size_t index = 0;
         for (const auto& j_tileset : j_tilesets)
         {
             JSON_VALIDATE_REQUIRED(j_tileset, firstgid, is_number);
             JSON_VALIDATE_REQUIRED(j_tileset, table_id, is_number);
             JSON_VALIDATE_REQUIRED(j_tileset, type, is_number);
 
-            sheet_info sheet;
-            sheet.first_gid = j_tileset["firstgid"].get<int32>();
-            sheet.table_id = j_tileset["table_id"].get<int32>();
-            sheet.type = j_tileset["type"].get<asset_pack::asset_type>();
-            this->sheets.push_back(sheet);
+            auto& sheet = this->sheets.at(index++);
+            sheet.first_gid = j_tileset["firstgid"].get<decltype(sheet.first_gid)>();
+            sheet.table_id = j_tileset["table_id"].get<decltype(sheet.table_id)>();
+            sheet.type = j_tileset["type"].get<decltype(sheet.type)>();
+
+            if (sheet.type == asset_pack::asset_type_spritesheet)
+            {
+                sheet.spritesheet = packfile.GetAsset<SpriteSheet>(sheet.table_id);
+            }
+            else if (sheet.type == asset_pack::asset_type_tileset)
+            {
+                sheet.tileset = packfile.GetAsset<Tileset>(sheet.table_id);
+            }
         }
 
         for (auto& j_layer : j["layers"])

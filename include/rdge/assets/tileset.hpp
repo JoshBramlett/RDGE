@@ -7,7 +7,6 @@
 
 #include <rdge/core.hpp>
 #include <rdge/assets/shared_asset.hpp>
-#include <rdge/assets/surface.hpp>
 #include <rdge/math/vec2.hpp>
 
 #include <vector>
@@ -17,6 +16,7 @@ namespace rdge {
 
 //!@{ Forward declarations
 class PackFile;
+class Surface;
 struct tex_coords;
 //!@}
 
@@ -63,7 +63,7 @@ public:
     //! \param [in] packfile \ref PackFile reference (to load dependencies)
     //! \throws rdge::Exception Unable to parse config
     //! \see http://msgpack.org/
-    explicit Tileset (const std::vector<uint8>& msgpack, PackFile& pack);
+    explicit Tileset (const std::vector<uint8>& msgpack, PackFile& packfile);
 
     //! \brief Tileset default dtor
     ~Tileset (void) noexcept;

@@ -1,5 +1,6 @@
 #include <rdge/assets/tileset.hpp>
 #include <rdge/assets/pack_file.hpp>
+#include <rdge/assets/surface.hpp>
 #include <rdge/graphics/tex_coords.hpp>
 #include <rdge/util/io/rwops_base.hpp>
 #include <rdge/util/memory/alloc.hpp>

@@ -223,7 +223,7 @@ PackFile::GetTilemap (int32 asset_id)
     m_file.seek(info.offset, rwops_base::seekdir::beg);
     m_file.read(msgpack.data(), info.size);
 
-    return tilemap::Tilemap(json::from_msgpack(msgpack));
+    return tilemap::Tilemap(msgpack, *this);
 }
 
 } // namespace rdge

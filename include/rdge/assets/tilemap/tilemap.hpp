@@ -13,15 +13,19 @@
 #include <rdge/graphics/color.hpp>
 #include <rdge/math/vec2.hpp>
 
-//!@{ Forward declarations
-//namespace nlohmann { class json; }
-// TODO Add forward declaration
-// https://github.com/nlohmann/json/issues/314
-#include <rdge/util/json.hpp>
-//!@}
+#include <rdge/assets/shared_asset.hpp>
+#include <rdge/assets/tileset.hpp>
+#include <rdge/assets/spritesheet.hpp>
+
+#include <vector>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
+
+//!@{ Forward declarations
+class PackFile;
+//!@}
+
 namespace tilemap {
 
 //! \enum Orientation
@@ -72,9 +76,12 @@ class Tilemap
 {
 public:
     //! \brief Tilemap ctor
-    //! \param [in] j json formatted layer
+    //! \details Loads and parses the packed json (used with \ref PackFile).
+    //! \param [in] msgpack Packed json configuration
+    //! \param [in] packfile \ref PackFile reference (to load dependencies)
     //! \throws rdge::Exception Parsing failed
-    Tilemap (const nlohmann::json& j);
+    //! \see http://msgpack.org/
+    Tilemap (const std::vector<uint8>& msgpack, PackFile& packfile);
 
     //!@{ Tilemap default ctor/dtor
     Tilemap (void) = default;
@@ -101,6 +108,9 @@ public:
         int32 first_gid;             //!< First global tile id in the sheet
         int32 table_id;              //!< Sheet table id in the \ref PackFile
         asset_pack::asset_type type; //!< Sheet type (spritesheet or tileset)
+
+        shared_asset<Tileset> tileset;
+        shared_asset<SpriteSheet> spritesheet;
     };
 
     tilemap_grid grid;              //!< Grid for the Tilemap

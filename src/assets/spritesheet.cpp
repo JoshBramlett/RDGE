@@ -1,6 +1,6 @@
 #include <rdge/assets/spritesheet.hpp>
 #include <rdge/assets/pack_file.hpp>
-#include <rdge/math/intrinsics.hpp>
+#include <rdge/math/vec2.hpp>
 #include <rdge/util/io/rwops_base.hpp>
 #include <rdge/util/memory/alloc.hpp>
 #include <rdge/util/compiler.hpp>
@@ -15,7 +15,6 @@
 
 namespace rdge {
 
-using namespace rdge::math;
 using json = nlohmann::json;
 
 namespace {
@@ -33,7 +32,7 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
     JSON_VALIDATE_OPTIONAL(j, animations, is_array);
 
     const auto& j_regions = j["frames"];
-    sheet.regions = std::vector<region_data>(j_regions.size());
+    std::vector<region_data>(j_regions.size()).swap(sheet.regions);
 
     auto surface_size = sheet.surface->Size();
     size_t index = 0;
@@ -87,10 +86,10 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
         float x2 = normalize(region.value.clip.x + region.value.clip.w, surface_size.w);
         float y1 = normalize(region.value.clip.y, surface_size.h);
         float y2 = normalize(region.value.clip.y + region.value.clip.h, surface_size.h);
-        region.value.coords.bottom_left  = vec2(x1, y1);
-        region.value.coords.bottom_right = vec2(x2, y1);
-        region.value.coords.top_left     = vec2(x1, y2);
-        region.value.coords.top_right    = vec2(x2, y2);
+        region.value.coords.bottom_left  = math::vec2(x1, y1);
+        region.value.coords.bottom_right = math::vec2(x2, y1);
+        region.value.coords.top_left     = math::vec2(x1, y2);
+        region.value.coords.top_right    = math::vec2(x2, y2);
 
         if (region.value.is_rotated)
         {
@@ -125,7 +124,7 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
     if (j.count("animations"))
     {
         const auto& j_animations = j["animations"];
-        sheet.animations = std::vector<animation_data>(j_animations.size());
+        std::vector<animation_data>(j_animations.size()).swap(sheet.animations);
 
         index = 0;
         for (const auto& j_animation : j_animations)
