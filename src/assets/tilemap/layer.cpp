@@ -24,14 +24,14 @@ Layer::Layer (const nlohmann::json& j)
         JSON_VALIDATE_OPTIONAL(j, tileset_index, is_number);
 
         // required
-        this->name = j["name"].get<std::string>();
+        this->name = j["name"].get<decltype(this->name)>();
         if (!try_parse(j["type"].get<std::string>(), this->type))
         {
             throw std::invalid_argument("Layer invalid type. name=" + this->name);
         }
 
-        this->visible = j["visible"].get<bool>();
-        this->opacity = j["opacity"].get<float>();
+        this->visible = j["visible"].get<decltype(this->visible)>();
+        this->opacity = j["opacity"].get<decltype(this->opacity)>();
 
         // optional
         this->properties = PropertyCollection(j);
@@ -45,24 +45,33 @@ Layer::Layer (const nlohmann::json& j)
         // type specific
         if (this->type == LayerType::TILELAYER)
         {
+            JSON_VALIDATE_REQUIRED(j, startx, is_number);
+            JSON_VALIDATE_REQUIRED(j, starty, is_number);
+            JSON_VALIDATE_REQUIRED(j, width, is_number);
+            JSON_VALIDATE_REQUIRED(j, height, is_number);
             JSON_VALIDATE_OPTIONAL(j, data, is_array);
             JSON_VALIDATE_OPTIONAL(j, chunks, is_array);
+
+            this->grid_location.x = j["startx"].get<decltype(this->grid_location.x)>();
+            this->grid_location.y = j["starty"].get<decltype(this->grid_location.y)>();
+            this->grid_size.w = j["width"].get<decltype(this->grid_size.w)>();
+            this->grid_size.h = j["height"].get<decltype(this->grid_size.h)>();
 
             // fixed size map
             if (j.count("data"))
             {
-                this->chunks = std::vector<tile_chunk>(1);
+                std::vector<tile_chunk>(1).swap(this->chunks);
 
                 auto& chunk = this->chunks[0];
                 chunk.x = 0;
                 chunk.y = 0;
-                chunk.data = j["data"].get<std::vector<uint32>>();
+                chunk.data = j["data"].get<decltype(chunk.data)>();
             }
             // infinite size map
             else if (j.count("chunks"))
             {
                 const auto& j_chunks = j["chunks"];
-                this->chunks = std::vector<tile_chunk>(j_chunks.size());
+                std::vector<tile_chunk>(j_chunks.size()).swap(this->chunks);
 
                 size_t index = 0;
                 for (const auto& j_chunk : j_chunks)
@@ -72,9 +81,9 @@ Layer::Layer (const nlohmann::json& j)
                     JSON_VALIDATE_REQUIRED(j_chunk, data, is_array);
 
                     auto& chunk = this->chunks[index++];
-                    chunk.x = j_chunk["x"].get<size_t>();
-                    chunk.y = j_chunk["y"].get<size_t>();
-                    chunk.data = j_chunk["data"].get<std::vector<uint32>>();
+                    chunk.x = j_chunk["x"].get<decltype(chunk.x)>();
+                    chunk.y = j_chunk["y"].get<decltype(chunk.y)>();
+                    chunk.data = j_chunk["data"].get<decltype(chunk.data)>();
                 }
             }
             else

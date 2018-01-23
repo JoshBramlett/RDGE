@@ -44,7 +44,7 @@ TileBatch::TileBatch (uint16 capacity, const math::vec2& tile_size)
          << "layout (location = " << VATTR_UV_INDEX    << ") in vec2 v_uv;\n"
          << "layout (location = " << VATTR_COLOR_INDEX << ") in vec4 v_color;\n"
          //
-         << "uniform mat4 " << UNI_PROJ_MATRIX << ";\n"
+         << "uniform mat4 " << U_PROJ_XF << ";\n"
          //
          << "out vertex_attributes\n"
          << "{\n"
@@ -56,7 +56,7 @@ TileBatch::TileBatch (uint16 capacity, const math::vec2& tile_size)
          << "{\n"
          << "  vertex.uv    = v_uv;\n"
          << "  vertex.color = v_color;\n"
-         << "  gl_Position  = " << UNI_PROJ_MATRIX << " * v_pos;\n"
+         << "  gl_Position  = " << U_PROJ_XF << " * v_pos;\n"
          << "}\n";
 
     std::ostringstream frag;
@@ -64,7 +64,7 @@ TileBatch::TileBatch (uint16 capacity, const math::vec2& tile_size)
          //
          << "layout (location = 0) out vec4 color;\n"
          //
-         << "uniform sampler2D u_texture;\n"
+         << "uniform sampler2D " << U_TEXTURE << ";\n"
          //
          << "in vertex_attributes\n"
          << "{\n"
@@ -74,7 +74,7 @@ TileBatch::TileBatch (uint16 capacity, const math::vec2& tile_size)
          //
          << "void main()\n"
          << "{\n"
-         << "  color = vertex.color * texture(u_texture, vertex.uv);\n"
+         << "  color = vertex.color * texture(" << U_TEXTURE << ", vertex.uv);\n"
          << "}\n";
 
     m_shader = Shader(vert.str(), frag.str());
@@ -153,9 +153,6 @@ TileBatch::TileBatch (uint16 capacity, const math::vec2& tile_size)
 
     opengl::UnbindVertexArrays();
 
-    OrthographicCamera camera;
-    SetView(camera);
-
     DLOG() << "TileBatch[" << this << "]"
            << " capacity=" << m_capacity
            << " tile_size=" << m_tileSize
@@ -215,8 +212,8 @@ TileBatch::SetView (const OrthographicCamera& camera)
     SDL_assert(m_vao != 0);
 
     m_shader.Enable();
-    m_shader.SetUniformValue(UNI_PROJ_MATRIX, camera.combined);
-    m_shader.SetUniformValue("u_texture", 0);
+    m_shader.SetUniformValue(U_PROJ_XF, camera.combined);
+    m_shader.SetUniformValue(U_TEXTURE, TEXTURE_UNIT_ID);
     m_shader.Disable();
 
     m_far = -camera.far;

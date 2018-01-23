@@ -9,7 +9,7 @@ Working
       - Changes to Tilemap
         - Move Tilemap to base namespace
         - Move Tilemap objects, layers, etc, within Tilemap
-        - Remove global grid requirement
+        x Remove global grid requirement
       - Have assets load all dependencies
         - Create unified json for dependency importing
         - Alternatively specify all dependencies in the asset pack file

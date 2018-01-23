@@ -34,7 +34,10 @@ public:
     static constexpr uint32 VATTR_UV_INDEX    = 1; //!< UV coordinates attribute index
     static constexpr uint32 VATTR_COLOR_INDEX = 2; //!< Color attribute index
 
-    static constexpr const char* UNI_PROJ_MATRIX = "proj_matrix"; //!< Projection matrix uniform
+    static constexpr const char* U_PROJ_XF = "u_proj_xf"; //!< Projection transform uniform
+    static constexpr const char* U_TEXTURE = "u_texture"; //!< Sampler2D uniform
+
+    static constexpr int32 TEXTURE_UNIT_ID = 0; //!< Slot used by the shader
     //!@}
 
     //! \brief TileBatch default ctor

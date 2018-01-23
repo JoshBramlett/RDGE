@@ -137,6 +137,8 @@ public:
         std::vector<uint32> data; //!< Array of GIDs
     };
 
+    math::ivec2 grid_location;
+    math::uivec2 grid_size;
     std::vector<tile_chunk> chunks; //!< List of chunks that make up the mapping
     //!@}
 

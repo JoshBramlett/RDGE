@@ -9,6 +9,10 @@
 #include <rdge/util/logger.hpp>
 #include <rdge/util/memory/alloc.hpp>
 
+// debug
+#include <rdge/debug/renderer.hpp>
+#include <rdge/graphics/color.hpp>
+
 #include <SDL_assert.h>
 
 #include <sstream>
@@ -32,7 +36,11 @@ TileLayer::TileLayer (const tilemap_grid& grid,
     , m_offset(def.offset * scale)
     , texture(std::make_shared<Texture>(*tileset.surface))
 {
-    this->texture->unit_id = 0;
+    this->texture->unit_id = TileBatch::TEXTURE_UNIT_ID;
+
+    // TODO short-term hack to only include the layer rather than the global grid
+    m_grid.pos = def.grid_location;
+    m_grid.size = def.grid_size;
 
     // Convert to y-is-up
     m_offset.y *= -1.f;
@@ -78,8 +86,9 @@ TileLayer::TileLayer (const tilemap_grid& grid,
         SDL_assert(cells_in_chunk == def_chunk.data.size());
 
         // x/y in local chunk coordinates
-        int32 chunk_x = (def_chunk.x - grid.pos.x) / m_grid.chunk_size.w;
-        int32 chunk_y = (def_chunk.y - grid.pos.y) / m_grid.chunk_size.h;
+        // NOTE: def_chunk position is still in screen coordinates
+        int32 chunk_x = (def_chunk.x - m_grid.pos.x) / m_grid.chunk_size.w;
+        int32 chunk_y = (def_chunk.y + m_grid.pos.y) / m_grid.chunk_size.h;
         SDL_assert(chunk_x >= 0);
         SDL_assert(chunk_y >= 0);
 
@@ -183,6 +192,8 @@ TileLayer::Draw (TileBatch& renderer, const OrthographicCamera& camera)
     {
         return;
     }
+
+    //debug::DrawWireFrame(m_bounds, color::RED);
 
     renderer.SetView(camera);
     renderer.Prime();
