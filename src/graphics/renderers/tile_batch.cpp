@@ -31,14 +31,10 @@ constexpr size_t TILE_SIZE = VERTEX_SIZE * 4;
 
 } // anonymous namespace
 
-TileBatch::TileBatch (uint16 capacity,
-                      const math::vec2& tile_size,
-                      std::shared_ptr<Texture> texture)
+TileBatch::TileBatch (uint16 capacity, const math::vec2& tile_size)
     : m_tileSize(tile_size)
     , m_capacity(capacity)
-    , m_texture(std::move(texture))
 {
-    m_texture->unit_id = 0;
     this->blend.enabled = true;
 
     std::ostringstream vert;
@@ -162,6 +158,7 @@ TileBatch::TileBatch (uint16 capacity,
 
     DLOG() << "TileBatch[" << this << "]"
            << " capacity=" << m_capacity
+           << " tile_size=" << m_tileSize
            << " vao[" << m_vao << "]"
            << " vbo[" << m_vbo << "].size=" << vbo_size
            << " ibo[" << m_ibo << "].size=" << ibo_size;
@@ -182,7 +179,6 @@ TileBatch::TileBatch (TileBatch&& other) noexcept
     , m_cursor(other.m_cursor)
     , m_submissions(other.m_submissions)
     , m_capacity(other.m_capacity)
-    , m_texture(std::move(other.m_texture))
 {
     std::swap(m_vao, other.m_vao);
     std::swap(m_vbo, other.m_vbo);
@@ -201,7 +197,6 @@ TileBatch::operator= (TileBatch&& rhs) noexcept
         m_cursor = rhs.m_cursor;
         m_submissions = rhs.m_submissions;
         m_capacity = rhs.m_capacity;
-        m_texture = std::move(rhs.m_texture);
 
         std::swap(m_vao, rhs.m_vao);
         std::swap(m_vbo, rhs.m_vbo);
@@ -280,7 +275,7 @@ TileBatch::Draw (const tile_cell_chunk& chunk, color c)
 }
 
 void
-TileBatch::Flush (void)
+TileBatch::Flush (std::shared_ptr<Texture> texture)
 {
     // Sanity check the same VBO is bound throughout the draw call
     SDL_assert(m_vbo == static_cast<uint32>(opengl::GetInt(GL_ARRAY_BUFFER_BINDING)));
@@ -290,7 +285,7 @@ TileBatch::Flush (void)
 
     if (m_submissions > 0)
     {
-        m_texture->Activate();
+        texture->Activate();
         this->blend.Apply();
 
         opengl::BindVertexArray(m_vao);

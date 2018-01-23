@@ -32,6 +32,8 @@ TileLayer::TileLayer (const tilemap_grid& grid,
     , m_offset(def.offset * scale)
     , texture(std::make_shared<Texture>(*tileset.surface))
 {
+    this->texture->unit_id = 0;
+
     // Convert to y-is-up
     m_offset.y *= -1.f;
     m_grid.pos.y *= -1;
@@ -145,6 +147,7 @@ TileLayer::TileLayer (TileLayer&& other) noexcept
     , m_bounds(other.m_bounds)
     , m_color(other.m_color)
     , m_inv(other.m_inv)
+    , texture(std::move(other.texture))
 {
     other.m_cells = nullptr;
     other.m_chunks.data = nullptr;
@@ -160,6 +163,7 @@ TileLayer::operator= (TileLayer&& rhs) noexcept
         m_bounds = rhs.m_bounds;
         m_color = rhs.m_color;
         m_inv = rhs.m_inv;
+        this->texture = std::move(rhs.texture);
 
         std::swap(m_cells, rhs.m_cells);
         std::swap(m_chunks, rhs.m_chunks);
@@ -211,7 +215,7 @@ TileLayer::Draw (TileBatch& renderer, const OrthographicCamera& camera)
 
     //ILOG() << "this=" << this << " draw calls: " << draw_calls;
 
-    renderer.Flush();
+    renderer.Flush(this->texture);
 }
 
 std::ostream&

@@ -21,7 +21,7 @@
 /        Debugging defines
 ***********************************/
 
-#define RDGE_DEBUG_MEMORY_TRACKER
+//#define RDGE_DEBUG_MEMORY_TRACKER
 
 /***********************************
 /    Compiler specific defines

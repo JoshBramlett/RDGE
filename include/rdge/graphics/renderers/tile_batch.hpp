@@ -44,9 +44,9 @@ public:
     //! \details Creates a copy of the \ref tilemap_data from the provided \ref
     //!          SpriteSheet.  Setup for all OpenGL performed.
     //! \param [in] capacity Max number of tiles rendered per draw call
-    //! \param [in] texture Tileset texture
+    //! \param [in] tile_size Static fixed size for a tile cell (in pixels)
     //! \throws rdge::Exception Initialization failure
-    explicit TileBatch (uint16 capacity, const math::vec2& tile_size, std::shared_ptr<Texture> texture);
+    explicit TileBatch (uint16 capacity, const math::vec2& tile_size);
 
     //! \brief TileBatch dtor
     ~TileBatch (void) noexcept;
@@ -68,7 +68,7 @@ public:
     //! \brief Draw the tilemap contents
     void Draw (const tile_cell_chunk& chunk, color c);
 
-    void Flush (void);
+    void Flush (std::shared_ptr<Texture> texture);
 
     // TODO
     // ImGui support to list drawn tiles per frame
@@ -90,8 +90,6 @@ private:
     tile_vertex* m_cursor;          //!< VBO cursor
     size_t       m_submissions = 0; //!< Tracks submissions per draw call
     size_t       m_capacity = 0;    //!< Max number of submissions per draw
-
-    std::shared_ptr<Texture> m_texture; //!< Tilemap texture
 };
 
 } // namespace rdge

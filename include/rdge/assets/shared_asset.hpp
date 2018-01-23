@@ -8,7 +8,6 @@
 #include <rdge/core.hpp>
 #include <rdge/assets/file_formats/asset_pack.hpp>
 #include <rdge/util/compiler.hpp>
-#include <rdge/util/logger.hpp>
 #include <rdge/util/memory/alloc.hpp>
 #include <rdge/internal/exception_macros.hpp>
 

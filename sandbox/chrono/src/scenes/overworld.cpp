@@ -24,34 +24,31 @@ OverworldScene::OverworldScene (void)
     // Background layer
     ///////////////////
 
-    //auto sheet = g_game.pack->GetSpriteSheet(rdge_asset_spritesheet_animals);
-    //auto tileset = g_game.pack->GetTileset(rdge_asset_tileset_overworld_bg);
-
-    std::shared_ptr<Texture> same;
     auto tilemap = g_game.pack->GetTilemap(rdge_asset_tilemap_overworld);
-    for (const auto& layer : tilemap.layers)
-    {
-        if (layer.type == LayerType::TILELAYER && layer.tileset_index >= 0)
-        {
-            const auto& info = tilemap.sheets[layer.tileset_index];
-            auto tileset = g_game.pack->GetAsset<Tileset>(info.table_id);
-            tile_layers.emplace_back(tilemap.grid, layer, *tileset, g_game.asset_scale);
 
-            if (!same)
-            {
-                auto& l = tile_layers.back();
-                same = l.texture;
-                tile_batch = TileBatch(50000, math::vec2(64.f, 64.f), l.texture);
-            }
-            else
-            {
-                auto& l = tile_layers.back();
-                l.texture = same;
-            }
-        }
+    // TODO This is the total tile count, but more care should be taken into
+    //      consideration to construct the buffer size because this should be
+    //      set to the maximum number of tiles that could be drawn in a single
+    //      frame.  Zoom should be considered, but in the general case this
+    //      should be no more than the the number of tiles drawn for the maximum
+    //      resolution supported.
+    size_t tile_count = tilemap.grid.size.w * tilemap.grid.size.h;
+    auto tile_size = static_cast<math::vec2>(tilemap.grid.cell_size) * g_game.asset_scale;
+    tile_batch = TileBatch(tile_count, tile_size);
+
+    {
+        const auto& bg_0 = tilemap.layers[overworld_layer_bg];
+        const auto& bg_1 = tilemap.layers[overworld_layer_bg_overlay_1];
+
+        auto table_id_0 = tilemap.sheets[bg_0.tileset_index].table_id;
+        auto table_id_1 = tilemap.sheets[bg_1.tileset_index].table_id;
+        SDL_assert(table_id_0 == table_id_1);
+
+        auto tileset = g_game.pack->GetAsset<Tileset>(table_id_0);
+        tile_layers.emplace_back(tilemap.grid, bg_0, *tileset, g_game.asset_scale);
+        tile_layers.emplace_back(tilemap.grid, bg_1, *tileset, g_game.asset_scale);
     }
 
-    //auto sheet = g_game.pack->GetSpriteSheet(rdge_asset_spritesheet_player);
     auto sheet = g_game.pack->GetAsset<SpriteSheet>(rdge_asset_spritesheet_player);
     sprite_batch = std::make_shared<SpriteBatch>();
     sprite_layers.emplace_back(sprite_batch);
