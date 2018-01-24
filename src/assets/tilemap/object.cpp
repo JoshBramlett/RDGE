@@ -67,7 +67,7 @@ Object::Object (const nlohmann::json& j)
         case ObjectType::POINT:
             break;
         case ObjectType::CIRCLE:
-            JSON_VALIDATE_REQUIRED(j, radius, is_number_float);
+            JSON_VALIDATE_REQUIRED(j, radius, is_number);
 
             m_radius = j["radius"].get<float>();
             break;
@@ -136,7 +136,7 @@ Object::GetCircle (void) const
         throw std::invalid_argument(ss.str());
     }
 
-    return physics::circle(this->position, m_size.x);
+    return physics::circle(this->position, m_radius);
 }
 
 physics::polygon

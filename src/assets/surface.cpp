@@ -11,7 +11,7 @@
 
 #define STBI_MALLOC(x) RDGE_MALLOC_SZ(x, nullptr)
 #define STBI_FREE(x) RDGE_FREE(x, nullptr)
-#define STBI_REALLOC(x, n) RDGE_REALLOC(x, n, nullptr)
+#define STBI_REALLOC(x, n) RDGE_REALLOC_SZ(x, n, nullptr)
 #define STB_IMAGE_IMPLEMENTATION
 #include <nothings/stb_image.h>
 

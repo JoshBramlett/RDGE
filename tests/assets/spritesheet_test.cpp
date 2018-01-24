@@ -44,8 +44,8 @@ TEST_F(SpriteSheetTest, HandlesSuccess)
 
     // origin set
     const auto& part2 = sheet["uv_2"];
-    EXPECT_FLOAT_EQ(part2.origin.x, 16.f);
-    EXPECT_FLOAT_EQ(part2.origin.y, 32.f);
+    EXPECT_FLOAT_EQ(part2.origin.x, 32.f);
+    EXPECT_FLOAT_EQ(part2.origin.y, 16.f);
 
     // 2) Texture coordinates match expected (tests float normalization)
     // 2a) Test lower bound where normalized coordinate == 0.f

@@ -42,7 +42,7 @@ PropertyCollection::PropertyCollection (const nlohmann::json& j)
                 p.i = static_cast<int32>(j_prop["value"].get<bool>());
                 break;
             case property_type_float:
-                JSON_VALIDATE_REQUIRED(j_prop, value, is_number_float);
+                JSON_VALIDATE_REQUIRED(j_prop, value, is_number);
                 p.f = j_prop["value"].get<float>();
                 break;
             case property_type_int:

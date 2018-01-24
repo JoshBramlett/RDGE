@@ -21,6 +21,11 @@
       "value":3.14
     },
     {
+      "type":"int",
+      "name":"cust_prop_int",
+      "value":5
+    },
+    {
       "type":"string",
       "name":"cust_prop_string",
       "value":"asdf"

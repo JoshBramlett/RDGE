@@ -49,7 +49,7 @@ TEST(PropertyTest, HandleInvalidConstruction)
       {
         "properties": [
           {
-            "type":"int",
+            "type":"mint",
             "name":"cust_prop_int",
             "value":5
           }
@@ -58,7 +58,20 @@ TEST(PropertyTest, HandleInvalidConstruction)
     )"_json;
 
     EXPECT_THROW(tilemap::PropertyCollection { j }, std::runtime_error);
-    EXPECT_THROW(tilemap::PropertyCollection { json::object() }, std::runtime_error);
+
+    j = R"(
+      {
+        "properties": [
+          {
+            "type":"int",
+            "name":"cust_prop_int",
+            "value":true
+          }
+        ]
+      }
+    )"_json;
+
+    EXPECT_THROW(tilemap::PropertyCollection { j }, std::runtime_error);
 }
 
 TEST(PropertyTest, HandleInvalidKey)
@@ -83,7 +96,7 @@ TEST(PropertyTest, HandleTypeMismatch)
       }
     )"_json;
 
-    tilemap::PropertyCollection properties(j["properties"]);
+    tilemap::PropertyCollection properties(j);
     EXPECT_EQ(properties.Size(), 1);
     EXPECT_EQ(properties.GetInt("cust_prop_int"), 5);
     EXPECT_THROW(properties.GetString("cust_prop_int"), std::runtime_error);

@@ -29,13 +29,29 @@ memory_profile s_anonymousProfile;
 
 } // anonymous namespace
 
+// The versions of safe_alloc and safe_realloc that return a pointer are
+// to provide a c-style interface for use when overriding allocations in
+// external libraries (namely stb)
+
 void*
 safe_alloc (size_t size, memory_profile* profile)
 {
-    void* ptr = nullptr;
-    safe_alloc((void**)&(ptr), size, 1, false, profile);
+    void* p = nullptr;
+    safe_alloc((void**)&(p), size, 1, false, profile);
 
-    return ptr;
+    return p;
+}
+
+void*
+safe_realloc (void** p, size_t size, memory_profile* profile)
+{
+    if (*p == nullptr)
+    {
+        return safe_alloc(size, profile);
+    }
+
+    safe_realloc((void**)&(p), size, 1, profile);
+    return *p;
 }
 
 bool
