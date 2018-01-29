@@ -113,6 +113,7 @@ Resources
   - Iterators
     - https://github.com/llvm-mirror/llvm/blob/master/include/llvm/ADT/iterator.h
     - https://github.com/electronicarts/EASTL/blob/master/include/EASTL/iterator.h
+    - https://stackoverflow.com/questions/8054273/how-to-implement-an-stl-style-iterator-and-avoid-common-pitfalls
 
 Low Priority
   - Create scope guard

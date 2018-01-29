@@ -70,7 +70,7 @@ RigidBody::CreateFixture (const fixture_profile& profile)
     }
 
     Fixture* result = graph->block_allocator.New<Fixture>(profile, this);
-    fixtures.push_back(result);
+    fixtures.push_back(*result);
 
     if (IsSimulating())
     {
@@ -100,7 +100,7 @@ RigidBody::DestroyFixture (Fixture* fixture)
 {
     SDL_assert(fixture);
     SDL_assert(fixture->body == this);
-    SDL_assert(fixtures.contains(fixture));
+    SDL_assert(fixtures.contains(*fixture));
 
     if (graph->IsLocked())
     {
@@ -122,7 +122,7 @@ RigidBody::DestroyFixture (Fixture* fixture)
         }
     });
 
-    fixtures.remove(fixture);
+    fixtures.remove(*fixture);
     graph->block_allocator.Delete<Fixture>(fixture);
 
     ComputeMass();
@@ -312,9 +312,9 @@ std::ostream& operator<< (std::ostream& os, const RigidBody& b)
        << "\n    sleep_prevented=" << std::boolalpha << b.IsSleepPrevented()
        << "\n    fixed_rotation=" << std::boolalpha << b.IsFixedRotation()
        << "\n  collections:"
-       << "\n    fixtures=" << b.fixtures.count
-       << "\n    contacts=" << b.contact_edges.count
-       << "\n    joints=" << b.joint_edges.count
+       << "\n    fixtures=" << b.fixtures.size()
+       << "\n    contacts=" << b.contact_edges.size()
+       << "\n    joints=" << b.joint_edges.size()
        << "\n  sweep:"
        << "\n    local_center=" << b.sweep.local_center
        << "\n    pos_0=" << b.sweep.pos_0

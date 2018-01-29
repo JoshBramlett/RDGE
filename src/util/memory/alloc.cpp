@@ -200,13 +200,13 @@ void
 register_memory_profile (memory_profile& profile, const char* name)
 {
     profile.name = name;
-    s_profiles[memory_profile_subsystem_none].push_back(&profile);
+    s_profiles[memory_profile_subsystem_none].push_back(profile);
 }
 
 void
 unregister_memory_profile (memory_profile& profile)
 {
-    s_profiles[memory_profile_subsystem_none].remove(&profile);
+    s_profiles[memory_profile_subsystem_none].remove(profile);
 }
 #endif
 

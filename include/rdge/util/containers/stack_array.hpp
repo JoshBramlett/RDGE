@@ -28,6 +28,8 @@ namespace rdge {
 template <typename T>
 struct stack_array
 {
+    using iterator = detail::ra_iterator<T>;
+
     //! \brief Size multiplier when a realloc is required
     static constexpr float OVER_ALLOC_RATIO = 1.5f;
 
@@ -52,8 +54,7 @@ struct stack_array
         UNTRACK_MEMORY_PROFILE();
     }
 
-    //!@{
-    //! \brief Non-copyable, move enabled
+    //!@{ Non-copyable, move enabled
     stack_array (const stack_array&) = delete;
     stack_array& operator= (const stack_array&) = delete;
 
@@ -78,6 +79,11 @@ struct stack_array
 
         return *this;
     }
+    //!@}
+
+    //!@{ Random access iterator support
+    iterator begin (void) { return iterator(&m_data[0]); }
+    iterator end (void) { return iterator(&m_data[m_count]); }
     //!@}
 
     //! \brief stack_array Subscript Operator
@@ -144,12 +150,6 @@ struct stack_array
     bool empty (void) const noexcept { return (m_count == 0); }
     size_t size (void) const noexcept { return m_count; }
     size_t capacity (void) const noexcept { return m_capacity; }
-    //!@}
-
-    //!@{ Random access iterator support
-    using iterator = detail::ra_iterator<T>;
-    iterator begin (void) { return iterator(&m_data[0]); }
-    iterator end (void) { return iterator(&m_data[m_count]); }
     //!@}
 
 private:

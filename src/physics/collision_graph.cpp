@@ -40,9 +40,9 @@ CollisionGraph::ClearGraph (void) noexcept
     m_tree.ClearProxies();
     block_allocator.Clear();
 
-    SDL_assert(m_bodies.count == 0);
-    SDL_assert(m_contacts.count == 0);
-    SDL_assert(m_joints.count == 0);
+    SDL_assert(m_bodies.size() == 0);
+    SDL_assert(m_contacts.size() == 0);
+    SDL_assert(m_joints.size() == 0);
 }
 
 RigidBody*
@@ -55,7 +55,7 @@ CollisionGraph::CreateBody (const rigid_body_profile& profile)
     }
 
     RigidBody* result = block_allocator.New<RigidBody>(profile, this);
-    m_bodies.push_back(result);
+    m_bodies.push_back(*result);
 
     return result;
 }
@@ -78,7 +78,7 @@ CollisionGraph::DestroyBody (RigidBody* body)
         body->DestroyFixture(f);
     });
 
-    m_bodies.remove(body);
+    m_bodies.remove(*body);
     block_allocator.Delete<RigidBody>(body);
 }
 
@@ -92,9 +92,9 @@ CollisionGraph::CreateRevoluteJoint (RigidBody* a, RigidBody* b, math::vec2 anch
     }
 
     RevoluteJoint* result = block_allocator.New<RevoluteJoint>(a, b, anchor);
-    m_joints.push_back(result);
-    a->joint_edges.push_back(&result->edge_a);
-    b->joint_edges.push_back(&result->edge_b);
+    m_joints.push_back(*result);
+    a->joint_edges.push_back(result->edge_a);
+    b->joint_edges.push_back(result->edge_b);
 
     return result;
 }
@@ -125,9 +125,9 @@ CollisionGraph::DestroyJoint (BaseJoint* joint)
         });
     }
 
-    m_joints.remove(joint);
-    body_a->joint_edges.remove(&joint->edge_a);
-    body_b->joint_edges.remove(&joint->edge_b);
+    m_joints.remove(*joint);
+    body_a->joint_edges.remove(joint->edge_a);
+    body_b->joint_edges.remove(joint->edge_b);
 
     // TODO update once more joints are added
     block_allocator.Delete<RevoluteJoint>(static_cast<RevoluteJoint*>(joint));
@@ -191,9 +191,9 @@ CollisionGraph::Step (float dt)
     {
         ScopeProfiler<> p(&debug_profile.solve);
         static std::vector<RigidBody*> body_stack;
-        body_stack.reserve(m_bodies.count);
+        body_stack.reserve(m_bodies.size());
 
-        m_solver.Initialize(m_bodies.count, m_contacts.count, m_joints.count);
+        m_solver.Initialize(m_bodies.size(), m_contacts.size(), m_joints.size());
         m_bodies.for_each([&](auto* body) {
             if ((body->m_flags & RigidBody::ON_ISLAND) ||
                 !body->IsSimulating() ||
@@ -327,9 +327,9 @@ CollisionGraph::CreateContact (fixture_proxy* a, fixture_proxy* b)
     }
 
     Contact* contact = block_allocator.New<Contact>(a->fixture, b->fixture);
-    m_contacts.push_back(contact);
-    body_a->contact_edges.push_back(&contact->edge_a);
-    body_b->contact_edges.push_back(&contact->edge_b);
+    m_contacts.push_back(*contact);
+    body_a->contact_edges.push_back(contact->edge_a);
+    body_b->contact_edges.push_back(contact->edge_b);
 
     if (!contact->fixture_a->IsSensor() &&
         !contact->fixture_b->IsSensor())
@@ -360,9 +360,9 @@ CollisionGraph::DestroyContact (Contact* contact)
         }
     }
 
-    m_contacts.remove(contact);
-    body_a->contact_edges.remove(&contact->edge_a);
-    body_b->contact_edges.remove(&contact->edge_b);
+    m_contacts.remove(*contact);
+    body_a->contact_edges.remove(contact->edge_a);
+    body_b->contact_edges.remove(contact->edge_b);
 
     block_allocator.Delete<Contact>(contact);
 }
