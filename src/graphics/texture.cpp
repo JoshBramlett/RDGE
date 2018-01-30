@@ -1,18 +1,140 @@
 #include <rdge/graphics/texture.hpp>
 #include <rdge/graphics/shader.hpp>
 #include <rdge/assets/surface.hpp>
-#include <rdge/math/intrinsics.hpp>
 #include <rdge/util/logger.hpp>
+#include <rdge/util/memory/alloc.hpp>
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
 
 #include <SDL.h>
 #include <GL/glew.h>
 
+#include <sstream>
+
 namespace rdge {
 
-Texture::Texture (void)
-{ }
+// Underlying data for texture sharing.  The surface pointer is cached for
+// comparison but never dereferenced, because there is no guarantee the
+// surface will outlast the texture.  As such, width/height are cached.
+struct shared_texture_data
+{
+    const SDL_Surface* surface; // DO NOT DEREFERENCE
+    size_t width;
+    size_t height;
+    uint32 handle;              // OpenGL handle
+    size_t ref_count;
+};
+
+class TextureManager
+{
+public:
+    TextureManager (void)
+        : m_capacity(Shader::MaxFragmentShaderUnits())
+    {
+        if (RDGE_UNLIKELY(!RDGE_CALLOC(m_textures, m_capacity, nullptr)))
+        {
+            RDGE_THROW("Failed to allocate memory");
+        }
+    }
+
+    ~TextureManager (void) noexcept
+    {
+        RDGE_FREE(m_textures, nullptr);
+    }
+
+    shared_texture_data* Register (const SDL_Surface* surface)
+    {
+        for (size_t i = 0; i < m_count; i++)
+        {
+            auto& t = m_textures[i];
+            if (t.surface == surface)
+            {
+                t.ref_count++;
+                DLOG() << "Texture Reference Added"
+                       << " handle=" << t.handle
+                       << " ref_count=" << t.ref_count;
+
+                return &t;
+            }
+        }
+
+        if (++m_count > m_capacity)
+        {
+            std::ostringstream ss;
+            ss << "Failed to register texture.  Max fragment units reached."
+               << " limit=" << m_capacity;
+            RDGE_THROW(ss.str());
+        }
+
+        size_t index = 0;
+        for (size_t i = 0; i < m_capacity; i++)
+        {
+            // find the first available - units can be released in any order
+            if (m_textures[i].handle == 0)
+            {
+                index = i;
+                break;
+            }
+        }
+
+        auto& t = m_textures[index];
+        t.surface = surface;
+        t.width = surface->w;
+        t.height = surface->h;
+        t.handle = opengl::CreateTexture();
+        t.ref_count = 1;
+
+        ILOG() << "Texture[" << t.width << "x" << t.height << "] Registered"
+               << " handle=" << t.handle;
+
+        return &t;
+    }
+
+    void Release (shared_texture_data* t)
+    {
+        if (t)
+        {
+            SDL_assert(t->ref_count > 0);
+            t->ref_count--;
+            if (t->ref_count == 0)
+            {
+                ILOG() << "Texture[" << t->width << "x" << t->height << "] Deleted"
+                       << " handle=" << t->handle;
+
+                opengl::DeleteTexture(t->handle);
+                t->surface = nullptr;
+                t->handle = 0;
+                t->ref_count = 0;
+                t->width = 0;
+                t->height = 0;
+            }
+            else
+            {
+                DLOG() << "Texture Reference Removed"
+                       << " handle=" << t->handle
+                       << " ref_count=" << t->ref_count;
+            }
+        }
+    }
+
+private:
+    shared_texture_data* m_textures = nullptr;
+    size_t m_count = 0;
+    size_t m_capacity = 0;
+};
+
+namespace {
+
+TextureManager&
+GetManager (void)
+{
+    // requires singleton lazy loading b/c context must be established
+    static TextureManager mgr;
+    return mgr;
+}
+
+} // anonymous namespace
+
 
 // TODO Test surface exception can bubble up
 Texture::Texture (const std::string& path)
@@ -25,32 +147,52 @@ Texture::Texture (Surface&& surface)
 
 Texture::Texture (Surface& surface)
 {
-    auto surface_ptr = static_cast<const SDL_Surface*>(surface);
-    if (!math::is_pot(surface_ptr->w) || !math::is_pot(surface_ptr->h))
+    m_data = GetManager().Register(static_cast<const SDL_Surface*>(surface));
+    if (m_data->ref_count == 1)
     {
-        WLOG() << "Texture loaded has NPOT dimensions."
-               << " w=" << surface_ptr->w
-               << " h=" << surface_ptr->h;
+        Reload(surface);
     }
-
-    m_handle = opengl::CreateTexture();
-    Reload(surface);
 }
 
 Texture::~Texture (void) noexcept
 {
-    glDeleteTextures(1, &m_handle);
+    GetManager().Release(m_data);
 }
 
-Texture::Texture (Texture&& rhs) noexcept
-    : unit_id(rhs.unit_id)
-    , width(rhs.width)
-    , height(rhs.height)
+Texture::Texture (const Texture& other)
+    : unit_id(other.unit_id)
+    , m_data(other.m_data)
 {
-    std::swap(m_handle, rhs.m_handle);
-    rhs.unit_id = INVALID_UNIT_ID;
-    rhs.width   = 0;
-    rhs.height  = 0;
+    if (m_data)
+    {
+        SDL_assert(m_data->ref_count > 0);
+        m_data->ref_count++;
+    }
+}
+
+Texture&
+Texture::operator= (const Texture& rhs)
+{
+    if (this != &rhs)
+    {
+        m_data = rhs.m_data;
+        unit_id = rhs.unit_id;
+
+        if (m_data)
+        {
+            SDL_assert(m_data->ref_count > 0);
+            m_data->ref_count++;
+        }
+    }
+
+    return *this;
+}
+
+Texture::Texture (Texture&& other) noexcept
+    : unit_id(other.unit_id)
+{
+    std::swap(m_data, other.m_data);
+    other.unit_id = INVALID_UNIT_ID;
 }
 
 Texture&
@@ -58,26 +200,58 @@ Texture::operator= (Texture&& rhs) noexcept
 {
     if (this != &rhs)
     {
-        std::swap(m_handle, rhs.m_handle);
+        std::swap(m_data, rhs.m_data);
         unit_id = rhs.unit_id;
-        width   = rhs.width;
-        height  = rhs.height;
 
         rhs.unit_id = INVALID_UNIT_ID;
-        rhs.width   = 0;
-        rhs.height  = 0;
     }
 
     return *this;
 }
 
+bool
+Texture::IsEmpty (void) const noexcept
+{
+    return (m_data == nullptr);
+}
+
+bool
+Texture::IsUnique (void) const noexcept
+{
+    return (m_data == nullptr) || (m_data->ref_count == 1);
+}
+
+size_t
+Texture::Width (void) const noexcept
+{
+    return ((m_data == nullptr) ? 0 : m_data->width);
+}
+
+size_t
+Texture::Height (void) const noexcept
+{
+    return ((m_data == nullptr) ? 0 : m_data->height);
+}
+
+math::uivec2
+Texture::Size (void) const noexcept
+{
+    if (m_data)
+    {
+        return math::uivec2(m_data->width, m_data->height);
+    }
+
+    return math::uivec2(0, 0);
+}
+
 void
 Texture::Activate (void) const
 {
+    SDL_assert(m_data);
     SDL_assert(this->unit_id >= 0 && this->unit_id < Shader::MaxFragmentShaderUnits());
 
     opengl::SetActiveTexture(GL_TEXTURE0 + this->unit_id);
-    opengl::BindTexture(GL_TEXTURE_2D, m_handle);
+    opengl::BindTexture(GL_TEXTURE_2D, m_data->handle);
 }
 
 void
@@ -96,7 +270,7 @@ Texture::Reload (Surface& surface)
     //          SDL_GetWindowPixelFormat(m_window);
     surface.ChangePixelFormat(SDL_PIXELFORMAT_ABGR8888);
 
-    opengl::BindTexture(GL_TEXTURE_2D, m_handle);
+    opengl::BindTexture(GL_TEXTURE_2D, m_data->handle);
 
     // TODO: This is a naive implementation.  The following filters are used to
     //       define how OpenGL will handle the scaling when textures are greater
@@ -126,15 +300,6 @@ Texture::Reload (Surface& surface)
                            surface_ptr->pixels);
 
     opengl::UnbindTexture(GL_TEXTURE_2D);
-
-    this->width = surface_ptr->w;
-    this->height = surface_ptr->h;
-}
-
-bool
-Texture::IsEmpty (void) const
-{
-    return (m_handle == 0);
 }
 
 } // namespace rdge

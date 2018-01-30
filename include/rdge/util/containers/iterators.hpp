@@ -37,10 +37,12 @@ public:
     intrusive_forward_list_iterator (const this_type&) = default;
     this_type& operator= (const this_type&) = default;
 
+    //!@{ member access
     reference operator* (void) const { return *m_ptr; }
     pointer operator-> (void) const { return m_ptr; }
+    //!@}
 
-    //!@{ pre/post increment/decrement
+    //!@{ pre/post increment
     this_type& operator++ (void) { m_ptr = m_ptr->next; return *this; }
 
     intrusive_forward_list_iterator operator++ (int)
@@ -86,8 +88,10 @@ public:
     intrusive_list_iterator (const this_type&) = default;
     this_type& operator= (const this_type&) = default;
 
+    //!@{ member access
     reference operator* (void) const { return *m_ptr; }
     pointer operator-> (void) const { return m_ptr; }
+    //!@}
 
     //!@{ pre/post increment/decrement
     this_type& operator++ (void) { m_ptr = m_ptr->next; return *this; }
@@ -139,9 +143,11 @@ public:
     ra_iterator (const ra_iterator&) = default;
     ra_iterator& operator= (const ra_iterator&) = default;
 
+    //!@{ member access
     reference operator* (void) const { return *m_ptr; }
     pointer operator-> (void) const { return m_ptr; }
     reference operator[] (difference_type d) const { return m_ptr[d]; }
+    //!@}
 
     //!@{ pre/post increment/decrement
     ra_iterator& operator++ (void) { ++m_ptr; return *this; }

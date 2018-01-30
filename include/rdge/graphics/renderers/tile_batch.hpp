@@ -71,7 +71,7 @@ public:
     //! \brief Draw the tilemap contents
     void Draw (const tile_cell_chunk& chunk, color c);
 
-    void Flush (std::shared_ptr<Texture> texture);
+    void Flush (const Texture& texture);
 
     // TODO
     // ImGui support to list drawn tiles per frame

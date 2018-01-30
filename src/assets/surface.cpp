@@ -266,8 +266,10 @@ Surface::ChangePixelFormat (uint32 pixel_format)
         SDL_THROW("Failed to convert surface pixel format", "SDL_ConvertSurfaceFormat");
     }
 
+    void* pixel_data = m_surface->userdata;
     SDL_FreeSurface(m_surface);
     m_surface = new_surface;
+    m_surface->userdata = pixel_data;
 }
 
 Surface

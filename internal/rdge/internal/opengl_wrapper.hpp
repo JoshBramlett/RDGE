@@ -734,6 +734,20 @@ CreateTextures (uint32 n, uint32* textures)
     GL_CHECK_ERROR(glGenTextures(n, textures));
 }
 
+//! \brief Delete a single texture from glDeleteTextures
+//! \details Deletes a single texture object
+//! \see https://www.khronos.org/registry/OpenGL-Refpages/es2.0/xhtml/glDeleteTextures.xml
+inline void
+DeleteTexture (uint32 name)
+{
+    GL_CHECK_ERROR(glDeleteTextures(1, &name));
+}
+
+inline void DeleteTextures (uint32 size, uint32* textures)
+{
+    GL_CHECK_ERROR(glDeleteTextures(size, textures));
+}
+
 //! \brief Direct map to glBindTexture
 //! \details Bind the texture object to the binding target
 //! \param [in] target The target to which the texture is bound
@@ -809,16 +823,6 @@ inline void
 SetActiveTexture (uint32 texture)
 {
     GL_CHECK_ERROR(glActiveTexture(texture));
-}
-
-inline void DeleteTexture(uint32 texture)
-{
-    GL_CHECK_ERROR(glDeleteTextures(1, &texture));
-}
-
-inline void DeleteTextures(uint32 size, uint32* textures)
-{
-    GL_CHECK_ERROR(glDeleteTextures(size, textures));
 }
 
 /******************************************************************

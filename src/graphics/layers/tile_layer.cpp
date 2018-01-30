@@ -2,7 +2,6 @@
 #include <rdge/assets/tileset.hpp>
 #include <rdge/assets/tilemap/layer.hpp>
 #include <rdge/graphics/orthographic_camera.hpp>
-#include <rdge/graphics/texture.hpp>
 #include <rdge/graphics/renderers/tile_batch.hpp>
 #include <rdge/math/intrinsics.hpp>
 #include <rdge/util/strings.hpp>
@@ -34,9 +33,9 @@ TileLayer::TileLayer (const tilemap_grid& grid,
                       float scale)
     : m_grid(grid)
     , m_offset(def.offset * scale)
-    , texture(std::make_shared<Texture>(*tileset.surface))
+    , texture(*tileset.surface)
 {
-    this->texture->unit_id = TileBatch::TEXTURE_UNIT_ID;
+    this->texture.unit_id = TileBatch::TEXTURE_UNIT_ID;
 
     // TODO short-term hack to only include the layer rather than the global grid
     m_grid.pos = def.grid_location;

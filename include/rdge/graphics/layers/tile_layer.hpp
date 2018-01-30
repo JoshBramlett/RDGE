@@ -7,17 +7,15 @@
 
 #include <rdge/core.hpp>
 #include <rdge/graphics/color.hpp>
+#include <rdge/graphics/texture.hpp>
 #include <rdge/graphics/tex_coords.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/physics/aabb.hpp>
-
-#include <memory>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
 //!@{ Forward declarations
-class Texture;
 class Tileset;
 class TileBatch;
 class OrthographicCamera;
@@ -118,7 +116,7 @@ private:
     math::vec2 m_inv;              //!< Inverse pixel to chunk ratio
 
 public:
-    std::shared_ptr<Texture> texture; //!< Tileset texture
+    Texture texture; //!< Tileset texture
 };
 
 //! \brief TileRenderOrder stream output operator

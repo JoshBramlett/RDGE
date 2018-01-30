@@ -272,7 +272,7 @@ TileBatch::Draw (const tile_cell_chunk& chunk, color c)
 }
 
 void
-TileBatch::Flush (std::shared_ptr<Texture> texture)
+TileBatch::Flush (const Texture& texture)
 {
     // Sanity check the same VBO is bound throughout the draw call
     SDL_assert(m_vbo == static_cast<uint32>(opengl::GetInt(GL_ARRAY_BUFFER_BINDING)));
@@ -282,7 +282,7 @@ TileBatch::Flush (std::shared_ptr<Texture> texture)
 
     if (m_submissions > 0)
     {
-        texture->Activate();
+        texture.Activate();
         this->blend.Apply();
 
         opengl::BindVertexArray(m_vao);
