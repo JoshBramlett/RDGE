@@ -26,29 +26,51 @@ def usage():
     print "Usage:"
     print "export_objectsheet.py -f <tileset.json> -o <output_dir>"
 
+# object sheets in the tiled editor are the tilesets classified as a
+# "collection of images".  We don't care about the tileset itself, but
+# Tiled allows metadata to be stored per tile, or in this case, per
+# image.  The basic use case is to define collision shapes for sprites.
+#
+# We load this file and store the metadata in the tile_defs global.
 tile_defs = []
 def parse_tileset(in_file):
-    with open(in_file) as json_data:
-        j = json.load(json_data)
+    # Export the tileset tsx file to a temporary json file for reading
+    path = os.path.dirname(in_file)
+    tmp_file = os.path.join(path, 'temp.json')
 
-    if 'type' not in j or j['type'] != "tileset":
+    cmd = TILED_PATH
+    cmd += ' --export-tileset json'
+    cmd += ' ' + in_file
+    cmd += ' ' + tmp_file
+
+    code = subprocess.call(cmd, shell=True)
+    if code is not 0:
+        raise Exception('Tiled export-tileset call failed.  code=%d' % code)
+
+    with open(tmp_file) as json_data:
+        tileset = json.load(json_data)
+
+    try_delete_file(tmp_file)
+
+    if 'type' not in tileset or tileset['type'] != "tileset":
         raise Exception('Invalid tileset file format')
 
-    path = os.path.dirname(in_file)
-    for tile in j['tiles']:
+    for tile in tileset['tiles']:
         tile_def = {}
-        tile_def['index'] = int(tile)
-        tile_def['image'] = os.path.join(path, j['tiles'][tile]['image'])
+        tile_def['index'] = tile['id']
+        tile_def['image'] = os.path.join(path, tile['image'])
         tile_def['objects'] = []
 
-        objects = j['tiles'][tile]['objectgroup']['objects']
+        objects = tile['objectgroup']['objects']
         for obj in objects:
             translate_object(obj)
             tile_def['objects'].append(obj)
 
         global tile_defs
-        tile_defs.insert(int(tile), tile_def)
+        tile_defs.insert(int(tile_def['index']), tile_def)
 
+# merge the tileset object metadata with the generated texture packer
+# data file.
 def merge_data(data_file):
     with open(data_file) as json_data:
         j = json.load(json_data)
@@ -65,6 +87,10 @@ def merge_data(data_file):
         f.write(json.dumps(j, indent=2, ensure_ascii=False))
 
 def process(in_file, out_dir):
+    print('Exporting ObjectSheet')
+    print('    file: %s' % (in_file))
+    print('    out:  %s' % (out_dir))
+
     if not os.path.isfile(in_file):
         raise Exception('Cannot find input file')
 
@@ -75,9 +101,9 @@ def process(in_file, out_dir):
     parse_tileset(in_file)
 
     out_dir = os.path.abspath(out_dir)
-    sheet_dir = os.path.join(out_dir, IMAGE_DIR)
     data_dir = os.path.join(out_dir, SPRITESHEET_DIR)
-    if not try_mkdir(sheet_dir) or not try_mkdir(data_dir):
+    sheet_dir = os.path.join(out_dir, IMAGE_DIR)
+    if not try_mkdir(data_dir) or not try_mkdir(sheet_dir):
         raise Exception('Unable to open/create child directories')
 
     base_name = os.path.splitext(os.path.basename(in_file))[0]

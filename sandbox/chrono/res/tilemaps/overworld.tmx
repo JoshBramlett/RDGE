@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="1.0.3" orientation="orthogonal" renderorder="right-down" width="80" height="64" tilewidth="16" tileheight="16" infinite="1" nextobjectid="44">
- <tileset firstgid="1" source="../tilesets/overworld_bg.json"/>
- <tileset firstgid="441" source="../objects/overworld/overworld_obj.json"/>
+<map version="1.0" tiledversion="1.1.2" orientation="orthogonal" renderorder="right-down" width="80" height="64" tilewidth="16" tileheight="16" infinite="1" nextobjectid="44">
+ <tileset firstgid="1" source="../tilesets/overworld_bg.tsx"/>
+ <tileset firstgid="441" source="../objects/overworld/overworld_obj.tsx"/>
  <layer name="bg" width="80" height="64">
   <data encoding="csv">
    <chunk x="-16" y="-16" width="16" height="16">

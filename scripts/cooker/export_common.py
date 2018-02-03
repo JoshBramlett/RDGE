@@ -1,6 +1,7 @@
 import errno
 import os
 import math
+import subprocess
 
 IMAGE_DIR = 'images'
 SPRITESHEET_DIR = 'spritesheets'
@@ -19,40 +20,55 @@ def try_mkdir(path):
             return False
     return True
 
-# Translates Tiled dual dictionary implementation to a single array
-#
-# "properties":
-# {
-#   "cust_prop_float":3.14
-#   "cust_prop_int":3
-# },
-# "propertytypes":
-# {
-#   "cust_prop_float":"float"
-#   "cust_prop_int":"int"
-# }
-#
-# to
-#
-# "properties": { [
-#   "name": "cust_prop_float",
-#   "value": 3.14,
-#   "type": "float"
-#  ], [
-#   "name": "cust_prop_int",
-#   "value": 3,
-#   "type": "int"
-#  ] }
-def translate_properties(parent):
-    props = parent.pop('properties', None)
-    types = parent.pop('propertytypes', None)
+def try_delete_file(path):
+    print('Deleting file %s' % path)
 
-    if props is not None:
-        parent['properties'] = []
-        for key, value in props.iteritems():
-            if key not in types:
-                raise Exception('Property/PropertyType mismatch')
-            parent['properties'].append({ 'name': key, 'value': value, 'type': types[key] })
+    if not os.path.isfile(path):
+        raise Exception('Invalid parameter')
+
+    i = 0
+    max_iterations = 10
+    while True:
+        try:
+            os.remove(path)
+            return
+        except:
+            print('Failed to delete file.  Attempt %d/%d' % (i + 1), max_iterations)
+            time.sleep(1)
+            i += 1
+            if i >= max_iterations:
+                raise Exception('Unable to delete file')
+
+# Tiled exporting has the behavior to update the paths of all dependencies
+# in the file based on the relative paths of the source and destination.
+# To keep these unchanged, we invoke the call from the source directory,
+# and manually move the file to it's proper destination.
+def invoke_tiled_export(command, source_file, dest_file):
+    cwd = os.getcwd()
+    os.chdir(os.path.dirname(source_file))
+
+    cmd = TILED_PATH
+    cmd += ' ' + command
+    cmd += ' ' + os.path.basename(source_file)
+    cmd += ' ' + os.path.basename(dest_file)
+
+    code = subprocess.call(cmd, shell=True)
+    if code is not 0:
+        raise Exception('Tiled export failed. code=%d' % code)
+
+    os.rename(os.path.basename(dest_file), dest_file)
+    os.chdir(cwd)
+
+# Verify expected formats
+def verify_properties(parent):
+    if 'properties' in parent:
+        for prop in parent['properties']:
+            if 'name' not in prop:
+                raise Exception('Invalid property format. missing "name" property')
+            elif 'type' not in prop:
+                raise Exception('Invalid property format. missing "type" property')
+            elif 'value' not in prop:
+                raise Exception('Invalid property format. missing "value" property')
 
 def rotate_point(p, angle):
     sin = math.sin(math.radians(angle))
@@ -123,4 +139,4 @@ def translate_object(obj):
         obj.pop('width')
         obj.pop('height')
 
-    translate_properties(obj)
+    verify_properties(obj)

@@ -19,9 +19,13 @@ def usage():
     print "Note: Any tile collision data will be discarded."
     print ""
     print "Usage:"
-    print "export_tileset.py -f <tileset.json> -o <output_dir>"
+    print "export_tileset.py -f <tileset.tsx> -o <output_dir>"
 
 def process(in_file, out_dir):
+    print('Exporting Tileset')
+    print('    file: %s' % (in_file))
+    print('    out:  %s' % (out_dir))
+
     if not os.path.isfile(in_file):
         raise Exception('Cannot find input file')
 
@@ -29,33 +33,35 @@ def process(in_file, out_dir):
         raise Exception('Cannot find output directory')
 
     out_dir = os.path.abspath(out_dir)
-    sheet_dir = os.path.join(out_dir, IMAGE_DIR)
     data_dir = os.path.join(out_dir, TILESET_DIR)
-    if not try_mkdir(sheet_dir) or not try_mkdir(data_dir):
+    sheet_dir = os.path.join(out_dir, IMAGE_DIR)
+    if not try_mkdir(data_dir) or not try_mkdir(sheet_dir):
         raise Exception('Unable to open/create child directories')
 
     base_name = os.path.splitext(os.path.basename(in_file))[0]
     sheet_file = os.path.join(sheet_dir, base_name + '.png')
     data_file = os.path.join(data_dir, base_name + '.json')
 
-    # 1) Export data file
-    with open(in_file) as json_data:
-        j = json.load(json_data)
+    # 1) Convert, normalize and verify data file
+    invoke_tiled_export('--export-tileset json', in_file, data_file)
 
-    if 'type' not in j or j['type'] != "tileset":
+    with open(data_file) as json_data:
+        tileset = json.load(json_data)
+
+    if 'type' not in tileset or tileset['type'] != "tileset":
         raise Exception('Invalid tileset file format')
 
-    original_sheet_file = os.path.join(os.path.dirname(in_file), j['image'])
+    original_sheet_file = os.path.join(os.path.dirname(in_file), tileset['image'])
     if not os.path.isfile(original_sheet_file):
         raise Exception('Cannot read original sheet.  file=%s' % original_sheet_file)
 
-    translate_properties(j)
-    j['image'] = os.path.join('..', IMAGE_DIR, os.path.basename(sheet_file))
+    tileset['image'] = os.path.join('..', IMAGE_DIR, os.path.basename(sheet_file))
+    verify_properties(tileset)
 
     with open(data_file, 'w') as f:
-        f.write(json.dumps(j, indent=2, ensure_ascii=False))
+        f.write(json.dumps(tileset, indent=2, ensure_ascii=False))
 
-    # 1) Export sheet file
+    # 2) Export sheet file
     copyfile(original_sheet_file, sheet_file)
 
 def main():

@@ -133,6 +133,10 @@ def create_global_grid(tilemap):
     tilemap.pop('height')
 
 def process(in_file, out_dir):
+    print('Exporting Tilemap')
+    print('    file: %s' % (in_file))
+    print('    out:  %s' % (out_dir))
+
     if not os.path.isfile(in_file):
         raise Exception('Cannot find input file')
 
@@ -147,15 +151,8 @@ def process(in_file, out_dir):
     base_name = os.path.splitext(os.path.basename(in_file))[0]
     data_file = os.path.join(data_dir, base_name + '.json')
 
-    # 1) Convert and export data file
-    cmd = TILED_PATH
-    cmd += ' --export-map json'
-    cmd += ' ' + in_file
-    cmd += ' ' + data_file
-
-    code = subprocess.call(cmd, shell=True)
-    if code is not 0:
-        raise Exception('Tiled export call failed.  code=%s' % str(code))
+    # 1) Convert, normalize and verify data file
+    invoke_tiled_export('--export-map json', in_file, data_file)
 
     with open(data_file) as json_data:
         tilemap = json.load(json_data)
@@ -163,7 +160,7 @@ def process(in_file, out_dir):
     if 'type' not in tilemap or tilemap['type'] != "map":
         raise Exception('Invalid tilemap file format')
 
-    translate_properties(tilemap)
+    verify_properties(tilemap)
 
     # Remove unused
     tilemap.pop('tiledversion')
@@ -200,7 +197,7 @@ def process(in_file, out_dir):
     #   - A tileset index
     #   - A data array with the firstgid offset removed from all entries
     for layer in tilemap['layers']:
-        translate_properties(layer)
+        verify_properties(layer)
 
         # Remove unused
         layer.pop('x')
@@ -243,10 +240,10 @@ def process(in_file, out_dir):
     # 3) Update tileset reference paths
     for tileset in tilemap['tilesets']:
         if 'tilesets' in tileset['source']:
-            source_file = os.path.basename(tileset['source'])
+            source_file = os.path.splitext(os.path.basename(tileset['source']))[0] + '.json'
             tileset['source'] = os.path.join('..', TILESET_DIR, source_file)
         elif 'objects' in tileset['source']:
-            source_file = os.path.basename(tileset['source'])
+            source_file = os.path.splitext(os.path.basename(tileset['source']))[0] + '.json'
             tileset['source'] = os.path.join('..', SPRITESHEET_DIR, source_file)
 
     with open(data_file, 'w') as f:

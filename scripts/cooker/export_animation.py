@@ -46,6 +46,10 @@ def merge_data(data_file, anim_file):
         f.write(json.dumps(j_data, indent=2, ensure_ascii=False))
 
 def process(tps_file, out_dir):
+    print('Exporting Animation')
+    print('    file: %s' % (tps_file))
+    print('    out:  %s' % (out_dir))
+
     if not os.path.isfile(tps_file):
         raise Exception('Cannot find tps file. file=%s' % tps_file)
 
