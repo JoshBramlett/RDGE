@@ -8,6 +8,7 @@
 #include <rdge/core.hpp>
 #include <rdge/assets/tilemap/object.hpp>
 #include <rdge/assets/tilemap/property.hpp>
+#include <rdge/graphics/layers/tile_layer.hpp>
 #include <rdge/graphics/layers/sprite_layer.hpp>
 #include <rdge/math/vec2.hpp>
 
@@ -97,7 +98,6 @@ class Layer
 public:
     //! \brief Layer ctor
     //! \param [in] j json formatted layer
-    //! \param [in] grid Grid properties from the \ref Tilemap
     //! \throws rdge::Exception Parsing failed
     Layer (const nlohmann::json& j);
 
@@ -128,6 +128,10 @@ public:
     //!@}
 
     PropertyCollection properties; //!< Custom variable type property collection
+
+// breaks unit tests
+//private:
+    //friend class rdge::TileLayer;
 
     //!@{ LayerType::TILELAYER
     struct tile_chunk

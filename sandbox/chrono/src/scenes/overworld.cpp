@@ -37,16 +37,21 @@ OverworldScene::OverworldScene (void)
     tile_batch = TileBatch(tile_count, tile_size);
 
     {
-        const auto& bg_0 = tilemap.layers[overworld_layer_bg];
-        const auto& bg_1 = tilemap.layers[overworld_layer_bg_overlay_1];
+        tile_layers.emplace_back(tilemap.CreateTileLayer(overworld_layer_bg,
+                                                         g_game.asset_scale));
+        tile_layers.emplace_back(tilemap.CreateTileLayer(overworld_layer_bg_overlay_1,
+                                                         g_game.asset_scale));
 
-        auto table_id_0 = tilemap.sheets[bg_0.tileset_index].table_id;
-        auto table_id_1 = tilemap.sheets[bg_1.tileset_index].table_id;
-        SDL_assert(table_id_0 == table_id_1);
+        //const auto& bg_0 = tilemap.layers[overworld_layer_bg];
+        //const auto& bg_1 = tilemap.layers[overworld_layer_bg_overlay_1];
 
-        auto tileset = g_game.pack->GetAsset<Tileset>(table_id_0);
-        tile_layers.emplace_back(tilemap.grid, bg_0, *tileset, g_game.asset_scale);
-        tile_layers.emplace_back(tilemap.grid, bg_1, *tileset, g_game.asset_scale);
+        //auto table_id_0 = tilemap.sheets[bg_0.tileset_index].table_id;
+        //auto table_id_1 = tilemap.sheets[bg_1.tileset_index].table_id;
+        //SDL_assert(table_id_0 == table_id_1);
+
+        //auto tileset = g_game.pack->GetAsset<Tileset>(table_id_0);
+        //tile_layers.emplace_back(tilemap.grid, bg_0, *tileset, g_game.asset_scale);
+        //tile_layers.emplace_back(tilemap.grid, bg_1, *tileset, g_game.asset_scale);
     }
 
     auto sheet = g_game.pack->GetAsset<SpriteSheet>(rdge_asset_spritesheet_player);

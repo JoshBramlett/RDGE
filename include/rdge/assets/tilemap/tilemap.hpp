@@ -95,7 +95,7 @@ public:
     Tilemap& operator= (Tilemap&&) noexcept = default;
     //!@}
 
-    //TileLayer CreateTileLayer (int32 layer_id, float scale);
+    TileLayer CreateTileLayer (int32 layer_id, float scale);
 public:
 
     //!@{ Rendering properties

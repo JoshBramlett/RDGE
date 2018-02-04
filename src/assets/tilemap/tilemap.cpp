@@ -116,25 +116,30 @@ Tilemap::Tilemap (const std::vector<uint8>& msgpack, PackFile& packfile)
     }
 }
 
-//TileLayer
-//Tilemap::CreateTileLayer (int32 layer_id, float scale)
-//{
-    //try
-    //{
-        //const auto& layer = this->layers.at(layer_id);
-        //if (layer.type != LayerType::TILELAYER || layer.tileset_index < 0)
-        //{
-            //throw std::invalid_argument("Invalid TileLayer definition");
-        //}
+TileLayer
+Tilemap::CreateTileLayer (int32 layer_id, float scale)
+{
+    try
+    {
+        const auto& layer = this->layers.at(layer_id);
+        if (layer.type != LayerType::TILELAYER || layer.tileset_index < 0)
+        {
+            throw std::invalid_argument("Invalid TileLayer definition");
+        }
 
-        //const auto& info = this->sheets[layer.tileset_index];
-        //auto tileset = g_game.pack->GetTileset(info.table_id);
-    //}
-    //catch (const std::exception& ex)
-    //{
-        //RDGE_THROW(ex.what());
-    //}
-//}
+        const auto& sheet = this->sheets[layer.tileset_index];
+        if (sheet.type != asset_pack::asset_type_tileset)
+        {
+            throw std::invalid_argument("TileLayer not mapped to Tileset");
+        }
+
+        return TileLayer(grid, layer, *sheet.tileset, scale);
+    }
+    catch (const std::exception& ex)
+    {
+        RDGE_THROW(ex.what());
+    }
+}
 
 std::ostream&
 operator<< (std::ostream& os, Orientation value)
