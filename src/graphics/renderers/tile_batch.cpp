@@ -216,7 +216,7 @@ TileBatch::SetView (const OrthographicCamera& camera)
     m_shader.SetUniformValue(U_TEXTURE, TEXTURE_UNIT_ID);
     m_shader.Disable();
 
-    m_far = -camera.far;
+    m_far = 0.0f;//-camera.far;
 }
 
 void

@@ -10,6 +10,7 @@
 #include <rdge/assets/tilemap/property.hpp>
 #include <rdge/assets/file_formats/asset_pack.hpp>
 #include <rdge/graphics/layers/tile_layer.hpp>
+#include <rdge/graphics/layers/sprite_layer.hpp>
 #include <rdge/graphics/color.hpp>
 #include <rdge/math/vec2.hpp>
 
@@ -96,6 +97,7 @@ public:
     //!@}
 
     TileLayer CreateTileLayer (int32 layer_id, float scale);
+    NewSpriteLayer CreateSpriteLayer (int32 layer_id, float scale);
 public:
 
     //!@{ Rendering properties

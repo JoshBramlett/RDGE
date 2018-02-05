@@ -98,16 +98,36 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
             region.value.rotate(TexCoordsRotation::ROTATE_270);
         }
 
-        const auto& j_size = j_region["sourceSize"];
-        JSON_VALIDATE_REQUIRED(j_size, w, is_number_unsigned);
-        JSON_VALIDATE_REQUIRED(j_size, h, is_number_unsigned);
-        region.value.size.w = j_size["w"].get<float>();
-        region.value.size.h = j_size["h"].get<float>();
+        {
+            const auto& j_ss = j_region["sourceSize"];
+            JSON_VALIDATE_REQUIRED(j_ss, w, is_number_unsigned);
+            JSON_VALIDATE_REQUIRED(j_ss, h, is_number_unsigned);
+
+            auto& sz = region.value.size;
+            sz.w = j_ss["w"].get<decltype(sz.w)>();
+            sz.h = j_ss["h"].get<decltype(sz.h)>();
+        }
+
+        {
+            const auto& j_sss = j_region["spriteSourceSize"];
+            JSON_VALIDATE_REQUIRED(j_sss, x, is_number_unsigned);
+            JSON_VALIDATE_REQUIRED(j_sss, y, is_number_unsigned);
+            JSON_VALIDATE_REQUIRED(j_sss, w, is_number_unsigned);
+            JSON_VALIDATE_REQUIRED(j_sss, h, is_number_unsigned);
+
+            auto& offset = region.value.sprite_offset;
+            offset.x = j_sss["x"].get<decltype(offset.x)>();
+            offset.y = j_sss["y"].get<decltype(offset.y)>();
+
+            auto& sz = region.value.sprite_size;
+            sz.w = j_sss["w"].get<decltype(sz.w)>();
+            sz.h = j_sss["h"].get<decltype(sz.h)>();
+        }
 
         // convert pivot to pixels and y-is-up
         const auto& j_pivot = j_region["pivot"];
-        JSON_VALIDATE_REQUIRED(j_pivot, x, is_number_float);
-        JSON_VALIDATE_REQUIRED(j_pivot, y, is_number_float);
+        JSON_VALIDATE_REQUIRED(j_pivot, x, is_number);
+        JSON_VALIDATE_REQUIRED(j_pivot, y, is_number);
         region.value.origin.x = region.value.size.w * j_pivot["x"].get<float>();
         region.value.origin.y = region.value.size.h * (1.f - j_pivot["y"].get<float>());
 

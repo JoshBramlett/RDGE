@@ -50,6 +50,7 @@ public:
     rdge::OrthographicCamera camera;
     std::shared_ptr<rdge::SpriteBatch> sprite_batch;
     rdge::TileBatch tile_batch;
+    std::vector<rdge::NewSpriteLayer> new_sprite_layers;
     std::vector<rdge::SpriteLayer> sprite_layers;
     std::vector<rdge::TileLayer> tile_layers;
 

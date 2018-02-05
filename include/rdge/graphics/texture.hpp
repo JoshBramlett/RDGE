@@ -63,6 +63,11 @@ public:
     Texture& operator= (Texture&&) noexcept;
     //!@}
 
+    //!@{ Comparison operators
+    bool operator== (const Texture&) const noexcept;
+    bool operator!= (const Texture&) const noexcept;
+    //!@}
+
     //!@{ Basic Surface properties
     bool IsEmpty (void) const noexcept;
     bool IsUnique (void) const noexcept;

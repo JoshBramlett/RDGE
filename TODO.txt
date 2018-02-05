@@ -1,5 +1,12 @@
 Working
 
+    spritesheet_region
+      - Remove all uses of this object - should be only used in the spritesheet for the definition
+    NewSpriteLayer
+      - Replace original SpriteLayer
+      - Implement moving items in the linked list
+    TileBatch - Remove setting m_far
+
     Assets:
       x Build asset system to manage memory/loading/caching etc.
       x Create a SharedAsset wrapper (like shared_ptr)
@@ -9,6 +16,7 @@ Working
       - Changes to Tilemap
         - Move Tilemap to base namespace
         - Move Tilemap objects, layers, etc, within Tilemap
+        - Fix accessor scope in layers/objects
         x Remove global grid requirement
       - Have assets load all dependencies
         - Create unified json for dependency importing
@@ -17,8 +25,8 @@ Working
       - Create a CustomAllocator/SmallVector for caching
       - So I don't forget:  Look into why specifying a swap method was recommended
     Graphics:
-      - Create texture manager to avoid texture duplication.
-        - Could be tied to a surface, or simply a static collection like libgdx
+      x Create texture manager to avoid texture duplication.
+        x Could be tied to a surface, or simply a static collection like libgdx
       - Create a more cohesive way to represent sprites
         - Allocation should be done through a block allocator
         - Tie in with physics system (via entity).  Note: SpriteGroup/RigidBody

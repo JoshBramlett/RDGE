@@ -24,14 +24,12 @@ Object::Object (const nlohmann::json& j)
         JSON_VALIDATE_REQUIRED(j, visible, is_boolean);
 
         // required
-        this->id = j["id"].get<int32>();
-        this->name = j["name"].get<std::string>();
-        this->custom_type = j["type"].get<std::string>();
-        this->visible = j["visible"].get<bool>();
-
-        auto x = j["x"].get<int32>();
-        auto y = j["y"].get<int32>();
-        this->position = math::vec2(static_cast<float>(x), static_cast<float>(y));
+        this->id = j["id"].get<decltype(this->id)>();
+        this->name = j["name"].get<decltype(this->name)>();
+        this->custom_type = j["type"].get<decltype(this->custom_type)>();
+        this->position.x = j["x"].get<decltype(this->position.x)>();
+        this->position.y = j["y"].get<decltype(this->position.y)>();
+        this->visible = j["visible"].get<decltype(this->visible)>();
 
         // optional
         this->properties = PropertyCollection(j);
@@ -53,9 +51,10 @@ Object::Object (const nlohmann::json& j)
             JSON_VALIDATE_REQUIRED(j, height, is_number);
             JSON_VALIDATE_REQUIRED(j, rotation, is_number);
 
-            m_gid = j["gid"].get<int32>();
-            m_size = math::vec2(j["width"].get<float>(), j["height"].get<float>());
-            m_rotation = j["rotation"].get<float>();
+            m_gid = j["gid"].get<decltype(m_gid)>();
+            m_size.w = j["width"].get<decltype(m_size.w)>();
+            m_size.h = j["height"].get<decltype(m_size.h)>();
+            m_rotation = j["rotation"].get<decltype(m_rotation)>();
 
             if (m_gid <= 0)
             {

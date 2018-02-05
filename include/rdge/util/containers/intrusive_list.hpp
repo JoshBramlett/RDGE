@@ -86,8 +86,43 @@ public:
     //!@{ Non-copyable, move enabled
     intrusive_list (const intrusive_list&) = delete;
     intrusive_list& operator= (const intrusive_list&) = delete;
-    intrusive_list (intrusive_list&&) noexcept = default;
-    intrusive_list& operator= (intrusive_list&&) noexcept = default;
+    intrusive_list (intrusive_list&& other) noexcept
+        : m_count(other.m_count)
+    {
+        if (other.m_anchor.prev != &other.m_anchor)
+        {
+            m_anchor.prev = other.m_anchor.prev;
+            m_anchor.prev->next = &m_anchor;
+        }
+
+        if (other.m_anchor.next != &other.m_anchor)
+        {
+            m_anchor.next = other.m_anchor.next;
+            m_anchor.next->prev = &m_anchor;
+        }
+    }
+
+    intrusive_list& operator= (intrusive_list&& rhs) noexcept
+    {
+        if (this != &rhs)
+        {
+            m_count = rhs.m_count;
+
+            if (rhs.m_anchor.prev != &rhs.m_anchor)
+            {
+                m_anchor.prev = rhs.m_anchor.prev;
+                m_anchor.prev->next = &m_anchor;
+            }
+
+            if (rhs.m_anchor.next != &rhs.m_anchor)
+            {
+                m_anchor.next = rhs.m_anchor.next;
+                m_anchor.next->prev = &m_anchor;
+            }
+        }
+
+        return *this;
+    }
     //!@}
 
     //!@{ Forward iterator

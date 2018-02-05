@@ -10,6 +10,13 @@
 #include <memory>
 #include <vector>
 
+// NewSpriteLayer
+#include <rdge/util/containers/intrusive_list.hpp>
+#include <rdge/math/vec2.hpp>
+#include <rdge/graphics/color.hpp>
+#include <rdge/graphics/tex_coords.hpp>
+#include <rdge/graphics/texture.hpp>
+
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
@@ -17,6 +24,15 @@ namespace rdge {
 class ISprite;
 class Shader;
 class SpriteBatch;
+//!@}
+
+// NewSpriteLayer
+//!@{ Forward declarations
+//class SpriteBatch;
+class SpriteSheet;
+class OrthographicCamera;
+struct spritesheet_region;
+namespace tilemap { class Layer; }
 //!@}
 
 //! \enum DrawOrder
@@ -76,6 +92,56 @@ public:
 public:
     std::shared_ptr<SpriteBatch>          renderer; //!< Render target
     std::vector<std::shared_ptr<ISprite>> sprites;  //!< Collection of sprites
+};
+
+struct sprite_data : public intrusive_list_element<sprite_data>
+{
+    size_t index;
+    math::vec2 pos;
+    math::vec2 size;
+    math::vec2 origin;
+    float depth;
+    tex_coords uvs;
+    int32 tid;
+    color color;
+};
+
+class NewSpriteLayer
+{
+public:
+    explicit NewSpriteLayer (const tilemap::Layer& def,
+                             const SpriteSheet& spritesheet,
+                             float scale);
+    ~NewSpriteLayer (void) noexcept;
+
+    //!@{ Non-copyable, move enabled
+    NewSpriteLayer (const NewSpriteLayer&) = delete;
+    NewSpriteLayer& operator= (const NewSpriteLayer&) = delete;
+    NewSpriteLayer (NewSpriteLayer&&) noexcept;
+    NewSpriteLayer& operator= (NewSpriteLayer&&) noexcept;
+    //!@}
+
+    // thoughts:
+    // Good idea to pre-sort b/c most sprites will be static and should therefore
+    // have cache locality when rendering.
+    //! \brief Draw all tiles within the camera bounds
+    void Draw (SpriteBatch& renderer, const OrthographicCamera& camera);
+
+    //sprite_data* AddSprite (const math::vec2 pos,
+                            //const spritesheet_region& region,
+                            //Texture texture);
+
+    //void BoundsDirty (sprite_data* data);
+
+private:
+    intrusive_list<sprite_data> m_list;
+    sprite_data* m_sprites = nullptr;
+    size_t m_spriteCount = 0;
+
+    color m_color = color::WHITE;  //!< Render color (to store opacity)
+
+public:
+    std::vector<Texture> textures; //!< Sprite textures
 };
 
 //! \brief DrawOrder stream output operator

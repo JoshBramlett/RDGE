@@ -210,6 +210,18 @@ Texture::operator= (Texture&& rhs) noexcept
 }
 
 bool
+Texture::operator== (const Texture& other) const noexcept
+{
+    return (m_data == other.m_data);
+}
+
+bool
+Texture::operator!= (const Texture& other) const noexcept
+{
+    return !(*this == other);
+}
+
+bool
 Texture::IsEmpty (void) const noexcept
 {
     return (m_data == nullptr);

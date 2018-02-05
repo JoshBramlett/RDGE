@@ -6,6 +6,7 @@
 #include <rdge/util/memory/alloc.hpp>
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
+#include <rdge/graphics/layers/sprite_layer.hpp>
 
 #include <SDL.h>
 #include <GL/glew.h>
@@ -335,6 +336,41 @@ SpriteBatch::Submit (const SpriteVertices& vertices)
 }
 
 void
+SpriteBatch::Submit (const sprite_data& sprite)
+{
+    const auto& p = sprite.pos;
+    const auto& sz = sprite.size;
+    auto c = static_cast<uint32>(sprite.color);
+    float m_far = 0.0f;//-1.f;
+
+    m_cursor->pos   = math::vec3(p, m_far);
+    m_cursor->uv    = sprite.uvs[0];
+    m_cursor->tid   = sprite.tid;
+    m_cursor->color = c;
+    m_cursor++;
+
+    m_cursor->pos   = math::vec3(p.x, p.y + sz.h, m_far);
+    m_cursor->uv    = sprite.uvs[1];
+    m_cursor->tid   = sprite.tid;
+    m_cursor->color = c;
+    m_cursor++;
+
+    m_cursor->pos   = math::vec3(p.x + sz.w, p.y + sz.h, m_far);
+    m_cursor->uv    = sprite.uvs[2];
+    m_cursor->tid   = sprite.tid;
+    m_cursor->color = c;
+    m_cursor++;
+
+    m_cursor->pos   = math::vec3(p.x + sz.w, p.y, m_far);
+    m_cursor->uv    = sprite.uvs[3];
+    m_cursor->tid   = sprite.tid;
+    m_cursor->color = c;
+    m_cursor++;
+
+    m_submissions++;
+}
+
+void
 SpriteBatch::Flush (void)
 {
     // Sanity check our VBO is bound ensures noone else is binding a different VBO
@@ -371,6 +407,33 @@ SpriteBatch::Flush (void)
 
     opengl::UnbindBuffers(GL_ELEMENT_ARRAY_BUFFER);
     opengl::UnbindVertexArrays();
+}
+
+void
+SpriteBatch::Flush (const std::vector<Texture>& textures)
+{
+    SDL_assert(m_vbo == static_cast<uint32>(opengl::GetInt(GL_ARRAY_BUFFER_BINDING)));
+    SDL_assert(m_submissions != 0);
+
+    opengl::ReleaseBufferPointer(GL_ARRAY_BUFFER);
+    opengl::UnbindBuffers(GL_ARRAY_BUFFER);
+
+    if (m_submissions > 0)
+    {
+        for (auto& texture : textures)
+        {
+            texture.Activate();
+        }
+        this->blend.Apply();
+
+        opengl::BindVertexArray(m_vao);
+        opengl::BindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
+
+        opengl::DrawElements(GL_TRIANGLES, (m_submissions * 6), GL_UNSIGNED_INT, nullptr);
+
+        opengl::UnbindBuffers(GL_ELEMENT_ARRAY_BUFFER);
+        opengl::UnbindVertexArrays();
+    }
 }
 
 void

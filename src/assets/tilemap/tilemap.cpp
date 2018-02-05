@@ -141,6 +141,31 @@ Tilemap::CreateTileLayer (int32 layer_id, float scale)
     }
 }
 
+NewSpriteLayer
+Tilemap::CreateSpriteLayer (int32 layer_id, float scale)
+{
+    try
+    {
+        const auto& layer = this->layers.at(layer_id);
+        if (layer.type != LayerType::OBJECTGROUP || layer.tileset_index < 0)
+        {
+            throw std::invalid_argument("Invalid SpriteLayer definition");
+        }
+
+        const auto& sheet = this->sheets[layer.tileset_index];
+        if (sheet.type != asset_pack::asset_type_spritesheet)
+        {
+            throw std::invalid_argument("TileLayer not mapped to SpriteSheet");
+        }
+
+        return NewSpriteLayer(layer, *sheet.spritesheet, scale);
+    }
+    catch (const std::exception& ex)
+    {
+        RDGE_THROW(ex.what());
+    }
+}
+
 std::ostream&
 operator<< (std::ostream& os, Orientation value)
 {

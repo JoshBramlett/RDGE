@@ -108,6 +108,8 @@ TileLayer::TileLayer (const tilemap_grid& grid,
                 cell.pos = origin;
                 cell.pos.x += m_grid.cell_size.w * static_cast<float>(i % m_grid.chunk_size.w);
                 cell.pos.y -= m_grid.cell_size.h * static_cast<float>(i / m_grid.chunk_size.w);
+                // Include one more cell height to convert to y-is-up
+                cell.pos.y -= m_grid.cell_size.h;
 
                 uint32 gid = def_chunk.data[i] - 1;
                 bool flip_x = (gid & FLIPPED_HORIZONTALLY);

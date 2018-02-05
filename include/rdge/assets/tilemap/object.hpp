@@ -142,13 +142,13 @@ public:
 
     PropertyCollection properties; //!< Custom variable type property collection
 
-private:
     //!@{ Sprite properties
     int32      m_gid = 0;        //!< Tilemap texture region Id
     math::vec2 m_size;           //!< Sprite size
     float      m_rotation = 0.f; //!< Angle in degrees clockwise
     //!@}
 
+private:
     //!@{ Polygon properties
     float m_radius = 0.f;
     //!@}

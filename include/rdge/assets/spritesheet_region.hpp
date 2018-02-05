@@ -22,23 +22,24 @@ namespace rdge {
 struct spritesheet_region
 {
     //! \brief Surface clipping rectangle
-    //! \details Should remain unmodified from the import.  Used for blitting
-    //!          from the associated surface.
     screen_rect clip;
 
     //! \brief Normalized texture coordinates
-    //! \details UV coordinates normalized to the associated surface.
     tex_coords coords;
 
-    //! \brief Size (possibly scaled) of the texture region
-    //! \details Used as a cache for rendering operations to prevent having to
-    //!          compute a scaled size every frame.
+    //! \brief Original size of the asset (in pixels)
     math::vec2 size;
 
-    //! \brief Origin (possibly scaled) used for drawing offsets
-    //! \details Optional field for aligning similar frames.  The origin
-    //!          represents the center point when generating sprite vertices.
+    //! \brief Trimmed margin from the original size (in pixels)
+    math::vec2 sprite_offset;
+
+    //! \brief Actual size after trimming (in pixels)
+    math::vec2 sprite_size;
+
+    //! \brief Pivot origin normalized to the sprite size
     //! \note Defaults to the centroid.
+    // TODO Once I do animation, figure out if the origin should be recalculated
+    //      for the sprite_size rather than just use the same ratio for the size.
     math::vec2 origin;
 
     bool is_rotated; //!< Whether the TexturePacker rotated the region 90 clockwise

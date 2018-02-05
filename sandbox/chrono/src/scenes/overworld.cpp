@@ -21,7 +21,7 @@ OverworldScene::OverworldScene (void)
     debug::settings::draw_physics_fixtures = false;
 
     ///////////////////
-    // Background layer
+    // Tile layers
     ///////////////////
 
     auto tilemap = g_game.pack->GetTilemap(rdge_asset_tilemap_overworld);
@@ -36,23 +36,12 @@ OverworldScene::OverworldScene (void)
     auto tile_size = static_cast<math::vec2>(tilemap.grid.cell_size) * g_game.asset_scale;
     tile_batch = TileBatch(tile_count, tile_size);
 
-    {
-        tile_layers.emplace_back(tilemap.CreateTileLayer(overworld_layer_bg,
-                                                         g_game.asset_scale));
-        tile_layers.emplace_back(tilemap.CreateTileLayer(overworld_layer_bg_overlay_1,
-                                                         g_game.asset_scale));
-
-        //const auto& bg_0 = tilemap.layers[overworld_layer_bg];
-        //const auto& bg_1 = tilemap.layers[overworld_layer_bg_overlay_1];
-
-        //auto table_id_0 = tilemap.sheets[bg_0.tileset_index].table_id;
-        //auto table_id_1 = tilemap.sheets[bg_1.tileset_index].table_id;
-        //SDL_assert(table_id_0 == table_id_1);
-
-        //auto tileset = g_game.pack->GetAsset<Tileset>(table_id_0);
-        //tile_layers.emplace_back(tilemap.grid, bg_0, *tileset, g_game.asset_scale);
-        //tile_layers.emplace_back(tilemap.grid, bg_1, *tileset, g_game.asset_scale);
-    }
+    tile_layers.emplace_back(tilemap.CreateTileLayer(overworld_layer_bg,
+                                                     g_game.asset_scale));
+    tile_layers.emplace_back(tilemap.CreateTileLayer(overworld_layer_bg_overlay_1,
+                                                     g_game.asset_scale));
+    new_sprite_layers.emplace_back(tilemap.CreateSpriteLayer(overworld_layer_bg_sprites,
+                                                             g_game.asset_scale));
 
     auto sheet = g_game.pack->GetAsset<SpriteSheet>(rdge_asset_spritesheet_player);
     sprite_batch = std::make_shared<SpriteBatch>();
@@ -65,18 +54,6 @@ OverworldScene::OverworldScene (void)
     auto sprite = std::make_shared<Sprite>(p, region.size * g_game.asset_scale, t, region.coords);
     layer.AddSprite(sprite);
     }
-
-    auto tileset = g_game.pack->GetAsset<Tileset>(rdge_asset_tileset_overworld_bg);
-    {
-    math::vec3 p(2612, -2468, 0.f);
-    auto t = std::make_shared<Texture>(*tileset->surface);
-    auto& coords = tileset->tiles[29];
-    auto sprite = std::make_shared<Sprite>(p, tileset->tile_size * g_game.asset_scale, t, coords);
-    layer.AddSprite(sprite);
-    }
-
-
-    //layer.AddSprite(std::make_shared<Sprite>(p, s, color::RED));
 }
 
 void
@@ -126,7 +103,6 @@ OverworldScene::OnRender (void)
     //camera.Update();
 
     camera.SetPosition(math::vec2(2712, -2468));
-    //camera.SetPosition(math::vec2(-1024, 1024));
     camera.Update();
     for (auto& layer : this->tile_layers)
     {
@@ -134,11 +110,15 @@ OverworldScene::OnRender (void)
     }
 
     sprite_batch->SetProjection(camera.combined);
+    for (auto& layer : this->new_sprite_layers)
+    {
+        layer.Draw(*sprite_batch, camera);
+    }
+
     for (auto& layer : this->sprite_layers)
     {
         layer.Draw();
     }
-
 
     // debug drawing
     debug::SetProjection(camera.combined);
