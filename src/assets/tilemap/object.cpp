@@ -152,6 +152,64 @@ Object::GetPolygon (void) const
     return physics::polygon(m_vertices, m_numVerts);
 }
 
+sprite_data
+Object::GetSprite (void) const
+{
+    if (this->type != ObjectType::SPRITE)
+    {
+        std::ostringstream ss;
+        ss << "Object[" << this->id << "] cannot build sprite "
+           << "from an object of type " << this->type;
+        throw std::invalid_argument(ss.str());
+    }
+
+    sprite_data result;
+    result.index = this->id;
+    return result;
+
+#if 0
+    try
+    {
+        const auto& layer = this->layers.at(layer_id);
+        if (layer.type != LayerType::OBJECTGROUP || layer.tileset_index < 0)
+        {
+            throw std::invalid_argument("Invalid SpriteLayer definition");
+        }
+
+        const auto& sheet = this->sheets[layer.tileset_index];
+        if (sheet.type != asset_pack::asset_type_spritesheet)
+        {
+            throw std::invalid_argument("TileLayer not mapped to SpriteSheet");
+        }
+
+        return NewSpriteLayer(layer, *sheet.spritesheet, scale);
+    }
+    catch (const std::exception& ex)
+    {
+        RDGE_THROW(ex.what());
+    }
+#endif
+
+#if 0
+    const auto& region = spritesheet.regions[obj.m_gid - 1].value;
+    auto& sprite = m_sprites[sprite_index];
+    sprite.index = sprite_index;
+    sprite.pos = obj.position * scale;
+
+    sprite.pos.x += region.sprite_offset.x * scale;
+    sprite.pos.y -= (region.size.h - region.sprite_size.h - region.sprite_offset.y) * scale;
+    sprite.pos.y *= -1.f;
+
+    sprite.size = region.sprite_size * scale;
+    sprite.depth = 1.f;
+    sprite.color = color::WHITE;
+    sprite.uvs = region.coords;
+    sprite.tid = t.unit_id;
+    //obj.m_rotation;
+    //obj.visible;
+#endif
+}
+
 std::ostream&
 operator<< (std::ostream& os, ObjectType value)
 {

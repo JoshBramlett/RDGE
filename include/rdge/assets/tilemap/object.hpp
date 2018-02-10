@@ -10,6 +10,7 @@
 #include <rdge/math/vec2.hpp>
 #include <rdge/physics/shapes/circle.hpp>
 #include <rdge/physics/shapes/polygon.hpp>
+#include <rdge/graphics/layers/sprite_layer.hpp>
 
 //!@{ Forward declarations
 //namespace nlohmann { class json; }
@@ -124,6 +125,7 @@ public:
     math::vec2 GetPoint (void) const;
     physics::circle GetCircle (void) const;
     physics::polygon GetPolygon (void) const;
+    sprite_data GetSprite (void) const;
     //!@}
 
 public:

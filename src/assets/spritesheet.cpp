@@ -128,15 +128,15 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
         const auto& j_pivot = j_region["pivot"];
         JSON_VALIDATE_REQUIRED(j_pivot, x, is_number);
         JSON_VALIDATE_REQUIRED(j_pivot, y, is_number);
-        region.value.origin.x = region.value.size.w * j_pivot["x"].get<float>();
-        region.value.origin.y = region.value.size.h * (1.f - j_pivot["y"].get<float>());
+        region.value.origin.x = j_pivot["x"].get<float>();
+        region.value.origin.y = (1.f - j_pivot["y"].get<float>());
 
         if (j_region.count("objects"))
         {
             region.objects.reserve(j_region["objects"].size());
             for (const auto& j_obj : j_region["objects"])
             {
-                region.objects.emplace_back(tilemap::Object(j_obj));
+                region.objects.emplace_back(j_obj);
             }
         }
     }
@@ -155,7 +155,7 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
             JSON_VALIDATE_REQUIRED(j_animation, frames, is_array);
 
             auto& animation = sheet.animations.at(index++);
-            animation.name = j_animation["name"].get<std::string>();
+            animation.name = j_animation["name"].get<decltype(animation.name)>();
             animation.value.interval = j_animation["interval"].get<uint32>();
 
             if (!try_parse(j_animation["mode"].get<std::string>(), animation.value.mode))
@@ -177,6 +177,7 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
                     frame_flip = static_cast<TexCoordsFlip>(j_frame["flip"].get<uint32>());
                 }
 
+                animation.value.frames.reserve(j_frames.size());
                 bool found = false;
                 for (const auto& region : sheet.regions)
                 {
@@ -184,7 +185,15 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
                     {
                         auto region_copy = region.value;
                         region_copy.flip(frame_flip);
-                        animation.value.frames.emplace_back(region_copy);
+
+                        animation_frame frame;
+                        frame.size = region.value.sprite_size;
+                        frame.origin = region.value.sprite_size;
+                        frame.origin.x *= region.value.origin.x;
+                        frame.origin.y *= region.value.origin.y;
+                        frame.uvs = region.value.coords;
+
+                        animation.value.frames.push_back(frame);
 
                         found = true;
                         break;
@@ -280,7 +289,8 @@ SpriteSheet::GetAnimation (const std::string& name, float scale) const
             auto result = animation.value;
             for (auto& frame : result.frames)
             {
-                frame.scale(scale);
+                frame.size *= scale;
+                frame.origin *= scale;
             }
 
             return result;
@@ -299,7 +309,8 @@ SpriteSheet::GetAnimation (int32 animation_id, float scale) const
     auto result = this->animations[animation_id].value;
     for (auto& frame : result.frames)
     {
-        frame.scale(scale);
+        frame.size *= scale;
+        frame.origin *= scale;
     }
 
     return result;

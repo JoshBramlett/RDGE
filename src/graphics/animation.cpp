@@ -57,7 +57,7 @@ Animation::GetFrameIndex (uint32 ticks) noexcept
     return frame;
 }
 
-const spritesheet_region&
+const animation_frame&
 Animation::GetFrame (uint32 ticks)
 {
     SDL_assert(this->frames.empty() == false);

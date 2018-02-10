@@ -97,11 +97,17 @@ public:
 struct sprite_data : public intrusive_list_element<sprite_data>
 {
     size_t index;
+
+    // location
     math::vec2 pos;
+    float depth;
+
+    // frame
     math::vec2 size;
     math::vec2 origin;
-    float depth;
     tex_coords uvs;
+
+    // render properties
     int32 tid;
     color color;
 };

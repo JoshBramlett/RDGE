@@ -6,17 +6,26 @@
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/assets/spritesheet_region.hpp>
+#include <rdge/math/vec2.hpp>
+#include <rdge/graphics/tex_coords.hpp>
 
 #include <vector>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
+//! \struct animation_frame
+//! \brief Texture data for a single animation frame
+struct animation_frame
+{
+    math::vec2 size;   //!< Frame size (in pixels)
+    math::vec2 origin; //!< Origin (or pivot point) of the frame (in pixels)
+    tex_coords uvs;    //!< Texture coordinates of the frame
+};
+
 //! \class Animation
 //! \brief Storage and logic to represent an animated sequence
-//! \details Stores a collection of \ref spritesheet_region objects that are
-//!          the individual frames in the animation.  Elapsed ticks are
+//! \details Stores a collection of animation frames.  Elapsed ticks are
 //!          accumulated in a local cache and the resultant frame will be
 //!          provided based upon that and the specified \ref PlayMode.
 class Animation
@@ -48,10 +57,10 @@ public:
     //! \returns Index of the current frame
     uint32 GetFrameIndex (uint32 ticks) noexcept;
 
-    //! \brief Get the \ref spritesheet_region of the current frame
+    //! \brief Get the current frame
     //! \param [in] ticks Elapsed ticks since last call
     //! \returns Current frame
-    const spritesheet_region& GetFrame (uint32 ticks);
+    const animation_frame& GetFrame (uint32 ticks);
 
     //! \brief Reset the animation sequence
     void Reset (void) noexcept;
@@ -70,7 +79,7 @@ public:
     uint32 interval = 0; //!< Interval between frames
     uint32 elapsed = 0;  //!< Elapsed time since the start of the animation
 
-    std::vector<spritesheet_region> frames; //!< Collection of the frames
+    std::vector<animation_frame> frames; //!< Collection of the frames
 };
 
 //! \brief Animation::PlayMode stream output operator

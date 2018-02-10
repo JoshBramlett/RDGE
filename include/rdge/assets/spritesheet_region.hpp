@@ -38,8 +38,6 @@ struct spritesheet_region
 
     //! \brief Pivot origin normalized to the sprite size
     //! \note Defaults to the centroid.
-    // TODO Once I do animation, figure out if the origin should be recalculated
-    //      for the sprite_size rather than just use the same ratio for the size.
     math::vec2 origin;
 
     bool is_rotated; //!< Whether the TexturePacker rotated the region 90 clockwise

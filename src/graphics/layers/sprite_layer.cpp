@@ -150,7 +150,17 @@ NewSpriteLayer::NewSpriteLayer (const tilemap::Layer& def,
 
         sprite_index++;
 
-        m_list.push_back(sprite);
+        // sorted insert according to render order
+        auto it = m_list.begin();
+        for (; it != m_list.end(); ++it)
+        {
+            if (it->pos.y > sprite.pos.y)
+            {
+                break;
+            }
+        }
+
+        m_list.insert(it, sprite);
     }
 }
 

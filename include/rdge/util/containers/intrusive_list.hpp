@@ -8,6 +8,7 @@
 #include <rdge/core.hpp>
 #include <rdge/util/compiler.hpp>
 #include <rdge/util/containers/iterators.hpp>
+#include <rdge/util/logger.hpp>
 
 #include <SDL_assert.h>
 
@@ -86,6 +87,7 @@ public:
     //!@{ Non-copyable, move enabled
     intrusive_list (const intrusive_list&) = delete;
     intrusive_list& operator= (const intrusive_list&) = delete;
+
     intrusive_list (intrusive_list&& other) noexcept
         : m_count(other.m_count)
     {
@@ -93,13 +95,17 @@ public:
         {
             m_anchor.prev = other.m_anchor.prev;
             m_anchor.prev->next = &m_anchor;
+            other.m_anchor.prev = &other.m_anchor;
         }
 
         if (other.m_anchor.next != &other.m_anchor)
         {
             m_anchor.next = other.m_anchor.next;
             m_anchor.next->prev = &m_anchor;
+            other.m_anchor.next = &other.m_anchor;
         }
+
+        other.m_count = 0;
     }
 
     intrusive_list& operator= (intrusive_list&& rhs) noexcept
@@ -107,17 +113,20 @@ public:
         if (this != &rhs)
         {
             m_count = rhs.m_count;
+            rhs.m_count = 0;
 
             if (rhs.m_anchor.prev != &rhs.m_anchor)
             {
                 m_anchor.prev = rhs.m_anchor.prev;
                 m_anchor.prev->next = &m_anchor;
+                rhs.m_anchor.prev = &rhs.m_anchor;
             }
 
             if (rhs.m_anchor.next != &rhs.m_anchor)
             {
                 m_anchor.next = rhs.m_anchor.next;
                 m_anchor.next->prev = &m_anchor;
+                rhs.m_anchor.next = &rhs.m_anchor;
             }
         }
 
@@ -233,6 +242,26 @@ public:
         m_count++;
     }
 
+    //! \brief Insert an element before the iterator position
+    //! \note Insertion complexity: O(1)
+    //! \param [in] pos Iterator to the insert position
+    //! \param [in] element Element to be added
+    //! \returns Iterator to the inserted element
+    iterator insert (iterator pos, reference element)
+    {
+        // Unclean or in another collection
+        SDL_assert(element.next == nullptr);
+        SDL_assert(element.prev == nullptr);
+
+        element.prev = pos->prev;
+        element.next = &(*pos);
+        pos->prev = &element;
+        element.prev->next = &element;
+        m_count++;
+
+        return iterator(&element);
+    }
+
     //! \brief Remove an element from the list
     //! \param [in] element Element to be removed
     void remove (reference element)
@@ -250,6 +279,23 @@ public:
         m_count--;
     }
 
+    //! \brief Clear the list (invalidating all pointers)
+    void clear (void) noexcept
+    {
+        pointer cursor = m_anchor.next;
+        while (cursor != &m_anchor)
+        {
+            pointer next = cursor->next;
+            cursor->prev = nullptr;
+            cursor->next = nullptr;
+            cursor = next;
+        }
+
+        m_anchor.prev = &m_anchor;
+        m_anchor.next = &m_anchor;
+        m_count = 0;
+    }
+
     //! \brief Check if an element is contained in the list
     //! \param [in] element Element to be checked
     //! \returns True iff the list contains the element
@@ -264,6 +310,40 @@ public:
         }
 
         return false;
+    }
+
+    //! \brief Sort the items in the list using the provided comparator
+    //! \details Avoid use.  Algorithm based on bubble sort.
+    //! \note Sort complexity: O(n^2)
+    //! \param [in] fn Comparison function
+    void sort (std::function<bool(const_reference, const_reference)> fn)
+    {
+        bool sorted = false;
+        while (!sorted)
+        {
+            sorted = true;
+            pointer cursor = m_anchor.next;
+            while (cursor != &m_anchor)
+            {
+                pointer ncursor = cursor->next;
+                if (ncursor != &m_anchor && !fn(*cursor, *ncursor))
+                {
+                    cursor->prev->next = ncursor;
+                    ncursor->next->prev = cursor;
+
+                    ncursor->prev = cursor->prev;
+                    cursor->prev = ncursor;
+                    cursor->next = ncursor->next;
+                    ncursor->next = cursor;
+
+                    sorted = false;
+                }
+                else
+                {
+                    cursor = ncursor;
+                }
+            }
+        }
     }
 
     //! \brief Call the provided function for each member of the list
@@ -341,8 +421,28 @@ public:
     //!@{ Non-copyable, move enabled
     intrusive_forward_list (const intrusive_forward_list&) = delete;
     intrusive_forward_list& operator= (const intrusive_forward_list&) = delete;
-    intrusive_forward_list (intrusive_forward_list&&) noexcept = default;
-    intrusive_forward_list& operator= (intrusive_forward_list&&) noexcept = default;
+
+    intrusive_forward_list (intrusive_forward_list&& other) noexcept
+        : m_first(other.m_first)
+        , m_count(other.m_count)
+    {
+        other.m_first = nullptr;
+        other.m_count = 0;
+    }
+
+    intrusive_forward_list& operator= (intrusive_forward_list&& rhs) noexcept
+    {
+        if (this != &rhs)
+        {
+            m_first = rhs.m_first;
+            rhs.m_first = nullptr;
+
+            m_count = rhs.m_count;
+            rhs.m_count = 0;
+        }
+
+        return *this;
+    }
     //!@}
 
     //!@{ Forward iterator
@@ -395,6 +495,34 @@ public:
         m_count++;
     }
 
+    //! \brief Insert an element before the iterator position
+    //! \note Insertion complexity: O(1)
+    //! \param [in] pos Iterator to the insert position
+    //! \param [in] element Element to be added
+    //! \returns Iterator to the inserted element
+    iterator insert (iterator pos, reference element)
+    {
+        SDL_assert(element.next == nullptr); // Unclean or in another collection
+
+        T** cursor = &m_first;
+        do
+        {
+            if (*cursor == &(*pos))
+            {
+                *cursor = &element;
+                element.next = &(*pos);
+
+                m_count++;
+                return iterator(&element);
+            }
+
+            cursor = &(*cursor)->next;
+        } while (*cursor);
+
+        SDL_assert(false);
+        return iterator(nullptr);
+    }
+
     //! \brief Remove an element from the list
     //! \note Complexity: O(n) (worst-case)
     //! \param [in] element Element to be removed
@@ -409,8 +537,8 @@ public:
             {
                 *cursor = element.next;
                 element.next = nullptr;
-                m_count--;
 
+                m_count--;
                 return;
             }
 
@@ -418,6 +546,21 @@ public:
         }
 
         SDL_assert(false); // not in collection
+    }
+
+    //! \brief Clear the list (invalidating all pointers)
+    void clear (void) noexcept
+    {
+        pointer cursor = m_first;
+        while (cursor)
+        {
+            auto next = cursor->next;
+            cursor->next = nullptr;
+            cursor = next;
+        }
+
+        m_first = nullptr;
+        m_count = 0;
     }
 
     //! \brief Check if an element is contained in the list

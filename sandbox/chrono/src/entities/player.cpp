@@ -1,4 +1,6 @@
-#include "player.hpp"
+#include <chrono/entities/player.hpp>
+#include <chrono/asset_table.hpp>
+#include <chrono/globals.hpp>
 
 #include <rdge/assets.hpp>
 #include <rdge/math.hpp>
@@ -7,9 +9,6 @@
 #include <rdge/util.hpp>
 
 #include <SDL_assert.h>
-
-#include "../../asset_table.hpp"
-#include "../../globals.hpp"
 
 #define CHRONO_ADD_SWORD 0
 

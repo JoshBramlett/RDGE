@@ -9,11 +9,11 @@ spritesheet_region::flip (TexCoordsFlip f) noexcept
 
     if (f == TexCoordsFlip::HORIZONTAL)
     {
-        origin.x = size.w - origin.x;
+        origin.x = 1.f - origin.x;
     }
     else if (f == TexCoordsFlip::VERTICAL)
     {
-        origin.y = size.h - origin.y;
+        origin.y = 1.f - origin.y;
     }
 }
 
@@ -25,17 +25,19 @@ spritesheet_region::rotate (TexCoordsRotation r) noexcept
     switch (r)
     {
     case TexCoordsRotation::ROTATE_90:
-        origin = math::vec2(origin.y, size.w - origin.x);
+        origin = math::vec2(origin.y, 1.f - origin.x);
         size = math::vec2(size.h, size.w);
+        sprite_size = math::vec2(sprite_size.h, sprite_size.w);
 
         break;
     case TexCoordsRotation::ROTATE_180:
-        origin = math::vec2(size.w - origin.x, size.h - origin.y);
+        origin = math::vec2(1.f - origin.x, 1.f - origin.y);
 
         break;
     case TexCoordsRotation::ROTATE_270:
-        origin = math::vec2(size.h - origin.y, origin.x);
+        origin = math::vec2(1.f - origin.y, origin.x);
         size = math::vec2(size.h, size.w);
+        sprite_size = math::vec2(sprite_size.h, sprite_size.w);
 
         break;
     case TexCoordsRotation::NONE:
@@ -48,7 +50,8 @@ void
 spritesheet_region::scale (float scale) noexcept
 {
     size *= scale;
-    origin *= scale;
+    sprite_offset *= sprite_offset;
+    sprite_size *= sprite_size;
 }
 
 std::ostream& operator<< (std::ostream& os, const spritesheet_region& p)
