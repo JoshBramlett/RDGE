@@ -147,8 +147,8 @@ public:
     //!@}
 
     //!@{ LayerType::OBJECTGROUP
-    std::vector<Object> objects;               //!< Array of objects
-    DrawOrder draw_order = DrawOrder::INVALID; //!< How to render the layer
+    std::vector<Object> objects;                               //!< Array of objects
+    SpriteRenderOrder draw_order = SpriteRenderOrder::INVALID; //!< How to render the layer
     //!@}
 
     // image

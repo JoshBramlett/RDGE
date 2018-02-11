@@ -40,20 +40,20 @@ OverworldScene::OverworldScene (void)
                                                      g_game.asset_scale));
     tile_layers.emplace_back(tilemap.CreateTileLayer(overworld_layer_bg_overlay_1,
                                                      g_game.asset_scale));
-    new_sprite_layers.emplace_back(tilemap.CreateSpriteLayer(overworld_layer_bg_sprites,
+    sprite_layers.emplace_back(tilemap.CreateSpriteLayer(overworld_layer_bg_sprites,
                                                              g_game.asset_scale));
 
-    auto sheet = g_game.pack->GetAsset<SpriteSheet>(rdge_asset_spritesheet_player);
-    sprite_batch = std::make_shared<SpriteBatch>();
-    sprite_layers.emplace_back(sprite_batch);
-    auto& layer = sprite_layers.back();
     {
-    math::vec3 p(2712, -2468, 0.f);
-    auto t = std::make_shared<Texture>(*sheet->surface);
-    auto& region = sheet->regions[frame_player_attack_back_2].value;
-    auto sprite = std::make_shared<Sprite>(p, region.size * g_game.asset_scale, t, region.coords);
-    layer.AddSprite(sprite);
+        auto sheet = g_game.pack->GetAsset<SpriteSheet>(rdge_asset_spritesheet_player);
+        auto& layer = sprite_layers.back();
+        layer.AddSprite(math::vec2(678.f, -617.f),
+                        frame_player_idle_front_1,
+                        *sheet,
+                        g_game.asset_scale);
     }
+
+
+    sprite_batch = std::make_shared<SpriteBatch>();
 }
 
 void
@@ -110,14 +110,9 @@ OverworldScene::OnRender (void)
     }
 
     sprite_batch->SetProjection(camera.combined);
-    for (auto& layer : this->new_sprite_layers)
-    {
-        layer.Draw(*sprite_batch, camera);
-    }
-
     for (auto& layer : this->sprite_layers)
     {
-        layer.Draw();
+        layer.Draw(*sprite_batch, camera);
     }
 
     // debug drawing

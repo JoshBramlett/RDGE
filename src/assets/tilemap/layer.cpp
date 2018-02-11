@@ -27,7 +27,7 @@ Layer::Layer (const nlohmann::json& j)
         this->name = j["name"].get<decltype(this->name)>();
         if (!try_parse(j["type"].get<std::string>(), this->type))
         {
-            throw std::invalid_argument("Layer invalid type. name=" + this->name);
+            throw std::invalid_argument("Invalid Layer type. name=" + this->name);
         }
 
         this->visible = j["visible"].get<decltype(this->visible)>();
@@ -98,7 +98,7 @@ Layer::Layer (const nlohmann::json& j)
 
             if (!try_parse(j["draworder"].get<std::string>(), this->draw_order))
             {
-                throw std::invalid_argument("Layer invalid draworder. name=" + this->name);
+                throw std::invalid_argument("Invalid SpriteRenderOrder. name=" + this->name);
             }
 
             for (const auto& j_obj : j["objects"])

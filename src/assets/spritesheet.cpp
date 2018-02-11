@@ -124,12 +124,16 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
             sz.h = j_sss["h"].get<decltype(sz.h)>();
         }
 
-        // convert pivot to pixels and y-is-up
-        const auto& j_pivot = j_region["pivot"];
-        JSON_VALIDATE_REQUIRED(j_pivot, x, is_number);
-        JSON_VALIDATE_REQUIRED(j_pivot, y, is_number);
-        region.value.origin.x = j_pivot["x"].get<float>();
-        region.value.origin.y = (1.f - j_pivot["y"].get<float>());
+        {
+            const auto& j_pivot = j_region["pivot"];
+            JSON_VALIDATE_REQUIRED(j_pivot, x, is_number);
+            JSON_VALIDATE_REQUIRED(j_pivot, y, is_number);
+
+            // convert pivot to pixels and y-is-up
+            auto& origin = region.value.origin;
+            origin.x = j_pivot["x"].get<decltype(origin.x)>();
+            origin.y = (1.f - j_pivot["y"].get<decltype(origin.y)>());
+        }
 
         if (j_region.count("objects"))
         {

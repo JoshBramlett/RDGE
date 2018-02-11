@@ -132,7 +132,7 @@ public:
     ObjectType type = ObjectType::INVALID; //!< Base type
 
     //!@{ Custom identifiers
-    int32       id = -1;     //!< Globally unique id
+    int32       id = -1;     //!< [unused] Globally unique id
     std::string name;        //!< 'Name' field assigned in editor
     std::string custom_type; //!< 'Type' field assigned in editor
     //!@}
@@ -146,7 +146,7 @@ public:
 
     //!@{ Sprite properties
     int32      m_gid = 0;        //!< Tilemap texture region Id
-    math::vec2 m_size;           //!< Sprite size
+    math::vec2 m_size;           //!< [unused] Sprite size
     float      m_rotation = 0.f; //!< Angle in degrees clockwise
     //!@}
 

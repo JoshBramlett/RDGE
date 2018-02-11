@@ -97,7 +97,7 @@ public:
     //!@}
 
     TileLayer CreateTileLayer (int32 layer_id, float scale);
-    NewSpriteLayer CreateSpriteLayer (int32 layer_id, float scale);
+    SpriteLayer CreateSpriteLayer (int32 layer_id, float scale);
 public:
 
     //!@{ Rendering properties

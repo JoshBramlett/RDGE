@@ -141,7 +141,7 @@ Tilemap::CreateTileLayer (int32 layer_id, float scale)
     }
 }
 
-NewSpriteLayer
+SpriteLayer
 Tilemap::CreateSpriteLayer (int32 layer_id, float scale)
 {
     try
@@ -158,7 +158,7 @@ Tilemap::CreateSpriteLayer (int32 layer_id, float scale)
             throw std::invalid_argument("TileLayer not mapped to SpriteSheet");
         }
 
-        return NewSpriteLayer(layer, *sheet.spritesheet, scale);
+        return SpriteLayer(layer, *sheet.spritesheet, scale);
     }
     catch (const std::exception& ex)
     {

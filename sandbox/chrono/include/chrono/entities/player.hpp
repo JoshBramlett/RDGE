@@ -37,7 +37,7 @@ public:
     rdge::Direction facing = rdge::Direction::SOUTH;
     rdge::math::vec2 normal;
 
-    std::shared_ptr<rdge::Sprite> sprite;
+    rdge::sprite_data* sprite = nullptr;
     rdge::physics::RigidBody* body = nullptr;
     rdge::physics::Fixture* hitbox = nullptr;
     rdge::CardinalDirectionArray<rdge::physics::Fixture*> dir_sensors;
