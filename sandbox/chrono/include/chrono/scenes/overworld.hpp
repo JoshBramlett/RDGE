@@ -10,6 +10,8 @@
 #include <vector>
 #include <memory>
 
+#include <chrono/entities/player.hpp>
+
 class OverworldScene
     : public rdge::IScene
     , public rdge::physics::GraphListener
@@ -48,10 +50,14 @@ public:
 public:
     rdge::physics::CollisionGraph collision_graph;
     rdge::OrthographicCamera camera;
-    std::shared_ptr<rdge::SpriteBatch> sprite_batch;
-    rdge::TileBatch tile_batch;
+
+    rdge::SpriteBatch sprite_batch;
     std::vector<rdge::SpriteLayer> sprite_layers;
+
+    rdge::TileBatch tile_batch;
     std::vector<rdge::TileLayer> tile_layers;
+
+    Player player;
 
     // debug
     bool show_widget = true;

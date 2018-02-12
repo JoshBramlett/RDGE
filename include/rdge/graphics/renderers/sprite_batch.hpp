@@ -21,6 +21,7 @@ namespace rdge {
 
 //!@{ Forward declarations
 struct sprite_data;
+class OrthographicCamera;
 //!@}
 
 //! \class SpriteBatch
@@ -101,9 +102,10 @@ public:
     void Flush (void);
     void Flush (const std::vector<Texture>& textures);
 
-    //! \brief Set the shader uniform projection
-    //! \param [in] projection Projection matrix
-    void SetProjection (const math::mat4& projection);
+    //! \brief Set the viewport that will be rendered
+    //! \details Should be called every frame prior to drawing.
+    //! \param [in] camera Orthographic camera
+    void SetView (const OrthographicCamera& camera);
 
     //! \brief Push a transformation on the stack
     //! \details Applies the transformation to all submitted renderables until
@@ -145,7 +147,6 @@ private:
     uint32         m_capacity = 0;     //!< Max number of submissions per draw
 
     std::shared_ptr<Shader>   m_shader;     //!< Shader program
-    math::mat4                m_projection; //!< Projection matrix provided to shader
 
     std::vector<math::mat4> m_transformStack;      //!< Rendering transformation stack
     math::mat4*             m_transform = nullptr; //!< Points to the top element of the stack

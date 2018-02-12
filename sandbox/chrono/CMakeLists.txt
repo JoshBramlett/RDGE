@@ -16,6 +16,7 @@ include_directories (include)
 
 add_executable (chrono
                 src/main.cpp
+                src/entities/player.cpp
                 src/scenes/overworld.cpp)
 
 target_link_libraries (chrono

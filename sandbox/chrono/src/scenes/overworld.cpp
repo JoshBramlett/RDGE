@@ -20,11 +20,11 @@ OverworldScene::OverworldScene (void)
     debug::settings::show_overlay = true;
     debug::settings::draw_physics_fixtures = false;
 
+    auto tilemap = g_game.pack->GetTilemap(rdge_asset_tilemap_overworld);
+
     ///////////////////
     // Tile layers
     ///////////////////
-
-    auto tilemap = g_game.pack->GetTilemap(rdge_asset_tilemap_overworld);
 
     // TODO This is the total tile count, but more care should be taken into
     //      consideration to construct the buffer size because this should be
@@ -33,34 +33,31 @@ OverworldScene::OverworldScene (void)
     //      should be no more than the the number of tiles drawn for the maximum
     //      resolution supported.
     size_t tile_count = tilemap.grid.size.w * tilemap.grid.size.h;
-    auto tile_size = static_cast<math::vec2>(tilemap.grid.cell_size) * g_game.asset_scale;
+    auto tile_size = static_cast<math::vec2>(tilemap.grid.cell_size) * g_game.ratios.base_to_screen;
+
     tile_batch = TileBatch(tile_count, tile_size);
-
     tile_layers.emplace_back(tilemap.CreateTileLayer(overworld_layer_bg,
-                                                     g_game.asset_scale));
+                                                     g_game.ratios.base_to_screen));
     tile_layers.emplace_back(tilemap.CreateTileLayer(overworld_layer_bg_overlay_1,
-                                                     g_game.asset_scale));
+                                                     g_game.ratios.base_to_screen));
+
+    ///////////////////
+    // Sprite layers
+    ///////////////////
+
     sprite_layers.emplace_back(tilemap.CreateSpriteLayer(overworld_layer_bg_sprites,
-                                                             g_game.asset_scale));
+                                                         g_game.ratios.base_to_screen));
 
-    {
-        auto sheet = g_game.pack->GetAsset<SpriteSheet>(rdge_asset_spritesheet_player);
-        auto& layer = sprite_layers.back();
-        layer.AddSprite(math::vec2(678.f, -617.f),
-                        frame_player_idle_front_1,
-                        *sheet,
-                        g_game.asset_scale);
-    }
-
-
-    sprite_batch = std::make_shared<SpriteBatch>();
+    math::vec2 player_pos(678.f, -617.f);
+    player.InitPhysics(collision_graph, player_pos);
+    player.InitGraphics(sprite_layers.back(), player_pos);
 }
 
 void
 OverworldScene::Initialize (void)
 {
     debug::RegisterCamera(&camera);
-    debug::RegisterPhysics(&collision_graph, g_game.ppm);
+    debug::RegisterPhysics(&collision_graph, g_game.ratios.world_to_screen);
 }
 
 void
@@ -74,7 +71,7 @@ void
 OverworldScene::Activate (void)
 {
     debug::RegisterCamera(&camera);
-    debug::RegisterPhysics(&collision_graph, g_game.ppm);
+    debug::RegisterPhysics(&collision_graph, g_game.ratios.world_to_screen);
 }
 
 void
@@ -87,32 +84,30 @@ OverworldScene::Hibernate (void)
 void
 OverworldScene::OnEvent (const Event& event)
 {
-    rdge::Unused(event);
+    player.OnEvent(event);
 }
 
 void
 OverworldScene::OnUpdate (const delta_time& dt)
 {
-    rdge::Unused(dt);
+    player.OnUpdate(dt);
+    collision_graph.Step(1.f / 60.f);
 }
 
 void
 OverworldScene::OnRender (void)
 {
-    //camera.SetPosition(player.GetWorldCenter() * g_game.ppm);
-    //camera.Update();
-
-    camera.SetPosition(math::vec2(2712, -2468));
+    camera.SetPosition(player.GetWorldCenter() * g_game.ratios.world_to_screen);
     camera.Update();
+
     for (auto& layer : this->tile_layers)
     {
         layer.Draw(tile_batch, camera);
     }
 
-    sprite_batch->SetProjection(camera.combined);
     for (auto& layer : this->sprite_layers)
     {
-        layer.Draw(*sprite_batch, camera);
+        layer.Draw(sprite_batch, camera);
     }
 
     // debug drawing

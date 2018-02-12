@@ -10,16 +10,11 @@
 
 #include <SDL_assert.h>
 
-#define CHRONO_ADD_SWORD 0
-
 using namespace rdge;
 using namespace rdge::math;
 using namespace rdge::physics;
 
 namespace {
-
-// image pixels/meter
-float base_asset_ppm = 16.f;
 
 // sprite animations
 CardinalDirectionArray<Animation> s_idle;
@@ -33,43 +28,52 @@ CardinalDirectionArray<Animation> s_attack;
 
 Player::Player (void)
 {
-    auto sheet = g_game.pack->GetSpriteSheet(rdge_asset_spritesheet_player);
+    static bool once [[gnu::unused]] = [](void) {
+        auto sheet = g_game.pack->GetAsset<SpriteSheet>(rdge_asset_spritesheet_player);
+        float s = g_game.ratios.base_to_screen;
 
-    static bool once [[gnu::unused]] = [&sheet](void) {
-        float scale = g_game.ppm / base_asset_ppm;
-        s_idle[Direction::UP]    = sheet.GetAnimation(animation_player_idle_back, scale);
-        s_idle[Direction::RIGHT] = sheet.GetAnimation(animation_player_idle_right, scale);
-        s_idle[Direction::DOWN]  = sheet.GetAnimation(animation_player_idle_front, scale);
-        s_idle[Direction::LEFT]  = sheet.GetAnimation(animation_player_idle_left, scale);
+        s_idle[Direction::UP]    = sheet->GetAnimation(animation_player_idle_back, s);
+        s_idle[Direction::RIGHT] = sheet->GetAnimation(animation_player_idle_right, s);
+        s_idle[Direction::DOWN]  = sheet->GetAnimation(animation_player_idle_front, s);
+        s_idle[Direction::LEFT]  = sheet->GetAnimation(animation_player_idle_left, s);
 
-        s_walk[Direction::UP]    = sheet.GetAnimation(animation_player_walk_back, scale);
-        s_walk[Direction::RIGHT] = sheet.GetAnimation(animation_player_walk_right, scale);
-        s_walk[Direction::DOWN]  = sheet.GetAnimation(animation_player_walk_front, scale);
-        s_walk[Direction::LEFT]  = sheet.GetAnimation(animation_player_walk_left, scale);
+        s_walk[Direction::UP]    = sheet->GetAnimation(animation_player_walk_back, s);
+        s_walk[Direction::RIGHT] = sheet->GetAnimation(animation_player_walk_right, s);
+        s_walk[Direction::DOWN]  = sheet->GetAnimation(animation_player_walk_front, s);
+        s_walk[Direction::LEFT]  = sheet->GetAnimation(animation_player_walk_left, s);
 
-        s_run[Direction::UP]    = sheet.GetAnimation(animation_player_run_back, scale);
-        s_run[Direction::RIGHT] = sheet.GetAnimation(animation_player_run_right, scale);
-        s_run[Direction::DOWN]  = sheet.GetAnimation(animation_player_run_front, scale);
-        s_run[Direction::LEFT]  = sheet.GetAnimation(animation_player_run_left, scale);
+        s_run[Direction::UP]    = sheet->GetAnimation(animation_player_run_back, s);
+        s_run[Direction::RIGHT] = sheet->GetAnimation(animation_player_run_right, s);
+        s_run[Direction::DOWN]  = sheet->GetAnimation(animation_player_run_front, s);
+        s_run[Direction::LEFT]  = sheet->GetAnimation(animation_player_run_left, s);
 
-        s_sheathe[Direction::UP]    = sheet.GetAnimation(animation_player_sheathe_back, scale);
-        s_sheathe[Direction::RIGHT] = sheet.GetAnimation(animation_player_sheathe_right, scale);
-        s_sheathe[Direction::DOWN]  = sheet.GetAnimation(animation_player_sheathe_front, scale);
-        s_sheathe[Direction::LEFT]  = sheet.GetAnimation(animation_player_sheathe_left, scale);
+        s_sheathe[Direction::UP]    = sheet->GetAnimation(animation_player_sheathe_back, s);
+        s_sheathe[Direction::RIGHT] = sheet->GetAnimation(animation_player_sheathe_right, s);
+        s_sheathe[Direction::DOWN]  = sheet->GetAnimation(animation_player_sheathe_front, s);
+        s_sheathe[Direction::LEFT]  = sheet->GetAnimation(animation_player_sheathe_left, s);
 
-        s_fight[Direction::UP]    = sheet.GetAnimation(animation_player_fight_idle_back, scale);
-        s_fight[Direction::RIGHT] = sheet.GetAnimation(animation_player_fight_idle_right, scale);
-        s_fight[Direction::DOWN]  = sheet.GetAnimation(animation_player_fight_idle_front, scale);
-        s_fight[Direction::LEFT]  = sheet.GetAnimation(animation_player_fight_idle_left, scale);
+        s_fight[Direction::UP]    = sheet->GetAnimation(animation_player_fight_idle_back, s);
+        s_fight[Direction::RIGHT] = sheet->GetAnimation(animation_player_fight_idle_right, s);
+        s_fight[Direction::DOWN]  = sheet->GetAnimation(animation_player_fight_idle_front, s);
+        s_fight[Direction::LEFT]  = sheet->GetAnimation(animation_player_fight_idle_left, s);
 
-        s_attack[Direction::UP]    = sheet.GetAnimation(animation_player_attack_back, scale);
-        s_attack[Direction::RIGHT] = sheet.GetAnimation(animation_player_attack_right, scale);
-        s_attack[Direction::DOWN]  = sheet.GetAnimation(animation_player_attack_front, scale);
-        s_attack[Direction::LEFT]  = sheet.GetAnimation(animation_player_attack_left, scale);
+        s_attack[Direction::UP]    = sheet->GetAnimation(animation_player_attack_back, s);
+        s_attack[Direction::RIGHT] = sheet->GetAnimation(animation_player_attack_right, s);
+        s_attack[Direction::DOWN]  = sheet->GetAnimation(animation_player_attack_front, s);
+        s_attack[Direction::LEFT]  = sheet->GetAnimation(animation_player_attack_left, s);
         return true;
     }();
+}
 
-    //this->sprite = std::make_shared<Sprite>(vec3(), vec2(), sheet.texture);
+void
+Player::InitGraphics (SpriteLayer& layer, const math::vec2& pos)
+{
+    auto sheet = g_game.pack->GetAsset<SpriteSheet>(rdge_asset_spritesheet_player);
+    this->sprite = layer.AddSprite(pos,
+                                   frame_player_idle_front_1,
+                                   *sheet,
+                                   g_game.ratios.base_to_screen);
+
     this->facing = Direction::SOUTH;
     m_currentAnimation = &s_idle[this->facing];
 }
@@ -79,7 +83,7 @@ Player::InitPhysics (CollisionGraph& graph, const math::vec2& pos)
 {
     rigid_body_profile bprof;
     bprof.type = RigidBodyType::DYNAMIC;
-    bprof.position = pos;
+    bprof.position = pos * g_game.ratios.base_to_world;
     bprof.gravity_scale = 0.f;
     bprof.prevent_rotation = true;
     bprof.prevent_sleep = true;
@@ -124,27 +128,6 @@ Player::InitPhysics (CollisionGraph& graph, const math::vec2& pos)
         fprof.shape = &c;
         this->dir_sensors[Direction::DOWN] = body->CreateFixture(fprof);
     }
-
-#if (CHRONO_ADD_SWORD)
-    // players sword
-    bprof.prevent_rotation = false;
-    bprof.position += { 0.f, 0.75f };
-    sword = graph.CreateBody(bprof);
-
-    polygon s(0.125f, 0.75f);
-    fprof.shape = &s;
-    fprof.density = 1.f;
-    fprof.restitution = 0.8f;
-    sword_hitbox = sword->CreateFixture(fprof);
-
-    auto j = graph.CreateRevoluteJoint(body, sword, vec2(0.f, 0.f));
-    j->SetMotorSpeed(3 * 3.14f);
-    j->SetMaxMotorTorque(10000.f);
-    j->EnableMotor();
-
-    //j->SetLimits(-90.f, 90.f);
-    //j->EnableLimits();
-#endif
 }
 
 void
@@ -242,7 +225,7 @@ Player::OnUpdate (const delta_time& dt)
         }
     }
 
-#if 1
+#if 0
     // high damping if directional normal is different than the linear velocity
     body->linear.damping = (math::dot(this->normal, body->linear.velocity) > 0.f) ? 0.f : 9.f;
 
@@ -250,14 +233,15 @@ Player::OnUpdate (const delta_time& dt)
     math::vec2 impulse = delta * body->linear.mass;
     body->ApplyForce(impulse);
 #else
-    body->linear.velocity = (this->normal * velocity_scale);;
+    body->linear.velocity = (this->normal * velocity_scale);
 #endif
 
     auto& frame = this->m_currentAnimation->GetFrame(dt.ticks);
-    math::vec2 pos((this->hitbox->GetWorldCenter() * g_game.ppm) - frame.origin);
+    math::vec2 screen_pos(this->hitbox->GetWorldCenter() * g_game.ratios.world_to_screen);
 
-    vops::SetPosition(this->sprite->vertices, pos, frame.size);
-    vops::SetTexCoords(this->sprite->vertices, frame.coords);
+    sprite->pos = screen_pos - frame.origin;
+    sprite->size = frame.size;
+    sprite->uvs = frame.uvs;
 }
 
 void

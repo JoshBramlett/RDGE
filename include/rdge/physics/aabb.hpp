@@ -114,13 +114,24 @@ struct aabb
         return *this;
     }
 
+    //! \brief Extend the lo and hi coordinates by the provided value
+    //! \param [in] amount Amount to extend
+    aabb& fatten (float width, float height) noexcept
+    {
+        lo.x -= width;
+        lo.y -= height;
+        hi.x += width;
+        hi.y += height;
+        return *this;
+    }
+
     //! \brief Scale dimensions
     //! \param [in] amount Amount to scale
     aabb& scale (float amount) noexcept
     {
-        lo *= amount;
-        hi *= amount;
-        return *this;
+        float w = (width() * amount) - width();
+        float h = (height() * amount) - height();
+        return fatten(w, h);
     }
 
     //! \brief Get the perimeter length

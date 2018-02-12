@@ -313,7 +313,8 @@ public:
     }
 
     //! \brief Sort the items in the list using the provided comparator
-    //! \details Avoid use.  Algorithm based on bubble sort.
+    //! \details Algorithm based on bubble sort.  Be cognizant of use, bubble
+    //!          sort is suboptimal unless list is small or nearly sorted.
     //! \note Sort complexity: O(n^2)
     //! \param [in] fn Comparison function
     void sort (std::function<bool(const_reference, const_reference)> fn)

@@ -8,6 +8,7 @@
 #include <rdge/core.hpp>
 #include <rdge/graphics/color.hpp>
 #include <rdge/graphics/tex_coords.hpp>
+#include <rdge/graphics/texture.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/util/containers/intrusive_list.hpp>
 
@@ -20,7 +21,6 @@ namespace rdge {
 class SpriteBatch;
 class SpriteSheet;
 class OrthographicCamera;
-class Texture;
 struct spritesheet_region;
 namespace tilemap { class Layer; }
 //!@}
@@ -36,20 +36,23 @@ enum class SpriteRenderOrder
 
 struct sprite_data : public intrusive_list_element<sprite_data>
 {
-    size_t index;
+    size_t index; //!< Index the sprite was added to the layer
 
-    // location
+    //!@{ Location
     math::vec2 pos;
     float depth;
+    //!@}
 
-    // frame
+    //!@{ Frame
     math::vec2 size;
     math::vec2 origin;
     tex_coords uvs;
+    //!@}
 
-    // render properties
+    //!@{ Render properties
     int32 tid;
     color color;
+    //!@}
 };
 
 class SpriteLayer
@@ -75,13 +78,14 @@ public:
                             const SpriteSheet& spritesheet,
                             float scale);
 
-    //void BoundsDirty (sprite_data* data);
-
 private:
     intrusive_list<sprite_data> m_list;
     sprite_data* m_sprites = nullptr;
     size_t m_spriteCount = 0;
     size_t m_spriteCapacity = 0;
+
+    float m_padW = 0.f; //!< Culling region width padding
+    float m_padH = 0.f; //!< Culling region height padding
 
     color m_color = color::WHITE;  //!< Render color (to store opacity)
 

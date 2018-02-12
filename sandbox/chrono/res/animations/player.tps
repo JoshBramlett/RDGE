@@ -466,7 +466,7 @@
             <key type="filename">player/idle/back_1.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
+                <point_f>0.5,0.66666</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -479,9 +479,13 @@
             <key type="filename">player/idle/front_1.png</key>
             <key type="filename">player/idle/front_2.png</key>
             <key type="filename">player/idle/front_3.png</key>
+            <key type="filename">player/walk/back_1.png</key>
+            <key type="filename">player/walk/back_4.png</key>
+            <key type="filename">player/walk/front_1.png</key>
+            <key type="filename">player/walk/front_4.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
+                <point_f>0.5,0.66666</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -494,9 +498,10 @@
             <key type="filename">player/idle/side_1.png</key>
             <key type="filename">player/idle/side_2.png</key>
             <key type="filename">player/idle/side_3.png</key>
+            <key type="filename">player/walk/side_3.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
+                <point_f>0.5,0.66666</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -510,7 +515,7 @@
             <key type="filename">player/run/back_2.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
+                <point_f>0.5,0.66666</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -522,9 +527,11 @@
             </struct>
             <key type="filename">player/run/front_1.png</key>
             <key type="filename">player/run/front_2.png</key>
+            <key type="filename">player/walk/front_3.png</key>
+            <key type="filename">player/walk/front_6.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
+                <point_f>0.5,0.66666</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -536,10 +543,9 @@
             </struct>
             <key type="filename">player/run/side_1.png</key>
             <key type="filename">player/run/side_2.png</key>
-            <key type="filename">player/sheathe/side_3.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
+                <point_f>0.5,0.66666</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -653,16 +659,16 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">player/walk/back_1.png</key>
+            <key type="filename">player/sheathe/side_3.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.4375,0.647059</point_f>
+                <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>4,9,8,17</rect>
+                <rect>7,8,14,16</rect>
                 <key>scale9Paddings</key>
-                <rect>4,9,8,17</rect>
+                <rect>7,8,14,16</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -670,7 +676,7 @@
             <key type="filename">player/walk/back_5.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.65625</point_f>
+                <point_f>0.5,0.66666</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -684,150 +690,36 @@
             <key type="filename">player/walk/back_6.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.636364</point_f>
+                <point_f>0.5,0.66666</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
                 <rect>5,8,9,17</rect>
                 <key>scale9Paddings</key>
                 <rect>5,8,9,17</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">player/walk/back_4.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5625,0.647059</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>4,9,8,17</rect>
-                <key>scale9Paddings</key>
-                <rect>4,9,8,17</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">player/walk/front_1.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.647059</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>4,9,8,17</rect>
-                <key>scale9Paddings</key>
-                <rect>4,9,8,17</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
             <key type="filename">player/walk/front_2.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.470588,0.625</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>4,8,9,16</rect>
-                <key>scale9Paddings</key>
-                <rect>4,8,9,16</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">player/walk/front_3.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.444444,0.647059</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>5,9,9,17</rect>
-                <key>scale9Paddings</key>
-                <rect>5,9,9,17</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">player/walk/front_4.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.676471</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>4,9,8,17</rect>
-                <key>scale9Paddings</key>
-                <rect>4,9,8,17</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
             <key type="filename">player/walk/front_5.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.529412,0.625</point_f>
+                <point_f>0.5,0.66666</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
                 <rect>4,8,9,16</rect>
                 <key>scale9Paddings</key>
                 <rect>4,8,9,16</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">player/walk/front_6.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.555556,0.647059</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>5,9,9,17</rect>
-                <key>scale9Paddings</key>
-                <rect>5,9,9,17</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
             <key type="filename">player/walk/side_1.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.52381,0.65625</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>6,9,12,18</rect>
-                <key>scale9Paddings</key>
-                <rect>6,9,12,18</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
             <key type="filename">player/walk/side_2.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.533333,0.636364</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>6,9,12,18</rect>
-                <key>scale9Paddings</key>
-                <rect>6,9,12,18</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">player/walk/side_3.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.647059</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>4,9,7,17</rect>
-                <key>scale9Paddings</key>
-                <rect>4,9,7,17</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
             <key type="filename">player/walk/side_4.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.5,0.6875</point_f>
+                <point_f>0.5,0.66666</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
@@ -853,7 +745,7 @@
             <key type="filename">player/walk/side_6.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
-                <point_f>0.533333,0.617647</point_f>
+                <point_f>0.533333,0.66666</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>

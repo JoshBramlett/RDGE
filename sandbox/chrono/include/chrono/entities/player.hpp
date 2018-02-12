@@ -8,17 +8,19 @@
 #include <rdge/math.hpp>
 #include <rdge/physics.hpp>
 
-#include "../iactor.hpp"
-
-#include <vector>
-#include <memory>
+#include <chrono/entities/iactor.hpp>
 
 class Player : public IActor
 {
 public:
     Player (void);
 
+    void InitGraphics (rdge::SpriteLayer& layer, const rdge::math::vec2& pos);
     void InitPhysics (rdge::physics::CollisionGraph& graph, const rdge::math::vec2& pos);
+
+    // Implement when switching between scenes
+    //void InitPosition (const rdge::math::vec2& pos, rdge::Direction facing);
+
     void OnEvent (const rdge::Event& event);
     void OnUpdate (const rdge::delta_time& dt);
 
@@ -35,7 +37,7 @@ private:
 public:
 
     rdge::Direction facing = rdge::Direction::SOUTH;
-    rdge::math::vec2 normal;
+    rdge::math::vec2 normal; // direction normal
 
     rdge::sprite_data* sprite = nullptr;
     rdge::physics::RigidBody* body = nullptr;

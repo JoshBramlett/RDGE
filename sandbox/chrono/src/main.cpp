@@ -59,9 +59,7 @@ int main ()
         PackFile pack("res/assets.pack");
         g_game.game = &game;
         g_game.pack = &pack;
-        g_game.asset_scale = (game.window->IsHighDPI() ? 4.f : 2.f);
-        g_game.ppm = 32.f * ((game.window->IsHighDPI()) ? 2.f : 1.f);
-        g_game.inv_ppm = 1.f / g_game.ppm;
+        g_game.ratios = game_ratios(16.f, 2.f, ((game.window->IsHighDPI()) ? 2.f : 1.f));
 
         game.PushScene(std::make_shared<OverworldScene>());
         game.Run();

@@ -1,5 +1,6 @@
 #include <rdge/graphics/renderers/sprite_batch.hpp>
 #include <rdge/graphics/color.hpp>
+#include <rdge/graphics/orthographic_camera.hpp>
 #include <rdge/assets/surface.hpp>
 #include <rdge/util/compiler.hpp>
 #include <rdge/util/logger.hpp>
@@ -181,17 +182,7 @@ SpriteBatch::SpriteBatch (uint16 capacity, std::shared_ptr<Shader> shader, bool 
     int32 n = 0;
     std::generate(texture_units.begin(), texture_units.end(), [&n]{ return n++; });
 
-    // TODO Figure out how depth is generally defined for an orthographic projection.  In
-    //      the OrthographicCamera (taken from libgdx, near=0 and far=100).  LUL (and
-    //      maybe some other sources) were setting it to NDC values (near=-1 and far=1)
-    //m_projection = math::mat4::orthographic(-width, width, -height, height, -1.f, 1.f);
-    auto viewport = opengl::GetViewport();
-    auto width  = viewport[2] / 2.f;
-    auto height = viewport[3] / 2.f;
-    m_projection = math::mat4::orthographic(-width, width, -height, height, 0.f, 100.f);
-
     m_shader->Enable();
-    m_shader->SetUniformValue(UNI_PROJ_MATRIX, m_projection);
     m_shader->SetUniformValue(UNI_SAMPLER_ARR, texture_units.size(), texture_units.data());
     m_shader->Disable();
 
@@ -231,7 +222,6 @@ SpriteBatch::SpriteBatch (SpriteBatch&& other) noexcept
     , m_submissions(other.m_submissions)
     , m_capacity(other.m_capacity)
     , m_shader(std::move(other.m_shader))
-    , m_projection(other.m_projection)
     , m_transformStack(std::move(other.m_transformStack))
     , m_transform(other.m_transform)
     , m_textures(std::move(other.m_textures))
@@ -257,7 +247,6 @@ SpriteBatch::operator= (SpriteBatch&& rhs) noexcept
         m_submissions = rhs.m_submissions;
         m_capacity = rhs.m_capacity;
         m_shader = std::move(rhs.m_shader);
-        m_projection = rhs.m_projection;
         m_transformStack = std::move(rhs.m_transformStack);
         m_transform = rhs.m_transform;
         m_textures = std::move(rhs.m_textures);
@@ -412,8 +401,8 @@ SpriteBatch::Flush (void)
 void
 SpriteBatch::Flush (const std::vector<Texture>& textures)
 {
+    // Sanity check the same VBO is bound throughout the draw call
     SDL_assert(m_vbo == static_cast<uint32>(opengl::GetInt(GL_ARRAY_BUFFER_BINDING)));
-    SDL_assert(m_submissions != 0);
 
     opengl::ReleaseBufferPointer(GL_ARRAY_BUFFER);
     opengl::UnbindBuffers(GL_ARRAY_BUFFER);
@@ -437,12 +426,13 @@ SpriteBatch::Flush (const std::vector<Texture>& textures)
 }
 
 void
-SpriteBatch::SetProjection (const math::mat4& projection)
+SpriteBatch::SetView (const OrthographicCamera& camera)
 {
-    m_projection = projection;
+    SDL_assert(m_vao != 0);
 
     m_shader->Enable();
-    m_shader->SetUniformValue(UNI_PROJ_MATRIX, m_projection);
+    //m_shader->SetUniformValue(U_PROJ_XF, camera.combined);
+    m_shader->SetUniformValue(UNI_PROJ_MATRIX, camera.combined);
     m_shader->Disable();
 }
 

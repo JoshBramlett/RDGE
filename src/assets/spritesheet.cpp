@@ -191,11 +191,11 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
                         region_copy.flip(frame_flip);
 
                         animation_frame frame;
-                        frame.size = region.value.sprite_size;
-                        frame.origin = region.value.sprite_size;
-                        frame.origin.x *= region.value.origin.x;
-                        frame.origin.y *= region.value.origin.y;
-                        frame.uvs = region.value.coords;
+                        frame.size = region_copy.sprite_size;
+                        frame.origin = region_copy.sprite_size;
+                        frame.origin.x *= region_copy.origin.x;
+                        frame.origin.y *= region_copy.origin.y;
+                        frame.uvs = region_copy.coords;
 
                         animation.value.frames.push_back(frame);
 

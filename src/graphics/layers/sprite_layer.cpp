@@ -5,7 +5,6 @@
 #include <rdge/assets/tilemap/object.hpp>
 #include <rdge/graphics/renderers/sprite_batch.hpp>
 #include <rdge/graphics/orthographic_camera.hpp>
-#include <rdge/graphics/texture.hpp>
 #include <rdge/util/memory/alloc.hpp>
 #include <rdge/util/logger.hpp>
 #include <rdge/util/strings.hpp>
@@ -13,6 +12,7 @@
 #include <SDL_assert.h>
 
 #include <sstream>
+#include <memory>
 
 // debug
 #include <rdge/debug/renderer.hpp>
@@ -39,10 +39,12 @@ SpriteLayer::SpriteLayer (const tilemap::Layer& def,
     RDGE_CALLOC(m_sprites, m_spriteCapacity, nullptr);
 
     Texture t(*spritesheet.surface);
+    uint32 unit_id = t.unit_id;
     if (std::find(textures.begin(), textures.end(), t) == textures.end())
     {
         t.unit_id = textures.size();
-        textures.emplace_back(t);
+        unit_id = t.unit_id;
+        textures.emplace_back(std::move(t));
     }
 
     for (const auto& obj : def.objects)
@@ -65,9 +67,19 @@ SpriteLayer::SpriteLayer (const tilemap::Layer& def,
         sprite.depth = 1.f;
         sprite.color = color::WHITE;
         sprite.uvs = region.coords;
-        sprite.tid = t.unit_id;
+        sprite.tid = unit_id;
         //obj.m_rotation;
         //obj.visible;
+
+        if (sprite.size.w > m_padW)
+        {
+            m_padW = sprite.size.w;
+        }
+
+        if (sprite.size.h > m_padH)
+        {
+            m_padH = sprite.size.h;
+        }
 
         // sorted insert according to render order
         auto it = m_list.begin();
@@ -93,6 +105,8 @@ SpriteLayer::SpriteLayer (SpriteLayer&& other) noexcept
     , m_sprites(other.m_sprites)
     , m_spriteCount(other.m_spriteCount)
     , m_spriteCapacity(other.m_spriteCapacity)
+    , m_padW(other.m_padW)
+    , m_padH(other.m_padH)
     , m_color(other.m_color)
     , textures(std::move(other.textures))
 {
@@ -107,6 +121,8 @@ SpriteLayer::operator= (SpriteLayer&& rhs) noexcept
         m_list = std::move(rhs.m_list);
         m_spriteCount = rhs.m_spriteCount;
         m_spriteCapacity = rhs.m_spriteCapacity;
+        m_padW = rhs.m_padW;
+        m_padH = rhs.m_padH;
         m_color = rhs.m_color;
         this->textures = std::move(rhs.textures);
 
@@ -128,13 +144,12 @@ SpriteLayer::AddSprite (const math::vec2& pos,
     }
 
     Texture t(*spritesheet.surface);
+    uint32 unit_id = t.unit_id;
     if (std::find(textures.begin(), textures.end(), t) == textures.end())
     {
         t.unit_id = textures.size();
-        ILOG() << "found"
-               << " t.unit_id=" << t.unit_id
-               << " textures.size=" << textures.size();
-        textures.emplace_back(t);
+        unit_id = t.unit_id;
+        textures.emplace_back(std::move(t));
     }
 
     const auto& region = spritesheet.regions[id].value;
@@ -149,11 +164,17 @@ SpriteLayer::AddSprite (const math::vec2& pos,
     sprite.depth = 1.f;
     sprite.color = color::WHITE;
     sprite.uvs = region.coords;
-    sprite.tid = t.unit_id;
+    sprite.tid = unit_id;
 
-    ILOG() << "Add Sprite:"
-           << " tid=" << sprite.tid
-           << " pos=" << sprite.pos;
+    if (sprite.size.w > m_padW)
+    {
+        m_padW = sprite.size.w;
+    }
+
+    if (sprite.size.h > m_padH)
+    {
+        m_padH = sprite.size.h;
+    }
 
     // sorted insert according to render order
     auto it = m_list.begin();
@@ -173,16 +194,28 @@ SpriteLayer::AddSprite (const math::vec2& pos,
 void
 SpriteLayer::Draw (SpriteBatch& renderer, const OrthographicCamera& camera)
 {
-    rdge::Unused(camera);
+    // buffer the camera bounds by max padding
+    auto frame_bounds = camera.bounds;
+    frame_bounds.fatten(m_padW, m_padH);
+
+    renderer.SetView(camera);
     renderer.PrepSubmit();
 
+    m_list.sort([](const auto& a, const auto& b) { return a.pos.y > b.pos.y; });
     for (const auto& sprite : m_list)
     {
-        math::vec2 hi (sprite.pos.x + sprite.size.w, sprite.pos.y + sprite.size.h);
-        physics::aabb r(sprite.pos, hi);
-        debug::DrawWireFrame(r, color::RED);
-
-        renderer.Submit(sprite);
+        // NOTE Culling by an AABB intersection test may be sub-optimal
+        //      when there are a lot of sprites outside the camera bounds.
+        //      Since the list is sorted by the y-coordinate, it might be
+        //      beneficial to cache the first sprite rendered on the previous
+        //      frame.  Then do a quick backwards traversal to see if there
+        //      are more that must be rendered versus the prior frame.
+        physics::aabb box(sprite.pos, sprite.size.w, sprite.size.h);
+        if (frame_bounds.intersects_with(box))
+        {
+            debug::DrawWireFrame(box, color::RED);
+            renderer.Submit(sprite);
+        }
     }
 
     renderer.Flush(this->textures);
