@@ -6,11 +6,15 @@
 #pragma once
 
 #include <rdge/core.hpp>
+#include <rdge/assets/spritesheet.hpp>
+#include <rdge/assets/tileset.hpp>
+#include <rdge/assets/shared_asset.hpp>
 #include <rdge/assets/tilemap/object.hpp>
 #include <rdge/assets/tilemap/property.hpp>
 #include <rdge/graphics/layers/tile_layer.hpp>
 #include <rdge/graphics/layers/sprite_layer.hpp>
 #include <rdge/math/vec2.hpp>
+
 
 //!@{ Forward declarations
 //namespace nlohmann { class json; }
@@ -22,6 +26,10 @@
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 namespace tilemap {
+
+//!@{ Forward declarations
+class Tilemap;
+//!@}
 
 //! \enum LayerType
 //! \brief Base layer type
@@ -97,9 +105,10 @@ class Layer
 {
 public:
     //! \brief Layer ctor
+    //! \param [in] parent Tilemap the layer belongs to
     //! \param [in] j json formatted layer
     //! \throws rdge::Exception Parsing failed
-    Layer (const nlohmann::json& j);
+    Layer (Tilemap* parent, const nlohmann::json& j);
 
     //!@{ Layer default ctor/dtor
     Layer (void) = default;
@@ -144,17 +153,22 @@ public:
     math::ivec2 grid_location;
     math::uivec2 grid_size;
     std::vector<tile_chunk> chunks; //!< List of chunks that make up the mapping
+    shared_asset<Tileset> tileset;
     //!@}
 
     //!@{ LayerType::OBJECTGROUP
     std::vector<Object> objects;                               //!< Array of objects
     SpriteRenderOrder draw_order = SpriteRenderOrder::INVALID; //!< How to render the layer
+    shared_asset<SpriteSheet> spritesheet;
     //!@}
 
     // image
 
     // group
     std::vector<Layer> layers;
+
+private:
+    Tilemap* m_parent = nullptr;
 };
 
 //! \brief LayerType stream output operator

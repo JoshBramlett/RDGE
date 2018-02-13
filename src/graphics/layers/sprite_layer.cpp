@@ -20,9 +20,7 @@
 
 namespace rdge {
 
-SpriteLayer::SpriteLayer (const tilemap::Layer& def,
-                          const SpriteSheet& spritesheet,
-                          float scale)
+SpriteLayer::SpriteLayer (const tilemap::Layer& def, float scale)
     : m_spriteCapacity(def.objects.size() + 100)
 {
     // !! IMPORTANT !!
@@ -38,7 +36,7 @@ SpriteLayer::SpriteLayer (const tilemap::Layer& def,
     //    be more dynamic using a small block allocator.
     RDGE_CALLOC(m_sprites, m_spriteCapacity, nullptr);
 
-    Texture t(*spritesheet.surface);
+    Texture t(*def.spritesheet->surface);
     uint32 unit_id = t.unit_id;
     if (std::find(textures.begin(), textures.end(), t) == textures.end())
     {
@@ -54,7 +52,7 @@ SpriteLayer::SpriteLayer (const tilemap::Layer& def,
             continue;
         }
 
-        const auto& region = spritesheet.regions[obj.m_gid - 1].value;
+        const auto& region = def.spritesheet->regions[obj.m_gid - 1].value;
         auto& sprite = m_sprites[m_spriteCount];
         sprite.index = m_spriteCount++;
         sprite.pos = obj.position * scale;

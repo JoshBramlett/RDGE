@@ -36,6 +36,7 @@ OverworldScene::OverworldScene (void)
     auto tile_size = static_cast<math::vec2>(tilemap.grid.cell_size) * g_game.ratios.base_to_screen;
 
     tile_batch = TileBatch(tile_count, tile_size);
+    tile_layers.reserve(2);
     tile_layers.emplace_back(tilemap.CreateTileLayer(overworld_layer_bg,
                                                      g_game.ratios.base_to_screen));
     tile_layers.emplace_back(tilemap.CreateTileLayer(overworld_layer_bg_overlay_1,
@@ -45,8 +46,27 @@ OverworldScene::OverworldScene (void)
     // Sprite layers
     ///////////////////
 
+#if 1
     sprite_layers.emplace_back(tilemap.CreateSpriteLayer(overworld_layer_bg_sprites,
                                                          g_game.ratios.base_to_screen));
+
+#else
+    const auto& def = tilemap.layers[overworld_layer_bg_sprites];
+
+    sprite_layers.emplace_back(def.objects.size() + 100);
+    auto& layer = sprite_layers.back();
+
+    for (const auto& obj : def.objects)
+    {
+        if (obj.type != tilemap::ObjectType::SPRITE)
+        {
+            continue;
+        }
+
+        this->actors.emplace_back(StaticActor(obj, layer, collision_graph);
+    }
+
+#endif
 
     math::vec2 player_pos(678.f, -617.f);
     player.InitPhysics(collision_graph, player_pos);

@@ -99,7 +99,20 @@ Tilemap::Tilemap (const std::vector<uint8>& msgpack, PackFile& packfile)
 
         for (auto& j_layer : j["layers"])
         {
-            this->layers.emplace_back(j_layer);
+            this->layers.emplace_back(this, j_layer);
+        //if (j.count("tileset_index"))
+        //{
+            //this->tileset_index = j["tileset_index"].get<decltype(this->tileset_index)>();
+        //}
+            auto& layer = this->layers.back();
+            if (layer.type == LayerType::TILELAYER && layer.tileset_index >= 0)
+            {
+                layer.tileset = this->sheets[layer.tileset_index].tileset;
+            }
+            if (layer.type == LayerType::OBJECTGROUP && layer.tileset_index >= 0)
+            {
+                layer.spritesheet = this->sheets[layer.tileset_index].spritesheet;
+            }
         }
 
         // optional
@@ -133,7 +146,7 @@ Tilemap::CreateTileLayer (int32 layer_id, float scale)
             throw std::invalid_argument("TileLayer not mapped to Tileset");
         }
 
-        return TileLayer(grid, layer, *sheet.tileset, scale);
+        return TileLayer(grid, layer, scale);
     }
     catch (const std::exception& ex)
     {
@@ -152,13 +165,14 @@ Tilemap::CreateSpriteLayer (int32 layer_id, float scale)
             throw std::invalid_argument("Invalid SpriteLayer definition");
         }
 
-        const auto& sheet = this->sheets[layer.tileset_index];
-        if (sheet.type != asset_pack::asset_type_spritesheet)
-        {
-            throw std::invalid_argument("TileLayer not mapped to SpriteSheet");
-        }
+        return SpriteLayer(layer, scale);
+        //const auto& sheet = this->sheets[layer.tileset_index];
+        //if (sheet.type != asset_pack::asset_type_spritesheet)
+        //{
+            //throw std::invalid_argument("SpriteLayer not mapped to SpriteSheet");
+        //}
 
-        return SpriteLayer(layer, *sheet.spritesheet, scale);
+        //return SpriteLayer(layer, *sheet.spritesheet, scale);
     }
     catch (const std::exception& ex)
     {

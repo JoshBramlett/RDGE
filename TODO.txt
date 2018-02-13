@@ -2,9 +2,6 @@ Working
 
     spritesheet_region
       - Remove all uses of this object - should be only used in the spritesheet for the definition
-    NewSpriteLayer
-      - Replace original SpriteLayer
-      - Implement moving items in the linked list
     TileBatch - Remove setting m_far
 
     Assets:

@@ -58,9 +58,7 @@ struct sprite_data : public intrusive_list_element<sprite_data>
 class SpriteLayer
 {
 public:
-    explicit SpriteLayer (const tilemap::Layer& def,
-                          const SpriteSheet& spritesheet,
-                          float scale);
+    explicit SpriteLayer (const tilemap::Layer& def, float scale);
     ~SpriteLayer (void) noexcept;
 
     //!@{ Non-copyable, move enabled

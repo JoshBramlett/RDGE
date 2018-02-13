@@ -21,12 +21,12 @@ public:
     // Implement when switching between scenes
     //void InitPosition (const rdge::math::vec2& pos, rdge::Direction facing);
 
-    void OnEvent (const rdge::Event& event);
-    void OnUpdate (const rdge::delta_time& dt);
 
     bool IsAttacking (void) const noexcept { return m_flags & ATTACKING; }
 
     // IActor
+    void OnEvent (const rdge::Event& event) override;
+    void OnUpdate (const rdge::delta_time& dt) override;
     void OnMeleeAttack (float damage, const rdge::math::vec2& pos) override;
     rdge::math::vec2 GetWorldCenter (void) const noexcept override;
 

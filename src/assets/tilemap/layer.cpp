@@ -1,4 +1,5 @@
 #include <rdge/assets/tilemap/layer.hpp>
+#include <rdge/assets/tilemap/tilemap.hpp>
 #include <rdge/math/intrinsics.hpp>
 #include <rdge/util/strings.hpp>
 #include <rdge/internal/exception_macros.hpp>
@@ -10,7 +11,8 @@ namespace tilemap {
 
 using json = nlohmann::json;
 
-Layer::Layer (const nlohmann::json& j)
+Layer::Layer (Tilemap* parent, const nlohmann::json& j)
+    : m_parent(parent)
 {
     try
     {
@@ -115,7 +117,7 @@ Layer::Layer (const nlohmann::json& j)
         {
             for (auto& l : j["layers"])
             {
-                this->layers.emplace_back(Layer(l));
+                this->layers.emplace_back(m_parent, l);
             }
         }
     }

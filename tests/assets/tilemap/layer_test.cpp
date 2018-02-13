@@ -32,7 +32,7 @@ TEST(LayerTest, VerifyTileLayerConstruction)
     )"_json;
 
     // 1) Validate proper construction
-    tilemap::Layer layer(j);
+    tilemap::Layer layer(nullptr, j);
     EXPECT_EQ(layer.type, tilemap::LayerType::TILELAYER);
     EXPECT_EQ(rdge::to_string(layer.type), "TILELAYER");
     EXPECT_EQ(layer.name, "ground");
@@ -67,7 +67,7 @@ TEST(LayerTest, VerifyObjectLayerConstruction)
     )"_json;
 
     // 1) Validate proper construction
-    tilemap::Layer layer(j);
+    tilemap::Layer layer(nullptr, j);
     EXPECT_EQ(layer.type, tilemap::LayerType::OBJECTGROUP);
     EXPECT_EQ(rdge::to_string(layer.type), "OBJECTGROUP");
     EXPECT_EQ(layer.name, "people");

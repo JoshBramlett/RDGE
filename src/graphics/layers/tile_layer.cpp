@@ -29,11 +29,10 @@ constexpr uint32 FLIPPED_ANTIDIAGONALLY = 0x20000000;
 
 TileLayer::TileLayer (const tilemap_grid& grid,
                       const tilemap::Layer& def,
-                      const Tileset& tileset,
                       float scale)
     : m_grid(grid)
     , m_offset(def.offset * scale)
-    , texture(*tileset.surface)
+    , texture(*def.tileset->surface)
 {
     this->texture.unit_id = TileBatch::TEXTURE_UNIT_ID;
 
@@ -117,7 +116,7 @@ TileLayer::TileLayer (const tilemap_grid& grid,
                 bool flip_d = (gid & FLIPPED_ANTIDIAGONALLY);
                 gid &= ~(FLIPPED_HORIZONTALLY | FLIPPED_VERTICALLY | FLIPPED_ANTIDIAGONALLY);
 
-                cell.uvs = tileset.tiles[gid];
+                cell.uvs = def.tileset->tiles[gid];
                 if (flip_x)
                 {
                     cell.uvs.flip(TexCoordsFlip::HORIZONTAL);

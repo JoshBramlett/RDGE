@@ -79,7 +79,6 @@ class TileLayer
 public:
     explicit TileLayer (const tilemap_grid& grid,
                         const tilemap::Layer& def,
-                        const Tileset& tileset,
                         float scale);
     ~TileLayer (void) noexcept;
 
