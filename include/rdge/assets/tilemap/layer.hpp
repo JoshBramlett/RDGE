@@ -124,7 +124,6 @@ public:
 
 public:
     LayerType type = LayerType::INVALID; //!< Base type
-    int32 tileset_index = -1;            //!< Index of the tileset in the tilemap
 
     //!@{ Custom identifiers
     std::string name; //!< Name assigned in editor

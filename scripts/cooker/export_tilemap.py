@@ -220,8 +220,9 @@ def process(in_file, out_dir):
             if 'data' in layer and layer['data']:
                 min_gid, max_gid = get_gid_range(layer['data'])
                 ts_index, first_gid = get_tileset(tilemap['tilesets'], min_gid, max_gid)
-                layer['tileset_index'] = ts_index
-                remove_gid_offset(layer['data'], first_gid)
+                if ts_index is not None:
+                    layer['tileset_index'] = ts_index
+                    remove_gid_offset(layer['data'], first_gid)
             elif 'chunks' in layer and layer['chunks']:
                 agg_max = 0
                 agg_min = sys.maxint
@@ -233,9 +234,10 @@ def process(in_file, out_dir):
                         agg_max = max_gid
 
                 ts_index, first_gid = get_tileset(tilemap['tilesets'], agg_min, agg_max)
-                layer['tileset_index'] = ts_index
-                for chunk in layer['chunks']:
-                    remove_gid_offset(chunk['data'], first_gid)
+                if ts_index is not None:
+                    layer['tileset_index'] = ts_index
+                    for chunk in layer['chunks']:
+                        remove_gid_offset(chunk['data'], first_gid)
 
     # 3) Update tileset reference paths
     for tileset in tilemap['tilesets']:

@@ -39,10 +39,6 @@ Layer::Layer (Tilemap* parent, const nlohmann::json& j)
         this->properties = PropertyCollection(j);
         this->offset = math::vec2(j.count("offsetx") ? j["offsetx"].get<float>() : 0.f,
                                   j.count("offsety") ? j["offsety"].get<float>() : 0.f);
-        if (j.count("tileset_index"))
-        {
-            this->tileset_index = j["tileset_index"].get<decltype(this->tileset_index)>();
-        }
 
         // type specific
         if (this->type == LayerType::TILELAYER)
@@ -115,10 +111,13 @@ Layer::Layer (Tilemap* parent, const nlohmann::json& j)
         }
         else if (this->type == LayerType::GROUP)
         {
-            for (auto& l : j["layers"])
-            {
-                this->layers.emplace_back(m_parent, l);
-            }
+            // TODO In order for this to work, I'd need to move assigning the
+            //      spritesheet/tileset from the tilemap to the ctor.  In order
+            //      for this to work I'd also need to pass the pack file in.
+            //for (auto& l : j["layers"])
+            //{
+                //this->layers.emplace_back(m_parent, l);
+            //}
         }
     }
     catch (const std::exception& ex)

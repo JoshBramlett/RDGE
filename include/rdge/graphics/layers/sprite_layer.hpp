@@ -21,7 +21,6 @@ namespace rdge {
 class SpriteBatch;
 class SpriteSheet;
 class OrthographicCamera;
-struct spritesheet_region;
 namespace tilemap { class Layer; }
 //!@}
 

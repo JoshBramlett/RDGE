@@ -8,7 +8,6 @@
 #include <rdge/core.hpp>
 #include <rdge/assets/tilemap/layer.hpp>
 #include <rdge/assets/tilemap/property.hpp>
-#include <rdge/assets/file_formats/asset_pack.hpp>
 #include <rdge/graphics/layers/tile_layer.hpp>
 #include <rdge/graphics/layers/sprite_layer.hpp>
 #include <rdge/graphics/color.hpp>
@@ -101,24 +100,26 @@ public:
 
 public:
 
+    //! \struct sheet_info
+    //! \brief Tilemap dependency information
+    struct sheet_info
+    {
+        int32 first_gid;             //!< [unused] First global tile id in the sheet
+        int32 table_id;              //!< Sheet table id in the \ref PackFile
+        asset_pack::asset_type type; //!< Sheet type (spritesheet or tileset)
+    };
+
+public:
+
     //!@{ Rendering properties
     color background = color::BLACK;
     Orientation orientation = Orientation::INVALID;
     //!@}
 
-    struct sheet_info
-    {
-        int32 first_gid;             //!< First global tile id in the sheet
-        int32 table_id;              //!< Sheet table id in the \ref PackFile
-        asset_pack::asset_type type; //!< Sheet type (spritesheet or tileset)
-
-        shared_asset<Tileset> tileset;
-        shared_asset<SpriteSheet> spritesheet;
-    };
-
     tilemap_grid grid;              //!< Grid for the Tilemap
     std::vector<Layer> layers;      //!< List of Tilemap layers
-    std::vector<sheet_info> sheets; //!< List of Tilesets/Spritesheets dependencies
+    std::vector<sheet_info> sheets; //!< Table of Tileset/SpriteSheet dependencies
+
     PropertyCollection properties;  //!< Custom variable type property collection
 };
 

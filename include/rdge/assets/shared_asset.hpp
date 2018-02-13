@@ -150,6 +150,12 @@ public:
     }
     //!@}
 
+    //!@{ Comparison operators
+    explicit operator bool (void) const noexcept { return m_ptr != nullptr; }
+    bool operator== (std::nullptr_t) const noexcept { return m_ptr == nullptr; }
+    bool operator!= (std::nullptr_t) const noexcept { return m_ptr != nullptr; }
+    //!@}
+
     //!@{ Member access operators
     typename std::add_lvalue_reference<T>::type operator* (void) const { return *m_ptr; }
     pointer operator-> (void) const noexcept { return m_ptr; }
@@ -157,7 +163,7 @@ public:
 
     //!@{ Wrapper/Asset accessors
     pointer get (void) const noexcept { return m_ptr; }
-    bool is_empty (void) const noexcept { return m_ptr == nullptr; }
+    bool empty (void) const noexcept { return m_ptr == nullptr; }
     size_t use_count (void) const noexcept
         { return (!m_block ? 0 : m_block->ref_count); }
     int32 asset_id (void) const noexcept

@@ -1,7 +1,5 @@
 Working
 
-    spritesheet_region
-      - Remove all uses of this object - should be only used in the spritesheet for the definition
     TileBatch - Remove setting m_far
 
     Assets:
@@ -14,10 +12,9 @@ Working
         - Move Tilemap to base namespace
         - Move Tilemap objects, layers, etc, within Tilemap
         - Fix accessor scope in layers/objects
+        - Once done, update PackFile for a templatized Get<>
         x Remove global grid requirement
-      - Have assets load all dependencies
-        - Create unified json for dependency importing
-        - Alternatively specify all dependencies in the asset pack file
+      x Have assets load all dependencies
       - Create an AssetBase type
       - Create a CustomAllocator/SmallVector for caching
       - So I don't forget:  Look into why specifying a swap method was recommended
@@ -32,12 +29,8 @@ Working
         x Add culling
         x Add blending for upper layers
         - ImGui support (rendering statistics)
-        - [maybe] Global color (for tinting)
-        - Add support TileRenderOrder
-        - Investigate severing the global grid from the TileLayer.  Now that culling
-          is working I no longer think it's required to key off of a global x/y, so
-          the intersects_with test will actually mean something again when used with
-          a sparsely tiled layer.
+      - SpriteLayer
+        - ImGui support (rendering statistics)
 
 
 
@@ -55,10 +48,14 @@ Graphics:
   - OpenGL context settings configuration variables
   - Add texture sorting for properly rendering semi-transparent sprites
 
-Graphics (low priority);
+Graphics (low priority - implement as needed);
   - Add rich text support
   - Implement "focus" system for UI controls
   - Create a perspective camera
+  - Add support TileRenderOrder
+  - Add support SpriteRenderOrder
+  - TileLayer Global color (for tinting)
+  - SpriteLayer Global color (for tinting)
   - Ability to pad NPOT textures
 
 Physics:

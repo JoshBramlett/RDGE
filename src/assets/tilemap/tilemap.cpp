@@ -1,4 +1,5 @@
 #include <rdge/assets/tilemap/tilemap.hpp>
+#include <rdge/assets/file_formats/asset_pack.hpp>
 #include <rdge/assets/pack_file.hpp>
 #include <rdge/math/intrinsics.hpp>
 #include <rdge/util/json.hpp>
@@ -6,6 +7,8 @@
 #include <rdge/internal/exception_macros.hpp>
 
 #include <sstream>
+
+using json = nlohmann::json;
 
 namespace rdge {
 
@@ -45,7 +48,17 @@ from_json (const nlohmann::json& j, tilemap_grid& grid)
 
 namespace tilemap {
 
-using json = nlohmann::json;
+void
+from_json (const nlohmann::json& j, Tilemap::sheet_info& sheet)
+{
+    JSON_VALIDATE_REQUIRED(j, firstgid, is_number);
+    JSON_VALIDATE_REQUIRED(j, table_id, is_number);
+    JSON_VALIDATE_REQUIRED(j, type, is_number);
+
+    sheet.first_gid = j["firstgid"].get<decltype(sheet.first_gid)>();
+    sheet.table_id = j["table_id"].get<decltype(sheet.table_id)>();
+    sheet.type = j["type"].get<decltype(sheet.type)>();
+}
 
 Tilemap::Tilemap (const std::vector<uint8>& msgpack, PackFile& packfile)
 {
@@ -71,47 +84,46 @@ Tilemap::Tilemap (const std::vector<uint8>& msgpack, PackFile& packfile)
         }
 
         this->grid = j["grid"].get<tilemap_grid>();
-
-        const auto& j_tilesets = j["tilesets"];
-        std::vector<sheet_info>(j_tilesets.size()).swap(this->sheets);
-
-        size_t index = 0;
-        for (const auto& j_tileset : j_tilesets)
-        {
-            JSON_VALIDATE_REQUIRED(j_tileset, firstgid, is_number);
-            JSON_VALIDATE_REQUIRED(j_tileset, table_id, is_number);
-            JSON_VALIDATE_REQUIRED(j_tileset, type, is_number);
-
-            auto& sheet = this->sheets.at(index++);
-            sheet.first_gid = j_tileset["firstgid"].get<decltype(sheet.first_gid)>();
-            sheet.table_id = j_tileset["table_id"].get<decltype(sheet.table_id)>();
-            sheet.type = j_tileset["type"].get<decltype(sheet.type)>();
-
-            if (sheet.type == asset_pack::asset_type_spritesheet)
-            {
-                sheet.spritesheet = packfile.GetAsset<SpriteSheet>(sheet.table_id);
-            }
-            else if (sheet.type == asset_pack::asset_type_tileset)
-            {
-                sheet.tileset = packfile.GetAsset<Tileset>(sheet.table_id);
-            }
-        }
+        this->sheets = j["tilesets"].get<std::vector<sheet_info>>();
 
         for (auto& j_layer : j["layers"])
         {
             this->layers.emplace_back(this, j_layer);
-        //if (j.count("tileset_index"))
-        //{
-            //this->tileset_index = j["tileset_index"].get<decltype(this->tileset_index)>();
-        //}
-            auto& layer = this->layers.back();
-            if (layer.type == LayerType::TILELAYER && layer.tileset_index >= 0)
+
+            if (j_layer.count("tileset_index"))
             {
-                layer.tileset = this->sheets[layer.tileset_index].tileset;
-            }
-            if (layer.type == LayerType::OBJECTGROUP && layer.tileset_index >= 0)
-            {
-                layer.spritesheet = this->sheets[layer.tileset_index].spritesheet;
+                auto tileset_index = j_layer["tileset_index"].get<int32>();
+                const auto& sheet = this->sheets.at(tileset_index);
+                if (sheet.type == asset_pack::asset_type_tileset)
+                {
+                    auto& layer = this->layers.back();
+                    if (layer.type != LayerType::TILELAYER)
+                    {
+                        std::ostringstream ss;
+                        ss << "Tilemap Layer[" << layer.name << "] type mismatch."
+                           << " asset.type=" << sheet.type
+                           << " layer.type=" << layer.type;
+
+                        throw std::invalid_argument(ss.str());
+                    }
+
+                    layer.tileset = packfile.GetAsset<Tileset>(sheet.table_id);
+                }
+                else if (sheet.type == asset_pack::asset_type_spritesheet)
+                {
+                    auto& layer = this->layers.back();
+                    if (layer.type != LayerType::OBJECTGROUP)
+                    {
+                        std::ostringstream ss;
+                        ss << "Tilemap Layer[" << layer.name << "] type mismatch."
+                           << " asset.type=" << sheet.type
+                           << " layer.type=" << layer.type;
+
+                        throw std::invalid_argument(ss.str());
+                    }
+
+                    layer.spritesheet = packfile.GetAsset<SpriteSheet>(sheet.table_id);
+                }
             }
         }
 
@@ -135,15 +147,14 @@ Tilemap::CreateTileLayer (int32 layer_id, float scale)
     try
     {
         const auto& layer = this->layers.at(layer_id);
-        if (layer.type != LayerType::TILELAYER || layer.tileset_index < 0)
+        if (layer.type != LayerType::TILELAYER || !layer.tileset)
         {
-            throw std::invalid_argument("Invalid TileLayer definition");
-        }
-
-        const auto& sheet = this->sheets[layer.tileset_index];
-        if (sheet.type != asset_pack::asset_type_tileset)
-        {
-            throw std::invalid_argument("TileLayer not mapped to Tileset");
+            std::ostringstream ss;
+            ss << "Cannot create TileLayer:"
+               << " name=" << layer.name
+               << " type=" << layer.type
+               << " tileset=" << static_cast<void*>(layer.tileset.get());
+            throw std::invalid_argument(ss.str());
         }
 
         return TileLayer(grid, layer, scale);
@@ -160,19 +171,17 @@ Tilemap::CreateSpriteLayer (int32 layer_id, float scale)
     try
     {
         const auto& layer = this->layers.at(layer_id);
-        if (layer.type != LayerType::OBJECTGROUP || layer.tileset_index < 0)
+        if (layer.type != LayerType::OBJECTGROUP || !layer.spritesheet)
         {
-            throw std::invalid_argument("Invalid SpriteLayer definition");
+            std::ostringstream ss;
+            ss << "Cannot create SpriteLayer:"
+               << " name=" << layer.name
+               << " type=" << layer.type
+               << " spritesheet=" << static_cast<void*>(layer.spritesheet.get());
+            throw std::invalid_argument(ss.str());
         }
 
         return SpriteLayer(layer, scale);
-        //const auto& sheet = this->sheets[layer.tileset_index];
-        //if (sheet.type != asset_pack::asset_type_spritesheet)
-        //{
-            //throw std::invalid_argument("SpriteLayer not mapped to SpriteSheet");
-        //}
-
-        //return SpriteLayer(layer, *sheet.spritesheet, scale);
     }
     catch (const std::exception& ex)
     {
