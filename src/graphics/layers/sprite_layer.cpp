@@ -21,7 +21,7 @@
 namespace rdge {
 
 SpriteLayer::SpriteLayer (const tilemap::Layer& def, float scale)
-    : m_spriteCapacity(def.objects.size() + 100)
+    : m_spriteCapacity(def.objectgroup.objects.size() + 100)
 {
     // !! IMPORTANT !!
     //
@@ -36,7 +36,7 @@ SpriteLayer::SpriteLayer (const tilemap::Layer& def, float scale)
     //    be more dynamic using a small block allocator.
     RDGE_CALLOC(m_sprites, m_spriteCapacity, nullptr);
 
-    Texture t(*def.spritesheet->surface);
+    Texture t(*def.objectgroup.spritesheet->surface);
     uint32 unit_id = t.unit_id;
     if (std::find(textures.begin(), textures.end(), t) == textures.end())
     {
@@ -45,17 +45,17 @@ SpriteLayer::SpriteLayer (const tilemap::Layer& def, float scale)
         textures.emplace_back(std::move(t));
     }
 
-    for (const auto& obj : def.objects)
+    for (const auto& obj : def.objectgroup.objects)
     {
         if (obj.type != tilemap::ObjectType::SPRITE)
         {
             continue;
         }
 
-        const auto& region = def.spritesheet->regions[obj.m_gid - 1].value;
+        const auto& region = def.objectgroup.spritesheet->regions[obj.sprite.gid - 1].value;
         auto& sprite = m_sprites[m_spriteCount];
         sprite.index = m_spriteCount++;
-        sprite.pos = obj.position * scale;
+        sprite.pos = obj.pos * scale;
 
         sprite.pos.x += region.sprite_offset.x * scale;
         sprite.pos.y -= (region.size.h - region.sprite_size.h - region.sprite_offset.y) * scale;

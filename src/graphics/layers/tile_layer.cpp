@@ -27,18 +27,12 @@ constexpr uint32 FLIPPED_ANTIDIAGONALLY = 0x20000000;
 
 } // anonymous namespace
 
-TileLayer::TileLayer (const tilemap_grid& grid,
-                      const tilemap::Layer& def,
-                      float scale)
-    : m_grid(grid)
+TileLayer::TileLayer (const tilemap::Layer& def, float scale)
+    : m_grid(def.tilelayer.grid)
     , m_offset(def.offset * scale)
-    , texture(*def.tileset->surface)
+    , texture(*def.tilelayer.tileset->surface)
 {
     this->texture.unit_id = TileBatch::TEXTURE_UNIT_ID;
-
-    // TODO short-term hack to only include the layer rather than the global grid
-    m_grid.pos = def.grid_location;
-    m_grid.size = def.grid_size;
 
     // Convert to y-is-up
     m_offset.y *= -1.f;
@@ -76,17 +70,17 @@ TileLayer::TileLayer (const tilemap_grid& grid,
     // the cell data for that chunk will be null.
     size_t cells_in_chunk = m_grid.chunk_size.w * m_grid.chunk_size.h;
     RDGE_CALLOC(m_chunks.data, m_chunks.count, nullptr);
-    RDGE_CALLOC(m_cells, cells_in_chunk * def.chunks.size(), nullptr);
+    RDGE_CALLOC(m_cells, cells_in_chunk * def.tilelayer.chunks.size(), nullptr);
 
     size_t cells_index = 0;
-    for (const auto& def_chunk : def.chunks)
+    for (const auto& def_chunk : def.tilelayer.chunks)
     {
         SDL_assert(cells_in_chunk == def_chunk.data.size());
 
         // x/y in local chunk coordinates
         // NOTE: def_chunk position is still in screen coordinates
-        int32 chunk_x = (def_chunk.x - m_grid.pos.x) / m_grid.chunk_size.w;
-        int32 chunk_y = (def_chunk.y + m_grid.pos.y) / m_grid.chunk_size.h;
+        int32 chunk_x = (def_chunk.coord.x - m_grid.pos.x) / m_grid.chunk_size.w;
+        int32 chunk_y = (def_chunk.coord.y + m_grid.pos.y) / m_grid.chunk_size.h;
         SDL_assert(chunk_x >= 0);
         SDL_assert(chunk_y >= 0);
 
@@ -97,8 +91,8 @@ TileLayer::TileLayer (const tilemap_grid& grid,
         cells_index += cells_in_chunk;
 
         math::vec2 origin = pixel_offset;
-        origin.x += static_cast<float>(m_grid.cell_size.w) * def_chunk.x;
-        origin.y -= static_cast<float>(m_grid.cell_size.h) * def_chunk.y;
+        origin.x += static_cast<float>(m_grid.cell_size.w) * def_chunk.coord.x;
+        origin.y -= static_cast<float>(m_grid.cell_size.h) * def_chunk.coord.y;
         for (size_t i = 0; i < chunk.cell_count; i++)
         {
             if (def_chunk.data[i])
@@ -116,7 +110,7 @@ TileLayer::TileLayer (const tilemap_grid& grid,
                 bool flip_d = (gid & FLIPPED_ANTIDIAGONALLY);
                 gid &= ~(FLIPPED_HORIZONTALLY | FLIPPED_VERTICALLY | FLIPPED_ANTIDIAGONALLY);
 
-                cell.uvs = def.tileset->tiles[gid];
+                cell.uvs = def.tilelayer.tileset->tiles[gid];
                 if (flip_x)
                 {
                     cell.uvs.flip(TexCoordsFlip::HORIZONTAL);

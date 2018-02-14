@@ -15,9 +15,7 @@ using namespace rdge::math;
 using namespace rdge::physics;
 using namespace rdge::tilemap;
 
-StaticActor::StaticActor (const Object& def,
-                          SpriteLayer& layer,
-                          CollisionGraph& graph)
+StaticActor::StaticActor (const Object& def, SpriteLayer& layer, CollisionGraph& graph)
 {
     auto sheet = g_game.pack->GetAsset<SpriteSheet>(rdge_asset_spritesheet_player);
     this->sprite = layer.AddSprite(pos,

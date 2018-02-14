@@ -1,12 +1,17 @@
 #include <rdge/assets/tilemap/tilemap.hpp>
-#include <rdge/assets/file_formats/asset_pack.hpp>
+#include <rdge/assets/shared_asset.hpp>
+#include <rdge/assets/tileset.hpp>
+#include <rdge/assets/spritesheet.hpp>
 #include <rdge/assets/pack_file.hpp>
-#include <rdge/math/intrinsics.hpp>
+#include <rdge/graphics/layers/sprite_layer.hpp>
+#include <rdge/util/compiler.hpp>
 #include <rdge/util/json.hpp>
 #include <rdge/util/logger.hpp>
+#include <rdge/util/strings.hpp>
 #include <rdge/internal/exception_macros.hpp>
 
 #include <sstream>
+#include <cstring> // strrchr
 
 using json = nlohmann::json;
 
@@ -78,7 +83,7 @@ Tilemap::Tilemap (const std::vector<uint8>& msgpack, PackFile& packfile)
             throw std::invalid_argument("Tilemap invalid orientation");
         }
 
-        if (this->orientation != Orientation::ORTHOGONAL)
+        if (RDGE_UNLIKELY(this->orientation != Orientation::ORTHOGONAL))
         {
             throw std::invalid_argument("Tilemap only supports orthogonal maps");
         }
@@ -97,7 +102,7 @@ Tilemap::Tilemap (const std::vector<uint8>& msgpack, PackFile& packfile)
                 if (sheet.type == asset_pack::asset_type_tileset)
                 {
                     auto& layer = this->layers.back();
-                    if (layer.type != LayerType::TILELAYER)
+                    if (RDGE_UNLIKELY(layer.type != LayerType::TILELAYER))
                     {
                         std::ostringstream ss;
                         ss << "Tilemap Layer[" << layer.name << "] type mismatch."
@@ -107,12 +112,12 @@ Tilemap::Tilemap (const std::vector<uint8>& msgpack, PackFile& packfile)
                         throw std::invalid_argument(ss.str());
                     }
 
-                    layer.tileset = packfile.GetAsset<Tileset>(sheet.table_id);
+                    layer.tilelayer.tileset = packfile.GetAsset<Tileset>(sheet.table_id);
                 }
                 else if (sheet.type == asset_pack::asset_type_spritesheet)
                 {
                     auto& layer = this->layers.back();
-                    if (layer.type != LayerType::OBJECTGROUP)
+                    if (RDGE_UNLIKELY(layer.type != LayerType::OBJECTGROUP))
                     {
                         std::ostringstream ss;
                         ss << "Tilemap Layer[" << layer.name << "] type mismatch."
@@ -122,7 +127,7 @@ Tilemap::Tilemap (const std::vector<uint8>& msgpack, PackFile& packfile)
                         throw std::invalid_argument(ss.str());
                     }
 
-                    layer.spritesheet = packfile.GetAsset<SpriteSheet>(sheet.table_id);
+                    layer.objectgroup.spritesheet = packfile.GetAsset<SpriteSheet>(sheet.table_id);
                 }
             }
         }
@@ -147,17 +152,17 @@ Tilemap::CreateTileLayer (int32 layer_id, float scale)
     try
     {
         const auto& layer = this->layers.at(layer_id);
-        if (layer.type != LayerType::TILELAYER || !layer.tileset)
+        if (RDGE_UNLIKELY(layer.type != LayerType::TILELAYER || !layer.tilelayer.tileset))
         {
             std::ostringstream ss;
             ss << "Cannot create TileLayer:"
                << " name=" << layer.name
                << " type=" << layer.type
-               << " tileset=" << static_cast<void*>(layer.tileset.get());
+               << " tileset=" << static_cast<void*>(layer.tilelayer.tileset.get());
             throw std::invalid_argument(ss.str());
         }
 
-        return TileLayer(grid, layer, scale);
+        return TileLayer(layer, scale);
     }
     catch (const std::exception& ex)
     {
@@ -171,13 +176,14 @@ Tilemap::CreateSpriteLayer (int32 layer_id, float scale)
     try
     {
         const auto& layer = this->layers.at(layer_id);
-        if (layer.type != LayerType::OBJECTGROUP || !layer.spritesheet)
+        if (RDGE_UNLIKELY(layer.type != LayerType::OBJECTGROUP ||
+                          !layer.objectgroup.spritesheet))
         {
             std::ostringstream ss;
             ss << "Cannot create SpriteLayer:"
                << " name=" << layer.name
                << " type=" << layer.type
-               << " spritesheet=" << static_cast<void*>(layer.spritesheet.get());
+               << " spritesheet=" << static_cast<void*>(layer.objectgroup.spritesheet.get());
             throw std::invalid_argument(ss.str());
         }
 
@@ -218,8 +224,9 @@ to_string (tilemap::Orientation value)
 }
 
 bool
-try_parse (const std::string& s, tilemap::Orientation& out)
+try_parse (const std::string& test, tilemap::Orientation& out)
 {
+    std::string s = rdge::to_lower(test);
     if      (s == "orthogonal") { out = tilemap::Orientation::ORTHOGONAL; return true; }
     else if (s == "isometric")  { out = tilemap::Orientation::ISOMETRIC;  return true; }
     else if (s == "staggered")  { out = tilemap::Orientation::STAGGERED;  return true; }

@@ -77,9 +77,7 @@ struct tile_cell_chunk
 class TileLayer
 {
 public:
-    explicit TileLayer (const tilemap_grid& grid,
-                        const tilemap::Layer& def,
-                        float scale);
+    explicit TileLayer (const tilemap::Layer& def, float scale);
     ~TileLayer (void) noexcept;
 
     //!@{ Non-copyable, move enabled

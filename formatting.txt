@@ -8,6 +8,26 @@ class Surface;
 class Texture;
 //!@}
 
+//!@{ Forward declarations
+namespace rdge {
+class SpriteLayer;
+class Event;
+struct delta_time;
+struct sprite_data;
+
+namespace physics {
+class CollisionGraph;
+class RigidBody;
+class Fixture;
+} // namespace physics
+
+namespace tilemap {
+class Object;
+} // namespace tilemap
+
+} // namespace rdge
+//!@}
+
 ****************************************************************
                         Move Semantics
 ****************************************************************

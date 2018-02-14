@@ -1,15 +1,72 @@
 #include <rdge/assets/tilemap/object.hpp>
-#include <rdge/math/intrinsics.hpp>
+#include <rdge/physics/shapes/circle.hpp>
+#include <rdge/util/compiler.hpp>
+#include <rdge/util/json.hpp>
 #include <rdge/util/strings.hpp>
 #include <rdge/internal/exception_macros.hpp>
 
 #include <sstream>
-#include <cstring>
+#include <cstring> // strrchr
 
 namespace rdge {
 namespace tilemap {
 
 using json = nlohmann::json;
+
+void
+from_json (const nlohmann::json& j, Object::object_sprite_data& sprite)
+{
+    JSON_VALIDATE_REQUIRED(j, gid, is_number_unsigned);
+    JSON_VALIDATE_REQUIRED(j, width, is_number);
+    JSON_VALIDATE_REQUIRED(j, height, is_number);
+    JSON_VALIDATE_REQUIRED(j, rotation, is_number);
+
+    sprite.gid = j["gid"].get<decltype(sprite.gid)>();
+    sprite.size.w = j["width"].get<decltype(sprite.size.w)>();
+    sprite.size.h = j["height"].get<decltype(sprite.size.h)>();
+    sprite.rotation = j["rotation"].get<decltype(sprite.rotation)>();
+
+    if (RDGE_UNLIKELY(sprite.gid == 0))
+    {
+        throw std::invalid_argument("Sprite must have a valid GID");
+    }
+}
+
+void
+from_json (const nlohmann::json& j, Object::object_circle_data& circle)
+{
+    JSON_VALIDATE_REQUIRED(j, radius, is_number);
+
+    circle.radius = j["radius"].get<decltype(circle.radius)>();
+}
+
+void
+from_json (const nlohmann::json& j, Object::object_polygon_data& poly)
+{
+    JSON_VALIDATE_REQUIRED(j, coords, is_array);
+    poly.vertex_count = j["coords"].size();
+
+    if (RDGE_UNLIKELY(poly.vertex_count == 0))
+    {
+        throw std::invalid_argument("Polygon has no vertex data");
+    }
+    else if (RDGE_UNLIKELY(poly.vertex_count > physics::polygon::MAX_VERTICES))
+    {
+        throw std::invalid_argument("Polygon vertex count exceeds max");
+    }
+    else
+    {
+        for (size_t i = 0; i < poly.vertex_count; i++)
+        {
+            const auto& j_coord = j["coords"][i];
+            JSON_VALIDATE_REQUIRED(j_coord, x, is_number);
+            JSON_VALIDATE_REQUIRED(j_coord, y, is_number);
+
+            poly.vertices[i].x = j_coord["x"].get<float>();
+            poly.vertices[i].y = j_coord["y"].get<float>();
+        }
+    }
+}
 
 Object::Object (const nlohmann::json& j)
 {
@@ -27,8 +84,8 @@ Object::Object (const nlohmann::json& j)
         this->id = j["id"].get<decltype(this->id)>();
         this->name = j["name"].get<decltype(this->name)>();
         this->custom_type = j["type"].get<decltype(this->custom_type)>();
-        this->position.x = j["x"].get<decltype(this->position.x)>();
-        this->position.y = j["y"].get<decltype(this->position.y)>();
+        this->pos.x = j["x"].get<decltype(this->pos.x)>();
+        this->pos.y = j["y"].get<decltype(this->pos.y)>();
         this->visible = j["visible"].get<decltype(this->visible)>();
 
         // optional
@@ -38,62 +95,24 @@ Object::Object (const nlohmann::json& j)
         if (!try_parse(j["obj_type"].get<std::string>(), this->type))
         {
             std::ostringstream ss;
-            ss << "Object[" << this->id << "] unable to parse object type."
-               << " obj_type=" << j["obj_type"].get<std::string>();
+            ss << "Unable to parse ObjectType."
+               << " value=" << j["obj_type"].get<std::string>();
             throw std::invalid_argument(ss.str());
         }
 
         switch (this->type)
         {
         case ObjectType::SPRITE:
-            JSON_VALIDATE_REQUIRED(j, gid, is_number);
-            JSON_VALIDATE_REQUIRED(j, width, is_number);
-            JSON_VALIDATE_REQUIRED(j, height, is_number);
-            JSON_VALIDATE_REQUIRED(j, rotation, is_number);
-
-            m_gid = j["gid"].get<decltype(m_gid)>();
-            m_size.w = j["width"].get<decltype(m_size.w)>();
-            m_size.h = j["height"].get<decltype(m_size.h)>();
-            m_rotation = j["rotation"].get<decltype(m_rotation)>();
-
-            if (m_gid <= 0)
-            {
-                std::ostringstream ss;
-                ss << "Object[" << this->id << "] has an invalid gid";
-                throw std::invalid_argument(ss.str());
-            }
+            this->sprite = j.get<decltype(this->sprite)>();
             break;
         case ObjectType::POINT:
+            // intentionally empty
             break;
         case ObjectType::CIRCLE:
-            JSON_VALIDATE_REQUIRED(j, radius, is_number);
-
-            m_radius = j["radius"].get<float>();
+            this->circle = j.get<decltype(this->circle)>();
             break;
         case ObjectType::POLYGON:
-            JSON_VALIDATE_REQUIRED(j, coords, is_array);
-            m_numVerts = j["coords"].size();
-            if (m_numVerts == 0)
-            {
-                std::ostringstream ss;
-                ss << "Object[" << this->id << "] polygon has no vertices";
-                throw std::invalid_argument(ss.str());
-            }
-            else if (m_numVerts > physics::polygon::MAX_VERTICES)
-            {
-                std::ostringstream ss;
-                ss << "Object[" << this->id << "] polygon exceeds max vertex count";
-                throw std::invalid_argument(ss.str());
-            }
-
-            for (size_t i = 0; i < m_numVerts; i++)
-            {
-                const auto& coord = j["coords"][i];
-                JSON_VALIDATE_REQUIRED(coord, x, is_number);
-                JSON_VALIDATE_REQUIRED(coord, y, is_number);
-
-                m_vertices[i] = math::vec2(coord["x"].get<float>(), coord["y"].get<float>());
-            }
+            this->polygon = j.get<decltype(this->polygon)>();
             break;
         case ObjectType::POLYLINE:
             throw std::invalid_argument("ObjectType::POLYLINE currently unsupported");
@@ -101,12 +120,14 @@ Object::Object (const nlohmann::json& j)
             throw std::invalid_argument("ObjectType::TEXT currently unsupported");
         case ObjectType::INVALID:
         default:
-            throw std::invalid_argument("Invalid ObjectType. name=" + this->name);
+            throw std::invalid_argument("Invalid ObjectType");
         }
     }
     catch (const std::exception& ex)
     {
-        RDGE_THROW(ex.what());
+        std::ostringstream ss;
+        ss << "Tilemap::Object[" << this->id << "]: " << ex.what();
+        RDGE_THROW(ss.str());
     }
 }
 
@@ -116,12 +137,12 @@ Object::GetPoint (void) const
     if (this->type != ObjectType::POINT)
     {
         std::ostringstream ss;
-        ss << "Object[" << this->id << "] cannot build POINT "
+        ss << "Tilemap::Object[" << this->id << "] cannot build POINT "
            << "from an object of type " << this->type;
         throw std::invalid_argument(ss.str());
     }
 
-    return this->position;
+    return this->pos;
 }
 
 physics::circle
@@ -130,12 +151,12 @@ Object::GetCircle (void) const
     if (this->type != ObjectType::CIRCLE)
     {
         std::ostringstream ss;
-        ss << "Object[" << this->id << "] cannot build circle "
+        ss << "Tilemap::Object[" << this->id << "] cannot build circle "
            << "from an object of type " << this->type;
         throw std::invalid_argument(ss.str());
     }
 
-    return physics::circle(this->position, m_radius);
+    return physics::circle(this->pos, this->circle.radius);
 }
 
 physics::polygon
@@ -144,70 +165,12 @@ Object::GetPolygon (void) const
     if (this->type != ObjectType::POLYGON)
     {
         std::ostringstream ss;
-        ss << "Object[" << this->id << "] cannot build polygon "
+        ss << "Tilemap::Object[" << this->id << "] cannot build polygon "
            << "from an object of type " << this->type;
         throw std::invalid_argument(ss.str());
     }
 
-    return physics::polygon(m_vertices, m_numVerts);
-}
-
-sprite_data
-Object::GetSprite (void) const
-{
-    if (this->type != ObjectType::SPRITE)
-    {
-        std::ostringstream ss;
-        ss << "Object[" << this->id << "] cannot build sprite "
-           << "from an object of type " << this->type;
-        throw std::invalid_argument(ss.str());
-    }
-
-    sprite_data result;
-    result.index = this->id;
-    return result;
-
-#if 0
-    try
-    {
-        const auto& layer = this->layers.at(layer_id);
-        if (layer.type != LayerType::OBJECTGROUP || layer.tileset_index < 0)
-        {
-            throw std::invalid_argument("Invalid SpriteLayer definition");
-        }
-
-        const auto& sheet = this->sheets[layer.tileset_index];
-        if (sheet.type != asset_pack::asset_type_spritesheet)
-        {
-            throw std::invalid_argument("TileLayer not mapped to SpriteSheet");
-        }
-
-        return NewSpriteLayer(layer, *sheet.spritesheet, scale);
-    }
-    catch (const std::exception& ex)
-    {
-        RDGE_THROW(ex.what());
-    }
-#endif
-
-#if 0
-    const auto& region = spritesheet.regions[obj.m_gid - 1].value;
-    auto& sprite = m_sprites[sprite_index];
-    sprite.index = sprite_index;
-    sprite.pos = obj.position * scale;
-
-    sprite.pos.x += region.sprite_offset.x * scale;
-    sprite.pos.y -= (region.size.h - region.sprite_size.h - region.sprite_offset.y) * scale;
-    sprite.pos.y *= -1.f;
-
-    sprite.size = region.sprite_size * scale;
-    sprite.depth = 1.f;
-    sprite.color = color::WHITE;
-    sprite.uvs = region.coords;
-    sprite.tid = t.unit_id;
-    //obj.m_rotation;
-    //obj.visible;
-#endif
+    return physics::polygon(this->polygon.vertices, this->polygon.vertex_count);
 }
 
 std::ostream&

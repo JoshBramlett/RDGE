@@ -31,7 +31,7 @@ TEST(LayerTest, VerifyTileLayerConstruction)
       }
     )"_json;
 
-    // 1) Validate proper construction
+    // 1) Validate shared properties
     tilemap::Layer layer(nullptr, j);
     EXPECT_EQ(layer.type, tilemap::LayerType::TILELAYER);
     EXPECT_EQ(rdge::to_string(layer.type), "TILELAYER");
@@ -40,12 +40,14 @@ TEST(LayerTest, VerifyTileLayerConstruction)
     EXPECT_FLOAT_EQ(layer.offset.y, 350.f);
     EXPECT_FLOAT_EQ(layer.opacity, 1.f);
     EXPECT_EQ(layer.visible, true);
-    EXPECT_EQ(layer.grid_location.x, -16);
-    EXPECT_EQ(layer.grid_location.y, 16);
-    EXPECT_EQ(layer.grid_size.x, 4);
-    EXPECT_EQ(layer.grid_size.y, 4);
 
-    // 2) Validate base object
+    // 2) Validate tilelayer properties
+    EXPECT_EQ(layer.tilelayer.grid.pos.x, -16);
+    EXPECT_EQ(layer.tilelayer.grid.pos.y, 16);
+    EXPECT_EQ(layer.tilelayer.grid.size.x, 4);
+    EXPECT_EQ(layer.tilelayer.grid.size.y, 4);
+
+    // 3) Validate base object
     // TODO
 }
 
@@ -66,13 +68,16 @@ TEST(LayerTest, VerifyObjectLayerConstruction)
       }
     )"_json;
 
-    // 1) Validate proper construction
+    // 1) Validate shared properties
     tilemap::Layer layer(nullptr, j);
     EXPECT_EQ(layer.type, tilemap::LayerType::OBJECTGROUP);
     EXPECT_EQ(rdge::to_string(layer.type), "OBJECTGROUP");
     EXPECT_EQ(layer.name, "people");
     EXPECT_EQ(layer.visible, false);
     EXPECT_FLOAT_EQ(layer.opacity, 1.f);
+
+    // 2) Validate tilelayer properties
+    // TODO
 
     // 2) Validate base object
     // TODO

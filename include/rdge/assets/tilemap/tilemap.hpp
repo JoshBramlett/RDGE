@@ -6,16 +6,11 @@
 #pragma once
 
 #include <rdge/core.hpp>
+#include <rdge/assets/file_formats/asset_pack.hpp>
 #include <rdge/assets/tilemap/layer.hpp>
 #include <rdge/assets/tilemap/property.hpp>
 #include <rdge/graphics/layers/tile_layer.hpp>
-#include <rdge/graphics/layers/sprite_layer.hpp>
 #include <rdge/graphics/color.hpp>
-#include <rdge/math/vec2.hpp>
-
-#include <rdge/assets/shared_asset.hpp>
-#include <rdge/assets/tileset.hpp>
-#include <rdge/assets/spritesheet.hpp>
 
 #include <vector>
 
@@ -24,6 +19,7 @@ namespace rdge {
 
 //!@{ Forward declarations
 class PackFile;
+class SpriteLayer;
 //!@}
 
 namespace tilemap {
@@ -95,11 +91,20 @@ public:
     Tilemap& operator= (Tilemap&&) noexcept = default;
     //!@}
 
+    //! \brief Create renderable \ref TileLayer from the layer definition
+    //! \param [in] layer_id Layer id (via asset pack enum)
+    //! \param [in] scale Ratio to scale textures for rendering
+    //! \throws rdge::Exception Invalid argument
     TileLayer CreateTileLayer (int32 layer_id, float scale);
+
+    //! \brief Create renderable \ref SpriteLayer from the layer definition
+    //! \details All sprite objects in the definition are added to the layer.
+    //! \param [in] layer_id Layer id (via asset pack enum)
+    //! \param [in] scale Ratio to scale textures for rendering
+    //! \throws rdge::Exception Invalid argument
     SpriteLayer CreateSpriteLayer (int32 layer_id, float scale);
 
 public:
-
     //! \struct sheet_info
     //! \brief Tilemap dependency information
     struct sheet_info

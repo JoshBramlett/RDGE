@@ -8,9 +8,7 @@
 #include <rdge/core.hpp>
 #include <rdge/assets/tilemap/property.hpp>
 #include <rdge/math/vec2.hpp>
-#include <rdge/physics/shapes/circle.hpp>
 #include <rdge/physics/shapes/polygon.hpp>
-#include <rdge/graphics/layers/sprite_layer.hpp>
 
 //!@{ Forward declarations
 //namespace nlohmann { class json; }
@@ -21,6 +19,13 @@
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
+
+//!@{ Forward declarations
+namespace physics {
+struct circle;
+} // namespace physics
+//!@}
+
 namespace tilemap {
 
 //! \enum ObjectType
@@ -125,39 +130,47 @@ public:
     math::vec2 GetPoint (void) const;
     physics::circle GetCircle (void) const;
     physics::polygon GetPolygon (void) const;
-    sprite_data GetSprite (void) const;
     //!@}
 
 public:
     ObjectType type = ObjectType::INVALID; //!< Base type
 
     //!@{ Custom identifiers
-    int32       id = -1;     //!< [unused] Globally unique id
+    int32 id = -1;           //!< [unused] Globally unique id
     std::string name;        //!< 'Name' field assigned in editor
     std::string custom_type; //!< 'Type' field assigned in editor
     //!@}
 
     //!@{ Rendering/physics properties
-    math::vec2 position; //!< Position relative to parent
-    bool       visible;  //!< Object is shown in editor
+    math::vec2 pos; //!< Position relative to parent
+    bool visible;   //!< Object is shown in editor
     //!@}
 
     PropertyCollection properties; //!< Custom variable type property collection
 
-    //!@{ Sprite properties
-    int32      m_gid = 0;        //!< Tilemap texture region Id
-    math::vec2 m_size;           //!< [unused] Sprite size
-    float      m_rotation = 0.f; //!< Angle in degrees clockwise
+public:
+    //!@{ ObjectType::SPRITE
+    struct object_sprite_data
+    {
+        uint32 gid = 0;       //!< Texture region Id (offset by 1, zero is undefined)
+        math::vec2 size;      //!< [unused] Sprite size
+        float rotation = 0.f; //!< Angle in degrees clockwise
+    } sprite;
     //!@}
 
-private:
-    //!@{ Polygon properties
-    float m_radius = 0.f;
+    //!@{ ObjectType::CIRCLE
+    struct object_circle_data
+    {
+        float radius = 0.f;
+    } circle;
     //!@}
 
-    //!@{ Polygon properties
-    physics::polygon::PolygonData m_vertices;
-    size_t                        m_numVerts = 0;
+    //!@{ ObjectType::POLYGON
+    struct object_polygon_data
+    {
+        physics::polygon::PolygonData vertices;
+        size_t vertex_count = 0;
+    } polygon;
     //!@}
 };
 

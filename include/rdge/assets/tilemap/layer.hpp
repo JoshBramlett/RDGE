@@ -137,34 +137,30 @@ public:
 
     PropertyCollection properties; //!< Custom variable type property collection
 
-// breaks unit tests
-//private:
-    //friend class rdge::TileLayer;
-
+public:
     //!@{ LayerType::TILELAYER
-    struct tile_chunk
+    struct tilelayer_data
     {
-        int32 x;                  //!< x-coordinate in the tile grid
-        int32 y;                  //!< y-coordinate in the tile grid
-        std::vector<uint32> data; //!< Array of GIDs
-    };
+        struct tile_chunk
+        {
+            math::ivec2 coord;        //!< x/y coordinate in the tile grid
+            std::vector<uint32> data; //!< Array of GIDs
+        };
 
-    math::ivec2 grid_location;
-    math::uivec2 grid_size;
-    std::vector<tile_chunk> chunks; //!< List of chunks that make up the mapping
-    shared_asset<Tileset> tileset;
+        tilemap_grid grid;              //!< Grid local to the Layer
+        std::vector<tile_chunk> chunks; //!< List of chunks that make up the mapping
+        shared_asset<Tileset> tileset;  //!< Associated asset
+    } tilelayer;
     //!@}
 
     //!@{ LayerType::OBJECTGROUP
-    std::vector<Object> objects;                               //!< Array of objects
-    SpriteRenderOrder draw_order = SpriteRenderOrder::INVALID; //!< How to render the layer
-    shared_asset<SpriteSheet> spritesheet;
+    struct objectgroup_data
+    {
+        SpriteRenderOrder draw_order;          //!< Sprite ordering when rendered
+        std::vector<Object> objects;           //!< Collection of objects
+        shared_asset<SpriteSheet> spritesheet; //!< Associated asset
+    } objectgroup;
     //!@}
-
-    // image
-
-    // group
-    std::vector<Layer> layers;
 
 private:
     Tilemap* m_parent = nullptr;

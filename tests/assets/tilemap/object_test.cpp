@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <rdge/assets/tilemap/object.hpp>
+#include <rdge/physics/shapes/circle.hpp>
 #include <rdge/util/json.hpp>
 
 #include <exception>
@@ -40,8 +41,8 @@ TEST(ObjectTest, VerifyPointConstruction)
     EXPECT_EQ(object.id, 20);
     EXPECT_EQ(object.name, "point_name");
     EXPECT_EQ(object.custom_type, "point_type");
-    EXPECT_FLOAT_EQ(object.position.x, 220.f);
-    EXPECT_FLOAT_EQ(object.position.y, 350.f);
+    EXPECT_FLOAT_EQ(object.pos.x, 220.f);
+    EXPECT_FLOAT_EQ(object.pos.y, 350.f);
     EXPECT_EQ(object.visible, true);
 
     // 2) Validate base object
@@ -72,8 +73,8 @@ TEST(ObjectTest, VerifyCircleConstruction)
     EXPECT_EQ(object.id, 13);
     EXPECT_EQ(object.name, "circle_name");
     EXPECT_EQ(object.custom_type, "circle_type");
-    EXPECT_FLOAT_EQ(object.position.x, 560.f);
-    EXPECT_FLOAT_EQ(object.position.y, 808.f);
+    EXPECT_FLOAT_EQ(object.pos.x, 560.f);
+    EXPECT_FLOAT_EQ(object.pos.y, 808.f);
     EXPECT_EQ(object.visible, true);
 
     // 2) Validate base object
@@ -125,8 +126,8 @@ TEST(ObjectTest, VerifyPolygonConstruction)
     EXPECT_EQ(object.id, 15);
     EXPECT_EQ(object.name, "polygon_name");
     EXPECT_EQ(object.custom_type, "polygon_type");
-    EXPECT_FLOAT_EQ(object.position.x, -176.f);
-    EXPECT_FLOAT_EQ(object.position.y, 432.f);
+    EXPECT_FLOAT_EQ(object.pos.x, -176.f);
+    EXPECT_FLOAT_EQ(object.pos.y, 432.f);
     EXPECT_EQ(object.visible, true);
 
     // 2) Validate base object

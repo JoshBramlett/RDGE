@@ -6,8 +6,8 @@
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/graphics/color.hpp>
-#include <rdge/util/io/rwops_base.hpp>
+
+#include <vector>
 
 //!@{ Forward declarations
 //namespace nlohmann { class json; }
@@ -18,6 +18,12 @@
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
+
+//!@{ Forward declarations
+class rwops_base;
+struct color;
+//!@}
+
 namespace tilemap {
 
 //! \class PropertyCollection
@@ -71,7 +77,8 @@ public:
     size_t Size (void) const noexcept;
 
 private:
-
+    //! \enum property_type
+    //! \brief Supported base types
     enum property_type
     {
         property_type_invalid,
