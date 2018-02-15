@@ -119,9 +119,12 @@ Layer::Layer (Tilemap* parent, const nlohmann::json& j)
             this->tilelayer = j.get<decltype(this->tilelayer)>();
 
             // populate remaining global fields from the parent
-            this->tilelayer.grid.render_order = m_parent->grid.render_order;
-            this->tilelayer.grid.cell_size = m_parent->grid.cell_size;
-            this->tilelayer.grid.chunk_size = m_parent->grid.chunk_size;
+            if (m_parent)
+            {
+                this->tilelayer.grid.render_order = m_parent->grid.render_order;
+                this->tilelayer.grid.cell_size = m_parent->grid.cell_size;
+                this->tilelayer.grid.chunk_size = m_parent->grid.chunk_size;
+            }
             break;
         case LayerType::OBJECTGROUP:
             this->objectgroup = j.get<decltype(this->objectgroup)>();

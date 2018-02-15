@@ -127,9 +127,9 @@ public:
     //!@}
 
     //!@{ Base type accessors
-    math::vec2 GetPoint (void) const;
-    physics::circle GetCircle (void) const;
-    physics::polygon GetPolygon (void) const;
+    math::vec2 GetPoint (float scale) const;
+    physics::circle GetCircle (float scale) const;
+    physics::polygon GetPolygon (float scale) const;
     //!@}
 
 public:

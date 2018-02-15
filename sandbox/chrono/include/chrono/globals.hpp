@@ -9,17 +9,22 @@ enum chrono_collision_category
 {
     chrono_collision_category_none                      = 0x0000,
 
-    chrono_collision_category_player_hitbox             = 0x0001,
-    chrono_collision_category_player_sensor_directional = 0x0002,
-    chrono_collision_category_player_sensor_proximity   = 0x0004,
-    chrono_collision_category_player_sensor_spell       = 0x0008,
+    chrono_collision_category_reserved                  = 0x0001, //!< fixture default
+
+    chrono_collision_category_environment_static        = 0x0002,
+    chrono_collision_category_environment_triggers      = 0x0004,
 
     chrono_collision_category_enemy_hitbox              = 0x0010,
 
-    chrono_collision_category_environment_static        = 0x0100,
-    chrono_collision_category_environment_triggers      = 0x0200,
+    chrono_collision_category_player_hitbox             = 0x1000,
+    chrono_collision_category_player_sensor_directional = 0x2000,
+    chrono_collision_category_player_sensor_proximity   = 0x4000,
+    chrono_collision_category_player_sensor_spell       = 0x8000,
 
-    chrono_collision_category_all                       = 0xFFFF
+    chrono_collision_category_all                       = 0xFFFF,
+
+    chrono_collision_category_all_hitbox = chrono_collision_category_enemy_hitbox |
+                                           chrono_collision_category_player_hitbox
 };
 
 //! \struct game_ratios

@@ -89,7 +89,7 @@ def translate_object(obj):
             raise Exception('width/height mismatch: ellipse only supports circles')
 
         obj['obj_type'] = 'circle'
-        obj['radius'] = obj['width']
+        obj['radius'] = float(obj['width']) * 0.5
 
         obj.pop('ellipse')
         obj.pop('rotation')

@@ -22,14 +22,17 @@ from_json (const nlohmann::json& j, Object::object_sprite_data& sprite)
     JSON_VALIDATE_REQUIRED(j, rotation, is_number);
 
     sprite.gid = j["gid"].get<decltype(sprite.gid)>();
-    sprite.size.w = j["width"].get<decltype(sprite.size.w)>();
-    sprite.size.h = j["height"].get<decltype(sprite.size.h)>();
-    sprite.rotation = j["rotation"].get<decltype(sprite.rotation)>();
-
     if (RDGE_UNLIKELY(sprite.gid == 0))
     {
         throw std::invalid_argument("Sprite must have a valid GID");
     }
+
+    // gid index from the import starts with 1.  Zero is undefined (useful for
+    // the tile layer), but all sprites must have a valid gid so we offset
+    sprite.gid--;
+    sprite.size.w = j["width"].get<decltype(sprite.size.w)>();
+    sprite.size.h = j["height"].get<decltype(sprite.size.h)>();
+    sprite.rotation = j["rotation"].get<decltype(sprite.rotation)>();
 }
 
 void
@@ -84,9 +87,11 @@ Object::Object (const nlohmann::json& j)
         this->id = j["id"].get<decltype(this->id)>();
         this->name = j["name"].get<decltype(this->name)>();
         this->custom_type = j["type"].get<decltype(this->custom_type)>();
-        this->pos.x = j["x"].get<decltype(this->pos.x)>();
-        this->pos.y = j["y"].get<decltype(this->pos.y)>();
         this->visible = j["visible"].get<decltype(this->visible)>();
+
+        // convert position to y-is-up
+        this->pos.x = j["x"].get<decltype(this->pos.x)>();
+        this->pos.y = j["y"].get<decltype(this->pos.y)>() * -1.f;
 
         // optional
         this->properties = PropertyCollection(j);
@@ -132,7 +137,7 @@ Object::Object (const nlohmann::json& j)
 }
 
 math::vec2
-Object::GetPoint (void) const
+Object::GetPoint (float scale) const
 {
     if (this->type != ObjectType::POINT)
     {
@@ -142,11 +147,11 @@ Object::GetPoint (void) const
         throw std::invalid_argument(ss.str());
     }
 
-    return this->pos;
+    return this->pos * scale;
 }
 
 physics::circle
-Object::GetCircle (void) const
+Object::GetCircle (float scale) const
 {
     if (this->type != ObjectType::CIRCLE)
     {
@@ -156,11 +161,20 @@ Object::GetCircle (void) const
         throw std::invalid_argument(ss.str());
     }
 
-    return physics::circle(this->pos, this->circle.radius);
+    // Circle position is the corner of a theoretical AABB that surrounds it.  Our
+    // physics engine represents the position as the circle center, so we must
+    // offset the position by the radius.
+
+    auto p = this->pos * scale;
+    auto r = this->circle.radius * scale;
+    p.x += r;
+    p.y -= r;
+
+    return physics::circle(p, r);
 }
 
 physics::polygon
-Object::GetPolygon (void) const
+Object::GetPolygon (float scale) const
 {
     if (this->type != ObjectType::POLYGON)
     {
@@ -170,7 +184,13 @@ Object::GetPolygon (void) const
         throw std::invalid_argument(ss.str());
     }
 
-    return physics::polygon(this->polygon.vertices, this->polygon.vertex_count);
+    physics::polygon::PolygonData scaled;
+    for (size_t i = 0; i < this->polygon.vertex_count; i++)
+    {
+        scaled[i] = this->polygon.vertices[i] * scale;
+    }
+
+    return physics::polygon(scaled, this->polygon.vertex_count);
 }
 
 std::ostream&

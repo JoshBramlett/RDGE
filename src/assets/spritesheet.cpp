@@ -115,13 +115,14 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
             JSON_VALIDATE_REQUIRED(j_sss, w, is_number_unsigned);
             JSON_VALIDATE_REQUIRED(j_sss, h, is_number_unsigned);
 
-            auto& offset = region.value.sprite_offset;
-            offset.x = j_sss["x"].get<decltype(offset.x)>();
-            offset.y = j_sss["y"].get<decltype(offset.y)>();
-
             auto& sz = region.value.sprite_size;
             sz.w = j_sss["w"].get<decltype(sz.w)>();
             sz.h = j_sss["h"].get<decltype(sz.h)>();
+
+            // invert offset to convert to y-is-up
+            auto& offset = region.value.sprite_offset;
+            offset.x = j_sss["x"].get<decltype(offset.x)>();
+            offset.y = region.value.size.h - (sz.h + j_sss["y"].get<decltype(offset.y)>());
         }
 
         {
@@ -129,7 +130,7 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
             JSON_VALIDATE_REQUIRED(j_pivot, x, is_number);
             JSON_VALIDATE_REQUIRED(j_pivot, y, is_number);
 
-            // convert pivot to pixels and y-is-up
+            // convert pivot/origin normal to y-is-up
             auto& origin = region.value.origin;
             origin.x = j_pivot["x"].get<decltype(origin.x)>();
             origin.y = (1.f - j_pivot["y"].get<decltype(origin.y)>());
@@ -141,6 +142,14 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
             for (const auto& j_obj : j_region["objects"])
             {
                 region.objects.emplace_back(j_obj);
+
+                // invert object position to convert to y-is-up
+                // The object has relative position to the sprite, so it's y-axis
+                // must be positive on import.  The object ctor negates the y-axis,
+                // so we can safely assume a negative value.
+                auto& obj = region.objects.back();
+                SDL_assert(obj.pos.y <= 0.f);
+                obj.pos.y = region.value.sprite_size.h + obj.pos.y;
             }
         }
     }

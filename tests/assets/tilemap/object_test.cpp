@@ -42,13 +42,13 @@ TEST(ObjectTest, VerifyPointConstruction)
     EXPECT_EQ(object.name, "point_name");
     EXPECT_EQ(object.custom_type, "point_type");
     EXPECT_FLOAT_EQ(object.pos.x, 220.f);
-    EXPECT_FLOAT_EQ(object.pos.y, 350.f);
+    EXPECT_FLOAT_EQ(object.pos.y, -350.f);
     EXPECT_EQ(object.visible, true);
 
     // 2) Validate base object
-    auto base = object.GetPoint();
+    auto base = object.GetPoint(1.f);
     EXPECT_FLOAT_EQ(base.x, 220.f);
-    EXPECT_FLOAT_EQ(base.y, 350.f);
+    EXPECT_FLOAT_EQ(base.y, -350.f);
 }
 
 TEST(ObjectTest, VerifyCircleConstruction)
@@ -74,13 +74,13 @@ TEST(ObjectTest, VerifyCircleConstruction)
     EXPECT_EQ(object.name, "circle_name");
     EXPECT_EQ(object.custom_type, "circle_type");
     EXPECT_FLOAT_EQ(object.pos.x, 560.f);
-    EXPECT_FLOAT_EQ(object.pos.y, 808.f);
+    EXPECT_FLOAT_EQ(object.pos.y, -808.f);
     EXPECT_EQ(object.visible, true);
 
     // 2) Validate base object
-    auto base = object.GetCircle();
-    EXPECT_FLOAT_EQ(base.pos.x, 560.f);
-    EXPECT_FLOAT_EQ(base.pos.y, 808.f);
+    auto base = object.GetCircle(1.f);
+    EXPECT_FLOAT_EQ(base.pos.x, 565.f);
+    EXPECT_FLOAT_EQ(base.pos.y, -813.f);
     EXPECT_FLOAT_EQ(base.radius, 5.f);
 }
 
@@ -127,11 +127,11 @@ TEST(ObjectTest, VerifyPolygonConstruction)
     EXPECT_EQ(object.name, "polygon_name");
     EXPECT_EQ(object.custom_type, "polygon_type");
     EXPECT_FLOAT_EQ(object.pos.x, -176.f);
-    EXPECT_FLOAT_EQ(object.pos.y, 432.f);
+    EXPECT_FLOAT_EQ(object.pos.y, -432.f);
     EXPECT_EQ(object.visible, true);
 
     // 2) Validate base object
-    auto base = object.GetPolygon();
+    auto base = object.GetPolygon(1.f);
     EXPECT_EQ(base.count, 5);
     //EXPECT_FLOAT_EQ(base.lo.y, 2.f);
     //EXPECT_FLOAT_EQ(base.hi.x, 7.5f);

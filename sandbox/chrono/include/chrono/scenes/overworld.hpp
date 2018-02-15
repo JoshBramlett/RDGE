@@ -11,6 +11,7 @@
 #include <memory>
 
 #include <chrono/entities/player.hpp>
+#include <chrono/entities/static_actor.hpp>
 
 class OverworldScene
     : public rdge::IScene
@@ -48,16 +49,22 @@ public:
     //!@}
 
 public:
+    //!@{ Physics
     rdge::physics::CollisionGraph collision_graph;
+    //!@}
+
+    //!@{ Rendering
     rdge::OrthographicCamera camera;
-
     rdge::SpriteBatch sprite_batch;
-    std::vector<rdge::SpriteLayer> sprite_layers;
-
     rdge::TileBatch tile_batch;
+    std::vector<rdge::SpriteLayer> sprite_layers;
     std::vector<rdge::TileLayer> tile_layers;
+    //!@}
 
+    //!@{ Actors
     Player player;
+    std::vector<StaticActor> static_actors;
+    //!@}
 
     // debug
     bool show_widget = true;

@@ -69,8 +69,7 @@ def parse_tileset(in_file):
         global tile_defs
         tile_defs.insert(int(tile_def['index']), tile_def)
 
-# merge the tileset object metadata with the generated texture packer
-# data file.
+# merge tileset object metadata with the generated texture packer data file
 def merge_data(data_file):
     with open(data_file) as json_data:
         j = json.load(json_data)
@@ -82,6 +81,15 @@ def merge_data(data_file):
             if frame['filename'] == name:
                 frame['index'] = d['index']
                 frame['objects'] = d['objects']
+
+                # All collision objects have relative position around the parent
+                # sprite, and the local position assumed the original sprite size.
+                # Therefore we remove sprites trimmed margin from the objects position.
+                offset_x = float(frame['spriteSourceSize']['x'])
+                offset_y = float(frame['spriteSourceSize']['y'])
+                for obj in frame['objects']:
+                    obj['x'] = float(obj['x']) - offset_x
+                    obj['y'] = float(obj['y']) - offset_y
 
     with open(data_file, 'w') as f:
         f.write(json.dumps(j, indent=2, ensure_ascii=False))

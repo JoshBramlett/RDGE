@@ -1,5 +1,17 @@
 Working
 
+    Physics Circle/Poly collision
+      - Ordering is wrong so the normal is messed up.  Adding the rect prior to the circle
+        works, vice versa does not.
+    Finish importing polygons
+    Remove/replace that horrid vector of unique_ptrs
+    Move spritesheet_region into SpriteSheet
+      - Document EVERYTHING that changed to y-is-up
+    Change Tilemap and it's children to convert to y-is-up
+      - Document EVERYTHING that changed to y-is-up
+    Normalize shapes import.  Might be different behavior from a sprite parent to global.
+
+
     TileBatch - Remove setting m_far
 
     Assets:
@@ -9,6 +21,8 @@ Working
         x Whether the cached SharedAsset is destroyed is determined by refcount and
           an override to keep alive
       - Changes to Tilemap
+        - Add global object types file into tilemap before packing
+          - Add support for collision categories
         - Move Tilemap to base namespace
         - Move Tilemap objects, layers, etc, within Tilemap
         - Fix accessor scope in layers/objects

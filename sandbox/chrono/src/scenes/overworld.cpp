@@ -18,7 +18,7 @@ OverworldScene::OverworldScene (void)
 
     debug::AddWidget(this);
     debug::settings::show_overlay = true;
-    debug::settings::draw_physics_fixtures = false;
+    debug::settings::draw_physics_fixtures = true;
 
     auto tilemap = g_game.pack->GetTilemap(rdge_asset_tilemap_overworld);
 
@@ -46,31 +46,38 @@ OverworldScene::OverworldScene (void)
     // Sprite layers
     ///////////////////
 
-#if 1
+#if 0
     sprite_layers.emplace_back(tilemap.CreateSpriteLayer(overworld_layer_bg_sprites,
                                                          g_game.ratios.base_to_screen));
-
-#else
-    const auto& def = tilemap.layers[overworld_layer_bg_sprites];
-
-    sprite_layers.emplace_back(def.objects.size() + 100);
-    auto& layer = sprite_layers.back();
-
-    for (const auto& obj : def.objects)
-    {
-        if (obj.type != tilemap::ObjectType::SPRITE)
-        {
-            continue;
-        }
-
-        this->actors.emplace_back(StaticActor(obj, layer, collision_graph);
-    }
-
-#endif
 
     math::vec2 player_pos(678.f, -617.f);
     player.InitPhysics(collision_graph, player_pos);
     player.InitGraphics(sprite_layers.back(), player_pos);
+
+#else
+    const auto& def = tilemap.layers[overworld_layer_bg_sprites];
+    uint16 sprite_capacity = def.objectgroup.objects.size() + 100;
+
+    this->static_actors.reserve(sprite_capacity);
+    this->sprite_layers.emplace_back(sprite_capacity);
+
+    auto& layer = this->sprite_layers.back();
+    math::vec2 player_pos(678.f, -617.f);
+    player.InitPhysics(collision_graph, player_pos);
+    player.InitGraphics(layer, player_pos);
+
+    for (const auto& obj : def.objectgroup.objects)
+    {
+        // TODO Could set property on the obj to define that it's indeed static
+        if (obj.type == tilemap::ObjectType::SPRITE)
+        {
+            this->static_actors.emplace_back(obj,
+                                             *def.objectgroup.spritesheet,
+                                             layer,
+                                             collision_graph);
+        }
+    }
+#endif
 }
 
 void

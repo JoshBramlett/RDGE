@@ -87,7 +87,7 @@ Player::InitPhysics (CollisionGraph& graph, const math::vec2& pos)
     bprof.gravity_scale = 0.f;
     bprof.prevent_rotation = true;
     bprof.prevent_sleep = true;
-    bprof.linear_damping = 0.0f;
+    bprof.linear_damping = 0.5f;
     this->body = graph.CreateBody(bprof);
 
     {
@@ -104,6 +104,7 @@ Player::InitPhysics (CollisionGraph& graph, const math::vec2& pos)
         this->hitbox = body->CreateFixture(fprof);
     }
 
+#if 0
     {
         // directional sensors
         fixture_profile fprof;
@@ -128,6 +129,7 @@ Player::InitPhysics (CollisionGraph& graph, const math::vec2& pos)
         fprof.shape = &c;
         this->dir_sensors[Direction::DOWN] = body->CreateFixture(fprof);
     }
+#endif
 }
 
 void
@@ -225,7 +227,7 @@ Player::OnUpdate (const delta_time& dt)
         }
     }
 
-#if 0
+#if 1
     // high damping if directional normal is different than the linear velocity
     body->linear.damping = (math::dot(this->normal, body->linear.velocity) > 0.f) ? 0.f : 9.f;
 

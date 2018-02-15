@@ -7,6 +7,7 @@
 
 //!@{ Forward declarations
 namespace rdge {
+class SpriteSheet;
 class SpriteLayer;
 class Event;
 struct delta_time;
@@ -29,6 +30,7 @@ class StaticActor : public IActor
 {
 public:
     StaticActor (const rdge::tilemap::Object& def,
+                 const rdge::SpriteSheet& sheet,
                  rdge::SpriteLayer& layer,
                  rdge::physics::CollisionGraph& graph);
 

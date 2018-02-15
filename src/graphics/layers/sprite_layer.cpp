@@ -6,8 +6,10 @@
 #include <rdge/graphics/renderers/sprite_batch.hpp>
 #include <rdge/graphics/orthographic_camera.hpp>
 #include <rdge/util/memory/alloc.hpp>
+#include <rdge/util/compiler.hpp>
 #include <rdge/util/logger.hpp>
 #include <rdge/util/strings.hpp>
+#include <rdge/internal/exception_macros.hpp>
 
 #include <SDL_assert.h>
 
@@ -19,6 +21,15 @@
 #include <rdge/graphics/color.hpp>
 
 namespace rdge {
+
+SpriteLayer::SpriteLayer (uint16 capacity)
+    : m_spriteCapacity(capacity)
+{
+    if (RDGE_UNLIKELY(!RDGE_CALLOC(m_sprites, m_spriteCapacity, nullptr)))
+    {
+        RDGE_THROW("Failed to allocate memory");
+    }
+}
 
 SpriteLayer::SpriteLayer (const tilemap::Layer& def, float scale)
     : m_spriteCapacity(def.objectgroup.objects.size() + 100)
@@ -34,15 +45,25 @@ SpriteLayer::SpriteLayer (const tilemap::Layer& def, float scale)
     //    pointers to the sprite_data will be stored by different objects.
     //    For now we'll enforce a strict limit, but it can be later extended to
     //    be more dynamic using a small block allocator.
-    RDGE_CALLOC(m_sprites, m_spriteCapacity, nullptr);
-
-    Texture t(*def.objectgroup.spritesheet->surface);
-    uint32 unit_id = t.unit_id;
-    if (std::find(textures.begin(), textures.end(), t) == textures.end())
+    if (RDGE_UNLIKELY(!RDGE_CALLOC(m_sprites, m_spriteCapacity, nullptr)))
     {
-        t.unit_id = textures.size();
-        unit_id = t.unit_id;
-        textures.emplace_back(std::move(t));
+        RDGE_THROW("Failed to allocate memory");
+    }
+
+    uint32 unit_id;
+    {
+        Texture t(*def.objectgroup.spritesheet->surface);
+        const auto& it = std::find(textures.begin(), textures.end(), t);
+        if (it == textures.end())
+        {
+            t.unit_id = textures.size();
+            unit_id = t.unit_id;
+            textures.emplace_back(std::move(t));
+        }
+        else
+        {
+            unit_id = it->unit_id;
+        }
     }
 
     for (const auto& obj : def.objectgroup.objects)
@@ -52,14 +73,14 @@ SpriteLayer::SpriteLayer (const tilemap::Layer& def, float scale)
             continue;
         }
 
-        const auto& region = def.objectgroup.spritesheet->regions[obj.sprite.gid - 1].value;
+        const auto& region = def.objectgroup.spritesheet->regions[obj.sprite.gid].value;
         auto& sprite = m_sprites[m_spriteCount];
         sprite.index = m_spriteCount++;
-        sprite.pos = obj.pos * scale;
 
+        // update position to accomodate for trimming
+        sprite.pos = obj.pos * scale;
         sprite.pos.x += region.sprite_offset.x * scale;
-        sprite.pos.y -= (region.size.h - region.sprite_size.h - region.sprite_offset.y) * scale;
-        sprite.pos.y *= -1.f;
+        sprite.pos.y += region.sprite_offset.y * scale;
 
         sprite.size = region.sprite_size * scale;
         sprite.depth = 1.f;
@@ -141,22 +162,30 @@ SpriteLayer::AddSprite (const math::vec2& pos,
         RDGE_THROW("SpriteLayer count is at capacity");
     }
 
-    Texture t(*spritesheet.surface);
-    uint32 unit_id = t.unit_id;
-    if (std::find(textures.begin(), textures.end(), t) == textures.end())
+    uint32 unit_id;
     {
-        t.unit_id = textures.size();
-        unit_id = t.unit_id;
-        textures.emplace_back(std::move(t));
+        Texture t(*spritesheet.surface);
+        const auto& it = std::find(textures.begin(), textures.end(), t);
+        if (it == textures.end())
+        {
+            t.unit_id = textures.size();
+            unit_id = t.unit_id;
+            textures.emplace_back(std::move(t));
+        }
+        else
+        {
+            unit_id = it->unit_id;
+        }
     }
 
     const auto& region = spritesheet.regions[id].value;
     auto& sprite = m_sprites[m_spriteCount];
     sprite.index = m_spriteCount++;
-    sprite.pos = pos * scale;
 
+    // update position to accomodate for trimming
+    sprite.pos = pos * scale;
     sprite.pos.x += region.sprite_offset.x * scale;
-    sprite.pos.y += (region.size.h - region.sprite_size.h - region.sprite_offset.y) * scale;
+    sprite.pos.y += region.sprite_offset.y * scale;
 
     sprite.size = region.sprite_size * scale;
     sprite.depth = 1.f;
