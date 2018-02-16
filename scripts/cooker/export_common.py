@@ -140,10 +140,6 @@ def translate_object(obj):
                           rotate_point(p3, obj['rotation']),
                           rotate_point(p4, obj['rotation']) ]
 
-        # rectangle position is the top-left corner
-        # convert it to the bottom-left
-        obj['y'] = obj['y'] + obj['height']
-
         obj.pop('rotation')
         obj.pop('width')
         obj.pop('height')

@@ -90,7 +90,7 @@ Player::Init (const math::vec2& pos, SpriteLayer& layer, CollisionGraph& graph)
         // hitbox
         fixture_profile fprof;
         fprof.density = 1.f;
-        fprof.restitution = 0.8f;
+        //fprof.restitution = 0.8f;
         fprof.filter.category = chrono_collision_category_player_hitbox;
         fprof.filter.mask = chrono_collision_category_enemy_hitbox |
                             chrono_collision_category_environment_static;

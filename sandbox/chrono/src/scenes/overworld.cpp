@@ -50,40 +50,69 @@ OverworldScene::OverworldScene (void)
     sprite_layers.emplace_back(tilemap.CreateSpriteLayer(overworld_layer_bg_sprites,
                                                          g_game.ratios.base_to_screen));
 
-    math::vec2 player_pos(678.f, -617.f);
-    player.InitPhysics(collision_graph, player_pos);
-    player.InitGraphics(sprite_layers.back(), player_pos);
-
+    math::vec2 player_pos(672.f, -526.f);
+    player.Init(player_pos, sprite_layers.back(), collision_graph);
 #else
-    const auto& def = tilemap.layers[overworld_layer_bg_sprites];
-    uint16 sprite_capacity = def.objectgroup.objects.size() + 100;
-
-    this->static_actors.reserve(sprite_capacity);
-    this->sprite_layers.emplace_back(sprite_capacity);
-
-    // FIXME Polygons must be added before circles or all hell breaks loose
-    auto& layer = this->sprite_layers.back();
-    math::vec2 player_pos(678.f, -617.f);
-    player.Init(player_pos, layer, collision_graph);
-
-    for (const auto& obj : def.objectgroup.objects)
     {
-        // TODO Could set property on the obj to define that it's indeed static
-        //
-        // TODO StaticActors need to be initialized differently than other sprites.
-        //      These objects have the collision object relative to their sprite.
-        //      Dynamic sprites (especially those with animations) render their
-        //      sprite relative to a collision object.  There should be a very
-        //      explicit definition of those two types.
-        if (obj.type == tilemap::ObjectType::SPRITE)
+        const auto& def = tilemap.layers[overworld_layer_bg_sprites];
+        uint16 sprite_capacity = def.objectgroup.objects.size() + 100;
+
+        this->static_actors.reserve(sprite_capacity);
+        this->sprite_layers.emplace_back(sprite_capacity);
+
+        // FIXME Polygons must be added before circles or all hell breaks loose
+        auto& layer = this->sprite_layers.back();
+        math::vec2 player_pos(672.f, -526.f);
+        player.Init(player_pos, layer, collision_graph);
+
+        for (const auto& obj : def.objectgroup.objects)
         {
-            this->static_actors.emplace_back(obj,
-                                             *def.objectgroup.spritesheet,
-                                             layer,
-                                             collision_graph);
+            // TODO Could set property on the obj to define that it's indeed static
+            //
+            // TODO StaticActors need to be initialized differently than other sprites.
+            //      These objects have the collision object relative to their sprite.
+            //      Dynamic sprites (especially those with animations) render their
+            //      sprite relative to a collision object.  There should be a very
+            //      explicit definition of those two types.
+            if (obj.type == tilemap::ObjectType::SPRITE)
+            {
+                this->static_actors.emplace_back(obj,
+                                                 *def.objectgroup.spritesheet,
+                                                 layer,
+                                                 collision_graph);
+            }
         }
     }
 #endif
+
+    ///////////////////
+    // World Collision
+    ///////////////////
+
+    {
+        const auto& def = tilemap.layers[overworld_layer_bg_collision];
+        for (const auto& obj : def.objectgroup.objects)
+        {
+            if (obj.type == tilemap::ObjectType::POLYGON)
+            {
+                rigid_body_profile bprof;
+                bprof.type = RigidBodyType::STATIC;
+                bprof.position = obj.pos * g_game.ratios.base_to_world;
+                auto body = collision_graph.CreateBody(bprof);
+
+                // TODO these properties should be read by the object
+                fixture_profile fprof;
+                fprof.density = 1.f;
+                //fprof.restitution = 0.8f;
+                fprof.filter.category = chrono_collision_category_environment_static;
+                fprof.filter.mask = chrono_collision_category_all_hitbox;
+
+                auto p = obj.GetPolygon(g_game.ratios.base_to_world, true);
+                fprof.shape = &p;
+                body->CreateFixture(fprof);
+            }
+        }
+    }
 }
 
 void

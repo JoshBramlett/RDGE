@@ -39,7 +39,7 @@ StaticActor::StaticActor (const Object& def,
         // TODO these properties should be read by the object
         fixture_profile fprof;
         fprof.density = 1.f;
-        fprof.restitution = 0.8f;
+        //fprof.restitution = 0.8f;
         fprof.filter.category = chrono_collision_category_environment_static;
         fprof.filter.mask = chrono_collision_category_all_hitbox;
 

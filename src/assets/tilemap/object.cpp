@@ -66,7 +66,7 @@ from_json (const nlohmann::json& j, Object::object_polygon_data& poly)
             JSON_VALIDATE_REQUIRED(j_coord, y, is_number);
 
             poly.vertices[i].x = j_coord["x"].get<float>();
-            poly.vertices[i].y = j_coord["y"].get<float>();
+            poly.vertices[i].y = j_coord["y"].get<float>() * -1.f;
         }
     }
 }
@@ -165,7 +165,7 @@ Object::GetCircle (float scale) const
 }
 
 physics::polygon
-Object::GetPolygon (float scale) const
+Object::GetPolygon (float scale, bool local) const
 {
     if (this->type != ObjectType::POLYGON)
     {
@@ -175,10 +175,11 @@ Object::GetPolygon (float scale) const
         throw std::invalid_argument(ss.str());
     }
 
+    math::vec2 pos_offset = (local) ? math::vec2(0.f, 0.f) : this->pos;
     physics::polygon::PolygonData scaled;
     for (size_t i = 0; i < this->polygon.vertex_count; i++)
     {
-        scaled[i] = (this->pos + this->polygon.vertices[i]) * scale;
+        scaled[i] = (pos_offset + this->polygon.vertices[i]) * scale;
     }
 
     return physics::polygon(scaled, this->polygon.vertex_count);

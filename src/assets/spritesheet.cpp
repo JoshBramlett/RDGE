@@ -143,16 +143,15 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
             {
                 region.objects.emplace_back(j_obj);
 
-                // invert object position to convert to y-is-up
                 // The object has relative position to the sprite, so it's y-axis
                 // must be positive on import.  The object ctor negates the y-axis,
                 // so we can safely assume a negative value.
                 auto& obj = region.objects.back();
-                obj.pos.y = region.value.sprite_size.h + obj.pos.y;
-
                 SDL_assert(obj.pos.y <= 0.f);
                 SDL_assert(obj.type == tilemap::ObjectType::POLYGON ||
-                           obj.type == tilemap::ObjectType::CIRCLE)
+                           obj.type == tilemap::ObjectType::CIRCLE);
+
+                obj.pos.y = region.value.sprite_size.h + obj.pos.y;
             }
         }
     }
