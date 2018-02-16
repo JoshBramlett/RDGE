@@ -7,10 +7,12 @@
 
 #include <rdge/core.hpp>
 #include <rdge/assets/shared_asset.hpp>
-#include <rdge/assets/spritesheet_region.hpp>
 #include <rdge/assets/surface.hpp>
 #include <rdge/assets/tilemap/object.hpp>
 #include <rdge/graphics/animation.hpp>
+#include <rdge/graphics/tex_coords.hpp>
+#include <rdge/math/vec2.hpp>
+#include <rdge/system/types.hpp>
 
 #include <vector>
 
@@ -20,6 +22,44 @@ namespace rdge {
 //!@{ Forward declarations
 class PackFile;
 //!@}
+
+//! \struct spritesheet_region
+//! \brief Represents an individual section of the \ref SpriteSheet
+//! \details Container includes the data the client can use for rendering and
+//!          commonly represents a sprite texture or animation frame.
+//! \note The size and origin values may be modified from the config to
+//!       accommodate the scale multiplication.
+struct spritesheet_region
+{
+    //! \brief Surface clipping rectangle
+    screen_rect clip;
+
+    //! \brief Normalized texture coordinates
+    tex_coords coords;
+
+    //! \brief Original size of the asset (in pixels)
+    math::vec2 size;
+
+    //! \brief Trimmed margin from the original size (in pixels)
+    //! \details Margin is the pixels trimmed from the left (x-axis) and
+    //!          the bottom (y-axis) of the sprite.
+    math::vec2 sprite_offset;
+
+    //! \brief Actual size after trimming (in pixels)
+    math::vec2 sprite_size;
+
+    //! \brief Pivot origin normalized to the sprite size
+    //! \note Defaults to the centroid.
+    math::vec2 origin;
+
+    bool is_rotated; //!< Whether the TexturePacker rotated the region 90 clockwise
+
+    //!@{ Basic spritesheet_region transforms
+    void flip (TexCoordsFlip) noexcept;
+    void rotate (TexCoordsRotation) noexcept;
+    void scale (float) noexcept;
+    //!@}
+};
 
 //! \struct region_data
 //! \brief Expanded read-only \ref spritesheet_region container
@@ -32,6 +72,7 @@ struct region_data
     //! \brief Collection of tile objects
     //! \details Used with object sheets, tile objects are shapes for creating the
     //!          collision data for the provided region.
+    //! \note The position of the object is relative to the region.
     std::vector<tilemap::Object> objects;
 };
 
@@ -155,5 +196,8 @@ public:
 
     shared_asset<Surface> surface; //!< Pixel data of the sprite sheet
 };
+
+//! \brief spritesheet_region stream output operator
+std::ostream& operator<< (std::ostream&, const spritesheet_region&);
 
 } // namespace rdge

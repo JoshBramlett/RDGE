@@ -161,16 +161,7 @@ Object::GetCircle (float scale) const
         throw std::invalid_argument(ss.str());
     }
 
-    // Circle position is the corner of a theoretical AABB that surrounds it.  Our
-    // physics engine represents the position as the circle center, so we must
-    // offset the position by the radius.
-
-    auto p = this->pos * scale;
-    auto r = this->circle.radius * scale;
-    p.x += r;
-    p.y -= r;
-
-    return physics::circle(p, r);
+    return physics::circle(this->pos * scale, this->circle.radius * scale);
 }
 
 physics::polygon
@@ -187,7 +178,7 @@ Object::GetPolygon (float scale) const
     physics::polygon::PolygonData scaled;
     for (size_t i = 0; i < this->polygon.vertex_count; i++)
     {
-        scaled[i] = this->polygon.vertices[i] * scale;
+        scaled[i] = (this->pos + this->polygon.vertices[i]) * scale;
     }
 
     return physics::polygon(scaled, this->polygon.vertex_count);

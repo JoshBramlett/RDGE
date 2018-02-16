@@ -1,50 +1,34 @@
-Working
+Working (bugs)
 
     Physics Circle/Poly collision
       - Ordering is wrong so the normal is messed up.  Adding the rect prior to the circle
         works, vice versa does not.
-    Finish importing polygons
-    Remove/replace that horrid vector of unique_ptrs
-    Move spritesheet_region into SpriteSheet
-      - Document EVERYTHING that changed to y-is-up
-    Change Tilemap and it's children to convert to y-is-up
-      - Document EVERYTHING that changed to y-is-up
-    Normalize shapes import.  Might be different behavior from a sprite parent to global.
+    Player animations frames and collision boxes don't match up
+      - It's working correctly, but the origin is wrong.
 
-
-    TileBatch - Remove setting m_far
+Working (enhancements)
 
     Assets:
-      x Build asset system to manage memory/loading/caching etc.
-      x Create a SharedAsset wrapper (like shared_ptr)
-        x SharedAssets will be cached in a vector, and refcounted
-        x Whether the cached SharedAsset is destroyed is determined by refcount and
-          an override to keep alive
+      - Investigate removing shared_asset destrutor call (to allow forward decl)
+        - Look into shared_ptr deleter
       - Changes to Tilemap
         - Add global object types file into tilemap before packing
           - Add support for collision categories
         - Move Tilemap to base namespace
         - Move Tilemap objects, layers, etc, within Tilemap
-        - Fix accessor scope in layers/objects
+        - Convert layer to y-is-up (or document why it can be unique)
         - Once done, update PackFile for a templatized Get<>
-        x Remove global grid requirement
-      x Have assets load all dependencies
-      - Create an AssetBase type
-      - Create a CustomAllocator/SmallVector for caching
-      - So I don't forget:  Look into why specifying a swap method was recommended
     Graphics:
-      x Create texture manager to avoid texture duplication.
-        x Could be tied to a surface, or simply a static collection like libgdx
       - Create a more cohesive way to represent sprites
-        - Allocation should be done through a block allocator
+        - Explictly define sprites from object sheet and normal sprites
         - Tie in with physics system (via entity).  Note: SpriteGroup/RigidBody
         - Logically separate position from depth - use vec2 when setting position
-      - TileLayer
-        x Add culling
-        x Add blending for upper layers
+          - Remove m_far from TileBatch (really only applicable for bg layers)
+      - TileLayer & SpriteLayer
         - ImGui support (rendering statistics)
-      - SpriteLayer
-        - ImGui support (rendering statistics)
+      - Remove ISprite, Sprite, vops, etc.
+        - Clean up SpriteBatch for above
+      - Unify SpriteBatch and TileBatch interfaces
 
 
 
@@ -73,6 +57,7 @@ Graphics (low priority - implement as needed);
   - Ability to pad NPOT textures
 
 Physics:
+  - Change all for_each lambdas to use a range based for
   - Move GJK and all itersects methods out of the shapes and into collision.cpp
   - Solving:
     - Warm starting (seems to cut down processing time considerably)

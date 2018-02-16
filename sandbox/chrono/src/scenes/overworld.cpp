@@ -61,14 +61,20 @@ OverworldScene::OverworldScene (void)
     this->static_actors.reserve(sprite_capacity);
     this->sprite_layers.emplace_back(sprite_capacity);
 
+    // FIXME Polygons must be added before circles or all hell breaks loose
     auto& layer = this->sprite_layers.back();
     math::vec2 player_pos(678.f, -617.f);
-    player.InitPhysics(collision_graph, player_pos);
-    player.InitGraphics(layer, player_pos);
+    player.Init(player_pos, layer, collision_graph);
 
     for (const auto& obj : def.objectgroup.objects)
     {
         // TODO Could set property on the obj to define that it's indeed static
+        //
+        // TODO StaticActors need to be initialized differently than other sprites.
+        //      These objects have the collision object relative to their sprite.
+        //      Dynamic sprites (especially those with animations) render their
+        //      sprite relative to a collision object.  There should be a very
+        //      explicit definition of those two types.
         if (obj.type == tilemap::ObjectType::SPRITE)
         {
             this->static_actors.emplace_back(obj,

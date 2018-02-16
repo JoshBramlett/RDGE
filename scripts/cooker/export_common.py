@@ -91,6 +91,11 @@ def translate_object(obj):
         obj['obj_type'] = 'circle'
         obj['radius'] = float(obj['width']) * 0.5
 
+        # ellipse position is the top-left corner of the surrounding AABB
+        # convert it to the centroid
+        obj['x'] = obj['x'] + obj['radius']
+        obj['y'] = obj['y'] + obj['radius']
+
         obj.pop('ellipse')
         obj.pop('rotation')
         obj.pop('width')
@@ -134,6 +139,10 @@ def translate_object(obj):
                           rotate_point(p2, obj['rotation']),
                           rotate_point(p3, obj['rotation']),
                           rotate_point(p4, obj['rotation']) ]
+
+        # rectangle position is the top-left corner
+        # convert it to the bottom-left
+        obj['y'] = obj['y'] + obj['height']
 
         obj.pop('rotation')
         obj.pop('width')

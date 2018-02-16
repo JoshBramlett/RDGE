@@ -15,8 +15,9 @@ class Player : public IActor
 public:
     Player (void);
 
-    void InitGraphics (rdge::SpriteLayer& layer, const rdge::math::vec2& pos);
-    void InitPhysics (rdge::physics::CollisionGraph& graph, const rdge::math::vec2& pos);
+    void Init (const rdge::math::vec2& pos,
+               rdge::SpriteLayer& layer,
+               rdge::physics::CollisionGraph& graph);
 
     // Implement when switching between scenes
     //void InitPosition (const rdge::math::vec2& pos, rdge::Direction facing);

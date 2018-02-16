@@ -148,8 +148,11 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
                 // must be positive on import.  The object ctor negates the y-axis,
                 // so we can safely assume a negative value.
                 auto& obj = region.objects.back();
-                SDL_assert(obj.pos.y <= 0.f);
                 obj.pos.y = region.value.sprite_size.h + obj.pos.y;
+
+                SDL_assert(obj.pos.y <= 0.f);
+                SDL_assert(obj.type == tilemap::ObjectType::POLYGON ||
+                           obj.type == tilemap::ObjectType::CIRCLE)
             }
         }
     }
@@ -226,6 +229,58 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
 }
 
 } // anonymous namespace
+
+void
+spritesheet_region::flip (TexCoordsFlip f) noexcept
+{
+    coords.flip(f);
+
+    if (f == TexCoordsFlip::HORIZONTAL)
+    {
+        origin.x = 1.f - origin.x;
+    }
+    else if (f == TexCoordsFlip::VERTICAL)
+    {
+        origin.y = 1.f - origin.y;
+    }
+}
+
+void
+spritesheet_region::rotate (TexCoordsRotation r) noexcept
+{
+    coords.rotate(r);
+
+    switch (r)
+    {
+    case TexCoordsRotation::ROTATE_90:
+        origin = math::vec2(origin.y, 1.f - origin.x);
+        size = math::vec2(size.h, size.w);
+        sprite_size = math::vec2(sprite_size.h, sprite_size.w);
+
+        break;
+    case TexCoordsRotation::ROTATE_180:
+        origin = math::vec2(1.f - origin.x, 1.f - origin.y);
+
+        break;
+    case TexCoordsRotation::ROTATE_270:
+        origin = math::vec2(1.f - origin.y, origin.x);
+        size = math::vec2(size.h, size.w);
+        sprite_size = math::vec2(sprite_size.h, sprite_size.w);
+
+        break;
+    case TexCoordsRotation::NONE:
+    default:
+        break;
+    }
+}
+
+void
+spritesheet_region::scale (float scale) noexcept
+{
+    size *= scale;
+    sprite_offset *= scale;
+    sprite_size *= scale;
+}
 
 SpriteSheet::SpriteSheet (const char* filepath)
 {
@@ -327,6 +382,18 @@ SpriteSheet::GetAnimation (int32 animation_id, float scale) const
     }
 
     return result;
+}
+
+std::ostream& operator<< (std::ostream& os, const spritesheet_region& p)
+{
+    os << "spritesheet_region: ["
+       << "\n  clip=" << p.clip
+       << "\n  coords=" << p.coords
+       << "\n  size=" << p.size
+       << "\n  origin=" << p.origin
+       << "\n]\n";
+
+    return os;
 }
 
 } // namespace rdge

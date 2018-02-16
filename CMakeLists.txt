@@ -98,7 +98,6 @@ add_library (RDGE SHARED
              src/assets/font.cpp
              src/assets/tileset.cpp
              src/assets/spritesheet.cpp
-             src/assets/spritesheet_region.cpp
              src/assets/surface.cpp
 
              src/debug/widgets/camera_widget.cpp

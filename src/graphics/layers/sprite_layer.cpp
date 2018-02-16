@@ -1,6 +1,5 @@
 #include <rdge/graphics/layers/sprite_layer.hpp>
 #include <rdge/assets/spritesheet.hpp>
-#include <rdge/assets/spritesheet_region.hpp>
 #include <rdge/assets/tilemap/layer.hpp>
 #include <rdge/assets/tilemap/object.hpp>
 #include <rdge/graphics/renderers/sprite_batch.hpp>

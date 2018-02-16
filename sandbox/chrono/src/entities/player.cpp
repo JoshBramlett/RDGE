@@ -66,7 +66,7 @@ Player::Player (void)
 }
 
 void
-Player::InitGraphics (SpriteLayer& layer, const math::vec2& pos)
+Player::Init (const math::vec2& pos, SpriteLayer& layer, CollisionGraph& graph)
 {
     auto sheet = g_game.pack->GetAsset<SpriteSheet>(rdge_asset_spritesheet_player);
     this->sprite = layer.AddSprite(pos,
@@ -76,11 +76,7 @@ Player::InitGraphics (SpriteLayer& layer, const math::vec2& pos)
 
     this->facing = Direction::SOUTH;
     m_currentAnimation = &s_idle[this->facing];
-}
 
-void
-Player::InitPhysics (CollisionGraph& graph, const math::vec2& pos)
-{
     rigid_body_profile bprof;
     bprof.type = RigidBodyType::DYNAMIC;
     bprof.position = pos * g_game.ratios.base_to_world;
@@ -213,12 +209,12 @@ Player::OnUpdate (const delta_time& dt)
             if (m_flags & RUN_BUTTON_PRESSED)
             {
                 m_currentAnimation = &s_run[this->facing];
-                velocity_scale = 12.5f;
+                velocity_scale = 12.5f * 2.f;
             }
             else
             {
                 m_currentAnimation = &s_walk[this->facing];
-                velocity_scale = 5.5f;
+                velocity_scale = 5.5f * 2.f;
             }
         }
         else
