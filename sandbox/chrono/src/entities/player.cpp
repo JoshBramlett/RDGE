@@ -223,7 +223,7 @@ Player::OnUpdate (const delta_time& dt)
         }
     }
 
-#if 1
+#if 0
     // high damping if directional normal is different than the linear velocity
     body->linear.damping = (math::dot(this->normal, body->linear.velocity) > 0.f) ? 0.f : 9.f;
 

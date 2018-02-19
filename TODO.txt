@@ -11,13 +11,10 @@ Working (enhancements)
     Assets:
       - Investigate removing shared_asset destrutor call (to allow forward decl)
         - Look into shared_ptr deleter
+      - Create a vector-like container for tracking memory
+        - Update all asset classes to use that rather than a vector
       - Changes to Tilemap
-        - Add global object types file into tilemap before packing
-          - Add support for collision categories
-        - Move Tilemap to base namespace
-        - Move Tilemap objects, layers, etc, within Tilemap
         - Convert layer to y-is-up (or document why it can be unique)
-        - Once done, update PackFile for a templatized Get<>
     Graphics:
       - Create a more cohesive way to represent sprites
         - Explictly define sprites from object sheet and normal sprites

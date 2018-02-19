@@ -184,7 +184,7 @@ def process(in_file, out_dir):
     #   - chunk size (in cells)
     create_global_grid(tilemap)
 
-    # 2) Normalize and validate layer data
+    # 3) Normalize and validate layer data
     #
     # Both an objectgroup and tilelayer may contain a list of gid's that map
     # to a tile id of any tileset.  Changes include:
@@ -239,7 +239,7 @@ def process(in_file, out_dir):
                     for chunk in layer['chunks']:
                         remove_gid_offset(chunk['data'], first_gid)
 
-    # 3) Update tileset reference paths
+    # 4) Update tileset reference paths
     for tileset in tilemap['tilesets']:
         if 'tilesets' in tileset['source']:
             source_file = os.path.splitext(os.path.basename(tileset['source']))[0] + '.json'
@@ -247,6 +247,21 @@ def process(in_file, out_dir):
         elif 'objects' in tileset['source']:
             source_file = os.path.splitext(os.path.basename(tileset['source']))[0] + '.json'
             tileset['source'] = os.path.join('..', SPRITESHEET_DIR, source_file)
+
+    # 5) Add external referenced object types
+    if 'properties' in tilemap:
+        for prop in tilemap['properties']:
+            if prop['name'] == 'object_types':
+                if prop['type'] != 'file':
+                    raise Exception('object_types property is not a file')
+
+                tilemap_dir = os.path.dirname(in_file)
+                obj_types_file = os.path.join(tilemap_dir, prop['value'])
+                with open(obj_types_file) as json_data:
+                    obj_types = json.load(json_data)
+
+                tilemap['object_types'] = obj_types
+                break
 
     with open(data_file, 'w') as f:
         f.write(json.dumps(tilemap, indent=2, ensure_ascii=False))

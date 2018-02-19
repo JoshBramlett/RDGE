@@ -64,25 +64,8 @@ from_json (const nlohmann::json& j, Layer::tilelayer_data& layer)
     }
 }
 
-void
-from_json (const nlohmann::json& j, Layer::objectgroup_data& group)
-{
-    JSON_VALIDATE_REQUIRED(j, objects, is_array);
-    JSON_VALIDATE_REQUIRED(j, draworder, is_string);
-
-    if (!try_parse(j["draworder"].get<std::string>(), group.draw_order))
-    {
-        throw std::invalid_argument("Invalid SpriteRenderOrder");
-    }
-
-    for (const auto& j_obj : j["objects"])
-    {
-        group.objects.emplace_back(j_obj);
-    }
-}
-
-Layer::Layer (Tilemap* parent, const nlohmann::json& j)
-    : m_parent(parent)
+Layer::Layer (const nlohmann::json& j, Tilemap* tilemap)
+    : parent(tilemap)
 {
     try
     {
@@ -119,15 +102,26 @@ Layer::Layer (Tilemap* parent, const nlohmann::json& j)
             this->tilelayer = j.get<decltype(this->tilelayer)>();
 
             // populate remaining global fields from the parent
-            if (m_parent)
+            if (this->parent)
             {
-                this->tilelayer.grid.render_order = m_parent->grid.render_order;
-                this->tilelayer.grid.cell_size = m_parent->grid.cell_size;
-                this->tilelayer.grid.chunk_size = m_parent->grid.chunk_size;
+                this->tilelayer.grid.render_order = this->parent->grid.render_order;
+                this->tilelayer.grid.cell_size = this->parent->grid.cell_size;
+                this->tilelayer.grid.chunk_size = this->parent->grid.chunk_size;
             }
             break;
         case LayerType::OBJECTGROUP:
-            this->objectgroup = j.get<decltype(this->objectgroup)>();
+            JSON_VALIDATE_REQUIRED(j, objects, is_array);
+            JSON_VALIDATE_REQUIRED(j, draworder, is_string);
+
+            if (!try_parse(j["draworder"].get<std::string>(), this->objectgroup.draw_order))
+            {
+                throw std::invalid_argument("Invalid SpriteRenderOrder");
+            }
+
+            for (const auto& j_obj : j["objects"])
+            {
+                this->objectgroup.objects.emplace_back(j_obj, this->parent);
+            }
             break;
         case LayerType::IMAGELAYER:
             //throw std::invalid_argument("LayerType::IMAGELAYER currently unsupported");

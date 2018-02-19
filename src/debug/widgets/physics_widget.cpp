@@ -12,13 +12,15 @@ using namespace rdge::physics;
 void
 PhysicsWidget::UpdateWidget (void)
 {
-    if (!settings::show_physics_widget)
+    using namespace rdge::debug::settings::physics;
+
+    if (!show_widget)
     {
         return;
     }
 
     ImGui::SetNextWindowSize(ImVec2(210.f, 410.f), ImGuiSetCond_FirstUseEver);
-    if (!ImGui::Begin("Physics", &settings::show_physics_widget))
+    if (!ImGui::Begin("Physics", &show_widget))
     {
         ImGui::End();
         return;
@@ -110,11 +112,11 @@ PhysicsWidget::UpdateWidget (void)
     ImGui::Text("Debug Drawing");
     ImGui::Spacing();
     ImGui::Indent(15.f);
-    ImGui::Checkbox("Show Fixtures", &settings::draw_physics_fixtures);
-    ImGui::Checkbox("Show Proxy AABBs", &settings::draw_physics_proxy_aabbs);
-    ImGui::Checkbox("Show Joints", &settings::draw_physics_joints);
-    ImGui::Checkbox("Show Center of Mass", &settings::draw_physics_center_of_mass);
-    ImGui::Checkbox("Show BVH Nodes", &settings::draw_physics_bvh_nodes);
+    ImGui::Checkbox("Show Fixtures", &draw_fixtures);
+    ImGui::Checkbox("Show Proxy AABBs", &draw_proxy_aabbs);
+    ImGui::Checkbox("Show Joints", &draw_joints);
+    ImGui::Checkbox("Show Center of Mass", &draw_center_of_mass);
+    ImGui::Checkbox("Show BVH Nodes", &draw_bvh_nodes);
     ImGui::Unindent(15.f);
 
     ImGui::End();
@@ -123,63 +125,55 @@ PhysicsWidget::UpdateWidget (void)
 void
 PhysicsWidget::OnWidgetCustomRender (void)
 {
+    using namespace rdge::debug::settings::physics;
+
     if (!graph)
     {
         return;
     }
 
-    if (settings::draw_physics_bvh_nodes)
+    if (draw_bvh_nodes)
     {
         graph->m_tree.DebugDraw(scale);
     }
 
-    if (settings::draw_physics_joints)
+    if (draw_joints)
     {
         graph->m_joints.for_each([=](auto* j) {
-            debug::DrawLine(j->body_a->GetPosition(), j->AnchorA(), colors.joints);
-            debug::DrawLine(j->body_b->GetPosition(), j->AnchorB(), colors.joints);
+            debug::DrawLine(j->body_a->GetPosition(), j->AnchorA(), colors::joints);
+            debug::DrawLine(j->body_b->GetPosition(), j->AnchorB(), colors::joints);
         });
     }
 
-    if (settings::draw_physics_fixtures ||
-        settings::draw_physics_proxy_aabbs ||
-        settings::draw_physics_center_of_mass)
+    if (draw_fixtures || draw_proxy_aabbs || draw_center_of_mass)
     {
         graph->m_bodies.for_each([=](auto* body) {
             body->fixtures.for_each([=](auto* f) {
-                if (settings::draw_physics_fixtures)
+                if (draw_fixtures)
                 {
                     if (!body->IsSimulating())
                     {
-                        debug::DrawWireFrame(f, colors.not_simulating, scale);
-                    }
-                    else if (body->GetType() == RigidBodyType::STATIC)
-                    {
-                        debug::DrawWireFrame(f, colors.static_body, scale);
-                    }
-                    else if (body->GetType() == RigidBodyType::KINEMATIC)
-                    {
-                        debug::DrawWireFrame(f, colors.kinematic_body, scale);
+                        debug::DrawWireFrame(f, colors::not_simulating, scale);
                     }
                     else if (!body->IsAwake())
                     {
-                        debug::DrawWireFrame(f, colors.sleeping_body, scale);
+                        debug::DrawWireFrame(f, colors::sleeping_body, scale);
                     }
                     else
                     {
-                        debug::DrawWireFrame(f, colors.dynamic_body, scale);
+                        debug::DrawWireFrame(f, f->wireframe, scale);
                     }
                 }
 
-                if (settings::draw_physics_proxy_aabbs)
+                if (draw_proxy_aabbs)
                 {
-                    debug::DrawWireFrame(f->proxy->box, colors.proxy_aabb, scale);
+                    debug::DrawWireFrame(f->proxy->box, colors::proxy_aabb, scale);
                 }
             });
 
-            if (settings::draw_physics_center_of_mass)
+            if (draw_center_of_mass)
             {
-                debug::DrawPoint(body->GetWorldCenter(), colors.center_of_mass, 4.f);
+                debug::DrawPoint(body->GetWorldCenter(), colors::center_of_mass, 4.f);
             }
         });
     }

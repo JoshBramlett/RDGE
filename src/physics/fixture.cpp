@@ -7,6 +7,8 @@
 
 #include <SDL_assert.h>
 
+#include <rdge/debug/renderer.hpp>
+
 namespace rdge {
 namespace physics {
 
@@ -49,6 +51,25 @@ Fixture::Fixture (const fixture_profile& profile, RigidBody* parent)
     proxy->fixture = this;
     proxy->box = shape.world->compute_aabb();
     proxy->handle = fixture_proxy::INVALID_HANDLE;
+
+#ifdef RDGE_DEBUG
+    if (profile.override_color)
+    {
+        this->wireframe = profile.wireframe;
+    }
+    else if (this->body->GetType() == RigidBodyType::STATIC)
+    {
+        this->wireframe = debug::settings::physics::colors::static_body;
+    }
+    else if (this->body->GetType() == RigidBodyType::KINEMATIC)
+    {
+        this->wireframe = debug::settings::physics::colors::kinematic_body;
+    }
+    else
+    {
+        this->wireframe = debug::settings::physics::colors::dynamic_body;
+    }
+#endif
 }
 
 Fixture::~Fixture (void) noexcept

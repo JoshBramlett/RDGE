@@ -6,6 +6,7 @@
 #pragma once
 
 #include <rdge/core.hpp>
+#include <rdge/graphics/color.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/physics/aabb.hpp>
 #include <rdge/physics/shapes/ishape.hpp>
@@ -48,6 +49,10 @@ struct fixture_profile
 
     collision_filter filter;   //!< Collision filter
     bool is_sensor = false;    //!< If fixture generates a collision response
+
+    // debug
+    bool override_color = false; //!< Override debug wireframe color
+    color wireframe;             //!< Debug wireframe color
 };
 
 //! \struct fixture_proxy
@@ -129,6 +134,8 @@ public:
     float restitution = 0.f;
 
     collision_filter filter;
+
+    color wireframe; //!< Debug wireframe color
 
 private:
     friend class RigidBody;

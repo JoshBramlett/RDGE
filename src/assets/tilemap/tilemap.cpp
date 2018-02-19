@@ -65,6 +65,18 @@ from_json (const nlohmann::json& j, Tilemap::sheet_info& sheet)
     sheet.type = j["type"].get<decltype(sheet.type)>();
 }
 
+void
+from_json (const nlohmann::json& j, extended_object_data& data)
+{
+    JSON_VALIDATE_REQUIRED(j, name, is_string);
+    JSON_VALIDATE_REQUIRED(j, color, is_string);
+    JSON_VALIDATE_REQUIRED(j, properties, is_array);
+
+    data.name = j["name"].get<decltype(data.name)>();
+    data.color = color::from_argb(j["color"].get<std::string>());
+    data.properties = PropertyCollection(j);
+}
+
 Tilemap::Tilemap (const std::vector<uint8>& msgpack, PackFile& packfile)
 {
     try
@@ -76,6 +88,7 @@ Tilemap::Tilemap (const std::vector<uint8>& msgpack, PackFile& packfile)
         JSON_VALIDATE_REQUIRED(j, tilesets, is_array);
 
         JSON_VALIDATE_OPTIONAL(j, backgroundcolor, is_string);
+        JSON_VALIDATE_OPTIONAL(j, object_types, is_array);
 
         // required
         if (!try_parse(j["orientation"].get<std::string>(), this->orientation))
@@ -90,10 +103,14 @@ Tilemap::Tilemap (const std::vector<uint8>& msgpack, PackFile& packfile)
 
         this->grid = j["grid"].get<tilemap_grid>();
         this->sheets = j["tilesets"].get<std::vector<sheet_info>>();
+        if (j.count("object_types"))
+        {
+            this->obj_data = j["object_types"].get<std::vector<extended_object_data>>();
+        }
 
         for (auto& j_layer : j["layers"])
         {
-            this->layers.emplace_back(this, j_layer);
+            this->layers.emplace_back(j_layer, this);
 
             if (j_layer.count("tileset_index"))
             {
@@ -193,6 +210,20 @@ Tilemap::CreateSpriteLayer (int32 layer_id, float scale)
     {
         RDGE_THROW(ex.what());
     }
+}
+
+const extended_object_data*
+Tilemap::GetSharedObjectData (const std::string& key) const
+{
+    for (const auto& data : this->obj_data)
+    {
+        if (data.name == key)
+        {
+            return &data;
+        }
+    }
+
+    return nullptr;
 }
 
 std::ostream&

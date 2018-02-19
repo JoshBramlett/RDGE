@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset name="overworld_obj" tilewidth="80" tileheight="96" tilecount="9" columns="0">
+<tileset name="overworld_obj" tilewidth="80" tileheight="96" tilecount="10" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0">
   <image width="80" height="96" source="tree_01.png"/>
   <objectgroup draworder="index" name="tree_01">
-   <object id="1" name="hitbox" type="environment_static" x="29.3155" y="70.9521" width="22.5177" height="22.5177">
+   <object id="1" name="hitbox" type="environment_static" x="29.3155" y="65.9521" width="22.5177" height="22.5177">
     <ellipse/>
    </object>
   </objectgroup>
@@ -67,6 +67,14 @@
   <image width="32" height="16" source="stone_02.png"/>
   <objectgroup draworder="index">
    <object id="1" name="hitbox" type="environment_static" x="2.47544" y="4.95088" width="23.8261" height="9.90176"/>
+  </objectgroup>
+ </tile>
+ <tile id="9">
+  <image width="80" height="96" source="tree_02.png"/>
+  <objectgroup draworder="index">
+   <object id="1" name="hitbox" type="environment_static" x="29.3629" y="68.313" width="22.9917" height="22.9917">
+    <ellipse/>
+   </object>
   </objectgroup>
  </tile>
 </tileset>

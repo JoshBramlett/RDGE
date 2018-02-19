@@ -36,9 +36,9 @@ enum class Orientation
 };
 
 //! \class Tilemap
-//! \brief Generic tilemap layer
-//! \details Tilemap represents the collection of all the entities that make up
-//!          the scene.
+//! \brief Definition of all layers and objects that compose a scene
+//! \details Tilemaps provide a mechanism to represent numerous aspects of a
+//!          scene, from defining sprites, layers, objects, collision data, etc.
 //!
 //!          The proprietary json format expands on the Tiled default format.
 //!
@@ -104,6 +104,11 @@ public:
     //! \throws rdge::Exception Invalid argument
     SpriteLayer CreateSpriteLayer (int32 layer_id, float scale);
 
+    //! \brief Lookup for an object's extended data
+    //! \param [in] key Shared object type key
+    //! \returns Pointer to the data if the lookup succeeds, nullptr otherwise
+    const extended_object_data* GetSharedObjectData (const std::string& key) const;
+
 public:
     //! \struct sheet_info
     //! \brief Tilemap dependency information
@@ -121,11 +126,12 @@ public:
     Orientation orientation = Orientation::INVALID;
     //!@}
 
-    tilemap_grid grid;              //!< Grid for the Tilemap
-    std::vector<Layer> layers;      //!< List of Tilemap layers
-    std::vector<sheet_info> sheets; //!< Table of Tileset/SpriteSheet dependencies
+    tilemap_grid grid;                          //!< Grid for the Tilemap
+    std::vector<Layer> layers;                  //!< Tilemap layers
+    std::vector<sheet_info> sheets;             //!< Tileset/SpriteSheet dependencies
+    std::vector<extended_object_data> obj_data; //!< Shared object data
 
-    PropertyCollection properties;  //!< Custom variable type property collection
+    PropertyCollection properties; //!< Custom variable type property collection
 };
 
 //! \brief Orientation stream output operator

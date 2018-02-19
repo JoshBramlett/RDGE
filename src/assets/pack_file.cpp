@@ -211,19 +211,43 @@ PackFile::GetAsset (int32 asset_id)
     return shared_asset<Tileset>(static_cast<Tileset*>(data.asset), &data);
 }
 
-tilemap::Tilemap
-PackFile::GetTilemap (int32 asset_id)
+template <>
+shared_asset<tilemap::Tilemap>
+PackFile::GetAsset (int32 asset_id)
 {
+    using namespace rdge::tilemap;
     SDL_assert(asset_id >= 0 && (uint32)asset_id < m_header.asset_count);
 
-    auto& info = m_table[asset_id];
-    SDL_assert(info.type == asset_type_tilemap);
+    auto& data = m_cache[asset_id];
+    if (!data.asset)
+    {
+        auto& info = m_table[asset_id];
+        SDL_assert(info.type == asset_type_tilemap);
 
-    std::vector<std::uint8_t> msgpack(info.size);
-    m_file.seek(info.offset, rwops_base::seekdir::beg);
-    m_file.read(msgpack.data(), info.size);
+        void* asset_memory = nullptr;
+        if (RDGE_UNLIKELY(!RDGE_MALLOC(asset_memory, sizeof(Tilemap), nullptr)))
+        {
+            RDGE_THROW("Memory allocation failed");
+        }
 
-    return tilemap::Tilemap(msgpack, *this);
+        std::vector<std::uint8_t> msgpack(info.size);
+        m_file.seek(info.offset, rwops_base::seekdir::beg);
+        m_file.read(msgpack.data(), info.size);
+
+        data.ref_count = 0;
+        data.asset_id = asset_id;
+        data.type = info.type;
+        data.lifetime = SharedAssetLifetime::REF_COUNT_MANAGED;
+        data.asset = new (asset_memory) Tilemap(msgpack, *this);
+
+        ILOG() << "Asset Loaded:"
+               << " asset_id=" << data.asset_id
+               << " type=" << data.type
+               << " size=" << info.size;
+    }
+
+    SDL_assert(data.type == asset_type_tilemap);
+    return shared_asset<Tilemap>(static_cast<Tilemap*>(data.asset), &data);
 }
 
 } // namespace rdge

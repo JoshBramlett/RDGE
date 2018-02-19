@@ -105,10 +105,10 @@ class Layer
 {
 public:
     //! \brief Layer ctor
-    //! \param [in] parent Tilemap the layer belongs to
     //! \param [in] j json formatted layer
+    //! \param [in] parent Tilemap the layer belongs to
     //! \throws rdge::Exception Parsing failed
-    Layer (Tilemap* parent, const nlohmann::json& j);
+    Layer (const nlohmann::json& j, Tilemap* parent = nullptr);
 
     //!@{ Layer default ctor/dtor
     Layer (void) = default;
@@ -137,6 +137,8 @@ public:
 
     PropertyCollection properties; //!< Custom variable type property collection
 
+    Tilemap* parent = nullptr; //!< Circular reference to parent (if avavilable)
+
 public:
     //!@{ LayerType::TILELAYER
     struct tilelayer_data
@@ -161,9 +163,6 @@ public:
         shared_asset<SpriteSheet> spritesheet; //!< Associated asset
     } objectgroup;
     //!@}
-
-private:
-    Tilemap* m_parent = nullptr;
 };
 
 //! \brief LayerType stream output operator

@@ -15,7 +15,7 @@ using namespace rdge::physics;
 TilesScene::TilesScene (void)
     : collision_graph({ 0.f, -9.8f })
 {
-    debug::settings::draw_physics_fixtures = true;
+    debug::settings::physics::draw_fixtures = true;
 }
 
 void

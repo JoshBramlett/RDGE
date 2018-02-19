@@ -18,9 +18,9 @@ OverworldScene::OverworldScene (void)
 
     debug::AddWidget(this);
     debug::settings::show_overlay = true;
-    debug::settings::draw_physics_fixtures = true;
+    debug::settings::physics::draw_fixtures = true;
 
-    auto tilemap = g_game.pack->GetTilemap(rdge_asset_tilemap_overworld);
+    auto tilemap = g_game.pack->GetAsset<tilemap::Tilemap>(rdge_asset_tilemap_overworld);
 
     ///////////////////
     // Tile layers
@@ -32,15 +32,15 @@ OverworldScene::OverworldScene (void)
     //      frame.  Zoom should be considered, but in the general case this
     //      should be no more than the the number of tiles drawn for the maximum
     //      resolution supported.
-    size_t tile_count = tilemap.grid.size.w * tilemap.grid.size.h;
-    auto tile_size = static_cast<math::vec2>(tilemap.grid.cell_size) * g_game.ratios.base_to_screen;
+    size_t tile_count = tilemap->grid.size.w * tilemap->grid.size.h;
+    auto tile_size = static_cast<math::vec2>(tilemap->grid.cell_size) * g_game.ratios.base_to_screen;
 
     tile_batch = TileBatch(tile_count, tile_size);
     tile_layers.reserve(2);
-    tile_layers.emplace_back(tilemap.CreateTileLayer(overworld_layer_bg,
-                                                     g_game.ratios.base_to_screen));
-    tile_layers.emplace_back(tilemap.CreateTileLayer(overworld_layer_bg_overlay_1,
-                                                     g_game.ratios.base_to_screen));
+    tile_layers.emplace_back(tilemap->CreateTileLayer(overworld_layer_bg,
+                                                      g_game.ratios.base_to_screen));
+    tile_layers.emplace_back(tilemap->CreateTileLayer(overworld_layer_bg_overlay_1,
+                                                      g_game.ratios.base_to_screen));
 
     ///////////////////
     // Sprite layers
@@ -54,7 +54,7 @@ OverworldScene::OverworldScene (void)
     player.Init(player_pos, sprite_layers.back(), collision_graph);
 #else
     {
-        const auto& def = tilemap.layers[overworld_layer_bg_sprites];
+        const auto& def = tilemap->layers[overworld_layer_bg_sprites];
         uint16 sprite_capacity = def.objectgroup.objects.size() + 100;
 
         this->static_actors.reserve(sprite_capacity);
@@ -90,26 +90,49 @@ OverworldScene::OverworldScene (void)
     ///////////////////
 
     {
-        const auto& def = tilemap.layers[overworld_layer_bg_collision];
+        const auto& def = tilemap->layers[overworld_layer_bg_collision];
         for (const auto& obj : def.objectgroup.objects)
         {
-            if (obj.type == tilemap::ObjectType::POLYGON)
+            if (obj.ext_type == "environment_static")
             {
                 rigid_body_profile bprof;
+                fixture_profile fprof;
+
                 bprof.type = RigidBodyType::STATIC;
                 bprof.position = obj.pos * g_game.ratios.base_to_world;
                 auto body = collision_graph.CreateBody(bprof);
 
-                // TODO these properties should be read by the object
-                fixture_profile fprof;
-                fprof.density = 1.f;
-                //fprof.restitution = 0.8f;
-                fprof.filter.category = chrono_collision_category_environment_static;
-                fprof.filter.mask = chrono_collision_category_all_hitbox;
+                if (obj.ext_data)
+                {
+                    // TODO This lookup is counter-productive.  Fixture profile
+                    //      should be cached
+                    const auto& ext_props = obj.ext_data->properties;
+                    fprof.density = ext_props.GetFloat("density");
+                    fprof.friction = ext_props.GetFloat("friction");
+                    fprof.restitution = ext_props.GetFloat("restitution");
+                    fprof.is_sensor = ext_props.GetBool("sensor");
+                    fprof.filter.category = ext_props.GetInt("cgroup");
+                    fprof.filter.mask = ext_props.GetInt("cmask");
 
-                auto p = obj.GetPolygon(g_game.ratios.base_to_world, true);
-                fprof.shape = &p;
-                body->CreateFixture(fprof);
+                    fprof.override_color = true;
+                    fprof.wireframe = obj.ext_data->color;
+                }
+                else
+                {
+                    fprof.density = 1.f;
+                    fprof.friction = 0.2f;
+                    fprof.restitution = 0.0f;
+                    fprof.is_sensor = false;
+                    fprof.filter.category = chrono_collision_category_environment_static;
+                    fprof.filter.mask = chrono_collision_category_all_hitbox;
+                }
+
+                if (obj.type == tilemap::ObjectType::POLYGON)
+                {
+                    auto p = obj.GetPolygon(g_game.ratios.base_to_world, true);
+                    fprof.shape = &p;
+                    body->CreateFixture(fprof);
+                }
             }
         }
     }

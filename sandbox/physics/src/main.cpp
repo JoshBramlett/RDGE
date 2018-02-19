@@ -118,7 +118,7 @@ int main ()
 
     debug::AddWidget(&widget);
     debug::settings::show_overlay = true;
-    debug::settings::draw_physics_fixtures = true;
+    debug::settings::physics::draw_fixtures = true;
 
     widget.game.on_event_hook = [&](const Event& event) {
         if (event.IsQuitEvent())

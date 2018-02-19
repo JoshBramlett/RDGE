@@ -1,4 +1,5 @@
 #include <rdge/assets/tilemap/object.hpp>
+#include <rdge/assets/tilemap/tilemap.hpp>
 #include <rdge/physics/shapes/circle.hpp>
 #include <rdge/util/compiler.hpp>
 #include <rdge/util/json.hpp>
@@ -71,7 +72,8 @@ from_json (const nlohmann::json& j, Object::object_polygon_data& poly)
     }
 }
 
-Object::Object (const nlohmann::json& j)
+Object::Object (const nlohmann::json& j, Tilemap* tilemap)
+    : parent(tilemap)
 {
     try
     {
@@ -86,12 +88,17 @@ Object::Object (const nlohmann::json& j)
         // required
         this->id = j["id"].get<decltype(this->id)>();
         this->name = j["name"].get<decltype(this->name)>();
-        this->custom_type = j["type"].get<decltype(this->custom_type)>();
         this->visible = j["visible"].get<decltype(this->visible)>();
 
         // convert position to y-is-up
         this->pos.x = j["x"].get<decltype(this->pos.x)>();
         this->pos.y = j["y"].get<decltype(this->pos.y)>() * -1.f;
+
+        this->ext_type = j["type"].get<decltype(this->ext_type)>();
+        if (!this->ext_type.empty() && this->parent)
+        {
+            this->ext_data = this->parent->GetSharedObjectData(this->ext_type);
+        }
 
         // optional
         this->properties = PropertyCollection(j);

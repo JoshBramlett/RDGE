@@ -36,11 +36,12 @@ public:
 
     //void PreloadAsset (int32 asset_id, SharedAssetLifetime lifetime);
 
+    //! \brief Get a constructed asset from the asset packed file
+    //! \details Assets will be cached and not reconstructed every call
+    //! \param [in] asset_id Index of the asset in the table
+    //! \throws rdge::Exception Unable to generate asset
     template <typename T>
     shared_asset<T> GetAsset (int32 asset_id);
-
-    // TODO Cache these
-    tilemap::Tilemap GetTilemap (int32 asset_id);
 
 private:
     rwops_base m_file;

@@ -7,6 +7,7 @@
 
 #include <rdge/core.hpp>
 #include <rdge/assets/tilemap/property.hpp>
+#include <rdge/graphics/color.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/physics/shapes/polygon.hpp>
 
@@ -28,6 +29,10 @@ struct circle;
 
 namespace tilemap {
 
+//!@{ Forward declarations
+class Tilemap;
+//!@}
+
 //! \enum ObjectType
 //! \brief Base object type
 enum class ObjectType
@@ -39,6 +44,17 @@ enum class ObjectType
     POLYGON,
     POLYLINE,
     TEXT
+};
+
+//! \struct extended_object_data
+//! \brief Custom object traits shared between objects
+//! \details The \ref Tilemap manages an array of all extended data which
+//!          can be accessed by the object's custom_type property
+struct extended_object_data
+{
+    std::string name;              //!< Unique name
+    color color;                   //!< Debug wireframe color
+    PropertyCollection properties; //!< Shared properties
 };
 
 //! \class Object
@@ -111,8 +127,9 @@ class Object
 public:
     //! \brief Object ctor
     //! \param [in] j json formatted object
+    //! \param [in] parent
     //! \throws rdge::Exception Parsing failed
-    Object (const nlohmann::json& j);
+    Object (const nlohmann::json& j, Tilemap* parent = nullptr);
 
     //!@{ Object default ctor/dtor
     Object (void) = default;
@@ -138,7 +155,6 @@ public:
     //!@{ Custom identifiers
     int32 id = -1;           //!< [unused] Globally unique id
     std::string name;        //!< 'Name' field assigned in editor
-    std::string custom_type; //!< 'Type' field assigned in editor
     //!@}
 
     //!@{ Rendering/physics properties
@@ -146,7 +162,19 @@ public:
     bool visible;   //!< Object is shown in editor
     //!@}
 
+    //!@{
+    // \brief Shared cusotm object attributes
+    // \details Extended data is optional.  If the object was constructed
+    //          from the \ref Tilemap the pointer will be set.  If the object
+    //          was constructed outside the Tilemap (e.g. SpriteSheet) you
+    //          can query the Tilemap using the ext_type.
+    std::string ext_type;
+    const extended_object_data* ext_data = nullptr;
+    //!@}
+
     PropertyCollection properties; //!< Custom variable type property collection
+
+    Tilemap* parent = nullptr; //!< Circular reference to parent (if avavilable)
 
 public:
     //!@{ ObjectType::SPRITE
