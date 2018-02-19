@@ -1,17 +1,39 @@
+Working (bugs)
+
+    Physics Circle/Poly collision
+      - Ordering is wrong so the normal is messed up.  Adding the rect prior to the circle
+        works, vice versa does not.
+    Player animations frames and collision boxes don't match up
+      - It's working correctly, but the origin is wrong.
+
+Working (enhancements)
+
+    Assets:
+      - Investigate removing shared_asset destrutor call (to allow forward decl)
+        - Look into shared_ptr deleter
+      - Create a vector-like container for tracking memory
+        - Update all asset classes to use that rather than a vector
+      - Changes to Tilemap
+        - Convert layer to y-is-up (or document why it can be unique)
+    Graphics:
+      - Create a more cohesive way to represent sprites
+        - Explictly define sprites from object sheet and normal sprites
+        - Tie in with physics system (via entity).  Note: SpriteGroup/RigidBody
+        - Logically separate position from depth - use vec2 when setting position
+          - Remove m_far from TileBatch (really only applicable for bg layers)
+      - TileLayer & SpriteLayer
+        - ImGui support (rendering statistics)
+      - Remove ISprite, Sprite, vops, etc.
+        - Clean up SpriteBatch for above
+      - Unify SpriteBatch and TileBatch interfaces
+
+
+
 Assets:
   - Add bitmap font support
   - Remove SDL_ttf dependency
 
 Graphics:
-  - Create a more cohesive way to represent sprites
-    - Allocation should be done through a block allocator
-    - Tie in with physics system (via entity).  Note: SpriteGroup/RigidBody
-    - Logically separate position from depth - use vec2 when setting position
-  - TilemapBatch
-    - Add culling
-    - Add blending for upper layers
-    - ImGui support (rendering statistics)
-    - [maybe] Global color (for tinting)
   - Add shader support for distance field fonts
   - Better support for texture based filter, blending & wrapping (look to LibGDX)
   - Add support for 24bpp images (surface and texture)
@@ -21,20 +43,23 @@ Graphics:
   - OpenGL context settings configuration variables
   - Add texture sorting for properly rendering semi-transparent sprites
 
-Graphics (low priority);
+Graphics (low priority - implement as needed);
   - Add rich text support
   - Implement "focus" system for UI controls
   - Create a perspective camera
+  - Add support TileRenderOrder
+  - Add support SpriteRenderOrder
+  - TileLayer Global color (for tinting)
+  - SpriteLayer Global color (for tinting)
   - Ability to pad NPOT textures
 
 Physics:
+  - Change all for_each lambdas to use a range based for
   - Move GJK and all itersects methods out of the shapes and into collision.cpp
-    - Pass transforms and remove local manifold conversion from Contact.cpp
   - Solving:
     - Warm starting (seems to cut down processing time considerably)
     - Box2D "Box Solver" LCP (Linear complementarity problem)
     - TOI solver
-  - Circle/Polygon manifold generation
   - Change GraphListener to lambdas.  Implement destruction listener.
   - RigidBody has a lot of unimplemented methods
   - Clean up and finish documenting
@@ -45,13 +70,18 @@ Physics:
 Math:
 
 Util:
-  - Add proper logging across the library
-  - Normalize and add support for normal print and pretty printing
   - Enhance global memory tracker
     - Find an elegant way to categorize tracking.
+      - Idea: Remove all memory_profile references, and rather than passing the pointer
+        to the profile you just pass an enum.  Subsystems could be better tracked by creating
+        a stateful system (e.g. PUSH_TRACKED_MEMORY_SUBSYSTEM(xxx_physics)).  The enums
+        provided to the malloc call would be more specific, like xxx_freelist.
     - Improve ImGui memory tracking window.
     - Find solution for properly aligning memory.
-  - Build asset system to manage memory/loading/caching etc.
+    - Investigate overriding SDL allocation for tracking (like STB is overridden in surface.cpp)
+
+  - Add proper logging across the library
+  - Normalize and add support for normal print and pretty printing
   - Support TextInput and TextEdit SDL events
 
 Debug:
@@ -70,11 +100,18 @@ Game
   - Anchoring system for entity placement
 
 Misc
+  - Remove internal
   - Support targeted builds
   - Verify delegating constructors across library
   - Init SDL on demand
   - Ensure Move semantics across library
   - Code conformity maintenence
+
+Resources
+  - Iterators
+    - https://github.com/llvm-mirror/llvm/blob/master/include/llvm/ADT/iterator.h
+    - https://github.com/electronicarts/EASTL/blob/master/include/EASTL/iterator.h
+    - https://stackoverflow.com/questions/8054273/how-to-implement-an-stl-style-iterator-and-avoid-common-pitfalls
 
 Low Priority
   - Create scope guard

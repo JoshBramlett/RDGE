@@ -124,8 +124,10 @@ TEST(AABBTest, VerifyContainsAABBResult)
 
 TEST(AABBTest, VerifyIntersectsWithResult)
 {
-    // NOTE - Each case ran twice making sure the function generating the manifold
-    //        data has the same boolean result as the naive test.
+    // NOTE - Each case is ran twice because intersects_with is overloaded.
+    //        The result should be the same for the function that solely
+    //        performs the test, as well as the function that generates
+    //        a collision manifold.
 
     aabb a({ 1.f, 1.f }, { 4.f, 3.f });
     collision_manifold dummy;

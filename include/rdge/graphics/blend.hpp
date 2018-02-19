@@ -66,6 +66,14 @@ public:
 
     //! \brief Blend default ctor
     Blend (void) = default;
+    ~Blend (void) noexcept = default;
+
+    //!@{ Copy and move enabled
+    Blend (const Blend&) = default;
+    Blend& operator= (const Blend&) = default;
+    Blend (Blend&&) noexcept = default;
+    Blend& operator= (Blend&&) noexcept = default;
+    //!@}
 
     //! \brief Blend ctor
     //! \details Apply source and destination parameters to both color and alpha.

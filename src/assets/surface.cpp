@@ -1,12 +1,17 @@
 #include <rdge/assets/surface.hpp>
 #include <rdge/math/intrinsics.hpp>
+#include <rdge/system/types.hpp>
 #include <rdge/util/logger.hpp>
 #include <rdge/type_traits.hpp>
+#include <rdge/util/compiler.hpp>
+#include <rdge/util/memory/alloc.hpp>
 #include <rdge/internal/exception_macros.hpp>
-#include <rdge/internal/hints.hpp>
 
 #include <SDL_assert.h>
 
+#define STBI_MALLOC(x) RDGE_MALLOC_SZ(x, nullptr)
+#define STBI_FREE(x) RDGE_FREE(x, nullptr)
+#define STBI_REALLOC(x, n) RDGE_REALLOC_SZ(x, n, nullptr)
 #define STB_IMAGE_IMPLEMENTATION
 #include <nothings/stb_image.h>
 
@@ -88,12 +93,9 @@ Surface::Surface (const std::string& filepath, PixelDepth depth)
         channels = STBI_rgb_alpha;
     }
 
-    // TODO when implementing a memory tracker, stbi has a define rule to use
-    //      a custom allocator.  Look into the same for SDL.
-
     int32 w, h, file_channels;
     void* pixel_data = stbi_load(filepath.c_str(), &w, &h, &file_channels, channels);
-    if (UNLIKELY(!pixel_data))
+    if (RDGE_UNLIKELY(!pixel_data))
     {
         std::ostringstream ss;
         ss << "Surface load failed."
@@ -141,7 +143,7 @@ Surface::Surface (const std::string& filepath, PixelDepth depth)
                                                    static_cast<int32>(depth),
                                                    pitch,
                                                    GetFormat(depth));
-    if (UNLIKELY(!m_surface))
+    if (RDGE_UNLIKELY(!m_surface))
     {
         stbi_image_free(pixel_data);
         SDL_THROW("Failed to create surface from pixel data",
@@ -178,7 +180,7 @@ Surface::Surface (void* pixel_data, int32 w, int32 h, int32 channels)
                                                    static_cast<int32>(depth),
                                                    pitch,
                                                    GetFormat(depth));
-    if (UNLIKELY(!m_surface))
+    if (RDGE_UNLIKELY(!m_surface))
     {
         SDL_THROW("Failed to create surface from pixel data",
                   "SDL_CreateRGBSurfaceWithFormatFrom");
@@ -194,75 +196,36 @@ Surface::~Surface (void) noexcept
 
     if (m_surface)
     {
-        m_surface->refcount--;
-        if (m_surface->refcount == 0)
-        {
-            void* pixel_data = m_surface->userdata;
-            SDL_FreeSurface(m_surface);
-            free(pixel_data);
-        }
+        void* pixel_data = m_surface->userdata;
+        SDL_FreeSurface(m_surface);
+        stbi_image_free(pixel_data);
     }
 }
 
-Surface::Surface (const Surface& other)
-    : m_surface(other.m_surface)
+bool
+Surface::IsEmpty (void) const noexcept
 {
-    if (m_surface)
-    {
-        m_surface->refcount++;
-    }
+    return (m_surface == nullptr);
 }
 
-Surface&
-Surface::operator= (const Surface& rhs)
-{
-    m_surface = rhs.m_surface;
-    if (m_surface)
-    {
-        m_surface->refcount++;
-    }
-
-    return *this;
-}
-
-Surface::Surface (Surface&& other) noexcept
-    : m_surface(other.m_surface)
-{
-    other.m_surface = nullptr;
-}
-
-Surface&
-Surface::operator= (Surface&& rhs) noexcept
-{
-    if (this != &rhs)
-    {
-        std::swap(m_surface, rhs.m_surface);
-    }
-
-    return *this;
-}
-
-uint32
+size_t
 Surface::Width (void) const noexcept
 {
     SDL_assert(m_surface != nullptr);
-
-    return static_cast<uint32>(m_surface->w);
+    return static_cast<size_t>(m_surface->w);
 }
 
-uint32
+size_t
 Surface::Height (void) const noexcept
 {
     SDL_assert(m_surface != nullptr);
-
-    return static_cast<uint32>(m_surface->h);
+    return static_cast<size_t>(m_surface->h);
 }
 
 math::uivec2
 Surface::Size (void) const noexcept
 {
     SDL_assert(m_surface != nullptr);
-
     return { static_cast<uint32>(m_surface->w), static_cast<uint32>(m_surface->h) };
 }
 
@@ -270,7 +233,6 @@ uint32
 Surface::PixelFormat (void) const noexcept
 {
     SDL_assert(m_surface != nullptr);
-
     return m_surface->format->format;
 }
 
@@ -299,13 +261,15 @@ Surface::ChangePixelFormat (uint32 pixel_format)
 
     // last param is 'flags', docs say it's unused and should be set to 0
     auto new_surface = SDL_ConvertSurfaceFormat(m_surface, pixel_format, 0);
-    if (UNLIKELY(!new_surface))
+    if (RDGE_UNLIKELY(!new_surface))
     {
         SDL_THROW("Failed to convert surface pixel format", "SDL_ConvertSurfaceFormat");
     }
 
+    void* pixel_data = m_surface->userdata;
     SDL_FreeSurface(m_surface);
     m_surface = new_surface;
+    m_surface->userdata = pixel_data;
 }
 
 Surface
@@ -321,12 +285,12 @@ Surface::CreateSubSurface (const screen_rect& clip)
                                   masks.g_mask,
                                   masks.b_mask,
                                   masks.a_mask);
-    if (UNLIKELY(!s))
+    if (RDGE_UNLIKELY(!s))
     {
         SDL_THROW("Failed to create blank surface", "SDL_CreateRGBSurface");
     }
 
-    if (UNLIKELY(SDL_BlitSurface(m_surface, &clip, s, nullptr) != 0))
+    if (RDGE_UNLIKELY(SDL_BlitSurface(m_surface, &clip, s, nullptr) != 0))
     {
         SDL_THROW("Failed to create sub-surface", "SDL_BlitSurface");
     }

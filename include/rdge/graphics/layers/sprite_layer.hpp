@@ -6,67 +6,97 @@
 #pragma once
 
 #include <rdge/core.hpp>
+#include <rdge/graphics/color.hpp>
+#include <rdge/graphics/tex_coords.hpp>
+#include <rdge/graphics/texture.hpp>
+#include <rdge/math/vec2.hpp>
+#include <rdge/util/containers/intrusive_list.hpp>
 
-#include <memory>
 #include <vector>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
 //!@{ Forward declarations
-class ISprite;
-class Shader;
 class SpriteBatch;
+class SpriteSheet;
+class OrthographicCamera;
+namespace tilemap { class Layer; }
 //!@}
 
-//! \class SpriteLayer
-//! \brief Layer of ISprite objects
-//! \details A layer represents a logical group of sprites that will be drawn
-//!          together using the same render target.  A uniform depth value can be set
-//!          for all cached sprites in order to mimic the behavior of a photoshop
-//!          layer.  Facilitates the interface between the sprite and the render
-//!          target for batch drawing.
+//! \enum SpriteRenderOrder
+//! \brief Options for how to render the \ref SpriteLayer
+enum class SpriteRenderOrder
+{
+    INVALID = -1,
+    TOPDOWN,      //!< Sorted by y-coordinate, drawing from top to bottom
+    INDEX         //!< Draws sprites in the order they are added to the layer
+};
+
+struct sprite_data : public intrusive_list_element<sprite_data>
+{
+    size_t index; //!< Index the sprite was added to the layer
+
+    //!@{ Location
+    math::vec2 pos;
+    float depth;
+    //!@}
+
+    //!@{ Frame
+    math::vec2 size;
+    math::vec2 origin;
+    tex_coords uvs;
+    //!@}
+
+    //!@{ Render properties
+    int32 tid;
+    color color;
+    //!@}
+};
+
 class SpriteLayer
 {
 public:
-    //! \brief SpriteLayer default ctor
-    //! \details Creates a new instance of the render target.
-    //! \param [in] num_sprites Max number of sprites that can be submitted
-    //! \param [in] shader Shader to pass to the render target
-    explicit SpriteLayer (uint16 num_sprites = 1000, std::shared_ptr<Shader> shader = nullptr);
-
-    //! \brief SpriteLayer ctor
-    //! \details Uses an existing render target.
-    //! \param [in] render_target Shared render target
-    // TODO If multiple layers share a renderer each still does it own prep and flush.
-    //      I could easily avoid this by setting a flag on the draw call.  Make sure
-    //      to profile the impact.
-    explicit SpriteLayer (std::shared_ptr<SpriteBatch> render_target);
-
-    //! \brief SpriteLayer dtor
-    ~SpriteLayer (void) noexcept = default;
+    explicit SpriteLayer (uint16 capacity);
+    SpriteLayer (const tilemap::Layer& def, float scale);
+    ~SpriteLayer (void) noexcept;
 
     //!@{ Non-copyable, move enabled
     SpriteLayer (const SpriteLayer&) = delete;
     SpriteLayer& operator= (const SpriteLayer&) = delete;
-    SpriteLayer (SpriteLayer&&) noexcept = default;
-    SpriteLayer& operator= (SpriteLayer&&) noexcept = default;
+    SpriteLayer (SpriteLayer&&) noexcept;
+    SpriteLayer& operator= (SpriteLayer&&) noexcept;
     //!@}
 
-    //! \brief Add sprite to the cache
-    //! \param [in] sprite Shared ISprite object
-    void AddSprite (std::shared_ptr<ISprite> sprite);
+    //! \brief Draw all tiles within the camera bounds
+    void Draw (SpriteBatch& renderer, const OrthographicCamera& camera);
 
-    //! \brief Draw all cached sprites
-    void Draw (void);
+    sprite_data* AddSprite (const math::vec2& pos,
+                            uint32 id,
+                            const SpriteSheet& spritesheet,
+                            float scale);
 
-    //! \brief Give all cached sprites a uniform depth
-    //! \param [in] depth Depth (z-index) value
-    void OverrideSpriteDepth (float depth);
+private:
+    intrusive_list<sprite_data> m_list;
+    sprite_data* m_sprites = nullptr;
+    size_t m_spriteCount = 0;
+    size_t m_spriteCapacity = 0;
+
+    float m_padW = 0.f; //!< Culling region width padding
+    float m_padH = 0.f; //!< Culling region height padding
+
+    color m_color = color::WHITE;  //!< Render color (to store opacity)
 
 public:
-    std::shared_ptr<SpriteBatch>          renderer; //!< Render target
-    std::vector<std::shared_ptr<ISprite>> sprites;  //!< Collection of sprites
+    std::vector<Texture> textures; //!< Sprite textures
 };
+
+//! \brief SpriteRenderOrder stream output operator
+std::ostream& operator<< (std::ostream&, SpriteRenderOrder);
+
+//!@{ SpriteRenderOrder string conversions
+bool try_parse (const std::string&, SpriteRenderOrder&);
+std::string to_string (SpriteRenderOrder);
+//!@}
 
 } // namespace rdge

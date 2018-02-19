@@ -4,3 +4,4 @@
 xcode/
 *.swp
 *.swo
+*.pyc

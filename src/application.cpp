@@ -1,7 +1,7 @@
 #include <rdge/application.hpp>
 #include <rdge/util/io/rwops_base.hpp>
 #include <rdge/internal/exception_macros.hpp>
-#include <rdge/internal/hints.hpp>
+#include <rdge/util/compiler.hpp>
 
 #include <SDL_ttf.h>
 #include <SDL_version.h>
@@ -53,7 +53,7 @@ Application::Application (const app_settings& settings)
     // This will need to be updated when more functionality is added.
 
     // Setting to SDL_INIT_VIDEO as it implicitly initializes SDL_INIT_EVENTS as well
-    if (UNLIKELY(SDL_Init(SDL_INIT_VIDEO) != 0))
+    if (RDGE_UNLIKELY(SDL_Init(SDL_INIT_VIDEO) != 0))
     {
         SDL_THROW("SDL Failed to initialize", "SDL_Init");
     }
@@ -64,7 +64,7 @@ Application::Application (const app_settings& settings)
 
     if (settings.enable_fonts)
     {
-        if (UNLIKELY(TTF_Init() != 0))
+        if (RDGE_UNLIKELY(TTF_Init() != 0))
         {
             SDL_THROW("SDL_ttf failed to initialize", "TTF_Init");
         }
@@ -137,10 +137,10 @@ Application::MessageBox (MessageBoxType     type,
                          const std::string& message,
                          SDL_Window*        window)
 {
-    if (UNLIKELY(SDL_ShowSimpleMessageBox(static_cast<uint32>(type),
-                                          title.c_str(),
-                                          message.c_str(),
-                                          window) != 0))
+    if (RDGE_UNLIKELY(SDL_ShowSimpleMessageBox(static_cast<uint32>(type),
+                                               title.c_str(),
+                                               message.c_str(),
+                                               window) != 0))
     {
         RDGE_THROW("Failed to show message box");
     }

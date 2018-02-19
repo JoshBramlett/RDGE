@@ -33,6 +33,16 @@
 // container classes, but depending on further use this tie may need to be severed.
 
 #ifdef RDGE_DEBUG_MEMORY_TRACKER
+    //! \def RDGE_MALLOC_SZ(size, profile)
+    //! \brief Dynamic allocation by size
+#   define RDGE_MALLOC_SZ(size, profile) \
+    rdge::detail::safe_alloc(size, profile)
+
+    //! \def RDGE_REALLOC_SZ(size, profile)
+    //! \brief Dynamic reallocation by size
+#   define RDGE_REALLOC_SZ(ptr, size, profile) \
+    rdge::detail::safe_realloc((void**)&(ptr), size, profile)
+
     //! \def RDGE_MALLOC(ptr, size, profile)
     //! \brief Dynamic allocation by size
 #   define RDGE_MALLOC(ptr, size, profile) \
@@ -82,6 +92,10 @@
 //!@}
 
 #else
+#   define RDGE_MALLOC_SZ(size, profile) \
+    rdge::detail::safe_alloc(size, nullptr)
+#   define RDGE_REALLOC_SZ(ptr, size, profile) \
+    rdge::detail::safe_realloc((void**)&(ptr), size, nullptr)
 #   define RDGE_MALLOC(ptr, size, profile) \
     rdge::detail::safe_alloc((void**)&(ptr), size, 1, false, nullptr)
 #   define RDGE_MALLOC_N(ptr, num, profile) \
@@ -120,9 +134,18 @@ enum memory_profile_subsystem
     memory_profile_subsystem_none = 0,
     memory_profile_subsystem_physics,
     memory_profile_subsystem_graphics,
+    memory_profile_subsystem_assets,
+
+    memory_profile_lib_stb,
 
     memory_profile_subsystem_count
 };
+
+//! \brief Use macros - do not call directly
+void* safe_alloc (size_t, memory_profile* = nullptr);
+
+//! \brief Use macros - do not call directly
+void* safe_realloc (void**, size_t, memory_profile* = nullptr);
 
 //! \brief Use macros - do not call directly
 bool safe_alloc (void**, size_t, size_t, bool, memory_profile* = nullptr);

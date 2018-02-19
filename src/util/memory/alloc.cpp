@@ -1,6 +1,5 @@
 #include <rdge/util/memory/alloc.hpp>
-#include <rdge/internal/hints.hpp>
-#include <rdge/internal/hints.hpp>
+#include <rdge/util/compiler.hpp>
 #include <rdge/util/logger.hpp>
 
 #include <SDL_assert.h>
@@ -30,6 +29,31 @@ memory_profile s_anonymousProfile;
 
 } // anonymous namespace
 
+// The versions of safe_alloc and safe_realloc that return a pointer are
+// to provide a c-style interface for use when overriding allocations in
+// external libraries (namely stb)
+
+void*
+safe_alloc (size_t size, memory_profile* profile)
+{
+    void* p = nullptr;
+    safe_alloc((void**)&(p), size, 1, false, profile);
+
+    return p;
+}
+
+void*
+safe_realloc (void** p, size_t size, memory_profile* profile)
+{
+    if (*p == nullptr)
+    {
+        return safe_alloc(size, profile);
+    }
+
+    safe_realloc((void**)&(p), size, 1, profile);
+    return *p;
+}
+
 bool
 safe_alloc (void** p, size_t size, size_t num, bool clear, memory_profile* profile)
 {
@@ -40,7 +64,7 @@ safe_alloc (void** p, size_t size, size_t num, bool clear, memory_profile* profi
         return true;
     }
 
-    if (UNLIKELY(SAFE_ALLOC_OVERSIZED(num, size)))
+    if (RDGE_UNLIKELY(SAFE_ALLOC_OVERSIZED(num, size)))
     {
         SDL_assert(false);
         errno = ENOMEM;
@@ -50,7 +74,7 @@ safe_alloc (void** p, size_t size, size_t num, bool clear, memory_profile* profi
 #ifdef RDGE_DEBUG_MEMORY_TRACKER
     size_t total_size = (num * size) + sizeof(size_t);
     void* poffset = malloc(total_size);
-    if (UNLIKELY(poffset == nullptr))
+    if (RDGE_UNLIKELY(poffset == nullptr))
     {
         return false;
     }
@@ -80,7 +104,7 @@ safe_alloc (void** p, size_t size, size_t num, bool clear, memory_profile* profi
     rdge::Unused(profile);
 
     *p = (clear) ? calloc(num, size) : malloc(num * size);
-    if (UNLIKELY(*p == nullptr))
+    if (RDGE_UNLIKELY(*p == nullptr))
     {
         return false;
     }
@@ -100,7 +124,7 @@ safe_realloc (void** p, size_t size, size_t num, memory_profile* profile)
         return true;
     }
 
-    if (UNLIKELY(SAFE_ALLOC_OVERSIZED(num, size)))
+    if (RDGE_UNLIKELY(SAFE_ALLOC_OVERSIZED(num, size)))
     {
         SDL_assert(false);
         errno = ENOMEM;
@@ -113,7 +137,7 @@ safe_realloc (void** p, size_t size, size_t num, memory_profile* profile)
 
     size_t new_size = (num * size) + sizeof(size_t);
     void* poffset = realloc(actual_p, new_size);
-    if (UNLIKELY(poffset == nullptr))
+    if (RDGE_UNLIKELY(poffset == nullptr))
     {
         return false;
     }
@@ -138,7 +162,7 @@ safe_realloc (void** p, size_t size, size_t num, memory_profile* profile)
     rdge::Unused(profile);
 
     void* tmp = realloc(*p, num * size);
-    if (UNLIKELY(tmp == nullptr))
+    if (RDGE_UNLIKELY(tmp == nullptr))
     {
         return false;
     }
@@ -176,13 +200,13 @@ void
 register_memory_profile (memory_profile& profile, const char* name)
 {
     profile.name = name;
-    s_profiles[memory_profile_subsystem_none].push_back(&profile);
+    s_profiles[memory_profile_subsystem_none].push_back(profile);
 }
 
 void
 unregister_memory_profile (memory_profile& profile)
 {
-    s_profiles[memory_profile_subsystem_none].remove(&profile);
+    s_profiles[memory_profile_subsystem_none].remove(profile);
 }
 #endif
 

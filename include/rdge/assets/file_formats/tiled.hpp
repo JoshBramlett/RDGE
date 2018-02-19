@@ -68,18 +68,16 @@ bool from_string (const std::string&, property_type&);
 
 struct property
 {
-    static constexpr size_t MAX_SIZE = 64;
-
     std::string name;
     property_type type;
 
-    union
-    {
-        bool  bool_value;
-        float float_value;
-        int32 int_value;
-        char  string_value[MAX_SIZE];
-    };
+    // TODO Replace with std::variant once Apple gets their head out of
+    //      their asses and packages it.
+    // NOTE Opted to not union the fields b/c strings are a hassle.
+    bool        bool_value;
+    float       float_value;
+    int32       int_value;
+    std::string string_value;
 };
 
 inline void
@@ -145,13 +143,7 @@ deserialize (const nlohmann::json& j, std::vector<property>& plist)
         case property_type_color:
         case property_type_file:
         case property_type_string:
-            {
-                auto pval = j["properties"][p.name].get<std::string>();
-                strncpy(p.string_value, pval.c_str(), pval.length());
-
-                size_t len = (pval.length() < 64) ? pval.length() : 63;
-                p.string_value[len] = '\0';
-            }
+            p.string_value = j["properties"][p.name].get<std::string>();
             break;
         }
 
@@ -167,7 +159,8 @@ deserialize (const nlohmann::json& j, std::vector<property>& plist)
 //!          stupidly more difficult.
 enum class object_type
 {
-    unknown,
+    sprite,
+    rect,
     point,
     ellipse,
     polygon,
@@ -245,9 +238,9 @@ struct object
     //!@}
 
     //!@{ Object type
-    object_type otype = object_type::unknown; //!< Internal
-    std::vector<coordinate> coords;           //!< Coordinate list in pixels
-    object_text text;                         //!< String key/value pairs
+    object_type otype = object_type::rect; //!< Internal
+    std::vector<coordinate> coords;        //!< Coordinate list in pixels
+    object_text text;                      //!< String key/value pairs
 
     // NOTE: Original implementation
     //bool point;                       //!< Used to mark an object as a point
@@ -255,6 +248,7 @@ struct object
     //std::vector<coordinate> polygon;  //!< Coordinate list in pixels
     //std::vector<coordinate> polyline; //!< Coordinate list in pixels
     //object_text text;                 //!< String key/value pairs
+
     //!@}
 };
 
@@ -273,15 +267,14 @@ to_json (nlohmann::json& j, const object& o)
         { "rotation", o.rotation }
     };
 
-    if (o.gid > 0)
-    {
-        j["gid"] = o.gid;
-    }
-
     serialize(j, o.properties);
 
     switch (o.otype)
     {
+    case object_type::sprite:
+        j["gid"] = o.gid;
+    case object_type::rect:
+        break;
     case object_type::point:
         j["point"] = true;
         break;
@@ -318,6 +311,7 @@ from_json (const nlohmann::json& j, object& o)
     JSON_VALIDATE_OPTIONAL(j, properties, is_object);
     JSON_VALIDATE_OPTIONAL(j, propertytypes, is_object);
 
+    JSON_VALIDATE_OPTIONAL(j, gid, is_number);
     JSON_VALIDATE_OPTIONAL(j, point, is_boolean);
     JSON_VALIDATE_OPTIONAL(j, ellipse, is_boolean);
     JSON_VALIDATE_OPTIONAL(j, polygon, is_array);
@@ -334,10 +328,21 @@ from_json (const nlohmann::json& j, object& o)
     o.visible = j["visible"].get<bool>();
     o.rotation = j["rotation"].get<float>();
 
-    o.gid = (j.count("gid")) ? j["gid"].get<int32>() : 0;
     deserialize(j, o.properties);
 
-    o.otype = object_type::unknown;
+    if (j.count("gid"))
+    {
+        o.gid = j["gid"].get<int32>();
+        if (o.gid <= 0)
+        {
+            throw std::invalid_argument("object has invalid gid");
+        }
+
+        o.otype = object_type::sprite;
+        return;
+    }
+
+    o.otype = object_type::rect;
     if (j.count("point") && j["point"].get<bool>())
     {
         o.otype = object_type::point;
@@ -345,50 +350,25 @@ from_json (const nlohmann::json& j, object& o)
 
     if (j.count("ellipse") && j["ellipse"].get<bool>())
     {
-        if (o.otype != object_type::unknown)
-        {
-            throw std::invalid_argument("tiled object has multiple types");
-        }
-
         o.otype = object_type::ellipse;
     }
 
     if (j.count("polygon"))
     {
-        if (o.otype != object_type::unknown)
-        {
-            throw std::invalid_argument("tiled object has multiple types");
-        }
-
         o.otype = object_type::polygon;
         o.coords = j["polygon"].get<std::vector<coordinate>>();
     }
 
     if (j.count("polyline"))
     {
-        if (o.otype != object_type::unknown)
-        {
-            throw std::invalid_argument("tiled object has multiple types");
-        }
-
         o.otype = object_type::polyline;
         o.coords = j["polyline"].get<std::vector<coordinate>>();
     }
 
     if (j.count("text"))
     {
-        if (o.otype != object_type::unknown)
-        {
-            throw std::invalid_argument("tiled object has multiple types");
-        }
-
         o.otype = object_type::text;
         o.text = j["text"].get<object_text>();
-    }
-
-    if (o.otype == object_type::unknown)
-    {
-        throw std::invalid_argument("tiled object has no type");
     }
 }
 

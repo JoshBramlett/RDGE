@@ -18,7 +18,8 @@ namespace physics {
 
 enum class ShapeType : uint8
 {
-    CIRCLE = 1,
+    INVALID = 0,
+    CIRCLE,
     POLYGON
 };
 
@@ -81,13 +82,17 @@ struct ishape
     //!@}
 };
 
-inline std::ostream& operator<< (std::ostream& os, const mass_data& data)
-{
-    return os << "[ centroid=" << data.centroid
-              << " mass=" << data.mass
-              << " mmoi=" << data.mmoi << " ]";
+//! \brief mass_data stream output operator
+std::ostream& operator<< (std::ostream&, const mass_data&);
 
-}
+//! \brief ShapeType stream output operator
+std::ostream& operator<< (std::ostream&, ShapeType);
 
 } // namespace physics
+
+//!@{ ShapeType string conversions
+std::string to_string (physics::ShapeType);
+bool try_parse (const std::string&, physics::ShapeType);
+//!@}
+
 } // namespace rdge

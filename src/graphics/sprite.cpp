@@ -21,7 +21,7 @@ Sprite::Sprite (const math::vec3& pos, std::shared_ptr<Texture> texture)
 {
     SDL_assert(m_texture != nullptr);
 
-    math::vec2 size(static_cast<float>(texture->width), static_cast<float>(texture->height));
+    math::vec2 size(static_cast<float>(texture->Width()), static_cast<float>(texture->Height()));
     vops::SetPosition(this->vertices, pos, size);
     vops::SetDefaultTexCoords(this->vertices);
     vops::SetTextureUnitID(this->vertices, m_texture->unit_id);

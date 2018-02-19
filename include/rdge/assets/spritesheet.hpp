@@ -6,71 +6,83 @@
 #pragma once
 
 #include <rdge/core.hpp>
+#include <rdge/assets/shared_asset.hpp>
 #include <rdge/assets/surface.hpp>
-#include <rdge/assets/spritesheet_region.hpp>
+#include <rdge/assets/tilemap/object.hpp>
+#include <rdge/graphics/animation.hpp>
 #include <rdge/graphics/tex_coords.hpp>
 #include <rdge/math/vec2.hpp>
-#include <rdge/math/vec3.hpp>
+#include <rdge/system/types.hpp>
 
-#include <memory>
 #include <vector>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
 //!@{ Forward declarations
-class Sprite;
-class SpriteGroup;
-class Texture;
-class Animation;
-struct region_data;
-struct animation_data;
+class PackFile;
 //!@}
 
-//! \struct tilemap_data
-//! \brief Contains the definition of a map of texture coordinates which will
-//!        be rendered as a contiguous image.
-struct tilemap_data
+//! \struct spritesheet_region
+//! \brief Represents an individual section of the \ref SpriteSheet
+//! \details Container includes the data the client can use for rendering and
+//!          commonly represents a sprite texture or animation frame.
+//! \note The size and origin values may be modified from the config to
+//!       accommodate the scale multiplication.
+struct spritesheet_region
 {
-    static constexpr size_t MAX_LAYER_COUNT = 4; //!< Maximum amount of layers
+    //! \brief Surface clipping rectangle
+    screen_rect clip;
 
-    //! \brief Denotes that a tile should not be rendered
-    //! \details Common with multi-layered tile maps, where higher layers could
-    //!          have sparse tile placement
-    static constexpr int32 INVALID_TILE = -1;
+    //! \brief Normalized texture coordinates
+    tex_coords coords;
 
-    tilemap_data (void) = default;
-    ~tilemap_data (void) noexcept;
+    //! \brief Original size of the asset (in pixels)
+    math::vec2 size;
 
-    //!@{ Copy and move enabled
-    tilemap_data (const tilemap_data&);
-    tilemap_data& operator= (const tilemap_data&);
-    tilemap_data (tilemap_data&&) noexcept;
-    tilemap_data& operator= (tilemap_data&&) noexcept;
+    //! \brief Trimmed margin from the original size (in pixels)
+    //! \details Margin is the pixels trimmed from the left (x-axis) and
+    //!          the bottom (y-axis) of the sprite.
+    math::vec2 sprite_offset;
+
+    //! \brief Actual size after trimming (in pixels)
+    math::vec2 sprite_size;
+
+    //! \brief Pivot origin normalized to the sprite size
+    //! \note Defaults to the centroid.
+    math::vec2 origin;
+
+    bool is_rotated; //!< Whether the TexturePacker rotated the region 90 clockwise
+
+    //!@{ Basic spritesheet_region transforms
+    void flip (TexCoordsFlip) noexcept;
+    void rotate (TexCoordsRotation) noexcept;
+    void scale (float) noexcept;
     //!@}
+};
 
-    //! \struct tile
-    //! \brief Individual tile in the map
-    struct tile
-    {
-        int32 index = INVALID_TILE; //!< Layer index, or \ref INVALID_TILE
-        math::uivec2 location;      //!< Coordinates of the tile in the map
-        tex_coords coords;          //!< UV data for the texture
-    };
+//! \struct region_data
+//! \brief Expanded read-only \ref spritesheet_region container
+//! \details Provides further details about the imported region
+struct region_data
+{
+    std::string        name;  //!< Name as specified by import
+    spritesheet_region value; //!< Core region data, including size, uv coords, etc.
 
-    //! \struct layer
-    //! \brief Layer of tiles, which should be rendered bottom to top
-    struct layer
-    {
-        tile* tiles = nullptr; //!< Array of tile_count tiles
-    };
+    //! \brief Collection of tile objects
+    //! \details Used with object sheets, tile objects are shapes for creating the
+    //!          collision data for the provided region.
+    //! \note The position of the object is relative to the region.
+    std::vector<tilemap::Object> objects;
+};
 
-    layer layers[MAX_LAYER_COUNT];
-    size_t layer_count = 0;
-
-    size_t tile_count = 0; //!< Number of tiles per layer
-    size_t tile_pitch = 0; //!< Number of tiles in a row
-    math::vec2 tile_size;  //!< Tile dimensions
+//! \struct animation_data
+//! \brief Expanded read-only \ref Animation container
+//! \details Provides further details about the imported animation
+struct animation_data
+{
+    std::string name;  //!< Name as specified by import
+    Animation   value; //!< Imported animation
 };
 
 //! \class SpriteSheet
@@ -78,66 +90,57 @@ struct tilemap_data
 //! \details SpriteSheet (aka TextureAtlas) represents the definition of how
 //!          pixel data is broken down to individual sprites.  The definition
 //!          is parsed from an external json resource, and includes support
-//!          for defining the texture regions (with optional support to define
-//!          animations), and tile maps.
+//!          for defining the texture regions, and optional support to define
+//!          animations whose frames are regions of the sprite sheet.
 //!
-//!          The root level field "type" is required to define how the json
-//!          resource is formatted.  Types include:
-//!            - "spritesheet"
-//!            - "tilemap"
+//!          The sprite sheet may also be imported as an "object sheet", where
+//!          the region data has additional properties defining the collision
+//!          data.  These are known as "tile objects", and are intended to provide
+//!          a full entity definition within a scene.
 //!
-//!          A "spritesheet" resource defines the regions and has optional
-//!          support for defining animations.
-//!
-//! \code{.json}
-//! {
-//!     "image_path": "textures/image.png",
-//!     "type": "spritesheet",
-//!     "margin": 1,
-//!     "regions": [ {
-//!         "name": "region_name",
-//!         "x": 0,
-//!         "y": 0,
-//!         "width": 32,
-//!         "height": 32,
-//!         "origin": [ 16, 16 ]
-//!     } ],
-//!     "animations": [ {
-//!         "name": "animation_name",
-//!         "mode": "normal",
-//!         "interval": 100,
-//!         "frames": [ {
-//!             "name": "part_name",
-//!             "flip": "horizontal"
-//!         } ]
-//!     } ]
-//! }
-//! \endcode
-//!
-//!          A "tilemap" resource generates the region data from the tile
-//!          definition.  The mapping is also parsed and cached.
+//!          The json proprietary format is an expansion on the TexturePacker
+//!          default format.  The differences include the animation array, and
+//!          support for object sheets.  Object sheets supply their own indices
+//!          as well as \ref tilemap::Object configurations for each region.
 //!
 //! \code{.json}
 //! {
-//!     "image_path": "textures/image.png",
-//!     "type": "tilemap",
-//!     "margin": 1,
-//!     "tileswide": 30,
-//!     "tileshigh": 30,
-//!     "tilewidth": 16,
-//!     "tileheight": 16,
-//!     "layers": [ {
-//!         "name": "Layer 0",
-//!         "number": 0,
-//!         "tiles": [ {
-//!             "x": 29,
-//!             "y": 29,
-//!             "flipX": false,
-//!             "rot": 0,
-//!             "index": 899,
-//!             "tile": 29
-//!         } ],
+//!   "frames": [ {
+//!     "index": 0,
+//!     "frame": {
+//!       "y": 2,
+//!       "x": 2,
+//!       "w": 75,
+//!       "h": 94
+//!     },
+//!     "rotated": false,
+//!     "filename": "tree_01",
+//!     "trimmed": true,
+//!     "objects": [ ... ],
+//!     "pivot": {
+//!       "y": 0.5,
+//!       "x": 0.5
+//!     },
+//!     "sourceSize": {
+//!       "h": 96,
+//!       "w": 80
+//!     },
+//!     "spriteSourceSize": {
+//!       "y": 2,
+//!       "x": 2,
+//!       "w": 75,
+//!       "h": 94
+//!     }
+//!   } ],
+//!   "animations": [ {
+//!     "name": "animation_name",
+//!     "mode": "normal",
+//!     "interval": 100,
+//!     "frames": [ {
+//!       "name": "part_name",
+//!       "flip": "horizontal"
 //!     } ]
+//!   } ]
 //! }
 //! \endcode
 //!
@@ -147,9 +150,6 @@ struct tilemap_data
 class SpriteSheet
 {
 public:
-    //! \brief SpriteSheet default ctor
-    SpriteSheet (void) = default;
-
     //! \brief SpriteSheet ctor
     //! \details Loads and parses the json file.
     //! \param [in] filepath Path to the config file
@@ -157,27 +157,29 @@ public:
     explicit SpriteSheet (const char* filepath);
 
     //! \brief SpriteSheet ctor
-    //! \details Loads and parses the packed json (used with \ref PackFile)
-    //! \param [in] msgpack Packed json data
-    //! \param [in] surface Associated surface
+    //! \details Loads and parses the packed json (used with \ref PackFile).
+    //! \param [in] msgpack Packed json configuration
+    //! \param [in] packfile \ref PackFile reference (to load dependencies)
     //! \throws rdge::Exception Unable to parse config
     //! \see http://msgpack.org/
-    explicit SpriteSheet (const std::vector<uint8>& msgpack, Surface surface);
+    explicit SpriteSheet (const std::vector<uint8>& msgpack, PackFile& pack);
 
-    //! \brief SpriteSheet dtor
-    ~SpriteSheet (void) noexcept;
+    //!@{ SpriteSheet default ctor/dtor
+    SpriteSheet (void) = default;
+    ~SpriteSheet (void) noexcept = default;
+    //!@}
 
     //!@{ Non-copyable, move enabled
     SpriteSheet (const SpriteSheet&) = delete;
     SpriteSheet& operator= (const SpriteSheet&) = delete;
-    SpriteSheet (SpriteSheet&&) noexcept;
-    SpriteSheet& operator= (SpriteSheet&&) noexcept;
+    SpriteSheet (SpriteSheet&&) noexcept = default;
+    SpriteSheet& operator= (SpriteSheet&&) noexcept = default;
     //!@}
 
     //! \brief SpriteSheet Subscript Operator
     //! \details Retrieves texture coordinates by name
     //! \param [in] name Name of the element
-    //! \returns Associated tex_coords
+    //! \returns Associated region
     //! \throws rdge::Exception Lookup failed
     const spritesheet_region& operator[] (const std::string& name) const;
 
@@ -188,41 +190,14 @@ public:
     Animation GetAnimation (int32 animation_id, float scale = 1.f) const;
     //!@}
 
-
-
-    // TODO
-    // - Add getter for the spritesheet_region
-    // - Support scaling?
-    // - Check for duplicate keys during import?
-
-    // TODO Remove
-    std::unique_ptr<Sprite> CreateSprite (const std::string& name,
-                                          const math::vec3& pos) const;
-
-    // TODO Remove
-    std::unique_ptr<SpriteGroup> CreateSpriteChain (const std::string& name,
-                                                    const math::vec3&  pos,
-                                                    const math::vec2&  to_fill) const;
-
 public:
-    Surface surface; //!< Pixel data of the sprite sheet
+    std::vector<region_data> regions;       //!< Spritesheet region list
+    std::vector<animation_data> animations; //!< Animation definition list
 
-    // TODO Consider remove
-    std::shared_ptr<Texture> texture; //!< Texture generated from the surface
-
-    //!@{ Region container
-    region_data* regions = nullptr;
-    size_t       region_count = 0;
-    //!@}
-
-    //!@{ Animation container
-    animation_data* animations = nullptr;
-    size_t          animation_count = 0;
-    //!@}
-
-    //!@{ Tilemap container
-    tilemap_data tilemap;
-    //!@}
+    shared_asset<Surface> surface; //!< Pixel data of the sprite sheet
 };
+
+//! \brief spritesheet_region stream output operator
+std::ostream& operator<< (std::ostream&, const spritesheet_region&);
 
 } // namespace rdge

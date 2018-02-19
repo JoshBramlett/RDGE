@@ -1,0 +1,68 @@
+{
+  "animations": [
+    {
+      "name": "animals_mallard_baby_walk_front",
+      "mode": "loop",
+      "interval": 175,
+      "frames": [
+        { "name": "animals_mallard_baby_walk_front_1" },
+        { "name": "animals_mallard_baby_walk_front_2" }
+      ]
+    },
+    {
+      "name": "animals_mallard_baby_walk_back",
+      "mode": "loop",
+      "interval": 175,
+      "frames": [
+        { "name": "animals_mallard_baby_walk_back_1" },
+        { "name": "animals_mallard_baby_walk_back_2" }
+      ]
+    },
+    {
+      "name": "animals_mallard_baby_walk_right",
+      "mode": "loop",
+      "interval": 175,
+      "frames": [
+        { "name": "animals_mallard_baby_walk_side_1" },
+        { "name": "animals_mallard_baby_walk_side_2" }
+      ]
+    },
+    {
+      "name": "animals_mallard_baby_walk_left",
+      "mode": "loop",
+      "interval": 175,
+      "frames": [
+        { "name": "animals_mallard_baby_walk_side_1", "flip": 1 },
+        { "name": "animals_mallard_baby_walk_side_2", "flip": 1 }
+      ]
+    },
+    {
+      "name": "animals_seagull_fly_left",
+      "mode": "loop",
+      "interval": 100,
+      "frames": [
+        { "name": "animals_seagull_fly_side_1" },
+        { "name": "animals_seagull_fly_side_2" },
+        { "name": "animals_seagull_fly_side_3" },
+        { "name": "animals_seagull_fly_side_4" },
+        { "name": "animals_seagull_fly_side_5" },
+        { "name": "animals_seagull_fly_side_6" },
+        { "name": "animals_seagull_fly_side_7" }
+      ]
+    },
+    {
+      "name": "animals_seagull_fly_right",
+      "mode": "loop",
+      "interval": 100,
+      "frames": [
+        { "name": "animals_seagull_fly_side_1", "flip": 1 },
+        { "name": "animals_seagull_fly_side_2", "flip": 1 },
+        { "name": "animals_seagull_fly_side_3", "flip": 1 },
+        { "name": "animals_seagull_fly_side_4", "flip": 1 },
+        { "name": "animals_seagull_fly_side_5", "flip": 1 },
+        { "name": "animals_seagull_fly_side_6", "flip": 1 },
+        { "name": "animals_seagull_fly_side_7", "flip": 1 }
+      ]
+    }
+  ]
+}

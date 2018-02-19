@@ -1,21 +1,67 @@
 {
-    "regions": [
-        {
-            "name": "uv_1",
-            "x": 0,
-            "y": 0,
-            "width": 64,
-            "height": 64
-        },
-        {
-            "name": "uv_2",
-            "x": 128,
-            "y": 128,
-            "width": 128,
-            "height": 128,
-            "origin": [ 16, 32 ]
-        }
-    ],
-    "image_path": "../tests/testdata/assets/spritesheet.png",
-    "type": "spritesheet"
+  "frames": [
+  {
+    "frame": {
+      "y": 0,
+      "x": 0,
+      "w": 64,
+      "h": 64
+    },
+    "rotated": false,
+    "filename": "uv_1",
+    "trimmed": false,
+    "pivot": {
+      "y": 0.5,
+      "x": 0.5
+    },
+    "sourceSize": {
+      "h": 64,
+      "w": 64
+    },
+    "spriteSourceSize": {
+      "y": 0,
+      "x": 0,
+      "w": 64,
+      "h": 64
+    }
+  },
+  {
+    "frame": {
+      "y": 128,
+      "x": 128,
+      "w": 128,
+      "h": 128
+    },
+    "rotated": false,
+    "filename": "uv_2",
+    "trimmed": false,
+    "pivot": {
+      "x": 0.25,
+      "y": 0.875
+    },
+    "sourceSize": {
+      "h": 128,
+      "w": 128
+    },
+    "spriteSourceSize": {
+      "y": 128,
+      "x": 128,
+      "w": 128,
+      "h": 128
+    }
+  }
+  ],
+  "meta": {
+    "scale": "1",
+    "format": "RGBA8888",
+    "app": "",
+    "version": "1.0",
+    "smartupdate": "",
+    "image": "../tests/testdata/assets/spritesheet.png",
+    "sheet_type": "spritesheet",
+    "size": {
+      "h": 256,
+      "w": 256
+    }
+  }
 }

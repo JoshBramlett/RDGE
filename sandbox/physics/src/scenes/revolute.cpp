@@ -43,7 +43,7 @@ RevoluteScene::Initialize (void)
 {
     debug::RegisterCamera(&camera);
     debug::RegisterPhysics(&collision_graph);
-    debug::settings::draw_physics_joints = true;
+    debug::settings::physics::draw_joints = true;
     camera.zoom = 0.05f;
 
     rigid_body_profile gp;

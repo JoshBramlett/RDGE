@@ -7,8 +7,8 @@
 #include <rdge/math.hpp>
 #include <rdge/system.hpp>
 
-#include "scenes/test.hpp"
-#include "globals.hpp"
+#include <chrono/globals.hpp>
+#include <chrono/scenes/overworld.hpp>
 
 #include <memory>
 
@@ -54,14 +54,20 @@ int main ()
         return false;
     };
 
-    PackFile pack("res/chrono.data");
-    g_game.game = &game;
-    g_game.pack = &pack;
-    g_game.ppm = 32.f * ((game.window->IsHighDPI()) ? 2.f : 1.f);
-    g_game.inv_ppm = 1.f / g_game.ppm;
+    try
+    {
+        PackFile pack("res/assets.pack");
+        g_game.game = &game;
+        g_game.pack = &pack;
+        g_game.ratios = game_ratios(16.f, 2.f, ((game.window->IsHighDPI()) ? 2.f : 1.f));
 
-    game.PushScene(std::make_shared<TestScene>());
-    game.Run();
+        game.PushScene(std::make_shared<OverworldScene>());
+        game.Run();
+    }
+    catch (const std::exception& ex)
+    {
+        std::cout << ex.what() << std::endl;
+    }
 
     return 0;
 }

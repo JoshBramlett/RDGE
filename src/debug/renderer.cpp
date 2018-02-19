@@ -14,10 +14,10 @@
 #include <rdge/physics/shapes/circle.hpp>
 #include <rdge/physics/shapes/polygon.hpp>
 #include <rdge/physics/fixture.hpp>
+#include <rdge/util/compiler.hpp>
 #include <rdge/util/logger.hpp>
 #include <rdge/util/memory/alloc.hpp>
 
-#include <rdge/internal/hints.hpp>
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
 
@@ -36,7 +36,6 @@ namespace settings {
 
     // Scene menu item
     bool show_camera_widget = false;
-    bool show_physics_widget = false;
     bool show_graphics_widget = false;
 
     // Memory menu item
@@ -48,12 +47,27 @@ namespace settings {
     // Camera Widget
     bool draw_camera_viewport = false;
 
-    // Physics Widget
-    bool draw_physics_fixtures = false;
-    bool draw_physics_proxy_aabbs = false;
-    bool draw_physics_joints = false;
-    bool draw_physics_center_of_mass = false;
-    bool draw_physics_bvh_nodes = false;
+namespace physics {
+    bool show_widget = false;
+
+    bool draw_fixtures = false;
+    bool draw_proxy_aabbs = false;
+    bool draw_joints = false;
+    bool draw_center_of_mass = false;
+    bool draw_bvh_nodes = false;
+
+    namespace colors {
+        color not_simulating = color(127, 127, 76);
+        color static_body    = color(127, 230, 127);
+        color kinematic_body = color(127, 127, 230);
+        color sleeping_body  = color(152, 152, 152);
+        color dynamic_body   = color(230, 178, 178);
+        color proxy_aabb     = color(230, 76, 230);
+        color center_of_mass = color::WHITE;
+        color joints         = color::CYAN;
+    } // namespace colors
+} // namespace physics
+
 } // namespace settings
 
 using namespace rdge::math;
@@ -163,7 +177,7 @@ private:
         opengl::BindBuffer(GL_ARRAY_BUFFER, m_vbo);
 
         uint32 vbo_size = static_cast<uint32>(m_capacity) * POINT_SIZE;
-        if (UNLIKELY(!RDGE_MALLOC(m_buffer, vbo_size, nullptr)))
+        if (RDGE_UNLIKELY(!RDGE_MALLOC(m_buffer, vbo_size, nullptr)))
         {
             RDGE_THROW("Failed to allocate memory");
         }
@@ -348,7 +362,7 @@ private:
         opengl::BindBuffer(GL_ARRAY_BUFFER, m_vbo);
 
         uint32 vbo_size = static_cast<uint32>(m_capacity) * LINE_SIZE;
-        if (UNLIKELY(!RDGE_MALLOC(m_buffer, vbo_size, nullptr)))
+        if (RDGE_UNLIKELY(!RDGE_MALLOC(m_buffer, vbo_size, nullptr)))
         {
             RDGE_THROW("Failed to allocate memory");
         }
@@ -481,7 +495,7 @@ public:
                 if (ImGui::BeginMenu("Scene"))
                 {
                     ImGui::MenuItem("Camera", nullptr, &settings::show_camera_widget);
-                    ImGui::MenuItem("Physics", nullptr, &settings::show_physics_widget);
+                    ImGui::MenuItem("Physics", nullptr, &settings::physics::show_widget);
                     ImGui::MenuItem("Graphics", nullptr, &settings::show_graphics_widget);
                     ImGui::EndMenu();
                 }
@@ -512,7 +526,7 @@ public:
 
             if (settings::show_imgui_test_window)
             {
-                ImGui::ShowTestWindow(&settings::show_imgui_test_window);
+                ImGui::ShowTestWindow();
             }
 
             if (settings::show_memory_tracker)
@@ -689,6 +703,9 @@ DrawWireFrame (const ishape* shape, const color& c, float scale)
         break;
     case ShapeType::POLYGON:
         DrawWireFrame(*static_cast<const polygon*>(shape), c, scale);
+        break;
+    case ShapeType::INVALID:
+    default:
         break;
     }
 }

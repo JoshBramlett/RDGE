@@ -1,0 +1,274 @@
+{
+  "animations": [
+  	{
+  	  "name": "player_idle_front",
+  	  "mode": "normal",
+  	  "interval": 25,
+  	  "frames": [
+  	    { "name": "player_idle_front_1" },
+  	    { "name": "player_idle_front_2" },
+  	    { "name": "player_idle_front_3" }
+  	  ]
+  	},
+  	{
+  	  "name": "player_idle_back",
+  	  "mode": "normal",
+  	  "interval": 25,
+  	  "frames": [
+  	    { "name": "player_idle_back_1" }
+  	  ]
+  	},
+  	{
+  	  "name": "player_idle_right",
+  	  "mode": "normal",
+  	  "interval": 25,
+  	  "frames": [
+  	    { "name": "player_idle_side_1" },
+  	    { "name": "player_idle_side_2" },
+  	    { "name": "player_idle_side_3" }
+  	  ]
+  	},
+  	{
+  	  "name": "player_idle_left",
+  	  "mode": "normal",
+  	  "interval": 25,
+  	  "frames": [
+  	    { "name": "player_idle_side_1", "flip": 1 },
+  	    { "name": "player_idle_side_2", "flip": 1 },
+  	    { "name": "player_idle_side_3", "flip": 1 }
+  	  ]
+  	},
+  	{
+  	  "name": "player_walk_front",
+  	  "mode": "loop",
+  	  "interval": 175,
+  	  "frames": [
+  	    { "name": "player_walk_front_1" },
+  	    { "name": "player_walk_front_2" },
+  	    { "name": "player_walk_front_3" },
+  	    { "name": "player_walk_front_4" },
+  	    { "name": "player_walk_front_5" },
+  	    { "name": "player_walk_front_6" }
+  	  ]
+  	},
+  	{
+  	  "name": "player_walk_back",
+  	  "mode": "loop",
+  	  "interval": 175,
+  	  "frames": [
+  	    { "name": "player_walk_back_1" },
+  	    { "name": "player_walk_back_2" },
+  	    { "name": "player_walk_back_3" },
+  	    { "name": "player_walk_back_4" },
+  	    { "name": "player_walk_back_5" },
+  	    { "name": "player_walk_back_6" }
+  	  ]
+  	},
+  	{
+  	  "name": "player_walk_right",
+  	  "mode": "loop",
+  	  "interval": 175,
+  	  "frames": [
+  	    { "name": "player_walk_side_1" },
+  	    { "name": "player_walk_side_2" },
+  	    { "name": "player_walk_side_3" },
+  	    { "name": "player_walk_side_4" },
+  	    { "name": "player_walk_side_5" },
+  	    { "name": "player_walk_side_6" }
+  	  ]
+  	},
+  	{
+  	  "name": "player_walk_left",
+  	  "mode": "loop",
+  	  "interval": 175,
+  	  "frames": [
+  	    { "name": "player_walk_side_1", "flip": 1 },
+  	    { "name": "player_walk_side_2", "flip": 1 },
+  	    { "name": "player_walk_side_3", "flip": 1 },
+  	    { "name": "player_walk_side_4", "flip": 1 },
+  	    { "name": "player_walk_side_5", "flip": 1 },
+  	    { "name": "player_walk_side_6", "flip": 1 }
+  	  ]
+  	},
+  	{
+  	  "name": "player_run_front",
+  	  "mode": "loop",
+  	  "interval": 100,
+  	  "frames": [
+  	    { "name": "player_run_front_2" },
+  	    { "name": "player_walk_front_2" },
+  	    { "name": "player_walk_front_3" },
+  	    { "name": "player_run_front_1" },
+  	    { "name": "player_walk_front_5" },
+  	    { "name": "player_walk_front_6" }
+  	  ]
+  	},
+  	{
+  	  "name": "player_run_back",
+  	  "mode": "loop",
+  	  "interval": 100,
+  	  "frames": [
+  	    { "name": "player_run_back_2" },
+  	    { "name": "player_walk_back_2" },
+  	    { "name": "player_walk_back_3" },
+  	    { "name": "player_run_back_1" },
+  	    { "name": "player_walk_back_5" },
+  	    { "name": "player_walk_back_6" }
+  	  ]
+  	},
+  	{
+  	  "name": "player_run_right",
+  	  "mode": "loop",
+  	  "interval": 100,
+  	  "frames": [
+  	    { "name": "player_run_side_2" },
+  	    { "name": "player_walk_side_2" },
+  	    { "name": "player_walk_side_3" },
+  	    { "name": "player_run_side_1" },
+  	    { "name": "player_walk_side_5" },
+  	    { "name": "player_walk_side_6" }
+  	  ]
+  	},
+  	{
+  	  "name": "player_run_left",
+  	  "mode": "loop",
+  	  "interval": 100,
+  	  "frames": [
+  	    { "name": "player_run_side_2", "flip": 1 },
+  	    { "name": "player_walk_side_2", "flip": 1 },
+  	    { "name": "player_walk_side_3", "flip": 1 },
+  	    { "name": "player_run_side_1", "flip": 1 },
+  	    { "name": "player_walk_side_5", "flip": 1 },
+  	    { "name": "player_walk_side_6", "flip": 1 }
+  	  ]
+  	},
+  	{
+  	  "name": "player_sheathe_front",
+  	  "mode": "normal",
+  	  "interval": 100,
+  	  "frames": [
+  	    { "name": "player_sheathe_front_1" },
+  	    { "name": "player_sheathe_front_2" },
+  	    { "name": "player_sheathe_front_3" }
+  	  ]
+  	},
+  	{
+  	  "name": "player_sheathe_back",
+  	  "mode": "normal",
+  	  "interval": 100,
+  	  "frames": [
+  	    { "name": "player_sheathe_back_1" },
+  	    { "name": "player_sheathe_back_2" },
+  	    { "name": "player_sheathe_back_3" }
+  	  ]
+  	},
+  	{
+  	  "name": "player_sheathe_right",
+  	  "mode": "normal",
+  	  "interval": 100,
+  	  "frames": [
+  	    { "name": "player_sheathe_side_1" },
+  	    { "name": "player_sheathe_side_2" },
+  	    { "name": "player_sheathe_side_3" }
+  	  ]
+  	},
+  	{
+  	  "name": "player_sheathe_left",
+  	  "mode": "normal",
+  	  "interval": 100,
+  	  "frames": [
+  	    { "name": "player_sheathe_side_1", "flip": 1 },
+  	    { "name": "player_sheathe_side_2", "flip": 1 },
+  	    { "name": "player_sheathe_side_3", "flip": 1 }
+  	  ]
+  	},
+  	{
+  	  "name": "player_fight_idle_front",
+  	  "mode": "looppingpong",
+  	  "interval": 180,
+  	  "frames": [
+  	    { "name": "player_fight_idle_front_1" },
+  	    { "name": "player_fight_idle_front_2" },
+  	    { "name": "player_fight_idle_front_3" }
+  	  ]
+  	},
+  	{
+  	  "name": "player_fight_idle_back",
+  	  "mode": "looppingpong",
+  	  "interval": 180,
+  	  "frames": [
+  	    { "name": "player_fight_idle_back_1" },
+  	    { "name": "player_fight_idle_back_2" },
+  	    { "name": "player_fight_idle_back_3" }
+  	  ]
+  	},
+  	{
+  	  "name": "player_fight_idle_right",
+  	  "mode": "looppingpong",
+  	  "interval": 180,
+  	  "frames": [
+  	    { "name": "player_fight_idle_side_1" },
+  	    { "name": "player_fight_idle_side_2" },
+  	    { "name": "player_fight_idle_side_3" }
+  	  ]
+  	},
+  	{
+  	  "name": "player_fight_idle_left",
+  	  "mode": "looppingpong",
+  	  "interval": 180,
+  	  "frames": [
+  	    { "name": "player_fight_idle_side_1", "flip": 1 },
+  	    { "name": "player_fight_idle_side_2", "flip": 1 },
+  	    { "name": "player_fight_idle_side_3", "flip": 1 }
+  	  ]
+  	},
+  	{
+  	  "name": "player_attack_front",
+  	  "mode": "normal",
+  	  "interval": 150,
+  	  "frames": [
+  	    { "name": "player_attack_front_1" },
+  	    { "name": "player_attack_front_2" },
+  	    { "name": "player_attack_front_3" },
+  	    { "name": "player_attack_front_4" },
+  	    { "name": "player_attack_front_5" }
+  	  ]
+  	},
+  	{
+  	  "name": "player_attack_back",
+  	  "mode": "normal",
+  	  "interval": 150,
+  	  "frames": [
+  	    { "name": "player_attack_back_1" },
+  	    { "name": "player_attack_back_2" },
+  	    { "name": "player_attack_back_3" },
+  	    { "name": "player_attack_back_4" },
+  	    { "name": "player_attack_back_5" }
+  	  ]
+  	},
+  	{
+  	  "name": "player_attack_right",
+  	  "mode": "normal",
+  	  "interval": 150,
+  	  "frames": [
+  	    { "name": "player_attack_side_1" },
+  	    { "name": "player_attack_side_2" },
+  	    { "name": "player_attack_side_3" },
+  	    { "name": "player_attack_side_4" },
+  	    { "name": "player_attack_side_5" }
+  	  ]
+  	},
+  	{
+  	  "name": "player_attack_left",
+  	  "mode": "normal",
+  	  "interval": 150,
+  	  "frames": [
+  	    { "name": "player_attack_side_1", "flip": 1 },
+  	    { "name": "player_attack_side_2", "flip": 1 },
+  	    { "name": "player_attack_side_3", "flip": 1 },
+  	    { "name": "player_attack_side_4", "flip": 1 },
+  	    { "name": "player_attack_side_5", "flip": 1 }
+  	  ]
+  	}
+  ]
+}

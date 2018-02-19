@@ -1,11 +1,13 @@
 #include <rdge/graphics/renderers/sprite_batch.hpp>
 #include <rdge/graphics/color.hpp>
+#include <rdge/graphics/orthographic_camera.hpp>
 #include <rdge/assets/surface.hpp>
+#include <rdge/util/compiler.hpp>
 #include <rdge/util/logger.hpp>
 #include <rdge/util/memory/alloc.hpp>
-#include <rdge/internal/hints.hpp>
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
+#include <rdge/graphics/layers/sprite_layer.hpp>
 
 #include <SDL.h>
 #include <GL/glew.h>
@@ -149,7 +151,7 @@ SpriteBatch::SpriteBatch (uint16 capacity, std::shared_ptr<Shader> shader, bool 
     uint32 ibo_size = ibo_count * sizeof(uint32);
 
     uint32* ibo_data;
-    if (UNLIKELY(!RDGE_MALLOC(ibo_data, ibo_size, nullptr)))
+    if (RDGE_UNLIKELY(!RDGE_MALLOC(ibo_data, ibo_size, nullptr)))
     {
         RDGE_THROW("Failed to allocate memory");
     }
@@ -180,17 +182,7 @@ SpriteBatch::SpriteBatch (uint16 capacity, std::shared_ptr<Shader> shader, bool 
     int32 n = 0;
     std::generate(texture_units.begin(), texture_units.end(), [&n]{ return n++; });
 
-    // TODO Figure out how depth is generally defined for an orthographic projection.  In
-    //      the OrthographicCamera (taken from libgdx, near=0 and far=100).  LUL (and
-    //      maybe some other sources) were setting it to NDC values (near=-1 and far=1)
-    //m_projection = math::mat4::orthographic(-width, width, -height, height, -1.f, 1.f);
-    auto viewport = opengl::GetViewport();
-    auto width  = viewport[2] / 2.f;
-    auto height = viewport[3] / 2.f;
-    m_projection = math::mat4::orthographic(-width, width, -height, height, 0.f, 100.f);
-
     m_shader->Enable();
-    m_shader->SetUniformValue(UNI_PROJ_MATRIX, m_projection);
     m_shader->SetUniformValue(UNI_SAMPLER_ARR, texture_units.size(), texture_units.data());
     m_shader->Disable();
 
@@ -225,11 +217,11 @@ SpriteBatch::~SpriteBatch (void) noexcept
 }
 
 SpriteBatch::SpriteBatch (SpriteBatch&& other) noexcept
-    : m_cursor(other.m_cursor)
+    : blend(other.blend)
+    , m_cursor(other.m_cursor)
     , m_submissions(other.m_submissions)
     , m_capacity(other.m_capacity)
     , m_shader(std::move(other.m_shader))
-    , m_projection(other.m_projection)
     , m_transformStack(std::move(other.m_transformStack))
     , m_transform(other.m_transform)
     , m_textures(std::move(other.m_textures))
@@ -250,11 +242,11 @@ SpriteBatch::operator= (SpriteBatch&& rhs) noexcept
 {
     if (this != &rhs)
     {
+        this->blend = rhs.blend;
         m_cursor = rhs.m_cursor;
         m_submissions = rhs.m_submissions;
         m_capacity = rhs.m_capacity;
         m_shader = std::move(rhs.m_shader);
-        m_projection = rhs.m_projection;
         m_transformStack = std::move(rhs.m_transformStack);
         m_transform = rhs.m_transform;
         m_textures = std::move(rhs.m_textures);
@@ -317,7 +309,7 @@ SpriteBatch::PrepSubmit (void)
 void
 SpriteBatch::Submit (const SpriteVertices& vertices)
 {
-    SDL_assert(m_vbo == static_cast<uint32>(opengl::GetIntegerValue(GL_ARRAY_BUFFER_BINDING)));
+    SDL_assert(m_vbo == static_cast<uint32>(opengl::GetInt(GL_ARRAY_BUFFER_BINDING)));
     SDL_assert(m_submissions <= m_capacity);
 
     for (const auto& vertex : vertices)
@@ -333,11 +325,46 @@ SpriteBatch::Submit (const SpriteVertices& vertices)
 }
 
 void
+SpriteBatch::Submit (const sprite_data& sprite)
+{
+    const auto& p = sprite.pos;
+    const auto& sz = sprite.size;
+    auto c = static_cast<uint32>(sprite.color);
+    float m_far = 0.0f;//-1.f;
+
+    m_cursor->pos   = math::vec3(p, m_far);
+    m_cursor->uv    = sprite.uvs[0];
+    m_cursor->tid   = sprite.tid;
+    m_cursor->color = c;
+    m_cursor++;
+
+    m_cursor->pos   = math::vec3(p.x, p.y + sz.h, m_far);
+    m_cursor->uv    = sprite.uvs[1];
+    m_cursor->tid   = sprite.tid;
+    m_cursor->color = c;
+    m_cursor++;
+
+    m_cursor->pos   = math::vec3(p.x + sz.w, p.y + sz.h, m_far);
+    m_cursor->uv    = sprite.uvs[2];
+    m_cursor->tid   = sprite.tid;
+    m_cursor->color = c;
+    m_cursor++;
+
+    m_cursor->pos   = math::vec3(p.x + sz.w, p.y, m_far);
+    m_cursor->uv    = sprite.uvs[3];
+    m_cursor->tid   = sprite.tid;
+    m_cursor->color = c;
+    m_cursor++;
+
+    m_submissions++;
+}
+
+void
 SpriteBatch::Flush (void)
 {
     // Sanity check our VBO is bound ensures noone else is binding a different VBO
     // during our submission process.
-    SDL_assert(m_vbo == static_cast<uint32>(opengl::GetIntegerValue(GL_ARRAY_BUFFER_BINDING)));
+    SDL_assert(m_vbo == static_cast<uint32>(opengl::GetInt(GL_ARRAY_BUFFER_BINDING)));
     SDL_assert(m_submissions != 0);
 
     opengl::ReleaseBufferPointer(GL_ARRAY_BUFFER);
@@ -349,6 +376,12 @@ SpriteBatch::Flush (void)
     //      how much of a cost enabling and activating a texture has.
     //      Keep in mind a limiting factor is that all textures must be assigned a
     //      unit id prior to activating.
+    //
+    //      Update: keep in mind multiple renderers will be used, so to work without
+    //              a hitch the ease route would be to activate  the textures every
+    //              draw call.  However, there's got to be a better way...base class
+    //              that holds a static that keeps track of the last used texture
+    //              and only activates if changed?
     for (auto& texture : m_textures)
     {
         texture->Activate();
@@ -366,12 +399,40 @@ SpriteBatch::Flush (void)
 }
 
 void
-SpriteBatch::SetProjection (const math::mat4& projection)
+SpriteBatch::Flush (const std::vector<Texture>& textures)
 {
-    m_projection = projection;
+    // Sanity check the same VBO is bound throughout the draw call
+    SDL_assert(m_vbo == static_cast<uint32>(opengl::GetInt(GL_ARRAY_BUFFER_BINDING)));
+
+    opengl::ReleaseBufferPointer(GL_ARRAY_BUFFER);
+    opengl::UnbindBuffers(GL_ARRAY_BUFFER);
+
+    if (m_submissions > 0)
+    {
+        for (auto& texture : textures)
+        {
+            texture.Activate();
+        }
+        this->blend.Apply();
+
+        opengl::BindVertexArray(m_vao);
+        opengl::BindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
+
+        opengl::DrawElements(GL_TRIANGLES, (m_submissions * 6), GL_UNSIGNED_INT, nullptr);
+
+        opengl::UnbindBuffers(GL_ELEMENT_ARRAY_BUFFER);
+        opengl::UnbindVertexArrays();
+    }
+}
+
+void
+SpriteBatch::SetView (const OrthographicCamera& camera)
+{
+    SDL_assert(m_vao != 0);
 
     m_shader->Enable();
-    m_shader->SetUniformValue(UNI_PROJ_MATRIX, m_projection);
+    //m_shader->SetUniformValue(U_PROJ_XF, camera.combined);
+    m_shader->SetUniformValue(UNI_PROJ_MATRIX, camera.combined);
     m_shader->Disable();
 }
 

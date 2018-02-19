@@ -1,31 +1,14 @@
-#include <rdge/core.hpp>
-#include <rdge/util/strings.hpp>
-#include <rdge/assets/asset_pack.hpp>
+#include "common.hpp"
+#include "flags.h"
+
+#include <rdge/util/io/rwops_base.hpp>
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <vector>
-#include <string>
 #include <ctime>
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
-
-#include "flags.h"
-
-#define TINYFILES_IMPL
-#include <tinyheaders/tinyfiles.h>
-
-#define STB_IMAGE_IMPLEMENTATION
-#include <nothings/stb_image.h>
-
-#include <nlohmann/json.hpp>
-
-#define IMAGE_DIR "images"
-#define FONT_DIR "fonts"
-#define SPRITESHEET_DIR "spritesheets"
-#define TILEMAP_DIR "tilemaps"
-
 
 // Asset packer
 //
@@ -40,486 +23,53 @@
 //     fonts/
 //     spritesheets/
 //     tilemaps/
+//     tilesets/
 //
 // The packer will iterate through each child directory and import every
 // valid file.
-//
-// Usage:
-//  Arg 1) Override the parent directory
-//  Arg 2) Override the title (used in file names and enum values)
 
 using json = nlohmann::json;
 using namespace rdge;
 
-struct global_properties
-{
-    std::string parent_dir = "./"; // directory where files are found
-    std::string title = "rdge";   // name of the pack file and header
-    uint32 running_count = 0;     // running asset id
-    uint64 running_offset = 0;    // running asset offset
-} globals;
-
-struct total_import_result
-{
-    total_import_result (void) = default;
-
-    struct system_import_result
-    {
-        size_t success = 0;
-        size_t failed = 0;
-        size_t skipped = 0;
-    };
-
-    system_import_result surfaces;
-    system_import_result spritesheets;
-    system_import_result tilemaps;
-
-    void print (void)
-    {
-        std::cout << "\nImport Summary\n\n"
-                  << "Image:       "
-                  << "  success: " << std::right << std::setw(3) << surfaces.success
-                  << "  failed:  " << std::right << std::setw(3) << surfaces.failed
-                  << "  skipped: " << std::right << std::setw(3) << surfaces.skipped
-                  << std::endl
-                  << "Spritesheet: "
-                  << "  success: " << std::right << std::setw(3) << spritesheets.success
-                  << "  failed:  " << std::right << std::setw(3) << spritesheets.failed
-                  << "  skipped: " << std::right << std::setw(3) << spritesheets.skipped
-                  << std::endl
-                  << "Tilemaps:    "
-                  << "  success: " << std::right << std::setw(3) << tilemaps.success
-                  << "  failed:  " << std::right << std::setw(3) << tilemaps.failed
-                  << "  skipped: " << std::right << std::setw(3) << tilemaps.skipped
-                  << std::endl;
-
-        system_import_result totals;
-        totals.success = surfaces.success +
-                         spritesheets.success +
-                         tilemaps.success;
-        totals.failed = surfaces.failed +
-                        spritesheets.failed +
-                        tilemaps.failed;
-        totals.skipped = surfaces.skipped +
-                         spritesheets.skipped +
-                         tilemaps.skipped;
-
-        std::cout << "-------------------------------------------------------\n"
-                  << "Total:       "
-                  << "  success: " << std::right << std::setw(3) << totals.success
-                  << "  failed:  " << std::right << std::setw(3) << totals.failed
-                  << "  skipped: " << std::right << std::setw(3) << totals.skipped
-                  << std::endl;
-    }
-
-} import_results;
-
-struct imported_asset
-{
-    std::string name;
-    uint32 table_id;
-    void* data;
-
-    rdge::asset_pack::asset_info info;
-
-    std::vector<std::string> enums; // string of the entire enum to be written
-};
-
-std::vector<imported_asset> imported_assets;
-
-
-bool
-IsImageFileSupported (const std::string& file)
-{
-    static std::vector<std::string> SUPPORTED = { "png" };
-
-    for (const auto& s : SUPPORTED)
-    {
-        if (rdge::ends_with(file, s))
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
+namespace {
 
 void
-ImportImages (void)
+PrintUsage (void)
 {
-    std::string path = globals.parent_dir + IMAGE_DIR;
-    std::cout << "ImportImages from " << path << std::endl;
-
-    tfDIR dir;
-    if (tfDirOpen(&dir, path.c_str()))
-    {
-        while (dir.has_next)
-        {
-            //struct tfFILE
-            //{
-                //char path[ TF_MAX_PATH ];
-                //char name[ TF_MAX_FILENAME ];
-                //char ext[ TF_MAX_EXT ];
-                //int is_dir;
-                //int is_reg;
-                //int size;
-                //struct stat info;
-            //};
-
-            tfFILE file;
-            tfReadFile(&dir, &file);
-
-            if (file.is_dir)
-            {
-                tfDirNext(&dir);
-                continue;
-            }
-
-            if (file.is_reg && IsImageFileSupported(file.name))
-            {
-                std::cout << "  Processing [" << file.name << "]";
-
-                imported_asset import;
-                import.info.type = rdge::asset_pack::asset_type_surface;
-                import.info.offset = globals.running_offset;
-                import.name = rdge::remove_extension(file.name);
-                import.table_id = globals.running_count;
-                import.data = stbi_load(file.path,
-                                        &import.info.surface.width,
-                                        &import.info.surface.height,
-                                        &import.info.surface.channels,
-                                        0);
-                if (import.data)
-                {
-                    import.info.size = import.info.surface.width *
-                                       import.info.surface.height *
-                                       import.info.surface.channels;
-
-                    std::cout << " SUCCESS"
-                              << " [" << import.info.surface.width
-                              << "x" << import.info.surface.height << "]"
-                              << " channels=" << import.info.surface.channels
-                              << " file_size=" << file.size
-                              << " import_size=" << import.info.size << std::endl;
-
-                    imported_assets.push_back(import);
-                    import_results.surfaces.success++;
-
-                    globals.running_count++;
-                    globals.running_offset += import.info.size;
-                }
-                else
-                {
-                    std::cout << " FAILED stbi_load"
-                              << " reason=" << stbi_failure_reason() << std::endl;
-                    import_results.surfaces.failed++;
-                }
-            }
-            else
-            {
-                std::cout << "  Skipping [" << file.name << "] unsupported type\n";
-                import_results.surfaces.skipped++;
-            }
-
-            tfDirNext(&dir);
-        }
-
-        tfDirClose(&dir);
-    }
-    else
-    {
-        std::cout << "  Subdirectory " << IMAGE_DIR << " not found" << std::endl;
-    }
+    std::cout << "\nPacks exported files and generates a asset table header\n\n"
+              << "Input/output directories are specified in a json config\n"
+              << "file.  This is intended to be ran after the export scripts\n"
+              << "have completed.\n\n"
+              << "Usage:\n"
+              << "asset_pack /path/to/config/ [flags]\n\n"
+              << "Flags:\n"
+              << "  --silent    Opress confirmation\n\n";
 }
 
-void
-ImportSpritesheets (void)
+std::string
+PrintImportResult (const import_result& result)
 {
-    std::string path = globals.parent_dir + SPRITESHEET_DIR;
-    std::cout << "ImportSpritesheets from " << path << std::endl;
+    std::ostringstream ss;
+    ss << "  success: " << std::right << std::setw(3) << result.success
+       << "  failed:  " << std::right << std::setw(3) << result.failed
+       << "  skipped: " << std::right << std::setw(3) << result.skipped
+       << std::endl;
 
-    tfDIR dir;
-    if (tfDirOpen(&dir, path.c_str()))
-    {
-        while (dir.has_next)
-        {
-            tfFILE file;
-            tfReadFile(&dir, &file);
-
-            if (file.is_dir)
-            {
-                tfDirNext(&dir);
-                continue;
-            }
-
-            if (file.is_reg && rdge::ends_with(file.name, "json"))
-            {
-                std::cout << "  Processing [" << file.name << "]";
-
-                imported_asset import;
-                import.info.type = rdge::asset_pack::asset_type_spritesheet;
-                import.info.offset = globals.running_offset;
-                import.name = rdge::remove_extension(file.name);
-                import.table_id = globals.running_count;
-
-                try
-                {
-                    auto rwops = rwops_base::from_file(file.path, "rt");
-                    auto text_size = rwops.size();
-                    char* text_data = (char*)calloc(text_size + 1, sizeof(char));
-                    if (!text_data)
-                    {
-                        throw std::runtime_error("failed memory allocation");
-                    }
-
-                    rwops.read(text_data, text_size);
-
-                    const auto j = json::parse(text_data);
-                    if (j["type"].get<std::string>() != "spritesheet")
-                    {
-                        free(text_data);
-                        throw std::runtime_error("spritesheet has invalid type property");
-                    }
-
-                    auto sp = j["image_path"].get<std::string>();
-                    auto surface_name = rdge::remove_path(rdge::remove_extension(sp));
-                    int index = -1;
-                    for (size_t i = 0; i < imported_assets.size(); i++)
-                    {
-                        const auto& test = imported_assets[i];
-                        if (test.info.type == rdge::asset_pack::asset_type_surface &&
-                            test.name == surface_name)
-                        {
-                            index = static_cast<int>(i);
-                            break;
-                        }
-                    }
-
-                    if (index < 0)
-                    {
-                        free(text_data);
-                        throw std::runtime_error("spritesheet cannot map to surface");
-                    }
-
-                    import.info.spritesheet.surface_id = index;
-                    std::vector<uint8> msgpack = json::to_msgpack(j);
-
-                    free(text_data);
-                    import.data = malloc(msgpack.size());
-                    if (!import.data)
-                    {
-                        throw std::runtime_error("failed memory allocation");
-                    }
-
-                    memcpy(import.data, msgpack.data(), msgpack.size());
-                    import.info.size = msgpack.size();
-
-                    if (j.count("regions") > 0)
-                    {
-                        std::ostringstream ss;
-                        ss << "enum " << import.name << "_spritesheet_regions\n"
-                           << "{\n";
-
-                        const auto& regions = j["regions"];
-                        int v = 0;
-                        for (const auto& region : regions)
-                        {
-                            auto n = region["name"].get<std::string>();
-                            ss << "    " << import.name << "_region_" << n << " = " << v++ << ",\n";
-                        }
-
-                        ss << "};";
-
-                        import.enums.emplace_back(ss.str());
-                    }
-
-                    if (j.count("animations") > 0)
-                    {
-                        std::ostringstream ss;
-                        ss << "enum " << import.name << "_spritesheet_animations\n"
-                           << "{\n";
-
-                        const auto& animations = j["animations"];
-                        int v = 0;
-                        for (const auto& animation : animations)
-                        {
-                            auto n = animation["name"].get<std::string>();
-                            ss << "    " << import.name << "_animation_" << n << " = " << v++ << ",\n";
-                        }
-
-                        ss << "};";
-
-                        import.enums.emplace_back(ss.str());
-                    }
-
-                    std::cout << " SUCCESS"
-                              << " surface_id=" << import.info.spritesheet.surface_id
-                              << " file_size=" << file.size
-                              << " import_size=" << import.info.size << std::endl;
-
-                    imported_assets.push_back(import);
-                    import_results.spritesheets.success++;
-
-                    globals.running_count++;
-                    globals.running_offset += import.info.size;
-                }
-                catch (const std::exception& ex)
-                {
-                    std::cout << " FAILED on exception"
-                              << " reason=" << ex.what() << std::endl;
-                    import_results.spritesheets.failed++;
-                }
-                catch (...)
-                {
-                    std::cout << " FAILED on unknown exception" << std::endl;
-                    import_results.spritesheets.failed++;
-                }
-            }
-            else
-            {
-                std::cout << "  Skipping [" << file.name << "] unsupported type\n";
-                import_results.spritesheets.skipped++;
-            }
-
-            tfDirNext(&dir);
-        }
-
-        tfDirClose(&dir);
-    }
-    else
-    {
-        std::cout << "  Subdirectory " << SPRITESHEET_DIR << " not found" << std::endl;
-    }
-}
-
-void
-ImportTilemaps (void)
-{
-    std::string path = globals.parent_dir + TILEMAP_DIR;
-    std::cout << "ImportTilemaps from " << path << std::endl;
-
-    tfDIR dir;
-    if (tfDirOpen(&dir, path.c_str()))
-    {
-        while (dir.has_next)
-        {
-            tfFILE file;
-            tfReadFile(&dir, &file);
-
-            if (file.is_dir)
-            {
-                tfDirNext(&dir);
-                continue;
-            }
-
-            if (file.is_reg && rdge::ends_with(file.name, "json"))
-            {
-                std::cout << "  Processing [" << file.name << "]";
-
-                imported_asset import;
-                import.info.type = rdge::asset_pack::asset_type_tilemap;
-                import.info.offset = globals.running_offset;
-                import.name = rdge::remove_extension(file.name);
-                import.table_id = globals.running_count;
-
-                try
-                {
-                    auto rwops = rwops_base::from_file(file.path, "rt");
-                    auto text_size = rwops.size();
-                    char* text_data = (char*)calloc(text_size + 1, sizeof(char));
-                    if (!text_data)
-                    {
-                        free(text_data);
-                        throw std::runtime_error("failed memory allocation");
-                    }
-
-                    rwops.read(text_data, text_size);
-
-                    const auto j = json::parse(text_data);
-                    if (j["type"].get<std::string>() != "tilemap")
-                    {
-                        free(text_data);
-                        throw std::runtime_error("tilemap has invalid type property");
-                    }
-
-                    auto sp = j["image_path"].get<std::string>();
-                    auto surface_name = rdge::remove_path(rdge::remove_extension(sp));
-                    int index = -1;
-                    for (size_t i = 0; i < imported_assets.size(); i++)
-                    {
-                        const auto& test = imported_assets[i];
-                        if (test.info.type == rdge::asset_pack::asset_type_surface &&
-                            test.name == surface_name)
-                        {
-                            index = static_cast<int>(i);
-                            break;
-                        }
-                    }
-
-                    if (index < 0)
-                    {
-                        free(text_data);
-                        throw std::runtime_error("tilemap cannot map to surface");
-                    }
-
-                    import.info.tilemap.surface_id = index;
-                    std::vector<uint8> msgpack = json::to_msgpack(j);
-
-                    free(text_data);
-                    import.data = malloc(msgpack.size());
-                    if (!import.data)
-                    {
-                        throw std::runtime_error("failed memory allocation");
-                    }
-
-                    memcpy(import.data, msgpack.data(), msgpack.size());
-                    import.info.size = msgpack.size();
-
-                    std::cout << " SUCCESS"
-                              << " surface_id=" << import.info.tilemap.surface_id
-                              << " file_size=" << file.size
-                              << " import_size=" << import.info.size << std::endl;
-
-                    imported_assets.push_back(import);
-                    import_results.tilemaps.success++;
-
-                    globals.running_count++;
-                    globals.running_offset += import.info.size;
-                }
-                catch (const std::exception& ex)
-                {
-                    std::cout << " FAILED on exception"
-                              << " reason=" << ex.what() << std::endl;
-                    import_results.tilemaps.failed++;
-                }
-                catch (...)
-                {
-                    std::cout << " FAILED on unknown exception" << std::endl;
-                    import_results.tilemaps.failed++;
-                }
-            }
-            else
-            {
-                std::cout << "  Skipping [" << file.name << "] unsupported type\n";
-                import_results.tilemaps.skipped++;
-            }
-
-            tfDirNext(&dir);
-        }
-
-        tfDirClose(&dir);
-    }
-    else
-    {
-        std::cout << "  Subdirectory " << TILEMAP_DIR << " not found" << std::endl;
-    }
+    return ss.str();
 }
 
 struct generated_header_file
 {
+    std::ofstream ofs;
+    nlohmann::json asset_table; // Table of all assets
+    nlohmann::json asset_enums; // Asset specific enums added from importing
+
     generated_header_file (const std::string file)
         : ofs(file, std::ofstream::out | std::ofstream::trunc)
+        , asset_enums(json::array())
     {
+        asset_table = { { "name", "rdge_asset_pack_table" },
+                        { "values", json::array() } };
     }
 
     ~generated_header_file (void) noexcept
@@ -527,12 +77,38 @@ struct generated_header_file
         ofs.close();
     }
 
+    void add_asset (const imported_asset& asset)
+    {
+        std::ostringstream ss;
+        ss << "rdge_asset_" << asset.info.type << "_" << asset.name;
+        this->asset_table["values"].push_back({{ "n", ss.str() }, { "v", asset.table_id }});
+
+        for (const auto& e : asset.enums)
+        {
+            this->asset_enums.push_back(e);
+        }
+    }
+
+    void write_enum (const nlohmann::json& element)
+    {
+        ofs << "enum " << element["name"].get<std::string>() << "\n"
+            << "{\n";
+
+        for (auto& value : element["values"])
+        {
+            ofs << "    " << value["n"].get<std::string>()
+                << " = " << value["v"].get<int32>() << ",\n";
+        }
+
+        ofs << "};\n\n";
+    }
+
     void write (void)
     {
         std::time_t now = std::time(NULL);
         std::tm* t = std::localtime(&now);
-        char buffer[11];
-        std::strftime(buffer, 11, "%m/%d/%Y", t);
+        char buffer[50] = {};
+        std::strftime(buffer, 50, "%c", t);
 
         ofs << "/************************************************************/\n"
             << "/**              File generated by asset_packer            **/\n"
@@ -542,87 +118,99 @@ struct generated_header_file
             << "// Version: " << RDGE_ASSET_PACK_VERSION << "\n"
             << "\n"
             << "#pragma once\n"
-            << "\n"
-            << "enum " << globals.title << "_asset_pack_table\n"
-            << "{\n";
+            << "\n";
 
-        for (const auto& e : asset_pack_table)
+        write_enum(this->asset_table);
+        for (const auto& e : this->asset_enums)
         {
-            ofs << e;
-        }
-
-        ofs << "};\n";
-
-        for (const auto& e : asset_enums)
-        {
-            ofs << "\n" << e << "\n";
+            write_enum(e);
         }
 
         ofs.flush();
     }
-
-    void add_enum_value (const imported_asset& asset)
-    {
-        std::ostringstream oss;
-        oss << "    " << globals.title << "_asset_";
-
-        switch (asset.info.type)
-        {
-        case rdge::asset_pack::asset_type_surface:
-            oss << "surface";
-            break;
-        case rdge::asset_pack::asset_type_font:
-            oss << "font";
-            break;
-        case rdge::asset_pack::asset_type_spritesheet:
-            oss << "spritesheet";
-            break;
-        case rdge::asset_pack::asset_type_tilemap:
-            oss << "tilemap";
-            break;
-        case rdge::asset_pack::asset_type_sound:
-            oss << "sound";
-            break;
-        default:
-            oss << "unknown";
-            break;
-        }
-
-        oss << "_" << asset.name << " = " << asset.table_id << "," << std::endl;
-        asset_pack_table.emplace_back(oss.str());
-    }
-
-    std::vector<std::string> asset_pack_table;
-    std::vector<std::string> asset_enums;
-    std::ofstream ofs;
 };
+
+} // anonymous namespace
 
 int
 main (int argc, char** argv)
 {
     const flags::args args(argc, argv);
+    if (args.get<bool>("h", false) || args.get<bool>("help", false))
+    {
+        PrintUsage();
+        return EXIT_SUCCESS;
+    }
+
     const auto silent = args.get<bool>("silent", false);
 
-    // TODO use flags library with other params
-    if (argc > 1)
+    const auto& pargs = args.positional();
+    if (pargs.empty())
     {
-        globals.parent_dir = argv[1];
-        if (!rdge::ends_with(globals.parent_dir, "/"))
+        std::cout << "Invalid request:\n";
+        PrintUsage();
+        return EXIT_FAILURE;
+    }
+
+    global_import_state global_state;
+
+    try {
+        std::string config_file(pargs[0]);
+        auto rwops = rwops_base::from_file(config_file.c_str(), "rt");
+        auto sz = rwops.size();
+
+        std::string file_data(sz + 1, '\0');
+        rwops.read(file_data.data(), sizeof(char), sz);
+
+        const auto j = json::parse(file_data);
+        if ((j.count("cooker") == 0) || (j.count("packer") == 0))
         {
-            globals.parent_dir += '/';
+            throw std::invalid_argument("Invalid config format");
         }
+
+        const auto& cooker = j["cooker"];
+        const auto& packer = j["packer"];
+        if ((cooker.count("export_dir") == 0) ||
+            (packer.count("data_file") == 0) ||
+            (packer.count("header_file") == 0))
+        {
+            throw std::invalid_argument("Invalid config format");
+        }
+
+        global_state.parent_dir = cooker["export_dir"].get<std::string>();
+        global_state.data_file = packer["data_file"].get<std::string>();
+        global_state.header_file = packer["header_file"].get<std::string>();
+    } catch (const std::exception& ex) {
+        std::cout << "Exception reading config file: " << ex.what() << '\n';
+        return EXIT_FAILURE;
     }
 
-    if (argc > 2)
-    {
-        globals.title = argv[2];
-    }
+    // !! IMPORTANT !!
+    // Order of import is critical.  Certain asset types have other type dependencies.
+    // Images                  <--   Spritesheet & Tileset
+    // Tileset & Spritesheet   <--   Tilemap
 
-    ImportImages();
-    ImportSpritesheets();
-    ImportTilemaps();
+    import_result totals;
 
-    import_results.print();
+    auto image_result = ImportImages(global_state);
+    totals += image_result;
+
+    auto spritesheet_result = ImportSpritesheets(global_state);
+    totals += spritesheet_result;
+
+    auto tileset_result = ImportTilesets(global_state);
+    totals += tileset_result;
+
+    auto tilemap_result = ImportTilemaps(global_state);
+    totals += tilemap_result;
+
+    std::cout << "\nImport Summary\n\n";
+    std::cout << "Image:       " << PrintImportResult(image_result);
+    std::cout << "Spritesheet: " << PrintImportResult(spritesheet_result);
+    std::cout << "Tilesets:    " << PrintImportResult(tileset_result);
+    std::cout << "Tilemaps:    " << PrintImportResult(tilemap_result);
+    std::cout << "-------------------------------------------------------\n"
+              << "Total:       " << PrintImportResult(totals);
 
     if (!silent)
     {
@@ -642,11 +230,8 @@ main (int argc, char** argv)
         }
     }
 
-    std::string pack_file_name = globals.title + ".data";
-    std::string pack_header_name = globals.title + ".hpp";
-
-    FILE* pack_file = fopen(pack_file_name.c_str(), "wb");
-    generated_header_file gen_header(pack_header_name);
+    FILE* pack_file = fopen(global_state.data_file.c_str(), "wb");
+    generated_header_file gen_header(global_state.header_file);
     if (pack_file && gen_header.ofs.is_open())
     {
         using namespace rdge::asset_pack;
@@ -654,24 +239,20 @@ main (int argc, char** argv)
         header h = {};
         h.magic_value = RDGE_MAGIC_VALUE;
         h.version = RDGE_ASSET_PACK_VERSION;
-        h.asset_count = globals.running_count;
+        h.asset_count = global_state.running_count;
         h.assets = sizeof(header);
         fwrite(&h, sizeof(header), 1, pack_file);
 
         uint32 asset_table_size = h.asset_count * sizeof(asset_info);
-        for (auto& import : imported_assets)
+        for (auto& import : global_state.imported_assets)
         {
-            gen_header.add_enum_value(import);
-            for (const auto& e : import.enums)
-            {
-                gen_header.asset_enums.push_back(e);
-            }
+            gen_header.add_asset(import);
 
             import.info.offset += sizeof(header) + asset_table_size;
             fwrite(&import.info, sizeof(asset_info), 1, pack_file);
         }
 
-        for (const auto& import : imported_assets)
+        for (const auto& import : global_state.imported_assets)
         {
             fwrite(import.data, import.info.size, 1, pack_file);
             free(import.data);
@@ -682,7 +263,7 @@ main (int argc, char** argv)
     }
     else
     {
-        std::cout << "ERROR: Couldn't open file" << std::endl;
+        std::cout << "ERROR: Couldn't open file\n";
         return EXIT_FAILURE;
     }
 

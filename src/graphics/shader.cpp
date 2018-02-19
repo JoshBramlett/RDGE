@@ -2,7 +2,7 @@
 #include <rdge/util/io.hpp>
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
-#include <rdge/internal/hints.hpp>
+#include <rdge/util/compiler.hpp>
 
 #include <GL/glew.h>
 #include <SDL_assert.h>
@@ -27,7 +27,7 @@ Compile (ShaderType shader_type, const std::string& source)
 
     GLint status;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-    if (UNLIKELY(status == GL_FALSE))
+    if (RDGE_UNLIKELY(status == GL_FALSE))
     {
         GLint length;
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
@@ -61,7 +61,7 @@ Link (const std::vector<uint32>& shaders)
 
     GLint status;
     glGetProgramiv(program, GL_LINK_STATUS, &status);
-    if (UNLIKELY(status == GL_FALSE))
+    if (RDGE_UNLIKELY(status == GL_FALSE))
     {
         GLint length;
         glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
@@ -200,7 +200,7 @@ Shader::MaxFragmentShaderUnits (void)
 
     if (max_units == 0)
     {
-        max_units = opengl::GetIntegerValue(GL_MAX_TEXTURE_IMAGE_UNITS);
+        max_units = opengl::GetInt(GL_MAX_TEXTURE_IMAGE_UNITS);
     }
 
     return max_units;

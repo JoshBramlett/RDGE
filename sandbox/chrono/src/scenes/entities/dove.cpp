@@ -8,7 +8,7 @@
 
 #include <SDL_assert.h>
 
-#include "../../asset_enums.hpp"
+#include "../../asset_table.hpp"
 #include "../../globals.hpp"
 
 using namespace rdge;
@@ -27,16 +27,16 @@ CardinalDirectionArray<Animation> s_fly;
 
 Dove::Dove (void)
 {
-    auto sheet = g_game.pack->GetSpriteSheet(chrono_asset_spritesheet_enemies);
+    auto sheet = g_game.pack->GetSpriteSheet(rdge_asset_spritesheet_animals);
 
     static bool once [[gnu::unused]] = [&sheet](void) {
         float scale = g_game.ppm / base_asset_ppm;
-        s_fly[Direction::RIGHT] = sheet.GetAnimation(enemies_animation_dove_right, scale);
-        s_fly[Direction::LEFT]  = sheet.GetAnimation(enemies_animation_dove_left, scale);
+        s_fly[Direction::RIGHT] = sheet.GetAnimation(animation_animals_seagull_fly_right, scale);
+        s_fly[Direction::LEFT]  = sheet.GetAnimation(animation_animals_seagull_fly_left, scale);
         return true;
     }();
 
-    this->sprite = std::make_shared<Sprite>(vec3(), vec2(), sheet.texture);
+    //this->sprite = std::make_shared<Sprite>(vec3(), vec2(), sheet.texture);
     this->facing = Direction::LEFT;
     m_currentAnimation = &s_fly[this->facing];
 }

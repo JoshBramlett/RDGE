@@ -6,9 +6,10 @@ alias debm='make -j4 -C/Users/jbramlett/Documents/Projects/RDGE/debug'
 
 function chronopack()
 {
+    cd ~/Documents/Projects/RDGE/scripts/cooker/
+    python export_all.py -f ../../sandbox/chrono/res/export.json
+    cd -
     cd ~/Documents/Projects/RDGE/debug/tools/asset_packer/
-    ./asset_packer ../../../sandbox/chrono/res/ chrono --silent
-    mv -f chrono.data ../../sandbox/chrono/res
-    mv -f chrono.hpp ../../../sandbox/chrono/src/asset_enums.hpp
+    ./asset_packer ../../../sandbox/chrono/res/export.json --silent
     cd -
 }

@@ -1,0 +1,38 @@
+[
+    {
+        "color": "#ffa0a0a4",
+        "name": "environment_static",
+        "properties": [
+            {
+                "name": "cgroup",
+                "type": "int",
+                "value": 2
+            },
+            {
+                "name": "cmask",
+                "type": "int",
+                "value": 4112
+            },
+            {
+                "name": "density",
+                "type": "float",
+                "value": 1
+            },
+            {
+                "name": "friction",
+                "type": "float",
+                "value": 0.2
+            },
+            {
+                "name": "restitution",
+                "type": "float",
+                "value": 0
+            },
+            {
+                "name": "sensor",
+                "type": "bool",
+                "value": false
+            }
+        ]
+    }
+]

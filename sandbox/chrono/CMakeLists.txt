@@ -11,15 +11,20 @@ message (STATUS "RDGE include dir: ${RDGE_SOURCE_DIR}/include")
 link_directories (${RDGE_BINARY_DIR}/lib)
 include_directories (${RDGE_INCLUDE_DIR})
 
+# project includes
+include_directories (include)
+
 add_executable (chrono
                 src/main.cpp
-                src/scenes/test.cpp
-                src/scenes/entities/duck.cpp
-                src/scenes/entities/dove.cpp
-                src/scenes/entities/player.cpp)
+                src/entities/player.cpp
+                src/entities/static_actor.cpp
+                src/scenes/overworld.cpp)
 
 target_link_libraries (chrono
                        RDGE)
+
+add_custom_command(TARGET chrono PRE_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:chrono>/res/export)
 
 # TODO : Disabling for asset packing
 #add_custom_command(TARGET chrono PRE_BUILD

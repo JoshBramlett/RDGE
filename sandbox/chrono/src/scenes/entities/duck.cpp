@@ -10,7 +10,7 @@
 
 #include "player.hpp"
 #include "../test.hpp"
-#include "../../asset_enums.hpp"
+#include "../../asset_table.hpp"
 #include "../../globals.hpp"
 
 using namespace rdge;
@@ -30,18 +30,18 @@ CardinalDirectionArray<Animation> s_walk;
 Duck::Duck (TestScene* parent)
     : m_parent(parent)
 {
-    auto sheet = g_game.pack->GetSpriteSheet(chrono_asset_spritesheet_enemies);
+    auto sheet = g_game.pack->GetSpriteSheet(rdge_asset_spritesheet_animals);
 
     static bool once [[gnu::unused]] = [&sheet](void) {
         float scale = g_game.ppm / base_asset_ppm;
-        s_walk[Direction::UP]    = sheet.GetAnimation(enemies_animation_duck_back, scale);
-        s_walk[Direction::RIGHT] = sheet.GetAnimation(enemies_animation_duck_right, scale);
-        s_walk[Direction::DOWN]  = sheet.GetAnimation(enemies_animation_duck_front, scale);
-        s_walk[Direction::LEFT]  = sheet.GetAnimation(enemies_animation_duck_left, scale);
+        s_walk[Direction::UP]    = sheet.GetAnimation(animation_animals_mallard_baby_walk_back, scale);
+        s_walk[Direction::RIGHT] = sheet.GetAnimation(animation_animals_mallard_baby_walk_right, scale);
+        s_walk[Direction::DOWN]  = sheet.GetAnimation(animation_animals_mallard_baby_walk_front, scale);
+        s_walk[Direction::LEFT]  = sheet.GetAnimation(animation_animals_mallard_baby_walk_left, scale);
         return true;
     }();
 
-    this->sprite = std::make_shared<Sprite>(vec3(), vec2(), sheet.texture);
+    //this->sprite = std::make_shared<Sprite>(vec3(), vec2(), sheet.texture);
     this->facing = Direction::SOUTH;
     m_currentAnimation = &s_walk[this->facing];
 }

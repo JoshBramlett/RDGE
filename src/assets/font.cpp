@@ -1,7 +1,7 @@
 #include <rdge/assets/font.hpp>
 #include <rdge/util/io.hpp>
 #include <rdge/internal/exception_macros.hpp>
-#include <rdge/internal/hints.hpp>
+#include <rdge/util/compiler.hpp>
 
 #define STB_TRUETYPE_IMPLEMENTATION
 #include <nothings/stb_truetype.h>
@@ -17,14 +17,14 @@ Font::Font (const std::string& file, uint32 point_size, int64 index)
     if (TTF_WasInit() == 0)
     {
         // perform lazy loading if not already initialized through the application
-        if (UNLIKELY(TTF_Init() != 0))
+        if (RDGE_UNLIKELY(TTF_Init() != 0))
         {
             SDL_THROW("SDL_ttf failed to initialize", "TTF_Init");
         }
     }
 
     m_font = TTF_OpenFontIndex(file.c_str(), point_size, index);
-    if (UNLIKELY(!m_font))
+    if (RDGE_UNLIKELY(!m_font))
     {
         SDL_THROW("Failed to load font. file=" + file, "TTF_OpenFontIndex");
     }
@@ -74,7 +74,7 @@ Font::operator= (Font&& rhs) noexcept
 Font::Style
 Font::GetStyles (void) const
 {
-    if (UNLIKELY(!m_font))
+    if (RDGE_UNLIKELY(!m_font))
     {
         RDGE_THROW("Trying to get the style of a null font object");
     }
@@ -99,7 +99,7 @@ Font::AddStyle (Font::Style flags)
 void
 Font::SetStyle (Font::Style flags)
 {
-    if (UNLIKELY(!m_font))
+    if (RDGE_UNLIKELY(!m_font))
     {
         RDGE_THROW("Trying to set the style of a null font object");
     }
@@ -110,7 +110,7 @@ Font::SetStyle (Font::Style flags)
 bool
 Font::IsMonospaced (void) const
 {
-    if (UNLIKELY(!m_font))
+    if (RDGE_UNLIKELY(!m_font))
     {
         RDGE_THROW("Trying to set the style of a null font object");
     }
@@ -121,13 +121,13 @@ Font::IsMonospaced (void) const
 math::uivec2
 Font::SampleSizeUTF8 (const std::string& text)
 {
-    if (UNLIKELY(!m_font))
+    if (RDGE_UNLIKELY(!m_font))
     {
         RDGE_THROW("Trying to sample the size using a null font object");
     }
 
     int32 w, h;
-    if (UNLIKELY(TTF_SizeUTF8(m_font, text.c_str(), &w, &h) != 0))
+    if (RDGE_UNLIKELY(TTF_SizeUTF8(m_font, text.c_str(), &w, &h) != 0))
     {
         SDL_THROW("Failed to sample surface size", "TTF_SizeUTF8");
     }
@@ -141,7 +141,7 @@ Font::RenderUTF8 (const std::string& text,
                   Font::RenderMode   mode,
                   const rdge::color& background)
 {
-    if (UNLIKELY(!m_font))
+    if (RDGE_UNLIKELY(!m_font))
     {
         RDGE_THROW("Trying to render text using a null font object");
     }
@@ -162,7 +162,7 @@ Font::RenderUTF8 (const std::string& text,
         RDGE_THROW("Invalid RenderMode. mode=" + std::to_string(static_cast<int>(mode)));
     }
 
-    if (UNLIKELY(!surface))
+    if (RDGE_UNLIKELY(!surface))
     {
         SDL_THROW("Render text failed", "TTF_RenderUTF8_XXX");
     }

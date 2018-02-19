@@ -8,6 +8,26 @@ class Surface;
 class Texture;
 //!@}
 
+//!@{ Forward declarations
+namespace rdge {
+class SpriteLayer;
+class Event;
+struct delta_time;
+struct sprite_data;
+
+namespace physics {
+class CollisionGraph;
+class RigidBody;
+class Fixture;
+} // namespace physics
+
+namespace tilemap {
+class Object;
+} // namespace tilemap
+
+} // namespace rdge
+//!@}
+
 ****************************************************************
                         Move Semantics
 ****************************************************************
@@ -40,8 +60,10 @@ class Texture;
 //! \brief vec3 stream output operator
 std::ostream& operator<< (std::ostream&, const vec3&);
 
-//! \brief vec3 string conversion
+//!@{ vec3 string conversions
 std::string to_string (const math::vec3&);
+bool try_parse (const std::string&, math::vec3&);
+//!@}
 
 
 

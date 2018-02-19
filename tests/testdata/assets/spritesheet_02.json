@@ -1,13 +1,42 @@
 {
-    "regions": [
-        {
-            "name": "uv_1",
-            "x": 0,
-            "y": 0,
-            "width": 64,
-            "height": 64
-        }
-    ],
-    "image_path": "nofile.png",
-    "type": "spritesheet"
+  "frames": [
+  {
+    "frame": {
+      "y": 0,
+      "x": 0,
+      "w": 64,
+      "h": 64
+    },
+    "rotated": false,
+    "filename": "uv_1",
+    "trimmed": false,
+    "pivot": {
+      "y": 0.5,
+      "x": 0.5
+    },
+    "sourceSize": {
+      "h": 64,
+      "w": 64
+    },
+    "spriteSourceSize": {
+      "y": 0,
+      "x": 0,
+      "w": 64,
+      "h": 64
+    }
+  }
+  ],
+  "meta": {
+    "scale": "1",
+    "format": "RGBA8888",
+    "app": "",
+    "version": "1.0",
+    "smartupdate": "",
+    "image": "nofile.png",
+    "sheet_type": "spritesheet",
+    "size": {
+      "h": 256,
+      "w": 256
+    }
+  }
 }

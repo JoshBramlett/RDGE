@@ -7,12 +7,15 @@
 
 #include <rdge/core.hpp>
 #include <rdge/math/vec2.hpp>
-#include <rdge/system/types.hpp>
 
 #include <SDL_surface.h>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
+
+//!@{ Forward declarations
+struct screen_rect;
+//!@}
 
 //! \typedef SDLSurfaceUniquePtr
 //! \details Encosing unique_ptr type that includes the SDL custom deleter
@@ -60,26 +63,23 @@ public:
     Surface (const std::string& filepath, PixelDepth depth = PixelDepth::UNKNOWN);
 
     //! \brief Surface ctor
-    //! \details Create a Surface from preallocated pixel data.
+    //! \details Create a Surface from preallocated pixel data (used with \ref PackFile).
     //! \param [in] pixel_data Pointer to raw pixel data
-    //! \param [in] width Image width
-    //! \param [in] height Image height
+    //! \param [in] w Image width
+    //! \param [in] h Image height
     //! \param [in] channels Number of color channels per pixel
     //! \throws rdge::Exception Image initialization failed
     //! \throws rdge::SDLException SDL failed to create surface
-    Surface (void* pixel_data, int32 width, int32 height, int32 channels);
+    Surface (void* pixel_data, int32 w, int32 h, int32 channels);
 
     //! \brief Surface dtor
     ~Surface (void) noexcept;
 
-    //!@{
-    //! \brief Copy and move enabled
-    //! \details SDL_Surface has a refcount property which is incremented on copy,
-    //!          effectively making the Surface wrapper a shared pointer.
-    Surface (const Surface&);
-    Surface& operator= (const Surface&);
-    Surface (Surface&&) noexcept;
-    Surface& operator= (Surface&&) noexcept;
+    //!@{ Non-copyable, non-movable
+    Surface (const Surface&) = delete;
+    Surface& operator= (const Surface&) = delete;
+    Surface (Surface&&) noexcept = default;
+    Surface& operator= (Surface&&) noexcept = default;
     //!@}
 
     //!@{
@@ -90,8 +90,9 @@ public:
     //!@}
 
     //!@{ Basic Surface properties
-    uint32 Width (void) const noexcept;
-    uint32 Height (void) const noexcept;
+    bool IsEmpty (void) const noexcept;
+    size_t Width (void) const noexcept;
+    size_t Height (void) const noexcept;
     math::uivec2 Size (void) const noexcept;
     PixelDepth Depth (void) const noexcept;
     //!@}

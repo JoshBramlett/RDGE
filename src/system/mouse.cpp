@@ -1,7 +1,7 @@
 #include <rdge/system/mouse.hpp>
 #include <rdge/util/logger.hpp>
 #include <rdge/internal/exception_macros.hpp>
-#include <rdge/internal/hints.hpp>
+#include <rdge/util/compiler.hpp>
 
 #include <SDL_assert.h>
 #include <SDL_events.h>
@@ -13,7 +13,7 @@ namespace rdge {
 Cursor::Cursor (SystemCursor cursor)
 {
     m_cursor = SDL_CreateSystemCursor(static_cast<SDL_SystemCursor>(cursor));
-    if (UNLIKELY(!m_cursor))
+    if (RDGE_UNLIKELY(!m_cursor))
     {
         std::ostringstream ss;
         ss << "Failed to load system cursor"
@@ -26,7 +26,7 @@ Cursor::Cursor (SystemCursor cursor)
 Cursor::Cursor (Surface& surface, int32 hot_x, int32 hot_y)
 {
     m_cursor = SDL_CreateColorCursor(static_cast<SDL_Surface*>(surface), hot_x, hot_y);
-    if (UNLIKELY(!m_cursor))
+    if (RDGE_UNLIKELY(!m_cursor))
     {
         SDL_THROW("Failed to load custom cursor", "SDL_CreateColorCursor");
     }
@@ -106,7 +106,7 @@ void
 SetDefaultCursor (void) noexcept
 {
     auto cursor = SDL_GetDefaultCursor();
-    if (UNLIKELY(!cursor))
+    if (RDGE_UNLIKELY(!cursor))
     {
         WLOG() << "SDL_GetDefaultCursor returned a nullptr";
     }

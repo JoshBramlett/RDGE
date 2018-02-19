@@ -41,7 +41,7 @@ Text::Text (std::string           text,
     auto surface = m_font->RenderUTF8(m_text, color::WHITE, m_renderMode);
     m_texture = std::make_shared<Texture>(*surface);
 
-    vops::SetPosition(this->vertices, pos, to_ndc({ m_texture->width, m_texture->height }));
+    vops::SetPosition(this->vertices, pos, to_ndc(m_texture->Size()));
     vops::SetDefaultTexCoords(this->vertices);
     vops::SetColor(this->vertices, m_color);
 }
@@ -88,7 +88,7 @@ Text::Rebuild (void)
     auto surface = m_font->RenderUTF8(m_text, color::WHITE, m_renderMode);
     m_texture->Reload(*surface);
 
-    vops::SetSize(this->vertices, to_ndc({ m_texture->width, m_texture->height }));
+    vops::SetSize(this->vertices, to_ndc(m_texture->Size()));
 }
 
 } // namespace rdge

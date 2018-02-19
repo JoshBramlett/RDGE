@@ -19,6 +19,11 @@
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
+//!@{ Forward declarations
+struct sprite_data;
+class OrthographicCamera;
+//!@}
+
 //! \class SpriteBatch
 //! \details 2D renderer that writes vertex data to a pre-allocated buffer for ultra
 //!          fast batch rendering.  The buffer created is based upon 4 vertices per
@@ -90,14 +95,17 @@ public:
     //! \param [in] vertices Array of vertex data to be inserted into the buffer
     //! \note \ref PrepSubmit must be called before submissions.
     void Submit (const SpriteVertices& vertices);
+    void Submit (const sprite_data& sprite);
 
     //! \brief Draw the contents of the buffer
     //! \details Should be called every frame after all submissions.
     void Flush (void);
+    void Flush (const std::vector<Texture>& textures);
 
-    //! \brief Set the shader uniform projection
-    //! \param [in] projection Projection matrix
-    void SetProjection (const math::mat4& projection);
+    //! \brief Set the viewport that will be rendered
+    //! \details Should be called every frame prior to drawing.
+    //! \param [in] camera Orthographic camera
+    void SetView (const OrthographicCamera& camera);
 
     //! \brief Push a transformation on the stack
     //! \details Applies the transformation to all submitted renderables until
@@ -139,7 +147,6 @@ private:
     uint32         m_capacity = 0;     //!< Max number of submissions per draw
 
     std::shared_ptr<Shader>   m_shader;     //!< Shader program
-    math::mat4                m_projection; //!< Projection matrix provided to shader
 
     std::vector<math::mat4> m_transformStack;      //!< Rendering transformation stack
     math::mat4*             m_transform = nullptr; //!< Points to the top element of the stack
