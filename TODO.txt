@@ -5,6 +5,7 @@ Working (bugs)
         works, vice versa does not.
     Player animations frames and collision boxes don't match up
       - It's working correctly, but the origin is wrong.
+    Logger occasionally does not start
 
 Working (enhancements)
 
@@ -41,17 +42,20 @@ Graphics:
   - Add viewport class
   - Shader hot reload
   - OpenGL context settings configuration variables
-  - Add texture sorting for properly rendering semi-transparent sprites
 
 Graphics (low priority - implement as needed);
-  - Add rich text support
-  - Implement "focus" system for UI controls
-  - Create a perspective camera
-  - Add support TileRenderOrder
-  - Add support SpriteRenderOrder
-  - TileLayer Global color (for tinting)
-  - SpriteLayer Global color (for tinting)
-  - Ability to pad NPOT textures
+  - General
+    - Add rich text support
+    - Implement "focus" system for UI controls
+    - Create a perspective camera
+    - Ability to pad NPOT textures
+    - Improve texture sorting (see HMH radix sort)
+  - SpriteLayer
+    - Add support SpriteRenderOrder
+    - Global color (for tinting)
+  - TileLayer
+    - Add support TileRenderOrder
+    - TileLayer Global color (for tinting)
 
 Physics:
   - Change all for_each lambdas to use a range based for
