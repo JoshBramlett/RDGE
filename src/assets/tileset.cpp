@@ -52,9 +52,9 @@ ProcessTileset (const json& j, Tileset& tileset)
         throw std::invalid_argument("Tile spacing not currently supported");
     }
 
-    if (RDGE_UNLIKELY(!RDGE_CALLOC(tileset.tiles, tile_count, nullptr)))
+    if (RDGE_UNLIKELY(!RDGE_TCALLOC(tileset.tiles, tile_count, memory_bucket_assets)))
     {
-        throw std::runtime_error("Failed to allocate memory");
+        throw std::runtime_error("Memory allocation failed");
     }
 
     auto surface_size = tileset.surface->Size();
@@ -96,13 +96,13 @@ Tileset::Tileset (const char* filepath)
         JSON_VALIDATE_REQUIRED(j, imageheight, is_number_unsigned);
         JSON_VALIDATE_REQUIRED(j, imagewidth, is_number_unsigned);
 
-        void* asset_memory = nullptr;
-        if (RDGE_UNLIKELY(!RDGE_MALLOC(asset_memory, sizeof(Surface), nullptr)))
+        void* pnew = RDGE_MALLOC(sizeof(Surface), memory_bucket_assets);
+        if (RDGE_UNLIKELY(!pnew))
         {
             throw std::invalid_argument("Memory allocation failed");
         }
 
-        Surface* raw = new (asset_memory) Surface(j["image"].get<std::string>());
+        Surface* raw = new (pnew) Surface(j["image"].get<std::string>());
         this->surface = shared_asset<Surface>(raw);
 
         // sanity check
@@ -148,10 +148,7 @@ Tileset::Tileset (const std::vector<uint8>& msgpack, PackFile& packfile)
 
 Tileset::~Tileset (void) noexcept
 {
-    if (this->tiles)
-    {
-        RDGE_FREE(this->tiles, nullptr);
-    }
+    RDGE_FREE(this->tiles, memory_bucket_assets);
 }
 
 Tileset::Tileset (Tileset&& other) noexcept

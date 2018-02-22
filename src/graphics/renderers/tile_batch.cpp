@@ -125,13 +125,13 @@ TileBatch::TileBatch (uint16 capacity, const math::vec2& tile_size)
     m_ibo = opengl::CreateBuffer();
     opengl::BindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
 
-    uint32 ibo_count = m_capacity * 6;
-    uint32 ibo_size = ibo_count * sizeof(uint32);
+    size_t ibo_count = m_capacity * 6;
+    size_t ibo_size = ibo_count * sizeof(uint32);
 
-    uint32* ibo_data;
-    if (RDGE_UNLIKELY(!RDGE_MALLOC(ibo_data, ibo_size, nullptr)))
+    uint32* ibo_data = (uint32*)RDGE_MALLOC(ibo_size, memory_bucket_graphics);
+    if (RDGE_UNLIKELY(!ibo_data))
     {
-        RDGE_THROW("Failed to allocate memory");
+        RDGE_THROW("Memory allocation failed");
     }
 
     for (uint32 i = 0, idx = 0, offset = 0;
@@ -149,7 +149,7 @@ TileBatch::TileBatch (uint16 capacity, const math::vec2& tile_size)
 
     opengl::SetBufferData(GL_ELEMENT_ARRAY_BUFFER, ibo_size, ibo_data, GL_STATIC_DRAW);
     opengl::UnbindBuffers(GL_ELEMENT_ARRAY_BUFFER);
-    RDGE_FREE(ibo_data, nullptr);
+    RDGE_FREE(ibo_data, memory_bucket_graphics);
 
     opengl::UnbindVertexArrays();
 

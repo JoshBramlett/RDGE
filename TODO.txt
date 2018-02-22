@@ -75,12 +75,7 @@ Math:
 
 Util:
   - Enhance global memory tracker
-    - Find an elegant way to categorize tracking.
-      - Idea: Remove all memory_profile references, and rather than passing the pointer
-        to the profile you just pass an enum.  Subsystems could be better tracked by creating
-        a stateful system (e.g. PUSH_TRACKED_MEMORY_SUBSYSTEM(xxx_physics)).  The enums
-        provided to the malloc call would be more specific, like xxx_freelist.
-    - Improve ImGui memory tracking window.
+    - Allow containers to use different memory buckets
     - Find solution for properly aligning memory.
     - Investigate overriding SDL allocation for tracking (like STB is overridden in surface.cpp)
 

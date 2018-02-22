@@ -4,12 +4,14 @@
 
 #include <SDL_assert.h>
 
-#ifdef RDGE_DEBUG
-#include <imgui/imgui.h>
-#endif
-
-#include <cstdlib>
+#include <cstdlib> // malloc, realloc, free
+#include <cstring> // strrchr
+#include <sstream>
 #include <errno.h>
+
+#ifdef RDGE_DEBUG_MEMORY_TRACKER
+#include <rdge/debug/memory.hpp>
+#endif
 
 // Checks for arithmetic overflow on the (size * num) calculation.
 // Returns 1 if an overflow will occur.
@@ -20,51 +22,29 @@
 namespace rdge {
 namespace detail {
 
-namespace {
-
-#ifdef RDGE_DEBUG_MEMORY_TRACKER
-intrusive_list<memory_profile> s_profiles[memory_profile_subsystem_count];
-memory_profile s_anonymousProfile;
-#endif
-
-} // anonymous namespace
-
 // The versions of safe_alloc and safe_realloc that return a pointer are
 // to provide a c-style interface for use when overriding allocations in
 // external libraries (namely stb)
 
 void*
-safe_alloc (size_t size, memory_profile* profile)
+safe_alloc (size_t sz, memory_bucket id)
 {
     void* p = nullptr;
-    safe_alloc((void**)&(p), size, 1, false, profile);
+    safe_alloc((void**)&(p), sz, 1, false, id);
 
     return p;
 }
 
-void*
-safe_realloc (void** p, size_t size, memory_profile* profile)
-{
-    if (*p == nullptr)
-    {
-        return safe_alloc(size, profile);
-    }
-
-    safe_realloc((void**)&(p), size, 1, profile);
-    return *p;
-}
-
 bool
-safe_alloc (void** p, size_t size, size_t num, bool clear, memory_profile* profile)
+safe_alloc (void** p, size_t sz, size_t num, bool clear, memory_bucket id)
 {
-    if (size == 0 || num == 0)
+    if (sz == 0 || num == 0)
     {
-        SDL_assert(false); // Valid case, remove assert if intentional
         *p = nullptr;
         return true;
     }
 
-    if (RDGE_UNLIKELY(SAFE_ALLOC_OVERSIZED(num, size)))
+    if (RDGE_UNLIKELY(SAFE_ALLOC_OVERSIZED(num, sz)))
     {
         SDL_assert(false);
         errno = ENOMEM;
@@ -72,7 +52,7 @@ safe_alloc (void** p, size_t size, size_t num, bool clear, memory_profile* profi
     }
 
 #ifdef RDGE_DEBUG_MEMORY_TRACKER
-    size_t total_size = (num * size) + sizeof(size_t);
+    size_t total_size = (num * sz) + sizeof(size_t);
     void* poffset = malloc(total_size);
     if (RDGE_UNLIKELY(poffset == nullptr))
     {
@@ -87,23 +67,13 @@ safe_alloc (void** p, size_t size, size_t num, bool clear, memory_profile* profi
     memcpy(poffset, &total_size, sizeof(size_t));
     *p = ((uint8*)poffset) + sizeof(size_t);
 
-    if (!profile)
-    {
-        profile = &s_anonymousProfile;
-        DLOG() << "MALLOC size=" << total_size;
-    }
-    else
-    {
-        DLOG() << "MALLOC memory_profile[" << (void*)profile << "]"
-               << " size=" << total_size;
-    }
-
-    profile->resident += total_size;
-    profile->allocs++;
+    auto& bucket = debug::g_memoryBuckets[id];
+    bucket.resident += total_size;
+    bucket.allocs++;
 #else
-    rdge::Unused(profile);
+    rdge::Unused(id);
 
-    *p = (clear) ? calloc(num, size) : malloc(num * size);
+    *p = (clear) ? calloc(num, sz) : malloc(num * sz);
     if (RDGE_UNLIKELY(*p == nullptr))
     {
         return false;
@@ -113,18 +83,23 @@ safe_alloc (void** p, size_t size, size_t num, bool clear, memory_profile* profi
     return true;
 }
 
-bool
-safe_realloc (void** p, size_t size, size_t num, memory_profile* profile)
+void*
+safe_realloc (void** p, size_t sz, memory_bucket id)
 {
-    if (size == 0 || num == 0)
+    safe_realloc(p, sz, 1, id);
+    return *p;
+}
+
+bool
+safe_realloc (void** p, size_t sz, size_t num, memory_bucket id)
+{
+    if (sz == 0 || num == 0)
     {
-        SDL_assert(false); // Valid case, remove assert if intentional
-        free(*p);
-        *p = nullptr;
+        debug_free(p, id);
         return true;
     }
 
-    if (RDGE_UNLIKELY(SAFE_ALLOC_OVERSIZED(num, size)))
+    if (RDGE_UNLIKELY(SAFE_ALLOC_OVERSIZED(num, sz)))
     {
         SDL_assert(false);
         errno = ENOMEM;
@@ -132,10 +107,15 @@ safe_realloc (void** p, size_t size, size_t num, memory_profile* profile)
     }
 
 #ifdef RDGE_DEBUG_MEMORY_TRACKER
+    if (*p == nullptr)
+    {
+        return safe_alloc(p, sz, num, false, id);
+    }
+
     uint8* actual_p = ((uint8*)*p) - sizeof(size_t);
     size_t old_size = *(size_t*)actual_p;
 
-    size_t new_size = (num * size) + sizeof(size_t);
+    size_t new_size = (num * sz) + sizeof(size_t);
     void* poffset = realloc(actual_p, new_size);
     if (RDGE_UNLIKELY(poffset == nullptr))
     {
@@ -145,23 +125,13 @@ safe_realloc (void** p, size_t size, size_t num, memory_profile* profile)
     memcpy(poffset, &new_size, sizeof(size_t));
     *p = ((uint8*)poffset) + sizeof(size_t);
 
-    if (!profile)
-    {
-        profile = &s_anonymousProfile;
-        DLOG() << "REALLOC size=" << new_size;
-    }
-    else
-    {
-        DLOG() << "REALLOC memory_profile[" << (void*)profile << "]"
-               << " size=" << new_size;
-    }
-
-    profile->resident += new_size - old_size;
-    profile->reallocs++;
+    auto& bucket = debug::g_memoryBuckets[id];
+    bucket.resident += new_size - old_size;
+    bucket.reallocs++;
 #else
-    rdge::Unused(profile);
+    rdge::Unused(id);
 
-    void* tmp = realloc(*p, num * size);
+    void* tmp = realloc(*p, num * sz);
     if (RDGE_UNLIKELY(tmp == nullptr))
     {
         return false;
@@ -172,117 +142,61 @@ safe_realloc (void** p, size_t size, size_t num, memory_profile* profile)
     return true;
 }
 
-#ifdef RDGE_DEBUG_MEMORY_TRACKER
 void
-debug_free (void** p, memory_profile* profile)
+debug_free (void** p, memory_bucket id)
 {
     if (*p == nullptr)
     {
         return;
     }
 
+#ifdef RDGE_DEBUG_MEMORY_TRACKER
     uint8* actual_p = ((uint8*)*p) - sizeof(size_t);
-    size_t size = *(size_t*)actual_p;
+    size_t sz = *(size_t*)actual_p;
 
-    if (!profile)
-    {
-        profile = &s_anonymousProfile;
-    }
-
-    profile->resident -= size;
-    profile->frees++;
+    auto& bucket = debug::g_memoryBuckets[id];
+    bucket.resident -= sz;
+    bucket.frees++;
 
     free(actual_p);
     *p = nullptr;
-}
+#else
+    rdge::Unused(id);
 
-void
-register_memory_profile (memory_profile& profile, const char* name)
-{
-    profile.name = name;
-    s_profiles[memory_profile_subsystem_none].push_back(profile);
-}
-
-void
-unregister_memory_profile (memory_profile& profile)
-{
-    s_profiles[memory_profile_subsystem_none].remove(profile);
-}
+    free(*p);
+    *p = nullptr;
 #endif
+}
 
 } // namespace detail
 
-#ifdef RDGE_DEBUG
-namespace debug {
-
-// TODO Move to debug
-void
-ShowMemoryTracker (bool* p_open)
+std::ostream&
+operator<< (std::ostream& os, memory_bucket value)
 {
-#ifdef RDGE_DEBUG_MEMORY_TRACKER
-    using namespace rdge::detail;
-
-    ImGui::SetNextWindowSize(ImVec2(550,680), ImGuiSetCond_FirstUseEver);
-    if (!ImGui::Begin("Memory Tracker", p_open))
-    {
-        ImGui::End();
-        return;
-    }
-
-    if (ImGui::CollapsingHeader("Anonymous"))
-    {
-        ImGui::Columns(4, "anonymous_memory");
-        ImGui::Separator();
-        ImGui::Text("resident"); ImGui::NextColumn();
-        ImGui::Text("allocs"); ImGui::NextColumn();
-        ImGui::Text("frees"); ImGui::NextColumn();
-        ImGui::Text("reallocs"); ImGui::NextColumn();
-        ImGui::Separator();
-
-        ImGui::Text("%llu", s_anonymousProfile.resident); ImGui::NextColumn();
-        ImGui::Text("%zu", s_anonymousProfile.allocs); ImGui::NextColumn();
-        ImGui::Text("%zu", s_anonymousProfile.frees); ImGui::NextColumn();
-        ImGui::Text("%zu", s_anonymousProfile.reallocs); ImGui::NextColumn();
-        ImGui::Columns(1);
-    }
-
-    memory_profile_subsystem ss = memory_profile_subsystem_none;
-    size_t size = s_profiles[ss].size();
-    if (size > 0 && ImGui::CollapsingHeader("Tracked"))
-    {
-        ImGui::Columns(5, "tracked_memory");
-        ImGui::Separator();
-        ImGui::Text("name"); ImGui::NextColumn();
-        ImGui::Text("resident"); ImGui::NextColumn();
-        ImGui::Text("allocs"); ImGui::NextColumn();
-        ImGui::Text("frees"); ImGui::NextColumn();
-        ImGui::Text("reallocs"); ImGui::NextColumn();
-        ImGui::Separator();
-
-        s_profiles[ss].for_each([](auto* p) {
-            ImGui::Text("%s", p->name); ImGui::NextColumn();
-            ImGui::Text("%llu", p->resident); ImGui::NextColumn();
-            ImGui::Text("%zu", p->allocs); ImGui::NextColumn();
-            ImGui::Text("%zu", p->frees); ImGui::NextColumn();
-            ImGui::Text("%zu", p->reallocs); ImGui::NextColumn();
-        });
-        ImGui::Columns(1);
-    }
-
-    ss = memory_profile_subsystem_graphics;
-    size = s_profiles[ss].size();
-    if (size > 0 && ImGui::CollapsingHeader("Graphics"))
-    {
-        ImGui::Text("Nothing yet.");
-    }
-
-    ImGui::End();
-#else
-    rdge::Unused(p_open);
-#endif
+    return os << rdge::to_string(value);
 }
 
-} // namespace debug
-#endif
+std::string
+to_string (memory_bucket value)
+{
+    switch (value)
+    {
+#define CASE(X) case X: return (strrchr(#X, '_') + 1); break;
+        CASE(memory_bucket_none)
+        CASE(memory_bucket_ext)
+        CASE(memory_bucket_debug)
+        CASE(memory_bucket_assets)
+        CASE(memory_bucket_graphics)
+        CASE(memory_bucket_physics)
+        CASE(memory_bucket_allocators)
+        CASE(memory_bucket_containers)
+        default: break;
+#undef CASE
+    }
+
+    std::ostringstream ss;
+    ss << "unknown[" << static_cast<uint32>(value) << "]";
+    return ss.str();
+}
 
 } // namespace rdge

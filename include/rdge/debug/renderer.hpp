@@ -48,8 +48,7 @@ namespace debug {
 static const rdge::color DEFAULT_COLOR = color::YELLOW; //!< Default line color
 
 //! \namespace settings
-//! \brief Global Debug Settings
-//! \details Allows programmatic access to flags used by ImGui debug overlay
+//! \brief Global ImGui debug overlay settings
 namespace settings {
 
 extern bool show_overlay; //!< Show/Hide global debug overlay
@@ -60,7 +59,10 @@ extern bool show_graphics_widget;   //!< Show/Hide Graphics Widget
 //!@}
 
 //!@{ Memory main menu items
-extern bool show_memory_tracker;    //!< Show/Hide Memory Tracker Widget
+namespace memory {
+    // widget display
+    extern bool show_widget;
+} // namespace memory
 //!@}
 
 //!@{ ImGui main menu items
@@ -70,7 +72,6 @@ extern bool show_imgui_test_window; //!< Show/Hide ImGui 'Test Window'
 //!@{ Camera Widget
 extern bool draw_camera_viewport;   //!< Draw viewport boundary
 //!@}
-
 
     //!@{ Physics Widget Properties
     namespace physics {

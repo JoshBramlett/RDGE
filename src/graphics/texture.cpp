@@ -1,6 +1,7 @@
 #include <rdge/graphics/texture.hpp>
 #include <rdge/graphics/shader.hpp>
 #include <rdge/assets/surface.hpp>
+#include <rdge/util/compiler.hpp>
 #include <rdge/util/logger.hpp>
 #include <rdge/util/memory/alloc.hpp>
 #include <rdge/internal/exception_macros.hpp>
@@ -31,7 +32,7 @@ public:
     TextureManager (void)
         : m_capacity(Shader::MaxFragmentShaderUnits())
     {
-        if (RDGE_UNLIKELY(!RDGE_CALLOC(m_textures, m_capacity, nullptr)))
+        if (RDGE_UNLIKELY(!RDGE_TCALLOC(m_textures, m_capacity, memory_bucket_graphics)))
         {
             RDGE_THROW("Failed to allocate memory");
         }
@@ -39,7 +40,7 @@ public:
 
     ~TextureManager (void) noexcept
     {
-        RDGE_FREE(m_textures, nullptr);
+        RDGE_FREE(m_textures, memory_bucket_graphics);
     }
 
     shared_texture_data* Register (const SDL_Surface* surface)

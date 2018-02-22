@@ -7,6 +7,7 @@
 
 #include <rdge/core.hpp>
 #include <rdge/util/memory/alloc.hpp>
+#include <rdge/util/compiler.hpp>
 
 #include <SDL_assert.h>
 
@@ -44,18 +45,16 @@ public:
     //! \param [in] capacity Initial capacity to allocate
     //! \throws std::runtime_error Memory allocation failed
     explicit freelist (size_t capacity = 0)
-        : m_capacity((capacity == 0) ? ChunkSize : capacity)
+        : m_capacity(capacity)
     {
-        TRACK_MEMORY_PROFILE();
-
-        if (!RDGE_CALLOC(m_data, m_capacity, &this->mem_prof))
+        if (RDGE_UNLIKELY(!RDGE_TCALLOC(m_data, m_capacity, memory_bucket_containers)))
         {
-            throw std::runtime_error("Failed to allocate memory");
+            throw std::runtime_error("Memory allocation failed");
         }
 
-        if (!RDGE_CALLOC(m_handles, m_capacity, &this->mem_prof))
+        if (RDGE_UNLIKELY(!RDGE_TMALLOC(m_handles, m_capacity, memory_bucket_containers)))
         {
-            throw std::runtime_error("Failed to allocate memory");
+            throw std::runtime_error("Memory allocation failed");
         }
 
         create_handles();
@@ -65,9 +64,8 @@ public:
     //! \details Frees all resources
     ~freelist (void) noexcept
     {
-        RDGE_FREE(m_data, &this->mem_prof);
-        RDGE_FREE(m_handles, &this->mem_prof);
-        UNTRACK_MEMORY_PROFILE();
+        RDGE_FREE(m_data, memory_bucket_containers);
+        RDGE_FREE(m_handles, memory_bucket_containers);
     }
 
     //!@{ Non-copyable, move enabled
@@ -80,7 +78,6 @@ public:
     {
         std::swap(m_data, rhs.m_data);
         std::swap(m_handles, rhs.m_handles);
-        SWAP_MEMORY_PROFILE();
     }
 
     freelist& operator= (freelist&& rhs) noexcept
@@ -89,7 +86,6 @@ public:
         {
             std::swap(m_data, rhs.m_data);
             std::swap(m_handles, rhs.m_handles);
-            SWAP_MEMORY_PROFILE();
 
             m_count = rhs.m_count;
             m_capacity = rhs.m_capacity;
@@ -127,14 +123,14 @@ public:
         if (m_count == m_capacity)
         {
             m_capacity += ChunkSize;
-            if (!RDGE_REALLOC(m_data, m_capacity, &this->mem_prof))
+            if (RDGE_UNLIKELY(!RDGE_TREALLOC(m_data, m_capacity, memory_bucket_containers)))
             {
-                throw std::runtime_error("Failed to allocate memory");
+                throw std::runtime_error("Memory allocation failed");
             }
 
-            if (!RDGE_REALLOC(m_handles, m_capacity, &this->mem_prof))
+            if (RDGE_UNLIKELY(!RDGE_TREALLOC(m_handles, m_capacity, memory_bucket_containers)))
             {
-                throw std::runtime_error("Failed to allocate memory");
+                throw std::runtime_error("Memory allocation failed");
             }
 
             create_handles();
@@ -197,9 +193,6 @@ private:
     uint32* m_handles = nullptr; //!< Array of handles that map to indices of the data
     size_t m_count = 0;          //!< Number of stored elements
     size_t m_capacity = 0;       //!< Current array capacity
-
-public:
-    MEMORY_PROFILE_MEMBER
 };
 
 } // namespace rdge

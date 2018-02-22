@@ -43,14 +43,13 @@ SmallBlockAllocator::SmallBlockAllocator (void)
         }
     });
 
-    TRACK_MEMORY_PROFILE();
     m_available.fill(nullptr);
 
     // Allocate the list used to point to chunks.  Each chunk will be allocated
     // on demand and assigned to this list.
-    if (RDGE_UNLIKELY(!RDGE_CALLOC(m_chunks, CHUNK_ELEMENTS, &this->mem_prof)))
+    if (RDGE_UNLIKELY(!RDGE_TCALLOC(m_chunks, CHUNK_ELEMENTS, memory_bucket_allocators)))
     {
-        RDGE_THROW("Failed to allocate memory");
+        RDGE_THROW("Memory allocation failed");
     }
 }
 
@@ -58,11 +57,10 @@ SmallBlockAllocator::~SmallBlockAllocator (void) noexcept
 {
     for (size_t i = 0; i < m_chunkCount; ++i)
     {
-        RDGE_FREE(m_chunks[i].nodes, &this->mem_prof);
+        RDGE_FREE(m_chunks[i].nodes, memory_bucket_allocators);
     }
 
-    RDGE_FREE(m_chunks, &this->mem_prof);
-    UNTRACK_MEMORY_PROFILE();
+    RDGE_FREE(m_chunks, memory_bucket_allocators);
 }
 
 SmallBlockAllocator::SmallBlockAllocator (SmallBlockAllocator&& rhs) noexcept
@@ -71,7 +69,6 @@ SmallBlockAllocator::SmallBlockAllocator (SmallBlockAllocator&& rhs) noexcept
 {
     std::swap(m_chunks, rhs.m_chunks);
     std::swap(m_chunkCount, rhs.m_chunkCount);
-    SWAP_MEMORY_PROFILE();
 
 #ifdef RDGE_DEBUG
     usage = std::move(rhs.usage);
@@ -85,7 +82,6 @@ SmallBlockAllocator::operator= (SmallBlockAllocator&& rhs) noexcept
     {
         std::swap(m_chunks, rhs.m_chunks);
         std::swap(m_chunkCount, rhs.m_chunkCount);
-        SWAP_MEMORY_PROFILE();
 
         m_chunkCapacity = rhs.m_chunkCapacity;
         m_available = std::move(rhs.m_available);
@@ -108,10 +104,10 @@ SmallBlockAllocator::Alloc (size_t size)
 #ifdef RDGE_DEBUG
         usage.large_allocs++;
 #endif
-        void* result = nullptr;
-        if (RDGE_UNLIKELY(!RDGE_MALLOC(result, size, &this->mem_prof)))
+        void* result = RDGE_MALLOC(size, memory_bucket_allocators);
+        if (RDGE_UNLIKELY(!result))
         {
-            RDGE_THROW("Failed to allocate memory");
+            RDGE_THROW("Memory allocation failed");
         }
 
         return result;
@@ -137,18 +133,19 @@ SmallBlockAllocator::Alloc (size_t size)
     {
         // The number of heaps is exhausted - reallocate
         m_chunkCapacity += CHUNK_ELEMENTS;
-        if (RDGE_UNLIKELY(!RDGE_REALLOC(m_chunks, m_chunkCapacity, &this->mem_prof)))
+        if (RDGE_UNLIKELY(!RDGE_TREALLOC(m_chunks, m_chunkCapacity, memory_bucket_allocators)))
         {
-            RDGE_THROW("Failed to allocate memory");
+            RDGE_THROW("Memory allocation failed");
         }
     }
 
     // No pre-allocated block is available - allocate a new heap
     chunk* c = m_chunks + m_chunkCount;
     c->block_size = s_blockSizes[index];
-    if (RDGE_UNLIKELY(!RDGE_MALLOC(c->nodes, CHUNK_SIZE, &this->mem_prof)))
+    c->nodes = (block_node*)RDGE_MALLOC(CHUNK_SIZE, memory_bucket_allocators);
+    if (RDGE_UNLIKELY(!c->nodes))
     {
-        RDGE_THROW("Failed to allocate memory");
+        RDGE_THROW("Memory allocation failed");
     }
 
     // Break up the heap into block sized partitions
@@ -185,7 +182,7 @@ SmallBlockAllocator::Free (void* p, size_t size)
 
     if (size > MAX_BLOCK_SIZE)
     {
-        RDGE_FREE(p, &this->mem_prof);
+        RDGE_FREE(p, memory_bucket_allocators);
         return;
     }
 
@@ -231,7 +228,7 @@ SmallBlockAllocator::Clear (void)
 
     for (size_t i = 0; i < m_chunkCount; ++i)
     {
-        RDGE_FREE(m_chunks[i].nodes, &this->mem_prof);
+        RDGE_FREE(m_chunks[i].nodes, memory_bucket_allocators);
     }
 
     m_chunkCount = 0;

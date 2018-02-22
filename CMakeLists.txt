@@ -101,6 +101,7 @@ add_library (RDGE SHARED
              src/assets/surface.cpp
 
              src/debug/widgets/camera_widget.cpp
+             src/debug/widgets/memory_widget.cpp
              src/debug/widgets/physics_widget.cpp
              src/debug/renderer.cpp
 

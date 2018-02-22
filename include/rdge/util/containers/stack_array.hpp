@@ -8,6 +8,7 @@
 #include <rdge/core.hpp>
 #include <rdge/util/containers/iterators.hpp>
 #include <rdge/util/memory/alloc.hpp>
+#include <rdge/util/compiler.hpp>
 
 #include <SDL_assert.h>
 
@@ -37,21 +38,16 @@ struct stack_array
     explicit stack_array (size_t capacity = 0)
         : m_capacity(capacity)
     {
-        TRACK_MEMORY_PROFILE();
-        if (m_capacity > 0)
+        if (RDGE_UNLIKELY(!RDGE_TMALLOC(m_data, m_capacity, memory_bucket_containers)))
         {
-            if (!RDGE_MALLOC_N(m_data, m_capacity, &this->mem_prof))
-            {
-                throw std::runtime_error("Failed to allocate memory");
-            }
+            throw std::runtime_error("Memory allocation failed");
         }
     }
 
     //! \brief stack_array dtor
     ~stack_array (void) noexcept
     {
-        RDGE_FREE(m_data, &this->mem_prof);
-        UNTRACK_MEMORY_PROFILE();
+        RDGE_FREE(m_data, memory_bucket_containers);
     }
 
     //!@{ Non-copyable, move enabled
@@ -63,7 +59,6 @@ struct stack_array
         , m_capacity(rhs.m_capacity)
     {
         std::swap(m_data, rhs.m_data);
-        SWAP_MEMORY_PROFILE();
     }
 
     stack_array& operator= (stack_array&& rhs) noexcept
@@ -71,7 +66,6 @@ struct stack_array
         if (this != &rhs)
         {
             std::swap(m_data, rhs.m_data);
-            SWAP_MEMORY_PROFILE();
 
             m_count = rhs.m_count;
             m_capacity = rhs.m_capacity;
@@ -130,12 +124,10 @@ struct stack_array
     {
         if (new_cap > m_capacity)
         {
-            RDGE_FREE(m_data, &this->mem_prof);
-
             m_capacity = (static_cast<float>(new_cap) * OVER_ALLOC_RATIO);
-            if (!RDGE_MALLOC_N(m_data, m_capacity, &this->mem_prof))
+            if (RDGE_UNLIKELY(!RDGE_TREALLOC(m_data, m_capacity, memory_bucket_containers)))
             {
-                throw std::runtime_error("Failed to allocate memory");
+                throw std::runtime_error("Memory allocation failed");
             }
         }
     }
@@ -156,9 +148,6 @@ private:
     T* m_data = nullptr;   //!< Data array
     size_t m_count = 0;    //!< Number of stored elements
     size_t m_capacity = 0; //!< Current array capacity
-
-public:
-    MEMORY_PROFILE_MEMBER
 };
 
 } // namespace rdge

@@ -9,9 +9,9 @@
 
 #include <SDL_assert.h>
 
-#define STBI_MALLOC(x) RDGE_MALLOC_SZ(x, nullptr)
-#define STBI_FREE(x) RDGE_FREE(x, nullptr)
-#define STBI_REALLOC(x, n) RDGE_REALLOC_SZ(x, n, nullptr)
+#define STBI_MALLOC(x) RDGE_MALLOC(x, rdge::memory_bucket_ext)
+#define STBI_FREE(x) RDGE_FREE(x, rdge::memory_bucket_ext)
+#define STBI_REALLOC(x, n) RDGE_REALLOC(x, n, rdge::memory_bucket_ext)
 #define STB_IMAGE_IMPLEMENTATION
 #include <nothings/stb_image.h>
 

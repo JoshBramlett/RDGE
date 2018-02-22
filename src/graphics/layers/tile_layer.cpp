@@ -1,12 +1,13 @@
 #include <rdge/graphics/layers/tile_layer.hpp>
 #include <rdge/assets/tileset.hpp>
 #include <rdge/assets/tilemap/layer.hpp>
-#include <rdge/graphics/orthographic_camera.hpp>
 #include <rdge/graphics/renderers/tile_batch.hpp>
-#include <rdge/math/intrinsics.hpp>
-#include <rdge/util/strings.hpp>
-#include <rdge/util/logger.hpp>
+#include <rdge/graphics/orthographic_camera.hpp>
 #include <rdge/util/memory/alloc.hpp>
+#include <rdge/util/compiler.hpp>
+#include <rdge/util/logger.hpp>
+#include <rdge/util/strings.hpp>
+#include <rdge/internal/exception_macros.hpp>
 
 // debug
 #include <rdge/debug/renderer.hpp>
@@ -14,6 +15,7 @@
 
 #include <SDL_assert.h>
 
+#include <cstring> // strrchr
 #include <sstream>
 #include <algorithm>
 
@@ -68,9 +70,17 @@ TileLayer::TileLayer (const tilemap::Layer& def, float scale)
     //
     // All chunks in the grid are allocated, but if there is no corresponding definition
     // the cell data for that chunk will be null.
+    if (RDGE_UNLIKELY(!RDGE_TCALLOC(m_chunks.data, m_chunks.count, memory_bucket_graphics)))
+    {
+        RDGE_THROW("Memory allocation failed");
+    }
+
     size_t cells_in_chunk = m_grid.chunk_size.w * m_grid.chunk_size.h;
-    RDGE_CALLOC(m_chunks.data, m_chunks.count, nullptr);
-    RDGE_CALLOC(m_cells, cells_in_chunk * def.tilelayer.chunks.size(), nullptr);
+    size_t total_cell_count = cells_in_chunk * def.tilelayer.chunks.size();
+    if (RDGE_UNLIKELY(!RDGE_TCALLOC(m_cells, total_cell_count, memory_bucket_graphics)))
+    {
+        RDGE_THROW("Memory allocation failed");
+    }
 
     size_t cells_index = 0;
     for (const auto& def_chunk : def.tilelayer.chunks)
@@ -138,8 +148,8 @@ TileLayer::TileLayer (const tilemap::Layer& def, float scale)
 
 TileLayer::~TileLayer (void) noexcept
 {
-    RDGE_FREE(m_cells, nullptr);
-    RDGE_FREE(m_chunks.data, nullptr);
+    RDGE_FREE(m_cells, memory_bucket_graphics);
+    RDGE_FREE(m_chunks.data, memory_bucket_graphics);
 }
 
 TileLayer::TileLayer (TileLayer&& other) noexcept

@@ -3,8 +3,8 @@
 #include <rdge/physics/shapes/polygon.hpp>
 #include <rdge/util/strings.hpp>
 
+#include <cstring> // strrchr
 #include <sstream>
-#include <cstring>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {

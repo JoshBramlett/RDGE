@@ -160,7 +160,6 @@ private:
     std::array<block_node*, NUM_BLOCK_SIZES> m_available; //!< Next available nodes
 
 public:
-    MEMORY_PROFILE_MEMBER
 
 #ifdef RDGE_DEBUG
     struct usage_statistics

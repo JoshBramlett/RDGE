@@ -1,5 +1,6 @@
 #include <rdge/debug/renderer.hpp>
 #include <rdge/debug/widgets/camera_widget.hpp>
+#include <rdge/debug/widgets/memory_widget.hpp>
 #include <rdge/debug/widgets/physics_widget.hpp>
 #include <rdge/events/event.hpp>
 #include <rdge/gameobjects/iscene.hpp>
@@ -38,14 +39,15 @@ namespace settings {
     bool show_camera_widget = false;
     bool show_graphics_widget = false;
 
-    // Memory menu item
-    bool show_memory_tracker = false;
-
     // ImGui menu item
     bool show_imgui_test_window = false;
 
     // Camera Widget
     bool draw_camera_viewport = false;
+
+namespace memory {
+    bool show_widget = false;
+} // namespace memory
 
 namespace physics {
     bool show_widget = false;
@@ -176,10 +178,11 @@ private:
         m_vbo = opengl::CreateBuffer();
         opengl::BindBuffer(GL_ARRAY_BUFFER, m_vbo);
 
-        uint32 vbo_size = static_cast<uint32>(m_capacity) * POINT_SIZE;
-        if (RDGE_UNLIKELY(!RDGE_MALLOC(m_buffer, vbo_size, nullptr)))
+        size_t vbo_size = m_capacity * POINT_SIZE;
+        m_buffer = (point_vertex*)RDGE_MALLOC(vbo_size, memory_bucket_debug);
+        if (RDGE_UNLIKELY(!m_buffer))
         {
-            RDGE_THROW("Failed to allocate memory");
+            RDGE_THROW("Memory allocation failed");
         }
 
         opengl::SetBufferData(GL_ARRAY_BUFFER, vbo_size, nullptr, GL_DYNAMIC_DRAW);
@@ -229,7 +232,7 @@ private:
     {
         glDeleteBuffers(1, &m_vbo);
         glDeleteVertexArrays(1, &m_vao);
-        RDGE_FREE(m_buffer, nullptr);
+        RDGE_FREE(m_buffer, memory_bucket_debug);
     }
 
     PointRenderer (const PointRenderer&) = delete;
@@ -361,10 +364,11 @@ private:
         m_vbo = opengl::CreateBuffer();
         opengl::BindBuffer(GL_ARRAY_BUFFER, m_vbo);
 
-        uint32 vbo_size = static_cast<uint32>(m_capacity) * LINE_SIZE;
-        if (RDGE_UNLIKELY(!RDGE_MALLOC(m_buffer, vbo_size, nullptr)))
+        size_t vbo_size = m_capacity * LINE_SIZE;
+        m_buffer = (line_vertex*)RDGE_MALLOC(vbo_size, memory_bucket_debug);
+        if (RDGE_UNLIKELY(!m_buffer))
         {
-            RDGE_THROW("Failed to allocate memory");
+            RDGE_THROW("Memory allocation failed");
         }
 
         opengl::SetBufferData(GL_ARRAY_BUFFER, vbo_size, nullptr, GL_DYNAMIC_DRAW);
@@ -406,7 +410,7 @@ private:
     {
         glDeleteBuffers(1, &m_vbo);
         glDeleteVertexArrays(1, &m_vao);
-        RDGE_FREE(m_buffer, nullptr);
+        RDGE_FREE(m_buffer, memory_bucket_debug);
     }
 
     LineRenderer (const LineRenderer&) = delete;
@@ -420,8 +424,8 @@ private:
         uint32     color = 0xFFFFFFFF;
     };
 
-    static constexpr uint32 VERTEX_SIZE = sizeof(line_vertex);
-    static constexpr uint32 LINE_SIZE = VERTEX_SIZE * 2;
+    static constexpr size_t VERTEX_SIZE = sizeof(line_vertex);
+    static constexpr size_t LINE_SIZE = VERTEX_SIZE * 2;
 
     static constexpr uint32 VATTR_POS_INDEX = 0;
     static constexpr uint32 VATTR_COLOR_INDEX = 1;
@@ -432,8 +436,8 @@ private:
     uint32 m_vbo = 0;
 
     line_vertex* m_buffer = nullptr;
-    uint32       m_submissions = 0;
-    uint32       m_capacity = 0;
+    size_t       m_submissions = 0;
+    size_t       m_capacity = 0;
 };
 
 class Overlay
@@ -484,8 +488,6 @@ public:
             ImGui::Begin("Overlay", nullptr, ImVec2(0.f, 0.f), 0.f, overlay_flags);
 
             ImGui::SetCursorPos(ImVec2(10.f, 30.f));
-            ImGui::Text("Memory Tracker: %s",
-                        (debug::MEMORY_TRACKING_ENABLED ? "Enabled" : "Disabled"));
             ImGui::Text("%.3f frames/sec", io.Framerate);
             ImGui::End();
 
@@ -502,8 +504,7 @@ public:
 
                 if (ImGui::BeginMenu("Memory"))
                 {
-                    ImGui::MenuItem("Tracker", nullptr, &settings::show_memory_tracker,
-                                    debug::MEMORY_TRACKING_ENABLED);
+                    ImGui::MenuItem("Tracker", nullptr, &settings::memory::show_widget);
                     ImGui::EndMenu();
                 }
 
@@ -517,6 +518,7 @@ public:
             }
 
             camera_widget.UpdateWidget();
+            memory_widget.UpdateWidget();
             physics_widget.UpdateWidget();
 
             for (auto widget : widgets)
@@ -528,11 +530,6 @@ public:
             {
                 ImGui::ShowTestWindow();
             }
-
-            if (settings::show_memory_tracker)
-            {
-                debug::ShowMemoryTracker(&settings::show_memory_tracker);
-            }
         }
     }
 
@@ -540,6 +537,7 @@ public:
     OnRender (void)
     {
         camera_widget.OnWidgetCustomRender();
+        memory_widget.OnWidgetCustomRender();
         physics_widget.OnWidgetCustomRender();
 
         for (auto widget : widgets)
@@ -551,6 +549,7 @@ public:
     }
 
     CameraWidget camera_widget;
+    MemoryWidget memory_widget;
     PhysicsWidget physics_widget;
 
     std::vector<IWidget*> widgets;

@@ -297,13 +297,13 @@ SpriteSheet::SpriteSheet (const char* filepath)
         const auto& j_meta = j["meta"];
         JSON_VALIDATE_REQUIRED(j_meta, image, is_string);
 
-        void* asset_memory = nullptr;
-        if (RDGE_UNLIKELY(!RDGE_MALLOC(asset_memory, sizeof(Surface), nullptr)))
+        void* pnew = RDGE_MALLOC(sizeof(Surface), memory_bucket_assets);
+        if (RDGE_UNLIKELY(!pnew))
         {
             throw std::invalid_argument("Memory allocation failed");
         }
 
-        Surface* raw = new (asset_memory) Surface(j_meta["image"].get<std::string>());
+        Surface* raw = new (pnew) Surface(j_meta["image"].get<std::string>());
         this->surface = shared_asset<Surface>(raw);
         ProcessSpriteSheet(j, *this);
     }

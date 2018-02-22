@@ -24,14 +24,14 @@ namespace rdge {
 SpriteLayer::SpriteLayer (uint16 capacity)
     : m_spriteCapacity(capacity)
 {
-    if (RDGE_UNLIKELY(!RDGE_CALLOC(m_sprites, m_spriteCapacity, nullptr)))
+    if (RDGE_UNLIKELY(!RDGE_TCALLOC(m_sprites, m_spriteCapacity, memory_bucket_graphics)))
     {
-        RDGE_THROW("Failed to allocate memory");
+        RDGE_THROW("Memory allocation failed");
     }
 }
 
 SpriteLayer::SpriteLayer (const tilemap::Layer& def, float scale)
-    : m_spriteCapacity(def.objectgroup.objects.size() + 100)
+    : m_spriteCapacity(def.objectgroup.objects.size())
 {
     // !! IMPORTANT !!
     //
@@ -44,9 +44,9 @@ SpriteLayer::SpriteLayer (const tilemap::Layer& def, float scale)
     //    pointers to the sprite_data will be stored by different objects.
     //    For now we'll enforce a strict limit, but it can be later extended to
     //    be more dynamic using a small block allocator.
-    if (RDGE_UNLIKELY(!RDGE_CALLOC(m_sprites, m_spriteCapacity, nullptr)))
+    if (RDGE_UNLIKELY(!RDGE_TCALLOC(m_sprites, m_spriteCapacity, memory_bucket_graphics)))
     {
-        RDGE_THROW("Failed to allocate memory");
+        RDGE_THROW("Memory allocation failed");
     }
 
     uint32 unit_id;
@@ -115,7 +115,7 @@ SpriteLayer::SpriteLayer (const tilemap::Layer& def, float scale)
 
 SpriteLayer::~SpriteLayer (void) noexcept
 {
-    RDGE_FREE(m_sprites, nullptr);
+    RDGE_FREE(m_sprites, memory_bucket_graphics);
 }
 
 SpriteLayer::SpriteLayer (SpriteLayer&& other) noexcept

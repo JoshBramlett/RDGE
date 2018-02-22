@@ -73,9 +73,9 @@ public:
     explicit shared_asset (pointer ptr)
         : m_ptr(ptr)
     {
-        if (RDGE_UNLIKELY(!RDGE_CALLOC(m_block, 1, nullptr)))
+        if (RDGE_UNLIKELY(!RDGE_TCALLOC(m_block, 1, memory_bucket_assets)))
         {
-            RDGE_THROW("Failed to allocate memory");
+            RDGE_THROW("Memory allocation failed");
         }
 
         m_block->ref_count = 1;
@@ -185,13 +185,13 @@ private:
                 if (m_block->lifetime == SharedAssetLifetime::REF_COUNT)
                 {
                     m_ptr->~T();
-                    RDGE_FREE(m_ptr, nullptr);
-                    RDGE_FREE(m_block, nullptr);
+                    RDGE_FREE(m_ptr, memory_bucket_assets);
+                    RDGE_FREE(m_block, memory_bucket_assets);
                 }
                 else if (m_block->lifetime == SharedAssetLifetime::REF_COUNT_MANAGED)
                 {
                     m_ptr->~T();
-                    RDGE_FREE(m_ptr, nullptr);
+                    RDGE_FREE(m_ptr, memory_bucket_assets);
                     m_block->asset = nullptr;
                 }
             }
