@@ -196,15 +196,9 @@ bool IsKeyPressed (ScanCode key) noexcept;
 //!@}
 
 //! \brief KeyCode stream output operator
-//! \param [in] os Output stream
-//! \param [in] key KeyCode enum
-//! \returns Output stream
-std::ostream& operator<< (std::ostream& os, KeyCode key);
+std::ostream& operator<< (std::ostream&, KeyCode);
 
 //! \brief ScanCode stream output operator
-//! \param [in] os Output stream
-//! \param [in] key ScanCode enum
-//! \returns Output stream
-std::ostream& operator<< (std::ostream& os, ScanCode key);
+std::ostream& operator<< (std::ostream&, ScanCode);
 
 } // namespace rdge

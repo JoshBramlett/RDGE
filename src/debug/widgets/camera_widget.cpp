@@ -10,13 +10,15 @@ namespace debug {
 void
 CameraWidget::UpdateWidget (void)
 {
-    if (!settings::show_camera_widget)
+    using namespace rdge::debug::settings::camera;
+
+    if (!show_widget)
     {
         return;
     }
 
     ImGui::SetNextWindowSize(ImVec2(365.f, 275.f), ImGuiSetCond_FirstUseEver);
-    if (!ImGui::Begin("Camera", &settings::show_camera_widget))
+    if (!ImGui::Begin("Camera", &show_widget))
     {
         ImGui::End();
         return;
@@ -65,7 +67,7 @@ CameraWidget::UpdateWidget (void)
     ImGui::Spacing();
     ImGui::Indent(15.f);
     ImGui::Text("size:      %s", rdge::to_string(camera->viewport_size).c_str());
-    ImGui::Checkbox("Show Default", &settings::draw_camera_viewport);
+    ImGui::Checkbox("Show Default", &draw_viewport);
     ImGui::Unindent(15.f);
 
     ImGui::End();
@@ -74,13 +76,15 @@ CameraWidget::UpdateWidget (void)
 void
 CameraWidget::OnWidgetCustomRender (void)
 {
-    if (camera && settings::draw_camera_viewport)
+    using namespace rdge::debug::settings::camera;
+
+    if (camera && draw_viewport)
     {
-        float half_x = camera->viewport_size.x * 0.5f;
-        float half_y = camera->viewport_size.y * 0.5f;
-        debug::DrawWireFrame(physics::aabb({ -half_x, -half_y },
-                                           { half_x, half_y }),
-                                           colors.viewport);
+        auto pos = camera->position.xy() - (camera->viewport_size * 0.5f);
+        debug::DrawWireFrame(physics::aabb(pos,
+                                           camera->viewport_size.w,
+                                           camera->viewport_size.h),
+                                           colors::viewport);
     }
 }
 

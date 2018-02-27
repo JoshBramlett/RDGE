@@ -32,22 +32,30 @@ namespace rdge {
 namespace debug {
 
 namespace settings {
-    // Global overlay
-    bool show_overlay = false;
 
-    // Scene menu item
-    bool show_camera_widget = false;
-    bool show_graphics_widget = false;
+// global
+bool show_overlay = false;
+bool show_imgui_test_window = false;
 
-    // ImGui menu item
-    bool show_imgui_test_window = false;
-
-    // Camera Widget
-    bool draw_camera_viewport = false;
-
-namespace memory {
+namespace camera {
     bool show_widget = false;
-} // namespace memory
+
+    bool draw_viewport = false;
+
+    namespace colors {
+        color viewport = color::RED;
+    } // namespace colors
+} // namespace camera
+
+namespace graphics {
+    bool show_widget;
+
+    bool draw_sprites;
+
+    namespace colors {
+        color sprites = color::YELLOW;
+    } // namespace colors
+} // namespace graphics
 
 namespace physics {
     bool show_widget = false;
@@ -69,6 +77,10 @@ namespace physics {
         color joints         = color::CYAN;
     } // namespace colors
 } // namespace physics
+
+namespace memory {
+    bool show_widget = false;
+} // namespace memory
 
 } // namespace settings
 
@@ -451,9 +463,28 @@ public:
         if (event.IsKeyboardEvent())
         {
             const auto& args = event.GetKeyboardEventArgs();
-            if (args.PhysicalKey() == ScanCode::F1 && args.IsKeyPressed())
+            if (args.IsKeyPressed() && !args.IsRepeating())
             {
-                settings::show_overlay = !settings::show_overlay;
+                switch (args.PhysicalKey())
+                {
+                case ScanCode::F1:
+                    settings::show_overlay = !settings::show_overlay;
+                    break;
+                case ScanCode::F2:
+                    settings::camera::show_widget = !settings::camera::show_widget;
+                    break;
+                case ScanCode::F3:
+                    settings::physics::show_widget = !settings::physics::show_widget;
+                    break;
+                case ScanCode::F4:
+                    settings::graphics::show_widget = !settings::graphics::show_widget;
+                    break;
+                case ScanCode::F5:
+                    settings::memory::show_widget = !settings::memory::show_widget;
+                    break;
+                default:
+                    break;
+                }
             }
         }
 
@@ -496,15 +527,15 @@ public:
             {
                 if (ImGui::BeginMenu("Scene"))
                 {
-                    ImGui::MenuItem("Camera", nullptr, &settings::show_camera_widget);
-                    ImGui::MenuItem("Physics", nullptr, &settings::physics::show_widget);
-                    ImGui::MenuItem("Graphics", nullptr, &settings::show_graphics_widget);
+                    ImGui::MenuItem("Camera", "F2", &settings::camera::show_widget);
+                    ImGui::MenuItem("Graphics", "F3", &settings::graphics::show_widget);
+                    ImGui::MenuItem("Physics", "F4", &settings::physics::show_widget);
                     ImGui::EndMenu();
                 }
 
                 if (ImGui::BeginMenu("Memory"))
                 {
-                    ImGui::MenuItem("Tracker", nullptr, &settings::memory::show_widget);
+                    ImGui::MenuItem("Tracker", "F5", &settings::memory::show_widget);
                     ImGui::EndMenu();
                 }
 
@@ -518,8 +549,8 @@ public:
             }
 
             camera_widget.UpdateWidget();
-            memory_widget.UpdateWidget();
             physics_widget.UpdateWidget();
+            memory_widget.UpdateWidget();
 
             for (auto widget : widgets)
             {
@@ -537,8 +568,8 @@ public:
     OnRender (void)
     {
         camera_widget.OnWidgetCustomRender();
-        memory_widget.OnWidgetCustomRender();
         physics_widget.OnWidgetCustomRender();
+        memory_widget.OnWidgetCustomRender();
 
         for (auto widget : widgets)
         {

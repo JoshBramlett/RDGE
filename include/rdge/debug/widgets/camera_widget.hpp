@@ -25,12 +25,6 @@ public:
     void OnWidgetCustomRender (void) override;
 
     OrthographicCamera* camera = nullptr;
-
-    //! \brief Rendering colors
-    struct draw_colors
-    {
-        color viewport = color::RED;
-    } colors;
 };
 
 } // namespace debug

@@ -51,53 +51,67 @@ static const rdge::color DEFAULT_COLOR = color::YELLOW; //!< Default line color
 //! \brief Global ImGui debug overlay settings
 namespace settings {
 
-extern bool show_overlay; //!< Show/Hide global debug overlay
-
-//!@{ Scene main menu items
-extern bool show_camera_widget;     //!< Show/Hide Camera Widget
-extern bool show_graphics_widget;   //!< Show/Hide Graphics Widget
-//!@}
-
-//!@{ Memory main menu items
-namespace memory {
-    // widget display
-    extern bool show_widget;
-} // namespace memory
-//!@}
-
-//!@{ ImGui main menu items
+extern bool show_overlay;           //!< Show/Hide global debug overlay
 extern bool show_imgui_test_window; //!< Show/Hide ImGui 'Test Window'
+
+//!@{ Camera Widget Properties
+namespace camera {
+    extern bool show_widget;
+
+    // widget flags
+    extern bool draw_viewport;
+
+    // default wireframe colors
+    namespace colors {
+        extern color viewport;
+    }
+}
 //!@}
 
-//!@{ Camera Widget
-extern bool draw_camera_viewport;   //!< Draw viewport boundary
+//!@{ Graphics Widget Properties
+namespace graphics {
+    extern bool show_widget;
+
+    // widget flags
+    extern bool draw_sprites;
+
+    // default wireframe colors
+    namespace colors {
+        extern color sprites;
+    }
+}
 //!@}
 
-    //!@{ Physics Widget Properties
-    namespace physics {
-        // widget display
-        extern bool show_widget;
+//!@{ Physics Widget Properties
+namespace physics {
+    extern bool show_widget;
 
-        // widget flags
-        extern bool draw_fixtures;
-        extern bool draw_proxy_aabbs;
-        extern bool draw_joints;
-        extern bool draw_center_of_mass;
-        extern bool draw_bvh_nodes;
+    // widget flags
+    extern bool draw_fixtures;
+    extern bool draw_proxy_aabbs;
+    extern bool draw_joints;
+    extern bool draw_center_of_mass;
+    extern bool draw_bvh_nodes;
 
-        // default wireframe colors
-        namespace colors {
-            extern color not_simulating;
-            extern color static_body;
-            extern color kinematic_body;
-            extern color sleeping_body;
-            extern color dynamic_body;
-            extern color proxy_aabb;
-            extern color center_of_mass;
-            extern color joints;
-        } // namespace colors
-    } // namespace physics
-    //!@}
+    // default wireframe colors
+    namespace colors {
+        extern color not_simulating;
+        extern color static_body;
+        extern color kinematic_body;
+        extern color sleeping_body;
+        extern color dynamic_body;
+        extern color proxy_aabb;
+        extern color center_of_mass;
+        extern color joints;
+    }
+}
+//!@}
+
+//!@{ Memory Widget Properties
+namespace memory {
+    extern bool show_widget;
+}
+//!@}
 
 } // namespace settings
 
