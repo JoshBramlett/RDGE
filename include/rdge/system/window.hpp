@@ -171,13 +171,11 @@ public:
     //! \brief Present the renderer buffer to the screen
     void Present (void);
 
-    //! \brief Get a screenshot of the window
-    //! \details Saves the pixel data from the currently rendered screen
-    //!          in an RGB \ref Surface.  This method is slow, so it should
-    //!          be used sparingly (i.e. not within the game loop).
-    //! \note Result can be passed to SDL_SaveBMP to save to file
-    //! \returns Surface screenshot
-    //RDGE::Surface Screenshot (void);
+    //! \brief Save screenshot to disk
+    //! \details Screenshot will be saved in the binary directory with a
+    //!          filename formatted using the timestamp of the request.
+    //!          Screenshot will be taken form the currently active window.
+    static void SaveScreenshot (void);
 
     //! \brief Get the current window with focus
     //! \returns const reference to the current window

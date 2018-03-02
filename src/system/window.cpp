@@ -4,12 +4,19 @@
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
 #include <rdge/util/compiler.hpp>
+#include <rdge/util/memory/alloc.hpp>
 #include <rdge/debug/sdl_dumper.hpp>
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_rdge.h>
 
 #include <GL/glew.h>
+
+//#define STBIW_MALLOC(x) RDGE_MALLOC(x, rdge::memory_bucket_ext)
+//#define STBIW_FREE(x) RDGE_FREE(x, rdge::memory_bucket_ext)
+//#define STBIW_REALLOC(x, n) RDGE_REALLOC(x, n, rdge::memory_bucket_ext)
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <nothings/stb_image_write.h>
 
 #include <algorithm>
 
@@ -461,22 +468,30 @@ Window::Present (void)
     SDL_GL_SwapWindow(m_window);
 }
 
-/*
-RDGE::Surface
-Window::Screenshot (void)
+/* static */ void
+Window::SaveScreenshot (void)
 {
-    // TODO: Implement
     // taken from http://stackoverflow.com/questions/20233469
-    unsigned char * pixels = new unsigned char[w*h*4]; // 4 bytes for RGBA
-    glReadPixels(x,y,w, h, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+    auto sz = s_currentWindow->DrawableSize();
 
-    SDL_Surface * surf = SDL_CreateRGBSurfaceFrom(pixels, w, h, 8*4, w*4, 0,0,0,0);
-    SDL_SaveBMP(surf, filename);
+    // TODO Add error checking
+    // TODO STBIW alloc fns pass rvalues - Update the safe_alloc fns to accommodate.
 
-    SDL_FreeSurface(surf);
-    delete [] pixels;
+    int32 channels = 3; // RGB
+    void* pixel_data = malloc(sz.w * sz.h * channels);
+    glReadPixels(0, 0, sz.w, sz.h, GL_RGB, GL_UNSIGNED_BYTE, pixel_data);
+
+    std::time_t t = std::time(nullptr);
+    char buffer[100];
+    std::strftime(buffer, sizeof(buffer), "%F_%T", std::localtime(&t));
+    std::string filename = s_currentWindow->Title() + std::string(buffer) + ".png";
+
+    int32 pitch = sz.w * channels;
+    stbi_flip_vertically_on_write(1);
+    stbi_write_png(filename.c_str(), sz.w, sz.h, channels, pixel_data, pitch);
+
+    free(pixel_data);
 }
-*/
 
 /* static */ const Window&
 Window::Current (void)

@@ -15,6 +15,7 @@
 #include <rdge/physics/shapes/circle.hpp>
 #include <rdge/physics/shapes/polygon.hpp>
 #include <rdge/physics/fixture.hpp>
+#include <rdge/system/window.hpp>
 #include <rdge/util/compiler.hpp>
 #include <rdge/util/logger.hpp>
 #include <rdge/util/memory/alloc.hpp>
@@ -536,6 +537,15 @@ public:
                 if (ImGui::BeginMenu("Memory"))
                 {
                     ImGui::MenuItem("Tracker", "F5", &settings::memory::show_widget);
+                    ImGui::EndMenu();
+                }
+
+                if (ImGui::BeginMenu("Misc"))
+                {
+                    if (ImGui::MenuItem("Take Screenshot"))
+                    {
+                        Window::SaveScreenshot();
+                    }
                     ImGui::EndMenu();
                 }
 
