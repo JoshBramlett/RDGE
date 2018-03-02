@@ -62,7 +62,7 @@ OverworldScene::OverworldScene (void)
 
         // FIXME Polygons must be added before circles or all hell breaks loose
         auto& layer = this->sprite_layers.back();
-        math::vec2 player_pos(672.f, -526.f);
+        math::vec2 player_pos(650.f, -526.f);
         player.Init(player_pos, layer, collision_graph);
 
         for (const auto& obj : def.objectgroup.objects)
@@ -175,8 +175,8 @@ OverworldScene::OnEvent (const Event& event)
 void
 OverworldScene::OnUpdate (const delta_time& dt)
 {
-    player.OnUpdate(dt);
     collision_graph.Step(1.f / 60.f);
+    player.OnUpdate(dt);
 }
 
 void

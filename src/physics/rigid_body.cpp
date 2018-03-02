@@ -69,6 +69,12 @@ RigidBody::CreateFixture (const fixture_profile& profile)
         return nullptr;
     }
 
+    // TODO For debug builds assert:
+    // 1a) Moving shapes have a length <= 10.f
+    // 1b) Static shapes have a length <= 50.f
+    //
+    // 2) All moving bodies have at least one fixture with a non-zero density
+
     Fixture* result = graph->block_allocator.New<Fixture>(profile, this);
     fixtures.push_back(*result);
 

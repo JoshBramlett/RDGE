@@ -87,17 +87,27 @@ Player::Init (const math::vec2& pos, SpriteLayer& layer, CollisionGraph& graph)
     this->body = graph.CreateBody(bprof);
 
     {
-        // hitbox
+        // hurtbox
+        fixture_profile fprof;
+        fprof.is_sensor = true;
+        fprof.filter.category = chrono_collision_category_player_hitbox;
+        fprof.filter.mask = chrono_collision_category_enemy_hitbox;
+
+        polygon p(0.5f, 1.f);
+        fprof.shape = &p;
+        this->hurtbox = body->CreateFixture(fprof);
+    }
+    {
+        // envbox (environment collidable region - not sure what else to call it)
         fixture_profile fprof;
         fprof.density = 1.f;
         //fprof.restitution = 0.8f;
         fprof.filter.category = chrono_collision_category_player_hitbox;
-        fprof.filter.mask = chrono_collision_category_enemy_hitbox |
-                            chrono_collision_category_environment_static;
+        fprof.filter.mask = chrono_collision_category_environment_static;
 
-        polygon p(0.5f, 1.f);
+        polygon p(0.5f, 0.25f, math::vec2(0.f, -0.75f));
         fprof.shape = &p;
-        this->hitbox = body->CreateFixture(fprof);
+        this->envbox = body->CreateFixture(fprof);
     }
 
 #if 0
@@ -235,7 +245,7 @@ Player::OnUpdate (const delta_time& dt)
 #endif
 
     auto& frame = this->m_currentAnimation->GetFrame(dt.ticks);
-    math::vec2 screen_pos(this->hitbox->GetWorldCenter() * g_game.ratios.world_to_screen);
+    math::vec2 screen_pos(this->hurtbox->GetWorldCenter() * g_game.ratios.world_to_screen);
 
     sprite->pos = screen_pos - frame.origin;
     sprite->size = frame.size;
@@ -272,5 +282,5 @@ Player::OnMeleeAttack (float damage, const rdge::math::vec2& pos)
 math::vec2
 Player::GetWorldCenter (void) const noexcept
 {
-    return hitbox->GetWorldCenter();
+    return hurtbox->GetWorldCenter();
 }

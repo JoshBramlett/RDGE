@@ -79,9 +79,21 @@ struct sweep_step
 //! \brief Defines how a body acts during simulation
 enum class RigidBodyType : uint8
 {
-    STATIC = 0, //!< No mass or velocity, only collides with dynamic bodies
-    KINEMATIC,  //!< Does not react to forces, only collides with dynamic bodies
-    DYNAMIC     //!< Fully simulated
+    //! \enum STATIC
+    //! \details Static bodies have zero mass and no velocity, however they may
+    //!          be manually moved.  They only collide with dynamic bodies.
+    STATIC = 0,
+
+    //! \enum KINEMATIC
+    //! \details Kinematic bodies have zero mass, but are allowed to move under
+    //!          simulation by providing a velocity.  They do not react to forces
+    //!          and only collide with dynamic bodies.
+    KINEMATIC,
+
+    //! \enum DYNAMIC
+    //! \details Dynamic bodies are fully simulated.  They can be moved according
+    //!          to forces and collide with all other body types.
+    DYNAMIC
 };
 
 //! \struct rigid_body_profile

@@ -42,7 +42,8 @@ public:
 
     rdge::sprite_data* sprite = nullptr;
     rdge::physics::RigidBody* body = nullptr;
-    rdge::physics::Fixture* hitbox = nullptr;
+    rdge::physics::Fixture* hurtbox = nullptr;
+    rdge::physics::Fixture* envbox = nullptr;
     rdge::CardinalDirectionArray<rdge::physics::Fixture*> dir_sensors;
 
     rdge::physics::RigidBody* sword;

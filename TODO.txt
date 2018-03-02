@@ -3,8 +3,6 @@ Working (bugs)
     Physics Circle/Poly collision
       - Ordering is wrong so the normal is messed up.  Adding the rect prior to the circle
         works, vice versa does not.
-    Player animations frames and collision boxes don't match up
-      - It's working correctly, but the origin is wrong.
     Logger occasionally does not start
 
 Working (enhancements)
@@ -70,6 +68,8 @@ Physics:
   - Stats
   - Add way to step at a set interval defined through the ctor
   - [maybe] More joint support
+  - Add support for:
+    - RigidBody bullet flag
 
 Math:
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset name="overworld_obj" tilewidth="80" tileheight="96" tilecount="10" columns="0">
+<tileset name="overworld_obj" tilewidth="80" tileheight="96" tilecount="12" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0">
   <image width="80" height="96" source="tree_01.png"/>
@@ -75,6 +75,20 @@
    <object id="1" name="hitbox" type="environment_static" x="29.3629" y="68.313" width="22.9917" height="22.9917">
     <ellipse/>
    </object>
+  </objectgroup>
+ </tile>
+ <tile id="10">
+  <image width="32" height="32" source="firepit_01.png"/>
+  <objectgroup draworder="index">
+   <object id="1" name="firepit_01" type="environment_static" x="0.657549" y="1.39453" width="28.8006" height="28.8006">
+    <ellipse/>
+   </object>
+  </objectgroup>
+ </tile>
+ <tile id="11">
+  <image width="36" height="36" source="sign_direction_01.png"/>
+  <objectgroup draworder="index">
+   <object id="1" name="sign_direction_01" type="environment_static" x="2.36718" y="22.7512" width="30.6418" height="12.0989"/>
   </objectgroup>
  </tile>
 </tileset>
