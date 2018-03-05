@@ -18,7 +18,7 @@ struct mat4;
 //!@}
 
 //! \struct vec3
-//! \brief Three dimensional floating point vector
+//! \brief Three component floating point vector
 struct vec3
 {
     float x = 0.f; //!< x-coordinate

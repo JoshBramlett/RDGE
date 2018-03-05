@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="1.1.2" orientation="orthogonal" renderorder="right-down" width="80" height="64" tilewidth="16" tileheight="16" infinite="1" nextobjectid="54">
+<map version="1.0" tiledversion="1.1.2" orientation="orthogonal" renderorder="right-down" width="80" height="64" tilewidth="16" tileheight="16" infinite="1" nextobjectid="55">
  <properties>
   <property name="object_types" type="file" value="objecttypes.json"/>
  </properties>
@@ -400,7 +400,7 @@
 73,74,72,73,74,72,73,74,72,73,74,75,76,77,78,79,
 93,94,92,93,94,92,93,94,92,93,94,95,96,97,98,99,
 113,114,112,113,114,112,113,114,112,113,114,115,116,117,118,119,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,14,11,12,13,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -458,6 +458,7 @@
   <object id="51" name="tree" gid="450" x="364.414" y="594.102" width="80" height="96"/>
   <object id="52" gid="451" x="664.115" y="538.849" width="32" height="32"/>
   <object id="53" gid="452" x="448.68" y="559.836" width="36" height="36"/>
+  <object id="54" gid="453" x="597.939" y="686.714" width="52" height="44"/>
  </objectgroup>
  <imagelayer name="temp" offsetx="720" offsety="269.333">
   <image source="../temp/house_01.png" width="255" height="262"/>

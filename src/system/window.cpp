@@ -476,6 +476,8 @@ Window::SaveScreenshot (void)
 
     // TODO Add error checking
     // TODO STBIW alloc fns pass rvalues - Update the safe_alloc fns to accommodate.
+    // TODO Spin this off on it's own thread as it's noticably expensive
+    // TODO Figure out a way to provide feedback to the UI.  (show filename saved)
 
     int32 channels = 3; // RGB
     void* pixel_data = malloc(sz.w * sz.h * channels);

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset name="overworld_obj" tilewidth="80" tileheight="96" tilecount="12" columns="0">
+<tileset name="overworld_obj" tilewidth="80" tileheight="96" tilecount="13" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0">
   <image width="80" height="96" source="tree_01.png"/>
@@ -89,6 +89,14 @@
   <image width="36" height="36" source="sign_direction_01.png"/>
   <objectgroup draworder="index">
    <object id="1" name="sign_direction_01" type="environment_static" x="2.36718" y="22.7512" width="30.6418" height="12.0989"/>
+  </objectgroup>
+ </tile>
+ <tile id="12">
+  <image width="52" height="44" source="big_rock_01.png"/>
+  <objectgroup draworder="index">
+   <object id="2" name="big_rock_01" type="environment_static" x="9.34211" y="11.3421" width="29.6053" height="29.6053">
+    <ellipse/>
+   </object>
   </objectgroup>
  </tile>
 </tileset>
