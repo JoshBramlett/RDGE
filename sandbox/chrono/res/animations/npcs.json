@@ -1,0 +1,84 @@
+{
+  "animations": [
+    {
+      "name": "npcs_maid_01_walk_front",
+      "mode": "loop",
+      "interval": 225,
+      "frames": [
+        { "name": "npcs_maid_01_walk_front_1" },
+        { "name": "npcs_maid_01_walk_front_2" },
+        { "name": "npcs_maid_01_walk_front_3" }
+      ]
+    },
+    {
+      "name": "npcs_maid_01_walk_back",
+      "mode": "loop",
+      "interval": 225,
+      "frames": [
+        { "name": "npcs_maid_01_walk_back_1" },
+        { "name": "npcs_maid_01_walk_back_2" },
+        { "name": "npcs_maid_01_walk_back_3" }
+      ]
+    },
+    {
+      "name": "npcs_maid_01_walk_right",
+      "mode": "loop",
+      "interval": 225,
+      "frames": [
+        { "name": "npcs_maid_01_walk_side_1" },
+        { "name": "npcs_maid_01_walk_side_2" },
+        { "name": "npcs_maid_01_walk_side_3" }
+      ]
+    },
+    {
+      "name": "npcs_maid_01_walk_left",
+      "mode": "loop",
+      "interval": 175,
+      "frames": [
+        { "name": "npcs_maid_01_walk_side_1", "flip": 1 },
+        { "name": "npcs_maid_01_walk_side_2", "flip": 1 },
+        { "name": "npcs_maid_01_walk_side_3", "flip": 1 }
+      ]
+    },
+    {
+      "name": "npcs_young_girl_01_walk_front",
+      "mode": "loop",
+      "interval": 225,
+      "frames": [
+        { "name": "npcs_young_girl_01_walk_front_2" },
+        { "name": "npcs_young_girl_01_walk_front_3" },
+        { "name": "npcs_young_girl_01_walk_front_2" },
+        { "name": "npcs_young_girl_01_walk_front_3", "flip": 1 }
+      ]
+    },
+    {
+      "name": "npcs_young_girl_01_walk_back",
+      "mode": "loop",
+      "interval": 225,
+      "frames": [
+        { "name": "npcs_young_girl_01_walk_back_2" },
+        { "name": "npcs_young_girl_01_walk_back_3" }
+      ]
+    },
+    {
+      "name": "npcs_young_girl_01_walk_right",
+      "mode": "loop",
+      "interval": 225,
+      "frames": [
+        { "name": "npcs_young_girl_01_walk_side_1" },
+        { "name": "npcs_young_girl_01_walk_side_2" },
+        { "name": "npcs_young_girl_01_walk_side_3" }
+      ]
+    },
+    {
+      "name": "npcs_young_girl_01_walk_left",
+      "mode": "loop",
+      "interval": 175,
+      "frames": [
+        { "name": "npcs_young_girl_01_walk_side_1", "flip": 1 },
+        { "name": "npcs_young_girl_01_walk_side_2", "flip": 1 },
+        { "name": "npcs_young_girl_01_walk_side_3", "flip": 1 }
+      ]
+    }
+  ]
+}

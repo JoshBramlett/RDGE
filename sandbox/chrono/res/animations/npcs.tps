@@ -6,7 +6,7 @@
         <key>texturePackerVersion</key>
         <string>4.6.1</string>
         <key>fileName</key>
-        <string>/Users/jbramlett/Documents/Projects/RDGE/sandbox/chrono/res/animations/animals.tps</string>
+        <string>/Users/jbramlett/Documents/Projects/RDGE/sandbox/chrono/res/animations/npcs.tps</string>
         <key>autoSDSettings</key>
         <array>
             <struct type="AutoSDSettings">
@@ -199,147 +199,100 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
-            <key type="filename">animals/mallard_baby/squint/front_1.png</key>
-            <key type="filename">animals/mallard_baby/squint/side_1.png</key>
-            <key type="filename">animals/mallard_baby/walk/back_1.png</key>
-            <key type="filename">animals/mallard_baby/walk/front_1.png</key>
-            <key type="filename">animals/mallard_baby/walk/side_1.png</key>
+            <key type="filename">npcs/maid_01/walk/back_1.png</key>
+            <key type="filename">npcs/maid_01/walk/back_2.png</key>
+            <key type="filename">npcs/maid_01/walk/front_2.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>4,3,7,5</rect>
+                <rect>4,8,8,15</rect>
                 <key>scale9Paddings</key>
-                <rect>4,3,7,5</rect>
+                <rect>4,8,8,15</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">animals/mallard_baby/squint/front_2.png</key>
-            <key type="filename">animals/mallard_baby/walk/back_2.png</key>
-            <key type="filename">animals/mallard_baby/walk/front_2.png</key>
+            <key type="filename">npcs/maid_01/walk/back_3.png</key>
+            <key type="filename">npcs/maid_01/walk/front_1.png</key>
+            <key type="filename">npcs/maid_01/walk/front_3.png</key>
+            <key type="filename">npcs/maid_01/walk/side_3.png</key>
+            <key type="filename">npcs/young_girl_01/walk/back_3.png</key>
+            <key type="filename">npcs/young_girl_01/walk/front_1.png</key>
+            <key type="filename">npcs/young_girl_01/walk/front_2.png</key>
+            <key type="filename">npcs/young_girl_01/walk/front_3.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>3,3,6,5</rect>
+                <rect>4,8,7,15</rect>
                 <key>scale9Paddings</key>
-                <rect>3,3,6,5</rect>
+                <rect>4,8,7,15</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">animals/mallard_baby/squint/side_2.png</key>
-            <key type="filename">animals/mallard_baby/walk/side_2.png</key>
+            <key type="filename">npcs/maid_01/walk/side_1.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>3,3,7,5</rect>
+                <rect>3,8,6,16</rect>
                 <key>scale9Paddings</key>
-                <rect>3,3,7,5</rect>
+                <rect>3,8,6,16</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">animals/seagull/fly/side_1.png</key>
+            <key type="filename">npcs/maid_01/walk/side_2.png</key>
+            <key type="filename">npcs/young_girl_01/walk/back_1.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>5,4,9,7</rect>
+                <rect>3,8,6,15</rect>
                 <key>scale9Paddings</key>
-                <rect>5,4,9,7</rect>
+                <rect>3,8,6,15</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">animals/seagull/fly/side_2.png</key>
+            <key type="filename">npcs/young_girl_01/walk/back_2.png</key>
+            <key type="filename">npcs/young_girl_01/walk/side_1.png</key>
+            <key type="filename">npcs/young_girl_01/walk/side_3.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>4,4,9,7</rect>
+                <rect>3,8,7,15</rect>
                 <key>scale9Paddings</key>
-                <rect>4,4,9,7</rect>
+                <rect>3,8,7,15</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">animals/seagull/fly/side_3.png</key>
+            <key type="filename">npcs/young_girl_01/walk/side_2.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>5,3,9,6</rect>
+                <rect>3,7,7,15</rect>
                 <key>scale9Paddings</key>
-                <rect>5,3,9,6</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">animals/seagull/fly/side_4.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>5,4,9,8</rect>
-                <key>scale9Paddings</key>
-                <rect>5,4,9,8</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">animals/seagull/fly/side_5.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>4,4,9,9</rect>
-                <key>scale9Paddings</key>
-                <rect>4,4,9,9</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">animals/seagull/fly/side_6.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>4,5,9,9</rect>
-                <key>scale9Paddings</key>
-                <rect>4,5,9,9</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">animals/seagull/fly/side_7.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>4,4,9,8</rect>
-                <key>scale9Paddings</key>
-                <rect>4,4,9,8</rect>
+                <rect>3,7,7,15</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
         </map>
         <key>fileList</key>
         <array>
-            <filename>animals</filename>
+            <filename>npcs</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

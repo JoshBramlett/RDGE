@@ -2,6 +2,7 @@
   "cooker": {
     "animations": [
       "animations/animals.tps",
+      "animations/npcs.tps",
       "animations/player.tps"
     ],
     "objectsheets": [
