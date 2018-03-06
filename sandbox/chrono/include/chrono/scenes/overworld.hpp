@@ -11,6 +11,7 @@
 #include <memory>
 
 #include <chrono/entities/player.hpp>
+#include <chrono/entities/npcs/debutante.hpp>
 #include <chrono/entities/static_actor.hpp>
 
 class OverworldScene
@@ -63,6 +64,7 @@ public:
 
     //!@{ Actors
     Player player;
+    Debutante debutante;
     std::vector<StaticActor> static_actors;
     //!@}
 

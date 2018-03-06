@@ -35,6 +35,7 @@ public:
     //! \brief Defines how the animation will play
     enum class PlayMode : uint8
     {
+        NONE,        //!< No animation
         NORMAL,      //!< Single iteration
         REVERSE,     //!< Single iteration starting with the end frame
         LOOP,        //!< Loop starting with the start frame

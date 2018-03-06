@@ -17,10 +17,10 @@ Animation::Animation (uint32 interval, PlayMode mode)
 uint32
 Animation::GetFrameIndex (uint32 ticks) noexcept
 {
-    SDL_assert(this->interval > 0);
+    SDL_assert(this->mode == PlayMode::NONE || this->interval > 0);
     SDL_assert(this->frames.empty() == false);
 
-    size_t frame_count = this->frames.size();
+    const size_t frame_count = this->frames.size();
     if (frame_count == 1)
     {
         return 0;
@@ -49,6 +49,7 @@ Animation::GetFrameIndex (uint32 ticks) noexcept
             frame = (frame_count - 2) - (frame - frame_count);
         }
         break;
+    case PlayMode::NONE:
     default:
         frame = 0;
         break;
@@ -94,6 +95,7 @@ to_string (Animation::PlayMode value)
     switch (value)
     {
 #define CASE(X) case X: return (strrchr(#X, ':') + 1); break;
+        CASE(Animation::PlayMode::NONE)
         CASE(Animation::PlayMode::NORMAL)
         CASE(Animation::PlayMode::REVERSE)
         CASE(Animation::PlayMode::LOOP)
@@ -112,7 +114,8 @@ bool
 try_parse (const std::string& test, Animation::PlayMode& out)
 {
     std::string s = rdge::to_lower(test);
-    if      (s == "normal")       { out = Animation::PlayMode::NORMAL;       return true; }
+    if      (s == "none")         { out = Animation::PlayMode::NONE;         return true; }
+    else if (s == "normal")       { out = Animation::PlayMode::NORMAL;       return true; }
     else if (s == "reverse")      { out = Animation::PlayMode::REVERSE;      return true; }
     else if (s == "loop")         { out = Animation::PlayMode::LOOP;         return true; }
     else if (s == "loopreverse")  { out = Animation::PlayMode::LOOPREVERSE;  return true; }

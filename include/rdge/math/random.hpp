@@ -6,6 +6,7 @@
 #pragma once
 
 #include <rdge/core.hpp>
+#include <rdge/math/vec2.hpp>
 
 //! \namespace RDGE Rainbow Drop Game Engine
 namespace rdge {
@@ -39,6 +40,9 @@ public:
 
     //! \brief Generates a random normalized float within [0, 1)
     float Sample (void) const;
+
+    //! \brief Generates a random vector normal
+    vec2 Normal (void) const;
 };
 
 } // namespace math

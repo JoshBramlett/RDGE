@@ -199,6 +199,73 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
+            <key type="filename">npcs/debutante_01/idle/back_1.png</key>
+            <key type="filename">npcs/maid_01/walk/side_2.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>3,8,6,15</rect>
+                <key>scale9Paddings</key>
+                <rect>3,8,6,15</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">npcs/debutante_01/idle/front_1.png</key>
+            <key type="filename">npcs/debutante_01/idle/front_2.png</key>
+            <key type="filename">npcs/debutante_01/idle/front_3.png</key>
+            <key type="filename">npcs/debutante_01/walk/back_2.png</key>
+            <key type="filename">npcs/debutante_01/walk/front_1.png</key>
+            <key type="filename">npcs/debutante_01/walk/front_2.png</key>
+            <key type="filename">npcs/maid_01/walk/back_3.png</key>
+            <key type="filename">npcs/maid_01/walk/front_1.png</key>
+            <key type="filename">npcs/maid_01/walk/front_3.png</key>
+            <key type="filename">npcs/maid_01/walk/side_3.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,8,7,15</rect>
+                <key>scale9Paddings</key>
+                <rect>4,8,7,15</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">npcs/debutante_01/idle/side_1.png</key>
+            <key type="filename">npcs/debutante_01/idle/side_2.png</key>
+            <key type="filename">npcs/debutante_01/idle/side_3.png</key>
+            <key type="filename">npcs/debutante_01/walk/back_1.png</key>
+            <key type="filename">npcs/debutante_01/walk/side_1.png</key>
+            <key type="filename">npcs/debutante_01/walk/side_3.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>3,8,7,15</rect>
+                <key>scale9Paddings</key>
+                <rect>3,8,7,15</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">npcs/debutante_01/walk/side_2.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>3,7,7,15</rect>
+                <key>scale9Paddings</key>
+                <rect>3,7,7,15</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
             <key type="filename">npcs/maid_01/walk/back_1.png</key>
             <key type="filename">npcs/maid_01/walk/back_2.png</key>
             <key type="filename">npcs/maid_01/walk/front_2.png</key>
@@ -214,26 +281,6 @@
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
-            <key type="filename">npcs/maid_01/walk/back_3.png</key>
-            <key type="filename">npcs/maid_01/walk/front_1.png</key>
-            <key type="filename">npcs/maid_01/walk/front_3.png</key>
-            <key type="filename">npcs/maid_01/walk/side_3.png</key>
-            <key type="filename">npcs/young_girl_01/walk/back_3.png</key>
-            <key type="filename">npcs/young_girl_01/walk/front_1.png</key>
-            <key type="filename">npcs/young_girl_01/walk/front_2.png</key>
-            <key type="filename">npcs/young_girl_01/walk/front_3.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>4,8,7,15</rect>
-                <key>scale9Paddings</key>
-                <rect>4,8,7,15</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
             <key type="filename">npcs/maid_01/walk/side_1.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
@@ -244,48 +291,6 @@
                 <rect>3,8,6,16</rect>
                 <key>scale9Paddings</key>
                 <rect>3,8,6,16</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">npcs/maid_01/walk/side_2.png</key>
-            <key type="filename">npcs/young_girl_01/walk/back_1.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>3,8,6,15</rect>
-                <key>scale9Paddings</key>
-                <rect>3,8,6,15</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">npcs/young_girl_01/walk/back_2.png</key>
-            <key type="filename">npcs/young_girl_01/walk/side_1.png</key>
-            <key type="filename">npcs/young_girl_01/walk/side_3.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>3,8,7,15</rect>
-                <key>scale9Paddings</key>
-                <rect>3,8,7,15</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">npcs/young_girl_01/walk/side_2.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>3,7,7,15</rect>
-                <key>scale9Paddings</key>
-                <rect>3,7,7,15</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>

@@ -16,6 +16,8 @@ enum chrono_collision_category
 
     chrono_collision_category_enemy_hitbox              = 0x0010,
 
+    chrono_collision_category_npc                       = 0x0100,
+
     chrono_collision_category_player_hitbox             = 0x1000,
     chrono_collision_category_player_sensor_directional = 0x2000,
     chrono_collision_category_player_sensor_proximity   = 0x4000,

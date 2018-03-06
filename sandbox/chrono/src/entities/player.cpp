@@ -103,7 +103,8 @@ Player::Init (const math::vec2& pos, SpriteLayer& layer, CollisionGraph& graph)
         fprof.density = 1.f;
         //fprof.restitution = 0.8f;
         fprof.filter.category = chrono_collision_category_player_hitbox;
-        fprof.filter.mask = chrono_collision_category_environment_static;
+        fprof.filter.mask = chrono_collision_category_environment_static |
+                            chrono_collision_category_npc;
 
         polygon p(0.5f, 0.25f, math::vec2(0.f, -0.75f));
         fprof.shape = &p;

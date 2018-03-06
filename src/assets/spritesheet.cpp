@@ -165,13 +165,18 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
         for (const auto& j_animation : j_animations)
         {
             JSON_VALIDATE_REQUIRED(j_animation, name, is_string);
-            JSON_VALIDATE_REQUIRED(j_animation, interval, is_number_unsigned);
             JSON_VALIDATE_REQUIRED(j_animation, mode, is_string);
             JSON_VALIDATE_REQUIRED(j_animation, frames, is_array);
+            JSON_VALIDATE_OPTIONAL(j_animation, interval, is_number_unsigned);
 
             auto& animation = sheet.animations.at(index++);
             animation.name = j_animation["name"].get<decltype(animation.name)>();
-            animation.value.interval = j_animation["interval"].get<uint32>();
+
+            animation.value.interval = 0;
+            if (j_animation.count("interval"))
+            {
+                animation.value.interval = j_animation["interval"].get<uint32>();
+            }
 
             if (!try_parse(j_animation["mode"].get<std::string>(), animation.value.mode))
             {

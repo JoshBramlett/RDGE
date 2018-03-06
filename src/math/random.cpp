@@ -10,6 +10,8 @@ namespace math {
 namespace {
     std::random_device s_rd;
     std::mt19937 s_mt(s_rd());
+
+    float ONE_INC = 1.f + std::numeric_limits<float>::min();
 } // anonymous namespace
 
 uint32
@@ -34,8 +36,17 @@ Random::Next (uint32 low, uint32 high) const
 float
 Random::Sample (void) const
 {
-    std::uniform_real_distribution<float> dist(0, 1.0);
+    std::uniform_real_distribution<float> dist(0.f, 1.f);
     return dist(s_mt);
+}
+
+vec2
+Random::Normal (void) const
+{
+    std::uniform_real_distribution<float> x(-1.f, ONE_INC);
+    std::uniform_real_distribution<float> y(-1.f, ONE_INC);
+
+    return vec2(x(s_mt), y(s_mt));
 }
 
 } // namespace math

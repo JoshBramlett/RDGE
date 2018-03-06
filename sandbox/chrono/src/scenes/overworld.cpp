@@ -65,6 +65,9 @@ OverworldScene::OverworldScene (void)
         math::vec2 player_pos(650.f, -526.f);
         player.Init(player_pos, layer, collision_graph);
 
+        math::vec2 debutante_pos(550.f, -426.f);
+        debutante.Init(debutante_pos, layer, collision_graph);
+
         for (const auto& obj : def.objectgroup.objects)
         {
             // TODO Could set property on the obj to define that it's indeed static
@@ -177,6 +180,7 @@ OverworldScene::OnUpdate (const delta_time& dt)
 {
     collision_graph.Step(1.f / 60.f);
     player.OnUpdate(dt);
+    debutante.OnUpdate(dt);
 }
 
 void
