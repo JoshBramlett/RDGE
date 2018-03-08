@@ -79,8 +79,8 @@ TEST(ObjectTest, VerifyCircleConstruction)
 
     // 2) Validate base object
     auto base = object.GetCircle(1.f);
-    EXPECT_FLOAT_EQ(base.pos.x, 565.f);
-    EXPECT_FLOAT_EQ(base.pos.y, -813.f);
+    EXPECT_FLOAT_EQ(base.pos.x, 560.f);
+    EXPECT_FLOAT_EQ(base.pos.y, -808.f);
     EXPECT_FLOAT_EQ(base.radius, 5.f);
 }
 

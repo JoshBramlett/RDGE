@@ -362,7 +362,7 @@ constexpr T dot (const vec2_t<T>& a, const vec2_t<T>& b) noexcept
 
 //! \brief vec2_t perp_dot product specialization
 //! \details The dot product of the perpendicular of vector a with vector b.
-//!          The result represents the area of the parallelogram created by
+//!          abs(result) represents the area of the parallelogram created by
 //!          the vectors.  Also referred to as the 2D analog of the cross
 //!          product.  Other properties include:
 //!            a) result > 0 iff b is CCW from a

@@ -7,23 +7,30 @@
 
 #include <rdge/core.hpp>
 #include <rdge/math/vec2.hpp>
-#include <rdge/math/vec3.hpp>
-#include <rdge/math/vec4.hpp>
-#include <rdge/math/mat4.hpp>
+#include <rdge/util/compiler.hpp>
 
 #include <GL/glew.h>
 
-#include <vector>
 #include <unordered_map>
+
+//!@{ Forward declarations
+namespace rdge {
+namespace math {
+struct vec3;
+struct vec4;
+struct mat4;
+} // namespace math
+} // namespace rdge
+//!@}
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
 enum class ShaderType : uint32
 {
-    Vertex   = GL_VERTEX_SHADER,
-    Fragment = GL_FRAGMENT_SHADER,
-    Geometry = GL_GEOMETRY_SHADER
+    VERTEX   = GL_VERTEX_SHADER,
+    FRAGMENT = GL_FRAGMENT_SHADER,
+    GEOMETRY = GL_GEOMETRY_SHADER
 };
 
 class Shader
@@ -71,7 +78,7 @@ public:
     //! \param [in] vert_path File path to GLSL source code for the vertex shader
     //! \param [in] frag_path File path to GLSL source code for the fragment shader
     //! \returns Initialized Shader object
-    //! \throws RDGE::GLException Shader could not be built
+    //! \throws rdge::GLException Shader could not be built
     static Shader FromFile (const char* restrict vert_path, const char* restrict frag_path);
 
     //! \brief Number of textures supported in the fragment shader
@@ -104,6 +111,11 @@ private:
 };
 
 //! \brief ShaderType stream output operator
-std::ostream& operator<< (std::ostream& os, ShaderType type);
+std::ostream& operator<< (std::ostream&, ShaderType);
+
+//!@{ ShaderType string conversions
+std::string to_string (ShaderType);
+bool try_parse (const std::string&, ShaderType);
+//!@}
 
 } // namespace rdge

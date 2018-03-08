@@ -1,7 +1,6 @@
 #pragma once
 
 #include <rdge/util/exception.hpp>
-#include <rdge/util/io.hpp>
 #include <rdge/util/logger.hpp>
 #include <rdge/util/profiling.hpp>
 #include <rdge/util/strings.hpp>

@@ -1,5 +1,5 @@
 #include <rdge/assets/bmfont.hpp>
-#include <rdge/util/io.hpp>
+#include <rdge/util/io/rwops_base.hpp>
 #include <rdge/util/strings.hpp>
 #include <rdge/internal/exception_macros.hpp>
 
@@ -185,7 +185,7 @@ parse_line (const std::string& line, bmfont_char& c)
 void
 load_bmfont (const char* filepath, bmfont_data& font)
 {
-    auto config = util::read_text_file(filepath);
+    auto config = GetTextFileContent(filepath);
     if (config.empty())
     {
         RDGE_THROW("File does not exist or is empty" + std::string(filepath));

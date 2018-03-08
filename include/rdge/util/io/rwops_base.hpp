@@ -14,6 +14,13 @@
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
+//! \brief Read and return contents of a text file
+//! \param [in] filepath Path of the file to read
+//! \throws rdge::Exception File too large to be read
+//! \throws rdge::SDLException Inner RWOPS exception
+std::string
+GetTextFileContent (const char* filepath);
+
 //! \class rwops_base
 //! \brief Wrapper for SDL_RWops, an abstract interface to stream i/o
 //! \details Base class inherits the functionality provided by SDL which

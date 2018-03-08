@@ -21,7 +21,7 @@ TEST(FreelistTest, ValidateAllocation)
     // a) basic initialization
     freelist<test_object> a;
     EXPECT_EQ(a.size(), 0);
-    EXPECT_EQ(a.capacity(), 128);
+    EXPECT_EQ(a.capacity(), 0);
 
     // b) explicit initialization
     freelist<test_object> b(64);

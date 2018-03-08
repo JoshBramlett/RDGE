@@ -1,5 +1,6 @@
 #include <rdge/assets/font.hpp>
-#include <rdge/util/io.hpp>
+#include <rdge/util/io/rwops_base.hpp>
+#include <rdge/util/memory/alloc.hpp>
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/util/compiler.hpp>
 
@@ -32,10 +33,14 @@ Font::Font (const std::string& file, uint32 point_size, int64 index)
 
 Font::Font (const std::string& file)
 {
-    loaded_file lf = read_file(file.c_str());
+    auto rwops = rwops_base::from_file(file.c_str(), "rb");
+    auto sz = rwops.size();
+
+    uint8* data = (uint8*)RDGE_MALLOC(sz, memory_bucket_assets);
+    rwops.read(data, sizeof(uint8), sz);
 
     stbtt_fontinfo font;
-    stbtt_InitFont(&font, (uint8*)lf.data, stbtt_GetFontOffsetForIndex((uint8*)lf.data, 0));
+    stbtt_InitFont(&font, data, stbtt_GetFontOffsetForIndex(data, 0));
 
     int32 w, h;
     int32 scale = 20;
@@ -44,6 +49,7 @@ Font::Font (const std::string& file)
                                              stbtt_ScaleForPixelHeight(&font, scale),
                                              'a', &w, &h, 0, 0);
     STBTT_free(bitmap, nullptr);
+    RDGE_FREE(data, memory_bucket_assets);
 }
 
 Font::~Font (void) noexcept

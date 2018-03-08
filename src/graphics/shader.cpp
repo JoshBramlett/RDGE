@@ -1,12 +1,16 @@
 #include <rdge/graphics/shader.hpp>
-#include <rdge/util/io.hpp>
+#include <rdge/math/vec3.hpp>
+#include <rdge/math/vec4.hpp>
+#include <rdge/math/mat4.hpp>
+#include <rdge/util/io/rwops_base.hpp>
+#include <rdge/util/strings.hpp>
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
-#include <rdge/util/compiler.hpp>
 
 #include <GL/glew.h>
 #include <SDL_assert.h>
 
+#include <vector>
 #include <algorithm>
 #include <memory>
 #include <sstream>
@@ -93,8 +97,8 @@ Shader::Shader (const std::string& vert_source, const std::string& frag_source)
 {
     std::vector<uint32> shaders;
 
-    shaders.emplace_back(Compile(ShaderType::Vertex, vert_source));
-    shaders.emplace_back(Compile(ShaderType::Fragment, frag_source));
+    shaders.emplace_back(Compile(ShaderType::VERTEX, vert_source));
+    shaders.emplace_back(Compile(ShaderType::FRAGMENT, frag_source));
 
     m_programId = Link(shaders);
 }
@@ -187,8 +191,8 @@ Shader::SetUniformValue (const std::string& name, const math::mat4& matrix)
 /* static */ Shader
 Shader::FromFile (const char* restrict vert_path, const char* restrict frag_path)
 {
-    auto v = rdge::util::read_text_file(vert_path);
-    auto f = rdge::util::read_text_file(frag_path);
+    auto v = GetTextFileContent(vert_path);
+    auto f = GetTextFileContent(frag_path);
 
     return Shader(v, f);
 }
@@ -224,21 +228,39 @@ Shader::GetUniformLocation (const std::string& name)
     return location;
 }
 
-std::ostream& operator<< (std::ostream& os, ShaderType type)
+std::ostream&
+operator<< (std::ostream& os, ShaderType value)
 {
-    switch (type)
+    return os << rdge::to_string(value);
+}
+
+std::string
+to_string (ShaderType value)
+{
+    switch (value)
     {
-    case ShaderType::Vertex:
-        return os << "Vertex";
-    case ShaderType::Fragment:
-        return os << "Fragment";
-    case ShaderType::Geometry:
-        return os << "Geometry";
-    default:
-        break;
+#define CASE(X) case X: return (strrchr(#X, ':') + 1); break;
+        CASE(ShaderType::VERTEX)
+        CASE(ShaderType::FRAGMENT)
+        CASE(ShaderType::GEOMETRY)
+        default: break;
+#undef CASE
     }
 
-    return os << "Unknown";
+    std::ostringstream ss;
+    ss << "UNKNOWN[" << static_cast<uint32>(value) << "]";
+    return ss.str();
+}
+
+bool
+try_parse (const std::string& test, ShaderType& out)
+{
+    std::string s = rdge::to_lower(test);
+    if      (s == "vertex")   { out = ShaderType::VERTEX;   return true; }
+    else if (s == "fragment") { out = ShaderType::FRAGMENT; return true; }
+    else if (s == "geometry") { out = ShaderType::GEOMETRY; return true; }
+
+    return false;
 }
 
 } // namespace rdge

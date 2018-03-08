@@ -15,7 +15,7 @@
 #include <iomanip>
 #endif
 
-#define RDGE_VERSION "0.0.10"
+#define RDGE_VERSION "0.0.11"
 
 /***********************************
 /        Debugging defines
@@ -26,22 +26,6 @@
 /***********************************
 /    Compiler specific defines
 ***********************************/
-
-#if defined(COMPILER_GCC) || defined(__clang__)
-    #define NOINLINE __attribute__((noinline))
-#elif defined(COMPILER_MSVC)
-    #define NOINLINE __declspec(noinline)
-#else
-    #define NOINLINE
-#endif
-
-#ifndef restrict
-    #if defined(COMPILER_MSVC)
-        #define restrict __declspec(restrict)
-    #elif defined(COMPILER_GCC) || defined(__clang__)
-        #define restrict __restrict__
-    #endif
-#endif
 
 #ifndef FUNCTION_NAME
     #ifdef _MSC_VER

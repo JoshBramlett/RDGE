@@ -85,13 +85,7 @@ Tileset::Tileset (const char* filepath)
 {
     try
     {
-        auto rwops = rwops_base::from_file(filepath, "rt");
-        auto sz = rwops.size();
-
-        std::string file_data(sz + 1, '\0');
-        rwops.read(file_data.data(), sizeof(char), sz);
-
-        const auto j = json::parse(file_data);
+        const auto j = json::parse(GetTextFileContent(filepath));
         JSON_VALIDATE_REQUIRED(j, image, is_string);
         JSON_VALIDATE_REQUIRED(j, imageheight, is_number_unsigned);
         JSON_VALIDATE_REQUIRED(j, imagewidth, is_number_unsigned);

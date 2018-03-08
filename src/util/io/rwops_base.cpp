@@ -5,7 +5,32 @@
 
 #include <SDL_assert.h>
 
+#include <sstream>
+
 namespace rdge {
+
+std::string
+GetTextFileContent (const char* filepath)
+{
+    auto rwops = rwops_base::from_file(filepath, "rt");
+    auto sz = rwops.size();
+
+    std::string result;
+    if (RDGE_UNLIKELY((sz + 1u) > result.max_size()))
+    {
+        std::ostringstream ss;
+        ss << "File contents exceed max size."
+           << " filepath=" << filepath
+           << " size=" << (sz + 1u)
+           << " max_size=" << result.max_size();
+        RDGE_THROW(ss.str());
+    }
+
+    result = std::string((sz + 1u), '\0');
+    rwops.read(result.data(), sizeof(char), sz);
+
+    return result;
+}
 
 rwops_base::rwops_base (SDL_RWops* sdl_rwops)
     : m_rwops(sdl_rwops)

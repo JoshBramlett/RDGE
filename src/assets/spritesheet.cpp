@@ -290,13 +290,7 @@ SpriteSheet::SpriteSheet (const char* filepath)
 {
     try
     {
-        auto rwops = rwops_base::from_file(filepath, "rt");
-        auto sz = rwops.size();
-
-        std::string file_data(sz + 1, '\0');
-        rwops.read(file_data.data(), sizeof(char), sz);
-
-        const auto j = json::parse(file_data);
+        const auto j = json::parse(GetTextFileContent(filepath));
         JSON_VALIDATE_REQUIRED(j, meta, is_object);
 
         const auto& j_meta = j["meta"];

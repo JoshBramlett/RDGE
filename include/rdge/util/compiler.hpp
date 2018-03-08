@@ -20,3 +20,22 @@
 #else
     #define RDGE_ALWAYS_INLINE
 #endif
+
+#if __has_attribute(noinline)
+    #define RDGE_NO_INLINE __attribute__((noinline))
+#elif defined(_MSC_VER)
+    #define RDGE_NO_INLINE __declspec(noinline)
+#else
+    #define RDGE_NO_INLINE
+#endif
+
+#ifndef restrict
+    #if defined(COMPILER_GCC) || defined(__clang__)
+        #define restrict __restrict__
+    #elif defined(COMPILER_MSVC)
+        #define restrict __declspec(restrict)
+    #else
+        #define restrict
+    #endif
+#endif
+
