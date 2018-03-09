@@ -7,21 +7,31 @@ Working (bugs)
 
 Working (enhancements)
 
-    Assets:
-      - Investigate removing shared_asset destrutor call (to allow forward decl)
-        - Look into shared_ptr deleter
+    Fonts:
+      - Finish figuring out how to correctly layout text
+      - Move bmfont into file_formats
+      - Come up with way to cache text so the sprites don't have to be rebuilt every frame
+        - See libgdx
+      - Figure out if swapping the shader for a draw call is possible
+        - Write shader for distance field fonts
+        - Make sure I'm setting the texture filtering correctly
+      - Graphics (e.g. Text) should not hold a reference to a shared_asset.
+        - This should be removed and the data copied over.
+        - Change Text ctor to accept a BitmapFont, rather than a shared_asset<BitmapFont>
+      - Incorporate Fonts into the asset packer
+      - Add ability for BitmapFont to be loaded from the PackFile
+      - Remove all references to SDL_ttf
+
+
+    Util:
       - Create a vector-like container for tracking memory
         - Update all asset classes to use that rather than a vector
-      - Changes to Tilemap
-        - Convert layer to y-is-up (or document why it can be unique)
     Graphics:
       - Create a more cohesive way to represent sprites
         - Explictly define sprites from object sheet and normal sprites
         - Tie in with physics system (via entity).  Note: SpriteGroup/RigidBody
         - Logically separate position from depth - use vec2 when setting position
           - Remove m_far from TileBatch (really only applicable for bg layers)
-      - TileLayer & SpriteLayer
-        - ImGui support (rendering statistics)
       - Remove ISprite, Sprite, vops, etc.
         - Clean up SpriteBatch for above
       - Unify SpriteBatch and TileBatch interfaces
@@ -29,11 +39,12 @@ Working (enhancements)
 
 
 Assets:
-  - Add bitmap font support
-  - Remove SDL_ttf dependency
+  - Investigate removing shared_asset destrutor call (to allow forward decl)
+    - Look into shared_ptr deleter
+  - Changes to Tilemap
+    - Convert layer to y-is-up (or document why it can be unique)
 
 Graphics:
-  - Add shader support for distance field fonts
   - Better support for texture based filter, blending & wrapping (look to LibGDX)
   - Add support for 24bpp images (surface and texture)
   - Remove glew dependency in favor of glLoadGen

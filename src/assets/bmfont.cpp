@@ -196,6 +196,7 @@ load_bmfont (const char* filepath, bmfont_data& font)
 
     if (std::getline(input, line) && rdge::starts_with(line, "info"))
     {
+        rdge::trim(line);
         parse_line(line, font.info);
     }
     else
@@ -205,6 +206,7 @@ load_bmfont (const char* filepath, bmfont_data& font)
 
     if (std::getline(input, line) && rdge::starts_with(line, "common"))
     {
+        rdge::trim(line);
         parse_line(line, font.common);
     }
     else
@@ -219,6 +221,8 @@ load_bmfont (const char* filepath, bmfont_data& font)
         {
             if (std::getline(input, line) && rdge::starts_with(line, "page"))
             {
+                rdge::trim(line);
+
                 bmfont_page p;
                 parse_line(line, p);
 
@@ -238,6 +242,8 @@ load_bmfont (const char* filepath, bmfont_data& font)
     int32 char_count = 0;
     if (std::getline(input, line) && rdge::starts_with(line, "chars"))
     {
+        rdge::trim(line);
+
         try {
             auto token = line.substr(line.find("count"));
             size_t p = token.find('=', 0);
@@ -257,6 +263,8 @@ load_bmfont (const char* filepath, bmfont_data& font)
         {
             if (std::getline(input, line) && rdge::starts_with(line, "char"))
             {
+                rdge::trim(line);
+
                 bmfont_char c;
                 parse_line(line, c);
 

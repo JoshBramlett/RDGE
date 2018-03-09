@@ -6,32 +6,30 @@
 #pragma once
 
 #include <rdge/core.hpp>
+#include <rdge/assets/shared_asset.hpp>
+#include <rdge/assets/surface.hpp>
 #include <rdge/graphics/tex_coords.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/system/types.hpp>
 
-#include <memory>
-#include <unordered_map>
 #include <vector>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
-//!@{ Forward declarations
-class Surface;
-class Texture;
-//!@}
-
+//! \struct glyph
+//! \brief Represents the texture region of a specific glyph
 struct glyph
 {
-    uint32       id = 0; //!< Character id
-    screen_rect  clip;   //!< Spritesheet clipping rectangle
-    math::uivec2 size;   //!< Spritesheet size (in pixels)
-    tex_coords   coords; //!< Normalized texture coordinates
+    uint32      id = 0; //!< Character id
+    screen_rect clip;   //!< Surface clipping rectangle
+    tex_coords  coords; //!< Normalized texture coordinates
+    math::vec2  size;   //!< Size of the glyph (in pixels)
 
-    uint32       page = 0;
-    math::vec2   offset;
-    float        x_advance = 0.f;
+    uint32      page = 0; //!< Index of the surface containing the glyph
+    math::vec2  offset;
+    float       x_advance = 0.f;
+
     // TODO kerning
 };
 
@@ -63,11 +61,8 @@ public:
     float pad_left = 0.f;
     float line_height = 0;
 
-    std::vector<std::shared_ptr<Surface>> surfaces; //!< Surface created from image
-    std::vector<std::shared_ptr<Texture>> textures; //!< Texture generated from the surface
-
-private:
-    std::vector<glyph> m_glyphs;
+    std::vector<shared_asset<Surface>> surfaces; //!< Surfaces containing the glyphs
+    std::vector<glyph> glyphs;                   //!< Glyph region list
 };
 
 } // namespace rdge

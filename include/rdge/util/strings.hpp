@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <cctype>
 #include <sstream>
 #include <iomanip>
 
@@ -32,6 +33,29 @@ to_upper (const std::string& value)
     std::transform(result.begin(), result.end(), result.begin(), ::toupper);
 
     return result;
+}
+
+inline void
+ltrim (std::string &s)
+{
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch) {
+        return !std::isspace(ch);
+    }));
+}
+
+inline void
+rtrim (std::string &s)
+{
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch) {
+        return !std::isspace(ch);
+    }).base(), s.end());
+}
+
+inline void
+trim (std::string &s)
+{
+    ltrim(s);
+    rtrim(s);
 }
 
 inline std::vector<std::string>
@@ -84,6 +108,18 @@ basename (const std::string& filepath)
     if (pos != std::string::npos)
     {
         return filepath.substr(pos + 1);
+    }
+
+    return filepath;
+}
+
+inline std::string
+dirname (const std::string& filepath)
+{
+    auto pos = filepath.find_last_of("/\\");
+    if (pos != std::string::npos)
+    {
+        return filepath.substr(0, pos);
     }
 
     return filepath;

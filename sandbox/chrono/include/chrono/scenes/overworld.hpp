@@ -68,6 +68,10 @@ public:
     std::vector<StaticActor> static_actors;
     //!@}
 
+
+    rdge::Text mah_text;
+
+
     // debug
     bool show_widget = true;
 };

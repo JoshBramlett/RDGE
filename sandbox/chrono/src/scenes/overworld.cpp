@@ -16,6 +16,11 @@ OverworldScene::OverworldScene (void)
 {
     collision_graph.listener = this;
 
+    void* bmp_font = RDGE_MALLOC(sizeof(BitmapFont), memory_bucket_assets);
+    auto f = shared_asset<BitmapFont>(
+            new (bmp_font) BitmapFont("/Users/jbramlett/Documents/assets/fonts/bitpotion.fnt"));
+    mah_text = rdge::Text(f);
+
     auto tilemap = g_game.pack->GetAsset<tilemap::Tilemap>(rdge_asset_tilemap_overworld);
 
     ///////////////////
@@ -221,6 +226,9 @@ OverworldScene::OnRender (void)
     {
         layer.Draw(sprite_batch, camera);
     }
+
+    math::vec2 text_pos(650.f, -526.f);
+    mah_text.Draw(sprite_batch, "Hello", text_pos);
 
     // debug drawing
     debug::SetProjection(camera.combined);
