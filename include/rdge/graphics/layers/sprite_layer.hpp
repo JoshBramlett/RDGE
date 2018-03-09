@@ -11,6 +11,7 @@
 #include <rdge/graphics/texture.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/util/containers/intrusive_list.hpp>
+#include <rdge/debug/widgets/graphics_widget.hpp>
 
 #include <vector>
 
@@ -77,18 +78,29 @@ public:
                             float scale);
 
 private:
+    friend class rdge::debug::GraphicsWidget;
+
     intrusive_list<sprite_data> m_list;
     sprite_data* m_sprites = nullptr;
     size_t m_spriteCount = 0;
     size_t m_spriteCapacity = 0;
 
-    float m_padW = 0.f; //!< Culling region width padding
-    float m_padH = 0.f; //!< Culling region height padding
-
-    color m_color = color::WHITE;  //!< Render color (to store opacity)
+    color m_color = color::WHITE; //!< Render color (to store opacity)
+    math::vec2 m_padding;         //!< Culling region padding
 
 public:
+    std::string name;              //!< Layer name
     std::vector<Texture> textures; //!< Sprite textures
+
+#ifdef RDGE_DEBUG
+public:
+    struct debug_overlay_data
+    {
+        bool hide_layer = false;
+        bool draw_sprite_frames = false;
+        size_t sprites_drawn = 0;
+    } debug_overlay;
+#endif
 };
 
 //! \brief SpriteRenderOrder stream output operator

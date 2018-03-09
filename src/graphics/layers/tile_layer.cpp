@@ -32,6 +32,7 @@ constexpr uint32 FLIPPED_ANTIDIAGONALLY = 0x20000000;
 TileLayer::TileLayer (const tilemap::Layer& def, float scale)
     : m_grid(def.tilelayer.grid)
     , m_offset(def.offset * scale)
+    , name(def.name)
     , texture(*def.tilelayer.tileset->surface)
 {
     this->texture.unit_id = TileBatch::TEXTURE_UNIT_ID;
@@ -160,7 +161,11 @@ TileLayer::TileLayer (TileLayer&& other) noexcept
     , m_bounds(other.m_bounds)
     , m_color(other.m_color)
     , m_inv(other.m_inv)
+    , name(std::move(other.name))
     , texture(std::move(other.texture))
+#ifdef RDGE_DEBUG
+    , debug_overlay(other.debug_overlay)
+#endif
 {
     other.m_cells = nullptr;
     other.m_chunks.data = nullptr;
@@ -176,7 +181,11 @@ TileLayer::operator= (TileLayer&& rhs) noexcept
         m_bounds = rhs.m_bounds;
         m_color = rhs.m_color;
         m_inv = rhs.m_inv;
+        this->name = std::move(rhs.name);
         this->texture = std::move(rhs.texture);
+#ifdef RDGE_DEBUG
+        this->debug_overlay = rhs.debug_overlay;
+#endif
 
         std::swap(m_cells, rhs.m_cells);
         std::swap(m_chunks, rhs.m_chunks);
@@ -188,6 +197,14 @@ TileLayer::operator= (TileLayer&& rhs) noexcept
 void
 TileLayer::Draw (TileBatch& renderer, const OrthographicCamera& camera)
 {
+#ifdef RDGE_DEBUG
+    this->debug_overlay.chunks_drawn = 0;
+    if (this->debug_overlay.hide_layer)
+    {
+        return;
+    }
+#endif
+
     // buffer the camera bounds by 5 tiles
     auto frame_bounds = camera.bounds;
     frame_bounds.fatten(m_grid.cell_size.w * 2.f);
@@ -196,8 +213,6 @@ TileLayer::Draw (TileBatch& renderer, const OrthographicCamera& camera)
     {
         return;
     }
-
-    //debug::DrawWireFrame(m_bounds, color::RED);
 
     renderer.SetView(camera);
     renderer.Prime();
@@ -214,7 +229,6 @@ TileLayer::Draw (TileBatch& renderer, const OrthographicCamera& camera)
     int32 y2 = std::min(static_cast<int32>((bottom * m_inv.h) + 1.f),
                         static_cast<int32>(m_chunks.rows));
 
-    //size_t draw_calls = 0;
     for (int32 col = x1; col < x2; col++)
     {
         for (int32 row = y1; row < y2; row++)
@@ -223,12 +237,12 @@ TileLayer::Draw (TileBatch& renderer, const OrthographicCamera& camera)
             if (m_chunks.data[chunk_index].cells)
             {
                 renderer.Draw(m_chunks.data[chunk_index], m_color);
-                //draw_calls++;
+#ifdef RDGE_DEBUG
+                this->debug_overlay.chunks_drawn++;
+#endif
             }
         }
     }
-
-    //ILOG() << "this=" << this << " draw calls: " << draw_calls;
 
     renderer.Flush(this->texture);
 }

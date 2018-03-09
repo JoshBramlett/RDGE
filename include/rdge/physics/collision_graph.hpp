@@ -155,7 +155,7 @@ private:
 
     uint16 m_flags = 0;
 
-#ifdef RDGE_DEBUG
+#ifdef RDGE_DEBUG_PROFILING
 public:
     struct profiler
     {

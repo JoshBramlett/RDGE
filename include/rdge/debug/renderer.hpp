@@ -15,6 +15,8 @@ struct SDL_Window;
 
 namespace rdge {
 class OrthographicCamera;
+class SpriteLayer;
+class TileLayer;
 class Event;
 struct delta_time;
 
@@ -57,13 +59,14 @@ extern bool show_imgui_test_window; //!< Show/Hide ImGui 'Test Window'
 //!@{ Camera Widget Properties
 namespace camera {
     extern bool show_widget;
+    extern rdge::OrthographicCamera* active_camera;
 
     // widget flags
     extern bool draw_viewport;
 
     // default wireframe colors
     namespace colors {
-        extern color viewport;
+        extern rdge::color viewport;
     }
 }
 //!@}
@@ -71,13 +74,16 @@ namespace camera {
 //!@{ Graphics Widget Properties
 namespace graphics {
     extern bool show_widget;
+    extern std::vector<rdge::SpriteLayer*> active_sprite_layers;
+    extern std::vector<rdge::TileLayer*> active_tile_layers;
 
     // widget flags
     extern bool draw_sprites;
 
     // default wireframe colors
     namespace colors {
-        extern color sprites;
+        extern rdge::color sprites;
+        extern rdge::color tile_region;
     }
 }
 //!@}
@@ -85,6 +91,8 @@ namespace graphics {
 //!@{ Physics Widget Properties
 namespace physics {
     extern bool show_widget;
+    extern rdge::physics::CollisionGraph* active_graph;
+    extern float scale;
 
     // widget flags
     extern bool draw_fixtures;
@@ -95,14 +103,14 @@ namespace physics {
 
     // default wireframe colors
     namespace colors {
-        extern color not_simulating;
-        extern color static_body;
-        extern color kinematic_body;
-        extern color sleeping_body;
-        extern color dynamic_body;
-        extern color proxy_aabb;
-        extern color center_of_mass;
-        extern color joints;
+        extern rdge::color not_simulating;
+        extern rdge::color static_body;
+        extern rdge::color kinematic_body;
+        extern rdge::color sleeping_body;
+        extern rdge::color dynamic_body;
+        extern rdge::color proxy_aabb;
+        extern rdge::color center_of_mass;
+        extern rdge::color joints;
     }
 }
 //!@}
@@ -133,6 +141,9 @@ void SetProjection (const math::mat4& projection);
 void AddWidget (IWidget* widget);
 void RegisterCamera (OrthographicCamera* camera);
 void RegisterPhysics (physics::CollisionGraph* graph, float scale = 1.f);
+void RegisterGraphics (SpriteLayer* layer);
+void RegisterGraphics (TileLayer* layer);
+void ClearGraphics (void);
 //!@}
 
 //!@{ Draw primatives

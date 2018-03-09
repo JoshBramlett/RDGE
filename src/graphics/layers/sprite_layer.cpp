@@ -89,14 +89,14 @@ SpriteLayer::SpriteLayer (const tilemap::Layer& def, float scale)
         //obj.m_rotation;
         //obj.visible;
 
-        if (sprite.size.w > m_padW)
+        if (sprite.size.w > m_padding.w)
         {
-            m_padW = sprite.size.w;
+            m_padding.w = sprite.size.w;
         }
 
-        if (sprite.size.h > m_padH)
+        if (sprite.size.h > m_padding.h)
         {
-            m_padH = sprite.size.h;
+            m_padding.h = sprite.size.h;
         }
 
         // sorted insert according to render order
@@ -123,10 +123,13 @@ SpriteLayer::SpriteLayer (SpriteLayer&& other) noexcept
     , m_sprites(other.m_sprites)
     , m_spriteCount(other.m_spriteCount)
     , m_spriteCapacity(other.m_spriteCapacity)
-    , m_padW(other.m_padW)
-    , m_padH(other.m_padH)
     , m_color(other.m_color)
+    , m_padding(other.m_padding)
+    , name(std::move(other.name))
     , textures(std::move(other.textures))
+#ifdef RDGE_DEBUG
+    , debug_overlay(other.debug_overlay)
+#endif
 {
     other.m_sprites = nullptr;
 }
@@ -139,10 +142,13 @@ SpriteLayer::operator= (SpriteLayer&& rhs) noexcept
         m_list = std::move(rhs.m_list);
         m_spriteCount = rhs.m_spriteCount;
         m_spriteCapacity = rhs.m_spriteCapacity;
-        m_padW = rhs.m_padW;
-        m_padH = rhs.m_padH;
         m_color = rhs.m_color;
+        m_padding = rhs.m_padding;
+        this->name = std::move(rhs.name);
         this->textures = std::move(rhs.textures);
+#ifdef RDGE_DEBUG
+        this->debug_overlay = rhs.debug_overlay;
+#endif
 
         std::swap(m_sprites, rhs.m_sprites);
     }
@@ -192,14 +198,14 @@ SpriteLayer::AddSprite (const math::vec2& pos,
     sprite.uvs = region.coords;
     sprite.tid = unit_id;
 
-    if (sprite.size.w > m_padW)
+    if (sprite.size.w > m_padding.w)
     {
-        m_padW = sprite.size.w;
+        m_padding.w = sprite.size.w;
     }
 
-    if (sprite.size.h > m_padH)
+    if (sprite.size.h > m_padding.h)
     {
-        m_padH = sprite.size.h;
+        m_padding.h = sprite.size.h;
     }
 
     // sorted insert according to render order
@@ -220,9 +226,17 @@ SpriteLayer::AddSprite (const math::vec2& pos,
 void
 SpriteLayer::Draw (SpriteBatch& renderer, const OrthographicCamera& camera)
 {
+#ifdef RDGE_DEBUG
+    this->debug_overlay.sprites_drawn = 0;
+    if (this->debug_overlay.hide_layer)
+    {
+        return;
+    }
+#endif
+
     // buffer the camera bounds by max padding
     auto frame_bounds = camera.bounds;
-    frame_bounds.fatten(m_padW, m_padH);
+    frame_bounds.fatten(m_padding.w, m_padding.h);
 
     renderer.SetView(camera);
     renderer.PrepSubmit();
@@ -239,7 +253,14 @@ SpriteLayer::Draw (SpriteBatch& renderer, const OrthographicCamera& camera)
         physics::aabb box(sprite.pos, sprite.size.w, sprite.size.h);
         if (frame_bounds.intersects_with(box))
         {
-            debug::DrawWireFrame(box, color::RED);
+#ifdef RDGE_DEBUG
+            if (this->debug_overlay.draw_sprite_frames)
+            {
+                debug::DrawWireFrame(box, debug::settings::graphics::colors::sprites);
+            }
+
+            this->debug_overlay.sprites_drawn++;
+#endif
             renderer.Submit(sprite);
         }
     }

@@ -11,6 +11,7 @@
 #include <rdge/graphics/tex_coords.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/physics/aabb.hpp>
+#include <rdge/debug/widgets/graphics_widget.hpp>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
@@ -91,6 +92,8 @@ public:
     void Draw (TileBatch& renderer, const OrthographicCamera& camera);
 
 private:
+    friend class rdge::debug::GraphicsWidget;
+
     //! \struct chunk_grid
     //! \brief Quadrilateral subregion of the tilemap grid
     //! \details Chunks further break down the global grid into fixed size
@@ -113,7 +116,18 @@ private:
     math::vec2 m_inv;              //!< Inverse pixel to chunk ratio
 
 public:
-    Texture texture; //!< Tileset texture
+    std::string name; //!< Layer name
+    Texture texture;  //!< Tileset texture
+
+#ifdef RDGE_DEBUG
+public:
+    struct debug_overlay_data
+    {
+        bool hide_layer = false;
+        bool draw_renderable_area = false;
+        size_t chunks_drawn = 0;
+    } debug_overlay;
+#endif
 };
 
 //! \brief TileRenderOrder stream output operator

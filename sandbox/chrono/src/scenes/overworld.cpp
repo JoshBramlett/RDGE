@@ -16,10 +16,6 @@ OverworldScene::OverworldScene (void)
 {
     collision_graph.listener = this;
 
-    debug::AddWidget(this);
-    debug::settings::show_overlay = true;
-    debug::settings::physics::draw_fixtures = true;
-
     auto tilemap = g_game.pack->GetAsset<tilemap::Tilemap>(rdge_asset_tilemap_overworld);
 
     ///////////////////
@@ -62,6 +58,7 @@ OverworldScene::OverworldScene (void)
 
         // FIXME Polygons must be added before circles or all hell breaks loose
         auto& layer = this->sprite_layers.back();
+        layer.name = def.name;
         math::vec2 player_pos(650.f, -526.f);
         player.Init(player_pos, layer, collision_graph);
 
@@ -139,6 +136,10 @@ OverworldScene::OverworldScene (void)
             }
         }
     }
+
+    debug::AddWidget(this);
+    debug::settings::show_overlay = true;
+    debug::settings::physics::draw_fixtures = true;
 }
 
 void
@@ -146,6 +147,16 @@ OverworldScene::Initialize (void)
 {
     debug::RegisterCamera(&camera);
     debug::RegisterPhysics(&collision_graph, g_game.ratios.world_to_screen);
+
+    for (auto& layer : this->sprite_layers)
+    {
+        debug::RegisterGraphics(&layer);
+    }
+
+    for (auto& layer : this->tile_layers)
+    {
+        debug::RegisterGraphics(&layer);
+    }
 }
 
 void
@@ -153,6 +164,7 @@ OverworldScene::Terminate (void)
 {
     debug::RegisterCamera(nullptr);
     debug::RegisterPhysics(nullptr);
+    debug::ClearGraphics();
 }
 
 void
@@ -160,6 +172,16 @@ OverworldScene::Activate (void)
 {
     debug::RegisterCamera(&camera);
     debug::RegisterPhysics(&collision_graph, g_game.ratios.world_to_screen);
+
+    for (auto& layer : this->sprite_layers)
+    {
+        debug::RegisterGraphics(&layer);
+    }
+
+    for (auto& layer : this->tile_layers)
+    {
+        debug::RegisterGraphics(&layer);
+    }
 }
 
 void
@@ -167,6 +189,7 @@ OverworldScene::Hibernate (void)
 {
     debug::RegisterCamera(nullptr);
     debug::RegisterPhysics(nullptr);
+    debug::ClearGraphics();
 }
 
 void

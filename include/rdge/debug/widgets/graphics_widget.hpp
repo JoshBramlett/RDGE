@@ -1,7 +1,7 @@
-//! \headerfile <rdge/debug/widgets/camera_widget.hpp>
+//! \headerfile <rdge/debug/widgets/graphics_widget.hpp>
 //! \author Josh Bramlett
-//! \version 0.0.10
-//! \date 09/10/2017
+//! \version 0.0.11
+//! \date 03/08/2018
 
 #pragma once
 
@@ -12,12 +12,12 @@
 namespace rdge {
 namespace debug {
 
-//! \class CameraWidget
-//! \brief ImGui Wiget for runtime camera control
-class CameraWidget : public IWidget
+//! \class GraphicsWidget
+//! \brief ImGui Wiget for runtime graphics control
+class GraphicsWidget : public IWidget
 {
 public:
-    ~CameraWidget (void) noexcept = default;
+    ~GraphicsWidget (void) noexcept = default;
 
     void UpdateWidget (void) override;
     void OnWidgetCustomRender (void) override;

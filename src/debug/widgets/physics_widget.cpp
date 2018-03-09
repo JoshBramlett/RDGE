@@ -26,7 +26,7 @@ PhysicsWidget::UpdateWidget (void)
         return;
     }
 
-    if (!graph)
+    if (!active_graph)
     {
         ImGui::Spacing();
         ImGui::Text("CollisionGraph not registered");
@@ -39,9 +39,9 @@ PhysicsWidget::UpdateWidget (void)
     ImGui::Text("Graph");
     ImGui::Spacing();
     ImGui::Indent(15.f);
-    ImGui::Text("bodies:   %zu", graph->m_bodies.size());
-    ImGui::Text("contacts: %zu", graph->m_contacts.size());
-    ImGui::Text("joints:   %zu", graph->m_joints.size());
+    ImGui::Text("bodies:   %zu", active_graph->m_bodies.size());
+    ImGui::Text("contacts: %zu", active_graph->m_contacts.size());
+    ImGui::Text("joints:   %zu", active_graph->m_joints.size());
     ImGui::Unindent(15.f);
 
     ImGui::Spacing();
@@ -51,9 +51,9 @@ PhysicsWidget::UpdateWidget (void)
     ImGui::Text("SmallBlockAllocator");
     ImGui::Spacing();
     ImGui::Indent(15.f);
-    ImGui::Text("claimed:         %llu b", graph->block_allocator.usage.claimed);
-    ImGui::Text("slack:           %llu b", graph->block_allocator.usage.slack);
-    ImGui::Text("large_allocs:    %zu", graph->block_allocator.usage.large_allocs);
+    ImGui::Text("claimed:         %llu b", active_graph->block_allocator.usage.claimed);
+    ImGui::Text("slack:           %llu b", active_graph->block_allocator.usage.slack);
+    ImGui::Text("large_allocs:    %zu", active_graph->block_allocator.usage.large_allocs);
     ImGui::Unindent(15.f);
 
     ImGui::Spacing();
@@ -63,33 +63,35 @@ PhysicsWidget::UpdateWidget (void)
     ImGui::Text("BVH Tree");
     ImGui::Spacing();
     ImGui::Indent(15.f);
-    ImGui::Text("height:          %d", graph->m_tree.Height());
-    ImGui::Text("nodes:           %zu", graph->m_tree.Size());
+    ImGui::Text("height:          %d", active_graph->m_tree.Height());
+    ImGui::Text("nodes:           %zu", active_graph->m_tree.Size());
     ImGui::Unindent(15.f);
 
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::Spacing();
 
+#ifdef RDGE_DEBUG_PROFILING
     ImGui::Text("Profiling (us)");
     ImGui::Spacing();
     ImGui::Indent(15.f);
-    ImGui::Text("create contacts: %lld", graph->debug_profile.create_contacts);
-    ImGui::Text("purge contacts:  %lld", graph->debug_profile.purge_contacts);
-    ImGui::Text("solve:           %lld", graph->debug_profile.solve);
-    ImGui::Text("synchronize:     %lld", graph->debug_profile.synchronize);
+    ImGui::Text("create contacts: %lld", active_graph->debug_profile.create_contacts);
+    ImGui::Text("purge contacts:  %lld", active_graph->debug_profile.purge_contacts);
+    ImGui::Text("solve:           %lld", active_graph->debug_profile.solve);
+    ImGui::Text("synchronize:     %lld", active_graph->debug_profile.synchronize);
     ImGui::Text("---------------------");
-    ImGui::Text("total:           %lld", graph->debug_profile.create_contacts +
-                                         graph->debug_profile.purge_contacts +
-                                         graph->debug_profile.solve +
-                                         graph->debug_profile.synchronize);
+    ImGui::Text("total:           %lld", active_graph->debug_profile.create_contacts +
+                                         active_graph->debug_profile.purge_contacts +
+                                         active_graph->debug_profile.solve +
+                                         active_graph->debug_profile.synchronize);
     ImGui::Unindent(15.f);
 
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::Spacing();
+#endif
 
-    bool prevent_sleep = graph->IsSleepPrevented();
+    bool prevent_sleep = active_graph->IsSleepPrevented();
     ImGui::Text("Properties");
     ImGui::Spacing();
     ImGui::Indent(15.f);
@@ -98,11 +100,11 @@ PhysicsWidget::UpdateWidget (void)
 
     if (prevent_sleep)
     {
-        graph->m_flags |= CollisionGraph::PREVENT_SLEEP;
+        active_graph->m_flags |= CollisionGraph::PREVENT_SLEEP;
     }
     else
     {
-        graph->m_flags &= ~CollisionGraph::PREVENT_SLEEP;
+        active_graph->m_flags &= ~CollisionGraph::PREVENT_SLEEP;
     }
 
     ImGui::Spacing();
@@ -127,19 +129,19 @@ PhysicsWidget::OnWidgetCustomRender (void)
 {
     using namespace rdge::debug::settings::physics;
 
-    if (!graph)
+    if (!active_graph)
     {
         return;
     }
 
     if (draw_bvh_nodes)
     {
-        graph->m_tree.DebugDraw(scale);
+        active_graph->m_tree.DebugDraw(scale);
     }
 
     if (draw_joints)
     {
-        graph->m_joints.for_each([=](auto* j) {
+        active_graph->m_joints.for_each([=](auto* j) {
             debug::DrawLine(j->body_a->GetPosition(), j->AnchorA(), colors::joints);
             debug::DrawLine(j->body_b->GetPosition(), j->AnchorB(), colors::joints);
         });
@@ -147,7 +149,7 @@ PhysicsWidget::OnWidgetCustomRender (void)
 
     if (draw_fixtures || draw_proxy_aabbs || draw_center_of_mass)
     {
-        graph->m_bodies.for_each([=](auto* body) {
+        active_graph->m_bodies.for_each([=](auto* body) {
             body->fixtures.for_each([=](auto* f) {
                 if (draw_fixtures)
                 {

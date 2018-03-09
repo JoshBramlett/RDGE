@@ -1,11 +1,14 @@
 #include <rdge/debug/renderer.hpp>
 #include <rdge/debug/widgets/camera_widget.hpp>
+#include <rdge/debug/widgets/graphics_widget.hpp>
 #include <rdge/debug/widgets/memory_widget.hpp>
 #include <rdge/debug/widgets/physics_widget.hpp>
 #include <rdge/events/event.hpp>
 #include <rdge/gameobjects/iscene.hpp>
 #include <rdge/graphics/orthographic_camera.hpp>
 #include <rdge/graphics/shader.hpp>
+#include <rdge/graphics/layers/sprite_layer.hpp>
+#include <rdge/graphics/layers/tile_layer.hpp>
 #include <rdge/math/intrinsics.hpp>
 #include <rdge/math/mat4.hpp>
 #include <rdge/math/vec2.hpp>
@@ -40,26 +43,32 @@ bool show_imgui_test_window = false;
 
 namespace camera {
     bool show_widget = false;
+    rdge::OrthographicCamera* active_camera = nullptr;
 
     bool draw_viewport = false;
 
     namespace colors {
-        color viewport = color::RED;
+        rdge::color viewport = rdge::color::RED;
     } // namespace colors
 } // namespace camera
 
 namespace graphics {
     bool show_widget;
+    std::vector<rdge::SpriteLayer*> active_sprite_layers;
+    std::vector<rdge::TileLayer*> active_tile_layers;
 
     bool draw_sprites;
 
     namespace colors {
-        color sprites = color::YELLOW;
+        rdge::color sprites = rdge::color::YELLOW;
+        rdge::color tile_region = rdge::color::YELLOW;
     } // namespace colors
 } // namespace graphics
 
 namespace physics {
     bool show_widget = false;
+    rdge::physics::CollisionGraph* active_graph = nullptr;
+    float scale = 1.f;
 
     bool draw_fixtures = false;
     bool draw_proxy_aabbs = false;
@@ -68,14 +77,14 @@ namespace physics {
     bool draw_bvh_nodes = false;
 
     namespace colors {
-        color not_simulating = color(127, 127, 76);
-        color static_body    = color(127, 230, 127);
-        color kinematic_body = color(127, 127, 230);
-        color sleeping_body  = color(152, 152, 152);
-        color dynamic_body   = color(230, 178, 178);
-        color proxy_aabb     = color(230, 76, 230);
-        color center_of_mass = color::WHITE;
-        color joints         = color::CYAN;
+        rdge::color not_simulating = rdge::color(127, 127, 76);
+        rdge::color static_body    = rdge::color(127, 230, 127);
+        rdge::color kinematic_body = rdge::color(127, 127, 230);
+        rdge::color sleeping_body  = rdge::color(152, 152, 152);
+        rdge::color dynamic_body   = rdge::color(230, 178, 178);
+        rdge::color proxy_aabb     = rdge::color(230, 76, 230);
+        rdge::color center_of_mass = rdge::color::WHITE;
+        rdge::color joints         = rdge::color::CYAN;
     } // namespace colors
 } // namespace physics
 
@@ -456,6 +465,20 @@ private:
 class Overlay
 {
 public:
+    CameraWidget camera_widget;
+    GraphicsWidget graphics_widget;
+    MemoryWidget memory_widget;
+    PhysicsWidget physics_widget;
+    std::vector<IWidget*> widgets;
+
+public:
+    Overlay (void)
+    {
+        this->widgets.push_back(&camera_widget);
+        this->widgets.push_back(&graphics_widget);
+        this->widgets.push_back(&memory_widget);
+        this->widgets.push_back(&physics_widget);
+    }
 
     bool OnEvent (Event& event)
     {
@@ -558,10 +581,6 @@ public:
                 ImGui::EndMainMenuBar();
             }
 
-            camera_widget.UpdateWidget();
-            physics_widget.UpdateWidget();
-            memory_widget.UpdateWidget();
-
             for (auto widget : widgets)
             {
                 widget->UpdateWidget();
@@ -577,10 +596,6 @@ public:
     void
     OnRender (void)
     {
-        camera_widget.OnWidgetCustomRender();
-        physics_widget.OnWidgetCustomRender();
-        memory_widget.OnWidgetCustomRender();
-
         for (auto widget : widgets)
         {
             widget->OnWidgetCustomRender();
@@ -588,12 +603,6 @@ public:
 
         ImGui::Render();
     }
-
-    CameraWidget camera_widget;
-    MemoryWidget memory_widget;
-    PhysicsWidget physics_widget;
-
-    std::vector<IWidget*> widgets;
 };
 
 Overlay s_overlay;
@@ -609,12 +618,14 @@ InitializeOverlay (void)
     PointRenderer::Instance();
 }
 
-bool ProcessOnEvent (Event& event)
+bool
+ProcessOnEvent (Event& event)
 {
     return s_overlay.OnEvent(event);
 }
 
-void ProcessOnUpdate (SDL_Window* window, const delta_time& dt)
+void
+ProcessOnUpdate (SDL_Window* window, const delta_time& dt)
 {
     s_overlay.OnUpdate(window, dt);
 }
@@ -637,14 +648,33 @@ AddWidget (IWidget* widget)
 void
 RegisterCamera (OrthographicCamera* camera)
 {
-    s_overlay.camera_widget.camera = camera;
+    settings::camera::active_camera = camera;
 }
 
 void
 RegisterPhysics (CollisionGraph* graph, float scale)
 {
-    s_overlay.physics_widget.graph = graph;
-    s_overlay.physics_widget.scale = scale;
+    settings::physics::active_graph = graph;
+    settings::physics::scale = scale;
+}
+
+void
+RegisterGraphics (SpriteLayer* layer)
+{
+    settings::graphics::active_sprite_layers.push_back(layer);
+}
+
+void
+RegisterGraphics (TileLayer* layer)
+{
+    settings::graphics::active_tile_layers.push_back(layer);
+}
+
+void
+ClearGraphics (void)
+{
+    settings::graphics::active_sprite_layers.clear();
+    settings::graphics::active_tile_layers.clear();
 }
 
 void

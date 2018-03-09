@@ -148,7 +148,9 @@ CollisionGraph::Step (float dt)
         // find new contacts for any added proxies
         if (!m_dirtyProxies.empty())
         {
+#ifdef RDGE_DEBUG_PROFILING
             ScopeProfiler<> p(&debug_profile.create_contacts);
+#endif
             auto pairs = m_tree.Query<fixture_proxy>(m_dirtyProxies);
             for (auto& p : pairs)
             {
@@ -159,7 +161,9 @@ CollisionGraph::Step (float dt)
         }
 
         // remove all contacts that are not colliding
+#ifdef RDGE_DEBUG_PROFILING
         ScopeProfiler<> p(&debug_profile.purge_contacts);
+#endif
         PurgeContacts();
     }
 
@@ -189,7 +193,9 @@ CollisionGraph::Step (float dt)
 
     // 2) integration and contact solving
     {
+#ifdef RDGE_DEBUG_PROFILING
         ScopeProfiler<> p(&debug_profile.solve);
+#endif
         static std::vector<RigidBody*> body_stack;
         body_stack.reserve(m_bodies.size());
 
@@ -277,7 +283,9 @@ CollisionGraph::Step (float dt)
     }
 
     {
+#ifdef RDGE_DEBUG_PROFILING
         ScopeProfiler<> p(&debug_profile.synchronize);
+#endif
         m_bodies.for_each([=](auto* body) {
             // If a body was not in an island then it did not move.
             if (body->m_flags & RigidBody::ON_ISLAND)

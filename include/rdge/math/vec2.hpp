@@ -403,8 +403,9 @@ using svec2  = vec2_t<size_t>;
 
 } // namespace math
 
+template <typename T>
 inline std::string
-to_string (const math::vec2& value)
+to_string (const math::vec2_t<T>& value)
 {
     std::ostringstream ss;
     ss << "[" << value.x << ", " << value.y << "]";
