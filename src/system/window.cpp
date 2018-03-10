@@ -85,8 +85,6 @@ Window::Window (const std::string& title,
     , m_targetWidth(target_width)
     , m_targetHeight(target_height)
 {
-    ILOG() << "Initializing Window";
-
     // Ensure video subsystem is created.  Events subsystem (which is required by the
     // class) is initialized automatically by initializing video
     if (SDL_WasInit(SDL_INIT_VIDEO) == 0)
@@ -207,8 +205,6 @@ Window::Window (const std::string& title,
         SDL_THROW("SDL failed to create an OpenGL context", "SDL_GL_CreateContext");
     }
 
-    ILOG() << "Created OpenGL context v" << opengl::GetString(GL_VERSION);
-
     // !!!  IMPORTANT  !!!
     // There are a couple issues with GLEW initialization (as far as 1.13).
     //     1) GLEW has a problem with OpenGL 3.2+ core contexts, and the only fix
@@ -255,10 +251,6 @@ Window::Window (const std::string& title,
                    << " interval=" << interval
                    << " error=" << SDL_GetError();
         }
-        else
-        {
-            ILOG() << "Swap interval set to use VSYNC";
-        }
     }
 
     ResetViewport();
@@ -267,6 +259,14 @@ Window::Window (const std::string& title,
     SDL_AddEventWatch(&OnWindowEvent, this);
 
     s_currentWindow = this;
+
+    ILOG() << "Window Constructed:"
+           << " opengl=" << opengl::GetString(GL_VERSION)
+           << " vsync=" << std::boolalpha << IsUsingVSYNC()
+           << " high_dpi=" << std::boolalpha << IsHighDPI()
+           << " pixel_format=" << SDL_GetPixelFormatName(PixelFormat());
+
+    //ILOG() << debug::DumpRendererDriverInfo();
 }
 
 Window::~Window (void) noexcept
@@ -377,6 +377,18 @@ Window::IsHighDPI (void) const noexcept
 {
     uint32 flags = SDL_GetWindowFlags(m_window);
     return flags&SDL_WINDOW_ALLOW_HIGHDPI;
+}
+
+uint32
+Window::PixelFormat (void) const
+{
+    auto result = SDL_GetWindowPixelFormat(m_window);
+    if (RDGE_UNLIKELY(result == SDL_PIXELFORMAT_UNKNOWN))
+    {
+        SDL_THROW("SDL cannot determine pixel format", "SDL_GetWindowPixelFormat");
+    }
+
+    return result;
 }
 
 void

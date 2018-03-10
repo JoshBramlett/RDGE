@@ -151,7 +151,44 @@ Texture::Texture (Surface& surface)
     m_data = GetManager().Register(static_cast<const SDL_Surface*>(surface));
     if (m_data->ref_count == 1)
     {
-        Reload(surface);
+        // TODO [00036] Add support for 24bpp (no alpha channel) images.  Gimp doesn't
+        //      support it out of the box.  I believe the changes would be to convert
+        //      the surface to SDL_PIXELFORMAT_BGR888, and set GL_RGB in the OpenGL call.
+        //      To check whether 24 or 32bpp, BytesPerPixel should be 3 or 4.
+        //
+        //      Previously I was calling surface.ChangePixelFormat() to accommodate
+        //      changing an RGB to an RGBA, but it seems ridiculous for a couple reasons:
+        //        - It doesn't belong here (should be done in the surface)
+        //        - It re-creates the surface from scratch.
+        //      I should rather use the stb channel overrides to force an RGBA.
+        //
+        // There are also OpenGL gotchas regarding 24bpp.  See:
+        // https://www.khronos.org/opengl/wiki/Common_Mistakes#Texture_upload_and_pixel_reads
+
+        opengl::BindTexture(GL_TEXTURE_2D, m_data->handle);
+
+        // TODO: This is a naive implementation.  The following filters are used to
+        //       define how OpenGL will handle the scaling when textures are greater
+        //       or less than the size of their target.  GL_NEAREST produces harder
+        //       edges than other alternatives, so there needs to be a way to specify
+        //       in the ctor which option to take.
+        // see http://www.opengl-tutorial.org/beginners-tutorials/tutorial-5-a-textured-cube/
+        opengl::SetTextureParameter(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        opengl::SetTextureParameter(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        //opengl::SetTextureParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+        //opengl::SetTextureParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+
+        auto surface_ptr = static_cast<const SDL_Surface*>(surface);
+        opengl::UploadTextureData(GL_TEXTURE_2D,
+                                  GL_RGBA8,
+                                  surface_ptr->w,
+                                  surface_ptr->h,
+                                  surface.GL_PixelFormat(),
+                                  GL_UNSIGNED_BYTE,
+                                  surface_ptr->pixels);
+
+        opengl::UnbindTexture(GL_TEXTURE_2D);
     }
 }
 
@@ -265,54 +302,6 @@ Texture::Activate (void) const
 
     opengl::SetActiveTexture(GL_TEXTURE0 + this->unit_id);
     opengl::BindTexture(GL_TEXTURE_2D, m_data->handle);
-}
-
-void
-Texture::Reload (Surface& surface)
-{
-    // TODO: [00036] Add support for 24bpp (no alpha channel) images.  Gimp doesn't
-    //       support it out of the box.  I believe the changes would be to convert
-    //       the surface to SDL_PIXELFORMAT_BGR888, and set GL_RGB in the OpenGL call.
-    //       To check whether 24 or 32bpp, BytesPerPixel should be 3 or 4.
-    //
-    //       Removing ChangePixelFormat creates an ASAN crash in 04_scenes b/c it
-    //       it loads RGB textures and their isn't proper support.
-
-    // Change pixel format to what OpenGL understands
-    // TODO: This should be set to whatever the window uses
-    //          SDL_GetWindowPixelFormat(m_window);
-    surface.ChangePixelFormat(SDL_PIXELFORMAT_ABGR8888);
-
-    opengl::BindTexture(GL_TEXTURE_2D, m_data->handle);
-
-    // TODO: This is a naive implementation.  The following filters are used to
-    //       define how OpenGL will handle the scaling when textures are greater
-    //       or less than the size of their target.  GL_NEAREST produces harder
-    //       edges than other alternatives, so there needs to be a way to specify
-    //       in the ctor which option to take.
-    // see http://www.opengl-tutorial.org/beginners-tutorials/tutorial-5-a-textured-cube/
-    opengl::SetTextureParameter(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    opengl::SetTextureParameter(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    //opengl::SetTextureParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    //opengl::SetTextureParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-
-    // TODO The second param is the image precision, so when I do 24bpp support take
-    //      into consideration:
-    //
-    //      Although GL will accept GL_RGB, it is up to the driver to decide an
-    //      appropriate precision. We recommend that you be specific and write GL_RGB8:
-    //      https://www.opengl.org/wiki/Common_Mistakes#Image_precision
-    auto surface_ptr = static_cast<const SDL_Surface*>(surface);
-    opengl::SetTextureData(GL_TEXTURE_2D,
-                           GL_RGBA,
-                           surface_ptr->w,
-                           surface_ptr->h,
-                           GL_RGBA,
-                           GL_UNSIGNED_BYTE,
-                           surface_ptr->pixels);
-
-    opengl::UnbindTexture(GL_TEXTURE_2D);
 }
 
 } // namespace rdge

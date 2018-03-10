@@ -68,7 +68,7 @@ include_directories (${OPENGL_INCLUDE_DIR})
 # project includes
 include_directories (include)
 include_directories (internal)
-include_directories (lib)
+include_directories (SYSTEM lib)
 
 add_library (imgui STATIC
              lib/imgui/imgui.cpp

@@ -136,6 +136,9 @@ public:
     //! \return True iff window uses high-DPI, false otherwise
     bool IsHighDPI (void) const noexcept;
 
+    //! \brief Get the default SDL pixel format enum for the window
+    uint32 PixelFormat (void) const;
+
     //! \brief Return the SDL_Window pointer
     //! \details Raw pointer is returned so caller must ensure
     //!          Window object will not fall out of scope

@@ -792,18 +792,15 @@ SetTextureParameter (uint32 target, uint32 pname, int32 param)
 //! \param [in] data Pointer to the image data in memory
 //! \see https://www.khronos.org/opengles/sdk/docs/man/xhtml/glTexImage2D.xml
 inline void
-SetTextureData (
-                uint32 target,
-                int32  internalformat,
-                int32  width,
-                int32  height,
-                int32  format,
-                uint32 type,
-                const void*  data
-               )
+UploadTextureData (uint32 target,
+                   int32  internalformat,
+                   int32  width,
+                   int32  height,
+                   int32  format,
+                   uint32 type,
+                   const void* data)
 {
-    GL_CHECK_ERROR(glTexImage2D(
-                                target,
+    GL_CHECK_ERROR(glTexImage2D(target,
                                 0,              // level-of-detail
                                 internalformat,
                                 width,
@@ -811,8 +808,7 @@ SetTextureData (
                                 0,              // width of the border.  must be 0.
                                 format,
                                 type,
-                                data
-                               ));
+                                data));
 }
 
 //! \brief Direct map to glActiveTexture

@@ -80,13 +80,6 @@ public:
     //! \throws rdge::Exception Invalid sampler unit id
     void Activate (void) const;
 
-    //! \brief Reset the pixel data of the texture
-    //! \details Update texture and discard the previous stored data.
-    //! \param [in] surface Underlying surface asset
-    //! \note The surface pixel format may be changed to accommodate OpenGL
-    void Reload (Surface& surface);
-
-
     // TODO - from libgdx
     // https://github.com/libgdx/libgdx/blob/master/gdx/src/com/badlogic/gdx/graphics/GLTexture.java
     // SetFilter

@@ -29,15 +29,6 @@ inline auto CreateManagedSDLSurface (SDL_Surface* surface) -> SDLSurfaceUniquePt
     return SDLSurfaceUniquePtr(surface, SDL_FreeSurface);
 }
 
-//! \enum PixelDepth
-//! \brief Supported pixel depth values
-enum class PixelDepth : int32
-{
-    UNKNOWN = 0,
-    BPP_24 = 24, //!< 24 bits per pixel (RGB)
-    BPP_32 = 32  //!< 32 bits per pixel (RBGA)
-};
-
 //! \class Surface
 //! \brief Wrapper for an SDL_Surface, which represents an image in memory
 //! \details A surface provides a mechanism for loading images from disk.
@@ -57,10 +48,10 @@ public:
     //! \details Create a Surface from an image on disk.  If image depth is not
     //!          overridden the depth will be determined by the file.
     //! \param [in] filepath File path of the image to load
-    //! \param [in] depth Optional requested depth
+    //! \param [in] desired_channels Override channels when loading image
     //! \throws rdge::Exception Image initialization failed
     //! \throws rdge::SDLException SDL failed to create surface
-    Surface (const std::string& filepath, PixelDepth depth = PixelDepth::UNKNOWN);
+    Surface (const std::string& filepath, int32 desired_channels = 0);
 
     //! \brief Surface ctor
     //! \details Create a Surface from preallocated pixel data (used with \ref PackFile).
@@ -94,14 +85,19 @@ public:
     size_t Width (void) const noexcept;
     size_t Height (void) const noexcept;
     math::uivec2 Size (void) const noexcept;
-    PixelDepth Depth (void) const noexcept;
+    int32 Depth (void) const noexcept;
     //!@}
 
     //! \brief Get the internal pixel format of the surface
     //! \details Value represents the SDL_PixelFormatEnum value
     //! \returns Pixel format enumeration value
     //! \see https://wiki.libsdl.org/SDL_PixelFormatEnum
-    uint32 PixelFormat (void) const noexcept;
+    uint32 SDL_PixelFormat (void) const noexcept;
+
+    //! \brief Get the OpenGL pixel format of the surface
+    //! \returns OpenGL pixel format value
+    //! \throws rdge::Exception Format cannot be determined
+    int32 GL_PixelFormat (void) const;
 
     //! \brief Change the internal pixel format of the surface
     //! \param [in] pixel_format SDL_PixelFormatEnum value to change to
@@ -120,8 +116,5 @@ public:
 private:
     SDL_Surface* m_surface = nullptr;
 };
-
-//! \brief PixelDepth stream output operator
-std::ostream& operator<< (std::ostream&, PixelDepth);
 
 } // namespace rdge
