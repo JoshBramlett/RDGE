@@ -1,5 +1,5 @@
 #include <rdge/assets/bitmap_font.hpp>
-#include <rdge/assets/bmfont.hpp>
+#include <rdge/assets/file_formats/bmfont.hpp>
 #include <rdge/util/strings.hpp>
 #include <rdge/internal/exception_macros.hpp>
 
@@ -52,12 +52,12 @@ BitmapFont::BitmapFont (const char* filepath)
             }
 
             Surface* raw = new (pnew) Surface(dirname + page.file);
-            this->surfaces.at(page.id) = shared_asset<Surface>(raw);
-
             if (raw->Width() != font.common.scaleW || raw->Height() != font.common.scaleH)
             {
                 throw std::invalid_argument("Surface size doesn't match font info");
             }
+
+            this->surfaces.at(page.id) = shared_asset<Surface>(raw);
         }
 
         SDL_assert(font.high_id > 0);

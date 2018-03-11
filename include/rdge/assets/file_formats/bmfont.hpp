@@ -1,4 +1,4 @@
-//! \headerfile <rdge/assets/bmfont.hpp>
+//! \headerfile <rdge/assets/file_formats/bmfont.hpp>
 //! \author Josh Bramlett
 //! \version 0.0.10
 //! \date 07/31/2017
@@ -15,32 +15,43 @@ namespace rdge {
 
 enum bmfont_info_flags
 {
-    bmfont_info_smooth  = 0x0001, //!< Smoothing turned on
-    bmfont_info_unicode = 0x0002, //!< Unicode charset
-    bmfont_info_italic  = 0x0004, //!< Italic font
-    bmfont_info_bold    = 0x0008  //!< Bold font
+    bmfont_info_smooth       = 0x01, //!< Smoothing turned on
+    bmfont_info_unicode      = 0x02, //!< Unicode charset
+    bmfont_info_italic       = 0x04, //!< Italic font
+    bmfont_info_bold         = 0x08, //!< Bold font
+    bmfont_info_fixed_height = 0x10, //!< Undocumented
+    bmfont_info_reserved_1   = 0x20,
+    bmfont_info_reserved_2   = 0x40,
+    bmfont_info_reserved_3   = 0x80
 };
 
 //! \struct bmfont_info
 //! \brief Contains information on how the font was generated
 struct bmfont_info
 {
-    std::string face;    //!< Name of the TTF
+    int16 size = 0;      //!< Size of the TTF
+    uint8 flags = 0;     //!< \ref bmfont_info_flags bitset
     std::string charset; //!< Name of the OEM charset (when not unicode)
-    int32 size = 0;      //!< Size of the TTF
-    int32 stretchH = 0;  //!< Font height stretch percentage (100 means no stretch)
-    int32 aa = 0;        //!< Supersampling level (1 means no supersampling used)
-    int32 outline = 0;   //!< Outline thickness
-    int32 padding[4] = { 0, 0, 0, 0 }; //!< Character padding (top, right, bottom, left)
-    int32 spacing[2] = { 0, 0 };       //!< Character spacing (horizontal, vertical)
-    uint32 flags = 0;                  //!< \ref bmfont_info_flags bitset
+    uint16 stretchH = 0; //!< Font height stretch percentage (100 means no stretch)
+    uint8 aa = 0;        //!< Supersampling level (1 means no supersampling used)
+    uint8 padding[4] = { 0, 0, 0, 0 }; //!< Character padding (top, right, bottom, left)
+    int8 spacing[2] = { 0, 0 };        //!< Character spacing (horizontal, vertical)
+    uint8 outline = 0;   //!< Outline thickness
+    std::string face;    //!< Name of the TTF
 };
 
 enum bmfont_common_flags
 {
     //! \brief Monochrome characters are packed into each of the texture channels
     //! \details Alpha channel describes what is stored in each channel.
-    bmfont_common_packed = 0x0001
+    bmfont_common_reserved_1 = 0x01,
+    bmfont_common_reserved_2 = 0x02,
+    bmfont_common_reserved_3 = 0x04,
+    bmfont_common_reserved_4 = 0x08,
+    bmfont_common_reserved_5 = 0x10,
+    bmfont_common_reserved_6 = 0x20,
+    bmfont_common_reserved_7 = 0x40,
+    bmfont_common_packed     = 0x80
 };
 
 enum bmfont_common_channel_type
@@ -56,16 +67,16 @@ enum bmfont_common_channel_type
 //! \brief Contains information common to all characters
 struct bmfont_common
 {
-    int32 lineHeight = 0; //!< Distance between each line of text (in pixels)
-    int32 base = 0;       //!< Distance between the top and the baseline (in pixels)
-    int32 scaleW = 0;     //!< Texture width
-    int32 scaleH = 0;     //!< Texture height
-    int32 pages = 0;      //!< Number of texture pages
-    int32 alphaChnl = 0;
-    int32 redChnl = 0;
-    int32 greenChnl = 0;
-    int32 blueChnl = 0;
-    uint32 flags = 0;
+    uint16 lineHeight = 0; //!< Distance between each line of text (in pixels)
+    uint16 base = 0;       //!< Distance between the top and the baseline (in pixels)
+    uint16 scaleW = 0;     //!< Texture width
+    uint16 scaleH = 0;     //!< Texture height
+    uint16 pages = 0;      //!< Number of texture pages
+    uint8 flags = 0;
+    uint8 alphaChnl = 0;
+    uint8 redChnl = 0;
+    uint8 greenChnl = 0;
+    uint8 blueChnl = 0;
 };
 
 //! \struct bmfont_page
@@ -81,18 +92,18 @@ struct bmfont_page
 struct bmfont_char
 {
     uint32 id = 0;      //!< Character id
-    uint32 x = 0;       //!< Left clip of the character texture region
-    uint32 y = 0;       //!< Top clip of the character texture region
-    uint32 width = 0;   //!< Width of the character texture region
-    uint32 height = 0;  //!< Height of the character texture region
-    int32 xoffset = 0;  //!< X-axis amount to offset the cursor position
-    int32 yoffset = 0;  //!< Y-axis amount to offset the cursor position
-    int32 xadvance = 0; //!< Amount to advance the cursor after drawing
-    uint32 page = 0;    //!< Index of the texture page where the character image is found
+    uint16 x = 0;       //!< Left clip of the character texture region
+    uint16 y = 0;       //!< Top clip of the character texture region
+    uint16 width = 0;   //!< Width of the character texture region
+    uint16 height = 0;  //!< Height of the character texture region
+    int16 xoffset = 0;  //!< X-axis amount to offset the cursor position
+    int16 yoffset = 0;  //!< Y-axis amount to offset the cursor position
+    int16 xadvance = 0; //!< Amount to advance the cursor after drawing
+    uint8 page = 0;    //!< Index of the texture page where the character image is found
 
     //! \brief Texture channel where the character image is found
     //! \details (1 = blue, 2 = green, 4 = red, 8 = alpha, 15 = all channels)
-    uint32 chnl = 0;
+    uint8 chnl = 0;
 };
 
 //! \struct bmfont_kerning
@@ -123,6 +134,8 @@ struct bmfont_data
 //! \brief Load and populate bmfont definition from file
 //! \param [in] filepath File containing bmfont definition
 //! \param [out] font bmfont to populate
+//! \note Structures closely resemble the binary file layout, but currently
+//!       only the text file format is supported.
 //! \throws rdge::Exception Import failed
 void
 load_bmfont (const char* filepath, bmfont_data& font);

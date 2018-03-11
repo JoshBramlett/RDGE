@@ -1,4 +1,4 @@
-#include <rdge/assets/bmfont.hpp>
+#include <rdge/assets/file_formats/bmfont.hpp>
 #include <rdge/util/io/rwops_base.hpp>
 #include <rdge/util/strings.hpp>
 #include <rdge/internal/exception_macros.hpp>
@@ -217,7 +217,7 @@ load_bmfont (const char* filepath, bmfont_data& font)
     if (font.common.pages > 0)
     {
         font.pages.reserve(font.common.pages);
-        for (int32 i = 0; i < font.common.pages; i++)
+        for (decltype(font.common.pages) i = 0; i < font.common.pages; i++)
         {
             if (std::getline(input, line) && rdge::starts_with(line, "page"))
             {
@@ -239,7 +239,7 @@ load_bmfont (const char* filepath, bmfont_data& font)
         RDGE_THROW("Missing required \'common.pages\' value");
     }
 
-    int32 char_count = 0;
+    size_t char_count = 0;
     if (std::getline(input, line) && rdge::starts_with(line, "chars"))
     {
         rdge::trim(line);
@@ -259,7 +259,7 @@ load_bmfont (const char* filepath, bmfont_data& font)
     if (char_count > 0)
     {
         font.pages.reserve(char_count);
-        for (int32 i = 0; i < char_count; i++)
+        for (size_t i = 0; i < char_count; i++)
         {
             if (std::getline(input, line) && rdge::starts_with(line, "char"))
             {

@@ -87,13 +87,13 @@ add_library (RDGE SHARED
              src/application.cpp
 
              src/assets/file_formats/asset_pack.cpp
+             src/assets/file_formats/bmfont.cpp
              src/assets/file_formats/tiled.cpp
              src/assets/tilemap/layer.cpp
              src/assets/tilemap/object.cpp
              src/assets/tilemap/property.cpp
              src/assets/tilemap/tilemap.cpp
              src/assets/pack_file.cpp
-             src/assets/bmfont.cpp
              src/assets/bitmap_font.cpp
              src/assets/font.cpp
              src/assets/tileset.cpp
@@ -182,7 +182,7 @@ add_executable (rdge_test
                 tests/assets/tilemap/layer_test.cpp
                 tests/assets/tilemap/object_test.cpp
                 tests/assets/tilemap/property_test.cpp
-                tests/assets/bmfont_test.cpp
+                tests/assets/file_formats/bmfont_test.cpp
                 tests/assets/spritesheet_test.cpp
                 tests/graphics/color_test.cpp
                 tests/physics/aabb_test.cpp

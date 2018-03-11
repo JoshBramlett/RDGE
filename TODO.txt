@@ -8,16 +8,11 @@ Working (bugs)
 Working (enhancements)
 
     Fonts:
-      - Finish figuring out how to correctly layout text
-      - Move bmfont into file_formats
       - Come up with way to cache text so the sprites don't have to be rebuilt every frame
         - See libgdx
       - Figure out if swapping the shader for a draw call is possible
         - Write shader for distance field fonts
         - Make sure I'm setting the texture filtering correctly
-      - Graphics (e.g. Text) should not hold a reference to a shared_asset.
-        - This should be removed and the data copied over.
-        - Change Text ctor to accept a BitmapFont, rather than a shared_asset<BitmapFont>
       - Incorporate Fonts into the asset packer
       - Add ability for BitmapFont to be loaded from the PackFile
       - Remove all references to SDL_ttf

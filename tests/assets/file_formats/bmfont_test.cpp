@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <rdge/assets/bmfont.hpp>
+#include <rdge/assets/file_formats/bmfont.hpp>
 
 namespace {
 
