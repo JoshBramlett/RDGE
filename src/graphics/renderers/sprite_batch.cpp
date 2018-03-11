@@ -23,18 +23,25 @@ using namespace rdge;
 constexpr uint32 VERTEX_SIZE = sizeof(sprite_vertex);
 constexpr uint32 SPRITE_SIZE = VERTEX_SIZE * 4;
 
-std::pair<std::string, std::string>
-DefaultShaderSource (void)
+} // anonymous namespace
+
+namespace rdge {
+
+SpriteBatch::SpriteBatch (uint16 capacity)
+    : m_capacity(capacity)
 {
+    SDL_assert(capacity != 0);
+    this->blend.enabled = true;
+
     std::ostringstream vert;
     vert << "#version 330 core\n"
          //
-         << "layout (location = " << SpriteBatch::VATTR_POS_INDEX   << ") in vec4 position;\n"
-         << "layout (location = " << SpriteBatch::VATTR_UV_INDEX    << ") in vec2 uv;\n"
-         << "layout (location = " << SpriteBatch::VATTR_TID_INDEX   << ") in uint tid;\n"
-         << "layout (location = " << SpriteBatch::VATTR_COLOR_INDEX << ") in vec4 color;\n"
+         << "layout (location = " << VA_POS_INDEX   << ") in vec4 position;\n"
+         << "layout (location = " << VA_UV_INDEX    << ") in vec2 uv;\n"
+         << "layout (location = " << VA_TID_INDEX   << ") in uint tid;\n"
+         << "layout (location = " << VA_COLOR_INDEX << ") in vec4 color;\n"
          //
-         << "uniform mat4 " << SpriteBatch::UNI_PROJ_MATRIX << ";\n"
+         << "uniform mat4 " << U_PROJ_XF << ";\n"
          //
          << "out vertex_attributes\n"
          << "{\n"
@@ -50,7 +57,7 @@ DefaultShaderSource (void)
          << "  vertex.uv    = uv;\n"
          << "  vertex.tid   = tid;\n"
          << "  vertex.color = color;\n"
-         << "  gl_Position  = " << SpriteBatch::UNI_PROJ_MATRIX << " * position;\n"
+         << "  gl_Position  = " << U_PROJ_XF << " * position;\n"
          << "}\n";
 
     std::ostringstream frag;
@@ -58,7 +65,7 @@ DefaultShaderSource (void)
          //
          << "layout (location = 0) out vec4 color;\n"
          //
-         << "uniform sampler2D " << SpriteBatch::UNI_SAMPLER_ARR << "[" << Shader::MaxFragmentShaderUnits() << "];\n"
+         << "uniform sampler2D " << U_SAMPLER_ARRAY << "[" << Shader::MaxFragmentShaderUnits() << "];\n"
          //
          << "in vertex_attributes\n"
          << "{\n"
@@ -70,29 +77,34 @@ DefaultShaderSource (void)
          //
          << "void main()\n"
          << "{\n"
-         << "  color = vertex.color * texture(" << SpriteBatch::UNI_SAMPLER_ARR << "[vertex.tid], vertex.uv);\n"
+         << "  color = vertex.color * texture(" << U_SAMPLER_ARRAY << "[vertex.tid], vertex.uv);\n"
          << "}\n";
 
-    return std::make_pair(vert.str(), frag.str());
-}
+    std::ostringstream frag2;
+    frag2 << "#version 330 core\n"
+         //
+         << "layout (location = 0) out vec4 color;\n"
+         //
+         << "uniform sampler2D " << U_SAMPLER_ARRAY << "[" << Shader::MaxFragmentShaderUnits() << "];\n"
+         //
+         << "in vertex_attributes\n"
+         << "{\n"
+         << "  vec4 pos;\n"
+         << "  vec2 uv;\n"
+         << "  flat uint tid;\n"
+         << "  vec4 color;\n"
+         << "} vertex;\n"
+         //
+         << "const float smoothing = 1.0/16.0;\n"
+         //
+         << "void main()\n"
+         << "{\n"
+         << "  float distance = texture(" << U_SAMPLER_ARRAY << "[vertex.tid], vertex.uv).a;\n"
+         << "  float alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, distance);\n"
+         << "  color = vec4(vertex.color.rgb, vertex.color.a * alpha);\n"
+         << "}\n";
 
-} // anonymous namespace
-
-namespace rdge {
-
-SpriteBatch::SpriteBatch (uint16 capacity, std::shared_ptr<Shader> shader, bool enable_blending)
-    : m_capacity(capacity)
-    , m_shader(shader)
-{
-    SDL_assert(capacity != 0);
-
-    if (!shader)
-    {
-        auto source = DefaultShaderSource();
-        m_shader = std::make_unique<Shader>(source.first, source.second);
-    }
-
-    this->blend.enabled = enable_blending;
+    m_shader = Shader(vert.str(), frag2.str());
 
     // SpriteBatch implements it's buffer object streaming using the orphaning
     // technique, which means for every frame we ask OpenGL to give us a new buffer.
@@ -110,31 +122,31 @@ SpriteBatch::SpriteBatch (uint16 capacity, std::shared_ptr<Shader> shader, bool 
     uint32 vbo_size  = static_cast<uint32>(m_capacity) * SPRITE_SIZE;
     opengl::SetBufferData(GL_ARRAY_BUFFER, vbo_size, nullptr, GL_DYNAMIC_DRAW);
 
-    opengl::EnableVertexAttribute(VATTR_POS_INDEX);
-    opengl::VertexAttribPointer(VATTR_POS_INDEX,
+    opengl::EnableVertexAttribute(VA_POS_INDEX);
+    opengl::VertexAttribPointer(VA_POS_INDEX,
                                 3,
                                 GL_FLOAT,
                                 false,
                                 VERTEX_SIZE,
                                 reinterpret_cast<void*>(offsetof(sprite_vertex, pos)));
 
-    opengl::EnableVertexAttribute(VATTR_UV_INDEX);
-    opengl::VertexAttribPointer(VATTR_UV_INDEX,
+    opengl::EnableVertexAttribute(VA_UV_INDEX);
+    opengl::VertexAttribPointer(VA_UV_INDEX,
                                 2,
                                 GL_FLOAT,
                                 false,
                                 VERTEX_SIZE,
                                 reinterpret_cast<void*>(offsetof(sprite_vertex, uv)));
 
-    opengl::EnableVertexAttribute(VATTR_TID_INDEX);
-    opengl::VertexAttribIPointer(VATTR_TID_INDEX, // Note the "I" - required for integer types
+    opengl::EnableVertexAttribute(VA_TID_INDEX);
+    opengl::VertexAttribIPointer(VA_TID_INDEX, // Note the "I" - required for integer types
                                  1,
                                  GL_UNSIGNED_INT,
                                  VERTEX_SIZE,
                                  reinterpret_cast<void*>(offsetof(sprite_vertex, tid)));
 
-    opengl::EnableVertexAttribute(VATTR_COLOR_INDEX);
-    opengl::VertexAttribPointer(VATTR_COLOR_INDEX,
+    opengl::EnableVertexAttribute(VA_COLOR_INDEX);
+    opengl::VertexAttribPointer(VA_COLOR_INDEX,
                                 4,
                                 GL_UNSIGNED_BYTE,
                                 true,
@@ -182,9 +194,9 @@ SpriteBatch::SpriteBatch (uint16 capacity, std::shared_ptr<Shader> shader, bool 
     int32 n = 0;
     std::generate(texture_units.begin(), texture_units.end(), [&n]{ return n++; });
 
-    m_shader->Enable();
-    m_shader->SetUniformValue(UNI_SAMPLER_ARR, texture_units.size(), texture_units.data());
-    m_shader->Disable();
+    m_shader.Enable();
+    m_shader.SetUniformValue(U_SAMPLER_ARRAY, texture_units.size(), texture_units.data());
+    m_shader.Disable();
 
     // Create and register a single white pixel texture that will be associated with
     // all sprites that do not have a texture (i.e. color only).  In the fragment
@@ -297,12 +309,39 @@ SpriteBatch::RegisterTexture (std::shared_ptr<Texture> texture)
 }
 
 void
+SpriteBatch::SetView (const OrthographicCamera& camera)
+{
+    SDL_assert(m_vao != 0);
+
+    m_shader.Enable();
+    m_shader.SetUniformValue(U_PROJ_XF, camera.combined);
+    m_shader.Disable();
+}
+
+void
 SpriteBatch::PrepSubmit (void)
 {
-    m_shader->Enable();
-    opengl::BindBuffer(GL_ARRAY_BUFFER, m_vbo);
-    m_cursor = static_cast<sprite_vertex*>(opengl::GetBufferPointer(GL_ARRAY_BUFFER, GL_WRITE_ONLY));
+    m_shader.Enable();
 
+    opengl::BindBuffer(GL_ARRAY_BUFFER, m_vbo);
+    void* buffer = opengl::GetBufferPointer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+
+    m_cursor = static_cast<sprite_vertex*>(buffer);
+    m_submissions = 0;
+}
+
+void
+SpriteBatch::Prime (const OrthographicCamera& camera, Shader& shader)
+{
+    SDL_assert(m_vao != 0);
+
+    shader.Enable();
+    shader.SetUniformValue(U_PROJ_XF, camera.combined);
+
+    opengl::BindBuffer(GL_ARRAY_BUFFER, m_vbo);
+    void* buffer = opengl::GetBufferPointer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+
+    m_cursor = static_cast<sprite_vertex*>(buffer);
     m_submissions = 0;
 }
 
@@ -423,17 +462,6 @@ SpriteBatch::Flush (const std::vector<Texture>& textures)
         opengl::UnbindBuffers(GL_ELEMENT_ARRAY_BUFFER);
         opengl::UnbindVertexArrays();
     }
-}
-
-void
-SpriteBatch::SetView (const OrthographicCamera& camera)
-{
-    SDL_assert(m_vao != 0);
-
-    m_shader->Enable();
-    //m_shader->SetUniformValue(U_PROJ_XF, camera.combined);
-    m_shader->SetUniformValue(UNI_PROJ_MATRIX, camera.combined);
-    m_shader->Disable();
 }
 
 void

@@ -32,34 +32,24 @@ class OrthographicCamera;
 class SpriteBatch
 {
 public:
-    //!@{
-    //! \brief Required shader fields/values
-    //! \details Any shader which is used by this renderer must adhere to the required
-    //!          fields/values.  The layout locations defined in the vertex shader are
-    //!          a direct mapping to the /ref sprite_vertex struct, and the uniforms
-    //!          are used to reference the projection matrix and texture data.
-    static constexpr uint32 VATTR_POS_INDEX   = 0; //!< Position attribute index
-    static constexpr uint32 VATTR_UV_INDEX    = 1; //!< UV coordinates attribute index
-    static constexpr uint32 VATTR_TID_INDEX   = 2; //!< Texture Unit ID attribute index
-    static constexpr uint32 VATTR_COLOR_INDEX = 3; //!< Color attribute index
+    //!@{ Required shader vertex attributes
+    static constexpr uint16 VA_POS_INDEX   = 0; //!< Position attribute index
+    static constexpr uint16 VA_UV_INDEX    = 1; //!< UV coordinates attribute index
+    static constexpr uint16 VA_TID_INDEX   = 2; //!< Sampler slot attribute index
+    static constexpr uint16 VA_COLOR_INDEX = 3; //!< Color attribute index
+    //!@}
 
-    static constexpr const char* UNI_PROJ_MATRIX = "proj_matrix"; //!< Projection matrix uniform
-    static constexpr const char* UNI_SAMPLER_ARR = "textures";    //!< Sampler2D array uniform
+    //!@{ Required shader uniforms
+    static constexpr const char* U_PROJ_XF       = "u_proj_xf";  //!< Projection transform
+    static constexpr const char* U_SAMPLER_ARRAY = "u_textures"; //!< Sampler2D array
     //!@}
 
     //! \brief SpriteBatch default ctor
-    //! \details Creates a rendering buffer for the provided sprite count.  If no
-    //!          shader is provided a default shader will be used.  The projection
-    //!          is initialized to an orthographic based on the dimensions retrieved
-    //!          from the OpenGL viewport.
+    //! \details Creates a rendering buffer for the provided capacity.  A default
+    //!          shader will be compiled and used.
     //! \param [in] capacity Max number of sprites that can be submitted
-    //! \param [in] shader Compatable shader
-    //! \param [in] enable_blending Enable blending
     //! \throws rdge::Exception Initialization failure
-    //! \warning Shader source must follow the required fields/values specification
-    explicit SpriteBatch (uint16                  capacity        = 1000,
-                          std::shared_ptr<Shader> shader          = nullptr,
-                          bool                    enable_blending = true);
+    explicit SpriteBatch (uint16 capacity = 1000);
 
     //! \brief SpriteBatch dtor
     ~SpriteBatch (void) noexcept;
@@ -90,6 +80,7 @@ public:
     //! \warning Each instances submission process must flush before another
     //!          instance can begin.
     void PrepSubmit (void);
+    void Prime (const OrthographicCamera& camera, Shader& shader);
 
     //! \brief Submit an array of sprite vertices for drawing
     //! \param [in] vertices Array of vertex data to be inserted into the buffer
@@ -142,11 +133,11 @@ private:
     uint32 m_vbo = 0; //!< Vertex buffer handle
     uint32 m_ibo = 0; //!< Index buffer handle
 
-    sprite_vertex* m_cursor = nullptr; //!< Cursor for current submission
-    uint32         m_submissions = 0;  //!< Submissions count between draw calls
-    uint32         m_capacity = 0;     //!< Max number of submissions per draw
+    sprite_vertex* m_cursor = nullptr; //!< VBO cursor
+    size_t m_submissions = 0;          //!< Tracks submissions per draw call
+    size_t m_capacity = 0;             //!< Max number of submissions per draw
 
-    std::shared_ptr<Shader>   m_shader;     //!< Shader program
+    Shader m_shader; //!< Shader program
 
     std::vector<math::mat4> m_transformStack;      //!< Rendering transformation stack
     math::mat4*             m_transform = nullptr; //!< Points to the top element of the stack

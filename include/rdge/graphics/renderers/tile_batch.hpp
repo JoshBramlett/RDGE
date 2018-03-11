@@ -28,17 +28,18 @@ class Texture;
 class TileBatch
 {
 public:
-    //!@{
-    //! \brief Required shader fields/values
-    static constexpr uint32 VATTR_POS_INDEX   = 0; //!< Position attribute index
-    static constexpr uint32 VATTR_UV_INDEX    = 1; //!< UV coordinates attribute index
-    static constexpr uint32 VATTR_COLOR_INDEX = 2; //!< Color attribute index
+    //!@{ Required shader vertex attributes
+    static constexpr uint16 VA_POS_INDEX   = 0; //!< Position attribute index
+    static constexpr uint16 VA_UV_INDEX    = 1; //!< UV coordinates attribute index
+    static constexpr uint16 VA_COLOR_INDEX = 2; //!< Color attribute index
+    //!@}
 
-    static constexpr const char* U_PROJ_XF = "u_proj_xf"; //!< Projection transform uniform
-    static constexpr const char* U_TEXTURE = "u_texture"; //!< Sampler2D uniform
+    //!@{ Required shader uniforms
+    static constexpr const char* U_PROJ_XF = "u_proj_xf"; //!< Projection transform
+    static constexpr const char* U_SAMPLER = "u_texture"; //!< Sampler2D
+    //!@}
 
     static constexpr int32 TEXTURE_UNIT_ID = 0; //!< Slot used by the shader
-    //!@}
 
     //! \brief TileBatch default ctor
     TileBatch (void) = default;
@@ -61,16 +62,18 @@ public:
     TileBatch& operator= (TileBatch&&) noexcept;
     //!@}
 
-    //! \brief Set the viewport that will be rendered
-    //! \details Should be called every frame prior to drawing.
-    //! \param [in] camera Orthographic camera
-    void SetView (const OrthographicCamera& camera);
+    //! \brief Prepare the renderer to receive tiles to draw
+    //! \note Should be called every frame prior to drawing.
+    //! \param [in] camera Camera to set the viewport
+    void Prime (const OrthographicCamera& camera);
 
-    void Prime (void);
-
-    //! \brief Draw the tilemap contents
+    //! \brief Draw the chunk contents
+    //! \param [in] chunk Chunk of tiles
+    //! \param [in] c Tinting color
     void Draw (const tile_cell_chunk& chunk, color c);
 
+    //! \brief Flush the contents of the buffer
+    //! \param [in] texture Texture to activate
     void Flush (const Texture& texture);
 
     // TODO
@@ -86,13 +89,13 @@ private:
     uint32 m_vbo = 0; //!< Vertex buffer handle
     uint32 m_ibo = 0; //!< Index buffer handle
 
-    Shader     m_shader;    //!< Shader program
+    tile_vertex* m_cursor = nullptr; //!< VBO cursor
+    size_t m_submissions = 0;        //!< Tracks submissions per draw call
+    size_t m_capacity = 0;           //!< Max number of submissions per draw
+
+    Shader m_shader;        //!< Shader program
     math::vec2 m_tileSize;  //!< Tile size
     float      m_far = 0.f; //!< Far clipping plane
-
-    tile_vertex* m_cursor;          //!< VBO cursor
-    size_t       m_submissions = 0; //!< Tracks submissions per draw call
-    size_t       m_capacity = 0;    //!< Max number of submissions per draw
 };
 
 } // namespace rdge

@@ -214,8 +214,7 @@ TileLayer::Draw (TileBatch& renderer, const OrthographicCamera& camera)
         return;
     }
 
-    renderer.SetView(camera);
-    renderer.Prime();
+    renderer.Prime(camera);
 
     float left = (camera.bounds.left() - m_bounds.left());
     float right = left + camera.bounds.width();

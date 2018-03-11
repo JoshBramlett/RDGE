@@ -32,17 +32,17 @@ constexpr size_t TILE_SIZE = VERTEX_SIZE * 4;
 } // anonymous namespace
 
 TileBatch::TileBatch (uint16 capacity, const math::vec2& tile_size)
-    : m_tileSize(tile_size)
-    , m_capacity(capacity)
+    : m_capacity(capacity)
+    , m_tileSize(tile_size)
 {
     this->blend.enabled = true;
 
     std::ostringstream vert;
     vert << "#version 330 core\n"
          //
-         << "layout (location = " << VATTR_POS_INDEX   << ") in vec4 v_pos;\n"
-         << "layout (location = " << VATTR_UV_INDEX    << ") in vec2 v_uv;\n"
-         << "layout (location = " << VATTR_COLOR_INDEX << ") in vec4 v_color;\n"
+         << "layout (location = " << VA_POS_INDEX   << ") in vec4 v_pos;\n"
+         << "layout (location = " << VA_UV_INDEX    << ") in vec2 v_uv;\n"
+         << "layout (location = " << VA_COLOR_INDEX << ") in vec4 v_color;\n"
          //
          << "uniform mat4 " << U_PROJ_XF << ";\n"
          //
@@ -64,7 +64,7 @@ TileBatch::TileBatch (uint16 capacity, const math::vec2& tile_size)
          //
          << "layout (location = 0) out vec4 color;\n"
          //
-         << "uniform sampler2D " << U_TEXTURE << ";\n"
+         << "uniform sampler2D " << U_SAMPLER << ";\n"
          //
          << "in vertex_attributes\n"
          << "{\n"
@@ -74,7 +74,7 @@ TileBatch::TileBatch (uint16 capacity, const math::vec2& tile_size)
          //
          << "void main()\n"
          << "{\n"
-         << "  color = vertex.color * texture(" << U_TEXTURE << ", vertex.uv);\n"
+         << "  color = vertex.color * texture(" << U_SAMPLER << ", vertex.uv);\n"
          << "}\n";
 
     m_shader = Shader(vert.str(), frag.str());
@@ -95,24 +95,24 @@ TileBatch::TileBatch (uint16 capacity, const math::vec2& tile_size)
     uint32 vbo_size = m_capacity * TILE_SIZE;
     opengl::SetBufferData(GL_ARRAY_BUFFER, vbo_size, nullptr, GL_DYNAMIC_DRAW);
 
-    opengl::EnableVertexAttribute(VATTR_POS_INDEX);
-    opengl::VertexAttribPointer(VATTR_POS_INDEX,
+    opengl::EnableVertexAttribute(VA_POS_INDEX);
+    opengl::VertexAttribPointer(VA_POS_INDEX,
                                 3,
                                 GL_FLOAT,
                                 false,
                                 VERTEX_SIZE,
                                 reinterpret_cast<void*>(offsetof(tile_vertex, pos)));
 
-    opengl::EnableVertexAttribute(VATTR_UV_INDEX);
-    opengl::VertexAttribPointer(VATTR_UV_INDEX,
+    opengl::EnableVertexAttribute(VA_UV_INDEX);
+    opengl::VertexAttribPointer(VA_UV_INDEX,
                                 2,
                                 GL_FLOAT,
                                 false,
                                 VERTEX_SIZE,
                                 reinterpret_cast<void*>(offsetof(tile_vertex, uv)));
 
-    opengl::EnableVertexAttribute(VATTR_COLOR_INDEX);
-    opengl::VertexAttribPointer(VATTR_COLOR_INDEX,
+    opengl::EnableVertexAttribute(VA_COLOR_INDEX);
+    opengl::VertexAttribPointer(VA_COLOR_INDEX,
                                 4,
                                 GL_UNSIGNED_BYTE,
                                 true,
@@ -170,12 +170,12 @@ TileBatch::~TileBatch (void) noexcept
 
 TileBatch::TileBatch (TileBatch&& other) noexcept
     : blend(other.blend)
-    , m_shader(std::move(other.m_shader))
-    , m_tileSize(other.m_tileSize)
-    , m_far(other.m_far)
     , m_cursor(other.m_cursor)
     , m_submissions(other.m_submissions)
     , m_capacity(other.m_capacity)
+    , m_shader(std::move(other.m_shader))
+    , m_tileSize(other.m_tileSize)
+    , m_far(other.m_far)
 {
     std::swap(m_vao, other.m_vao);
     std::swap(m_vbo, other.m_vbo);
@@ -207,22 +207,14 @@ TileBatch::operator= (TileBatch&& rhs) noexcept
 }
 
 void
-TileBatch::SetView (const OrthographicCamera& camera)
+TileBatch::Prime (const OrthographicCamera& camera)
 {
     SDL_assert(m_vao != 0);
 
     m_shader.Enable();
     m_shader.SetUniformValue(U_PROJ_XF, camera.combined);
-    m_shader.SetUniformValue(U_TEXTURE, TEXTURE_UNIT_ID);
-    m_shader.Disable();
-
-    m_far = 0.0f;//-camera.far;
-}
-
-void
-TileBatch::Prime (void)
-{
-    m_shader.Enable();
+    m_shader.SetUniformValue(U_SAMPLER, TEXTURE_UNIT_ID);
+    m_far = -camera.far;
 
     opengl::BindBuffer(GL_ARRAY_BUFFER, m_vbo);
     void* buffer = opengl::GetBufferPointer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
