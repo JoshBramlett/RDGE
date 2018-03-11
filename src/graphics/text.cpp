@@ -13,7 +13,10 @@ Text::Text (shared_asset<BitmapFont> font)
     m_textures.reserve(m_font->surfaces.size());
     for (const auto& surface : m_font->surfaces)
     {
-        Texture t(*surface);
+        // TODO Need a way to programmatically determine if this is a distance
+        //      field font.  Could make it part of the asset processing.
+        //      Also, libgdx says to use mipmaps if making the text smaller.
+        Texture t(*surface, TextureFilter::LINEAR, TextureFilter::LINEAR);
         t.unit_id = m_textures.size();
         m_textures.emplace_back(std::move(t));
     }

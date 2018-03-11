@@ -45,7 +45,6 @@ Assets:
     - Convert layer to y-is-up (or document why it can be unique)
 
 Graphics:
-  - Better support for texture based filter, blending & wrapping (look to LibGDX)
   - Add support for 24bpp images (surface and texture)
   - Remove glew dependency in favor of glLoadGen
   - Add viewport class

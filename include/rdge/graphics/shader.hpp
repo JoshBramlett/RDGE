@@ -26,6 +26,8 @@ struct mat4;
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
+//! \enum ShaderType
+//! \brief Mapping to OpenGL shader type enum
 enum class ShaderType : uint32
 {
     VERTEX   = GL_VERTEX_SHADER,
@@ -33,6 +35,8 @@ enum class ShaderType : uint32
     GEOMETRY = GL_GEOMETRY_SHADER
 };
 
+//! \class Shader
+//! \brief Represents an OpenGL shader program
 class Shader
 {
 public:

@@ -3,9 +3,9 @@
 
 #include <SDL_assert.h>
 
+#include <cstring> // strrchr
 #include <algorithm> // std::min, std::max
 #include <sstream>
-#include <cstring>
 
 namespace rdge {
 
