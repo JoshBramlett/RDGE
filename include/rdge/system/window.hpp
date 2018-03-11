@@ -17,6 +17,10 @@
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
+//!@{ Forward declarations
+struct screen_point;
+//!@}
+
 struct aspect_ratio
 {
     float ratio;
@@ -139,12 +143,6 @@ public:
     //! \brief Get the default SDL pixel format enum for the window
     uint32 PixelFormat (void) const;
 
-    //! \brief Return the SDL_Window pointer
-    //! \details Raw pointer is returned so caller must ensure
-    //!          Window object will not fall out of scope
-    //! \return Raw pointer to an SDL Window
-    SDL_Window* RawPtr (void) const { return m_window; }
-
     //! \brief Set the window title
     //! \param [in] title Title of the window
     void SetTitle (const std::string& title);
@@ -156,7 +154,7 @@ public:
 
     //! \brief Set the cursor location
     //! \param [in] location Point containing the x and y coordinates
-    void SetCursorLocation (const math::ivec2& location);
+    void SetCursorLocation (const screen_point& location);
 
     //! \brief Set the background color
     //! \details Color presented to the screen before any drawing takes place

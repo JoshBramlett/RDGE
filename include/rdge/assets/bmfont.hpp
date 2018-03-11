@@ -25,17 +25,15 @@ enum bmfont_info_flags
 //! \brief Contains information on how the font was generated
 struct bmfont_info
 {
-    std::string face;         //!< Name of the TTF
-    std::string charset;      //!< Name of the OEM charset (when not unicode)
-    int32       size = 0;     //!< Size of the TTF
-    int32       stretchH = 0; //!< Font height stretch percentage (100 means no stretch)
-    int32       aa = 0;       //!< Supersampling level (1 means no supersampling used)
-    int32       outline = 0;  //!< Outline thickness
-    //! \brief Padding for each character (up, right, down, left)
-    int32       padding[4] = { 0, 0, 0, 0 };
-    //! \brief Spacing for each character (horizontal, vertical)
-    int32       spacing[2] = { 0, 0 };
-    uint32      flags = 0;
+    std::string face;    //!< Name of the TTF
+    std::string charset; //!< Name of the OEM charset (when not unicode)
+    int32 size = 0;      //!< Size of the TTF
+    int32 stretchH = 0;  //!< Font height stretch percentage (100 means no stretch)
+    int32 aa = 0;        //!< Supersampling level (1 means no supersampling used)
+    int32 outline = 0;   //!< Outline thickness
+    int32 padding[4] = { 0, 0, 0, 0 }; //!< Character padding (top, right, bottom, left)
+    int32 spacing[2] = { 0, 0 };       //!< Character spacing (horizontal, vertical)
+    uint32 flags = 0;                  //!< \ref bmfont_info_flags bitset
 };
 
 enum bmfont_common_flags
@@ -58,15 +56,15 @@ enum bmfont_common_channel_type
 //! \brief Contains information common to all characters
 struct bmfont_common
 {
-    int32  lineHeight = 0; //!< Distance in pixels between each line of text
-    int32  base = 0;       //!< Number of pixels from the top of the line to the baseline
-    int32  scaleW = 0;     //!< Texture width
-    int32  scaleH = 0;     //!< Texture height
-    int32  pages = 0;      //!< Number of texture pages
-    int32  alphaChnl = 0;
-    int32  redChnl = 0;
-    int32  greenChnl = 0;
-    int32  blueChnl = 0;
+    int32 lineHeight = 0; //!< Distance between each line of text (in pixels)
+    int32 base = 0;       //!< Distance between the top and the baseline (in pixels)
+    int32 scaleW = 0;     //!< Texture width
+    int32 scaleH = 0;     //!< Texture height
+    int32 pages = 0;      //!< Number of texture pages
+    int32 alphaChnl = 0;
+    int32 redChnl = 0;
+    int32 greenChnl = 0;
+    int32 blueChnl = 0;
     uint32 flags = 0;
 };
 
@@ -82,15 +80,15 @@ struct bmfont_page
 //! \brief Character data inluding texture lookup and drawing info
 struct bmfont_char
 {
-    uint32 id = 0;       //!< Character id
-    uint32 x = 0;        //!< Left clip of the character texture region
-    uint32 y = 0;        //!< Top clip of the character texture region
-    uint32 width = 0;    //!< Width of the character texture region
-    uint32 height = 0;   //!< Height of the character texture region
-    int32  xoffset = 0;  //!< X-axis amount to offset the cursor position
-    int32  yoffset = 0;  //!< Y-axis amount to offset the cursor position
-    int32  xadvance = 0; //!< Amount to advance the cursor after drawing
-    uint32 page = 0;     //!< Index of the texture page where the character image is found
+    uint32 id = 0;      //!< Character id
+    uint32 x = 0;       //!< Left clip of the character texture region
+    uint32 y = 0;       //!< Top clip of the character texture region
+    uint32 width = 0;   //!< Width of the character texture region
+    uint32 height = 0;  //!< Height of the character texture region
+    int32 xoffset = 0;  //!< X-axis amount to offset the cursor position
+    int32 yoffset = 0;  //!< Y-axis amount to offset the cursor position
+    int32 xadvance = 0; //!< Amount to advance the cursor after drawing
+    uint32 page = 0;    //!< Index of the texture page where the character image is found
 
     //! \brief Texture channel where the character image is found
     //! \details (1 = blue, 2 = green, 4 = red, 8 = alpha, 15 = all channels)
@@ -103,7 +101,7 @@ struct bmfont_kerning
 {
     uint32 first = 0;  //!< First character id
     uint32 second = 0; //!< Second character id
-    int32  amount = 0; //!< Amount to adjust x-axis when drawing second character after first
+    int32 amount = 0;  //!< Amount to adjust x-axis when drawing second character after first
 };
 
 //! \struct bmfont_data
@@ -115,8 +113,8 @@ struct bmfont_data
     bmfont_info info;
     bmfont_common common;
 
-    std::vector<bmfont_page>    pages;
-    std::vector<bmfont_char>    chars;
+    std::vector<bmfont_page> pages;
+    std::vector<bmfont_char> chars;
     std::vector<bmfont_kerning> kerning_table;
 
     uint32 high_id = 0; //!< Highest character id in the set

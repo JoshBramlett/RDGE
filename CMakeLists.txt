@@ -116,6 +116,7 @@ add_library (RDGE SHARED
              src/graphics/renderers/sprite_batch.cpp
              src/graphics/renderers/tile_batch.cpp
              src/graphics/animation.cpp
+             src/graphics/bitmap_charset.cpp
              src/graphics/blend.cpp
              src/graphics/color.cpp
              src/graphics/isprite.cpp
@@ -124,7 +125,6 @@ add_library (RDGE SHARED
              src/graphics/shader.cpp
              src/graphics/sprite.cpp
              src/graphics/tex_coords.cpp
-             src/graphics/text.cpp
              src/graphics/texture.cpp
 
              #src/controls/control.cpp --> src/graphics/ui/widget.cpp

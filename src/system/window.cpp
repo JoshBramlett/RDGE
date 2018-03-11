@@ -1,10 +1,11 @@
 #include <rdge/system/window.hpp>
-#include <rdge/util/timer.hpp>
+#include <rdge/system/types.hpp>
+#include <rdge/util/compiler.hpp>
 #include <rdge/util/logger.hpp>
+#include <rdge/util/timer.hpp>
+#include <rdge/util/memory/alloc.hpp>
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
-#include <rdge/util/compiler.hpp>
-#include <rdge/util/memory/alloc.hpp>
 #include <rdge/debug/sdl_dumper.hpp>
 
 #include <imgui/imgui.h>
@@ -408,7 +409,7 @@ Window::SetSize (uint32 width, uint32 height)
 }
 
 void
-Window::SetCursorLocation (const rdge::math::ivec2& location)
+Window::SetCursorLocation (const screen_point& location)
 {
     SDL_WarpMouseInWindow(m_window, location.x, location.y);
 }

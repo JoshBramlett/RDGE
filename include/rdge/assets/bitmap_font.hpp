@@ -17,18 +17,18 @@
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
-//! \struct glyph
+//! \struct glyph_region
 //! \brief Represents the texture region of a specific glyph
-struct glyph
+struct glyph_region
 {
-    uint32      id = 0; //!< Character id
-    screen_rect clip;   //!< Surface clipping rectangle
-    tex_coords  coords; //!< Normalized texture coordinates
-    math::vec2  size;   //!< Size of the glyph (in pixels)
+    uint32 id = 0;     //!< Character id
+    screen_rect clip;  //!< Surface clipping rectangle
+    tex_coords coords; //!< Normalized texture coordinates
+    math::vec2 size;   //!< Size of the glyph (in pixels)
 
-    uint32      page = 0; //!< Index of the surface containing the glyph
-    math::vec2  offset;
-    float       x_advance = 0.f;
+    math::vec2 offset;     //!< Position offset when drawing (in pixels)
+    float x_advance = 0.f; //!< Amount to advance position after drawing (in pixels)
+    uint32 page = 0;       //!< Surface index containing the glyph
 
     // TODO kerning
 };
@@ -49,20 +49,21 @@ public:
     //!@}
 
     //! \brief BitmapFont Subscript Operator
-    //! \details Retrieves glyph by character id
+    //! \details Retrieves glyph_region by character id
     //! \param [in] id Id of the character
-    //! \returns Associated glyph
+    //! \returns Associated glyph_region
     //! \throws rdge::Exception Lookup failed
-    const glyph& operator[] (uint32 id) const;
+    const glyph_region& operator[] (uint32 id) const;
 
     float pad_top = 0.f;
     float pad_right = 0.f;
     float pad_bottom = 0.f;
     float pad_left = 0.f;
-    float line_height = 0;
+    float line_height = 0.f;
+    float baseline = 0.f;
 
     std::vector<shared_asset<Surface>> surfaces; //!< Surfaces containing the glyphs
-    std::vector<glyph> glyphs;                   //!< Glyph region list
+    std::vector<glyph_region> glyphs;            //!< Glyph region list
 };
 
 } // namespace rdge

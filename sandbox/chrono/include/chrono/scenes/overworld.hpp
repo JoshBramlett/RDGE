@@ -69,7 +69,7 @@ public:
     //!@}
 
 
-    rdge::Text mah_text;
+    rdge::BitmapCharset mah_text;
 
 
     // debug
