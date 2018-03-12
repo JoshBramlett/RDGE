@@ -6,9 +6,10 @@
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/graphics/texture.hpp>
 #include <rdge/graphics/color.hpp>
+#include <rdge/graphics/shader.hpp>
 #include <rdge/graphics/tex_coords.hpp>
+#include <rdge/graphics/texture.hpp>
 #include <rdge/math/vec2.hpp>
 
 #include <vector>
@@ -19,6 +20,7 @@ namespace rdge {
 //!@{ Forward declarations
 class BitmapFont;
 class SpriteBatch;
+class OrthographicCamera;
 //!@}
 
 //! \struct glyph
@@ -60,13 +62,14 @@ public:
     //! \param [in] renderer Render target
     //! \param [in] text Text to draw
     //! \param [in] pos Position to draw text
-    void Draw (SpriteBatch& renderer, const std::string& text, const math::vec2& pos);
+    void Draw (const OrthographicCamera& camera, SpriteBatch& renderer, const std::string& text, const math::vec2& pos);
 
 public:
     rdge::color color = color::WHITE; //!< Text color
+    Shader shader; //!< Distance field font shader
 
 private:
-    std::vector<glyph> m_glyphs;
+    std::vector<glyph> m_glyphs;     //!< List of renderable glyphs
     std::vector<Texture> m_textures; //!< List of textures containing the glyphs
 };
 

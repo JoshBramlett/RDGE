@@ -32,15 +32,56 @@ BitmapCharset::BitmapCharset (const BitmapFont& font, float scale)
         g_out.x_advance = g_in.x_advance * scale;
         g_out.page = static_cast<int8>(g_in.page);
     }
+
+    static std::string f_src;
+    if (f_src.empty())
+    {
+        std::ostringstream frag;
+        frag << "#version 330 core\n"
+             //
+             << "layout (location = 0) out vec4 color;\n"
+             //
+             << "uniform sampler2D " << SpriteBatch::U_SAMPLER_ARRAY
+                << "[" << Shader::MaxFragmentShaderUnits() << "];\n"
+             //
+             << "in vertex_attributes\n"
+             << "{\n"
+             << "  vec4 pos;\n"
+             << "  vec2 uv;\n"
+             << "  flat uint tid;\n"
+             << "  vec4 color;\n"
+             << "} vertex;\n"
+             //
+             << "const float smoothing = 1.0/16.0;\n"
+             //
+             << "void main()\n"
+             << "{\n"
+             << "  float distance = texture("
+                << SpriteBatch::U_SAMPLER_ARRAY << "[vertex.tid], vertex.uv).a;\n"
+             << "  float alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, distance);\n"
+             << "  color = vec4(vertex.color.rgb, vertex.color.a * alpha);\n"
+             << "}\n";
+
+        f_src = frag.str();
+    }
+
+    this->shader = Shader(SpriteBatch::DefaultShader(ShaderType::VERTEX), f_src);
+    std::vector<int32> texture_units(Shader::MaxFragmentShaderUnits());
+    int32 n = 0;
+    std::generate(texture_units.begin(), texture_units.end(), [&n]{ return n++; });
+
+    this->shader.Enable();
+    this->shader.SetUniformValue(SpriteBatch::U_SAMPLER_ARRAY, texture_units.size(), texture_units.data());
+    this->shader.Disable();
 }
 
 void
-BitmapCharset::Draw (SpriteBatch& renderer, const std::string& text, const math::vec2& pos)
+BitmapCharset::Draw (const OrthographicCamera& camera, SpriteBatch& renderer, const std::string& text, const math::vec2& pos)
 {
-    renderer.PrepSubmit();
+    renderer.Prime(camera, this->shader);
 
     sprite_data sprite;
-    sprite.depth = 1.f;
+    sprite.depth = 0.f;
     sprite.color = this->color;
 
     math::vec2 cursor = pos;

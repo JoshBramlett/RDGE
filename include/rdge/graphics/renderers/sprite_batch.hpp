@@ -125,6 +125,10 @@ public:
     // a uniform to multiply.
     //void SetColor (const color& color);
 
+    //! \brief Default shader source for the SpriteBatch
+    //! \param [in] type Type to query
+    static const std::string& DefaultShader (ShaderType type);
+
 public:
     Blend blend = Blend::LerpSourceAlpha; //!< Blend function (set every draw call)
 

@@ -82,7 +82,7 @@ SpriteLayer::SpriteLayer (const tilemap::Layer& def, float scale)
         sprite.pos.y += region.sprite_offset.y * scale;
 
         sprite.size = region.sprite_size * scale;
-        sprite.depth = 1.f;
+        sprite.depth = 0.f;
         sprite.color = color::WHITE;
         sprite.uvs = region.coords;
         sprite.tid = unit_id;
@@ -193,7 +193,7 @@ SpriteLayer::AddSprite (const math::vec2& pos,
     sprite.pos.y += region.sprite_offset.y * scale;
 
     sprite.size = region.sprite_size * scale;
-    sprite.depth = 1.f;
+    sprite.depth = 0.f;
     sprite.color = color::WHITE;
     sprite.uvs = region.coords;
     sprite.tid = unit_id;

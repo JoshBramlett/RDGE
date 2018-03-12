@@ -226,7 +226,7 @@ OverworldScene::OnRender (void)
     }
 
     math::vec2 text_pos(650.f, -526.f);
-    mah_text.Draw(sprite_batch, "Josh. jumps quickly?", text_pos * g_game.ratios.base_to_screen);
+    mah_text.Draw(camera, sprite_batch, "Josh. jumps quickly?", text_pos * g_game.ratios.base_to_screen);
 
     // debug drawing
     debug::SetProjection(camera.combined);

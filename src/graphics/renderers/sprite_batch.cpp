@@ -33,79 +33,6 @@ SpriteBatch::SpriteBatch (uint16 capacity)
     SDL_assert(capacity != 0);
     this->blend.enabled = true;
 
-    std::ostringstream vert;
-    vert << "#version 330 core\n"
-         //
-         << "layout (location = " << VA_POS_INDEX   << ") in vec4 position;\n"
-         << "layout (location = " << VA_UV_INDEX    << ") in vec2 uv;\n"
-         << "layout (location = " << VA_TID_INDEX   << ") in uint tid;\n"
-         << "layout (location = " << VA_COLOR_INDEX << ") in vec4 color;\n"
-         //
-         << "uniform mat4 " << U_PROJ_XF << ";\n"
-         //
-         << "out vertex_attributes\n"
-         << "{\n"
-         << "  vec4 pos;\n"
-         << "  vec2 uv;\n"
-         << "  flat uint tid;\n"
-         << "  vec4 color;\n"
-         << "} vertex;\n"
-         //
-         << "void main()\n"
-         << "{\n"
-         << "  vertex.pos   = position;\n"
-         << "  vertex.uv    = uv;\n"
-         << "  vertex.tid   = tid;\n"
-         << "  vertex.color = color;\n"
-         << "  gl_Position  = " << U_PROJ_XF << " * position;\n"
-         << "}\n";
-
-    std::ostringstream frag;
-    frag << "#version 330 core\n"
-         //
-         << "layout (location = 0) out vec4 color;\n"
-         //
-         << "uniform sampler2D " << U_SAMPLER_ARRAY << "[" << Shader::MaxFragmentShaderUnits() << "];\n"
-         //
-         << "in vertex_attributes\n"
-         << "{\n"
-         << "  vec4 pos;\n"
-         << "  vec2 uv;\n"
-         << "  flat uint tid;\n"
-         << "  vec4 color;\n"
-         << "} vertex;\n"
-         //
-         << "void main()\n"
-         << "{\n"
-         << "  color = vertex.color * texture(" << U_SAMPLER_ARRAY << "[vertex.tid], vertex.uv);\n"
-         << "}\n";
-
-    std::ostringstream frag2;
-    frag2 << "#version 330 core\n"
-         //
-         << "layout (location = 0) out vec4 color;\n"
-         //
-         << "uniform sampler2D " << U_SAMPLER_ARRAY << "[" << Shader::MaxFragmentShaderUnits() << "];\n"
-         //
-         << "in vertex_attributes\n"
-         << "{\n"
-         << "  vec4 pos;\n"
-         << "  vec2 uv;\n"
-         << "  flat uint tid;\n"
-         << "  vec4 color;\n"
-         << "} vertex;\n"
-         //
-         << "const float smoothing = 1.0/16.0;\n"
-         //
-         << "void main()\n"
-         << "{\n"
-         << "  float distance = texture(" << U_SAMPLER_ARRAY << "[vertex.tid], vertex.uv).a;\n"
-         << "  float alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, distance);\n"
-         << "  color = vec4(vertex.color.rgb, vertex.color.a * alpha);\n"
-         << "}\n";
-
-    m_shader = Shader(vert.str(), frag2.str());
-
     // SpriteBatch implements it's buffer object streaming using the orphaning
     // technique, which means for every frame we ask OpenGL to give us a new buffer.
     // Since we request the same size, it's likely (though not guaranteed) that
@@ -186,6 +113,9 @@ SpriteBatch::SpriteBatch (uint16 capacity)
     RDGE_FREE(ibo_data, memory_bucket_graphics);
 
     opengl::UnbindVertexArrays();
+
+    m_shader = Shader(SpriteBatch::DefaultShader(ShaderType::VERTEX),
+                      SpriteBatch::DefaultShader(ShaderType::FRAGMENT));
 
     // A requirement we impose on the fragment shader is to define a sampler2D array
     // with the element count equal to the maximum texture units available.  A vector
@@ -369,27 +299,26 @@ SpriteBatch::Submit (const sprite_data& sprite)
     const auto& p = sprite.pos;
     const auto& sz = sprite.size;
     auto c = static_cast<uint32>(sprite.color);
-    float m_far = 0.0f;//-1.f;
 
-    m_cursor->pos   = math::vec3(p, m_far);
+    m_cursor->pos   = math::vec3(p, sprite.depth);
     m_cursor->uv    = sprite.uvs[0];
     m_cursor->tid   = sprite.tid;
     m_cursor->color = c;
     m_cursor++;
 
-    m_cursor->pos   = math::vec3(p.x, p.y + sz.h, m_far);
+    m_cursor->pos   = math::vec3(p.x, p.y + sz.h, sprite.depth);
     m_cursor->uv    = sprite.uvs[1];
     m_cursor->tid   = sprite.tid;
     m_cursor->color = c;
     m_cursor++;
 
-    m_cursor->pos   = math::vec3(p.x + sz.w, p.y + sz.h, m_far);
+    m_cursor->pos   = math::vec3(p.x + sz.w, p.y + sz.h, sprite.depth);
     m_cursor->uv    = sprite.uvs[2];
     m_cursor->tid   = sprite.tid;
     m_cursor->color = c;
     m_cursor++;
 
-    m_cursor->pos   = math::vec3(p.x + sz.w, p.y, m_far);
+    m_cursor->pos   = math::vec3(p.x + sz.w, p.y, sprite.depth);
     m_cursor->uv    = sprite.uvs[3];
     m_cursor->tid   = sprite.tid;
     m_cursor->color = c;
@@ -488,6 +417,83 @@ SpriteBatch::PopTransformation (void)
     }
 
     m_transform = &m_transformStack.back();
+}
+
+/* static */ const std::string&
+SpriteBatch::DefaultShader (ShaderType type)
+{
+    if (type == ShaderType::VERTEX)
+    {
+        static std::string v_src;
+        if (v_src.empty())
+        {
+            std::ostringstream vert;
+            vert << "#version 330 core\n"
+                 //
+                 << "layout (location = " << VA_POS_INDEX   << ") in vec4 position;\n"
+                 << "layout (location = " << VA_UV_INDEX    << ") in vec2 uv;\n"
+                 << "layout (location = " << VA_TID_INDEX   << ") in uint tid;\n"
+                 << "layout (location = " << VA_COLOR_INDEX << ") in vec4 color;\n"
+                 //
+                 << "uniform mat4 " << U_PROJ_XF << ";\n"
+                 //
+                 << "out vertex_attributes\n"
+                 << "{\n"
+                 << "  vec4 pos;\n"
+                 << "  vec2 uv;\n"
+                 << "  flat uint tid;\n"
+                 << "  vec4 color;\n"
+                 << "} vertex;\n"
+                 //
+                 << "void main()\n"
+                 << "{\n"
+                 << "  vertex.pos   = position;\n"
+                 << "  vertex.uv    = uv;\n"
+                 << "  vertex.tid   = tid;\n"
+                 << "  vertex.color = color;\n"
+                 << "  gl_Position  = " << U_PROJ_XF << " * position;\n"
+                 << "}\n";
+
+            v_src = vert.str();
+        }
+
+        return v_src;
+    }
+    else if (type == ShaderType::FRAGMENT)
+    {
+        static std::string f_src;
+        if (f_src.empty())
+        {
+            std::ostringstream frag;
+            frag << "#version 330 core\n"
+                 //
+                 << "layout (location = 0) out vec4 color;\n"
+                 //
+                 << "uniform sampler2D "
+                    << U_SAMPLER_ARRAY << "[" << Shader::MaxFragmentShaderUnits() << "];\n"
+                 //
+                 << "in vertex_attributes\n"
+                 << "{\n"
+                 << "  vec4 pos;\n"
+                 << "  vec2 uv;\n"
+                 << "  flat uint tid;\n"
+                 << "  vec4 color;\n"
+                 << "} vertex;\n"
+                 //
+                 << "void main()\n"
+                 << "{\n"
+                 << "  color = vertex.color * texture("
+                    << U_SAMPLER_ARRAY << "[vertex.tid], vertex.uv);\n"
+                 << "}\n";
+
+            f_src = frag.str();
+        }
+
+        return f_src;
+    }
+
+    static std::string unavailable;
+    return unavailable;
 }
 
 } // namespace rdge
