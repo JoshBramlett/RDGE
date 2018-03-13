@@ -1,5 +1,5 @@
 #include <rdge/graphics/texture.hpp>
-#include <rdge/graphics/shader.hpp>
+#include <rdge/graphics/shaders/shader_program.hpp>
 #include <rdge/assets/surface.hpp>
 #include <rdge/util/compiler.hpp>
 #include <rdge/util/logger.hpp>
@@ -40,7 +40,7 @@ class TextureManager
 {
 public:
     TextureManager (void)
-        : m_capacity(Shader::MaxFragmentShaderUnits())
+        : m_capacity(ShaderProgram::MaxTextureSlots())
     {
         if (RDGE_UNLIKELY(!RDGE_TCALLOC(m_textures, m_capacity, memory_bucket_graphics)))
         {
@@ -320,7 +320,7 @@ void
 Texture::Activate (void) const
 {
     SDL_assert(m_data);
-    SDL_assert(this->unit_id >= 0 && this->unit_id < Shader::MaxFragmentShaderUnits());
+    SDL_assert(this->unit_id >= 0 && this->unit_id < ShaderProgram::MaxTextureSlots());
 
     opengl::SetActiveTexture(GL_TEXTURE0 + this->unit_id);
     opengl::BindTexture(GL_TEXTURE_2D, m_data->handle);

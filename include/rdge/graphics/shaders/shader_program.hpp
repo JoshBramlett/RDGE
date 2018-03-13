@@ -1,4 +1,4 @@
-//! \headerfile <rdge/graphics/shader.hpp>
+//! \headerfile <rdge/graphics/shaders/shader_program.hpp>
 //! \author Josh Bramlett
 //! \version 0.0.10
 //! \date 12/12/2016
@@ -35,30 +35,34 @@ enum class ShaderType : uint32
     GEOMETRY = GL_GEOMETRY_SHADER
 };
 
-//! \class Shader
+//! \class ShaderProgram
 //! \brief Represents an OpenGL shader program
-class Shader
+class ShaderProgram
 {
 public:
-    //! \brief Shader default ctor
-    Shader (void) = default;
+    //! \brief ShaderProgram default ctor
+    ShaderProgram (void) = default;
 
-    //! \brief Shader ctor
+    //! \brief ShaderProgram ctor
     //! \details Loads and compiles the shader source.
     //! \param [in] vert_source GLSL source code for the vertex shader
     //! \param [in] frag_source GLSL source code for the fragment shader
     //! \throws RDGE::GLException Shader could not be built
-    explicit Shader (const std::string& vert_source, const std::string& frag_source);
+    explicit ShaderProgram (const std::string& vert_source, const std::string& frag_source);
 
-    //! \brief Shader dtor
+    //! \brief ShaderProgram dtor
     //! \details Deletes the shader program from the OpenGL context
-    ~Shader (void) noexcept;
+    ~ShaderProgram (void) noexcept;
 
     //!@{ Non-copyable, move enabled
-    Shader (const Shader&) = delete;
-    Shader& operator= (const Shader&) = delete;
-    Shader (Shader&&) noexcept;
-    Shader& operator= (Shader&&) noexcept;
+    ShaderProgram (const ShaderProgram&) = delete;
+    ShaderProgram& operator= (const ShaderProgram&) = delete;
+    ShaderProgram (ShaderProgram&&) noexcept;
+    ShaderProgram& operator= (ShaderProgram&&) noexcept;
+    //!@}
+
+    //!@{ Basic Surface properties
+    bool IsEmpty (void) const noexcept;
     //!@}
 
     //!@{ Install/uninstall the program as part of the current rendering state
@@ -71,10 +75,10 @@ public:
     void SetUniformValue (const std::string& name, float value);
     void SetUniformValue (const std::string& name, uint32 count, int32* values);
     void SetUniformValue (const std::string& name, uint32 count, float* values);
-    void SetUniformValue (const std::string& name, const math::vec2& vec);
-    void SetUniformValue (const std::string& name, const math::vec3& vec);
-    void SetUniformValue (const std::string& name, const math::vec4& vec);
-    void SetUniformValue (const std::string& name, const math::mat4& matrix);
+    void SetUniformValue (const std::string& name, const math::vec2& value);
+    void SetUniformValue (const std::string& name, const math::vec3& value);
+    void SetUniformValue (const std::string& name, const math::vec4& value);
+    void SetUniformValue (const std::string& name, const math::mat4& value);
     //!@}
 
     //! \brief Create a program from source files
@@ -83,14 +87,16 @@ public:
     //! \param [in] frag_path File path to GLSL source code for the fragment shader
     //! \returns Initialized Shader object
     //! \throws rdge::GLException Shader could not be built
-    static Shader FromFile (const char* restrict vert_path, const char* restrict frag_path);
+    static ShaderProgram FromFile (const char* restrict vert_path,
+                                   const char* restrict frag_path);
 
-    //! \brief Number of textures supported in the fragment shader
-    //! \details Queries OpenGL for the maximum amount of texture image units the
-    //!          sampler in the fragment shader can access.  The minimum required
-    //!          as defined by OpenGL is 16.
-    //! \returns Number of supported textures in the fragment shader
-    static uint32 MaxFragmentShaderUnits (void);
+    //! \brief Maximum supported texture image units
+    //! \details Represents the texture slots available to the fragment shader.
+    //!          Query is sent to OpenGL and result is cached to not penalize
+    //!          multiple lookups.
+    //! \note The minimum required as defined by OpenGL is 16.
+    //! \returns Total supported texture slots
+    static size_t MaxTextureSlots (void);
 
 private:
     //! \brief Get the uniform location by name

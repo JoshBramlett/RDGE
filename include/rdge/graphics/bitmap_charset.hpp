@@ -6,8 +6,8 @@
 #pragma once
 
 #include <rdge/core.hpp>
+#include <rdge/graphics/shaders/sprite_batch_shader.hpp>
 #include <rdge/graphics/color.hpp>
-#include <rdge/graphics/shader.hpp>
 #include <rdge/graphics/tex_coords.hpp>
 #include <rdge/graphics/texture.hpp>
 #include <rdge/math/vec2.hpp>
@@ -66,41 +66,11 @@ public:
 
 public:
     rdge::color color = color::WHITE; //!< Text color
-    Shader shader; //!< Distance field font shader
+    DistanceFieldShader shader;       //!< Distance field shader
 
 private:
     std::vector<glyph> m_glyphs;     //!< List of renderable glyphs
     std::vector<Texture> m_textures; //!< List of textures containing the glyphs
 };
-#if 0
-class SpriteBatchShader
-{
-protected:
-    virtual std::string GetSource (ShaderType type);
-};
-
-class DistanceFieldShader : public SpriteBatchShader
-{
-public:
-protected:
-    std::string GetSource (ShaderType type) override;
-};
-
-class DistanceFieldOutlineShader : public SpriteBatchShader
-{
-public:
-    void SetColor (const color& c);
-    void SetOutlineDistance (float distance);
-protected:
-    std::string GetSource (ShaderType type) override;
-};
-
-class DistanceFieldDropShadowShader : public SpriteBatchShader
-{
-public:
-protected:
-    std::string GetSource (ShaderType type) override;
-};
-#endif
 
 } // namespace rdge

@@ -1,4 +1,4 @@
-#include <rdge/graphics/shader.hpp>
+#include <rdge/graphics/shaders/shader_program.hpp>
 #include <rdge/math/vec3.hpp>
 #include <rdge/math/vec4.hpp>
 #include <rdge/math/mat4.hpp>
@@ -7,7 +7,6 @@
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
 
-#include <GL/glew.h>
 #include <SDL_assert.h>
 
 #include <vector>
@@ -93,7 +92,7 @@ Link (const std::vector<uint32>& shaders)
 
 namespace rdge {
 
-Shader::Shader (const std::string& vert_source, const std::string& frag_source)
+ShaderProgram::ShaderProgram (const std::string& vert_source, const std::string& frag_source)
 {
     std::vector<uint32> shaders;
 
@@ -103,19 +102,19 @@ Shader::Shader (const std::string& vert_source, const std::string& frag_source)
     m_programId = Link(shaders);
 }
 
-Shader::~Shader (void) noexcept
+ShaderProgram::~ShaderProgram (void) noexcept
 {
     glDeleteProgram(m_programId);
 }
 
-Shader::Shader (Shader&& other) noexcept
+ShaderProgram::ShaderProgram (ShaderProgram&& other) noexcept
     : m_uniforms(std::move(other.m_uniforms))
 {
     std::swap(m_programId, other.m_programId);
 }
 
-Shader&
-Shader::operator= (Shader&& rhs) noexcept
+ShaderProgram&
+ShaderProgram::operator= (ShaderProgram&& rhs) noexcept
 {
     if (this != &rhs)
     {
@@ -126,8 +125,14 @@ Shader::operator= (Shader&& rhs) noexcept
     return *this;
 }
 
+bool
+ShaderProgram::IsEmpty (void) const noexcept
+{
+    return (m_programId == 0);
+}
+
 void
-Shader::Enable (void) const
+ShaderProgram::Enable (void) const
 {
     SDL_assert(m_programId != 0);
 
@@ -135,83 +140,82 @@ Shader::Enable (void) const
 }
 
 void
-Shader::Disable (void) const
+ShaderProgram::Disable (void) const
 {
     opengl::UseProgram(0);
 }
 
 void
-Shader::SetUniformValue (const std::string& name, int32 value)
+ShaderProgram::SetUniformValue (const std::string& name, int32 value)
 {
     opengl::SetUniformValue1i(GetUniformLocation(name), value);
 }
 
 void
-Shader::SetUniformValue (const std::string& name, float value)
+ShaderProgram::SetUniformValue (const std::string& name, float value)
 {
     opengl::SetUniformValue1f(GetUniformLocation(name), value);
 }
 
 void
-Shader::SetUniformValue (const std::string& name, uint32 count, int32* values)
+ShaderProgram::SetUniformValue (const std::string& name, uint32 count, int32* values)
 {
     opengl::SetUniformValue1iv(GetUniformLocation(name), count, values);
 }
 
 void
-Shader::SetUniformValue (const std::string& name, uint32 count, float* values)
+ShaderProgram::SetUniformValue (const std::string& name, uint32 count, float* values)
 {
     opengl::SetUniformValue1fv(GetUniformLocation(name), count, values);
 }
 
 void
-Shader::SetUniformValue (const std::string& name, const math::vec2& vec)
+ShaderProgram::SetUniformValue (const std::string& name, const math::vec2& vec)
 {
     opengl::SetUniformValue2f(GetUniformLocation(name), vec.x, vec.y);
 }
 
 void
-Shader::SetUniformValue (const std::string& name, const math::vec3& vec)
+ShaderProgram::SetUniformValue (const std::string& name, const math::vec3& vec)
 {
     opengl::SetUniformValue3f(GetUniformLocation(name), vec.x, vec.y, vec.z);
 }
 
 void
-Shader::SetUniformValue (const std::string& name, const math::vec4& vec)
+ShaderProgram::SetUniformValue (const std::string& name, const math::vec4& vec)
 {
     opengl::SetUniformValue4f(GetUniformLocation(name), vec.x, vec.y, vec.z, vec.w);
 }
 
 void
-Shader::SetUniformValue (const std::string& name, const math::mat4& matrix)
+ShaderProgram::SetUniformValue (const std::string& name, const math::mat4& matrix)
 {
     opengl::SetUniformValueMatrix4fv(GetUniformLocation(name), matrix.elements);
 }
 
-/* static */ Shader
-Shader::FromFile (const char* restrict vert_path, const char* restrict frag_path)
+/* static */ ShaderProgram
+ShaderProgram::FromFile (const char* restrict vert_path, const char* restrict frag_path)
 {
     auto v = GetTextFileContent(vert_path);
     auto f = GetTextFileContent(frag_path);
 
-    return Shader(v, f);
+    return ShaderProgram(v, f);
 }
 
-/* static */ uint32
-Shader::MaxFragmentShaderUnits (void)
+/* static */ size_t
+ShaderProgram::MaxTextureSlots (void)
 {
-    static uint32 max_units = 0;
-
+    static size_t max_units = 0;
     if (max_units == 0)
     {
-        max_units = opengl::GetInt(GL_MAX_TEXTURE_IMAGE_UNITS);
+        max_units = static_cast<size_t>(opengl::GetInt(GL_MAX_TEXTURE_IMAGE_UNITS));
     }
 
     return max_units;
 }
 
 int32
-Shader::GetUniformLocation (const std::string& name)
+ShaderProgram::GetUniformLocation (const std::string& name)
 {
     auto it = m_uniforms.find(name);
     if (it != m_uniforms.end())

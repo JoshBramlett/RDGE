@@ -113,6 +113,8 @@ add_library (RDGE SHARED
 
              src/graphics/layers/sprite_layer.cpp
              src/graphics/layers/tile_layer.cpp
+             src/graphics/shaders/shader_program.cpp
+             src/graphics/shaders/sprite_batch_shader.cpp
              src/graphics/renderers/sprite_batch.cpp
              src/graphics/renderers/tile_batch.cpp
              src/graphics/animation.cpp
@@ -122,7 +124,6 @@ add_library (RDGE SHARED
              src/graphics/isprite.cpp
              src/graphics/orthographic_camera.cpp
              src/graphics/sprite_group.cpp
-             src/graphics/shader.cpp
              src/graphics/sprite.cpp
              src/graphics/tex_coords.cpp
              src/graphics/texture.cpp

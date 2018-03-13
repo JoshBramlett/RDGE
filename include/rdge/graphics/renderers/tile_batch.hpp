@@ -6,12 +6,10 @@
 #pragma once
 
 #include <rdge/core.hpp>
+#include <rdge/graphics/shaders/shader_program.hpp>
+#include <rdge/graphics/blend.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/math/mat4.hpp>
-#include <rdge/graphics/shader.hpp>
-#include <rdge/graphics/blend.hpp>
-
-#include <memory>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
@@ -100,10 +98,10 @@ private:
     size_t m_submissions = 0;        //!< Tracks submissions per draw call
     size_t m_capacity = 0;           //!< Max number of submissions per draw
 
-    math::mat4 m_combined; //!< Projection/View matrix provided to the shader
-    float m_far = 0.f;     //!< Far clipping plane
-    Shader m_shader;       //!< Shader program
-    math::vec2 m_tileSize; //!< Tile size
+    math::mat4 m_combined;  //!< Projection/View matrix provided to the shader
+    float m_far = 0.f;      //!< Far clipping plane
+    ShaderProgram m_shader; //!< Shader program
+    math::vec2 m_tileSize;  //!< Tile size
 };
 
 } // namespace rdge

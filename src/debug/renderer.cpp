@@ -6,7 +6,7 @@
 #include <rdge/events/event.hpp>
 #include <rdge/gameobjects/iscene.hpp>
 #include <rdge/graphics/orthographic_camera.hpp>
-#include <rdge/graphics/shader.hpp>
+#include <rdge/graphics/shaders/shader_program.hpp>
 #include <rdge/graphics/layers/sprite_layer.hpp>
 #include <rdge/graphics/layers/tile_layer.hpp>
 #include <rdge/math/intrinsics.hpp>
@@ -192,7 +192,7 @@ private:
              << "  color = vertex_color;\n"
              << "}\n";
 
-        m_shader = Shader(vert.str(), frag.str());
+        m_shader = ShaderProgram(vert.str(), frag.str());
 
         m_vao = opengl::CreateVertexArray();
         opengl::BindVertexArray(m_vao);
@@ -277,7 +277,7 @@ private:
     static constexpr uint32 VATTR_SIZE_INDEX = 2;
     static constexpr const char* UNI_PROJ_MATRIX = "proj_matrix";
 
-    Shader m_shader;
+    ShaderProgram m_shader;
     uint32 m_vao = 0;
     uint32 m_vbo = 0;
 
@@ -378,7 +378,7 @@ private:
              << "  color = vertex_color;\n"
              << "}\n";
 
-        m_shader = Shader(vert.str(), frag.str());
+        m_shader = ShaderProgram(vert.str(), frag.str());
 
         m_vao = opengl::CreateVertexArray();
         opengl::BindVertexArray(m_vao);
@@ -453,7 +453,7 @@ private:
     static constexpr uint32 VATTR_COLOR_INDEX = 1;
     static constexpr const char* UNI_PROJ_MATRIX = "proj_matrix";
 
-    Shader m_shader;
+    ShaderProgram m_shader;
     uint32 m_vao = 0;
     uint32 m_vbo = 0;
 

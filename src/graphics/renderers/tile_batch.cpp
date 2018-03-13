@@ -77,7 +77,7 @@ TileBatch::TileBatch (uint16 capacity, const math::vec2& tile_size)
          << "  color = vertex.color * texture(" << U_SAMPLER << ", vertex.uv);\n"
          << "}\n";
 
-    m_shader = Shader(vert.str(), frag.str());
+    m_shader = ShaderProgram(vert.str(), frag.str());
 
     // TileBatch implements it's buffer object streaming using the orphaning
     // technique, which means for every frame we ask OpenGL to give us a new buffer.

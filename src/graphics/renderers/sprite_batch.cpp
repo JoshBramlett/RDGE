@@ -1,31 +1,34 @@
 #include <rdge/graphics/renderers/sprite_batch.hpp>
+#include <rdge/graphics/layers/sprite_layer.hpp>
 #include <rdge/graphics/color.hpp>
 #include <rdge/graphics/orthographic_camera.hpp>
-#include <rdge/assets/surface.hpp>
 #include <rdge/util/compiler.hpp>
 #include <rdge/util/logger.hpp>
 #include <rdge/util/memory/alloc.hpp>
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
-#include <rdge/graphics/layers/sprite_layer.hpp>
 
 #include <SDL.h>
 #include <GL/glew.h>
 
-#include <algorithm> // std::generate
-#include <utility> // std::pair
 #include <sstream>
 
-namespace {
+namespace rdge {
 
-using namespace rdge;
+struct sprite_vertex
+{
+    math::vec3 pos;
+    math::vec2 uv;
+    uint32 tid;
+    uint32 color;
+};
+
+namespace {
 
 constexpr uint32 VERTEX_SIZE = sizeof(sprite_vertex);
 constexpr uint32 SPRITE_SIZE = VERTEX_SIZE * 4;
 
 } // anonymous namespace
-
-namespace rdge {
 
 SpriteBatch::SpriteBatch (uint16 capacity)
     : m_capacity(capacity)
@@ -114,19 +117,7 @@ SpriteBatch::SpriteBatch (uint16 capacity)
 
     opengl::UnbindVertexArrays();
 
-    m_shader = Shader(SpriteBatch::DefaultShader(ShaderType::VERTEX),
-                      SpriteBatch::DefaultShader(ShaderType::FRAGMENT));
-
-    // A requirement we impose on the fragment shader is to define a sampler2D array
-    // with the element count equal to the maximum texture units available.  A vector
-    // is filled with values { 0 ... MAX-1 } and set to the uniform.
-    std::vector<int32> texture_units(Shader::MaxFragmentShaderUnits());
-    int32 n = 0;
-    std::generate(texture_units.begin(), texture_units.end(), [&n]{ return n++; });
-
-    m_shader.Enable();
-    m_shader.SetUniformValue(U_SAMPLER_ARRAY, texture_units.size(), texture_units.data());
-    m_shader.Disable();
+    m_shader.Build();
 
     // An identity matrix is placed at the base of the transform stack and used
     // as a no-op transform if none are provided.
@@ -206,15 +197,15 @@ SpriteBatch::SetView (const OrthographicCamera& camera)
     SDL_assert(m_vao != 0);
     m_combined = camera.combined;
 
-    m_shader.Enable();
-    m_shader.SetUniformValue(U_PROJ_XF, camera.combined);
-    m_shader.Disable();
+    m_shader.shader.Enable();
+    m_shader.shader.SetUniformValue(U_PROJ_XF, camera.combined);
+    m_shader.shader.Disable();
 }
 
 void
 SpriteBatch::Prime (void)
 {
-    m_shader.Enable();
+    m_shader.shader.Enable();
 
     opengl::BindBuffer(GL_ARRAY_BUFFER, m_vbo);
     void* buffer = opengl::GetBufferPointer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
@@ -224,12 +215,12 @@ SpriteBatch::Prime (void)
 }
 
 void
-SpriteBatch::Prime (Shader& shader)
+SpriteBatch::Prime (SpriteBatchShader& shader)
 {
     SDL_assert(m_vao != 0);
 
-    shader.Enable();
-    shader.SetUniformValue(U_PROJ_XF, m_combined);
+    shader.shader.Enable();
+    shader.shader.SetUniformValue(U_PROJ_XF, m_combined);
 
     opengl::BindBuffer(GL_ARRAY_BUFFER, m_vbo);
     void* buffer = opengl::GetBufferPointer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
@@ -327,83 +318,6 @@ SpriteBatch::PopTransformation (void)
     }
 
     m_transform = &m_transformStack.back();
-}
-
-/* static */ const std::string&
-SpriteBatch::DefaultShader (ShaderType type)
-{
-    if (type == ShaderType::VERTEX)
-    {
-        static std::string v_src;
-        if (v_src.empty())
-        {
-            std::ostringstream vert;
-            vert << "#version 330 core\n"
-                 //
-                 << "layout (location = " << VA_POS_INDEX   << ") in vec4 position;\n"
-                 << "layout (location = " << VA_UV_INDEX    << ") in vec2 uv;\n"
-                 << "layout (location = " << VA_TID_INDEX   << ") in uint tid;\n"
-                 << "layout (location = " << VA_COLOR_INDEX << ") in vec4 color;\n"
-                 //
-                 << "uniform mat4 " << U_PROJ_XF << ";\n"
-                 //
-                 << "out vertex_attributes\n"
-                 << "{\n"
-                 << "  vec4 pos;\n"
-                 << "  vec2 uv;\n"
-                 << "  flat uint tid;\n"
-                 << "  vec4 color;\n"
-                 << "} vertex;\n"
-                 //
-                 << "void main()\n"
-                 << "{\n"
-                 << "  vertex.pos   = position;\n"
-                 << "  vertex.uv    = uv;\n"
-                 << "  vertex.tid   = tid;\n"
-                 << "  vertex.color = color;\n"
-                 << "  gl_Position  = " << U_PROJ_XF << " * position;\n"
-                 << "}\n";
-
-            v_src = vert.str();
-        }
-
-        return v_src;
-    }
-    else if (type == ShaderType::FRAGMENT)
-    {
-        static std::string f_src;
-        if (f_src.empty())
-        {
-            std::ostringstream frag;
-            frag << "#version 330 core\n"
-                 //
-                 << "layout (location = 0) out vec4 color;\n"
-                 //
-                 << "uniform sampler2D "
-                    << U_SAMPLER_ARRAY << "[" << Shader::MaxFragmentShaderUnits() << "];\n"
-                 //
-                 << "in vertex_attributes\n"
-                 << "{\n"
-                 << "  vec4 pos;\n"
-                 << "  vec2 uv;\n"
-                 << "  flat uint tid;\n"
-                 << "  vec4 color;\n"
-                 << "} vertex;\n"
-                 //
-                 << "void main()\n"
-                 << "{\n"
-                 << "  color = vertex.color * texture("
-                    << U_SAMPLER_ARRAY << "[vertex.tid], vertex.uv);\n"
-                 << "}\n";
-
-            f_src = frag.str();
-        }
-
-        return f_src;
-    }
-
-    static std::string unavailable;
-    return unavailable;
 }
 
 } // namespace rdge

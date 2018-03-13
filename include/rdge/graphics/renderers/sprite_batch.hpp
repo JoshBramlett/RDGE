@@ -7,20 +7,18 @@
 
 #include <rdge/core.hpp>
 #include <rdge/graphics/blend.hpp>
-#include <rdge/graphics/isprite.hpp>
 #include <rdge/graphics/texture.hpp>
-#include <rdge/graphics/shader.hpp>
+#include <rdge/graphics/shaders/sprite_batch_shader.hpp>
 #include <rdge/math/mat4.hpp>
 
-#include <memory>
 #include <vector>
-#include <array>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
 //!@{ Forward declarations
 struct sprite_data;
+struct sprite_vertex;
 class OrthographicCamera;
 //!@}
 
@@ -77,7 +75,7 @@ public:
     //! \details If no shader is provided the default shader will be used.
     //! \note Required call prior to drawing.
     void Prime (void);
-    void Prime (Shader&);
+    void Prime (SpriteBatchShader&);
     //!@{
 
     //! \brief Submit a sprite to be drawn
@@ -111,10 +109,6 @@ public:
     // a uniform to multiply.
     //void SetColor (const color& color);
 
-    //! \brief Default shader source for the SpriteBatch
-    //! \param [in] type Type to query
-    static const std::string& DefaultShader (ShaderType type);
-
 public:
     Blend blend = Blend::LerpSourceAlpha; //!< Blend function (set every draw call)
 
@@ -127,13 +121,11 @@ private:
     size_t m_submissions = 0;          //!< Tracks submissions per draw call
     size_t m_capacity = 0;             //!< Max number of submissions per draw
 
-    math::mat4 m_combined; //!< Projection/View matrix provided to the shader
-    Shader m_shader; //!< Shader program
+    math::mat4 m_combined;      //!< Projection/View matrix provided to the shader
+    SpriteBatchShader m_shader; //!< Shader program
 
     std::vector<math::mat4> m_transformStack;      //!< Rendering transformation stack
     math::mat4*             m_transform = nullptr; //!< Points to the top element of the stack
-
-    std::vector<std::shared_ptr<Texture>> m_textures; //!< List of registered textures
 };
 
 } // namespace rdge
