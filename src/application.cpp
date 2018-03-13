@@ -3,7 +3,6 @@
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/util/compiler.hpp>
 
-#include <SDL_ttf.h>
 #include <SDL_version.h>
 #include <nlohmann/json.hpp>
 
@@ -18,14 +17,8 @@ Application::Application (const char* filepath)
     : Application(LoadAppSettings(filepath))
 { }
 
-Application::Application (const app_settings& settings)
+Application::Application (const app_settings& /* settings */)
 {
-    /***********************************************
-     *          1.  Initialize Logging
-     **********************************************/
-
-    InitializeLogger();
-
     // TODO settings file should be for overriding the default log level
     //      (which depends on whether it's a debug or release build).  Therefore
     //      setting a default value in the settings is wrong - this value
@@ -34,7 +27,7 @@ Application::Application (const app_settings& settings)
     //      Holding off setting the log level from a config until that's done.
 
     /***********************************************
-     *             2.  Initialize SDL
+     *             1.  Initialize SDL
      **********************************************/
 
     // FIXME RDGE-00055 Init SDL on demand
@@ -59,25 +52,14 @@ Application::Application (const app_settings& settings)
     }
 
     /***********************************************
-     *          4.  Initialize SDL_ttf
+     *          2.  Initialize Logging
      **********************************************/
 
-    if (settings.enable_fonts)
-    {
-        if (RDGE_UNLIKELY(TTF_Init() != 0))
-        {
-            SDL_THROW("SDL_ttf failed to initialize", "TTF_Init");
-        }
-    }
+    InitializeLogger();
 }
 
 Application::~Application (void) noexcept
 {
-    if (TTF_WasInit())
-    {
-        TTF_Quit();
-    }
-
     SDL_Quit();
 }
 
@@ -91,19 +73,6 @@ Application::SDLVersion (void) const
     ss << static_cast<int>(linked.major) << "."
        << static_cast<int>(linked.minor) << "."
        << static_cast<int>(linked.patch);
-
-    return ss.str();
-}
-
-std::string
-Application::SDLTTFVersion (void) const
-{
-    const SDL_version* linked = TTF_Linked_Version();
-
-    std::ostringstream ss;
-    ss << static_cast<int>(linked->major) << "."
-       << static_cast<int>(linked->minor) << "."
-       << static_cast<int>(linked->patch);
 
     return ss.str();
 }
@@ -163,11 +132,6 @@ LoadAppSettings (const char* filepath)
         if (!j.is_object())
         {
             return settings;
-        }
-
-        if (j["enable_fonts"].is_boolean())
-        {
-            settings.enable_fonts = j["enable_fonts"];
         }
 
         if (j["window_title"].is_string())

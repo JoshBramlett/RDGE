@@ -55,13 +55,11 @@ include(CTest)
 
 find_package (GTest REQUIRED)
 find_package (SDL2 REQUIRED)
-find_package (SDL2_ttf REQUIRED)
 find_package (GLEW REQUIRED)
 find_package (OpenGL REQUIRED)
 
 include_directories (${GTEST_INCLUDE_DIRS})
 include_directories (${SDL2_INCLUDE_DIR})
-include_directories (${SDL2_TTF_INCLUDE_DIR})
 include_directories (${GLEW_INCLUDE_DIRS})
 include_directories (${OPENGL_INCLUDE_DIR})
 
@@ -95,7 +93,6 @@ add_library (RDGE SHARED
              src/assets/tilemap/tilemap.cpp
              src/assets/pack_file.cpp
              src/assets/bitmap_font.cpp
-             src/assets/font.cpp
              src/assets/tileset.cpp
              src/assets/spritesheet.cpp
              src/assets/surface.cpp
@@ -165,7 +162,6 @@ add_library (RDGE SHARED
 target_link_libraries (RDGE
                        imgui
                        ${SDL2_LIBRARY}
-                       ${SDL2_TTF_LIBRARY}
                        ${GLEW_LIBRARIES}
                        ${OPENGL_LIBRARIES})
 

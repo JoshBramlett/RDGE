@@ -1,9 +1,12 @@
+Monitoring
+    Logger occasionally does not start
+      - I delayed the logger initialization.  Probably won't fix it, but it's low priority.
+
 Working (bugs)
 
     Physics Circle/Poly collision
       - Ordering is wrong so the normal is messed up.  Adding the rect prior to the circle
         works, vice versa does not.
-    Logger occasionally does not start
 
 Working (enhancements)
 
@@ -12,7 +15,7 @@ Working (enhancements)
         - See libgdx
       - Incorporate Fonts into the asset packer
       - Add ability for BitmapFont to be loaded from the PackFile
-      - Remove all references to SDL_ttf
+      - Unify SpriteBatch and TileBatch interfaces
 
 
     Util:
@@ -26,7 +29,6 @@ Working (enhancements)
           - Remove m_far from TileBatch (really only applicable for bg layers)
       - Remove ISprite, Sprite, vops, etc.
         - Clean up SpriteBatch for above
-      - Unify SpriteBatch and TileBatch interfaces
 
 
 
@@ -38,15 +40,17 @@ Assets:
 
 Graphics:
   - Add support for 24bpp images (surface and texture)
+    - Probably better just to force load everything with 4 channels.
   - Remove glew dependency in favor of glLoadGen
-  - Add viewport class
   - Shader hot reload
   - OpenGL context settings configuration variables
+  - Add rich text support
+  - Add unicode (wchar_t) support
 
 Graphics (low priority - implement as needed);
   - General
-    - Add rich text support
     - Implement "focus" system for UI controls
+    - Add viewport class
     - Create a perspective camera
     - Ability to pad NPOT textures
     - Improve texture sorting (see HMH radix sort)
@@ -86,9 +90,10 @@ Util:
   - Support TextInput and TextEdit SDL events
 
 Debug:
-  - Normalize a stat dump system across all applicable objects
-    - Useful for outputting stats at run time and on command
-    - Perhaps using metaprogramming to dynamically build display output
+  - Create ImGui "System" widget to display system information
+    - Would include SDL and OpenGL info
+    - Include a "Print to log" button
+    - Allow all stats to be printed to the log at startup via app_setting config
   - Add more debug rendering functionality
     - Labels placed on the upper left corner of a wireframe
     - Enhance physics rendering similar to Box2D

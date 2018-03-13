@@ -45,8 +45,6 @@ namespace rdge {
 //!          using the \ref rdge::LoadAppSettings function.
 struct app_settings
 {
-    bool enable_fonts = false; //!< Enable support for loading TTF fonts
-
     std::string window_title  = "RDGE"; //!< Title of the game window
     std::string window_icon   = "";     //!< Path and file for the window icon
     uint32      target_width  = 960;    //!< Target drawing size width
@@ -109,10 +107,6 @@ public:
     //! \brief SDL version linked against
     //! \return String containing the major, minor, and patch
     std::string SDLVersion (void) const;
-
-    //! \brief SDL_ttf version linked against
-    //! \return String containing the major, minor, and patch
-    std::string SDLTTFVersion (void) const;
 
     //! \brief Application base directory path
     //! \return Directory path where application resides
