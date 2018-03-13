@@ -61,42 +61,32 @@ public:
     SpriteBatch& operator= (SpriteBatch&&) noexcept;
     //!@}
 
-    //! \brief Register a texture with the renderer.
-    //! \details Registering a texture ties it to the shader by assigning it
-    //!          it's unit id, therefore textures should not be shared accross
-    //!          different renderers.  In order to activate the texture to the
-    //!          OpenGL context, a reference to the texture is cached.  The
-    //!          number of registrations allowed is defined by the OpenGL
-    //!          implementation, which can be queried by calling \ref
-    //!          Shader::MaxFragmentShaderUnits().
-    //! \note As a best practice, all registrations should occur before the
-    //!       first call to \ref PrepSubmit.
-    //! \param [in] texture Shared pointer to the texture
-    //! \throws rdge::Exception Registered textures already at maximum allowed
-    void RegisterTexture (std::shared_ptr<Texture> texture);
-
-    //! \brief Prepare the renderer to process submissions
-    //! \note This is a required call before any submissions.
-    //! \warning Each instances submission process must flush before another
-    //!          instance can begin.
-    void PrepSubmit (void);
-    void Prime (const OrthographicCamera& camera, Shader& shader);
-
-    //! \brief Submit an array of sprite vertices for drawing
-    //! \param [in] vertices Array of vertex data to be inserted into the buffer
-    //! \note \ref PrepSubmit must be called before submissions.
-    void Submit (const SpriteVertices& vertices);
-    void Submit (const sprite_data& sprite);
-
-    //! \brief Draw the contents of the buffer
-    //! \details Should be called every frame after all submissions.
-    void Flush (void);
-    void Flush (const std::vector<Texture>& textures);
+    //!@{ Basic SpriteBatch properties
+    uint16 Capacity (void) const noexcept;
+    //!@}
 
     //! \brief Set the viewport that will be rendered
-    //! \details Should be called every frame prior to drawing.
-    //! \param [in] camera Orthographic camera
+    //! \details The combined projection/view matrix is cached and provided to
+    //!          each shader prior to submission.  This should be called once
+    //!          at the beginning of each frame.
+    //! \param [in] camera Updated camera
     void SetView (const OrthographicCamera& camera);
+
+    //!@{
+    //! \brief Prepare the renderer to receive sprites to draw
+    //! \details If no shader is provided the default shader will be used.
+    //! \note Required call prior to drawing.
+    void Prime (void);
+    void Prime (Shader&);
+    //!@{
+
+    //! \brief Submit a sprite to be drawn
+    //! \param [in] sprite Sprite data to be added to the buffer
+    void Draw (const sprite_data& sprite);
+
+    //! \brief Draw the contents of the buffer
+    //! \param [in] textures Array of textures to activate
+    void Flush (const std::vector<Texture>& textures);
 
     //! \brief Push a transformation on the stack
     //! \details Applies the transformation to all submitted renderables until
@@ -104,15 +94,11 @@ public:
     //!          the pushed transformation will be a product of the provided
     //!          matrix and the the transform on the top of the stack.
     //! \param [in] matrix Transformation matrix
-    //! \param [in] override If true push raw parameter on stack
+    //! \param [in] override Do not accumulate with the current transformation
     void PushTransformation (const math::mat4& matrix, bool override = false);
 
     //! \brief Pop the top-most transformation off the stack
     void PopTransformation (void);
-
-    //! \brief SpriteBatch capacity (aka maximum submission count)
-    //! \returns Capacity
-    uint16 Capacity (void) const noexcept;
 
     // TODO - Transform
     // We perform the transform, libgdx passes the calculation to the shader via
@@ -141,6 +127,7 @@ private:
     size_t m_submissions = 0;          //!< Tracks submissions per draw call
     size_t m_capacity = 0;             //!< Max number of submissions per draw
 
+    math::mat4 m_combined; //!< Projection/View matrix provided to the shader
     Shader m_shader; //!< Shader program
 
     std::vector<math::mat4> m_transformStack;      //!< Rendering transformation stack

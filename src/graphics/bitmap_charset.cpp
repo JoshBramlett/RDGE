@@ -52,14 +52,41 @@ BitmapCharset::BitmapCharset (const BitmapFont& font, float scale)
              << "  vec4 color;\n"
              << "} vertex;\n"
              //
+             //<< "const float smoothing = 1.0/16.0;\n"
+             ////
+             //<< "void main()\n"
+             //<< "{\n"
+             //<< "  float distance = texture("
+                //<< SpriteBatch::U_SAMPLER_ARRAY << "[vertex.tid], vertex.uv).a;\n"
+             //<< "  float alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, distance);\n"
+             //<< "  color = vec4(vertex.color.rgb, vertex.color.a * alpha);\n"
+             //<< "}\n";
+
+//...
+//const float outlineDistance; // Between 0 and 0.5, 0 = thick outline, 0.5 = no outline
+//const vec4 outlineColor;
+//...
+//void main() {
+    //float distance = texture2D(u_texture, v_texCoord).a;
+    //float outlineFactor = smoothstep(0.5 - smoothing, 0.5 + smoothing, distance);
+    //vec4 color = mix(outlineColor, v_color, outlineFactor);
+    //float alpha = smoothstep(outlineDistance - smoothing, outlineDistance + smoothing, distance);
+    //gl_FragColor = vec4(color.rgb, color.a * alpha);
+//}
+
+             // Outline distance - between 0.0 (thick) and 0.5 (no outline)
              << "const float smoothing = 1.0/16.0;\n"
+             << "const float ol_dis = 0.25;\n"
+             << "const vec4 ol_color = vec4(1.0, 0.0, 0.0, 1.0);\n"
              //
              << "void main()\n"
              << "{\n"
              << "  float distance = texture("
                 << SpriteBatch::U_SAMPLER_ARRAY << "[vertex.tid], vertex.uv).a;\n"
-             << "  float alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, distance);\n"
-             << "  color = vec4(vertex.color.rgb, vertex.color.a * alpha);\n"
+             << "  float ol_factor = smoothstep(0.5 - smoothing, 0.5 + smoothing, distance);\n"
+             << "  vec4 mix_color = mix(ol_color, vertex.color, ol_factor);\n"
+             << "  float alpha = smoothstep(ol_dis - smoothing, ol_dis + smoothing, distance);\n"
+             << "  color = vec4(mix_color.rgb, mix_color.a * alpha);\n"
              << "}\n";
 
         f_src = frag.str();
@@ -76,9 +103,9 @@ BitmapCharset::BitmapCharset (const BitmapFont& font, float scale)
 }
 
 void
-BitmapCharset::Draw (const OrthographicCamera& camera, SpriteBatch& renderer, const std::string& text, const math::vec2& pos)
+BitmapCharset::Draw (SpriteBatch& renderer, const std::string& text, const math::vec2& pos)
 {
-    renderer.Prime(camera, this->shader);
+    renderer.Prime(this->shader);
 
     sprite_data sprite;
     sprite.depth = 0.f;
@@ -94,7 +121,7 @@ BitmapCharset::Draw (const OrthographicCamera& camera, SpriteBatch& renderer, co
         sprite.uvs = g.uvs;
         sprite.tid = m_textures[g.page].unit_id;
 
-        renderer.Submit(sprite);
+        renderer.Draw(sprite);
         cursor.x += g.x_advance;
     }
 

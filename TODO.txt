@@ -10,9 +10,6 @@ Working (enhancements)
     Fonts:
       - Come up with way to cache text so the sprites don't have to be rebuilt every frame
         - See libgdx
-      - Figure out if swapping the shader for a draw call is possible
-        - Write shader for distance field fonts
-        - Make sure I'm setting the texture filtering correctly
       - Incorporate Fonts into the asset packer
       - Add ability for BitmapFont to be loaded from the PackFile
       - Remove all references to SDL_ttf

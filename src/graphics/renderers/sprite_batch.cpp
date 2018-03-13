@@ -128,18 +128,6 @@ SpriteBatch::SpriteBatch (uint16 capacity)
     m_shader.SetUniformValue(U_SAMPLER_ARRAY, texture_units.size(), texture_units.data());
     m_shader.Disable();
 
-    // Create and register a single white pixel texture that will be associated with
-    // all sprites that do not have a texture (i.e. color only).  In the fragment
-    // shader the color is multiplied by the texture color to provide the final color,
-    // so this "dummy" texture will be a no-op.  This avoids having conditional logic
-    // in our shader code to determine whether the sprite has an associated texture.
-    // Non-uniform flow control has a major negative performance impact.
-    // https://www.opengl.org/wiki/Sampler_(GLSL)#Non-uniform_flow_control
-    uint32 pixel = 0xFFFFFFFF;
-    // TODO SDL 2.0.5 has a way to supply the pixel format
-    auto dummy = SDL_CreateRGBSurfaceFrom(static_cast<void*>(&pixel), 1, 1, 32, 4, 0, 0, 0, 0);
-    RegisterTexture(std::make_shared<Texture>(Surface(dummy))); // Surface temp will free 'dummy'
-
     // An identity matrix is placed at the base of the transform stack and used
     // as a no-op transform if none are provided.
     PushTransformation(math::mat4::identity(), true);
@@ -163,10 +151,10 @@ SpriteBatch::SpriteBatch (SpriteBatch&& other) noexcept
     , m_cursor(other.m_cursor)
     , m_submissions(other.m_submissions)
     , m_capacity(other.m_capacity)
+    , m_combined(other.m_combined)
     , m_shader(std::move(other.m_shader))
     , m_transformStack(std::move(other.m_transformStack))
     , m_transform(other.m_transform)
-    , m_textures(std::move(other.m_textures))
 {
     // Swap used so moved-from object dtor can cleanup
     std::swap(m_vao, other.m_vao);
@@ -188,10 +176,10 @@ SpriteBatch::operator= (SpriteBatch&& rhs) noexcept
         m_cursor = rhs.m_cursor;
         m_submissions = rhs.m_submissions;
         m_capacity = rhs.m_capacity;
+        m_combined = rhs.m_combined;
         m_shader = std::move(rhs.m_shader);
         m_transformStack = std::move(rhs.m_transformStack);
         m_transform = rhs.m_transform;
-        m_textures = std::move(rhs.m_textures);
 
         std::swap(m_vao, rhs.m_vao);
         std::swap(m_vbo, rhs.m_vbo);
@@ -213,35 +201,10 @@ SpriteBatch::Capacity (void) const noexcept
 }
 
 void
-SpriteBatch::RegisterTexture (std::shared_ptr<Texture> texture)
-{
-    // no texture or already assigned a unit_id
-    if (!texture || texture->unit_id != Texture::INVALID_UNIT_ID)
-    {
-        return;
-    }
-
-    auto size = static_cast<uint32>(m_textures.size());
-    if (size >= (Shader::MaxFragmentShaderUnits() - 1))
-    {
-        // Check is for MAX-1 to accommodate for our default texture
-        RDGE_THROW("Unable to register texture.  Max limit of " +
-                   std::to_string(Shader::MaxFragmentShaderUnits()) +
-                   " already reached.");
-    }
-
-    texture->unit_id = size;
-    m_textures.emplace_back(texture);
-
-    DLOG() << "SpriteBatch[" << this << "] texture registered:"
-           << " texture=" << texture.get()
-           << " unit_id=" << texture->unit_id;
-}
-
-void
 SpriteBatch::SetView (const OrthographicCamera& camera)
 {
     SDL_assert(m_vao != 0);
+    m_combined = camera.combined;
 
     m_shader.Enable();
     m_shader.SetUniformValue(U_PROJ_XF, camera.combined);
@@ -249,7 +212,7 @@ SpriteBatch::SetView (const OrthographicCamera& camera)
 }
 
 void
-SpriteBatch::PrepSubmit (void)
+SpriteBatch::Prime (void)
 {
     m_shader.Enable();
 
@@ -261,12 +224,12 @@ SpriteBatch::PrepSubmit (void)
 }
 
 void
-SpriteBatch::Prime (const OrthographicCamera& camera, Shader& shader)
+SpriteBatch::Prime (Shader& shader)
 {
     SDL_assert(m_vao != 0);
 
     shader.Enable();
-    shader.SetUniformValue(U_PROJ_XF, camera.combined);
+    shader.SetUniformValue(U_PROJ_XF, m_combined);
 
     opengl::BindBuffer(GL_ARRAY_BUFFER, m_vbo);
     void* buffer = opengl::GetBufferPointer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
@@ -276,25 +239,7 @@ SpriteBatch::Prime (const OrthographicCamera& camera, Shader& shader)
 }
 
 void
-SpriteBatch::Submit (const SpriteVertices& vertices)
-{
-    SDL_assert(m_vbo == static_cast<uint32>(opengl::GetInt(GL_ARRAY_BUFFER_BINDING)));
-    SDL_assert(m_submissions <= m_capacity);
-
-    for (const auto& vertex : vertices)
-    {
-        m_cursor->pos   = vertex.pos.transform(*m_transform);
-        m_cursor->uv    = vertex.uv;
-        m_cursor->tid   = (vertex.tid == Texture::INVALID_UNIT_ID) ? 0 : vertex.tid;
-        m_cursor->color = vertex.color;
-        m_cursor++;
-    }
-
-    m_submissions++;
-}
-
-void
-SpriteBatch::Submit (const sprite_data& sprite)
+SpriteBatch::Draw (const sprite_data& sprite)
 {
     const auto& p = sprite.pos;
     const auto& sz = sprite.size;
@@ -304,66 +249,31 @@ SpriteBatch::Submit (const sprite_data& sprite)
     m_cursor->uv    = sprite.uvs[0];
     m_cursor->tid   = sprite.tid;
     m_cursor->color = c;
+    m_cursor->pos.transform(*m_transform);
     m_cursor++;
 
     m_cursor->pos   = math::vec3(p.x, p.y + sz.h, sprite.depth);
     m_cursor->uv    = sprite.uvs[1];
     m_cursor->tid   = sprite.tid;
     m_cursor->color = c;
+    m_cursor->pos.transform(*m_transform);
     m_cursor++;
 
     m_cursor->pos   = math::vec3(p.x + sz.w, p.y + sz.h, sprite.depth);
     m_cursor->uv    = sprite.uvs[2];
     m_cursor->tid   = sprite.tid;
     m_cursor->color = c;
+    m_cursor->pos.transform(*m_transform);
     m_cursor++;
 
     m_cursor->pos   = math::vec3(p.x + sz.w, p.y, sprite.depth);
     m_cursor->uv    = sprite.uvs[3];
     m_cursor->tid   = sprite.tid;
     m_cursor->color = c;
+    m_cursor->pos.transform(*m_transform);
     m_cursor++;
 
     m_submissions++;
-}
-
-void
-SpriteBatch::Flush (void)
-{
-    // Sanity check our VBO is bound ensures noone else is binding a different VBO
-    // during our submission process.
-    SDL_assert(m_vbo == static_cast<uint32>(opengl::GetInt(GL_ARRAY_BUFFER_BINDING)));
-    SDL_assert(m_submissions != 0);
-
-    opengl::ReleaseBufferPointer(GL_ARRAY_BUFFER);
-    opengl::UnbindBuffers(GL_ARRAY_BUFFER);
-
-    // TODO Textures don't have to be activated for every draw call unless they have
-    //      changed.  One alternative could be to create a container that manages
-    //      all textures across all render targets.  I need to profile to determine
-    //      how much of a cost enabling and activating a texture has.
-    //      Keep in mind a limiting factor is that all textures must be assigned a
-    //      unit id prior to activating.
-    //
-    //      Update: keep in mind multiple renderers will be used, so to work without
-    //              a hitch the ease route would be to activate  the textures every
-    //              draw call.  However, there's got to be a better way...base class
-    //              that holds a static that keeps track of the last used texture
-    //              and only activates if changed?
-    for (auto& texture : m_textures)
-    {
-        texture->Activate();
-    }
-
-    this->blend.Apply();
-
-    opengl::BindVertexArray(m_vao);
-    opengl::BindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
-
-    opengl::DrawElements(GL_TRIANGLES, (m_submissions * 6), GL_UNSIGNED_INT, nullptr);
-
-    opengl::UnbindBuffers(GL_ELEMENT_ARRAY_BUFFER);
-    opengl::UnbindVertexArrays();
 }
 
 void
@@ -381,8 +291,8 @@ SpriteBatch::Flush (const std::vector<Texture>& textures)
         {
             texture.Activate();
         }
-        this->blend.Apply();
 
+        this->blend.Apply();
         opengl::BindVertexArray(m_vao);
         opengl::BindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
 

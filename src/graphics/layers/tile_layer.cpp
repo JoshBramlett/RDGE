@@ -214,8 +214,6 @@ TileLayer::Draw (TileBatch& renderer, const OrthographicCamera& camera)
         return;
     }
 
-    renderer.Prime(camera);
-
     float left = (camera.bounds.left() - m_bounds.left());
     float right = left + camera.bounds.width();
     int32 x1 = std::max(static_cast<int32>(left * m_inv.w), 0);
@@ -228,6 +226,7 @@ TileLayer::Draw (TileBatch& renderer, const OrthographicCamera& camera)
     int32 y2 = std::min(static_cast<int32>((bottom * m_inv.h) + 1.f),
                         static_cast<int32>(m_chunks.rows));
 
+    renderer.Prime();
     for (int32 col = x1; col < x2; col++)
     {
         for (int32 row = y1; row < y2; row++)

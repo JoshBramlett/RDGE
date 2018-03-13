@@ -173,9 +173,10 @@ TileBatch::TileBatch (TileBatch&& other) noexcept
     , m_cursor(other.m_cursor)
     , m_submissions(other.m_submissions)
     , m_capacity(other.m_capacity)
+    , m_combined(other.m_combined)
+    , m_far(other.m_far)
     , m_shader(std::move(other.m_shader))
     , m_tileSize(other.m_tileSize)
-    , m_far(other.m_far)
 {
     std::swap(m_vao, other.m_vao);
     std::swap(m_vbo, other.m_vbo);
@@ -188,12 +189,13 @@ TileBatch::operator= (TileBatch&& rhs) noexcept
     if (this != &rhs)
     {
         this->blend = rhs.blend;
-        m_shader = std::move(rhs.m_shader);
-        m_tileSize = rhs.m_tileSize;
-        m_far = rhs.m_far;
         m_cursor = rhs.m_cursor;
         m_submissions = rhs.m_submissions;
         m_capacity = rhs.m_capacity;
+        m_combined = rhs.m_combined;
+        m_far = rhs.m_far;
+        m_shader = std::move(rhs.m_shader);
+        m_tileSize = rhs.m_tileSize;
 
         std::swap(m_vao, rhs.m_vao);
         std::swap(m_vbo, rhs.m_vbo);
@@ -207,14 +209,24 @@ TileBatch::operator= (TileBatch&& rhs) noexcept
 }
 
 void
-TileBatch::Prime (const OrthographicCamera& camera)
+TileBatch::SetView (const OrthographicCamera& camera)
+{
+    SDL_assert(m_vao != 0);
+    m_combined = camera.combined;
+    m_far = -camera.far;
+
+    m_shader.Enable();
+    m_shader.SetUniformValue(U_PROJ_XF, camera.combined);
+    m_shader.Disable();
+}
+
+void
+TileBatch::Prime (void)
 {
     SDL_assert(m_vao != 0);
 
     m_shader.Enable();
-    m_shader.SetUniformValue(U_PROJ_XF, camera.combined);
     m_shader.SetUniformValue(U_SAMPLER, TEXTURE_UNIT_ID);
-    m_far = -camera.far;
 
     opengl::BindBuffer(GL_ARRAY_BUFFER, m_vbo);
     void* buffer = opengl::GetBufferPointer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);

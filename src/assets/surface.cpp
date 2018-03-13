@@ -157,13 +157,15 @@ Surface::~Surface (void) noexcept
 {
     // From SDL docs: https://wiki.libsdl.org/SDL_CreateRGBSurfaceFrom
     // Underlying pixel data is unmanaged and must be freed after the surface.
+    //
+    // Surfaces that are created using pre-allocated pixel data, we store the
+    // pointer to the pixel data in the 'userdata' field.  In all cases the
+    // 'userdata' field will point to the same location as the 'pixels' field,
+    // but the extra step is required because not all surfaces are created from
+    // pre-allocated pixel data.
 
     if (m_surface)
     {
-        // TODO No need to set userdata - the pixel data is stored in
-        //      m_surface->pixels.  However, sprite_batch creates a surface with
-        //      pixel_data from the stack so it fails.  Change once that is
-        //      removed.
         void* pixel_data = m_surface->userdata;
         SDL_FreeSurface(m_surface);
         stbi_image_free(pixel_data);

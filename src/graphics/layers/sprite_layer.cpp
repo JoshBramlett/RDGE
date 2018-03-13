@@ -238,10 +238,9 @@ SpriteLayer::Draw (SpriteBatch& renderer, const OrthographicCamera& camera)
     auto frame_bounds = camera.bounds;
     frame_bounds.fatten(m_padding.w, m_padding.h);
 
-    renderer.SetView(camera);
-    renderer.PrepSubmit();
-
     m_list.sort([](const auto& a, const auto& b) { return a.pos.y > b.pos.y; });
+
+    renderer.Prime();
     for (const auto& sprite : m_list)
     {
         // NOTE Culling by an AABB intersection test may be sub-optimal
@@ -261,7 +260,7 @@ SpriteLayer::Draw (SpriteBatch& renderer, const OrthographicCamera& camera)
 
             this->debug_overlay.sprites_drawn++;
 #endif
-            renderer.Submit(sprite);
+            renderer.Draw(sprite);
         }
     }
 

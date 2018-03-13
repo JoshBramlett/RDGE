@@ -41,19 +41,19 @@ Sprite::Sprite (const math::vec3&        pos,
 }
 
 void
-Sprite::SetRenderTarget (SpriteBatch& renderer)
+Sprite::SetRenderTarget (SpriteBatch&) // renderer)
 {
     if (!m_texture)
     {
         return;
     }
 
-    renderer.RegisterTexture(m_texture);
+    //renderer.RegisterTexture(m_texture);
     vops::SetTextureUnitID(this->vertices, m_texture->unit_id);
 }
 
 void
-Sprite::Draw (SpriteBatch& renderer)
+Sprite::Draw (SpriteBatch&)
 {
     // The texture must be registered with the renderer prior to constructing
     // the sprite.  If not the unit_id will not be updated with the vertex
@@ -63,7 +63,7 @@ Sprite::Draw (SpriteBatch& renderer)
 
     if (visible)
     {
-        renderer.Submit(this->vertices);
+        //renderer.Submit(this->vertices);
 
 #if RDGE_DEBUG
     if (this->debug_bounds.show)

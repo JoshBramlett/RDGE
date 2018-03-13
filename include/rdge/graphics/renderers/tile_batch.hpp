@@ -7,6 +7,7 @@
 
 #include <rdge/core.hpp>
 #include <rdge/math/vec2.hpp>
+#include <rdge/math/mat4.hpp>
 #include <rdge/graphics/shader.hpp>
 #include <rdge/graphics/blend.hpp>
 
@@ -62,13 +63,19 @@ public:
     TileBatch& operator= (TileBatch&&) noexcept;
     //!@}
 
-    //! \brief Prepare the renderer to receive tiles to draw
-    //! \note Should be called every frame prior to drawing.
-    //! \param [in] camera Camera to set the viewport
-    void Prime (const OrthographicCamera& camera);
+    //! \brief Set the viewport that will be rendered
+    //! \details The combined projection/view matrix is cached and provided to
+    //!          each shader prior to submission.
+    //! \note This should be called once at the beginning of each frame.
+    //! \param [in] camera Updated camera
+    void SetView (const OrthographicCamera& camera);
 
-    //! \brief Draw the chunk contents
-    //! \param [in] chunk Chunk of tiles
+    //! \brief Prepare the renderer to receive tiles to draw
+    //! \note Required call prior to drawing.
+    void Prime (void);
+
+    //! \brief Submit a tile chunk to be drawn
+    //! \param [in] chunk Chunk of tiles to be added to the buffer
     //! \param [in] c Tinting color
     void Draw (const tile_cell_chunk& chunk, color c);
 
@@ -93,9 +100,10 @@ private:
     size_t m_submissions = 0;        //!< Tracks submissions per draw call
     size_t m_capacity = 0;           //!< Max number of submissions per draw
 
-    Shader m_shader;        //!< Shader program
-    math::vec2 m_tileSize;  //!< Tile size
-    float      m_far = 0.f; //!< Far clipping plane
+    math::mat4 m_combined; //!< Projection/View matrix provided to the shader
+    float m_far = 0.f;     //!< Far clipping plane
+    Shader m_shader;       //!< Shader program
+    math::vec2 m_tileSize; //!< Tile size
 };
 
 } // namespace rdge

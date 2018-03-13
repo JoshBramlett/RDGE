@@ -62,7 +62,7 @@ public:
     //! \param [in] renderer Render target
     //! \param [in] text Text to draw
     //! \param [in] pos Position to draw text
-    void Draw (const OrthographicCamera& camera, SpriteBatch& renderer, const std::string& text, const math::vec2& pos);
+    void Draw (SpriteBatch& renderer, const std::string& text, const math::vec2& pos);
 
 public:
     rdge::color color = color::WHITE; //!< Text color
@@ -72,5 +72,35 @@ private:
     std::vector<glyph> m_glyphs;     //!< List of renderable glyphs
     std::vector<Texture> m_textures; //!< List of textures containing the glyphs
 };
+#if 0
+class SpriteBatchShader
+{
+protected:
+    virtual std::string GetSource (ShaderType type);
+};
+
+class DistanceFieldShader : public SpriteBatchShader
+{
+public:
+protected:
+    std::string GetSource (ShaderType type) override;
+};
+
+class DistanceFieldOutlineShader : public SpriteBatchShader
+{
+public:
+    void SetColor (const color& c);
+    void SetOutlineDistance (float distance);
+protected:
+    std::string GetSource (ShaderType type) override;
+};
+
+class DistanceFieldDropShadowShader : public SpriteBatchShader
+{
+public:
+protected:
+    std::string GetSource (ShaderType type) override;
+};
+#endif
 
 } // namespace rdge
