@@ -66,7 +66,9 @@ public:
 
 public:
     rdge::color color = color::WHITE; //!< Text color
-    DistanceFieldShader shader;       //!< Distance field shader
+    //DistanceFieldShader shader;       //!< Distance field shader
+    //DistanceFieldOutlineShader shader;
+    DistanceFieldDropShadowShader shader;
 
 private:
     std::vector<glyph> m_glyphs;     //!< List of renderable glyphs

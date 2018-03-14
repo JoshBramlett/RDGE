@@ -11,6 +11,9 @@ Working (bugs)
 Working (enhancements)
 
     Fonts:
+      - Spread from the distance field font generation must be passed to the engine.
+        - Shaders require this value
+        - Could read in the hiero save file as well as the fnt file
       - Come up with way to cache text so the sprites don't have to be rebuilt every frame
         - See libgdx
       - Incorporate Fonts into the asset packer

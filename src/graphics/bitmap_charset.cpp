@@ -9,7 +9,11 @@
 namespace rdge {
 
 BitmapCharset::BitmapCharset (const BitmapFont& font, float scale)
+    //: shader(2.f, 16.f)
+    //: shader(2.f, 16.f, color::BLACK, 0.15f)
+    : shader(2.f, 16.f, color::BLACK, 0.15f, math::vec2(1.f / -180.f, 1.f / 180.f))
 {
+    scale *= 4.f;
     m_textures.reserve(font.surfaces.size());
     for (const auto& surface : font.surfaces)
     {
