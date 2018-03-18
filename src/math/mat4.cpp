@@ -1,4 +1,5 @@
 #include <rdge/math/mat4.hpp>
+#include <rdge/math/vec3.hpp>
 #include <rdge/math/intrinsics.hpp>
 #include <rdge/util/logger.hpp>
 #include <rdge/util/compiler.hpp>
@@ -225,6 +226,17 @@ mat4::perspective (float field_of_view, float aspect_ratio, float near, float fa
     result[2][2] = -(far + near) / (far - near);         // | 0  0  b  c |
     result[2][3] = -1.f;                                 // | 0  0  -1 0 |
     result[3][2] = -(2.f * far * near) / (far - near);
+
+    return result;
+}
+
+/* static */ mat4
+mat4::translation (const vec2& translation)
+{
+    auto result = mat4::identity();
+    result[3][0] = translation.x;
+    result[3][1] = translation.y;
+    result[3][2] = 0.f;
 
     return result;
 }

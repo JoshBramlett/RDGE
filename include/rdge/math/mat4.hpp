@@ -6,7 +6,7 @@
 #pragma once
 
 #include <rdge/core.hpp>
-#include <rdge/math/vec3.hpp>
+#include <rdge/math/vec2.hpp>
 #include <rdge/math/vec4.hpp>
 
 /* TODO
@@ -22,6 +22,10 @@
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 namespace math {
+
+//!@{ Forward declarations
+struct vec3;
+//!@}
 
 //! \struct mat4
 //! \brief Represents a 4x4 matrix, ordered by column major
@@ -98,13 +102,17 @@ struct mat4
     //! \returns Perspective matrix
     static mat4 perspective (float fov, float aspect_ratio, float near, float far);
 
-    //! \brief Create a translation matrix
+    //!@{
+    //! \brief Generate a translation matrix
     //! \details Geometric transformation that moves every vertex in a model by
     //!          the same amount in the same direction.
-    //! \param [in] translation Vector of x, y, and z values to translate
+    //! \param [in] translation Vector values to translate
     //! \returns Translation matrix
+    //! \note The vec2 implementation sets the translation on the z-axis to 0.
     //! \see https://en.wikipedia.org/wiki/Translation_(geometry)
+    static mat4 translation (const vec2& translation);
     static mat4 translation (const vec3& translation);
+    //!@}
 
     //! \brief Create a rotation matrix
     //! \details The rotation matrix is generated from the axis & angle representation.

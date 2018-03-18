@@ -14,8 +14,6 @@ Working (enhancements)
       - Spread from the distance field font generation must be passed to the engine.
         - Shaders require this value
         - Could read in the hiero save file as well as the fnt file
-      - Come up with way to cache text so the sprites don't have to be rebuilt every frame
-        - See libgdx
       - Incorporate Fonts into the asset packer
       - Add ability for BitmapFont to be loaded from the PackFile
       - Unify SpriteBatch and TileBatch interfaces
@@ -47,8 +45,11 @@ Graphics:
   - Remove glew dependency in favor of glLoadGen
   - Shader hot reload
   - OpenGL context settings configuration variables
-  - Add rich text support
-  - Add unicode (wchar_t) support
+  - Text rendering
+    - Unicode support (wchar_t)
+    - Rich Text / Markup support
+    - GlyphLayout could have special functionality for monospaced fonts, like
+      the ability to only change the uv coordinates rather than rebuild
 
 Graphics (low priority - implement as needed);
   - General

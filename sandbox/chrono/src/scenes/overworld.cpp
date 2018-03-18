@@ -17,7 +17,12 @@ OverworldScene::OverworldScene (void)
     collision_graph.listener = this;
 
     BitmapFont font("/Users/jbramlett/Documents/assets/fonts/bitpotion.fnt");
-    mah_text = rdge::BitmapCharset(font, g_game.ratios.base_to_screen);
+    mah_charset = rdge::BitmapCharset(font, g_game.ratios.base_to_screen);
+
+    std::string text = "It's just one of them days";
+    math::vec2 text_pos(650.f, -526.f);
+    text_pos *= g_game.ratios.base_to_screen;
+    mah_text = GlyphLayout(text, text_pos, mah_charset, 1.f, color::WHITE, 500.f, 0.f);
 
     auto tilemap = g_game.pack->GetAsset<tilemap::Tilemap>(rdge_asset_tilemap_overworld);
 
@@ -228,8 +233,9 @@ OverworldScene::OnRender (void)
         layer.Draw(sprite_batch, camera);
     }
 
-    math::vec2 text_pos(650.f, -526.f);
-    mah_text.Draw(sprite_batch, "Josh. jumps quickly?", text_pos * g_game.ratios.base_to_screen);
+    mah_charset.Draw(sprite_batch, mah_text);
+    //math::vec2 text_pos(650.f, -526.f);
+    //mah_charset.Draw(sprite_batch, "Josh. jumps quickly?", text_pos * g_game.ratios.base_to_screen);
 
     // debug drawing
     debug::SetProjection(camera.combined);
