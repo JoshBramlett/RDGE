@@ -12,26 +12,16 @@
 #include <rdge/physics/shapes/polygon.hpp>
 
 //!@{ Forward declarations
-//namespace nlohmann { class json; }
-// TODO Add forward declaration
-// https://github.com/nlohmann/json/issues/314
-#include <rdge/util/json.hpp>
+#include <nlohmann/json_fwd.hpp>
+namespace rdge {
+namespace physics { struct circle; }
+namespace tilemap { class Tilemap; }
+}
 //!@}
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
-
-//!@{ Forward declarations
-namespace physics {
-struct circle;
-} // namespace physics
-//!@}
-
 namespace tilemap {
-
-//!@{ Forward declarations
-class Tilemap;
-//!@}
 
 //! \enum ObjectType
 //! \brief Base object type

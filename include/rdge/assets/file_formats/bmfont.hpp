@@ -7,8 +7,14 @@
 
 #include <rdge/core.hpp>
 
-#include <memory>
 #include <vector>
+
+//!@{ Forward declarations
+#include <nlohmann/json_fwd.hpp>
+namespace rdge {
+namespace tilemap { class Tilemap; }
+}
+//!@}
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
@@ -85,6 +91,7 @@ struct bmfont_page
 {
     std::string file;
     int32 id = 0;
+    size_t image_table_id = 0;
 };
 
 //! \struct bmfont_char
@@ -128,7 +135,10 @@ struct bmfont_data
     std::vector<bmfont_char> chars;
     std::vector<bmfont_kerning> kerning_table;
 
-    uint32 high_id = 0; //!< Highest character id in the set
+    //! \brief Highest character id in the set
+    //! \details Calculated when importing using the native bmfont, but should
+    //!          be provided when importing using the modified json format.
+    uint32 high_id = 0;
 };
 
 //! \brief Load and populate bmfont definition from file
@@ -139,5 +149,12 @@ struct bmfont_data
 //! \throws rdge::Exception Import failed
 void
 load_bmfont (const char* filepath, bmfont_data& font);
+
+//! \brief Load and populate bmfont definition from json
+//! \param [in] j json formatted bmfont
+//! \param [out] font bmfont to populate
+//! \throws rdge::Exception Import failed
+void
+load_bmfont (const nlohmann::json& j, bmfont_data& font);
 
 } // namespace rdge

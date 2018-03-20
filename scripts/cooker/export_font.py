@@ -48,7 +48,10 @@ def parse_bmfont_common(line, common_data):
     for token in tokens:
         if '=' in token:
             kv = token.split('=')
-            common_data[kv[0]] = int(kv[1])
+            if kv[0] == 'packed':
+                common_data[kv[0]] = bool(kv[1])
+            else:
+                common_data[kv[0]] = int(kv[1])
 
 def parse_bmfont_page(line, pages):
     page_data = {}
@@ -88,6 +91,14 @@ def convert_bmfont_to_json(in_file):
                 parse_bmfont_page(line, font_data['pages'])
             if line.startswith("char "):
                 parse_bmfont_char(line, font_data['chars'])
+
+    high_id = 0
+    for char in font_data['chars']:
+        id = int(char['id'])
+        if id > high_id:
+            high_id = id
+    font_data['high_id'] = high_id
+
     return font_data
 
 def add_heiro_effects(in_file, font_data):

@@ -10,15 +10,6 @@ Working (bugs)
 
 Working (enhancements)
 
-    Fonts:
-      - Spread from the distance field font generation must be passed to the engine.
-        - Shaders require this value
-        - Could read in the hiero save file as well as the fnt file
-      - Incorporate Fonts into the asset packer
-      - Add ability for BitmapFont to be loaded from the PackFile
-      - Unify SpriteBatch and TileBatch interfaces
-
-
     Util:
       - Create a vector-like container for tracking memory
         - Update all asset classes to use that rather than a vector

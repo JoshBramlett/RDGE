@@ -20,3 +20,17 @@
         throw std::invalid_argument("\"" #field "\" failed " #eval_fn "() check"); \
     }                                                                              \
 } while (false)
+
+#define JSON_GET_REQUIRED(j, obj, field) do {                                      \
+    if (j.count(#field) == 0) {                                                    \
+        throw std::invalid_argument("missing required field \"" #field "\"");      \
+    } else {                                                                       \
+        obj.field = j[#field].get<decltype(obj.field)>();                          \
+    }                                                                              \
+} while (false)
+
+#define JSON_GET_OPTIONAL(j, obj, field) do {                                      \
+    if (j.count(#field) > 0) {                                                     \
+        obj.field = j[#field].get<decltype(obj.field)>();                          \
+    }                                                                              \
+} while (false)

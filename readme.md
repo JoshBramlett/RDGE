@@ -2,15 +2,19 @@ RDGE - Rainbow Drop Game Engine
 
 If you're reading this, come back when it's done.
 
-1)  Dependencies
-    A)  Google Test - Requires "install" so libs and hearders are available
-        Linux - http://stackoverflow.com/questions/13513905/how-to-setup-googletest-as-a-shared-library-on-linux
-        Mac - http://stackoverflow.com/questions/20746232/how-to-properly-setup-googletest-on-os-x-aside-from-xcode/21045113#21045113
-2) OpenGL (GLEW)
-    A)  Mac - Install GLEW
-        a)  CMake has packaged FindGLEW.cmake.  CMake requires:
-        b)  find_package (GLEW REQUIRED)
-        c)  find_package (OpenGL REQUIRED)
-        d)  include_directories (${GLEW_INCLUDE_DIRS})
-        e)  include_directories (${OPENGL_INCLUDE_DIR})
-        f)  target_link_libraries (... ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES} ...)
+## Building
+
+Dependencies:
+
+* Engine
+   * [CMake 3.4](https://cmake.org/download/)
+   * [SDL](https://www.libsdl.org/download-2.0.php)
+   * OpenGL
+   * GLEW
+* Asset Packer
+   * [Tiled Map Editor](http://www.mapeditor.org/download.html)
+   * [TexturePacker](https://www.codeandweb.com/texturepacker/download)
+   * [Heiro](https://libgdx.badlogicgames.com/tools.html)
+* Testing
+   * [Google Test (Mac)](http://stackoverflow.com/questions/20746232)
+   * [Google Test (Linux)](http://stackoverflow.com/questions/13513905)

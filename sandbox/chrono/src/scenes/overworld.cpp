@@ -16,8 +16,10 @@ OverworldScene::OverworldScene (void)
 {
     collision_graph.listener = this;
 
-    BitmapFont font("/Users/jbramlett/Documents/assets/fonts/bitpotion.fnt");
-    mah_charset = rdge::BitmapCharset(font, g_game.ratios.base_to_screen);
+    auto font = g_game.pack->GetAsset<BitmapFont>(rdge_asset_font_bitpotion);
+    mah_charset = rdge::BitmapCharset(*font, g_game.ratios.base_to_screen);
+    //BitmapFont font("/Users/jbramlett/Documents/assets/fonts/bitpotion.fnt");
+    //mah_charset = rdge::BitmapCharset(font, g_game.ratios.base_to_screen);
 
     std::string text = "It's just one of them days";
     math::vec2 text_pos(650.f, -526.f);

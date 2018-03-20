@@ -166,16 +166,17 @@ GlyphLayout::Rebuild (const BitmapCharset& charset)
 BitmapCharset::BitmapCharset (const BitmapFont& font, float scale)
     : line_height(font.line_height * scale)
     , baseline(font.baseline * scale)
-    , shader(2.f, scale)
-    //, shader(2.f, scale, color::BLACK, 0.15f)
-    //, shader(2.f, scale, color::BLACK, 0.15f, math::vec2(1.f / -180.f, 1.f / 180.f))
+    , shader(font.distance_field.spread, scale)
+    //, shader(font.distance_field.spread, scale, color::BLACK, 0.15f)
+    //, shader(font.distance_field.spread, scale, color::BLACK, 0.15f, math::vec2(1.f / -180.f, 1.f / 180.f))
 {
     this->textures.reserve(font.surfaces.size());
     for (const auto& surface : font.surfaces)
     {
-        // TODO Need a way to programmatically determine if this is a distance
-        //      field font.  Could make it part of the asset processing.
-        //      Also, libgdx says to use mipmaps if making the text smaller.
+        // TODO Either remove the shader or shore up the initialization.
+        //      BitmapFont::IsDistanceField() available for a run time check
+        //      for setting the texture filters and shader type.
+        // NOTE libgdx says to use mipmaps if making the text smaller.
         Texture t(*surface, TextureFilter::LINEAR, TextureFilter::LINEAR);
         t.unit_id = this->textures.size();
         this->textures.emplace_back(std::move(t));

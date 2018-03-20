@@ -1,5 +1,6 @@
 #include <rdge/assets/file_formats/bmfont.hpp>
 #include <rdge/util/io/rwops_base.hpp>
+#include <rdge/util/json.hpp>
 #include <rdge/util/strings.hpp>
 #include <rdge/internal/exception_macros.hpp>
 
@@ -281,6 +282,88 @@ load_bmfont (const char* filepath, bmfont_data& font)
     {
         RDGE_THROW("Missing required \'chars.count\' value");
     }
+}
+
+void
+from_json (const nlohmann::json& j, bmfont_info& info)
+{
+    JSON_GET_REQUIRED(j, info, size);
+    JSON_GET_REQUIRED(j, info, charset);
+    JSON_GET_REQUIRED(j, info, stretchH);
+    JSON_GET_REQUIRED(j, info, aa);
+    JSON_GET_REQUIRED(j, info, face);
+    JSON_GET_OPTIONAL(j, info, outline);
+
+    const auto& j_padding = j["padding"];
+    info.padding[0] = j_padding["top"].get<uint8>();
+    info.padding[1] = j_padding["right"].get<uint8>();
+    info.padding[2] = j_padding["bottom"].get<uint8>();
+    info.padding[3] = j_padding["left"].get<uint8>();
+
+    const auto& j_spacing = j["spacing"];
+    info.spacing[0] = j_spacing["w"].get<int8>();
+    info.spacing[1] = j_spacing["h"].get<int8>();
+
+    if (j["smooth"].get<bool>()) { info.flags |= bmfont_info_smooth; }
+    if (j["unicode"].get<bool>()) { info.flags |= bmfont_info_unicode; }
+    if (j["italic"].get<bool>()) { info.flags |= bmfont_info_italic; }
+    if (j["bold"].get<bool>()) { info.flags |= bmfont_info_bold; }
+}
+
+void
+from_json (const nlohmann::json& j, bmfont_common& common)
+{
+    JSON_GET_REQUIRED(j, common, lineHeight);
+    JSON_GET_REQUIRED(j, common, base);
+    JSON_GET_REQUIRED(j, common, scaleW);
+    JSON_GET_REQUIRED(j, common, scaleH);
+    JSON_GET_REQUIRED(j, common, pages);
+
+    JSON_GET_OPTIONAL(j, common, alphaChnl);
+    JSON_GET_OPTIONAL(j, common, redChnl);
+    JSON_GET_OPTIONAL(j, common, greenChnl);
+    JSON_GET_OPTIONAL(j, common, blueChnl);
+
+    if (j["packed"].get<bool>()) { common.flags |= bmfont_common_packed; }
+}
+
+void
+from_json (const nlohmann::json& j, bmfont_page& page)
+{
+    JSON_GET_REQUIRED(j, page, id);
+    JSON_GET_REQUIRED(j, page, file);
+    JSON_GET_REQUIRED(j, page, image_table_id);
+}
+
+void
+from_json (const nlohmann::json& j, bmfont_char& c)
+{
+    JSON_GET_REQUIRED(j, c, id);
+    JSON_GET_REQUIRED(j, c, x);
+    JSON_GET_REQUIRED(j, c, y);
+    JSON_GET_REQUIRED(j, c, width);
+    JSON_GET_REQUIRED(j, c, height);
+    JSON_GET_REQUIRED(j, c, xoffset);
+    JSON_GET_REQUIRED(j, c, yoffset);
+    JSON_GET_REQUIRED(j, c, xadvance);
+    JSON_GET_REQUIRED(j, c, page);
+    JSON_GET_REQUIRED(j, c, chnl);
+}
+
+void
+from_json (const nlohmann::json& j, bmfont_data& data)
+{
+    JSON_GET_REQUIRED(j, data, info);
+    JSON_GET_REQUIRED(j, data, common);
+    JSON_GET_REQUIRED(j, data, pages);
+    JSON_GET_REQUIRED(j, data, chars);
+    JSON_GET_REQUIRED(j, data, high_id);
+}
+
+void
+load_bmfont (const nlohmann::json& j, bmfont_data& font)
+{
+    font = j.get<bmfont_data>();
 }
 
 } // namespace rdge
