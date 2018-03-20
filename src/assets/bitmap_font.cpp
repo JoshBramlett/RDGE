@@ -1,4 +1,5 @@
 #include <rdge/assets/bitmap_font.hpp>
+#include <rdge/assets/pack_file.hpp>
 #include <rdge/assets/file_formats/bmfont.hpp>
 #include <rdge/util/strings.hpp>
 #include <rdge/internal/exception_macros.hpp>
@@ -27,12 +28,11 @@ BitmapFont::BitmapFont (const char* filepath)
         bmfont_data font;
         load_bmfont(filepath, font);
 
-        this->pad_top = static_cast<float>(font.info.padding[0]);
-        this->pad_right = static_cast<float>(font.info.padding[1]);
-        this->pad_bottom = static_cast<float>(font.info.padding[2]);
-        this->pad_left = static_cast<float>(font.info.padding[3]);
+        this->name = font.info.face;
+        this->size = static_cast<size_t>(font.info.size);
         this->line_height = static_cast<float>(font.common.lineHeight);
         this->baseline = static_cast<float>(font.common.base);
+        m_flags = font.info.flags;
 
         SDL_assert(font.common.pages > 0);
         std::vector<shared_asset<Surface>>(font.common.pages).swap(this->surfaces);
@@ -94,6 +94,11 @@ BitmapFont::BitmapFont (const char* filepath)
     }
 }
 
+BitmapFont::BitmapFont (const std::vector<uint8>& msgpack, PackFile& packfile)
+{
+
+}
+
 const glyph_region&
 BitmapFont::operator[] (uint32 id) const
 {
@@ -105,6 +110,30 @@ BitmapFont::operator[] (uint32 id) const
     {
         RDGE_THROW("BitmapFont lookup failed. key=" + std::to_string(id));
     }
+}
+
+bool
+BitmapFont::IsUnicode (void) const noexcept
+{
+    return (m_flags & bmfont_info_unicode);
+}
+
+bool
+BitmapFont::IsBold (void) const noexcept
+{
+    return (m_flags & bmfont_info_bold);
+}
+
+bool
+BitmapFont::IsItalic (void) const noexcept
+{
+    return (m_flags & bmfont_info_italic);
+}
+
+bool
+BitmapFont::IsDistanceField (void) const noexcept
+{
+    return (this->distance_field.spread > 0.f);
 }
 
 } // namespace rdge

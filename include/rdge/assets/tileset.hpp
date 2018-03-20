@@ -7,6 +7,7 @@
 
 #include <rdge/core.hpp>
 #include <rdge/assets/shared_asset.hpp>
+#include <rdge/assets/surface.hpp>
 #include <rdge/math/vec2.hpp>
 
 #include <vector>
@@ -16,12 +17,11 @@ namespace rdge {
 
 //!@{ Forward declarations
 class PackFile;
-class Surface;
 struct tex_coords;
 //!@}
 
 //! \class Tileset
-//! \brief Load tileset from a json config
+//! \brief Image asset that stores fixed size regions
 //! \details Tileset represents the breakdown of the pixel data into individual
 //!          tiles.  The tiles all have the same size, and unlike the regions
 //!          of a sprite sheet, have no internal data stored for each tile.
@@ -48,9 +48,6 @@ struct tex_coords;
 class Tileset
 {
 public:
-    //! \brief Tileset default ctor
-    Tileset (void) = default;
-
     //! \brief Tileset ctor
     //! \details Loads and parses the json file.
     //! \param [in] filepath Path to the config file
@@ -65,8 +62,10 @@ public:
     //! \see http://msgpack.org/
     explicit Tileset (const std::vector<uint8>& msgpack, PackFile& packfile);
 
-    //! \brief Tileset default dtor
+    //!@{ Tileset default ctor/dtor
+    Tileset (void) = default;
     ~Tileset (void) noexcept;
+    //!@}
 
     //!@{ Non-copyable, move enabled
     Tileset (const Tileset&) = delete;

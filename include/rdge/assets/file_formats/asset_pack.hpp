@@ -7,10 +7,6 @@
 
 #include <rdge/core.hpp>
 
-//! \namespace rdge Rainbow Drop Game Engine
-namespace rdge {
-namespace asset_pack {
-
 #define MAGIC_VALUE_CODE(a, b, c, d) (((uint32)(a) << 0) |  \
                                       ((uint32)(b) << 8) |  \
                                       ((uint32)(c) << 16) | \
@@ -18,6 +14,12 @@ namespace asset_pack {
 
 #define RDGE_MAGIC_VALUE MAGIC_VALUE_CODE('r','d','g','e')
 #define RDGE_ASSET_PACK_VERSION 0
+
+#define RDGE_MAX_FONT_PAGES 4
+
+//! \namespace rdge Rainbow Drop Game Engine
+namespace rdge {
+namespace asset_pack {
 
 enum asset_type
 {
@@ -43,9 +45,16 @@ struct header
 
 struct surface_info
 {
+    // stbi requires all are signed types
     int32 width;
     int32 height;
     int32 channels;
+};
+
+struct font_info
+{
+    uint32 surface_ids[RDGE_MAX_FONT_PAGES];
+    size_t count;
 };
 
 struct spritesheet_info
@@ -72,6 +81,7 @@ struct asset_info
     union
     {
         surface_info     surface;
+        font_info        font;
         spritesheet_info spritesheet;
         tilemap_info     tilemap;
         tileset_info     tileset;

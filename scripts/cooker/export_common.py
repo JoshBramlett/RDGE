@@ -4,6 +4,7 @@ import math
 import subprocess
 
 IMAGE_DIR = 'images'
+FONT_DIR = 'fonts'
 SPRITESHEET_DIR = 'spritesheets'
 TILESET_DIR = 'tilesets'
 TILEMAP_DIR = 'tilemaps'

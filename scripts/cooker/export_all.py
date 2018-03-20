@@ -4,6 +4,7 @@ import os
 import sys
 
 import export_animation
+import export_font
 import export_objectsheet
 import export_tilemap
 import export_tileset
@@ -13,7 +14,7 @@ def usage():
     print "Export all resources"
     print ""
     print "Usage:"
-    print "export_tileset.py -f <config.json>"
+    print "export_all.py -f <config.json>"
 
 def main():
     try:
@@ -52,6 +53,9 @@ def main():
         config_dir = os.path.dirname(config_file)
         for f in cooker['animations']:
             export_animation.process(os.path.join(config_dir, f), export_dir)
+
+        for f in cooker['fonts']:
+            export_font.process(os.path.join(config_dir, f), export_dir)
 
         for f in cooker['objectsheets']:
             export_objectsheet.process(os.path.join(config_dir, f), export_dir)

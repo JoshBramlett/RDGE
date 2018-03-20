@@ -18,8 +18,8 @@ def usage():
     print "by providing a tps file in the same directory (and same base name) as"
     print "the tileset."
     print ""
-    print "Data file will be written to <output_dir>/spritesheets"
-    print "Texture file will be written to <output_dir>/images"
+    print "Data file will be written to <output_dir>/" + SPRITESHEET_DIR
+    print "Texture file will be written to <output_dir>/" + IMAGE_DIR
     print ""
     print "Note: Requires TexturePacker command line tools."
     print ""

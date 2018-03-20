@@ -5,6 +5,9 @@
       "animations/npcs.tps",
       "animations/player.tps"
     ],
+    "fonts": [
+      "fonts/bitpotion/bitpotion.fnt"
+    ],
     "objectsheets": [
       "objects/overworld/overworld_obj.tsx"
     ],

@@ -195,6 +195,9 @@ main (int argc, char** argv)
     auto image_result = ImportImages(global_state);
     totals += image_result;
 
+    auto font_result = ImportFonts(global_state);
+    totals += font_result;
+
     auto spritesheet_result = ImportSpritesheets(global_state);
     totals += spritesheet_result;
 
@@ -206,6 +209,7 @@ main (int argc, char** argv)
 
     std::cout << "\nImport Summary\n\n";
     std::cout << "Image:       " << PrintImportResult(image_result);
+    std::cout << "Font:        " << PrintImportResult(font_result);
     std::cout << "Spritesheet: " << PrintImportResult(spritesheet_result);
     std::cout << "Tilesets:    " << PrintImportResult(tileset_result);
     std::cout << "Tilemaps:    " << PrintImportResult(tilemap_result);

@@ -73,6 +73,7 @@ struct global_import_state
     }
 };
 
+import_result ImportFonts (global_import_state&);
 import_result ImportImages (global_import_state&);
 import_result ImportSpritesheets (global_import_state&);
 import_result ImportTilemaps (global_import_state&);

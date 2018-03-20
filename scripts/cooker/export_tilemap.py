@@ -15,7 +15,7 @@ def usage():
     print "if the tileset is a natural tileset or objectsheet and adjust the"
     print "path accordingly"
     print ""
-    print "Data file will be written to <output_dir>/tilemap"
+    print "Data file will be written to <output_dir>/" + TILEMAP_DIR
     print ""
     print "Usage:"
     print "export_tilemap.py -f <tilemap.tmx> -o <output_dir>"

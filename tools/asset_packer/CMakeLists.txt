@@ -12,6 +12,7 @@ link_directories (${RDGE_BINARY_DIR}/lib)
 include_directories (${RDGE_INCLUDE_DIR})
 
 add_executable (asset_packer
+                src/import_fonts.cpp
                 src/import_images.cpp
                 src/import_spritesheets.cpp
                 src/import_tilemaps.cpp
@@ -20,10 +21,6 @@ add_executable (asset_packer
 
 target_link_libraries (asset_packer
                        RDGE)
-
-#add_custom_command(TARGET physics PRE_BUILD
-                   #COMMAND ${CMAKE_COMMAND} -E copy_directory
-                   #${PROJECT_SOURCE_DIR}/res $<TARGET_FILE_DIR:physics>/res)
 
 # TODO : Implement install
 #install(TARGETS physics RUNTIME DESTINATION ${BIN_DIR})
