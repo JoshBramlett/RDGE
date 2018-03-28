@@ -119,6 +119,87 @@
         { "name": "npcs_debutante_01_walk_side_1", "flip": 1 },
         { "name": "npcs_debutante_01_walk_side_3", "flip": 1 }
       ]
+    },
+    {
+      "name": "npcs_katia_idle_front",
+      "mode": "loop",
+      "interval": 275,
+      "frames": [
+        { "name": "npcs_katia_idle_front_2" },
+        { "name": "npcs_katia_idle_front_3" },
+        { "name": "npcs_katia_idle_front_2" }
+      ]
+    },
+    {
+      "name": "npcs_katia_idle_back",
+      "mode": "none",
+      "frames": [
+        { "name": "npcs_katia_idle_back_1" }
+      ]
+    },
+    {
+      "name": "npcs_katia_idle_left",
+      "mode": "loop",
+      "interval": 275,
+      "frames": [
+        { "name": "npcs_katia_idle_side_1" },
+        { "name": "npcs_katia_idle_side_2" },
+        { "name": "npcs_katia_idle_side_3" }
+      ]
+    },
+    {
+      "name": "npcs_katia_idle_right",
+      "mode": "loop",
+      "interval": 275,
+      "frames": [
+        { "name": "npcs_katia_idle_side_1", "flip": 1 },
+        { "name": "npcs_katia_idle_side_2", "flip": 1 },
+        { "name": "npcs_katia_idle_side_3", "flip": 1 }
+      ]
+    },
+    {
+      "name": "npcs_katia_walk_front",
+      "mode": "loop",
+      "interval": 300,
+      "frames": [
+        { "name": "npcs_katia_walk_front_1" },
+        { "name": "npcs_katia_walk_front_2" },
+        { "name": "npcs_katia_walk_front_3" },
+        { "name": "npcs_katia_walk_front_4" }
+      ]
+    },
+    {
+      "name": "npcs_katia_walk_back",
+      "mode": "loop",
+      "interval": 300,
+      "frames": [
+        { "name": "npcs_katia_walk_back_1" },
+        { "name": "npcs_katia_walk_back_2" },
+        { "name": "npcs_katia_walk_back_3" },
+        { "name": "npcs_katia_walk_back_4" }
+      ]
+    },
+    {
+      "name": "npcs_katia_walk_left",
+      "mode": "loop",
+      "interval": 300,
+      "frames": [
+        { "name": "npcs_katia_walk_side_1" },
+        { "name": "npcs_katia_walk_side_2" },
+        { "name": "npcs_katia_walk_side_1" },
+        { "name": "npcs_katia_walk_side_3" }
+      ]
+    },
+    {
+      "name": "npcs_katia_walk_right",
+      "mode": "loop",
+      "interval": 300,
+      "frames": [
+        { "name": "npcs_katia_walk_side_1", "flip": 1 },
+        { "name": "npcs_katia_walk_side_2", "flip": 1 },
+        { "name": "npcs_katia_walk_side_1", "flip": 1 },
+        { "name": "npcs_katia_walk_side_3", "flip": 1 }
+      ]
     }
   ]
 }

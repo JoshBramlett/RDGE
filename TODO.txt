@@ -23,6 +23,11 @@ Working (enhancements)
         - Clean up SpriteBatch for above
 
 
+Game:
+  - Define a global object id
+    - This is to tie in different resources (e.g. The dialog system, animations, etc.)
+  - Rather than creating a class for each NPC, I could create a generic actor which
+    uses the global object id to load all data, and perhaps even behavior/attributes.
 
 Assets:
   - Investigate removing shared_asset destrutor call (to allow forward decl)
@@ -31,6 +36,12 @@ Assets:
     - Convert layer to y-is-up (or document why it can be unique)
 
 Graphics:
+  - Animation
+    - Rather than have all objects constantly playing animations, make changes to
+      have define a base frame for each direction.  Then for animations (like idle
+      blinking) I don't need to support multiple intervals.  Also, this would
+      allow me to have multiple animations per state (e.g. idle_blink and idle_stretch).
+    - Updates must be made to the json files
   - Add support for 24bpp images (surface and texture)
     - Probably better just to force load everything with 4 channels.
   - Remove glew dependency in favor of glLoadGen

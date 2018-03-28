@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="1.1.2" orientation="orthogonal" renderorder="right-down" width="80" height="64" tilewidth="16" tileheight="16" infinite="1" nextobjectid="55">
+<map version="1.0" tiledversion="1.1.2" orientation="orthogonal" renderorder="right-down" width="80" height="64" tilewidth="16" tileheight="16" infinite="1" nextobjectid="57">
  <properties>
   <property name="object_types" type="file" value="objecttypes.json"/>
  </properties>
@@ -430,7 +430,7 @@
  <layer name="bg_overlay_2" width="80" height="64">
   <data encoding="csv"/>
  </layer>
- <objectgroup name="bg_collision">
+ <objectgroup name="bg_collision" visible="0">
   <object id="27" type="environment_static" x="619.973" y="589.072">
    <polygon points="0,0 2.45242,29.9196 16.186,59.3486 25.9957,71.6108 32.5621,73.7659 32.2456,25.5503"/>
   </object>
@@ -448,7 +448,7 @@
   <object id="16" name="tree" gid="441" x="557.353" y="653.362" width="80" height="96"/>
   <object id="17" name="flower_pot" gid="442" x="812.381" y="546.422" width="32" height="32"/>
   <object id="18" name="bush" gid="443" x="965.932" y="605.658" width="32" height="32"/>
-  <object id="21" name="tree" gid="441" x="559.386" y="478.171" width="80" height="96"/>
+  <object id="21" name="tree" gid="441" x="577.944" y="454.598" width="80" height="96"/>
   <object id="22" name="chop_block" gid="447" x="1114.08" y="701.524" width="32" height="32"/>
   <object id="23" name="chop_block" gid="446" x="1098.69" y="740.996" width="32" height="32"/>
   <object id="24" name="bush" gid="444" x="917.727" y="606.143" width="32" height="32"/>
@@ -457,8 +457,9 @@
   <object id="50" name="tree" gid="450" x="566.622" y="382.639" width="80" height="96"/>
   <object id="51" name="tree" gid="450" x="364.414" y="594.102" width="80" height="96"/>
   <object id="52" gid="451" x="664.115" y="538.849" width="32" height="32"/>
-  <object id="53" gid="452" x="448.68" y="559.836" width="36" height="36"/>
   <object id="54" gid="453" x="597.939" y="686.714" width="52" height="44"/>
+  <object id="55" gid="454" x="448.446" y="571.196" width="36" height="48"/>
+  <object id="56" gid="452" x="581.86" y="478.427" width="36" height="36"/>
  </objectgroup>
  <imagelayer name="temp" offsetx="720" offsety="269.333">
   <image source="../temp/house_01.png" width="255" height="262"/>

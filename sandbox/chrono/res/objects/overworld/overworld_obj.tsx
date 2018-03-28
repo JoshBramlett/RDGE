@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset name="overworld_obj" tilewidth="80" tileheight="96" tilecount="13" columns="0">
+<tileset name="overworld_obj" tilewidth="80" tileheight="96" tilecount="14" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0">
   <image width="80" height="96" source="tree_01.png"/>
@@ -85,10 +85,10 @@
    </object>
   </objectgroup>
  </tile>
- <tile id="11">
-  <image width="36" height="36" source="sign_direction_01.png"/>
+  <tile id="11">
+  <image width="36" height="36" source="sign_post_info_01.png"/>
   <objectgroup draworder="index">
-   <object id="1" name="sign_direction_01" type="environment_static" x="2.36718" y="22.7512" width="30.6418" height="12.0989"/>
+   <object id="1" name="sign_post_small_01" type="environment_static" x="4.34028" y="21.0232" width="27.6693" height="12.207"/>
   </objectgroup>
  </tile>
  <tile id="12">
@@ -97,6 +97,12 @@
    <object id="2" name="big_rock_01" type="environment_static" x="9.34211" y="11.3421" width="29.6053" height="29.6053">
     <ellipse/>
    </object>
+  </objectgroup>
+ </tile>
+ <tile id="13">
+  <image width="36" height="48" source="sign_post_direction_01.png"/>
+  <objectgroup draworder="index">
+   <object id="1" name="sign_post_direction_01" type="environment_static" x="15.4622" y="33.9084" width="5.28971" height="10.8507"/>
   </objectgroup>
  </tile>
 </tileset>
