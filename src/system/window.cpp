@@ -262,6 +262,7 @@ Window::Window (const std::string& title,
     s_currentWindow = this;
 
     ILOG() << "Window Constructed:"
+           << " sdl=" << Application::SDLVersion()
            << " opengl=" << opengl::GetString(GL_VERSION)
            << " vsync=" << std::boolalpha << IsUsingVSYNC()
            << " high_dpi=" << std::boolalpha << IsHighDPI()
@@ -355,7 +356,7 @@ Window::Width (void) const
     int32 width;
     SDL_GetWindowSize(m_window, &width, nullptr);
 
-    return static_cast<rdge::uint32>(width);
+    return static_cast<uint32>(width);
 }
 
 uint32

@@ -63,26 +63,32 @@ Application::~Application (void) noexcept
     SDL_Quit();
 }
 
-std::string
-Application::SDLVersion (void) const
+/* static */ const std::string&
+Application::SDLVersion (void)
 {
-    SDL_version linked;
-    SDL_GetVersion(&linked);
+    // cached for multiple lookups
+    static std::string s_version = "";
+    if (s_version.empty())
+    {
+        SDL_version linked;
+        SDL_GetVersion(&linked);
 
-    std::ostringstream ss;
-    ss << static_cast<int>(linked.major) << "."
-       << static_cast<int>(linked.minor) << "."
-       << static_cast<int>(linked.patch);
+        std::ostringstream ss;
+        ss << static_cast<int>(linked.major) << "."
+           << static_cast<int>(linked.minor) << "."
+           << static_cast<int>(linked.patch);
 
-    return ss.str();
+        s_version = ss.str();
+    }
+
+    return s_version;
 }
 
 /* static */ const std::string&
 Application::BasePath (void)
 {
-    // cache basepath for multiple lookups
+    // cached for multiple lookups
     static std::string s_basePath = "";
-
     if (s_basePath.empty())
     {
         char* base_path = SDL_GetBasePath();

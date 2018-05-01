@@ -106,7 +106,7 @@ public:
 
     //! \brief SDL version linked against
     //! \return String containing the major, minor, and patch
-    std::string SDLVersion (void) const;
+    static const std::string& SDLVersion (void);
 
     //! \brief Application base directory path
     //! \return Directory path where application resides
