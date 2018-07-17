@@ -80,8 +80,9 @@ def merge_data(data_file):
     j['meta']['sheet_type'] = 'objectsheet'
     for d in tile_defs:
         name = os.path.splitext(os.path.basename(d['image']))[0]
+        found = False
         for frame in j['frames']:
-            if frame['filename'] == name:
+            if name in frame['filename']:
                 frame['index'] = d['index']
                 frame['objects'] = d['objects']
 
@@ -93,6 +94,10 @@ def merge_data(data_file):
                 for obj in frame['objects']:
                     obj['x'] = float(obj['x']) - offset_x
                     obj['y'] = float(obj['y']) - offset_y
+                found = True
+                break
+        if found == False:
+            raise Exception('Frame not found: ' + name)
 
     with open(data_file, 'w') as f:
         f.write(json.dumps(j, indent=2, ensure_ascii=False))
@@ -108,6 +113,10 @@ def process(in_file, out_dir):
     if not os.path.isdir(out_dir):
         raise Exception('Cannot find output directory')
 
+    tps_file = os.path.splitext(in_file)[0] + '.tps'
+    if not os.path.isfile(tps_file):
+        raise Exception('Cannot find tps file')
+
     # 1) parse tileset to get tile collision objects
     parse_tileset(in_file)
 
@@ -122,8 +131,8 @@ def process(in_file, out_dir):
     data_file = os.path.join(data_dir, base_name + '.json')
 
     cmd = TEXTURE_PACKER_PATH
-    cmd += ' --force-publish'                # force write even if unchanged
-    cmd += ' --sheet ' + sheet_file          # texture file location/filename
+    cmd += ' --force-publish'        # force write even if unchanged
+    cmd += ' --sheet ' + sheet_file  # texture file location/filename
 
     # data file
     cmd += ' --format json-array'                             # data file format
@@ -131,25 +140,12 @@ def process(in_file, out_dir):
     cmd += ' --texturepath ' + os.path.join('..', IMAGE_DIR)  # texture file path
 
     # data file: frame naming convention
-    cmd += ' --trim-sprite-names'            # remove file extension from name
-    cmd += ' --prepend-folder-name'          # prepend folder name
+    cmd += ' --trim-sprite-names'    # remove file extension from name
+    cmd += ' --prepend-folder-name'  # prepend folder name
+    cmd += ' --replace [\/]=_'       # replace path separators in names with underscores
 
-    # misc
-    cmd += ' --algorithm MaxRects'           # best algorithm for rectangle packing
-    cmd += ' --trim-mode Trim'               # maintain size, remove surrounding transparency
-    cmd += ' --extrude 0'                    # don't allow extension of border pixels
-    cmd += ' --padding 2'                    # 2 pixel padding between sprites
-    # cmd += ' --enable-rotation'
-    # cmd += ' --disable-rotation'
-
-    # include all files parsed from tileset
-    for d in tile_defs:
-        cmd += ' ' + d['image']
-
-    # include already existing tps file if existing
-    tps_file = os.path.splitext(in_file)[0] + '.tps'
-    if os.path.isfile(tps_file):
-        cmd += ' ' + tps_file
+    # include pre-existing tps file
+    cmd += ' ' + tps_file
 
     # 2) generate spritesheet and data file
     code = subprocess.call(cmd, shell=True)

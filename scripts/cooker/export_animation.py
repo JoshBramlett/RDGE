@@ -91,8 +91,8 @@ def process(tps_file, out_dir):
     data_file = os.path.join(data_dir, base_name + '.json')
 
     cmd = TEXTURE_PACKER_PATH
-    cmd += ' --force-publish'                # force write even if unchanged
-    cmd += ' --sheet ' + sheet_file          # texture file location/filename
+    cmd += ' --force-publish'        # force write even if unchanged
+    cmd += ' --sheet ' + sheet_file  # texture file location/filename
 
     # data file
     cmd += ' --format json-array'                             # data file format
@@ -100,15 +100,15 @@ def process(tps_file, out_dir):
     cmd += ' --texturepath ' + os.path.join('..', IMAGE_DIR)  # texture file path
 
     # data file: frame naming convention
-    cmd += ' --trim-sprite-names'            # remove file extension from names
-    cmd += ' --prepend-folder-name'          # add directory structure to the names
-    cmd += ' --replace [\/]=_'               # replace path separators in names with underscores
+    cmd += ' --trim-sprite-names'    # remove file extension from names
+    cmd += ' --prepend-folder-name'  # add directory structure to the names
+    cmd += ' --replace [\/]=_'       # replace path separators in names with underscores
 
     # misc
-    cmd += ' --algorithm MaxRects'           # best algorithm for rectangle packing
-    cmd += ' --trim-mode Trim'               # maintain size, remove surrounding transparency
-    cmd += ' --extrude 0'                    # don't allow extension of border pixels
-    cmd += ' --padding 2'                    # 2 pixel padding between sprites
+    cmd += ' --algorithm MaxRects'   # best algorithm for rectangle packing
+    cmd += ' --trim-mode Trim'       # maintain size, remove surrounding transparency
+    cmd += ' --extrude 0'            # don't allow extension of border pixels
+    cmd += ' --padding 2'            # 2 pixel padding between sprites
     # cmd += ' --enable-rotation'
     # cmd += ' --disable-rotation'
 

@@ -9,8 +9,8 @@
       "fonts/bitpotion/bitpotion.fnt"
     ],
     "objectsheets": [
-      "objects/overworld/overworld_obj.tsx",
-      "objects/indoors/indoors_obj.tsx"
+      "objects/overworld_obj.tsx",
+      "objects/indoors_obj.tsx"
     ],
     "tilemaps": [
       "tilemaps/overworld.tmx",

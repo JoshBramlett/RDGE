@@ -4,7 +4,7 @@
   <property name="object_types" type="file" value="objecttypes.json"/>
  </properties>
  <tileset firstgid="1" source="../tilesets/overworld_bg.tsx"/>
- <tileset firstgid="441" source="../objects/overworld/overworld_obj.tsx"/>
+ <tileset firstgid="441" source="../objects/overworld_obj.tsx"/>
  <layer name="bg" width="80" height="64">
   <data encoding="csv">
    <chunk x="0" y="0" width="16" height="16">

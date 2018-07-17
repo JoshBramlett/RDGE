@@ -42,9 +42,10 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
         JSON_VALIDATE_REQUIRED(j_region, rotated, is_boolean);
         JSON_VALIDATE_REQUIRED(j_region, trimmed, is_boolean);
         JSON_VALIDATE_REQUIRED(j_region, frame, is_object);
-        JSON_VALIDATE_REQUIRED(j_region, pivot, is_object);
         JSON_VALIDATE_REQUIRED(j_region, sourceSize, is_object);
         JSON_VALIDATE_REQUIRED(j_region, spriteSourceSize, is_object);
+
+        JSON_VALIDATE_OPTIONAL(j_region, pivot, is_object);
 
         // objectsheet only
         JSON_VALIDATE_OPTIONAL(j_region, index, is_number_unsigned);
@@ -125,6 +126,7 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
             offset.y = region.value.size.h - (sz.h + j_sss["y"].get<decltype(offset.y)>());
         }
 
+        if (j_region.count("pivot"))
         {
             const auto& j_pivot = j_region["pivot"];
             JSON_VALIDATE_REQUIRED(j_pivot, x, is_number);
@@ -134,6 +136,13 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
             auto& origin = region.value.origin;
             origin.x = j_pivot["x"].get<decltype(origin.x)>();
             origin.y = (1.f - j_pivot["y"].get<decltype(origin.y)>());
+        }
+        else
+        {
+            // no specified pivot defaults to the center
+            auto& origin = region.value.origin;
+            origin.x = 0.5f;
+            origin.y = 0.5f;
         }
 
         if (j_region.count("objects"))
