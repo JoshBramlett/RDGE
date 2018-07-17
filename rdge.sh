@@ -8,8 +8,11 @@ function chronopack()
 {
     cd ~/Documents/Projects/RDGE/scripts/cooker/
     python export_all.py -f ../../sandbox/chrono/res/export.json
-    cd -
-    cd ~/Documents/Projects/RDGE/debug/tools/asset_packer/
-    ./asset_packer ../../../sandbox/chrono/res/export.json --silent
+    if [ $? -eq 0 ]
+    then
+        cd -
+        cd ~/Documents/Projects/RDGE/debug/tools/asset_packer/
+        ./asset_packer ../../../sandbox/chrono/res/export.json --silent
+    fi
     cd -
 }

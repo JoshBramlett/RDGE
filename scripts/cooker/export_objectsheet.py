@@ -55,6 +55,10 @@ def parse_tileset(in_file):
     if 'type' not in tileset or tileset['type'] != "tileset":
         raise Exception('Invalid tileset file format')
 
+    # clear out the global cache for the next import
+    global tile_defs
+    tile_defs = []
+
     for tile in tileset['tiles']:
         tile_def = {}
         tile_def['index'] = tile['id']
@@ -66,7 +70,6 @@ def parse_tileset(in_file):
             translate_object(obj)
             tile_def['objects'].append(obj)
 
-        global tile_defs
         tile_defs.insert(int(tile_def['index']), tile_def)
 
 # merge tileset object metadata with the generated texture packer data file
@@ -129,6 +132,7 @@ def process(in_file, out_dir):
 
     # data file: frame naming convention
     cmd += ' --trim-sprite-names'            # remove file extension from name
+    cmd += ' --prepend-folder-name'          # prepend folder name
 
     # misc
     cmd += ' --algorithm MaxRects'           # best algorithm for rectangle packing

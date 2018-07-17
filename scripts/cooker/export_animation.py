@@ -22,6 +22,26 @@ def usage():
     print "Usage:"
     print "export_animation.py -f <animation.tps> -o <output_dir>"
 
+# ./aseprite -b ~/Documents/assets/ase_chrono/autumn_front.aseprite --filename-format '{path}/{tag}_{title}_{tagframe00}.{extension}' --save-as ~/Documents/assets/ase_chrono/autumn/front.png
+
+# ./aseprite -b ~/Documents/assets/ase_chrono/autumn_front.aseprite --data ~/Documents/assets/ase_chrono/autumn/autumn_front.json --list-layers --list-tags --format json-array --filename-format 'front_{tag}_{tagframe00}'
+
+    # cmd = ASEPRITE_PATH
+    # cmd += ' -b'                # force write even if unchanged
+    # cmd += aseprite_file        # texture file location/filename
+
+    # filename-format
+    # cmd += ' --filename-format'
+    # cmd += ' {path}/{tag}_{title}_{tagframe00}.{extension}'
+
+    # save-as
+    # cmd += ' --save-as'
+    # cmd += ' '
+
+
+    # cmd += ' --data ' + data_file                             # data file location/filename
+    # cmd += ' --texturepath ' + os.path.join('..', IMAGE_DIR)  # texture file path
+
 def merge_data(data_file, anim_file):
     with open(data_file) as json_data:
         j_data = json.load(json_data)

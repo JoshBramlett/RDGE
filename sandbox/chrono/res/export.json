@@ -9,13 +9,16 @@
       "fonts/bitpotion/bitpotion.fnt"
     ],
     "objectsheets": [
-      "objects/overworld/overworld_obj.tsx"
+      "objects/overworld/overworld_obj.tsx",
+      "objects/indoors/indoors_obj.tsx"
     ],
     "tilemaps": [
-      "tilemaps/overworld.tmx"
+      "tilemaps/overworld.tmx",
+      "tilemaps/winery.tmx"
     ],
     "tilesets": [
-      "tilesets/overworld_bg.tsx"
+      "tilesets/overworld_bg.tsx",
+      "tilesets/indoors.tsx"
     ],
     "export_dir": "/Users/jbramlett/Documents/Projects/RDGE/debug/sandbox/chrono/res/export/"
   },

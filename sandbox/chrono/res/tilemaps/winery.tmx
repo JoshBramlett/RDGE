@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="1.1.5" orientation="orthogonal" renderorder="right-down" width="60" height="60" tilewidth="16" tileheight="16" infinite="1" nextobjectid="30">
+<map version="1.0" tiledversion="1.1.5" orientation="orthogonal" renderorder="right-down" width="60" height="60" tilewidth="16" tileheight="16" infinite="1" nextobjectid="52">
  <tileset firstgid="1" source="../tilesets/indoors.tsx"/>
- <tileset firstgid="962" source="../objects/indoors/indoors_obj.tsx"/>
- <layer name="background" width="60" height="60">
+ <tileset firstgid="901" source="../objects/indoors/indoors_obj.tsx"/>
+ <layer name="bg" width="60" height="60">
   <data encoding="csv">
    <chunk x="-32" y="-32" width="16" height="16">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -204,7 +204,7 @@
 </chunk>
   </data>
  </layer>
- <layer name="background_accents_01" width="60" height="60">
+ <layer name="bg_overlay_01" width="60" height="60">
   <data encoding="csv">
    <chunk x="-32" y="-32" width="16" height="16">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -370,7 +370,7 @@
 </chunk>
   </data>
  </layer>
- <layer name="background_accents_02" width="60" height="60">
+ <layer name="bg_overlay_02" width="60" height="60">
   <data encoding="csv">
    <chunk x="-16" y="-32" width="16" height="16">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -482,7 +482,7 @@
 </chunk>
   </data>
  </layer>
- <layer name="background_accents_03" width="60" height="60">
+ <layer name="bg_overlay_03" width="60" height="60">
   <data encoding="csv">
    <chunk x="0" y="-32" width="16" height="16">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -522,7 +522,7 @@
 </chunk>
   </data>
  </layer>
- <layer name="background_accents_04" width="60" height="60">
+ <layer name="bg_overlay_04" width="60" height="60">
   <data encoding="csv">
    <chunk x="0" y="-32" width="16" height="16">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -544,7 +544,7 @@
 </chunk>
   </data>
  </layer>
- <layer name="background_accents_05" width="60" height="60">
+ <layer name="bg_overlay_05" width="60" height="60">
   <data encoding="csv">
    <chunk x="0" y="-32" width="16" height="16">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -566,7 +566,7 @@
 </chunk>
   </data>
  </layer>
- <layer name="fixtures_accents_01" width="60" height="60">
+ <layer name="tile_fixtures_01" width="60" height="60">
   <data encoding="csv">
    <chunk x="-16" y="-16" width="16" height="16">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -586,50 +586,6 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,197,197,197,197,197,0,0,0,0,0,0,0,0,0
 </chunk>
-  </data>
- </layer>
- <layer name="fixtures_accents_02" width="60" height="60">
-  <data encoding="csv">
-   <chunk x="-16" y="-16" width="16" height="16">
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,2147483907,2147483906,0,0,0,0,0,0,0,0,0,0,0,0
-</chunk>
-   <chunk x="-16" y="0" width="16" height="16">
-0,0,2147483937,2147483936,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,2147483967,2147483966,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-</chunk>
-  </data>
- </layer>
- <layer name="tile_fixtures_01" width="60" height="60">
-  <data encoding="csv">
    <chunk x="0" y="-16" width="16" height="16">
 0,0,0,0,0,0,171,172,173,174,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -666,24 +622,6 @@
 0,207,208,209,208,209,208,209,208,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </chunk>
-   <chunk x="-16" y="0" width="16" height="16">
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,238,239,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,268,269,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,298,299,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-</chunk>
   </data>
  </layer>
  <layer name="tile_fixtures_02" width="60" height="60">
@@ -705,6 +643,24 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,84,85,85,86,0,0,0,0,0,0
+</chunk>
+   <chunk x="-16" y="-16" width="16" height="16">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,2147483907,2147483906,0,0,0,0,0,0,0,0,0,0,0,0
 </chunk>
    <chunk x="0" y="-16" width="16" height="16">
 0,0,0,0,0,0,144,145,145,146,0,0,0,0,0,0,
@@ -742,39 +698,72 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </chunk>
+   <chunk x="-16" y="0" width="16" height="16">
+0,0,2147483937,2147483936,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,2147483967,2147483966,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</chunk>
   </data>
  </layer>
- <objectgroup name="fixtures">
-  <object id="1" gid="962" x="-128" y="16" width="16" height="48"/>
-  <object id="3" gid="965" x="-16" y="16" width="16" height="32"/>
-  <object id="4" gid="968" x="-128" y="48" width="16" height="64"/>
-  <object id="6" gid="971" x="-288" y="-240" width="32" height="64"/>
-  <object id="7" gid="970" x="-144" y="-240" width="32" height="32"/>
-  <object id="8" gid="972" x="-16" y="-160" width="48" height="64"/>
-  <object id="9" gid="963" x="-256" y="-240" width="48" height="32"/>
-  <object id="12" gid="976" x="-240" y="-48" width="48" height="32"/>
-  <object id="13" gid="977" x="-272" y="-48" width="16" height="48"/>
-  <object id="14" gid="973" x="-176" y="-48" width="32" height="64"/>
-  <object id="15" gid="974" x="-288" y="-48" width="16" height="32"/>
-  <object id="18" gid="978" x="-224" y="48" width="64" height="48"/>
-  <object id="19" gid="975" x="-160" y="48" width="16" height="32"/>
-  <object id="20" gid="979" x="176" y="-176" width="32" height="32"/>
-  <object id="21" gid="979" x="202" y="-176" width="32" height="32"/>
-  <object id="22" gid="980" x="-32" y="-176" width="16" height="32"/>
-  <object id="23" gid="980" x="-32" y="-195" width="16" height="32"/>
-  <object id="24" gid="980" x="32" y="-195" width="16" height="32"/>
-  <object id="26" gid="980" x="32" y="-176" width="16" height="32"/>
-  <object id="27" gid="980" x="384" y="0" width="16" height="32"/>
-  <object id="28" gid="979" x="187" y="-160" width="32" height="32"/>
-  <object id="29" gid="969" x="-176" y="-183" width="32" height="48"/>
+ <objectgroup name="bg_collision">
+  <object id="30" type="environment_static" x="0" y="-115" width="304" height="51"/>
+  <object id="31" type="environment_static" x="0" y="-64" width="16" height="80"/>
+  <object id="32" type="environment_static" x="160" y="-64" width="16" height="128"/>
+  <object id="33" type="environment_static" x="-48" y="61" width="320" height="19"/>
+  <object id="34" type="environment_static" x="-144" y="-3" width="16" height="67"/>
+  <object id="35" type="environment_static" x="-240" y="-3" width="16" height="67"/>
+  <object id="36" type="environment_static" x="-144" y="-115" width="16" height="67"/>
+  <object id="37" type="environment_static" x="-288" y="-115" width="144" height="51"/>
+  <object id="38" type="environment_static" x="-48" y="-115" width="11" height="73"/>
+  <object id="39" type="environment_static" x="-304" y="-272" width="16" height="352"/>
+  <object id="40" type="environment_static" x="-288" y="-272" width="448" height="16"/>
+  <object id="41" type="environment_static" x="160" y="-272" width="16" height="112"/>
+  <object id="43" type="environment_static" x="176" y="-208" width="224" height="16"/>
+  <object id="44" type="environment_static" x="336" y="-115" width="64" height="51"/>
+  <object id="45" type="environment_static" x="400" y="-208" width="16" height="288"/>
+  <object id="46" type="environment_static" x="304" y="64" width="96"/>
+  <object id="48" type="environment_static" x="-37" y="-115" width="37" height="2"/>
+  <object id="49" type="environment_static" x="304" y="61" width="96" height="19"/>
+  <object id="50" type="environment_static" x="-288" y="61" width="208" height="19"/>
  </objectgroup>
- <layer name="temp fixtures" width="60" height="60">
-  <data encoding="csv"/>
- </layer>
- <layer name="temp fixtures 2" width="60" height="60">
-  <data encoding="csv"/>
- </layer>
- <layer name="fixtures_accents_01" width="60" height="60">
+ <objectgroup name="fixtures">
+  <object id="1" gid="901" x="-128" y="16" width="16" height="48"/>
+  <object id="3" gid="904" x="-16" y="16" width="16" height="32"/>
+  <object id="4" gid="907" x="-128" y="48" width="16" height="64"/>
+  <object id="6" gid="910" x="-288" y="-240" width="32" height="64"/>
+  <object id="7" gid="909" x="-144" y="-240" width="32" height="32"/>
+  <object id="8" gid="911" x="-16" y="-160" width="48" height="64"/>
+  <object id="9" gid="902" x="-256" y="-240" width="48" height="32"/>
+  <object id="12" gid="915" x="-240" y="-48" width="48" height="32"/>
+  <object id="13" gid="916" x="-272" y="-48" width="16" height="48"/>
+  <object id="14" gid="912" x="-176" y="-48" width="32" height="64"/>
+  <object id="15" gid="913" x="-288" y="-48" width="16" height="32"/>
+  <object id="18" gid="917" x="-224" y="48" width="64" height="48"/>
+  <object id="19" gid="914" x="-160" y="48" width="16" height="32"/>
+  <object id="20" gid="918" x="176" y="-176" width="32" height="32"/>
+  <object id="21" gid="918" x="202" y="-176" width="32" height="32"/>
+  <object id="22" gid="919" x="-32" y="-176" width="16" height="32"/>
+  <object id="23" gid="919" x="-32" y="-195" width="16" height="32"/>
+  <object id="24" gid="919" x="32" y="-195" width="16" height="32"/>
+  <object id="26" gid="919" x="32" y="-176" width="16" height="32"/>
+  <object id="27" gid="919" x="384" y="0" width="16" height="32"/>
+  <object id="28" gid="918" x="187" y="-160" width="32" height="32"/>
+  <object id="29" gid="908" x="-176" y="-183" width="32" height="48"/>
+ </objectgroup>
+ <layer name="fixtures_overlay_01" width="60" height="60">
   <data encoding="csv">
    <chunk x="-16" y="-32" width="16" height="16">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -904,7 +893,7 @@
 </chunk>
   </data>
  </layer>
- <layer name="fixtures_accents_02" width="60" height="60">
+ <layer name="fixtures_overlay_02" width="60" height="60">
   <data encoding="csv">
    <chunk x="-32" y="-16" width="16" height="16">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -1164,7 +1153,7 @@
 </chunk>
   </data>
  </layer>
- <layer name="wall_top_accents_01" width="60" height="60">
+ <layer name="wall_top_overlay_01" width="60" height="60">
   <data encoding="csv">
    <chunk x="-16" y="-32" width="16" height="16">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -1187,9 +1176,9 @@
    <chunk x="-16" y="0" width="16" height="16">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,240,240,240,240,0,0,
-0,0,0,0,0,0,0,0,0,0,270,270,270,270,0,0,
-0,0,0,0,0,0,0,0,0,0,300,300,300,300,0,0,
+0,0,0,0,0,0,0,0,0,0,0,238,239,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,268,269,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,298,299,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -1222,7 +1211,7 @@
 </chunk>
   </data>
  </layer>
- <layer name="wall_top_accents_02" width="60" height="60">
+ <layer name="wall_top_overlay_02" width="60" height="60">
   <data encoding="csv">
    <chunk x="-16" y="-32" width="16" height="16">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -1239,6 +1228,24 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,611,612,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,641,642,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</chunk>
+   <chunk x="-16" y="0" width="16" height="16">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,240,240,240,240,0,0,
+0,0,0,0,0,0,0,0,0,0,270,270,270,270,0,0,
+0,0,0,0,0,0,0,0,0,0,300,300,300,300,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </chunk>

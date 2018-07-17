@@ -11,6 +11,7 @@ TILEMAP_DIR = 'tilemaps'
 
 TEXTURE_PACKER_PATH = '/usr/local/bin/TexturePacker'
 TILED_PATH = '/Users/jbramlett/Documents/GitHub/tiled/build/bin/Tiled.app/Contents/MacOS/Tiled'
+ASEPRITE_PATH = '/Applications/Aseprite.app/Contents/MacOS/aseprite'
 
 # Attempt to create directory if it doesn't exist
 def try_mkdir(path):

@@ -4,7 +4,7 @@
  <tile id="0">
   <image width="16" height="48" source="coat_rack_01.png"/>
   <objectgroup draworder="index">
-   <object id="1" name="coat_rack_01" type="environment_static" x="1.625" y="35.125" width="10.125" height="10.125">
+   <object id="1" name="coat_rack_01" type="environment_static" x="1.625" y="35.125" width="10" height="10">
     <ellipse/>
    </object>
   </objectgroup>
@@ -54,7 +54,7 @@
  <tile id="8">
   <image width="32" height="32" source="log_caddy_01.png"/>
   <objectgroup draworder="index">
-   <object id="1" type="environment_static" x="5.875" y="13.375" width="18.625" height="17.625">
+   <object id="1" type="environment_static" x="5" y="13" width="18.63" height="18.63">
     <ellipse/>
    </object>
   </objectgroup>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="1.1.2" orientation="orthogonal" renderorder="right-down" width="80" height="64" tilewidth="16" tileheight="16" infinite="1" nextobjectid="57">
+<map version="1.0" tiledversion="1.1.5" orientation="orthogonal" renderorder="right-down" width="80" height="64" tilewidth="16" tileheight="16" infinite="1" nextobjectid="58">
  <properties>
   <property name="object_types" type="file" value="objecttypes.json"/>
  </properties>
@@ -430,7 +430,7 @@
  <layer name="bg_overlay_2" width="80" height="64">
   <data encoding="csv"/>
  </layer>
- <objectgroup name="bg_collision" visible="0">
+ <objectgroup name="bg_collision">
   <object id="27" type="environment_static" x="619.973" y="589.072">
    <polygon points="0,0 2.45242,29.9196 16.186,59.3486 25.9957,71.6108 32.5621,73.7659 32.2456,25.5503"/>
   </object>
