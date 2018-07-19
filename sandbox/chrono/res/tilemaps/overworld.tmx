@@ -443,23 +443,23 @@
   <object id="36" x="952.894" y="648.108" width="29.7691" height="7.93842"/>
  </objectgroup>
  <objectgroup name="bg_sprites">
-  <object id="13" name="tree" gid="441" x="1060.41" y="638.654" width="80" height="96"/>
-  <object id="15" name="tree" gid="441" x="673.115" y="445.504" width="80" height="96"/>
-  <object id="16" name="tree" gid="441" x="557.353" y="653.362" width="80" height="96"/>
-  <object id="17" name="flower_pot" gid="442" x="812.381" y="546.422" width="32" height="32"/>
-  <object id="18" name="bush" gid="443" x="965.932" y="605.658" width="32" height="32"/>
-  <object id="21" name="tree" gid="441" x="577.944" y="454.598" width="80" height="96"/>
-  <object id="22" name="chop_block" gid="447" x="1114.08" y="701.524" width="32" height="32"/>
-  <object id="23" name="chop_block" gid="446" x="1098.69" y="740.996" width="32" height="32"/>
-  <object id="24" name="bush" gid="444" x="917.727" y="606.143" width="32" height="32"/>
-  <object id="25" name="bush" gid="445" x="885.039" y="514.039" width="32" height="26"/>
-  <object id="26" name="rock" gid="449" x="918.907" y="498.373" width="32" height="16"/>
-  <object id="50" name="tree" gid="450" x="566.622" y="382.639" width="80" height="96"/>
-  <object id="51" name="tree" gid="450" x="364.414" y="594.102" width="80" height="96"/>
-  <object id="52" gid="451" x="664.115" y="538.849" width="32" height="32"/>
-  <object id="54" gid="453" x="597.939" y="686.714" width="52" height="44"/>
-  <object id="55" gid="454" x="448.446" y="571.196" width="36" height="48"/>
-  <object id="56" gid="452" x="581.86" y="478.427" width="36" height="36"/>
+  <object id="13" name="tree_01" gid="441" x="1060.41" y="638.654" width="80" height="96"/>
+  <object id="15" name="tree_01" gid="441" x="673.115" y="445.504" width="80" height="96"/>
+  <object id="16" name="tree_01" gid="441" x="557.353" y="653.362" width="80" height="96"/>
+  <object id="17" name="flower_pot_01" gid="442" x="812.381" y="546.422" width="32" height="32"/>
+  <object id="18" name="bush_01" gid="443" x="965.932" y="605.658" width="32" height="32"/>
+  <object id="21" name="tree_01" gid="441" x="577.944" y="454.598" width="80" height="96"/>
+  <object id="22" name="chop_block_03" gid="447" x="1114.08" y="701.524" width="32" height="32"/>
+  <object id="23" name="chop_block_02" gid="446" x="1098.69" y="740.996" width="32" height="32"/>
+  <object id="24" name="bush_02" gid="444" x="917.727" y="606.143" width="32" height="32"/>
+  <object id="25" name="bush_03" gid="445" x="885.039" y="514.039" width="32" height="26"/>
+  <object id="26" name="stone_02" gid="449" x="918.907" y="498.373" width="32" height="16"/>
+  <object id="50" name="tree_02" gid="450" x="566.622" y="382.639" width="80" height="96"/>
+  <object id="51" name="tree_02" gid="450" x="364.414" y="594.102" width="80" height="96"/>
+  <object id="52" name="firepit_01" gid="451" x="664.115" y="538.849" width="32" height="32"/>
+  <object id="54" name="big_rock_01" gid="453" x="597.939" y="686.714" width="52" height="44"/>
+  <object id="55" name="sign_post_direction_01" gid="454" x="448.446" y="571.196" width="36" height="48"/>
+  <object id="56" name="sign_post_info_01" gid="452" x="581.86" y="478.427" width="36" height="36"/>
  </objectgroup>
  <imagelayer name="temp" offsetx="720" offsety="269.333">
   <image source="../temp/house_01.png" width="255" height="262"/>

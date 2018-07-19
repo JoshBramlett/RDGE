@@ -107,6 +107,25 @@ PropertyCollection::GetBool (const std::string& name) const
     return static_cast<bool>(Lookup(name, property_type_bool).i);
 }
 
+bool
+PropertyCollection::HasProperty (const std::string& name, property_type type) const noexcept
+{
+    for (const auto& p : m_properties)
+    {
+        if (name == p.name)
+        {
+            if (type == p.type || type == property_type_invalid)
+            {
+                return true;
+            }
+
+            return false;
+        }
+    }
+
+    return false;
+}
+
 size_t
 PropertyCollection::Size (void) const noexcept
 {

@@ -24,14 +24,14 @@
                 "value": 0.2
             },
             {
+                "name": "is_sensor",
+                "type": "bool",
+                "value": false
+            },
+            {
                 "name": "restitution",
                 "type": "float",
                 "value": 0
-            },
-            {
-                "name": "sensor",
-                "type": "bool",
-                "value": false
             }
         ]
     }

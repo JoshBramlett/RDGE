@@ -120,7 +120,7 @@ OverworldScene::OverworldScene (void)
                     fprof.density = ext_props.GetFloat("density");
                     fprof.friction = ext_props.GetFloat("friction");
                     fprof.restitution = ext_props.GetFloat("restitution");
-                    fprof.is_sensor = ext_props.GetBool("sensor");
+                    fprof.is_sensor = ext_props.GetBool("is_sensor");
                     fprof.filter.category = ext_props.GetInt("cgroup");
                     fprof.filter.mask = ext_props.GetInt("cmask");
 

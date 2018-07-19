@@ -12,37 +12,37 @@
  <tile id="1">
   <image width="48" height="32" source="indoors_obj/fs_01_coffee_table_large.png"/>
   <objectgroup draworder="index">
-   <object id="1" type="environment_static" x="1.5" y="18" width="45" height="11"/>
+   <object id="1" name="fs_01_coffee_table_large" type="environment_static" x="1.5" y="18" width="45" height="11"/>
   </objectgroup>
  </tile>
  <tile id="2">
   <image width="32" height="32" source="indoors_obj/fs_01_coffee_table_small.png"/>
   <objectgroup draworder="index">
-   <object id="1" type="environment_static" x="2" y="18" width="28" height="11"/>
+   <object id="1" name="fs_01_coffee_table_small" type="environment_static" x="2" y="18" width="28" height="11"/>
   </objectgroup>
  </tile>
  <tile id="3">
   <image width="16" height="32" source="indoors_obj/fs_01_end_table_left.png"/>
   <objectgroup draworder="index">
-   <object id="1" type="environment_static" x="3" y="17" width="13" height="11"/>
+   <object id="1" name="fs_01_end_table_left" type="environment_static" x="3" y="17" width="13" height="11"/>
   </objectgroup>
  </tile>
  <tile id="4">
   <image width="16" height="32" source="indoors_obj/fs_01_end_table_right.png"/>
   <objectgroup draworder="index">
-   <object id="1" type="environment_static" x="0" y="17" width="13" height="11"/>
+   <object id="1" name="fs_01_end_table_right" type="environment_static" x="0" y="17" width="13" height="11"/>
   </objectgroup>
  </tile>
  <tile id="5">
   <image width="16" height="64" source="indoors_obj/fs_01_foyer_bench_left.png"/>
   <objectgroup draworder="index">
-   <object id="1" type="environment_static" x="2" y="30" width="14" height="30"/>
+   <object id="1" name="fs_01_foyer_bench_left" type="environment_static" x="2" y="30" width="14" height="30"/>
   </objectgroup>
  </tile>
  <tile id="6">
   <image width="16" height="64" source="indoors_obj/fs_01_foyer_bench_right.png"/>
   <objectgroup draworder="index">
-   <object id="1" type="environment_static" x="0" y="30" width="14" height="30"/>
+   <object id="1" name="fs_01_foyer_bench_right" type="environment_static" x="0" y="30" width="14" height="30"/>
   </objectgroup>
  </tile>
  <tile id="7">
@@ -54,7 +54,7 @@
  <tile id="8">
   <image width="32" height="32" source="indoors_obj/log_caddy_01.png"/>
   <objectgroup draworder="index">
-   <object id="1" type="environment_static" x="5" y="13" width="18.63" height="18.63">
+   <object id="1" name="log_caddy_01" type="environment_static" x="5" y="13" width="18.63" height="18.63">
     <ellipse/>
    </object>
   </objectgroup>
@@ -62,7 +62,7 @@
  <tile id="9">
   <image width="32" height="64" source="indoors_obj/tree_01.png"/>
   <objectgroup draworder="index">
-   <object id="1" type="environment_static" x="9.25" y="45.25" width="14" height="14">
+   <object id="1" name="tree_01" type="environment_static" x="9.25" y="45.25" width="14" height="14">
     <ellipse/>
    </object>
   </objectgroup>
@@ -70,7 +70,7 @@
  <tile id="10">
   <image width="48" height="64" source="indoors_obj/wood_table_01.png"/>
   <objectgroup draworder="index">
-   <object id="1" type="environment_static" x="2" y="10" width="44" height="38"/>
+   <object id="1" name="wood_table_01" type="environment_static" x="2" y="10" width="44" height="38"/>
   </objectgroup>
  </tile>
  <tile id="11">

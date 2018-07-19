@@ -98,6 +98,7 @@ Object::Object (const nlohmann::json& j, Tilemap* tilemap)
         if (!this->ext_type.empty() && this->parent)
         {
             this->ext_data = this->parent->GetSharedObjectData(this->ext_type);
+            SDL_assert(this->ext_data);
         }
 
         // optional

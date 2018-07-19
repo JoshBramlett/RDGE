@@ -45,6 +45,19 @@ namespace tilemap {
 class PropertyCollection
 {
 public:
+    //! \enum property_type
+    //! \brief Supported base types
+    enum property_type
+    {
+        property_type_invalid,
+        property_type_bool,
+        property_type_color,
+        property_type_file,
+        property_type_float,
+        property_type_int,
+        property_type_string
+    };
+
     //! \brief PropertyCollection ctor
     //! \param [in] j json formatted property list
     //! \throws rdge::Exception Parsing failed
@@ -74,22 +87,11 @@ public:
     bool GetBool (const std::string& name) const;
     //!@}
 
+    bool HasProperty (const std::string& name,
+                      property_type type = property_type_invalid) const noexcept;
     size_t Size (void) const noexcept;
 
 private:
-    //! \enum property_type
-    //! \brief Supported base types
-    enum property_type
-    {
-        property_type_invalid,
-        property_type_bool,
-        property_type_color,
-        property_type_file,
-        property_type_float,
-        property_type_int,
-        property_type_string
-    };
-
     struct property
     {
         std::string name;

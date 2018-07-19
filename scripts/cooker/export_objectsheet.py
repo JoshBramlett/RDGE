@@ -64,6 +64,9 @@ def parse_tileset(in_file):
         tile_def['index'] = tile['id']
         tile_def['image'] = os.path.join(path, tile['image'])
         tile_def['objects'] = []
+        if 'properties' in tile:
+            verify_properties(tile_def)
+            tile_def['properties'] = tile['properties']
 
         objects = tile['objectgroup']['objects']
         for obj in objects:
@@ -85,6 +88,8 @@ def merge_data(data_file):
             if name in frame['filename']:
                 frame['index'] = d['index']
                 frame['objects'] = d['objects']
+                if 'properties' in d:
+                    frame['properties'] = d['properties']
 
                 # All collision objects have relative position around the parent
                 # sprite, and the local position assumed the original sprite size.

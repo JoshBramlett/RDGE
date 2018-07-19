@@ -15,46 +15,85 @@ using namespace rdge::math;
 using namespace rdge::physics;
 using namespace rdge::tilemap;
 
-StaticActor::StaticActor (const Object& def,
+StaticActor::StaticActor (const Object& obj,
                           const SpriteSheet& sheet,
                           SpriteLayer& layer,
                           CollisionGraph& graph)
 {
-    this->sprite = layer.AddSprite(def.pos,
-                                   def.sprite.gid,
+    this->sprite = layer.AddSprite(obj.pos,
+                                   obj.sprite.gid,
                                    sheet,
                                    g_game.ratios.base_to_screen);
 
-    const auto& region = sheet.regions[def.sprite.gid];
+    const auto& region = sheet.regions[obj.sprite.gid];
     if (!region.objects.empty())
     {
+        // The fixtures of a StaticActor are placed relative to the sprite
+        // therefore we must use the position of the sprite (rather than the
+        // object), as the AddSprite method will accommodate sprite trimming.
+
         rigid_body_profile bprof;
         bprof.type = RigidBodyType::STATIC;
         bprof.position = sprite->pos * g_game.ratios.screen_to_world;
         this->body = graph.CreateBody(bprof);
 
-        // For now assume 1 fixture per sprite region
-        SDL_assert(region.objects.size() == 1);
-
-        // TODO these properties should be read by the object
-        fixture_profile fprof;
-        fprof.density = 1.f;
-        //fprof.restitution = 0.8f;
-        fprof.filter.category = chrono_collision_category_environment_static;
-        fprof.filter.mask = chrono_collision_category_all_hitbox;
-
-        const auto& shape = region.objects[0];
-        if (shape.type == tilemap::ObjectType::CIRCLE)
+        // For now limit 4 fixtures per static actor
+        SDL_assert(region.objects.size() <= MAX_FIXTURES);
+        for (size_t i = 0; i < region.objects.size(); i++)
         {
-            auto c = shape.GetCircle(g_game.ratios.base_to_world);
-            fprof.shape = &c;
-            this->hitbox = this->body->CreateFixture(fprof);
-        }
-        if (shape.type == tilemap::ObjectType::POLYGON)
-        {
-            auto p = shape.GetPolygon(g_game.ratios.base_to_world);
-            fprof.shape = &p;
-            this->hitbox = this->body->CreateFixture(fprof);
+            const auto& fixture_def = region.objects[i];
+
+            // The region object data is just the fixture shape information,
+            // therefore no parent (Tilemap) is available so the ext_data is
+            // unpopulated.  The sprite object will have a parent, so we
+            // query for the ext_data using the matching ext_type.
+            SDL_assert(!fixture_def.ext_type.empty());
+            auto ext_data = obj.parent->GetSharedObjectData(fixture_def.ext_type);
+            SDL_assert(ext_data);
+
+            const auto& ext_props = ext_data->properties;
+            fixture_profile fprof;
+            // debug
+            fprof.override_color = true;
+            fprof.wireframe = ext_data->color;
+            // override from shared data if available
+            fprof.density = (fixture_def.properties.HasProperty("density"))
+                ? fixture_def.properties.GetFloat("density")
+                : ext_props.GetFloat("density");
+            fprof.friction = (fixture_def.properties.HasProperty("friction"))
+                ? fixture_def.properties.GetFloat("friction")
+                : ext_props.GetFloat("friction");
+            fprof.restitution = (fixture_def.properties.HasProperty("restitution"))
+                ? fixture_def.properties.GetFloat("restitution")
+                : ext_props.GetFloat("restitution");
+            fprof.is_sensor = (fixture_def.properties.HasProperty("is_sensor"))
+                ? fixture_def.properties.GetBool("is_sensor")
+                : ext_props.GetBool("is_sensor");
+            fprof.filter.category = (fixture_def.properties.HasProperty("cgroup"))
+                ? fixture_def.properties.GetInt("cgroup")
+                : ext_props.GetInt("cgroup");
+            fprof.filter.mask = (fixture_def.properties.HasProperty("cmask"))
+                ? fixture_def.properties.GetInt("cmask")
+                : ext_props.GetInt("cmask");
+
+            if (fixture_def.type == tilemap::ObjectType::CIRCLE)
+            {
+                auto c = fixture_def.GetCircle(g_game.ratios.base_to_world);
+                fprof.shape = &c;
+                this->fixtures[i] = this->body->CreateFixture(fprof);
+            }
+            else if (fixture_def.type == tilemap::ObjectType::POLYGON)
+            {
+                auto p = fixture_def.GetPolygon(g_game.ratios.base_to_world);
+                fprof.shape = &p;
+                this->fixtures[i] = this->body->CreateFixture(fprof);
+            }
+            else
+            {
+                SDL_assert(false);
+            }
+
+            this->num_fixtures++;
         }
     }
 }
@@ -76,5 +115,5 @@ StaticActor::OnMeleeAttack (float, const math::vec2&)
 math::vec2
 StaticActor::GetWorldCenter (void) const noexcept
 {
-    return hitbox->GetWorldCenter();
+    return this->body->GetWorldCenter();
 }

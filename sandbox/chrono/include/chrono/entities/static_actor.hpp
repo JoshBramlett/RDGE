@@ -29,6 +29,8 @@ class Object;
 class StaticActor : public IActor
 {
 public:
+    static constexpr size_t MAX_FIXTURES = 4;
+
     StaticActor (const rdge::tilemap::Object& def,
                  const rdge::SpriteSheet& sheet,
                  rdge::SpriteLayer& layer,
@@ -43,5 +45,7 @@ public:
 public:
     rdge::sprite_data* sprite = nullptr;
     rdge::physics::RigidBody* body = nullptr;
-    rdge::physics::Fixture* hitbox = nullptr;
+
+    size_t num_fixtures = 0;
+    rdge::physics::Fixture* fixtures[MAX_FIXTURES];
 };
