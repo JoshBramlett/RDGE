@@ -170,11 +170,11 @@ TileBatch::~TileBatch (void) noexcept
 
 TileBatch::TileBatch (TileBatch&& other) noexcept
     : blend(other.blend)
+    , depth(other.depth)
     , m_cursor(other.m_cursor)
     , m_submissions(other.m_submissions)
     , m_capacity(other.m_capacity)
     , m_combined(other.m_combined)
-    , m_far(other.m_far)
     , m_shader(std::move(other.m_shader))
     , m_tileSize(other.m_tileSize)
 {
@@ -189,11 +189,11 @@ TileBatch::operator= (TileBatch&& rhs) noexcept
     if (this != &rhs)
     {
         this->blend = rhs.blend;
+        this->depth = rhs.depth;
         m_cursor = rhs.m_cursor;
         m_submissions = rhs.m_submissions;
         m_capacity = rhs.m_capacity;
         m_combined = rhs.m_combined;
-        m_far = rhs.m_far;
         m_shader = std::move(rhs.m_shader);
         m_tileSize = rhs.m_tileSize;
 
@@ -209,11 +209,11 @@ TileBatch::operator= (TileBatch&& rhs) noexcept
 }
 
 void
-TileBatch::SetView (const OrthographicCamera& camera)
+TileBatch::SetView (const OrthographicCamera& camera, float depth)
 {
     SDL_assert(m_vao != 0);
     m_combined = camera.combined;
-    m_far = -camera.far;
+    this->depth = (!std::isnan(depth)) ? depth : -camera.far;
 
     m_shader.Enable();
     m_shader.SetUniformValue(U_PROJ_XF, camera.combined);
@@ -250,22 +250,22 @@ TileBatch::Draw (const tile_cell_chunk& chunk, color c)
         auto& cell = chunk.cells[i];
         if (!cell.uvs.is_empty())
         {
-            m_cursor->pos   = math::vec3(cell.pos, m_far);
+            m_cursor->pos   = math::vec3(cell.pos, this->depth);
             m_cursor->uv    = cell.uvs[0];
             m_cursor->color = ic;
             m_cursor++;
 
-            m_cursor->pos   = math::vec3(cell.pos.x, cell.pos.y + sz.y, m_far);
+            m_cursor->pos   = math::vec3(cell.pos.x, cell.pos.y + sz.y, this->depth);
             m_cursor->uv    = cell.uvs[1];
             m_cursor->color = ic;
             m_cursor++;
 
-            m_cursor->pos   = math::vec3(cell.pos.x + sz.x, cell.pos.y + sz.y, m_far);
+            m_cursor->pos   = math::vec3(cell.pos.x + sz.x, cell.pos.y + sz.y, this->depth);
             m_cursor->uv    = cell.uvs[2];
             m_cursor->color = ic;
             m_cursor++;
 
-            m_cursor->pos   = math::vec3(cell.pos.x + sz.x, cell.pos.y, m_far);
+            m_cursor->pos   = math::vec3(cell.pos.x + sz.x, cell.pos.y, this->depth);
             m_cursor->uv    = cell.uvs[3];
             m_cursor->color = ic;
             m_cursor++;

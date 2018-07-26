@@ -1,4 +1,4 @@
-#include <chrono/scenes/overworld.hpp>
+#include <chrono/scenes/winery.hpp>
 #include <chrono/asset_table.hpp>
 #include <chrono/globals.hpp>
 
@@ -11,22 +11,12 @@ using namespace rdge::math;
 using namespace rdge::physics;
 using namespace rdge::tilemap;
 
-OverworldScene::OverworldScene (void)
+WineryScene::WineryScene (void)
     : collision_graph({ 0.f, -9.8f })
 {
     collision_graph.listener = this;
 
-    auto font = g_game.pack->GetAsset<BitmapFont>(rdge_asset_font_bitpotion);
-    mah_charset = rdge::BitmapCharset(*font, g_game.ratios.base_to_screen);
-    //BitmapFont font("/Users/jbramlett/Documents/assets/fonts/bitpotion.fnt");
-    //mah_charset = rdge::BitmapCharset(font, g_game.ratios.base_to_screen);
-
-    std::string text = "It's just one of them days";
-    math::vec2 text_pos(650.f, -526.f);
-    text_pos *= g_game.ratios.base_to_screen;
-    mah_text = GlyphLayout(text, text_pos, mah_charset, 1.f, color::WHITE, 500.f, 0.f);
-
-    auto tilemap = g_game.pack->GetAsset<tilemap::Tilemap>(rdge_asset_tilemap_overworld);
+    auto tilemap = g_game.pack->GetAsset<tilemap::Tilemap>(rdge_asset_tilemap_winery);
 
     ///////////////////
     // Tile layers
@@ -42,29 +32,38 @@ OverworldScene::OverworldScene (void)
     auto tile_size = static_cast<math::vec2>(tilemap->grid.cell_size) * g_game.ratios.base_to_screen;
 
     tile_batch = TileBatch(tile_count, tile_size);
-    tile_layers.reserve(4);
-    tile_layers.emplace_back(tilemap->CreateTileLayer(overworld_layer_bg,
+    background_layers.reserve(6);
+    background_layers.emplace_back(tilemap->CreateTileLayer(winery_layer_bg,
                                                       g_game.ratios.base_to_screen));
-    tile_layers.emplace_back(tilemap->CreateTileLayer(overworld_layer_bg_overlay_1,
+    background_layers.emplace_back(tilemap->CreateTileLayer(winery_layer_bg_overlay_01,
                                                       g_game.ratios.base_to_screen));
-    tile_layers.emplace_back(tilemap->CreateTileLayer(overworld_layer_bg_overlay_2,
+    background_layers.emplace_back(tilemap->CreateTileLayer(winery_layer_bg_overlay_02,
                                                       g_game.ratios.base_to_screen));
-    tile_layers.emplace_back(tilemap->CreateTileLayer(overworld_layer_bg_overlay_4,
+    background_layers.emplace_back(tilemap->CreateTileLayer(winery_layer_bg_overlay_03,
+                                                      g_game.ratios.base_to_screen));
+    background_layers.emplace_back(tilemap->CreateTileLayer(winery_layer_bg_overlay_04,
+                                                      g_game.ratios.base_to_screen));
+    background_layers.emplace_back(tilemap->CreateTileLayer(winery_layer_bg_overlay_05,
+                                                      g_game.ratios.base_to_screen));
+
+    foreground_layers.reserve(5);
+    foreground_layers.emplace_back(tilemap->CreateTileLayer(winery_layer_fixtures_overlay_01,
+                                                      g_game.ratios.base_to_screen));
+    foreground_layers.emplace_back(tilemap->CreateTileLayer(winery_layer_fixtures_overlay_02,
+                                                      g_game.ratios.base_to_screen));
+    foreground_layers.emplace_back(tilemap->CreateTileLayer(winery_layer_wall_top,
+                                                      g_game.ratios.base_to_screen));
+    foreground_layers.emplace_back(tilemap->CreateTileLayer(winery_layer_wall_top_overlay_01,
+                                                      g_game.ratios.base_to_screen));
+    foreground_layers.emplace_back(tilemap->CreateTileLayer(winery_layer_wall_top_overlay_02,
                                                       g_game.ratios.base_to_screen));
 
     ///////////////////
     // Sprite layers
     ///////////////////
 
-#if 0
-    sprite_layers.emplace_back(tilemap.CreateSpriteLayer(overworld_layer_bg_sprites,
-                                                         g_game.ratios.base_to_screen));
-
-    math::vec2 player_pos(672.f, -526.f);
-    player.Init(player_pos, sprite_layers.back(), collision_graph);
-#else
     {
-        const auto& def = tilemap->layers[overworld_layer_bg_sprites];
+        const auto& def = tilemap->layers[winery_layer_fixtures];
         uint16 sprite_capacity = def.objectgroup.objects.size() + 100;
 
         this->static_actors.reserve(sprite_capacity);
@@ -72,11 +71,8 @@ OverworldScene::OverworldScene (void)
 
         auto& layer = this->sprite_layers.back();
         layer.name = def.name;
-        math::vec2 player_pos(650.f, -526.f);
+        math::vec2 player_pos(0.f, 0.f);
         player.Init(player_pos, layer, collision_graph);
-
-        math::vec2 debutante_pos(550.f, -426.f);
-        debutante.Init(debutante_pos, layer, collision_graph);
 
         for (const auto& obj : def.objectgroup.objects)
         {
@@ -96,29 +92,13 @@ OverworldScene::OverworldScene (void)
             }
         }
     }
-    {
-        const auto& def = tilemap->layers[overworld_layer_structures];
-        auto& layer = this->sprite_layers.back();
-
-        for (const auto& obj : def.objectgroup.objects)
-        {
-            if (obj.type == tilemap::ObjectType::SPRITE)
-            {
-                this->static_actors.emplace_back(obj,
-                                                 *def.objectgroup.spritesheet,
-                                                 layer,
-                                                 collision_graph);
-            }
-        }
-    }
-#endif
 
     ///////////////////
     // World Collision
     ///////////////////
 
     {
-        const auto& def = tilemap->layers[overworld_layer_bg_collision];
+        const auto& def = tilemap->layers[winery_layer_bg_collision];
         for (const auto& obj : def.objectgroup.objects)
         {
             if (obj.ext_type == "environment_static")
@@ -167,11 +147,11 @@ OverworldScene::OverworldScene (void)
 
     debug::AddWidget(this);
     debug::settings::show_overlay = true;
-    debug::settings::physics::draw_fixtures = true;
+    debug::settings::physics::draw_fixtures = false;
 }
 
 void
-OverworldScene::Initialize (void)
+WineryScene::Initialize (void)
 {
     debug::RegisterCamera(&camera);
     debug::RegisterPhysics(&collision_graph, g_game.ratios.world_to_screen);
@@ -181,14 +161,19 @@ OverworldScene::Initialize (void)
         debug::RegisterGraphics(&layer);
     }
 
-    for (auto& layer : this->tile_layers)
+    for (auto& layer : this->background_layers)
+    {
+        debug::RegisterGraphics(&layer);
+    }
+
+    for (auto& layer : this->foreground_layers)
     {
         debug::RegisterGraphics(&layer);
     }
 }
 
 void
-OverworldScene::Terminate (void)
+WineryScene::Terminate (void)
 {
     debug::RegisterCamera(nullptr);
     debug::RegisterPhysics(nullptr);
@@ -196,7 +181,7 @@ OverworldScene::Terminate (void)
 }
 
 void
-OverworldScene::Activate (void)
+WineryScene::Activate (void)
 {
     debug::RegisterCamera(&camera);
     debug::RegisterPhysics(&collision_graph, g_game.ratios.world_to_screen);
@@ -206,14 +191,19 @@ OverworldScene::Activate (void)
         debug::RegisterGraphics(&layer);
     }
 
-    for (auto& layer : this->tile_layers)
+    for (auto& layer : this->background_layers)
+    {
+        debug::RegisterGraphics(&layer);
+    }
+
+    for (auto& layer : this->foreground_layers)
     {
         debug::RegisterGraphics(&layer);
     }
 }
 
 void
-OverworldScene::Hibernate (void)
+WineryScene::Hibernate (void)
 {
     debug::RegisterCamera(nullptr);
     debug::RegisterPhysics(nullptr);
@@ -221,21 +211,20 @@ OverworldScene::Hibernate (void)
 }
 
 void
-OverworldScene::OnEvent (const Event& event)
+WineryScene::OnEvent (const Event& event)
 {
     player.OnEvent(event);
 }
 
 void
-OverworldScene::OnUpdate (const delta_time& dt)
+WineryScene::OnUpdate (const delta_time& dt)
 {
     collision_graph.Step(1.f / 60.f);
     player.OnUpdate(dt);
-    debutante.OnUpdate(dt);
 }
 
 void
-OverworldScene::OnRender (void)
+WineryScene::OnRender (void)
 {
     camera.SetPosition(player.GetWorldCenter() * g_game.ratios.world_to_screen);
     camera.Update();
@@ -243,7 +232,7 @@ OverworldScene::OnRender (void)
     tile_batch.SetView(camera);
     sprite_batch.SetView(camera);
 
-    for (auto& layer : this->tile_layers)
+    for (auto& layer : this->background_layers)
     {
         layer.Draw(tile_batch, camera);
     }
@@ -253,30 +242,32 @@ OverworldScene::OnRender (void)
         layer.Draw(sprite_batch, camera);
     }
 
-    mah_charset.Draw(sprite_batch, mah_text);
-    //math::vec2 text_pos(650.f, -526.f);
-    //mah_charset.Draw(sprite_batch, "Josh. jumps quickly?", text_pos * g_game.ratios.base_to_screen);
+    tile_batch.depth = 0.0f;
+    for (auto& layer : this->foreground_layers)
+    {
+        layer.Draw(tile_batch, camera);
+    }
 
     // debug drawing
     debug::SetProjection(camera.combined);
 }
 
 void
-OverworldScene::OnContactStart (Contact* c)
+WineryScene::OnContactStart (Contact* c)
 {
     rdge::Unused(c);
     //std::cout << "OnContactStart" << std::endl;
 }
 
 void
-OverworldScene::OnContactEnd (Contact* c)
+WineryScene::OnContactEnd (Contact* c)
 {
     rdge::Unused(c);
     //std::cout << "OnContactEnd" << std::endl;
 }
 
 void
-OverworldScene::OnPreSolve (Contact* c, const collision_manifold& mf)
+WineryScene::OnPreSolve (Contact* c, const collision_manifold& mf)
 {
     rdge::Unused(c);
     rdge::Unused(mf);
@@ -284,7 +275,7 @@ OverworldScene::OnPreSolve (Contact* c, const collision_manifold& mf)
 }
 
 void
-OverworldScene::OnPostSolve (Contact* c)
+WineryScene::OnPostSolve (Contact* c)
 {
     rdge::Unused(c);
     //std::cout << "OnPostSolve" << std::endl
@@ -293,11 +284,11 @@ OverworldScene::OnPostSolve (Contact* c)
 }
 
 void
-OverworldScene::OnDestroyed (Fixture*)
+WineryScene::OnDestroyed (Fixture*)
 { }
 
 void
-OverworldScene::UpdateWidget (void)
+WineryScene::UpdateWidget (void)
 {
 #if 0
     if (!this->show_widget)
@@ -313,7 +304,7 @@ OverworldScene::UpdateWidget (void)
     ImGui::SetNextWindowPos(ImVec2(fb_width - (menu_width + 20.f), 25.f));
     ImGui::SetNextWindowSize(ImVec2(menu_width, fb_height - 50.f),
                              ImGuiSetCond_FirstUseEver);
-    if (!ImGui::Begin("OverworldScene", &this->show_widget))
+    if (!ImGui::Begin("WineryScene", &this->show_widget))
     {
         ImGui::End();
         return;
@@ -357,5 +348,5 @@ OverworldScene::UpdateWidget (void)
 }
 
 void
-OverworldScene::OnWidgetCustomRender (void)
+WineryScene::OnWidgetCustomRender (void)
 { }

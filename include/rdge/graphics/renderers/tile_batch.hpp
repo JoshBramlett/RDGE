@@ -63,10 +63,13 @@ public:
 
     //! \brief Set the viewport that will be rendered
     //! \details The combined projection/view matrix is cached and provided to
-    //!          each shader prior to submission.
+    //!          each shader prior to submission.  By default tiles are rendered
+    //!          to the far plane but this can be overridden by explicitly setting
+    //!          the depth value.
     //! \note This should be called once at the beginning of each frame.
     //! \param [in] camera Updated camera
-    void SetView (const OrthographicCamera& camera);
+    //! \param [in] depth Depth index for tiles (defaults to far plane)
+    void SetView (const OrthographicCamera& camera, float depth = qnan32);
 
     //! \brief Prepare the renderer to receive tiles to draw
     //! \note Required call prior to drawing.
@@ -88,6 +91,7 @@ public:
 
 public:
     Blend blend = Blend::LerpSourceAlpha; //!< Blend function (set every draw call)
+    float depth = 0.f;                    //!< Tile depth
 
 private:
     uint32 m_vao = 0; //!< Vertex array handle
@@ -99,7 +103,6 @@ private:
     size_t m_capacity = 0;           //!< Max number of submissions per draw
 
     math::mat4 m_combined;  //!< Projection/View matrix provided to the shader
-    float m_far = 0.f;      //!< Far clipping plane
     ShaderProgram m_shader; //!< Shader program
     math::vec2 m_tileSize;  //!< Tile size
 };

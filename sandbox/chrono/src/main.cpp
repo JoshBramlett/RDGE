@@ -9,6 +9,7 @@
 
 #include <chrono/globals.hpp>
 #include <chrono/scenes/overworld.hpp>
+#include <chrono/scenes/winery.hpp>
 
 #include <memory>
 
@@ -61,7 +62,7 @@ int main ()
         g_game.pack = &pack;
         g_game.ratios = game_ratios(16.f, 2.f, ((game.window->IsHighDPI()) ? 2.f : 1.f));
 
-        game.PushScene(std::make_shared<OverworldScene>());
+        game.PushScene(std::make_shared<WineryScene>());
         game.Run();
     }
     catch (const std::exception& ex)
