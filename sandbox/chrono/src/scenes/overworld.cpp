@@ -47,6 +47,10 @@ OverworldScene::OverworldScene (void)
                                                       g_game.ratios.base_to_screen));
     tile_layers.emplace_back(tilemap->CreateTileLayer(overworld_layer_bg_overlay_1,
                                                       g_game.ratios.base_to_screen));
+    tile_layers.emplace_back(tilemap->CreateTileLayer(overworld_layer_bg_overlay_2,
+                                                      g_game.ratios.base_to_screen));
+    tile_layers.emplace_back(tilemap->CreateTileLayer(overworld_layer_bg_overlay_4,
+                                                      g_game.ratios.base_to_screen));
 
     ///////////////////
     // Sprite layers
@@ -84,6 +88,21 @@ OverworldScene::OverworldScene (void)
             //      Dynamic sprites (especially those with animations) render their
             //      sprite relative to a collision object.  There should be a very
             //      explicit definition of those two types.
+            if (obj.type == tilemap::ObjectType::SPRITE)
+            {
+                this->static_actors.emplace_back(obj,
+                                                 *def.objectgroup.spritesheet,
+                                                 layer,
+                                                 collision_graph);
+            }
+        }
+    }
+    {
+        const auto& def = tilemap->layers[overworld_layer_structures];
+        auto& layer = this->sprite_layers.back();
+
+        for (const auto& obj : def.objectgroup.objects)
+        {
             if (obj.type == tilemap::ObjectType::SPRITE)
             {
                 this->static_actors.emplace_back(obj,

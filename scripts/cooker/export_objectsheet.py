@@ -68,10 +68,11 @@ def parse_tileset(in_file):
             verify_properties(tile_def)
             tile_def['properties'] = tile['properties']
 
-        objects = tile['objectgroup']['objects']
-        for obj in objects:
-            translate_object(obj)
-            tile_def['objects'].append(obj)
+        if 'objectgroup' in tile:
+            objects = tile['objectgroup']['objects']
+            for obj in objects:
+                translate_object(obj)
+                tile_def['objects'].append(obj)
 
         tile_defs.insert(int(tile_def['index']), tile_def)
 

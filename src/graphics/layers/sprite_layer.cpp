@@ -103,7 +103,7 @@ SpriteLayer::SpriteLayer (const tilemap::Layer& def, float scale)
         auto it = m_list.begin();
         for (; it != m_list.end(); ++it)
         {
-            if (it->pos.y > sprite.pos.y)
+            if (it->pos.y >= sprite.pos.y)
             {
                 break;
             }
@@ -212,7 +212,7 @@ SpriteLayer::AddSprite (const math::vec2& pos,
     auto it = m_list.begin();
     for (; it != m_list.end(); ++it)
     {
-        if (it->pos.y > sprite.pos.y)
+        if (it->pos.y >= sprite.pos.y)
         {
             break;
         }
@@ -238,7 +238,7 @@ SpriteLayer::Draw (SpriteBatch& renderer, const OrthographicCamera& camera)
     auto frame_bounds = camera.bounds;
     frame_bounds.fatten(m_padding.w, m_padding.h);
 
-    m_list.sort([](const auto& a, const auto& b) { return a.pos.y > b.pos.y; });
+    m_list.sort([](const auto& a, const auto& b) { return a.pos.y >= b.pos.y; });
 
     renderer.Prime();
     for (const auto& sprite : m_list)

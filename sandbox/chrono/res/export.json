@@ -10,6 +10,7 @@
     ],
     "objectsheets": [
       "objects/overworld_obj.tsx",
+      "objects/overworld_houses.tsx",
       "objects/indoors_obj.tsx"
     ],
     "tilemaps": [

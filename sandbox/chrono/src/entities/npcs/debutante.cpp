@@ -126,8 +126,26 @@ void
 Debutante::OnMeleeAttack (float, const math::vec2&)
 { }
 
+uint32
+Debutante::GetActorId (void) const noexcept
+{
+    return 0;
+}
+
 math::vec2
 Debutante::GetWorldCenter (void) const noexcept
 {
     return this->body->GetWorldCenter();
+}
+
+bool
+Debutante::IsActionable (void) const noexcept
+{
+    return false;
+}
+
+ActionType
+Debutante::GetActionType (void) const noexcept
+{
+    return ActionType::NONE;
 }

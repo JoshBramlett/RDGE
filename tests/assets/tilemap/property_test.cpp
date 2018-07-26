@@ -80,6 +80,7 @@ TEST(PropertyTest, HandleInvalidKey)
     json j = json::array();
     tilemap::PropertyCollection properties(j);
     EXPECT_EQ(properties.Size(), 0);
+    EXPECT_FALSE(properties.HasProperty("bad"));
     EXPECT_THROW(properties.GetString("bad"), std::runtime_error);
 }
 
@@ -97,10 +98,17 @@ TEST(PropertyTest, HandleTypeMismatch)
       }
     )"_json;
 
+    std::string key = "cust_prop_int";
+    auto ptype_int = rdge::tilemap::PropertyCollection::property_type_int;
+    auto ptype_string = rdge::tilemap::PropertyCollection::property_type_string;
+
     tilemap::PropertyCollection properties(j);
     EXPECT_EQ(properties.Size(), 1);
-    EXPECT_EQ(properties.GetInt("cust_prop_int"), 5);
-    EXPECT_THROW(properties.GetString("cust_prop_int"), std::runtime_error);
+    EXPECT_TRUE(properties.HasProperty(key));
+    EXPECT_TRUE(properties.HasProperty(key, ptype_int));
+    EXPECT_FALSE(properties.HasProperty(key, ptype_string));
+    EXPECT_EQ(properties.GetInt(key), 5);
+    EXPECT_THROW(properties.GetString(key), std::runtime_error);
 }
 
 } // anonymous namespace

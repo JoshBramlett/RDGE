@@ -310,10 +310,12 @@ public:
 
     //void SetFixedRotation(bool flag);
 
+    //!@{ RigidBody type accessors
     RigidBodyType GetType (void) const noexcept { return m_type; }
     bool IsStatic (void) const noexcept { return m_type == RigidBodyType::STATIC; }
     bool IsKinematic (void) const noexcept { return m_type == RigidBodyType::KINEMATIC; }
     bool IsDynamic (void) const noexcept { return m_type == RigidBodyType::DYNAMIC; }
+    //!@}
 
     // world position of the body origin
     math::vec2 GetPosition (void) const noexcept { return world_transform.pos; }

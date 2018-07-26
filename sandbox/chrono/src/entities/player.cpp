@@ -280,8 +280,26 @@ Player::OnMeleeAttack (float damage, const rdge::math::vec2& pos)
     rdge::Unused(pos);
 }
 
+uint32
+Player::GetActorId (void) const noexcept
+{
+    return 0;
+}
+
 math::vec2
 Player::GetWorldCenter (void) const noexcept
 {
-    return hurtbox->GetWorldCenter();
+    return this->hurtbox->GetWorldCenter();
+}
+
+bool
+Player::IsActionable (void) const noexcept
+{
+    return false;
+}
+
+ActionType
+Player::GetActionType (void) const noexcept
+{
+    return ActionType::NONE;
 }

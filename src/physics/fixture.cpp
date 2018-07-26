@@ -105,15 +105,7 @@ Fixture::SetSensor (bool value) noexcept
     if (IsSensor() != value)
     {
         body->WakeUp();
-
-        if (value)
-        {
-            m_flags |= SENSOR;
-        }
-        else
-        {
-            m_flags &= ~SENSOR;
-        }
+        SET_FLAG(value, m_flags, SENSOR);
     }
 }
 

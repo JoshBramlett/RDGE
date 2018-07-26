@@ -2,6 +2,7 @@
 
 #include <rdge/core.hpp>
 #include <rdge/math/vec2.hpp>
+#include <rdge/gameobjects/types.hpp>
 
 #include <chrono/entities/iactor.hpp>
 
@@ -40,7 +41,11 @@ public:
     void OnEvent (const rdge::Event& event) override;
     void OnUpdate (const rdge::delta_time& dt) override;
     void OnMeleeAttack (float damage, const rdge::math::vec2& pos) override;
+
+    rdge::uint32 GetActorId (void) const noexcept override;
     rdge::math::vec2 GetWorldCenter (void) const noexcept override;
+    bool IsActionable (void) const noexcept override;
+    rdge::ActionType GetActionType (void) const noexcept override;
 
 public:
     rdge::sprite_data* sprite = nullptr;
@@ -48,4 +53,8 @@ public:
 
     size_t num_fixtures = 0;
     rdge::physics::Fixture* fixtures[MAX_FIXTURES];
+
+private:
+    rdge::uint32 m_actorId = 0;
+    rdge::ActionType m_actionType = rdge::ActionType::NONE;
 };

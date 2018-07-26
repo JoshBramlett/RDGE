@@ -107,6 +107,7 @@ add_library (RDGE SHARED
 
              src/gameobjects/input/keyboard_directional_input_handler.cpp
              src/gameobjects/game.cpp
+             src/gameobjects/types.cpp
 
              src/graphics/layers/sprite_layer.cpp
              src/graphics/layers/tile_layer.cpp
