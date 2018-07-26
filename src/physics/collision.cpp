@@ -33,53 +33,61 @@ intersects (const polygon& p, const circle& c, collision_manifold& mf)
     }
 
     size_t index_b = ((index_a + 1) < p.count) ? (index_a + 1) : 0;
-    const auto& face_a = p.vertices[index_a];
-    const auto& face_b = p.vertices[index_b];
+    const auto& vertex_a = p.vertices[index_a];
+    const auto& vertex_b = p.vertices[index_b];
 
     if (sep_max <= 0.f)
     {
-        // Circle center is inside the polygon
+        // Case 1) Circle center is inside the polygon
         mf.count = 1;
         mf.contacts[0] = c.pos;
         mf.depths[0] = sep_max;
         mf.normal = p.normals[index_a];
-        mf.plane = (face_a + face_b) * 0.5f;
+        mf.plane = (vertex_a + vertex_b) * 0.5f;
     }
-    else if (math::dot(c.pos - face_a, face_b - face_a) <= 0.f)
+    else if (math::dot(c.pos - vertex_a, vertex_b - vertex_a) <= 0.f)
     {
-        const auto& normal = c.pos - face_a;
-        if (normal.self_dot() > math::square(c.radius))
+        // Case 2a) Circle center outside of polygon - test if vertex_a is closest
+        // to the circle centroid.
+        //
+        // Note: If AB and A0 point in opposite directions we can infer vertex_a
+        // is closest to the circle centroid.
+
+        const auto& a_zero = c.pos - vertex_a;
+        if (a_zero.self_dot() > math::square(c.radius))
         {
             return false;
         }
 
-        // Circle center outside of polygon, and the edge AB and A0 (closest
-        // point to circle centroid) point in the same direction
         mf.count = 1;
         mf.contacts[0] = c.pos;
-        mf.depths[0] = c.radius - normal.length();
-        mf.normal = normal.normalize();
-        mf.plane = face_a;
+        mf.depths[0] = c.radius - a_zero.length();
+        mf.normal = a_zero.normalize();
+        mf.plane = vertex_a;
     }
-    else if (math::dot(c.pos - face_b, face_a - face_b) <= 0.f)
+    else if (math::dot(c.pos - vertex_b, vertex_a - vertex_b) <= 0.f)
     {
-        const auto& normal = c.pos - face_b;
-        if (normal.self_dot() > math::square(c.radius))
+        // Case 2b) Circle center outside of polygon - test if vertex_b is closest
+        // to the circle centroid.
+
+        const auto& b_zero = c.pos - vertex_b;
+        if (b_zero.self_dot() > math::square(c.radius))
         {
             return false;
         }
 
-        // Circle center outside of polygon, and the edge AB and A0 (closest
-        // point to circle centroid) point in the same direction
         mf.count = 1;
         mf.contacts[0] = c.pos;
-        mf.depths[0] = c.radius - normal.length();
-        mf.normal = normal.normalize();
-        mf.plane = face_b;
+        mf.depths[0] = c.radius - b_zero.length();
+        mf.normal = b_zero.normalize();
+        mf.plane = vertex_b;
     }
     else
     {
-        const auto& face_center = (face_a + face_b) * 0.5f;
+        // Case 3) Cannot infer which vertex is closest.  Use the plane AB as our
+        // reference edge.
+
+        const auto& face_center = (vertex_a + vertex_b) * 0.5f;
         float s = math::dot(c.pos - face_center, p.normals[index_a]);
         if (s > c.radius)
         {
@@ -88,7 +96,7 @@ intersects (const polygon& p, const circle& c, collision_manifold& mf)
 
         mf.count = 1;
         mf.contacts[0] = c.pos;
-        mf.depths[0] = math::dot(c.pos - face_center, p.normals[index_a]);
+        mf.depths[0] = s;
         mf.normal = p.normals[index_a];
         mf.plane = face_center;
     }

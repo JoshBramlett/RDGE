@@ -70,7 +70,6 @@ OverworldScene::OverworldScene (void)
         this->static_actors.reserve(sprite_capacity);
         this->sprite_layers.emplace_back(sprite_capacity);
 
-        // FIXME Polygons must be added before circles or all hell breaks loose
         auto& layer = this->sprite_layers.back();
         layer.name = def.name;
         math::vec2 player_pos(650.f, -526.f);

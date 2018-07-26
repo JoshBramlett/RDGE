@@ -7,6 +7,8 @@
 
 #include <SDL_assert.h>
 
+#include <algorithm>
+
 namespace rdge {
 namespace physics {
 
@@ -34,10 +36,16 @@ Contact::Contact (Fixture* a, Fixture* b)
     SDL_assert(fixture_b);
     SDL_assert(fixture_a != fixture_b);
 
-    edge_a.contact = this;
-    edge_b.contact = this;
-    edge_a.other = fixture_b->body;
-    edge_b.other = fixture_a->body;
+    if (fixture_a->shape.world->type() == ShapeType::CIRCLE &&
+        fixture_b->shape.world->type() == ShapeType::POLYGON)
+    {
+        std::swap(this->fixture_a, this->fixture_b);
+    }
+
+    this->edge_a.contact = this;
+    this->edge_b.contact = this;
+    this->edge_a.other = fixture_b->body;
+    this->edge_b.other = fixture_a->body;
 }
 
 void

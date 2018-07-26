@@ -336,14 +336,16 @@ CollisionGraph::CreateContact (fixture_proxy* a, fixture_proxy* b)
 
     Contact* contact = block_allocator.New<Contact>(a->fixture, b->fixture);
     m_contacts.push_back(*contact);
-    body_a->contact_edges.push_back(contact->edge_a);
-    body_b->contact_edges.push_back(contact->edge_b);
 
-    if (!contact->fixture_a->IsSensor() &&
-        !contact->fixture_b->IsSensor())
+    // fixtures may have swapped order during contact construction, so cached
+    // body variables cannot be trusted.
+    contact->fixture_a->body->contact_edges.push_back(contact->edge_a);
+    contact->fixture_b->body->contact_edges.push_back(contact->edge_b);
+
+    if (!contact->fixture_a->IsSensor() && !contact->fixture_b->IsSensor())
     {
-        body_a->WakeUp();
-        body_b->WakeUp();
+        contact->fixture_a->body->WakeUp();
+        contact->fixture_b->body->WakeUp();
     }
 }
 

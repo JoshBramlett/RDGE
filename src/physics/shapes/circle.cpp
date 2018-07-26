@@ -26,11 +26,9 @@ circle::intersects_with (const ishape* other, collision_manifold& mf) const
         return intersects_with(*static_cast<const circle*>(other), mf);
     }
 
-    auto result = intersects(*static_cast<const polygon*>(other), *this, mf);
-    mf.flip = true;
-    mf.normal = -mf.normal;
-
-    return result;
+    // Polygon should be primary
+    SDL_assert(false);
+    return false;
 }
 
 bool
