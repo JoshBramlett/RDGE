@@ -1,5 +1,52 @@
 [
     {
+        "color": "#ff1bd8e0",
+        "name": "action_trigger",
+        "properties": [
+            {
+                "name": "action_id",
+                "type": "int",
+                "value": 0
+            },
+            {
+                "name": "is_sensor",
+                "type": "bool",
+                "value": true
+            },
+            {
+                "name": "scene_id",
+                "type": "int",
+                "value": 0
+            }
+        ]
+    },
+    {
+        "color": "#ff3b00ff",
+        "name": "actor_marker",
+        "properties": [
+            {
+                "name": "action_id",
+                "type": "int",
+                "value": 0
+            },
+            {
+                "name": "actor_id",
+                "type": "int",
+                "value": 0
+            },
+            {
+                "name": "facing",
+                "type": "string",
+                "value": "south"
+            },
+            {
+                "name": "is_default",
+                "type": "bool",
+                "value": false
+            }
+        ]
+    },
+    {
         "color": "#ffa0a0a4",
         "name": "environment_static",
         "properties": [

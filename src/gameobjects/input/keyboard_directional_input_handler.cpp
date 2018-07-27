@@ -111,6 +111,15 @@ KeyboardDirectionalInputHandler::OnEvent (const Event& event)
     }
 }
 
+void
+KeyboardDirectionalInputHandler::ResetDirection (Direction facing)
+{
+    m_facing = facing;
+    m_stateMask = Direction::NONE;
+    m_displacement = { 0.f, 0.f };
+    m_dirty = false;
+}
+
 std::pair<math::vec2, Direction>
 KeyboardDirectionalInputHandler::Calculate (void)
 {

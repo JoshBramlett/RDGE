@@ -66,6 +66,17 @@ Player::Player (void)
 }
 
 void
+Player::InitPosition (const rdge::math::vec2& pos, rdge::Direction dir)
+{
+    this->sprite->pos = pos * g_game.ratios.base_to_screen;
+    this->body->SetPosition(pos * g_game.ratios.base_to_world);
+
+    this->facing = dir;
+    m_handler.ResetDirection(this->facing);
+    m_currentAnimation = &s_idle[this->facing];
+}
+
+void
 Player::Init (const math::vec2& pos, SpriteLayer& layer, CollisionGraph& graph)
 {
     auto sheet = g_game.pack->GetAsset<SpriteSheet>(rdge_asset_spritesheet_player);

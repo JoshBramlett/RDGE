@@ -70,7 +70,7 @@
  <tile id="10">
   <image width="48" height="64" source="indoors_obj/wood_table_01.png"/>
   <objectgroup draworder="index">
-   <object id="1" name="wood_table_01" type="environment_static" x="2" y="10" width="44" height="38"/>
+   <object id="1" name="wood_table_01" type="environment_static" x="2" y="10" width="44" height="47"/>
   </objectgroup>
  </tile>
  <tile id="11">
@@ -128,7 +128,7 @@
  <tile id="18">
   <image width="16" height="32" source="indoors_obj/wood_stool_01.png"/>
   <objectgroup draworder="index">
-   <object id="1" name="wood_stool_01" type="environment_static" x="0" y="21" width="16" height="11"/>
+   <object id="1" name="wood_stool_01" type="environment_static" x="0" y="21" width="15" height="11"/>
   </objectgroup>
  </tile>
 </tileset>

@@ -94,9 +94,17 @@ public:
 //! \brief ActionType stream output operator
 std::ostream& operator<< (std::ostream&, ActionType);
 
+//! \brief Direction stream output operator
+std::ostream& operator<< (std::ostream&, Direction);
+
 //!@{ ActionType string conversions
 bool try_parse (const std::string&, ActionType&);
 std::string to_string (ActionType);
+//!@}
+
+//!@{ Direction string conversions
+bool try_parse (const std::string&, Direction&);
+std::string to_string (Direction);
 //!@}
 
 } // namespace rdge

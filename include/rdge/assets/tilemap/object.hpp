@@ -134,9 +134,9 @@ public:
     //!@}
 
     //!@{ Base type accessors
-    math::vec2 GetPoint (float scale) const;
-    physics::circle GetCircle (float scale) const;
-    physics::polygon GetPolygon (float scale, bool local = false) const;
+    math::vec2 GetPoint (float scale = 1.f) const;
+    physics::circle GetCircle (float scale = 1.f) const;
+    physics::polygon GetPolygon (float scale = 1.f, bool local = false) const;
     //!@}
 
 public:

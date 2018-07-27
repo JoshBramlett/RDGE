@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="1.1.5" orientation="orthogonal" renderorder="right-down" width="80" height="64" tilewidth="16" tileheight="16" infinite="1" nextobjectid="62">
+<map version="1.0" tiledversion="1.1.5" orientation="orthogonal" renderorder="right-down" width="80" height="64" tilewidth="16" tileheight="16" infinite="1" nextobjectid="67">
  <properties>
   <property name="object_types" type="file" value="objecttypes.json"/>
  </properties>
@@ -927,4 +927,35 @@
 </chunk>
   </data>
  </layer>
+ <objectgroup name="triggers">
+  <object id="62" name="winery_main_entrance" type="action_trigger" x="1184" y="368" width="48" height="16">
+   <properties>
+    <property name="action_id" type="int" value="1"/>
+    <property name="scene_id" type="int" value="2"/>
+   </properties>
+  </object>
+  <object id="63" name="winery_store_entrance" type="action_trigger" x="1328" y="368" width="48" height="16">
+   <properties>
+    <property name="action_id" type="int" value="2"/>
+    <property name="scene_id" type="int" value="2"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup name="spawns">
+  <object id="65" name="winery_main_exit" type="actor_marker" x="1208" y="416">
+   <properties>
+    <property name="action_id" type="int" value="1"/>
+    <property name="actor_id" type="int" value="1"/>
+    <property name="is_default" type="bool" value="true"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="66" name="winery_store_exit" type="actor_marker" x="1352" y="416">
+   <properties>
+    <property name="action_id" type="int" value="2"/>
+    <property name="actor_id" type="int" value="1"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
 </map>

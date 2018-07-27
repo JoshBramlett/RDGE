@@ -69,6 +69,15 @@ public:
     //! \returns Pair containing the relative displacement and a NESW direction
     std::pair<math::vec2, Direction> Calculate (void) override;
 
+    //! \brief Get the current facing direction
+    Direction GetDirection (void) const noexcept { return m_facing; }
+
+    //! \brief Reset initial facing direction
+    //! \details Performs a reset on the state machine, so it's use should be
+    //!          limited to initialization routines.
+    //! \param [in] facing Facing direction
+    void ResetDirection (Direction facing);
+
 private:
 
     //! \brief Unit circle coordinates for a 45 degree directional vector

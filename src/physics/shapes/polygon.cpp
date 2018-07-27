@@ -63,7 +63,7 @@ polygon::polygon (const PolygonData& verts, size_t num_verts)
         bool unique = true;
         for (size_t j = 0; j < weld_count; ++j)
         {
-            if ((v - welds[i]).self_dot() < HALF_SLOP_SQUARED)
+            if ((v - welds[j]).self_dot() < HALF_SLOP_SQUARED)
             {
                 unique = false;
                 break;

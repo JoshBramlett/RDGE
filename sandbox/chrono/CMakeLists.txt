@@ -20,7 +20,8 @@ add_executable (chrono
                 src/entities/npcs/debutante.cpp
                 src/entities/static_actor.cpp
                 src/scenes/overworld.cpp
-                src/scenes/winery.cpp)
+                src/scenes/winery.cpp
+                src/util/tilemap_helpers.cpp)
 
 target_link_libraries (chrono
                        RDGE)

@@ -12,6 +12,7 @@
 
 #include <chrono/entities/player.hpp>
 #include <chrono/entities/static_actor.hpp>
+#include <chrono/util/tilemap_helpers.hpp>
 
 class WineryScene
     : public rdge::IScene
@@ -65,6 +66,10 @@ public:
     //!@{ Actors
     Player player;
     std::vector<StaticActor> static_actors;
+    //!@}
+
+    //!@{ Spawn Points
+    std::vector<chrono_spawn_point> spawn_points;
     //!@}
 
     // debug

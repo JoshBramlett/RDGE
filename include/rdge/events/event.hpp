@@ -23,13 +23,11 @@ enum class EventType : uint32
 {
     // IMPORTANT - If enum is updated, update ostream operator<< as well
 
-    //!@{
-    //! \brief Application Events
+    //!@{ Application Events
     Quit = SDL_QUIT, //!< User requested quit
     //!@}
 
-    //!@{
-    //! \brief Application Events - Android, iOS and WinRT
+    //!@{ Application Events - Android, iOS and WinRT
     AppTerminating         = SDL_APP_TERMINATING,         //!< OS is terminating the application
     AppLowMemory           = SDL_APP_LOWMEMORY,           //!< OS is low on memory (attempt to free)
     AppWillEnterBackground = SDL_APP_WILLENTERBACKGROUND, //!< Application is entering background
@@ -38,14 +36,12 @@ enum class EventType : uint32
     AppDidEnterForeground  = SDL_APP_DIDENTERFOREGROUND,  //!< Application entered foreground
     //!@}
 
-    //!@{
-    //! \brief Window Events
+    //!@{ Window Events
     Window                 = SDL_WINDOWEVENT, //!< Window state change
     SystemWindowManagement = SDL_SYSWMEVENT,  //!< Video driver dependent system event
     //!@}
 
-    //!@{
-    //! \brief Keyboard Events
+    //!@{ Keyboard Events
     KeyDown       = SDL_KEYDOWN,       //!< Key pressed
     KeyUp         = SDL_KEYUP,         //!< Key released
     TextEditing   = SDL_TEXTEDITING,   //!< Keyboard text editing (composition)
@@ -53,16 +49,14 @@ enum class EventType : uint32
     KeyMapChanged = SDL_KEYMAPCHANGED, //!< System event (language or keyboard layout change)
     //!@}
 
-    //!@{
-    //! \brief Mouse Events
+    //!@{ Mouse Events
     MouseMotion     = SDL_MOUSEMOTION,     //!< Mouse moved
     MouseButtonDown = SDL_MOUSEBUTTONDOWN, //!< Mouse button pressed
     MouseButtonUp   = SDL_MOUSEBUTTONUP,   //!< Mouse button released
     MouseWheel      = SDL_MOUSEWHEEL,      //!< Mouse wheel motion
     //!@}
 
-    //!@{
-    //! \brief Joystick Events
+    //!@{ Joystick Events
     JoystickAxisMotion    = SDL_JOYAXISMOTION,    //!< Joystick axis motion
     JoystickBallMotion    = SDL_JOYBALLMOTION,    //!< Joystick trackball motion
     JoystickHatMotion     = SDL_JOYHATMOTION,     //!< Joystick hat position change
@@ -72,8 +66,7 @@ enum class EventType : uint32
     JoystickDeviceRemoved = SDL_JOYDEVICEREMOVED, //!< Joystick disconnected
     //!@}
 
-    //!@{
-    //! \brief Controller Events
+    //!@{ Controller Events
     ControllerAxisMotion    = SDL_CONTROLLERAXISMOTION,     //!< Controller axis motion
     ControllerButtonDown    = SDL_CONTROLLERBUTTONDOWN,     //!< Controller button pressed
     ControllerButtonUp      = SDL_CONTROLLERBUTTONUP,       //!< Controller button released
@@ -82,38 +75,32 @@ enum class EventType : uint32
     ControllerDeviceMapped  = SDL_CONTROLLERDEVICEREMAPPED, //!< Controller mapping updated
     //!@}
 
-    //!@{
-    //! \brief Touch Events
+    //!@{ Touch Events
     FingerDown   = SDL_FINGERDOWN,   //!< Trackpad touched
     FingerUp     = SDL_FINGERUP,     //!< Trackpad no longer touched
     FingerMotion = SDL_FINGERMOTION, //!< Touch drag on trackpad
     //!@}
 
-    //!@{
-    //! \brief Gesture Events
+    //!@{ Gesture Events
     DollarGesture = SDL_DOLLARGESTURE,
     DollarRecord  = SDL_DOLLARRECORD,
     MultiGesture  = SDL_MULTIGESTURE,
     //!@}
 
-    //!@{
-    //! \brief Clipboard Events
+    //!@{ Clipboard Events
     ClipboardUpdate = SDL_CLIPBOARDUPDATE, //!< System clipboard changed
     //!@}
 
-    //!@{
-    //! \brief Drag and Drop Events
+    //!@{ Drag and Drop Events
     DropFile = SDL_DROPFILE, //!< System requests a file open
     //!@}
 
-    //!@{
-    //! \brief Audio Hotplug Events
+    //!@{ Audio Hotplug Events
     AudioDeviceAdded   = SDL_AUDIODEVICEADDED,   //!< New audio device available
     AudioDeviceRemoved = SDL_AUDIODEVICEREMOVED, //!< Audio device has been disconnected
     //!@}
 
-    //!@{
-    //! \brief Render Events
+    //!@{ Render Events
     RenderTargetsReset = SDL_RENDER_TARGETS_RESET, //!< Render target contents must be updated
     RenderDeviceReset  = SDL_RENDER_DEVICE_RESET   //!< Device reset, all textures must be recreated
     //!@}
@@ -625,7 +612,7 @@ void DisableEvent (EventType type);
 //!          the EventType enumeration).  This id must be used when pushing
 //!          the custom event on the queue.
 //! \returns Unique identifier for a custom event
-//! \throws RDGE::Exception Custom event pool is exhausted
+//! \throws rdge::Exception Custom event pool is exhausted
 uint32 RegisterCustomEvent (void);
 
 //! \brief Add a custom event on the queue
@@ -633,7 +620,7 @@ uint32 RegisterCustomEvent (void);
 //! \param [in] code User defined code
 //! \param [in] data1 User defined data pointer
 //! \param [in] data2 User defined data pointer
-//! \throws RDGE::SDLException Error occured while pushing event on the queue
+//! \throws rdge::SDLException Error occured while pushing event on the queue
 void QueueCustomEvent (uint32 type,
                        int32  code,
                        void*  data1 = nullptr,

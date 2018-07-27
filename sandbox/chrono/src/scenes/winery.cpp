@@ -19,6 +19,18 @@ WineryScene::WineryScene (void)
     auto tilemap = g_game.pack->GetAsset<tilemap::Tilemap>(rdge_asset_tilemap_winery);
 
     ///////////////////
+    // Spawn Points
+    ///////////////////
+
+    {
+        const auto& def = tilemap->layers[winery_layer_spawns];
+        for (const auto& obj : def.objectgroup.objects)
+        {
+            this->spawn_points.emplace_back(ProcessSpawnPoint(obj));
+        }
+    }
+
+    ///////////////////
     // Tile layers
     ///////////////////
 
@@ -71,8 +83,22 @@ WineryScene::WineryScene (void)
 
         auto& layer = this->sprite_layers.back();
         layer.name = def.name;
-        math::vec2 player_pos(0.f, 0.f);
+        math::vec2 player_pos;
+        Direction facing;
+        for (const auto& spawn : this->spawn_points)
+        {
+            if (spawn.is_default)
+            {
+                player_pos = spawn.pos;
+                facing = spawn.facing;
+                break;
+            }
+        }
+
+        // TODO clean this up
+        SDL_assert(!player_pos.is_zero());
         player.Init(player_pos, layer, collision_graph);
+        player.InitPosition(player_pos, facing);
 
         for (const auto& obj : def.objectgroup.objects)
         {
@@ -153,6 +179,7 @@ WineryScene::WineryScene (void)
 void
 WineryScene::Initialize (void)
 {
+    ILOG() << "WineryScene::Initialize";
     debug::RegisterCamera(&camera);
     debug::RegisterPhysics(&collision_graph, g_game.ratios.world_to_screen);
 
@@ -175,6 +202,7 @@ WineryScene::Initialize (void)
 void
 WineryScene::Terminate (void)
 {
+    ILOG() << "WineryScene::Terminate";
     debug::RegisterCamera(nullptr);
     debug::RegisterPhysics(nullptr);
     debug::ClearGraphics();
@@ -183,6 +211,7 @@ WineryScene::Terminate (void)
 void
 WineryScene::Activate (void)
 {
+    ILOG() << "WineryScene::Activate";
     debug::RegisterCamera(&camera);
     debug::RegisterPhysics(&collision_graph, g_game.ratios.world_to_screen);
 
@@ -205,6 +234,7 @@ WineryScene::Activate (void)
 void
 WineryScene::Hibernate (void)
 {
+    ILOG() << "WineryScene::Hibernate";
     debug::RegisterCamera(nullptr);
     debug::RegisterPhysics(nullptr);
     debug::ClearGraphics();
@@ -214,6 +244,17 @@ void
 WineryScene::OnEvent (const Event& event)
 {
     player.OnEvent(event);
+    if (event.IsKeyboardEvent())
+    {
+        const auto& args = event.GetKeyboardEventArgs();
+        if (!args.IsRepeating())
+        {
+            if (args.IsKeyPressed() && args.Key() == KeyCode::BACKSPACE)
+            {
+                QueueCustomEvent(g_game.custom_events.push_scene, 0);
+            }
+        }
+    }
 }
 
 void

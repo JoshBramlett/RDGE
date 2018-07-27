@@ -173,6 +173,7 @@ OverworldScene::OverworldScene (void)
 void
 OverworldScene::Initialize (void)
 {
+    ILOG() << "OverworldScene::Initialize";
     debug::RegisterCamera(&camera);
     debug::RegisterPhysics(&collision_graph, g_game.ratios.world_to_screen);
 
@@ -190,6 +191,7 @@ OverworldScene::Initialize (void)
 void
 OverworldScene::Terminate (void)
 {
+    ILOG() << "OverworldScene::Terminate";
     debug::RegisterCamera(nullptr);
     debug::RegisterPhysics(nullptr);
     debug::ClearGraphics();
@@ -198,6 +200,7 @@ OverworldScene::Terminate (void)
 void
 OverworldScene::Activate (void)
 {
+    ILOG() << "OverworldScene::Activate";
     debug::RegisterCamera(&camera);
     debug::RegisterPhysics(&collision_graph, g_game.ratios.world_to_screen);
 
@@ -215,6 +218,7 @@ OverworldScene::Activate (void)
 void
 OverworldScene::Hibernate (void)
 {
+    ILOG() << "OverworldScene::Hibernate";
     debug::RegisterCamera(nullptr);
     debug::RegisterPhysics(nullptr);
     debug::ClearGraphics();

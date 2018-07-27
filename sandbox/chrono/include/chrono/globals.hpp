@@ -1,9 +1,30 @@
 #pragma once
 
+#include <rdge/core.hpp>
+
 namespace rdge {
 class Game;
 class PackFile;
 }
+
+enum chrono_actor_id
+{
+    chrono_actor_none = 0,
+    chrono_actor_chrono = 1,
+    chrono_actor_autumn = 2
+};
+
+enum chrono_scene_id
+{
+    chrono_scene_overworld = 1,
+    chrono_scene_winery    = 2
+};
+
+enum chrono_action_id
+{
+    chrono_action_overworld_winery_main = 1,
+    chrono_action_overworld_winery_store = 2
+};
 
 enum chrono_collision_category
 {
@@ -60,12 +81,19 @@ struct game_ratios
     float screen_to_world = 0.f;
 };
 
+struct custom_event_data
+{
+    rdge::uint32 push_scene;
+    rdge::uint32 pop_scene;
+};
+
 struct chrono_globals
 {
     rdge::Game* game;
     rdge::PackFile* pack;
 
     game_ratios ratios;
+    custom_event_data custom_events;
 };
 
 extern chrono_globals g_game;

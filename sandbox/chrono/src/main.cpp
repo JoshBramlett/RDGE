@@ -51,6 +51,14 @@ int main ()
                 game.Stop();
             }
         }
+        else if (event.IsCustomEvent())
+        {
+            const auto& args = event.GetCustomEventArgs();
+            if (args.Type() == g_game.custom_events.push_scene)
+            {
+                game.PushScene(std::make_shared<OverworldScene>());
+            }
+        }
 
         return false;
     };
@@ -62,6 +70,10 @@ int main ()
         g_game.pack = &pack;
         g_game.ratios = game_ratios(16.f, 2.f, ((game.window->IsHighDPI()) ? 2.f : 1.f));
 
+        g_game.custom_events.push_scene = rdge::RegisterCustomEvent();
+        g_game.custom_events.pop_scene = rdge::RegisterCustomEvent();
+
+        //game.PushScene(std::make_shared<OverworldScene>());
         game.PushScene(std::make_shared<WineryScene>());
         game.Run();
     }
