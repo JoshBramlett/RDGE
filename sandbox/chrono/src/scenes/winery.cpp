@@ -6,6 +6,10 @@
 #include <rdge/math.hpp>
 #include <rdge/util.hpp>
 
+#define CREATE_TILE_LAYER(c, m, id) do {                                    \
+    c.emplace_back(m->CreateTileLayer(id, g_game.ratios.base_to_screen));   \
+} while (false)
+
 using namespace rdge;
 using namespace rdge::math;
 using namespace rdge::physics;
@@ -42,47 +46,67 @@ WineryScene::WineryScene (void)
     //      resolution supported.
     size_t tile_count = tilemap->grid.size.w * tilemap->grid.size.h;
     auto tile_size = static_cast<math::vec2>(tilemap->grid.cell_size) * g_game.ratios.base_to_screen;
-
     tile_batch = TileBatch(tile_count, tile_size);
-    background_layers.reserve(6);
-    background_layers.emplace_back(tilemap->CreateTileLayer(winery_layer_bg,
-                                                      g_game.ratios.base_to_screen));
-    background_layers.emplace_back(tilemap->CreateTileLayer(winery_layer_bg_overlay_01,
-                                                      g_game.ratios.base_to_screen));
-    background_layers.emplace_back(tilemap->CreateTileLayer(winery_layer_bg_overlay_02,
-                                                      g_game.ratios.base_to_screen));
-    background_layers.emplace_back(tilemap->CreateTileLayer(winery_layer_bg_overlay_03,
-                                                      g_game.ratios.base_to_screen));
-    background_layers.emplace_back(tilemap->CreateTileLayer(winery_layer_bg_overlay_04,
-                                                      g_game.ratios.base_to_screen));
-    background_layers.emplace_back(tilemap->CreateTileLayer(winery_layer_bg_overlay_05,
-                                                      g_game.ratios.base_to_screen));
 
-    foreground_layers.reserve(5);
-    foreground_layers.emplace_back(tilemap->CreateTileLayer(winery_layer_fixtures_overlay_01,
-                                                      g_game.ratios.base_to_screen));
-    foreground_layers.emplace_back(tilemap->CreateTileLayer(winery_layer_fixtures_overlay_02,
-                                                      g_game.ratios.base_to_screen));
-    foreground_layers.emplace_back(tilemap->CreateTileLayer(winery_layer_wall_top,
-                                                      g_game.ratios.base_to_screen));
-    foreground_layers.emplace_back(tilemap->CreateTileLayer(winery_layer_wall_top_overlay_01,
-                                                      g_game.ratios.base_to_screen));
-    foreground_layers.emplace_back(tilemap->CreateTileLayer(winery_layer_wall_top_overlay_02,
-                                                      g_game.ratios.base_to_screen));
+    {
+        auto& c = this->background_layers;
+
+        c.reserve(6);
+        CREATE_TILE_LAYER(c, tilemap, winery_layer_bg);
+        CREATE_TILE_LAYER(c, tilemap, winery_layer_bg_overlay_01);
+        CREATE_TILE_LAYER(c, tilemap, winery_layer_bg_overlay_02);
+        CREATE_TILE_LAYER(c, tilemap, winery_layer_bg_overlay_03);
+        CREATE_TILE_LAYER(c, tilemap, winery_layer_bg_overlay_04);
+        CREATE_TILE_LAYER(c, tilemap, winery_layer_bg_overlay_05);
+    }
+
+    {
+        auto& c = this->foreground_layers;
+
+        c.reserve(5);
+        CREATE_TILE_LAYER(c, tilemap, winery_layer_fixtures_overlay_01);
+        CREATE_TILE_LAYER(c, tilemap, winery_layer_fixtures_overlay_02);
+        CREATE_TILE_LAYER(c, tilemap, winery_layer_wall_top);
+        CREATE_TILE_LAYER(c, tilemap, winery_layer_wall_top_overlay_01);
+        CREATE_TILE_LAYER(c, tilemap, winery_layer_wall_top_overlay_02);
+    }
 
     ///////////////////
     // Sprite layers
     ///////////////////
 
     {
-        const auto& def = tilemap->layers[winery_layer_fixtures];
-        uint16 sprite_capacity = def.objectgroup.objects.size() + 100;
+        const auto& def_a = tilemap->layers[winery_layer_fixtures];
 
-        this->static_actors.reserve(sprite_capacity);
-        this->sprite_layers.emplace_back(sprite_capacity);
+        size_t total_sprite_capacity = 100; // buffer
+        total_sprite_capacity += def_a.objectgroup.objects.size();
 
+        this->sprite_layers.emplace_back(SpriteLayer(total_sprite_capacity));
         auto& layer = this->sprite_layers.back();
-        layer.name = def.name;
+        layer.name = def_a.name;
+
+        this->static_actors.reserve(total_sprite_capacity);
+        for (const auto& obj : def_a.objectgroup.objects)
+        {
+            // TODO Could set property on the obj to define that it's indeed static
+            //
+            // TODO StaticActors need to be initialized differently than other sprites.
+            //      These objects have the collision object relative to their sprite.
+            //      Dynamic sprites (especially those with animations) render their
+            //      sprite relative to a collision object.  There should be a very
+            //      explicit definition of those two types.
+            if (obj.type == tilemap::ObjectType::SPRITE)
+            {
+                this->static_actors.emplace_back(obj,
+                                                 *def_a.objectgroup.spritesheet,
+                                                 layer,
+                                                 collision_graph);
+            }
+        }
+
+
+
+
         math::vec2 player_pos;
         Direction facing;
         for (const auto& spawn : this->spawn_points)
@@ -100,23 +124,6 @@ WineryScene::WineryScene (void)
         player.Init(player_pos, layer, collision_graph);
         player.InitPosition(player_pos, facing);
 
-        for (const auto& obj : def.objectgroup.objects)
-        {
-            // TODO Could set property on the obj to define that it's indeed static
-            //
-            // TODO StaticActors need to be initialized differently than other sprites.
-            //      These objects have the collision object relative to their sprite.
-            //      Dynamic sprites (especially those with animations) render their
-            //      sprite relative to a collision object.  There should be a very
-            //      explicit definition of those two types.
-            if (obj.type == tilemap::ObjectType::SPRITE)
-            {
-                this->static_actors.emplace_back(obj,
-                                                 *def.objectgroup.spritesheet,
-                                                 layer,
-                                                 collision_graph);
-            }
-        }
     }
 
     ///////////////////
@@ -127,7 +134,7 @@ WineryScene::WineryScene (void)
         const auto& def = tilemap->layers[winery_layer_bg_collision];
         for (const auto& obj : def.objectgroup.objects)
         {
-            if (obj.ext_type == "environment_static")
+            if (obj.ext_type == "collidable")
             {
                 rigid_body_profile bprof;
                 fixture_profile fprof;
@@ -136,44 +143,35 @@ WineryScene::WineryScene (void)
                 bprof.position = obj.pos * g_game.ratios.base_to_world;
                 auto body = collision_graph.CreateBody(bprof);
 
-                if (obj.ext_data)
-                {
-                    // TODO This lookup is counter-productive.  Fixture profile
-                    //      should be cached
-                    const auto& ext_props = obj.ext_data->properties;
-                    fprof.density = ext_props.GetFloat("density");
-                    fprof.friction = ext_props.GetFloat("friction");
-                    fprof.restitution = ext_props.GetFloat("restitution");
-                    fprof.is_sensor = ext_props.GetBool("is_sensor");
-                    fprof.filter.category = ext_props.GetInt("cgroup");
-                    fprof.filter.mask = ext_props.GetInt("cmask");
-
-                    fprof.override_color = true;
-                    fprof.wireframe = obj.ext_data->color;
-                }
-                else
-                {
-                    fprof.density = 1.f;
-                    fprof.friction = 0.2f;
-                    fprof.restitution = 0.0f;
-                    fprof.is_sensor = false;
-                    fprof.filter.category = chrono_collision_category_environment_static;
-                    fprof.filter.mask = chrono_collision_category_all_hitbox;
-                }
-
-                if (obj.type == tilemap::ObjectType::POLYGON)
-                {
-                    auto p = obj.GetPolygon(g_game.ratios.base_to_world, true);
-                    fprof.shape = &p;
-                    body->CreateFixture(fprof);
-                }
+                ProcessCollidable(body, obj);
             }
         }
     }
 
+    {
+        const auto& def = tilemap->layers[winery_layer_triggers];
+        for (const auto& obj : def.objectgroup.objects)
+        {
+            if (obj.ext_type == "action_trigger")
+            {
+                rigid_body_profile bprof;
+                fixture_profile fprof;
+
+                bprof.type = RigidBodyType::STATIC;
+                bprof.position = obj.pos * g_game.ratios.base_to_world;
+                bprof.user_data = this;
+                auto body = collision_graph.CreateBody(bprof);
+
+                ILOG() << "ActionTrigger: " << obj.name;
+                this->triggers.emplace_back(ProcessActionTrigger(body, obj));
+            }
+        }
+    }
+
+
     debug::AddWidget(this);
     debug::settings::show_overlay = true;
-    debug::settings::physics::draw_fixtures = false;
+    debug::settings::physics::draw_fixtures = true;
 }
 
 void
@@ -296,8 +294,13 @@ WineryScene::OnRender (void)
 void
 WineryScene::OnContactStart (Contact* c)
 {
-    rdge::Unused(c);
-    //std::cout << "OnContactStart" << std::endl;
+    //rdge::Unused(c);
+    if (c->HasSensor())
+    {
+        ILOG() << "OnContactStart";
+    }
+
+    ILOG() << "meh";
 }
 
 void

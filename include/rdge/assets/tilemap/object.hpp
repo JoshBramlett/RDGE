@@ -133,6 +133,14 @@ public:
     Object& operator= (Object&&) noexcept = default;
     //!@}
 
+    //! \brief Check if the object represents a primitive shape.
+    bool IsFixture (void) const noexcept
+    {
+        return this->type == ObjectType::CIRCLE ||
+               this->type == ObjectType::POLYGON ||
+               this->type == ObjectType::POLYLINE;
+    }
+
     //!@{ Base type accessors
     math::vec2 GetPoint (float scale = 1.f) const;
     physics::circle GetCircle (float scale = 1.f) const;

@@ -50,6 +50,7 @@ public:
 
     bool IsTouching (void) const noexcept { return m_flags & TOUCHING; }
     bool IsEnabled (void) const noexcept { return m_flags & ENABLED; }
+    bool HasSensor (void) const noexcept { return m_flags & HAS_SENSOR; }
 
     //!@{ \ref Fixture nodes linked by this contact
     Fixture* fixture_a = nullptr;
@@ -84,10 +85,10 @@ private:
 
     enum StateFlags
     {
-        ENABLED  = 0x0001,
-        TOUCHING = 0x0002,
-
-        ON_ISLAND = 0x0004
+        ENABLED    = 0x0001,
+        TOUCHING   = 0x0002,
+        HAS_SENSOR = 0x0004,
+        ON_ISLAND  = 0x0008
     };
 
     uint16 m_flags = 0;

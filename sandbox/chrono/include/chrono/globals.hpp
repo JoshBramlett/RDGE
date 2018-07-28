@@ -16,12 +16,14 @@ enum chrono_actor_id
 
 enum chrono_scene_id
 {
+    chrono_scene_none = 0,
     chrono_scene_overworld = 1,
     chrono_scene_winery    = 2
 };
 
 enum chrono_action_id
 {
+    chrono_action_none = 0,
     chrono_action_overworld_winery_main = 1,
     chrono_action_overworld_winery_store = 2
 };

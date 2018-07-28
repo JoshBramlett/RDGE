@@ -91,6 +91,9 @@ public:
     intrusive_list (intrusive_list&& other) noexcept
         : m_count(other.m_count)
     {
+        m_anchor.prev = &m_anchor;
+        m_anchor.next = &m_anchor;
+
         if (other.m_anchor.prev != &other.m_anchor)
         {
             m_anchor.prev = other.m_anchor.prev;

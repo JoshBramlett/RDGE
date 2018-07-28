@@ -46,6 +46,11 @@ Contact::Contact (Fixture* a, Fixture* b)
     this->edge_b.contact = this;
     this->edge_a.other = fixture_b->body;
     this->edge_b.other = fixture_a->body;
+
+    if (fixture_a->IsSensor() || fixture_b->IsSensor())
+    {
+        m_flags |= HAS_SENSOR;
+    }
 }
 
 void
@@ -60,8 +65,7 @@ Contact::Update (GraphListener* listener)
     auto shape_a = fixture_a->shape.world;
     auto shape_b = fixture_b->shape.world;
 
-    bool is_sensor = fixture_a->IsSensor() || fixture_b->IsSensor();
-    if (is_sensor)
+    if (m_flags & HAS_SENSOR)
     {
         manifold.count = 0;
         is_touching = shape_a->intersects_with(shape_b);
@@ -78,14 +82,7 @@ Contact::Update (GraphListener* listener)
         }
     }
 
-    if (is_touching)
-    {
-        m_flags |= TOUCHING;
-    }
-    else
-    {
-        m_flags &= ~TOUCHING;
-    }
+    SET_FLAG(is_touching, m_flags, TOUCHING);
 
     if (listener)
     {
@@ -99,7 +96,7 @@ Contact::Update (GraphListener* listener)
             listener->OnContactEnd(this);
         }
 
-        if (is_touching && !is_sensor)
+        if (is_touching && (m_flags & HAS_SENSOR) == 0)
         {
             listener->OnPreSolve(this, old_manifold);
         }

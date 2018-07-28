@@ -722,24 +722,24 @@
   </data>
  </layer>
  <objectgroup name="bg_collision">
-  <object id="30" type="environment_static" x="0" y="-115" width="304" height="51"/>
-  <object id="31" type="environment_static" x="0" y="-64" width="16" height="80"/>
-  <object id="32" type="environment_static" x="160" y="-64" width="16" height="128"/>
-  <object id="33" type="environment_static" x="-48" y="61" width="320" height="19"/>
-  <object id="34" type="environment_static" x="-144" y="-3" width="16" height="67"/>
-  <object id="35" type="environment_static" x="-240" y="-3" width="16" height="67"/>
-  <object id="36" type="environment_static" x="-144" y="-115" width="16" height="67"/>
-  <object id="37" type="environment_static" x="-288" y="-115" width="144" height="51"/>
-  <object id="38" type="environment_static" x="-48" y="-115" width="11" height="73"/>
-  <object id="39" type="environment_static" x="-304" y="-272" width="16" height="352"/>
-  <object id="40" type="environment_static" x="-288" y="-272" width="448" height="16"/>
-  <object id="41" type="environment_static" x="160" y="-272" width="16" height="112"/>
-  <object id="43" type="environment_static" x="176" y="-208" width="224" height="16"/>
-  <object id="44" type="environment_static" x="336" y="-115" width="64" height="51"/>
-  <object id="45" type="environment_static" x="400" y="-208" width="16" height="288"/>
-  <object id="48" type="environment_static" x="-37" y="-115" width="37" height="2"/>
-  <object id="49" type="environment_static" x="304" y="61" width="96" height="19"/>
-  <object id="50" type="environment_static" x="-288" y="61" width="208" height="19"/>
+  <object id="30" type="collidable" x="0" y="-115" width="304" height="51"/>
+  <object id="31" type="collidable" x="0" y="-64" width="16" height="80"/>
+  <object id="32" type="collidable" x="160" y="-64" width="16" height="128"/>
+  <object id="33" type="collidable" x="-48" y="61" width="320" height="19"/>
+  <object id="34" type="collidable" x="-144" y="-3" width="16" height="67"/>
+  <object id="35" type="collidable" x="-240" y="-3" width="16" height="67"/>
+  <object id="36" type="collidable" x="-144" y="-115" width="16" height="67"/>
+  <object id="37" type="collidable" x="-288" y="-115" width="144" height="51"/>
+  <object id="38" type="collidable" x="-48" y="-115" width="11" height="73"/>
+  <object id="39" type="collidable" x="-304" y="-272" width="16" height="352"/>
+  <object id="40" type="collidable" x="-288" y="-272" width="448" height="16"/>
+  <object id="41" type="collidable" x="160" y="-272" width="16" height="112"/>
+  <object id="43" type="collidable" x="176" y="-208" width="224" height="16"/>
+  <object id="44" type="collidable" x="336" y="-115" width="64" height="51"/>
+  <object id="45" type="collidable" x="400" y="-208" width="16" height="288"/>
+  <object id="48" type="collidable" x="-37" y="-115" width="37" height="2"/>
+  <object id="49" type="collidable" x="304" y="61" width="96" height="19"/>
+  <object id="50" type="collidable" x="-288" y="61" width="208" height="19"/>
  </objectgroup>
  <objectgroup name="triggers">
   <object id="52" name="store_exit" type="action_trigger" x="256" y="64" width="64" height="16">
@@ -754,7 +754,7 @@
   </object>
  </objectgroup>
  <objectgroup name="spawns">
-  <object id="54" name="main_entrance" type="actor_marker" x="-64" y="16">
+  <object id="54" name="main_entrance" type="spawn_point" x="-64" y="16">
    <properties>
     <property name="action_id" type="int" value="1"/>
     <property name="actor_id" type="int" value="1"/>
@@ -763,7 +763,7 @@
    </properties>
    <point/>
   </object>
-  <object id="55" name="store_entrance" type="actor_marker" x="288" y="32">
+  <object id="55" name="store_entrance" type="spawn_point" x="288" y="32">
    <properties>
     <property name="action_id" type="int" value="2"/>
     <property name="actor_id" type="int" value="1"/>

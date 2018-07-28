@@ -121,7 +121,7 @@ OverworldScene::OverworldScene (void)
         const auto& def = tilemap->layers[overworld_layer_bg_collision];
         for (const auto& obj : def.objectgroup.objects)
         {
-            if (obj.ext_type == "environment_static")
+            if (obj.ext_type == "collidable")
             {
                 rigid_body_profile bprof;
                 fixture_profile fprof;
@@ -130,37 +130,7 @@ OverworldScene::OverworldScene (void)
                 bprof.position = obj.pos * g_game.ratios.base_to_world;
                 auto body = collision_graph.CreateBody(bprof);
 
-                if (obj.ext_data)
-                {
-                    // TODO This lookup is counter-productive.  Fixture profile
-                    //      should be cached
-                    const auto& ext_props = obj.ext_data->properties;
-                    fprof.density = ext_props.GetFloat("density");
-                    fprof.friction = ext_props.GetFloat("friction");
-                    fprof.restitution = ext_props.GetFloat("restitution");
-                    fprof.is_sensor = ext_props.GetBool("is_sensor");
-                    fprof.filter.category = ext_props.GetInt("cgroup");
-                    fprof.filter.mask = ext_props.GetInt("cmask");
-
-                    fprof.override_color = true;
-                    fprof.wireframe = obj.ext_data->color;
-                }
-                else
-                {
-                    fprof.density = 1.f;
-                    fprof.friction = 0.2f;
-                    fprof.restitution = 0.0f;
-                    fprof.is_sensor = false;
-                    fprof.filter.category = chrono_collision_category_environment_static;
-                    fprof.filter.mask = chrono_collision_category_all_hitbox;
-                }
-
-                if (obj.type == tilemap::ObjectType::POLYGON)
-                {
-                    auto p = obj.GetPolygon(g_game.ratios.base_to_world, true);
-                    fprof.shape = &p;
-                    body->CreateFixture(fprof);
-                }
+                ProcessCollidable(body, obj);
             }
         }
     }

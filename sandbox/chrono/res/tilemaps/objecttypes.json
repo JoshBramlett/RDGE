@@ -9,7 +9,7 @@
                 "value": 0
             },
             {
-                "name": "is_sensor",
+                "name": "invoke_required",
                 "type": "bool",
                 "value": true
             },
@@ -22,7 +22,7 @@
     },
     {
         "color": "#ff3b00ff",
-        "name": "actor_marker",
+        "name": "spawn_point",
         "properties": [
             {
                 "name": "action_id",
@@ -48,7 +48,7 @@
     },
     {
         "color": "#ffa0a0a4",
-        "name": "environment_static",
+        "name": "collidable",
         "properties": [
             {
                 "name": "cgroup",
@@ -69,11 +69,6 @@
                 "name": "friction",
                 "type": "float",
                 "value": 0.2
-            },
-            {
-                "name": "is_sensor",
-                "type": "bool",
-                "value": false
             },
             {
                 "name": "restitution",

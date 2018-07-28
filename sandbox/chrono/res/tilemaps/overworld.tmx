@@ -870,16 +870,15 @@
   </data>
  </layer>
  <objectgroup name="bg_collision">
-  <object id="27" type="environment_static" x="619.973" y="589.072">
+  <object id="27" type="collidable" x="619.973" y="589.072">
    <polygon points="0,0 2.45242,29.9196 16.186,59.3486 25.9957,71.6108 32.5621,73.7659 32.2456,25.5503"/>
   </object>
-  <object id="30" type="environment_static" x="652.196" y="655.61" width="302.247" height="7.20804"/>
-  <object id="31" type="environment_static" x="650.592" y="614.315" width="354.358" height="6.2133"/>
-  <object id="34" type="environment_static" x="998.848" y="615.974">
+  <object id="30" type="collidable" x="652.196" y="655.61" width="302.247" height="7.20804"/>
+  <object id="31" type="collidable" x="650.592" y="614.315" width="354.358" height="6.2133"/>
+  <object id="34" type="collidable" x="998.848" y="615.974">
    <polygon points="0,0 28.4007,-30.5442 28.9366,-7.77001 18.2193,21.7024 7.23415,40.7256 0.394105,46.3833"/>
   </object>
-  <object id="35" type="environment_static" x="980.96" y="655.251" width="18.2193" height="7.32765"/>
-  <object id="36" x="952.894" y="648.108" width="29.7691" height="7.93842"/>
+  <object id="35" type="collidable" x="980.96" y="655.251" width="18.2193" height="7.32765"/>
  </objectgroup>
  <objectgroup name="bg_sprites">
   <object id="15" name="tree_01" gid="683" x="673.115" y="445.504" width="80" height="96"/>
@@ -903,7 +902,7 @@
   <object id="61" gid="692" x="992" y="304" width="80" height="96"/>
  </objectgroup>
  <objectgroup name="structures">
-  <object id="58" gid="697" x="1136" y="384" width="272" height="224"/>
+  <object id="58" name="winery" gid="697" x="1136" y="384" width="272" height="224"/>
  </objectgroup>
  <layer name="bg_overlay_5" width="80" height="64">
   <data encoding="csv">
@@ -940,9 +939,10 @@
     <property name="scene_id" type="int" value="2"/>
    </properties>
   </object>
+  <object id="36" name="winery_cave_entrance" type="action_trigger" x="952.894" y="645.11" width="29.7691" height="7.93842"/>
  </objectgroup>
  <objectgroup name="spawns">
-  <object id="65" name="winery_main_exit" type="actor_marker" x="1208" y="416">
+  <object id="65" name="winery_main_exit" type="spawn_point" x="1208" y="416">
    <properties>
     <property name="action_id" type="int" value="1"/>
     <property name="actor_id" type="int" value="1"/>
@@ -950,7 +950,7 @@
    </properties>
    <point/>
   </object>
-  <object id="66" name="winery_store_exit" type="actor_marker" x="1352" y="416">
+  <object id="66" name="winery_store_exit" type="spawn_point" x="1352" y="416">
    <properties>
     <property name="action_id" type="int" value="2"/>
     <property name="actor_id" type="int" value="1"/>

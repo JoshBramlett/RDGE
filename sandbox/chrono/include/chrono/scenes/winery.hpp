@@ -69,7 +69,8 @@ public:
     //!@}
 
     //!@{ Spawn Points
-    std::vector<chrono_spawn_point> spawn_points;
+    std::vector<spawn_point_data> spawn_points;
+    std::vector<action_trigger_data> triggers;
     //!@}
 
     // debug
