@@ -1,13 +1,3 @@
-Monitoring
-    Logger occasionally does not start
-      - I delayed the logger initialization.  Probably won't fix it, but it's low priority.
-
-Working (bugs)
-
-    Physics Circle/Poly collision
-      - Ordering is wrong so the normal is messed up.  Adding the rect prior to the circle
-        works, vice versa does not.
-
 Working (enhancements)
 
     Util:
@@ -24,6 +14,9 @@ Working (enhancements)
 
 
 Game:
+  - Some tile layers are rendered above sprite layers and are used for accessorizing
+    static sprites.  This doesn't play well when rendering as they're always on top.
+    Need to figure out a way to render the tiles along with the sprites they're tied to.
   - Define a global object id
     - This is to tie in different resources (e.g. The dialog system, animations, etc.)
   - Rather than creating a class for each NPC, I could create a generic actor which

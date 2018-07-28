@@ -66,8 +66,12 @@ public:
     //! \param [in] item Item to enqueue
     void push (T&& item)
     {
-        std::lock_guard<std::mutex> guard(m_mutex);
-        m_queue.emplace(std::move(item));
+        {
+            std::lock_guard<std::mutex> guard(m_mutex);
+            m_predicate = true;
+            m_queue.emplace(std::move(item));
+        }
+
         m_cv.notify_one();
     }
 
@@ -77,12 +81,11 @@ public:
     void wait_and_pop (T& item)
     {
         std::unique_lock<std::mutex> lock(m_mutex);
-        m_cv.wait(lock, [=] {
-            return !m_queue.empty();
-        });
+        m_cv.wait(lock, [this] { return m_predicate; });
 
         item = std::move(m_queue.front());
         m_queue.pop();
+        m_predicate = !m_queue.empty();
     }
 
     //! \brief Pop item from the front of the queue
@@ -95,17 +98,16 @@ public:
     bool wait_and_pop (T& item, std::chrono::milliseconds ms)
     {
         std::unique_lock<std::mutex> lock(m_mutex);
-        bool result = m_cv.wait_for(lock, ms, [=] {
-            return !m_queue.empty();
-        });
-
-        if (result)
+        if (m_cv.wait_for(lock, ms, [this]{ return m_predicate; }))
         {
             item = std::move(m_queue.front());
             m_queue.pop();
+            m_predicate = !m_queue.empty();
+
+            return true;
         }
 
-        return result;
+        return false;
     }
 
     //! \brief Check if container is empty
@@ -134,6 +136,7 @@ private:
 
     mutable std::mutex      m_mutex;
     std::condition_variable m_cv;
+    bool m_predicate = false;
 };
 
 } // namespace rdge
