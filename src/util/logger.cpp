@@ -117,6 +117,7 @@ public:
     AsyncLogHandler (void)
     {
         m_thread = std::thread([=](void) {
+            m_running.store(true, std::memory_order_relaxed);
             using namespace std::chrono_literals;
             while (m_running.load(std::memory_order_relaxed))
             {
@@ -142,8 +143,6 @@ public:
                 }
             }
         });
-
-        m_running.store(true, std::memory_order_relaxed);
     }
 
     ~AsyncLogHandler (void) noexcept

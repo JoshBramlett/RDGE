@@ -81,7 +81,7 @@ public:
     void wait_and_pop (T& item)
     {
         std::unique_lock<std::mutex> lock(m_mutex);
-        m_cv.wait(lock, [this] { return m_predicate; });
+        m_cv.wait(lock, [this]{ return m_predicate; });
 
         item = std::move(m_queue.front());
         m_queue.pop();
