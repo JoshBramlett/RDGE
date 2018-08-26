@@ -157,7 +157,7 @@ PhysicsWidget::OnWidgetCustomRender (void)
                     {
                         debug::DrawWireFrame(f, colors::not_simulating, scale);
                     }
-                    else if (!body->IsAwake())
+                    else if (!body->IsStatic() && !body->IsAwake())
                     {
                         debug::DrawWireFrame(f, colors::sleeping_body, scale);
                     }
