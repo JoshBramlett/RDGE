@@ -50,9 +50,6 @@ bool
 ProcessCustomEvent (const rdge::CustomEventArgs& args)
 {
     auto event_id = args.Type();
-    RDGE_ASSERT(event_id > static_cast<decltype(event_id)>(ActionType::NONE));
-    RDGE_ASSERT(event_id < static_cast<decltype(event_id)>(ActionType::COUNT));
-
     const auto& event_ids = g_game.custom_events;
     if (event_id == event_ids[ActionType::SCENE_PUSH])
     {
@@ -81,6 +78,9 @@ ProcessCustomEvent (const rdge::CustomEventArgs& args)
     {
         return false;
     }
+
+    RDGE_ASSERT(false);
+    return true;
 }
 
 } // namespace perch

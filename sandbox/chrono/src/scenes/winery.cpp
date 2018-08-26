@@ -179,6 +179,11 @@ WineryScene::WineryScene (void)
     debug::settings::physics::draw_fixtures = true;
 }
 
+WineryScene::~WineryScene (void) noexcept
+{
+    collision_graph.listener = nullptr;
+}
+
 void
 WineryScene::Initialize (void)
 {
@@ -247,17 +252,6 @@ void
 WineryScene::OnEvent (const Event& event)
 {
     player.OnEvent(event);
-    if (event.IsKeyboardEvent())
-    {
-        const auto& args = event.GetKeyboardEventArgs();
-        if (!args.IsRepeating())
-        {
-            if (args.IsKeyPressed() && args.Key() == KeyCode::BACKSPACE)
-            {
-                QueueCustomEvent(g_game.custom_events[ActionType::SCENE_PUSH], 0);
-            }
-        }
-    }
 }
 
 void

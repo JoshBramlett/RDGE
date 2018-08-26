@@ -21,7 +21,7 @@ class WineryScene
 {
 public:
     WineryScene (void);
-    ~WineryScene (void) noexcept = default;
+    ~WineryScene (void) noexcept;
 
     //!@{ IScene - Scene Transitions
     void Initialize (void) override;

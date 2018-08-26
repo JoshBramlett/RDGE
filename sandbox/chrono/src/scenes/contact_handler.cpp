@@ -6,8 +6,11 @@
 #include <rdge/physics/contact.hpp>
 #include <rdge/physics/fixture.hpp>
 #include <rdge/util/logger.hpp>
+#include <rdge/debug/assert.hpp>
 
 #include <utility> // std::swap
+
+using namespace rdge;
 
 namespace perch {
 
@@ -50,8 +53,38 @@ ProcessContactStart (rdge::physics::Contact* c)
                 auto& trigger = sibling->action_trigger;
                 if (trigger.invoke_required)
                 {
-                    Player* player = Player::Extract(child);
-                    player->pending_actions.Add(c, child, sibling);
+                    bool add_pending = false;
+                    switch (trigger.facing_required)
+                    {
+                    case Direction::UP:
+                        add_pending = (child->type & fixture_user_data_player_sensor_up);
+                        break;
+                    case Direction::RIGHT:
+                        add_pending = (child->type & fixture_user_data_player_sensor_right);
+                        break;
+                    case Direction::DOWN:
+                        add_pending = (child->type & fixture_user_data_player_sensor_down);
+                        break;
+                    case Direction::LEFT:
+                        add_pending = (child->type & fixture_user_data_player_sensor_left);
+                        break;
+                    case Direction::NONE:
+                        add_pending = true;
+                        break;
+                    default:
+                        RDGE_ASSERT(false);
+                        add_pending = false;
+                        break;
+                    }
+
+                    if (add_pending)
+                    {
+                        Player* player = Player::Extract(child);
+                        player->pending_actions.Add(c, child, sibling);
+                        DLOG() << "Adding pending trigger:"
+                               << " contact=" << (void*)c
+                               << " num_pending=" << player->pending_actions.Size();
+                    }
                 }
                 else
                 {

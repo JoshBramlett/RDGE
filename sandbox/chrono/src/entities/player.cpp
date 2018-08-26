@@ -251,7 +251,34 @@ Player::OnUpdate (const delta_time& dt)
 
         if (m_flags & ATTACK_BUTTON_PRESSED)
         {
-            BeginAttack();
+            auto sibling = this->pending_actions.GetSibling(this->facing);
+            if (sibling)
+            {
+                // TODO
+                // action_trigger_data needs to be more robust.  For example, you may
+                // have an action with a type of SCENE_PUSH if this were a door, what
+                // about if the door was 'locked'?  It should display some indication
+                // that it's not interactable at this time, both in text and audio.
+                //
+                // Obviously this must be dependant on the game state (only locked at
+                // a certain time, or point in the story, etc.).
+                //
+                // Also...
+                // 1) Centralize processing scene transitions
+                // 2) Modify custom event signature for handling actions so the new
+                //    scene knows which spawn point to use
+                // 3) Figure out proper way to unlock input.  Could be the scene
+                //    transition callbacks, but I'm thinking a more thought out
+                //    state machine would be the way to go.
+                m_flags |= (INPUT_LOCKED);
+                QueueCustomEvent(g_game.custom_events[sibling->action_trigger.action_type],
+                                 sibling->action_trigger.scene_id);
+                ILOG() << "Hooray";
+            }
+            else
+            {
+                BeginAttack();
+            }
         }
         else if (!this->normal.is_zero())
         {

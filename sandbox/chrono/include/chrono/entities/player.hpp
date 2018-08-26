@@ -8,6 +8,7 @@
 #include <rdge/math.hpp>
 #include <rdge/physics.hpp>
 #include <rdge/util.hpp>
+#include <rdge/debug.hpp>
 
 #include <chrono/types.hpp>
 #include <chrono/entities/iactor.hpp>
@@ -42,6 +43,22 @@ public:
                 break;
             }
         }
+    }
+
+    fixture_user_data* GetSibling (rdge::Direction dir)
+    {
+        for (auto& action : m_actions)
+        {
+            RDGE_ASSERT(action.sibling->type & fixture_user_data_action_trigger);
+            RDGE_ASSERT(action.sibling->action_trigger.invoke_required);
+            auto facing = action.sibling->action_trigger.facing_required;
+            if (facing == rdge::Direction::NONE || facing == dir)
+            {
+                return action.sibling;
+            }
+        }
+
+        return nullptr;
     }
 
     size_t Size (void) const noexcept { return m_nodes.size(); }

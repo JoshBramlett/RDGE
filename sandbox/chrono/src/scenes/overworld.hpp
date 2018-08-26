@@ -21,7 +21,7 @@ class OverworldScene
 {
 public:
     OverworldScene (void);
-    ~OverworldScene (void) noexcept = default;
+    ~OverworldScene (void) noexcept;
 
     //!@{ IScene - Scene Transitions
     void Initialize (void) override;

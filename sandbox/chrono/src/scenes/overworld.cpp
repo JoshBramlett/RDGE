@@ -198,6 +198,11 @@ OverworldScene::OverworldScene (void)
     debug::settings::physics::draw_fixtures = true;
 }
 
+OverworldScene::~OverworldScene (void) noexcept
+{
+    collision_graph.listener = nullptr;
+}
+
 void
 OverworldScene::Initialize (void)
 {
