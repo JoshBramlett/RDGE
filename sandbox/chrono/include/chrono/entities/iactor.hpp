@@ -10,6 +10,47 @@ enum class ActionType;
 } // namespace rdge
 //!@}
 
+// Different types of actors
+// 1) Static
+//    - Tile collision
+// 2) Container
+//    - Fixtures
+//      - Tile collision
+//      - Tile sensor
+//    - Actionable
+//      - Inventory
+//    - Properties
+//      - Unique ObjectID (for serialization)
+//      - ActorID?
+//      - Open/Closed
+//      - Contained items
+//      - IsSafe (whether items can be randomly added/removed)
+// 3) Sign
+//    - Fixtures
+//      - Tile collision
+//      - Tile sensor
+//    - Actionable
+//      - Dialog
+//    - Properties
+//      - Unique ObjectID?
+//      - ActorID (for dialog lookup)
+// 3) NPC
+//    - Tile collision
+//    - Tile sensor
+//    - Actionable
+//    - Dialog
+//    - Inventory
+//
+//
+// GetActorID()
+// GetObjectID()
+// GetWorldCenter()
+//
+// IsActionable()
+// InvokeAction()
+
+
+
 class IActor
 {
 public:

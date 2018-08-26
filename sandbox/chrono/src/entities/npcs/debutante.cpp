@@ -1,6 +1,7 @@
 #include <chrono/entities/npcs/debutante.hpp>
 #include <chrono/asset_table.hpp>
 #include <chrono/globals.hpp>
+#include <chrono/types.hpp>
 
 #include <rdge/assets.hpp>
 #include <rdge/gameobjects.hpp>

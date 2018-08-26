@@ -9,6 +9,16 @@
                 "value": 0
             },
             {
+                "name": "action_type",
+                "type": "string",
+                "value": "scene_push"
+            },
+            {
+                "name": "facing_required",
+                "type": "string",
+                "value": "north"
+            },
+            {
                 "name": "invoke_required",
                 "type": "bool",
                 "value": true
@@ -17,32 +27,6 @@
                 "name": "scene_id",
                 "type": "int",
                 "value": 0
-            }
-        ]
-    },
-    {
-        "color": "#ff3b00ff",
-        "name": "spawn_point",
-        "properties": [
-            {
-                "name": "action_id",
-                "type": "int",
-                "value": 0
-            },
-            {
-                "name": "actor_id",
-                "type": "int",
-                "value": 0
-            },
-            {
-                "name": "facing",
-                "type": "string",
-                "value": "south"
-            },
-            {
-                "name": "is_default",
-                "type": "bool",
-                "value": false
             }
         ]
     },
@@ -74,6 +58,32 @@
                 "name": "restitution",
                 "type": "float",
                 "value": 0
+            }
+        ]
+    },
+    {
+        "color": "#ff3b00ff",
+        "name": "spawn_point",
+        "properties": [
+            {
+                "name": "action_id",
+                "type": "int",
+                "value": 0
+            },
+            {
+                "name": "actor_id",
+                "type": "int",
+                "value": 0
+            },
+            {
+                "name": "facing",
+                "type": "string",
+                "value": "south"
+            },
+            {
+                "name": "is_default",
+                "type": "bool",
+                "value": false
             }
         ]
     }

@@ -22,6 +22,17 @@ constexpr auto to_underlying (T value) noexcept -> std::underlying_type_t<T>
     return static_cast<std::underlying_type_t<T>>(value);
 }
 
+//! \brief Sanity check for unexpected enum additions
+//! \note For use in static asserts
+//! \param [in] last The last expected enum
+//! \param [in] count the "count" enum
+//! \returns Correctness of expected enums
+template <typename T, typename = typename std::enable_if_t<std::is_enum<T>::value>>
+constexpr bool enum_sanity_check (T last, T count)
+{
+    return ((to_underlying(count) - to_underlying(last)) == 1);
+}
+
 //! \struct is_enum_bitmask
 //! \brief Type traits check that an enum is a bitmask
 //! \details Bitwise operator overloads are provided for enabled types.  Enums must

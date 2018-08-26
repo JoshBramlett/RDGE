@@ -15,13 +15,16 @@ include_directories (${RDGE_INCLUDE_DIR})
 include_directories (include)
 
 add_executable (chrono
+                src/events.cpp
+                src/import.cpp
                 src/main.cpp
                 src/entities/player.cpp
                 src/entities/npcs/debutante.cpp
                 src/entities/static_actor.cpp
+                src/scenes/contact_handler.cpp
+                src/scenes/scene_manager.cpp
                 src/scenes/overworld.cpp
-                src/scenes/winery.cpp
-                src/util/tilemap_helpers.cpp)
+                src/scenes/winery.cpp)
 
 target_link_libraries (chrono
                        RDGE)

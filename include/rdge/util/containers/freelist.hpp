@@ -33,6 +33,8 @@ template <typename T, size_t ChunkSize = 128>
 struct freelist
 {
 public:
+    using handle_type = uint32;
+
     // TODO Because of the realloc it's easy to have a use after free:
     //        1) Create reference to object
     //        2) Reserve a new spot in the list (realloc occurs)
@@ -99,7 +101,7 @@ public:
     //! \details Retrieves the block of data associated to the handle.
     //! \param [in] handle Reserved handle
     //! \returns Reference to the data of the associated handle
-    T& operator[] (uint32 handle) const noexcept
+    T& operator[] (handle_type handle) const noexcept
     {
         SDL_assert(m_count > 0);
         SDL_assert(handle < m_capacity);
@@ -141,7 +143,7 @@ public:
 
     //! \brief Releases the block of memory back into the pool
     //! \param [in] handle Reserved handle
-    void release (uint32 handle)
+    void release (handle_type handle)
     {
         SDL_assert(m_count > 0);
         SDL_assert(handle < m_capacity);
@@ -159,7 +161,7 @@ public:
     }
 
     //! \returns True iff handle is in the reserved list
-    bool is_reserved (uint32 handle) const noexcept
+    bool is_reserved (handle_type handle) const noexcept
     {
         for (size_t i = 0; i < m_count; i++)
         {
@@ -185,14 +187,14 @@ private:
     {
         for (size_t i = m_count; i < m_capacity; ++i)
         {
-            m_handles[i] = i;
+            m_handles[i] = static_cast<handle_type>(i);
         }
     }
 
-    T* m_data = nullptr;         //!< Data array
-    uint32* m_handles = nullptr; //!< Array of handles that map to indices of the data
-    size_t m_count = 0;          //!< Number of stored elements
-    size_t m_capacity = 0;       //!< Current array capacity
+    T* m_data = nullptr;              //!< Data array
+    handle_type* m_handles = nullptr; //!< Array of handles that map to indices of the data
+    size_t m_count = 0;               //!< Number of stored elements
+    size_t m_capacity = 0;            //!< Current array capacity
 };
 
 } // namespace rdge

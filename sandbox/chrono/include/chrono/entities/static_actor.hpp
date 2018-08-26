@@ -5,7 +5,9 @@
 #include <rdge/gameobjects/types.hpp>
 
 #include <chrono/entities/iactor.hpp>
-#include <chrono/util/tilemap_helpers.hpp>
+#include <chrono/types.hpp>
+
+#include <vector>
 
 //!@{ Forward declarations
 namespace rdge {
@@ -31,8 +33,6 @@ class Object;
 class StaticActor : public IActor
 {
 public:
-    static constexpr size_t MAX_FIXTURES = 8;
-
     StaticActor (const rdge::tilemap::Object& def,
                  const rdge::SpriteSheet& sheet,
                  rdge::SpriteLayer& layer,
@@ -52,10 +52,10 @@ public:
     rdge::sprite_data* sprite = nullptr;
     rdge::physics::RigidBody* body = nullptr;
 
-    size_t num_fixtures = 0;
-    rdge::physics::Fixture* fixtures[MAX_FIXTURES];
-
-    action_trigger_data trigger;
+    //!@{ Fixtures (collision / triggers)
+    std::vector<fixture_user_data> collidables;
+    std::vector<fixture_user_data> triggers;
+    //!@}
 
 private:
     rdge::uint32 m_actorId = 0;

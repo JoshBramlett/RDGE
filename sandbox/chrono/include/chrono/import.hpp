@@ -1,18 +1,14 @@
 #pragma once
 
-#include <chrono/globals.hpp>
-
-#include <rdge/math/vec2.hpp>
-#include <rdge/gameobjects/types.hpp>
-
 //!@{ Forward declarations
+struct spawn_point_data;
+struct fixture_user_data;
 namespace rdge {
 namespace tilemap {
 class Object;
 struct extended_object_data;
 } // namespace tilemap
 namespace physics {
-class Fixture;
 class RigidBody;
 } // namespace tilemap
 } // namespace rdge
@@ -28,35 +24,22 @@ class RigidBody;
 //       reference to the ext data because they don't have a tilemap parent.
 //       These objects must provide a reference to the data when calling.
 
-struct spawn_point_data
-{
-    rdge::math::vec2 pos;
-    rdge::Direction facing = rdge::Direction::NONE;
-    chrono_action_id action_id = chrono_action_none;
-    chrono_actor_id actor_id = chrono_actor_none;
-    bool is_default = false;
-};
-
-struct action_trigger_data
-{
-    rdge::physics::Fixture* fixture = nullptr;
-    chrono_action_id action_id = chrono_action_none;
-    chrono_scene_id scene_id = chrono_scene_none;
-    bool invoke_required = false;
-};
+namespace perch {
 
 //! \brief Objects with ext_type == "spawn_point"
 spawn_point_data
 ProcessSpawnPoint (const rdge::tilemap::Object&);
 
 //! \brief Objects with ext_type == "action_trigger"
-action_trigger_data
+fixture_user_data
 ProcessActionTrigger (rdge::physics::RigidBody*,
                       const rdge::tilemap::Object&,
                       const rdge::tilemap::extended_object_data* = nullptr);
 
 //! \brief Objects with ext_type == "collidable"
-rdge::physics::Fixture*
+fixture_user_data
 ProcessCollidable (rdge::physics::RigidBody*,
                    const rdge::tilemap::Object&,
                    const rdge::tilemap::extended_object_data* = nullptr);
+
+} // namespace perch

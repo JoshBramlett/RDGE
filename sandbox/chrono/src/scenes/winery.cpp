@@ -1,14 +1,15 @@
-#include <chrono/scenes/winery.hpp>
+#include "winery.hpp"
+#include "contact_handler.hpp"
+#include "macros.hpp"
 #include <chrono/asset_table.hpp>
 #include <chrono/globals.hpp>
+#include <chrono/types.hpp>
+#include <chrono/import.hpp>
 
 #include <rdge/assets.hpp>
 #include <rdge/math.hpp>
 #include <rdge/util.hpp>
-
-#define CREATE_TILE_LAYER(c, m, id) do {                                    \
-    c.emplace_back(m->CreateTileLayer(id, g_game.ratios.base_to_screen));   \
-} while (false)
+#include <rdge/debug/assert.hpp>
 
 using namespace rdge;
 using namespace rdge::math;
@@ -30,7 +31,7 @@ WineryScene::WineryScene (void)
         const auto& def = tilemap->layers[winery_layer_spawns];
         for (const auto& obj : def.objectgroup.objects)
         {
-            this->spawn_points.emplace_back(ProcessSpawnPoint(obj));
+            this->spawn_points.emplace_back(perch::ProcessSpawnPoint(obj));
         }
     }
 
@@ -120,7 +121,7 @@ WineryScene::WineryScene (void)
         }
 
         // TODO clean this up
-        SDL_assert(!player_pos.is_zero());
+        RDGE_ASSERT(!player_pos.is_zero());
         player.Init(player_pos, layer, collision_graph);
         player.InitPosition(player_pos, facing);
 
@@ -143,13 +144,18 @@ WineryScene::WineryScene (void)
                 bprof.position = obj.pos * g_game.ratios.base_to_world;
                 auto body = collision_graph.CreateBody(bprof);
 
-                ProcessCollidable(body, obj);
+                perch::ProcessCollidable(body, obj);
             }
         }
     }
 
+    ///////////////////
+    // Action Triggers
+    ///////////////////
+
     {
         const auto& def = tilemap->layers[winery_layer_triggers];
+        this->triggers.reserve(def.objectgroup.objects.size());
         for (const auto& obj : def.objectgroup.objects)
         {
             if (obj.ext_type == "action_trigger")
@@ -159,15 +165,14 @@ WineryScene::WineryScene (void)
 
                 bprof.type = RigidBodyType::STATIC;
                 bprof.position = obj.pos * g_game.ratios.base_to_world;
-                bprof.user_data = this;
                 auto body = collision_graph.CreateBody(bprof);
 
-                ILOG() << "ActionTrigger: " << obj.name;
-                this->triggers.emplace_back(ProcessActionTrigger(body, obj));
+                this->triggers.emplace_back(perch::ProcessActionTrigger(body, obj));
+                auto& trigger = this->triggers.back();
+                trigger.fixture->user_data = (void*)&trigger;
             }
         }
     }
-
 
     debug::AddWidget(this);
     debug::settings::show_overlay = true;
@@ -249,7 +254,7 @@ WineryScene::OnEvent (const Event& event)
         {
             if (args.IsKeyPressed() && args.Key() == KeyCode::BACKSPACE)
             {
-                QueueCustomEvent(g_game.custom_events.push_scene, 0);
+                QueueCustomEvent(g_game.custom_events[ActionType::SCENE_PUSH], 0);
             }
         }
     }
@@ -294,20 +299,13 @@ WineryScene::OnRender (void)
 void
 WineryScene::OnContactStart (Contact* c)
 {
-    //rdge::Unused(c);
-    if (c->HasSensor())
-    {
-        ILOG() << "OnContactStart";
-    }
-
-    ILOG() << "meh";
+    perch::ProcessContactStart(c);
 }
 
 void
 WineryScene::OnContactEnd (Contact* c)
 {
-    rdge::Unused(c);
-    //std::cout << "OnContactEnd" << std::endl;
+    perch::ProcessContactEnd(c);
 }
 
 void

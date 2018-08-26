@@ -95,6 +95,7 @@ Player::Init (const math::vec2& pos, SpriteLayer& layer, CollisionGraph& graph)
     bprof.prevent_rotation = true;
     bprof.prevent_sleep = true;
     bprof.linear_damping = 0.5f;
+    bprof.user_data = (void*)this;
     this->body = graph.CreateBody(bprof);
 
     {
@@ -122,7 +123,7 @@ Player::Init (const math::vec2& pos, SpriteLayer& layer, CollisionGraph& graph)
         this->envbox = body->CreateFixture(fprof);
     }
 
-#if 0
+#if 1
     {
         // directional sensors
         fixture_profile fprof;
@@ -131,21 +132,45 @@ Player::Init (const math::vec2& pos, SpriteLayer& layer, CollisionGraph& graph)
         fprof.filter.mask = chrono_collision_category_enemy_hitbox |
                             chrono_collision_category_environment_triggers;
 
-        circle c(math::vec2(-0.5f, 0.f), 0.95f);
-        fprof.shape = &c;
-        this->dir_sensors[Direction::LEFT] = body->CreateFixture(fprof);
+        {
+            circle c(math::vec2(-0.5f, 0.f), 0.95f);
+            fprof.shape = &c;
 
-        c = circle(math::vec2(0.5f, 0.f), 0.95f);
-        fprof.shape = &c;
-        this->dir_sensors[Direction::RIGHT] = body->CreateFixture(fprof);
+            auto& sensor = this->dir_sensors[Direction::LEFT];
+            sensor.type = fixture_user_data_player_sensor_left;
+            sensor.fixture = body->CreateFixture(fprof);
+            sensor.fixture->user_data = (void*)&sensor;
+        }
 
-        c = circle(math::vec2(0.f, 1.f), 0.5f);
-        fprof.shape = &c;
-        this->dir_sensors[Direction::UP] = body->CreateFixture(fprof);
+        {
+            circle c(math::vec2(0.5f, 0.f), 0.95f);
+            fprof.shape = &c;
 
-        c = circle(math::vec2(0.f, -1.f), 0.5f);
-        fprof.shape = &c;
-        this->dir_sensors[Direction::DOWN] = body->CreateFixture(fprof);
+            auto& sensor = this->dir_sensors[Direction::RIGHT];
+            sensor.type = fixture_user_data_player_sensor_right;
+            sensor.fixture = body->CreateFixture(fprof);
+            sensor.fixture->user_data = (void*)&sensor;
+        }
+
+        {
+            circle c(math::vec2(0.f, 1.f), 0.5f);
+            fprof.shape = &c;
+
+            auto& sensor = this->dir_sensors[Direction::UP];
+            sensor.type = fixture_user_data_player_sensor_up;
+            sensor.fixture = body->CreateFixture(fprof);
+            sensor.fixture->user_data = (void*)&sensor;
+        }
+
+        {
+            circle c(math::vec2(0.f, -1.f), 0.5f);
+            fprof.shape = &c;
+
+            auto& sensor = this->dir_sensors[Direction::DOWN];
+            sensor.type = fixture_user_data_player_sensor_down;
+            sensor.fixture = body->CreateFixture(fprof);
+            sensor.fixture->user_data = (void*)&sensor;
+        }
     }
 #endif
 }
@@ -193,7 +218,8 @@ Player::OnUpdate (const delta_time& dt)
             }
             else
             {
-                Fixture* sensor = dir_sensors[this->facing];
+#if 0
+                Fixture* sensor = dir_sensors[this->facing].fixture;
                 body->contact_edges.for_each([=](auto* edge) {
                     Contact* c = edge->contact;
                     Fixture* other = nullptr;
@@ -212,6 +238,7 @@ Player::OnUpdate (const delta_time& dt)
                         actor->OnMeleeAttack(1.f, sensor->GetWorldCenter());
                     }
                 });
+#endif
             }
         }
     }
@@ -313,4 +340,17 @@ ActionType
 Player::GetActionType (void) const noexcept
 {
     return ActionType::NONE;
+}
+
+/* static */ Player*
+Player::Extract (const fixture_user_data* user_data)
+{
+    SDL_assert(user_data);
+    SDL_assert(user_data->fixture);
+
+    auto body = user_data->fixture->body;
+    SDL_assert(body);
+    SDL_assert(body->user_data);
+
+    return static_cast<Player*>(body->user_data);
 }

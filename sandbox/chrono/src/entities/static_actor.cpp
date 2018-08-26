@@ -1,6 +1,7 @@
 #include <chrono/entities/static_actor.hpp>
 #include <chrono/asset_table.hpp>
 #include <chrono/globals.hpp>
+#include <chrono/import.hpp>
 
 #include <rdge/assets.hpp>
 #include <rdge/math.hpp>
@@ -50,22 +51,21 @@ StaticActor::StaticActor (const Object& obj,
         this->body = graph.CreateBody(bprof);
 
         // cache lookup, even if we don't need it
-        auto collidable_data = obj.parent->GetSharedObjectData("collidable");
-        auto action_trigger_data = obj.parent->GetSharedObjectData("action_trigger");
-        SDL_assert(collidable_data);
-        SDL_assert(action_trigger_data);
+        auto ext_data_a = obj.parent->GetSharedObjectData("collidable");
+        auto ext_data_b = obj.parent->GetSharedObjectData("action_trigger");
+        SDL_assert(ext_data_a);
+        SDL_assert(ext_data_b);
 
-        SDL_assert(region.objects.size() <= MAX_FIXTURES);
         for (size_t i = 0; i < region.objects.size(); i++)
         {
             const auto& child = region.objects[i];
             if (child.ext_type == "collidable")
             {
-                fixtures[num_fixtures++] = ProcessCollidable(body, child, collidable_data);
+                this->collidables.emplace_back(perch::ProcessCollidable(body, child, ext_data_a));
             }
             else if (child.ext_type == "action_trigger")
             {
-                trigger = ProcessActionTrigger(body, child, action_trigger_data);
+                this->triggers.emplace_back(perch::ProcessActionTrigger(body, child, ext_data_b));
             }
         }
     }

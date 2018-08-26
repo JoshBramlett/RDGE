@@ -1,24 +1,24 @@
-#include <chrono/util/tilemap_helpers.hpp>
+#include <chrono/import.hpp>
+#include <chrono/globals.hpp>
+#include <chrono/types.hpp>
 
 #include <rdge/assets.hpp>
 #include <rdge/gameobjects.hpp>
-#include <rdge/math.hpp>
 #include <rdge/physics.hpp>
-#include <rdge/system.hpp>
-#include <rdge/util.hpp>
-
-#include <SDL_assert.h>
+#include <rdge/debug/assert.hpp>
 
 using namespace rdge;
+
+namespace perch {
 
 spawn_point_data
 ProcessSpawnPoint (const tilemap::Object& obj)
 {
     // Spawn points should never be nested objects, meaning the 'ext' data
     // should always be available
-    SDL_assert(obj.ext_type == "spawn_point");
-    SDL_assert(obj.ext_data);
-    SDL_assert(obj.type == tilemap::ObjectType::POINT);
+    RDGE_ASSERT(obj.ext_type == "spawn_point");
+    RDGE_ASSERT(obj.ext_data);
+    RDGE_ASSERT(obj.type == tilemap::ObjectType::POINT);
 
     const auto& props = obj.properties;
     const auto& ext_props = obj.ext_data->properties;
@@ -35,27 +35,29 @@ ProcessSpawnPoint (const tilemap::Object& obj)
         ? props.GetBool("is_default")
         : ext_props.GetBool("is_default");
 
-    std::string facing = (props.HasProperty("facing"))
-        ? props.GetString("facing")
-        : ext_props.GetString("facing");
+    {
+        std::string s = (props.HasProperty("facing"))
+            ? props.GetString("facing")
+            : ext_props.GetString("facing");
 
-    bool parse_result = rdge::try_parse(facing, result.facing);
-    SDL_assert(parse_result);
+        bool parse_result = rdge::try_parse(s, result.facing);
+        RDGE_ASSERT(parse_result);
+    }
 
     return result;
 }
 
-action_trigger_data
+fixture_user_data
 ProcessActionTrigger (rdge::physics::RigidBody* body,
                       const tilemap::Object& obj,
                       const rdge::tilemap::extended_object_data* ext_data)
 {
     // Action triggers may or may not be nested objects, so if the 'ext' data
     // is not available we retrieve it from the parent
-    SDL_assert(obj.ext_type == "action_trigger");
-    SDL_assert(obj.IsFixture());
+    RDGE_ASSERT(obj.ext_type == "action_trigger");
+    RDGE_ASSERT(obj.IsFixture());
 
-    SDL_assert((ext_data && !obj.ext_data) || (!ext_data && obj.ext_data));
+    RDGE_ASSERT((ext_data && !obj.ext_data) || (!ext_data && obj.ext_data));
     if (!ext_data)
     {
         ext_data = obj.ext_data;
@@ -64,17 +66,36 @@ ProcessActionTrigger (rdge::physics::RigidBody* body,
     const auto& props = obj.properties;
     const auto& ext_props = ext_data->properties;
 
-    action_trigger_data result;
+    fixture_user_data result;
+    result.type = fixture_user_data_action_trigger;
     result.fixture = nullptr;
-    result.action_id = (props.HasProperty("action_id"))
+    result.action_trigger.action_id = (props.HasProperty("action_id"))
         ? static_cast<chrono_action_id>(props.GetInt("action_id"))
         : static_cast<chrono_action_id>(ext_props.GetInt("action_id"));
-    result.scene_id = (props.HasProperty("scene_id"))
+    result.action_trigger.scene_id = (props.HasProperty("scene_id"))
         ? static_cast<chrono_scene_id>(props.GetInt("scene_id"))
         : static_cast<chrono_scene_id>(ext_props.GetInt("scene_id"));
-    result.invoke_required = (props.HasProperty("invoke_required"))
+    result.action_trigger.invoke_required = (props.HasProperty("invoke_required"))
         ? props.GetBool("invoke_required")
         : ext_props.GetBool("invoke_required");
+
+    {
+        std::string s = (props.HasProperty("action_type"))
+            ? props.GetString("action_type")
+            : ext_props.GetString("action_type");
+
+        bool parse_result = rdge::try_parse(s, result.action_trigger.action_type);
+        RDGE_ASSERT(parse_result);
+    }
+
+    {
+        std::string s = (props.HasProperty("facing_required"))
+            ? props.GetString("facing_required")
+            : ext_props.GetString("facing_required");
+
+        bool parse_result = rdge::try_parse(s, result.action_trigger.facing_required);
+        RDGE_ASSERT(parse_result);
+    }
 
     physics::fixture_profile fprof;
     fprof.is_sensor = true;
@@ -99,23 +120,23 @@ ProcessActionTrigger (rdge::physics::RigidBody* body,
     }
     else
     {
-        SDL_assert(false);
+        RDGE_ASSERT(false);
     }
 
     return result;
 }
 
-physics::Fixture*
+fixture_user_data
 ProcessCollidable (rdge::physics::RigidBody* body,
                    const tilemap::Object& obj,
                    const rdge::tilemap::extended_object_data* ext_data)
 {
     // Collidable objects may or may not be nested objects, so if the 'ext' data
     // is not available we retrieve it from the parent
-    SDL_assert(obj.ext_type == "collidable");
-    SDL_assert(obj.IsFixture());
+    RDGE_ASSERT(obj.ext_type == "collidable");
+    RDGE_ASSERT(obj.IsFixture());
 
-    SDL_assert((ext_data && !obj.ext_data) || (!ext_data && obj.ext_data));
+    RDGE_ASSERT((ext_data && !obj.ext_data) || (!ext_data && obj.ext_data));
     if (!ext_data)
     {
         ext_data = obj.ext_data;
@@ -123,6 +144,10 @@ ProcessCollidable (rdge::physics::RigidBody* body,
 
     const auto& props = obj.properties;
     const auto& ext_props = ext_data->properties;
+
+    fixture_user_data result;
+    result.type = fixture_user_data_collidable;
+    result.fixture = nullptr;
 
     physics::fixture_profile fprof;
     fprof.is_sensor = false;
@@ -145,25 +170,26 @@ ProcessCollidable (rdge::physics::RigidBody* body,
     fprof.override_color = true;
     fprof.wireframe = ext_data->color;
 
-    physics::Fixture* result = nullptr;
     if (obj.type == tilemap::ObjectType::CIRCLE)
     {
         auto c = obj.GetCircle(g_game.ratios.base_to_world);
         fprof.shape = &c;
-        result = body->CreateFixture(fprof);
+        result.fixture = body->CreateFixture(fprof);
     }
     else if (obj.type == tilemap::ObjectType::POLYGON)
     {
         // if the object has a parent tilemap placement is global
         auto p = obj.GetPolygon(g_game.ratios.base_to_world, (obj.parent != nullptr));
         fprof.shape = &p;
-        result = body->CreateFixture(fprof);
+        result.fixture = body->CreateFixture(fprof);
     }
     else
     {
-        SDL_assert(false);
+        RDGE_ASSERT(false);
     }
 
-    SDL_assert(result);
+    RDGE_ASSERT(result.fixture);
     return result;
 }
+
+} // namespace perch

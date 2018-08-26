@@ -432,28 +432,28 @@ public:
     //! \brief Event type triggering the event
     //! \details The type is provided by the user when queueing.
     //! \returns Event type that triggered the event
-    rdge::uint32 Type (void) const
+    uint32 Type (void) const
     {
         return type;
     }
 
     //! \brief The user defined event code
     //! \returns User defined code
-    constexpr rdge::int32 Code (void)
+    constexpr int32 Code (void) const
     {
         return code;
     }
 
     //! \brief User defined data pointer
     //! \returns User defined data pointer
-    constexpr void* Data1 (void)
+    constexpr void* Data1 (void) const
     {
         return data1;
     }
 
     //! \brief User defined data pointer
     //! \returns User defined data pointer
-    constexpr void* Data2 (void)
+    constexpr void* Data2 (void) const
     {
         return data2;
     }
@@ -622,7 +622,7 @@ uint32 RegisterCustomEvent (void);
 //! \param [in] data2 User defined data pointer
 //! \throws rdge::SDLException Error occured while pushing event on the queue
 void QueueCustomEvent (uint32 type,
-                       int32  code,
+                       int32  code = 0,
                        void*  data1 = nullptr,
                        void*  data2 = nullptr);
 

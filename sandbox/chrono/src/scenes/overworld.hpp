@@ -11,17 +11,17 @@
 #include <memory>
 
 #include <chrono/entities/player.hpp>
+#include <chrono/entities/npcs/debutante.hpp>
 #include <chrono/entities/static_actor.hpp>
-#include <chrono/util/tilemap_helpers.hpp>
 
-class WineryScene
+class OverworldScene
     : public rdge::IScene
     , public rdge::physics::GraphListener
     , public rdge::debug::IWidget
 {
 public:
-    WineryScene (void);
-    ~WineryScene (void) noexcept = default;
+    OverworldScene (void);
+    ~OverworldScene (void) noexcept = default;
 
     //!@{ IScene - Scene Transitions
     void Initialize (void) override;
@@ -59,19 +59,23 @@ public:
     rdge::SpriteBatch sprite_batch;
     rdge::TileBatch tile_batch;
     std::vector<rdge::SpriteLayer> sprite_layers;
-    std::vector<rdge::TileLayer> background_layers;
-    std::vector<rdge::TileLayer> foreground_layers;
+    std::vector<rdge::TileLayer> tile_layers;
     //!@}
 
     //!@{ Actors
     Player player;
+    Debutante debutante;
     std::vector<StaticActor> static_actors;
     //!@}
 
-    //!@{ Spawn Points
+    //!@{ Spawn Points / Triggers
     std::vector<spawn_point_data> spawn_points;
-    std::vector<action_trigger_data> triggers;
+    std::vector<fixture_user_data> triggers;
     //!@}
+
+    rdge::BitmapCharset mah_charset;
+    rdge::GlyphLayout mah_text;
+
 
     // debug
     bool show_widget = true;

@@ -1,10 +1,15 @@
-#include <chrono/scenes/overworld.hpp>
+#include "overworld.hpp"
+#include "contact_handler.hpp"
+#include "macros.hpp"
 #include <chrono/asset_table.hpp>
 #include <chrono/globals.hpp>
+#include <chrono/types.hpp>
+#include <chrono/import.hpp>
 
 #include <rdge/assets.hpp>
 #include <rdge/math.hpp>
 #include <rdge/util.hpp>
+#include <rdge/debug/assert.hpp>
 
 using namespace rdge;
 using namespace rdge::math;
@@ -29,6 +34,18 @@ OverworldScene::OverworldScene (void)
     auto tilemap = g_game.pack->GetAsset<tilemap::Tilemap>(rdge_asset_tilemap_overworld);
 
     ///////////////////
+    // Spawn Points
+    ///////////////////
+
+    {
+        const auto& def = tilemap->layers[overworld_layer_spawns];
+        for (const auto& obj : def.objectgroup.objects)
+        {
+            this->spawn_points.emplace_back(perch::ProcessSpawnPoint(obj));
+        }
+    }
+
+    ///////////////////
     // Tile layers
     ///////////////////
 
@@ -40,17 +57,18 @@ OverworldScene::OverworldScene (void)
     //      resolution supported.
     size_t tile_count = tilemap->grid.size.w * tilemap->grid.size.h;
     auto tile_size = static_cast<math::vec2>(tilemap->grid.cell_size) * g_game.ratios.base_to_screen;
-
     tile_batch = TileBatch(tile_count, tile_size);
-    tile_layers.reserve(4);
-    tile_layers.emplace_back(tilemap->CreateTileLayer(overworld_layer_bg,
-                                                      g_game.ratios.base_to_screen));
-    tile_layers.emplace_back(tilemap->CreateTileLayer(overworld_layer_bg_overlay_1,
-                                                      g_game.ratios.base_to_screen));
-    tile_layers.emplace_back(tilemap->CreateTileLayer(overworld_layer_bg_overlay_2,
-                                                      g_game.ratios.base_to_screen));
-    tile_layers.emplace_back(tilemap->CreateTileLayer(overworld_layer_bg_overlay_4,
-                                                      g_game.ratios.base_to_screen));
+
+    {
+        auto& c = this->tile_layers;
+
+        c.reserve(6);
+        CREATE_TILE_LAYER(c, tilemap, overworld_layer_bg);
+        CREATE_TILE_LAYER(c, tilemap, overworld_layer_bg_overlay_1);
+        CREATE_TILE_LAYER(c, tilemap, overworld_layer_bg_overlay_2);
+        CREATE_TILE_LAYER(c, tilemap, overworld_layer_bg_overlay_4);
+        CREATE_TILE_LAYER(c, tilemap, overworld_layer_bg_overlay_5);
+    }
 
     ///////////////////
     // Sprite layers
@@ -72,8 +90,23 @@ OverworldScene::OverworldScene (void)
 
         auto& layer = this->sprite_layers.back();
         layer.name = def.name;
-        math::vec2 player_pos(650.f, -526.f);
+
+        math::vec2 player_pos;
+        Direction facing;
+        for (const auto& spawn : this->spawn_points)
+        {
+            if (spawn.is_default)
+            {
+                player_pos = spawn.pos;
+                facing = spawn.facing;
+                break;
+            }
+        }
+
+        // TODO clean this up
+        RDGE_ASSERT(!player_pos.is_zero());
         player.Init(player_pos, layer, collision_graph);
+        player.InitPosition(player_pos, facing);
 
         math::vec2 debutante_pos(550.f, -426.f);
         debutante.Init(debutante_pos, layer, collision_graph);
@@ -130,7 +163,32 @@ OverworldScene::OverworldScene (void)
                 bprof.position = obj.pos * g_game.ratios.base_to_world;
                 auto body = collision_graph.CreateBody(bprof);
 
-                ProcessCollidable(body, obj);
+                perch::ProcessCollidable(body, obj);
+            }
+        }
+    }
+
+    ///////////////////
+    // Action Triggers
+    ///////////////////
+
+    {
+        const auto& def = tilemap->layers[overworld_layer_triggers];
+        this->triggers.reserve(def.objectgroup.objects.size());
+        for (const auto& obj : def.objectgroup.objects)
+        {
+            if (obj.ext_type == "action_trigger")
+            {
+                rigid_body_profile bprof;
+                fixture_profile fprof;
+
+                bprof.type = RigidBodyType::STATIC;
+                bprof.position = obj.pos * g_game.ratios.base_to_world;
+                auto body = collision_graph.CreateBody(bprof);
+
+                this->triggers.emplace_back(perch::ProcessActionTrigger(body, obj));
+                auto& trigger = this->triggers.back();
+                trigger.fixture->user_data = (void*)&trigger;
             }
         }
     }
@@ -238,15 +296,13 @@ OverworldScene::OnRender (void)
 void
 OverworldScene::OnContactStart (Contact* c)
 {
-    rdge::Unused(c);
-    //std::cout << "OnContactStart" << std::endl;
+    perch::ProcessContactStart(c);
 }
 
 void
 OverworldScene::OnContactEnd (Contact* c)
 {
-    rdge::Unused(c);
-    //std::cout << "OnContactEnd" << std::endl;
+    perch::ProcessContactEnd(c);
 }
 
 void

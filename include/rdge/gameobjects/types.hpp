@@ -20,7 +20,20 @@ enum class ActionType
     DIALOG     = 1,
     SCENE_PUSH = 2,
     SCENE_POP  = 3,
-    SCENE_SWAP = 4
+    SCENE_SWAP = 4,
+
+    COUNT      = 5
+};
+
+template <typename T>
+class ActionTypeArray
+{
+public:
+    T& operator[] (ActionType t) { return m_arr[to_underlying(t)]; }
+    const T& operator[] (ActionType t) const { return m_arr[to_underlying(t)]; }
+
+private:
+    T m_arr[to_underlying(ActionType::COUNT)];
 };
 
 //! \enum Direction
@@ -83,12 +96,11 @@ template <typename T>
 class CardinalDirectionArray
 {
 public:
-    T& operator[] (rdge::Direction dir)
-    {
-        return elements[rdge::math::lsb(rdge::to_underlying(dir)) - 1];
-    }
+    T& operator[] (Direction d) { return m_arr[math::lsb(to_underlying(d)) - 1]; }
+    const T& operator[] (Direction d) const { return m_arr[math::lsb(to_underlying(d)) - 1]; }
 
-    T elements[4];
+private:
+    T m_arr[4];
 };
 
 //! \brief ActionType stream output operator

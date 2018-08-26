@@ -20,6 +20,7 @@ namespace opengl {
 
 // Verify OpenGL / RDGE type compatibility
 // TODO Move to cpp file, so it'll get built
+//      Is the above actually true?
 static_assert(std::is_same<GLubyte,   uint8>::value,  "GLubyte != uint8");
 static_assert(std::is_same<GLbyte,    int8>::value,   "GLbyte != int8");
 static_assert(std::is_same<GLushort,  uint16>::value, "GLushort != uint16");
