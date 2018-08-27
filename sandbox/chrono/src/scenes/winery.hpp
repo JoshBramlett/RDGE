@@ -73,6 +73,11 @@ public:
     std::vector<fixture_user_data> triggers;
     //!@}
 
-    // debug
-    bool show_widget = true;
+
+private:
+    // debugging
+    void RegisterToDebugger (void);
+    void UnregisterFromDebugger (void);
+    bool m_showWidget = false;
+    rdge::uint32 m_overlaySettingsCache = 0;
 };

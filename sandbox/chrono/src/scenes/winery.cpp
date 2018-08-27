@@ -10,6 +10,7 @@
 #include <rdge/math.hpp>
 #include <rdge/util.hpp>
 #include <rdge/debug/assert.hpp>
+#include <rdge/debug/renderer.hpp>
 
 using namespace rdge;
 using namespace rdge::math;
@@ -175,12 +176,11 @@ WineryScene::WineryScene (void)
     }
 
     debug::AddWidget(this);
-    debug::settings::show_overlay = true;
-    debug::settings::physics::draw_fixtures = true;
 }
 
 WineryScene::~WineryScene (void) noexcept
 {
+    debug::RemoveWidget(this);
     collision_graph.listener = nullptr;
 }
 
@@ -188,64 +188,32 @@ void
 WineryScene::Initialize (void)
 {
     ILOG() << "WineryScene::Initialize";
-    debug::RegisterCamera(&camera);
-    debug::RegisterPhysics(&collision_graph, g_game.ratios.world_to_screen);
-
-    for (auto& layer : this->sprite_layers)
-    {
-        debug::RegisterGraphics(&layer);
-    }
-
-    for (auto& layer : this->background_layers)
-    {
-        debug::RegisterGraphics(&layer);
-    }
-
-    for (auto& layer : this->foreground_layers)
-    {
-        debug::RegisterGraphics(&layer);
-    }
+    RegisterToDebugger();
+    debug::settings::show_overlay = true;
+    debug::settings::physics::draw_fixtures = true;
 }
 
 void
 WineryScene::Terminate (void)
 {
     ILOG() << "WineryScene::Terminate";
-    debug::RegisterCamera(nullptr);
-    debug::RegisterPhysics(nullptr);
-    debug::ClearGraphics();
+    UnregisterFromDebugger();
 }
 
 void
 WineryScene::Activate (void)
 {
     ILOG() << "WineryScene::Activate";
-    debug::RegisterCamera(&camera);
-    debug::RegisterPhysics(&collision_graph, g_game.ratios.world_to_screen);
-
-    for (auto& layer : this->sprite_layers)
-    {
-        debug::RegisterGraphics(&layer);
-    }
-
-    for (auto& layer : this->background_layers)
-    {
-        debug::RegisterGraphics(&layer);
-    }
-
-    for (auto& layer : this->foreground_layers)
-    {
-        debug::RegisterGraphics(&layer);
-    }
+    RegisterToDebugger();
+    debug::LoadSettings(m_overlaySettingsCache);
 }
 
 void
 WineryScene::Hibernate (void)
 {
     ILOG() << "WineryScene::Hibernate";
-    debug::RegisterCamera(nullptr);
-    debug::RegisterPhysics(nullptr);
-    debug::ClearGraphics();
+    UnregisterFromDebugger();
+    m_overlaySettingsCache = debug::CacheSettings();
 }
 
 void
@@ -326,12 +294,12 @@ WineryScene::OnDestroyed (Fixture*)
 void
 WineryScene::UpdateWidget (void)
 {
-#if 0
-    if (!this->show_widget)
+    if (!m_showWidget)
     {
         return;
     }
 
+#if 0
     ImGuiIO& io = ImGui::GetIO();
     float fb_width = static_cast<float>(io.DisplaySize.x);
     float fb_height = static_cast<float>(io.DisplaySize.y);
@@ -386,3 +354,34 @@ WineryScene::UpdateWidget (void)
 void
 WineryScene::OnWidgetCustomRender (void)
 { }
+
+void
+WineryScene::RegisterToDebugger (void)
+{
+    debug::RegisterCamera(&camera);
+    debug::RegisterPhysics(&collision_graph, g_game.ratios.world_to_screen);
+
+    for (auto& layer : this->sprite_layers)
+    {
+        debug::RegisterGraphics(&layer);
+    }
+
+    for (auto& layer : this->background_layers)
+    {
+        debug::RegisterGraphics(&layer);
+    }
+
+    for (auto& layer : this->foreground_layers)
+    {
+        debug::RegisterGraphics(&layer);
+    }
+}
+
+void
+WineryScene::UnregisterFromDebugger (void)
+{
+    debug::RegisterCamera(nullptr);
+    debug::RegisterPhysics(nullptr);
+    debug::ClearGraphics();
+}
+

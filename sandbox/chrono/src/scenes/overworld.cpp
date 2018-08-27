@@ -1,6 +1,7 @@
 #include "overworld.hpp"
 #include "contact_handler.hpp"
 #include "macros.hpp"
+
 #include <chrono/asset_table.hpp>
 #include <chrono/globals.hpp>
 #include <chrono/types.hpp>
@@ -10,6 +11,7 @@
 #include <rdge/math.hpp>
 #include <rdge/util.hpp>
 #include <rdge/debug/assert.hpp>
+#include <rdge/debug/renderer.hpp>
 
 using namespace rdge;
 using namespace rdge::math;
@@ -194,12 +196,11 @@ OverworldScene::OverworldScene (void)
     }
 
     debug::AddWidget(this);
-    debug::settings::show_overlay = true;
-    debug::settings::physics::draw_fixtures = true;
 }
 
 OverworldScene::~OverworldScene (void) noexcept
 {
+    debug::RemoveWidget(this);
     collision_graph.listener = nullptr;
 }
 
@@ -207,54 +208,32 @@ void
 OverworldScene::Initialize (void)
 {
     ILOG() << "OverworldScene::Initialize";
-    debug::RegisterCamera(&camera);
-    debug::RegisterPhysics(&collision_graph, g_game.ratios.world_to_screen);
-
-    for (auto& layer : this->sprite_layers)
-    {
-        debug::RegisterGraphics(&layer);
-    }
-
-    for (auto& layer : this->tile_layers)
-    {
-        debug::RegisterGraphics(&layer);
-    }
+    RegisterToDebugger();
+    debug::settings::show_overlay = true;
+    debug::settings::physics::draw_fixtures = true;
 }
 
 void
 OverworldScene::Terminate (void)
 {
     ILOG() << "OverworldScene::Terminate";
-    debug::RegisterCamera(nullptr);
-    debug::RegisterPhysics(nullptr);
-    debug::ClearGraphics();
+    UnregisterFromDebugger();
 }
 
 void
 OverworldScene::Activate (void)
 {
     ILOG() << "OverworldScene::Activate";
-    debug::RegisterCamera(&camera);
-    debug::RegisterPhysics(&collision_graph, g_game.ratios.world_to_screen);
-
-    for (auto& layer : this->sprite_layers)
-    {
-        debug::RegisterGraphics(&layer);
-    }
-
-    for (auto& layer : this->tile_layers)
-    {
-        debug::RegisterGraphics(&layer);
-    }
+    RegisterToDebugger();
+    debug::LoadSettings(m_overlaySettingsCache);
 }
 
 void
 OverworldScene::Hibernate (void)
 {
     ILOG() << "OverworldScene::Hibernate";
-    debug::RegisterCamera(nullptr);
-    debug::RegisterPhysics(nullptr);
-    debug::ClearGraphics();
+    UnregisterFromDebugger();
+    m_overlaySettingsCache = debug::CacheSettings();
 }
 
 void
@@ -334,12 +313,12 @@ OverworldScene::OnDestroyed (Fixture*)
 void
 OverworldScene::UpdateWidget (void)
 {
-#if 0
-    if (!this->show_widget)
+    if (!m_showWidget)
     {
         return;
     }
 
+#if 0
     ImGuiIO& io = ImGui::GetIO();
     float fb_width = static_cast<float>(io.DisplaySize.x);
     float fb_height = static_cast<float>(io.DisplaySize.y);
@@ -394,3 +373,28 @@ OverworldScene::UpdateWidget (void)
 void
 OverworldScene::OnWidgetCustomRender (void)
 { }
+
+void
+OverworldScene::RegisterToDebugger (void)
+{
+    debug::RegisterCamera(&camera);
+    debug::RegisterPhysics(&collision_graph, g_game.ratios.world_to_screen);
+
+    for (auto& layer : this->sprite_layers)
+    {
+        debug::RegisterGraphics(&layer);
+    }
+
+    for (auto& layer : this->tile_layers)
+    {
+        debug::RegisterGraphics(&layer);
+    }
+}
+
+void
+OverworldScene::UnregisterFromDebugger (void)
+{
+    debug::RegisterCamera(nullptr);
+    debug::RegisterPhysics(nullptr);
+    debug::ClearGraphics();
+}

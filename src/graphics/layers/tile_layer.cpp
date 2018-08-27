@@ -199,7 +199,7 @@ TileLayer::Draw (TileBatch& renderer, const OrthographicCamera& camera)
 {
 #ifdef RDGE_DEBUG
     this->debug_overlay.chunks_drawn = 0;
-    if (this->debug_overlay.hide_layer)
+    if (debug::settings::graphics::hide_all_layers || this->debug_overlay.hide_layer)
     {
         return;
     }

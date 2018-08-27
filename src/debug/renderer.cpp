@@ -57,7 +57,7 @@ namespace graphics {
     std::vector<rdge::SpriteLayer*> active_sprite_layers;
     std::vector<rdge::TileLayer*> active_tile_layers;
 
-    bool draw_sprites;
+    bool hide_all_layers = false;
 
     namespace colors {
         rdge::color sprites = rdge::color::YELLOW;
@@ -98,6 +98,20 @@ using namespace rdge::math;
 using namespace rdge::physics;
 
 namespace {
+
+// Used with CacheSettings/LoadSettings
+enum scene_overlay_flags
+{
+    scene_overlay__none                        = 0x0000,
+    scene_overlay__show_overlay                = 0x0001,
+    scene_overlay__camera_draw_viewport        = 0x0002,
+    scene_overlay__graphics_hide_all_layers    = 0x0004,
+    scene_overlay__physics_draw_fixtures       = 0x0008,
+    scene_overlay__physics_draw_proxy_aabbs    = 0x0010,
+    scene_overlay__physics_draw_joints         = 0x0020,
+    scene_overlay__physics_draw_center_of_mass = 0x0040,
+    scene_overlay__physics_draw_bvh_nodes      = 0x0080
+};
 
 class PointRenderer
 {
@@ -474,6 +488,7 @@ public:
 public:
     Overlay (void)
     {
+        this->widgets.reserve(4);
         this->widgets.push_back(&camera_widget);
         this->widgets.push_back(&graphics_widget);
         this->widgets.push_back(&memory_widget);
@@ -646,6 +661,23 @@ AddWidget (IWidget* widget)
 }
 
 void
+RemoveWidget (IWidget* widget)
+{
+    for (auto it = s_overlay.widgets.begin(); it != s_overlay.widgets.end();)
+    {
+        if (*it == widget)
+        {
+            s_overlay.widgets.erase(it);
+            break;
+        }
+        else
+        {
+            ++it;
+        }
+    }
+}
+
+void
 RegisterCamera (OrthographicCamera* camera)
 {
     settings::camera::active_camera = camera;
@@ -784,6 +816,66 @@ void
 DrawWireFrame (const Fixture* fixture, const color& c, float scale)
 {
     DrawWireFrame(fixture->shape.world, c, scale);
+}
+
+uint32
+CacheSettings (void)
+{
+    uint32 result = 0;
+
+    {
+        using namespace rdge::debug::settings;
+        SET_FLAG(show_overlay, result, scene_overlay__show_overlay);
+    }
+
+    {
+        using namespace rdge::debug::settings::camera;
+        SET_FLAG(draw_viewport, result, scene_overlay__camera_draw_viewport);
+    }
+
+    {
+        using namespace rdge::debug::settings::graphics;
+        SET_FLAG(hide_all_layers, result, scene_overlay__graphics_hide_all_layers);
+    }
+
+    {
+        using namespace rdge::debug::settings::physics;
+        SET_FLAG(draw_fixtures, result, scene_overlay__physics_draw_fixtures);
+        SET_FLAG(draw_proxy_aabbs, result, scene_overlay__physics_draw_proxy_aabbs);
+        SET_FLAG(draw_joints, result, scene_overlay__physics_draw_joints);
+        SET_FLAG(draw_center_of_mass, result, scene_overlay__physics_draw_center_of_mass);
+        SET_FLAG(draw_bvh_nodes, result, scene_overlay__physics_draw_bvh_nodes);
+    }
+
+    return result;
+}
+
+void
+LoadSettings (uint32 flags)
+{
+    {
+        using namespace rdge::debug::settings;
+        show_overlay = (flags & scene_overlay__show_overlay);
+    }
+
+    {
+        using namespace rdge::debug::settings::camera;
+        draw_viewport = (flags & scene_overlay__camera_draw_viewport);
+    }
+
+    {
+        using namespace rdge::debug::settings::graphics;
+        hide_all_layers = (flags & scene_overlay__graphics_hide_all_layers);
+    }
+
+    {
+        using namespace rdge::debug::settings::physics;
+        draw_fixtures       = (flags & scene_overlay__physics_draw_fixtures);
+        draw_proxy_aabbs    = (flags & scene_overlay__physics_draw_proxy_aabbs);
+        draw_joints         = (flags & scene_overlay__physics_draw_joints);
+        draw_center_of_mass = (flags & scene_overlay__physics_draw_center_of_mass);
+        draw_bvh_nodes      = (flags & scene_overlay__physics_draw_bvh_nodes);
+    }
 }
 
 } // namespace debug

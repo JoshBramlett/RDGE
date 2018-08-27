@@ -77,6 +77,10 @@ public:
     rdge::GlyphLayout mah_text;
 
 
-    // debug
-    bool show_widget = true;
+private:
+    // debugging
+    void RegisterToDebugger (void);
+    void UnregisterFromDebugger (void);
+    bool m_showWidget = false;
+    rdge::uint32 m_overlaySettingsCache = 0;
 };

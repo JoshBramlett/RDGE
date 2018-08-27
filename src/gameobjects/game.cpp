@@ -5,15 +5,14 @@
 #include <rdge/util/logger.hpp>
 #include <rdge/util/timer.hpp>
 #include <rdge/debug/renderer.hpp>
-
-#include <SDL_assert.h>
+#include <rdge/debug/assert.hpp>
 
 namespace rdge {
 
 Game::Game (const app_settings& s)
     : settings(s)
 {
-    SDL_assert(this->settings.target_fps >= 30);
+    RDGE_ASSERT(this->settings.target_fps >= 30);
 
     ILOG() << "Constructing Game object";
     this->window = std::make_unique<Window>(this->settings);
@@ -34,7 +33,7 @@ Game::~Game (void) noexcept
 void
 Game::PushScene (std::shared_ptr<IScene> scene)
 {
-    SDL_assert((m_flags & ANY_DEFERRED) == 0);
+    RDGE_ASSERT((m_flags & ANY_DEFERRED) == 0);
 
     if (m_flags & RUNNING)
     {
@@ -64,9 +63,9 @@ Game::PushScene (std::shared_ptr<IScene> scene)
 void
 Game::PopScene (void)
 {
-    SDL_assert(m_flags & RUNNING);
-    SDL_assert((m_flags & ANY_DEFERRED) == 0);
-    SDL_assert(!m_sceneStack.empty());
+    RDGE_ASSERT(m_flags & RUNNING);
+    RDGE_ASSERT((m_flags & ANY_DEFERRED) == 0);
+    RDGE_ASSERT(!m_sceneStack.empty());
 
     // Defer current_scene termination till end of game loop
     m_flags |= POP_DEFERRED;
@@ -76,15 +75,10 @@ Game::PopScene (void)
 void
 Game::SwapScene (std::shared_ptr<IScene> scene)
 {
-    SDL_assert(m_flags & RUNNING);
-    SDL_assert((m_flags & ANY_DEFERRED) == 0);
-    SDL_assert(!m_sceneStack.empty());
-
-    if (m_sceneStack.back() == scene)
-    {
-        DLOG() << "Swap scene ignored.  Scene already current";
-        return;
-    }
+    RDGE_ASSERT(m_flags & RUNNING);
+    RDGE_ASSERT((m_flags & ANY_DEFERRED) == 0);
+    RDGE_ASSERT(!m_sceneStack.empty());
+    RDGE_ASSERT(m_sceneStack.back() != scene);
 
     // Defer current_scene termination till end of game loop
     m_flags |= SWAP_DEFERRED;

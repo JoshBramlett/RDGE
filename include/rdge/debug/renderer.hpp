@@ -78,7 +78,7 @@ namespace graphics {
     extern std::vector<rdge::TileLayer*> active_tile_layers;
 
     // widget flags
-    extern bool draw_sprites;
+    extern bool hide_all_layers;
 
     // default wireframe colors
     namespace colors {
@@ -139,11 +139,17 @@ void SetProjection (const math::mat4& projection);
 
 //!@{ Registers objects with the overlay dialogs
 void AddWidget (IWidget* widget);
+void RemoveWidget (IWidget* widget);
 void RegisterCamera (OrthographicCamera* camera);
 void RegisterPhysics (physics::CollisionGraph* graph, float scale = 1.f);
 void RegisterGraphics (SpriteLayer* layer);
 void RegisterGraphics (TileLayer* layer);
 void ClearGraphics (void);
+//!@}
+
+//!@{ Cache/Load debug overlay settings
+uint32 CacheSettings (void);
+void LoadSettings (uint32 flags);
 //!@}
 
 //!@{ Draw primatives

@@ -35,6 +35,12 @@ GraphicsWidget::UpdateWidget (void)
         return;
     }
 
+    {
+        ImGui::Spacing();
+        ImGui::Checkbox("Hide all Layers", &hide_all_layers);
+        ImGui::Spacing();
+    }
+
     // duplicated check boxes - each requires their own ID
     std::string lbl_hide_layer("Hide Layer##");
     std::string lbl_show_sprite_frames("Show Sprite Frames##");
@@ -95,6 +101,7 @@ GraphicsWidget::UpdateWidget (void)
 #ifdef RDGE_DEBUG_PROFILING
 #endif
 #if 0
+    // Leaving here in case profiling metrics are added to the graphics module
     ImGui::Text("Profiling (us)");
     ImGui::Spacing();
     ImGui::Indent(15.f);
