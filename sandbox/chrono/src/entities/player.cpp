@@ -218,27 +218,7 @@ Player::OnUpdate (const delta_time& dt)
             }
             else
             {
-#if 0
-                Fixture* sensor = dir_sensors[this->facing].fixture;
-                body->contact_edges.for_each([=](auto* edge) {
-                    Contact* c = edge->contact;
-                    Fixture* other = nullptr;
-                    if (sensor == c->fixture_a)
-                    {
-                        other = c->fixture_b;
-                    }
-                    else if (sensor == c->fixture_b)
-                    {
-                        other = c->fixture_a;
-                    }
-
-                    if (other && c->IsTouching())
-                    {
-                        auto actor = static_cast<IActor*>(other->body->user_data);
-                        actor->OnMeleeAttack(1.f, sensor->GetWorldCenter());
-                    }
-                });
-#endif
+                // invoke attack to actor
             }
         }
     }
@@ -336,13 +316,6 @@ Player::BeginAttack (void)
             m_lockedVelocity = 3.f;
         }
     }
-}
-
-void
-Player::OnMeleeAttack (float damage, const rdge::math::vec2& pos)
-{
-    rdge::Unused(damage);
-    rdge::Unused(pos);
 }
 
 uint32

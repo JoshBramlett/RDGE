@@ -81,10 +81,6 @@ StaticActor::OnUpdate (const delta_time&)
     // TODO collision graph culling
 }
 
-void
-StaticActor::OnMeleeAttack (float, const math::vec2&)
-{ }
-
 uint32
 StaticActor::GetActorId (void) const noexcept
 {

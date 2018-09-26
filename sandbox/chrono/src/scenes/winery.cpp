@@ -139,8 +139,6 @@ WineryScene::WineryScene (void)
             if (obj.ext_type == "collidable")
             {
                 rigid_body_profile bprof;
-                fixture_profile fprof;
-
                 bprof.type = RigidBodyType::STATIC;
                 bprof.position = obj.pos * g_game.ratios.base_to_world;
                 auto body = collision_graph.CreateBody(bprof);
@@ -162,8 +160,6 @@ WineryScene::WineryScene (void)
             if (obj.ext_type == "action_trigger")
             {
                 rigid_body_profile bprof;
-                fixture_profile fprof;
-
                 bprof.type = RigidBodyType::STATIC;
                 bprof.position = obj.pos * g_game.ratios.base_to_world;
                 auto body = collision_graph.CreateBody(bprof);

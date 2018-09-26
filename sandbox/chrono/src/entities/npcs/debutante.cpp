@@ -123,10 +123,6 @@ Debutante::OnUpdate (const delta_time& dt)
     sprite->uvs = frame.uvs;
 }
 
-void
-Debutante::OnMeleeAttack (float, const math::vec2&)
-{ }
-
 uint32
 Debutante::GetActorId (void) const noexcept
 {

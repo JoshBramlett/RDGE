@@ -159,8 +159,6 @@ OverworldScene::OverworldScene (void)
             if (obj.ext_type == "collidable")
             {
                 rigid_body_profile bprof;
-                fixture_profile fprof;
-
                 bprof.type = RigidBodyType::STATIC;
                 bprof.position = obj.pos * g_game.ratios.base_to_world;
                 auto body = collision_graph.CreateBody(bprof);
@@ -182,8 +180,6 @@ OverworldScene::OverworldScene (void)
             if (obj.ext_type == "action_trigger")
             {
                 rigid_body_profile bprof;
-                fixture_profile fprof;
-
                 bprof.type = RigidBodyType::STATIC;
                 bprof.position = obj.pos * g_game.ratios.base_to_world;
                 auto body = collision_graph.CreateBody(bprof);
@@ -269,11 +265,8 @@ OverworldScene::OnRender (void)
         layer.Draw(sprite_batch, camera);
     }
 
-    mah_charset.Draw(sprite_batch, mah_text);
-    //math::vec2 text_pos(650.f, -526.f);
-    //mah_charset.Draw(sprite_batch, "Josh. jumps quickly?", text_pos * g_game.ratios.base_to_screen);
-
     // debug drawing
+    mah_charset.Draw(sprite_batch, mah_text);
     debug::SetProjection(camera.combined);
 }
 

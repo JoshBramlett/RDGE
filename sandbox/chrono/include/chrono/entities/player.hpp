@@ -98,7 +98,6 @@ public:
     // IActor
     void OnEvent (const rdge::Event& event) override;
     void OnUpdate (const rdge::delta_time& dt) override;
-    void OnMeleeAttack (float damage, const rdge::math::vec2& pos) override;
 
     rdge::uint32 GetActorId (void) const noexcept override;
     rdge::math::vec2 GetWorldCenter (void) const noexcept override;
