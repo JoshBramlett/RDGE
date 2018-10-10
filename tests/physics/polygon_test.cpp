@@ -25,7 +25,7 @@ TEST(PolygonTest, HandlesConstruction)
         //vertices[2]=[4, 2] normals[2]=[0.780869, -0.624695]
     //]
 
-    EXPECT_EQ(tri_a.count, 3);
+    EXPECT_EQ(tri_a.count, 3u);
     EXPECT_FLOAT_EQ(tri_a.centroid.x, 4.6666665f);
     EXPECT_FLOAT_EQ(tri_a.centroid.y, 5.3333335f);
 
@@ -50,7 +50,7 @@ TEST(PolygonTest, HandlesConstruction)
         //vertices[2]=[9, 3] normals[2]=[0.961524, -0.274721]
     //]
 
-    EXPECT_EQ(tri_b.count, 3);
+    EXPECT_EQ(tri_b.count, 3u);
     EXPECT_FLOAT_EQ(tri_b.centroid.x, 8.3333335f);
     EXPECT_FLOAT_EQ(tri_b.centroid.y, 7.3333335f);
 

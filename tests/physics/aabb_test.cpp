@@ -202,7 +202,7 @@ TEST(AABBTest, ValidateManifoldSingleAxis)
     aabb lower_double_on_x({ 5.f, 1.f }, { 6.f, 3.f });
 
     EXPECT_TRUE(a.intersects_with(lower_double_on_x, mf));
-    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.count, 1u);
     EXPECT_EQ(mf.depths[0], 1.f);
     EXPECT_EQ(mf.contacts[0].x, 5.f);
     EXPECT_EQ(mf.contacts[0].y, 2.f);
@@ -210,7 +210,7 @@ TEST(AABBTest, ValidateManifoldSingleAxis)
     EXPECT_EQ(mf.normal.y, -1.f);
 
     EXPECT_TRUE(lower_double_on_x.intersects_with(a, mf));
-    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.count, 1u);
     EXPECT_EQ(mf.depths[0], 1.f);
     EXPECT_EQ(mf.contacts[0].x, 5.f);
     EXPECT_EQ(mf.contacts[0].y, 2.f);
@@ -221,7 +221,7 @@ TEST(AABBTest, ValidateManifoldSingleAxis)
     aabb upper_double_on_x({ 5.f, 7.f }, { 6.f, 9.f });
 
     EXPECT_TRUE(a.intersects_with(upper_double_on_x, mf));
-    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.count, 1u);
     EXPECT_EQ(mf.depths[0], 1.f);
     EXPECT_EQ(mf.contacts[0].x, 5.f);
     EXPECT_EQ(mf.contacts[0].y, 8.f);
@@ -229,7 +229,7 @@ TEST(AABBTest, ValidateManifoldSingleAxis)
     EXPECT_EQ(mf.normal.y, 1.f);
 
     EXPECT_TRUE(upper_double_on_x.intersects_with(a, mf));
-    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.count, 1u);
     EXPECT_EQ(mf.depths[0], 1.f);
     EXPECT_EQ(mf.contacts[0].x, 5.f);
     EXPECT_EQ(mf.contacts[0].y, 8.f);
@@ -240,7 +240,7 @@ TEST(AABBTest, ValidateManifoldSingleAxis)
     aabb lower_double_on_y({ 1.f, 4.f }, { 3.f, 6.f });
 
     EXPECT_TRUE(a.intersects_with(lower_double_on_y, mf));
-    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.count, 1u);
     EXPECT_EQ(mf.depths[0], 1.f);
     EXPECT_EQ(mf.contacts[0].x, 2.f);
     EXPECT_EQ(mf.contacts[0].y, 4.f);
@@ -248,7 +248,7 @@ TEST(AABBTest, ValidateManifoldSingleAxis)
     EXPECT_EQ(mf.normal.y, 0.f);
 
     EXPECT_TRUE(lower_double_on_y.intersects_with(a, mf));
-    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.count, 1u);
     EXPECT_EQ(mf.depths[0], 1.f);
     EXPECT_EQ(mf.contacts[0].x, 2.f);
     EXPECT_EQ(mf.contacts[0].y, 4.f);
@@ -259,7 +259,7 @@ TEST(AABBTest, ValidateManifoldSingleAxis)
     aabb upper_double_on_y({ 8.f, 4.f }, { 10.f, 6.f });
 
     EXPECT_TRUE(a.intersects_with(upper_double_on_y, mf));
-    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.count, 1u);
     EXPECT_EQ(mf.depths[0], 1.f);
     EXPECT_EQ(mf.contacts[0].x, 9.f);
     EXPECT_EQ(mf.contacts[0].y, 4.f);
@@ -267,7 +267,7 @@ TEST(AABBTest, ValidateManifoldSingleAxis)
     EXPECT_EQ(mf.normal.y, 0.f);
 
     EXPECT_TRUE(upper_double_on_y.intersects_with(a, mf));
-    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.count, 1u);
     EXPECT_EQ(mf.depths[0], 1.f);
     EXPECT_EQ(mf.contacts[0].x, 9.f);
     EXPECT_EQ(mf.contacts[0].y, 4.f);
@@ -278,7 +278,7 @@ TEST(AABBTest, ValidateManifoldSingleAxis)
     aabb quad_on_x({ 5.f, 1.f }, { 6.f, 9.f });
 
     EXPECT_TRUE(a.intersects_with(quad_on_x, mf));
-    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.count, 1u);
     EXPECT_EQ(mf.depths[0], 4.f);
     EXPECT_EQ(mf.contacts[0].x, 5.f);
     EXPECT_EQ(mf.contacts[0].y, 2.f);
@@ -286,7 +286,7 @@ TEST(AABBTest, ValidateManifoldSingleAxis)
     EXPECT_EQ(mf.normal.y, 0.f);
 
     EXPECT_TRUE(quad_on_x.intersects_with(a, mf));
-    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.count, 1u);
     EXPECT_EQ(mf.depths[0], 4.f);
     EXPECT_EQ(mf.contacts[0].x, 6.f);
     EXPECT_EQ(mf.contacts[0].y, 2.f);
@@ -297,7 +297,7 @@ TEST(AABBTest, ValidateManifoldSingleAxis)
     aabb quad_on_y({ 1.f, 4.f }, { 10.f, 6.f });
 
     EXPECT_TRUE(a.intersects_with(quad_on_y, mf));
-    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.count, 1u);
     EXPECT_EQ(mf.depths[0], 4.f);
     EXPECT_EQ(mf.contacts[0].x, 2.f);
     EXPECT_EQ(mf.contacts[0].y, 4.f);
@@ -305,7 +305,7 @@ TEST(AABBTest, ValidateManifoldSingleAxis)
     EXPECT_EQ(mf.normal.y, 1.f);
 
     EXPECT_TRUE(quad_on_y.intersects_with(a, mf));
-    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.count, 1u);
     EXPECT_EQ(mf.depths[0], 4.f);
     EXPECT_EQ(mf.contacts[0].x, 2.f);
     EXPECT_EQ(mf.contacts[0].y, 6.f);
@@ -322,7 +322,7 @@ TEST(AABBTest, ValidateManifoldDoubleAxis)
     aabb lower_left_on_x({ 1.f, 1.f }, { 3.f, 4.f });
 
     EXPECT_TRUE(a.intersects_with(lower_left_on_x, mf));
-    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.count, 1u);
     EXPECT_EQ(mf.depths[0], 1.f);
     EXPECT_EQ(mf.contacts[0].x, 2.f);
     EXPECT_EQ(mf.contacts[0].y, 4.f);
@@ -330,7 +330,7 @@ TEST(AABBTest, ValidateManifoldDoubleAxis)
     EXPECT_EQ(mf.normal.y, 0.f);
 
     EXPECT_TRUE(lower_left_on_x.intersects_with(a, mf));
-    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.count, 1u);
     EXPECT_EQ(mf.depths[0], 1.f);
     EXPECT_EQ(mf.contacts[0].x, 3.f);
     EXPECT_EQ(mf.contacts[0].y, 2.f);
@@ -341,7 +341,7 @@ TEST(AABBTest, ValidateManifoldDoubleAxis)
     aabb lower_left_on_y({ 1.f, 1.f }, { 4.f, 3.f });
 
     EXPECT_TRUE(a.intersects_with(lower_left_on_y, mf));
-    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.count, 1u);
     EXPECT_EQ(mf.depths[0], 1.f);
     EXPECT_EQ(mf.contacts[0].x, 4.f);
     EXPECT_EQ(mf.contacts[0].y, 2.f);
@@ -349,7 +349,7 @@ TEST(AABBTest, ValidateManifoldDoubleAxis)
     EXPECT_EQ(mf.normal.y, -1.f);
 
     EXPECT_TRUE(lower_left_on_y.intersects_with(a, mf));
-    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.count, 1u);
     EXPECT_EQ(mf.depths[0], 1.f);
     EXPECT_EQ(mf.contacts[0].x, 2.f);
     EXPECT_EQ(mf.contacts[0].y, 3.f);
@@ -360,7 +360,7 @@ TEST(AABBTest, ValidateManifoldDoubleAxis)
     aabb upper_left_on_x({ 1.f, 6.f }, { 3.f, 9.f });
 
     EXPECT_TRUE(a.intersects_with(upper_left_on_x, mf));
-    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.count, 1u);
     EXPECT_EQ(mf.depths[0], 1.f);
     EXPECT_EQ(mf.contacts[0].x, 2.f);
     EXPECT_EQ(mf.contacts[0].y, 6.f);
@@ -368,7 +368,7 @@ TEST(AABBTest, ValidateManifoldDoubleAxis)
     EXPECT_EQ(mf.normal.y, 0.f);
 
     EXPECT_TRUE(upper_left_on_x.intersects_with(a, mf));
-    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.count, 1u);
     EXPECT_EQ(mf.depths[0], 1.f);
     EXPECT_EQ(mf.contacts[0].x, 3.f);
     EXPECT_EQ(mf.contacts[0].y, 8.f);
@@ -379,7 +379,7 @@ TEST(AABBTest, ValidateManifoldDoubleAxis)
     aabb upper_left_on_y({ 1.f, 7.f }, { 4.f, 9.f });
 
     EXPECT_TRUE(a.intersects_with(upper_left_on_y, mf));
-    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.count, 1u);
     EXPECT_EQ(mf.depths[0], 1.f);
     EXPECT_EQ(mf.contacts[0].x, 4.f);
     EXPECT_EQ(mf.contacts[0].y, 8.f);
@@ -387,7 +387,7 @@ TEST(AABBTest, ValidateManifoldDoubleAxis)
     EXPECT_EQ(mf.normal.y, 1.f);
 
     EXPECT_TRUE(upper_left_on_y.intersects_with(a, mf));
-    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.count, 1u);
     EXPECT_EQ(mf.depths[0], 1.f);
     EXPECT_EQ(mf.contacts[0].x, 2.f);
     EXPECT_EQ(mf.contacts[0].y, 7.f);
@@ -398,7 +398,7 @@ TEST(AABBTest, ValidateManifoldDoubleAxis)
     aabb upper_right_on_x({ 8.f, 6.f }, { 10.f, 9.f });
 
     EXPECT_TRUE(a.intersects_with(upper_right_on_x, mf));
-    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.count, 1u);
     EXPECT_EQ(mf.depths[0], 1.f);
     EXPECT_EQ(mf.contacts[0].x, 9.f);
     EXPECT_EQ(mf.contacts[0].y, 6.f);
@@ -406,7 +406,7 @@ TEST(AABBTest, ValidateManifoldDoubleAxis)
     EXPECT_EQ(mf.normal.y, 0.f);
 
     EXPECT_TRUE(upper_right_on_x.intersects_with(a, mf));
-    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.count, 1u);
     EXPECT_EQ(mf.depths[0], 1.f);
     EXPECT_EQ(mf.contacts[0].x, 8.f);
     EXPECT_EQ(mf.contacts[0].y, 8.f);
@@ -417,7 +417,7 @@ TEST(AABBTest, ValidateManifoldDoubleAxis)
     aabb upper_right_on_y({ 7.f, 7.f }, { 10.f, 9.f });
 
     EXPECT_TRUE(a.intersects_with(upper_right_on_y, mf));
-    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.count, 1u);
     EXPECT_EQ(mf.depths[0], 1.f);
     EXPECT_EQ(mf.contacts[0].x, 7.f);
     EXPECT_EQ(mf.contacts[0].y, 8.f);
@@ -425,7 +425,7 @@ TEST(AABBTest, ValidateManifoldDoubleAxis)
     EXPECT_EQ(mf.normal.y, 1.f);
 
     EXPECT_TRUE(upper_right_on_y.intersects_with(a, mf));
-    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.count, 1u);
     EXPECT_EQ(mf.depths[0], 1.f);
     EXPECT_EQ(mf.contacts[0].x, 9.f);
     EXPECT_EQ(mf.contacts[0].y, 7.f);
@@ -436,7 +436,7 @@ TEST(AABBTest, ValidateManifoldDoubleAxis)
     aabb lower_right_on_x({ 8.f, 1.f }, { 10.f, 4.f });
 
     EXPECT_TRUE(a.intersects_with(lower_right_on_x, mf));
-    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.count, 1u);
     EXPECT_EQ(mf.depths[0], 1.f);
     EXPECT_EQ(mf.contacts[0].x, 9.f);
     EXPECT_EQ(mf.contacts[0].y, 4.f);
@@ -444,7 +444,7 @@ TEST(AABBTest, ValidateManifoldDoubleAxis)
     EXPECT_EQ(mf.normal.y, 0.f);
 
     EXPECT_TRUE(lower_right_on_x.intersects_with(a, mf));
-    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.count, 1u);
     EXPECT_EQ(mf.depths[0], 1.f);
     EXPECT_EQ(mf.contacts[0].x, 8.f);
     EXPECT_EQ(mf.contacts[0].y, 2.f);
@@ -455,7 +455,7 @@ TEST(AABBTest, ValidateManifoldDoubleAxis)
     aabb lower_right_on_y({ 7.f, 1.f }, { 10.f, 3.f });
 
     EXPECT_TRUE(a.intersects_with(lower_right_on_y, mf));
-    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.count, 1u);
     EXPECT_EQ(mf.depths[0], 1.f);
     EXPECT_EQ(mf.contacts[0].x, 7.f);
     EXPECT_EQ(mf.contacts[0].y, 2.f);
@@ -463,7 +463,7 @@ TEST(AABBTest, ValidateManifoldDoubleAxis)
     EXPECT_EQ(mf.normal.y, -1.f);
 
     EXPECT_TRUE(lower_right_on_y.intersects_with(a, mf));
-    EXPECT_EQ(mf.count, 1);
+    EXPECT_EQ(mf.count, 1u);
     EXPECT_EQ(mf.depths[0], 1.f);
     EXPECT_EQ(mf.contacts[0].x, 9.f);
     EXPECT_EQ(mf.contacts[0].y, 3.f);

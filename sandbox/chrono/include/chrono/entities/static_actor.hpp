@@ -44,8 +44,6 @@ public:
 
     rdge::uint32 GetActorId (void) const noexcept override;
     rdge::math::vec2 GetWorldCenter (void) const noexcept override;
-    bool IsActionable (void) const noexcept override;
-    rdge::ActionType GetActionType (void) const noexcept override;
 
 public:
     rdge::sprite_data* sprite = nullptr;
@@ -58,5 +56,4 @@ public:
 
 private:
     rdge::uint32 m_actorId = 0;
-    rdge::ActionType m_actionType = rdge::ActionType::NONE;
 };

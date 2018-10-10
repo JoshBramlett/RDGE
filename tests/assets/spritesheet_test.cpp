@@ -31,7 +31,7 @@ protected:
 TEST_F(SpriteSheetTest, HandlesSuccess)
 {
     SpriteSheet sheet("../tests/testdata/assets/spritesheet_01.json");
-    EXPECT_EQ(sheet.regions.size(), 2);
+    EXPECT_EQ(sheet.regions.size(), 2u);
 
     // 1) frame value validation
     const auto& part1 = sheet["uv_1"];

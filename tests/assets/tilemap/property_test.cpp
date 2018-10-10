@@ -24,7 +24,7 @@ TEST(PropertyTest, VerifyConstruction)
 
     // 1) Validate proper construction
     tilemap::PropertyCollection properties(j);
-    EXPECT_EQ(properties.Size(), 6);
+    EXPECT_EQ(properties.Size(), 6u);
 
     // 2) Validate accessors
     EXPECT_EQ(properties.GetBool("cust_prop_bool"), true);
@@ -41,7 +41,7 @@ TEST(PropertyTest, VerifyEmptyConstruction)
 {
     json j = json::array();
     tilemap::PropertyCollection properties(j);
-    EXPECT_EQ(properties.Size(), 0);
+    EXPECT_EQ(properties.Size(), 0u);
 }
 
 TEST(PropertyTest, HandleInvalidConstruction)
@@ -79,7 +79,7 @@ TEST(PropertyTest, HandleInvalidKey)
 {
     json j = json::array();
     tilemap::PropertyCollection properties(j);
-    EXPECT_EQ(properties.Size(), 0);
+    EXPECT_EQ(properties.Size(), 0u);
     EXPECT_FALSE(properties.HasProperty("bad"));
     EXPECT_THROW(properties.GetString("bad"), std::runtime_error);
 }
@@ -103,7 +103,7 @@ TEST(PropertyTest, HandleTypeMismatch)
     auto ptype_string = rdge::tilemap::PropertyCollection::property_type_string;
 
     tilemap::PropertyCollection properties(j);
-    EXPECT_EQ(properties.Size(), 1);
+    EXPECT_EQ(properties.Size(), 1u);
     EXPECT_TRUE(properties.HasProperty(key));
     EXPECT_TRUE(properties.HasProperty(key, ptype_int));
     EXPECT_FALSE(properties.HasProperty(key, ptype_string));

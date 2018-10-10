@@ -41,14 +41,14 @@ TEST(BMFontTest, ValidateParsing)
 
     // page id=0 file="banola.png"
 
-    EXPECT_EQ(font.pages.size(), 1);
+    EXPECT_EQ(font.pages.size(), 1u);
     EXPECT_EQ(font.pages[0].file, "banola.png");
     EXPECT_EQ(font.pages[0].id, 0);
 
     // char id=126     x=109  y=145  width=29   height=17   xoffset=-3   yoffset=10   xadvance=23   page=0    chnl=0
 
-    EXPECT_EQ(font.chars.size(), 97);
-    EXPECT_EQ(font.chars[96].id, 126);
+    EXPECT_EQ(font.chars.size(), 97u);
+    EXPECT_EQ(font.chars[96].id, 126u);
     EXPECT_EQ(font.chars[96].x, 109);
     EXPECT_EQ(font.chars[96].y, 145);
     EXPECT_EQ(font.chars[96].width, 29);
@@ -59,9 +59,9 @@ TEST(BMFontTest, ValidateParsing)
     EXPECT_EQ(font.chars[96].page, 0);
     EXPECT_EQ(font.chars[96].chnl, 0);
 
-    EXPECT_EQ(font.kerning_table.size(), 0);
+    EXPECT_EQ(font.kerning_table.size(), 0u);
 
-    EXPECT_EQ(font.high_id, 126);
+    EXPECT_EQ(font.high_id, 126u);
 }
 
 } // anonymous namespace

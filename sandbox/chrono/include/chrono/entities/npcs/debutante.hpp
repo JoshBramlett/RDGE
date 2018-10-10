@@ -39,8 +39,6 @@ public:
 
     rdge::uint32 GetActorId (void) const noexcept override;
     rdge::math::vec2 GetWorldCenter (void) const noexcept override;
-    bool IsActionable (void) const noexcept override;
-    rdge::ActionType GetActionType (void) const noexcept override;
 
 public:
 

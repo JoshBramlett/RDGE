@@ -44,8 +44,8 @@ TEST(LayerTest, VerifyTileLayerConstruction)
     // 2) Validate tilelayer properties
     EXPECT_EQ(layer.tilelayer.grid.pos.x, -16);
     EXPECT_EQ(layer.tilelayer.grid.pos.y, 16);
-    EXPECT_EQ(layer.tilelayer.grid.size.x, 4);
-    EXPECT_EQ(layer.tilelayer.grid.size.y, 4);
+    EXPECT_EQ(layer.tilelayer.grid.size.x, 4u);
+    EXPECT_EQ(layer.tilelayer.grid.size.y, 4u);
 
     // 3) Validate base object
     // TODO

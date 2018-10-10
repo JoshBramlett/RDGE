@@ -12,30 +12,6 @@
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
-//! \enum ActionType
-//! \brief Action to take when invoked
-enum class ActionType
-{
-    NONE       = 0,
-    DIALOG     = 1,
-    SCENE_PUSH = 2,
-    SCENE_POP  = 3,
-    SCENE_SWAP = 4,
-
-    COUNT      = 5
-};
-
-template <typename T>
-class ActionTypeArray
-{
-public:
-    T& operator[] (ActionType t) { return m_arr[to_underlying(t)]; }
-    const T& operator[] (ActionType t) const { return m_arr[to_underlying(t)]; }
-
-private:
-    T m_arr[to_underlying(ActionType::COUNT)];
-};
-
 //! \enum Direction
 //! \brief Bitmask representing cardinal and primary intercardinal directions
 //! \note is_enum_bitmask is enabled and supports bitwise operations
@@ -103,16 +79,8 @@ private:
     T m_arr[4];
 };
 
-//! \brief ActionType stream output operator
-std::ostream& operator<< (std::ostream&, ActionType);
-
 //! \brief Direction stream output operator
 std::ostream& operator<< (std::ostream&, Direction);
-
-//!@{ ActionType string conversions
-bool try_parse (const std::string&, ActionType&);
-std::string to_string (ActionType);
-//!@}
 
 //!@{ Direction string conversions
 bool try_parse (const std::string&, Direction&);

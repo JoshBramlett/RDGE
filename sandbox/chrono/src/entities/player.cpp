@@ -330,18 +330,6 @@ Player::GetWorldCenter (void) const noexcept
     return this->hurtbox->GetWorldCenter();
 }
 
-bool
-Player::IsActionable (void) const noexcept
-{
-    return false;
-}
-
-ActionType
-Player::GetActionType (void) const noexcept
-{
-    return ActionType::NONE;
-}
-
 /* static */ Player*
 Player::Extract (const fixture_user_data* user_data)
 {

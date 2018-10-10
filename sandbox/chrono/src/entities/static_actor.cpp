@@ -92,15 +92,3 @@ StaticActor::GetWorldCenter (void) const noexcept
 {
     return this->body->GetWorldCenter();
 }
-
-bool
-StaticActor::IsActionable (void) const noexcept
-{
-    return (m_actionType != ActionType::NONE);
-}
-
-ActionType
-StaticActor::GetActionType (void) const noexcept
-{
-    return m_actionType;
-}

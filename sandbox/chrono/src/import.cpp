@@ -84,7 +84,7 @@ ProcessActionTrigger (rdge::physics::RigidBody* body,
             ? props.GetString("action_type")
             : ext_props.GetString("action_type");
 
-        bool parse_result = rdge::try_parse(s, result.action_trigger.action_type);
+        bool parse_result = perch::try_parse(s, result.action_trigger.action_type);
         RDGE_ASSERT(parse_result);
     }
 

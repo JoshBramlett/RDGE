@@ -6,30 +6,40 @@
 namespace rdge {
 class Event;
 struct delta_time;
-enum class ActionType;
 } // namespace rdge
 //!@}
 
-// - Scene transition
-//      - outgoing
-//          - scene_stack_action
-//          - scene_id to transition to
-//          - entity_id (for spawn point)
-//          - [out] animation
-//          - [in] animation
-
-// Door
-// - Fixture sensor
-//      - invokable
-//      - facing direction
-
-
-
-
-// Different types of actors
-// 1) Static
-//    - Tile collision
-// 2) Container
+// Containers
+//   - Actor
+//     - ActorID
+//     - Tile collision
+//     - Tile sensor
+//       - facing
+//       - invoke
+//     - Inventory
+//       - Item list
+//       - Can Insert
+//       - Can Take
+//     - State
+//       - Open/Closed/Locked
+//   - ActorProfile
+//       - sprite
+//       - animation
+//       - sounds
+//
+//
+//    - Tiled
+//      - ActorID (unique to scene)
+//      - ActorType (enum value)
+//      - Tile collision
+//      - Tile sensor
+//        - facing
+//        - invoke
+//    - Config
+//      - Tile sensor
+//        -
+//
+//
 //    - Fixtures
 //      - Tile collision
 //      - Tile sensor
@@ -37,10 +47,13 @@ enum class ActionType;
 //      - Inventory
 //    - Properties
 //      - Unique ObjectID (for serialization)
-//      - ActorID?
+//      - ActorID
 //      - Open/Closed
 //      - Contained items
 //      - IsSafe (whether items can be randomly added/removed)
+
+// 1) Static
+//    - Tile collision
 // 3) Sign
 //    - Fixtures
 //      - Tile collision
@@ -72,16 +85,36 @@ class IActor
 public:
     virtual ~IActor (void) = default;
 
-    virtual void OnEvent (const rdge::Event& event) = 0;
-    virtual void OnUpdate (const rdge::delta_time& dt) = 0;
+    virtual void OnEvent (const rdge::Event&) = 0;
+    virtual void OnUpdate (const rdge::delta_time&) = 0;
 
     virtual rdge::uint32 GetActorId (void) const noexcept = 0;
     virtual rdge::math::vec2 GetWorldCenter (void) const noexcept = 0;
-    virtual bool IsActionable (void) const noexcept = 0;
-    virtual rdge::ActionType GetActionType (void) const noexcept = 0;
+
+
+
+
 };
 
 #if 0
+
+{
+  "actor_id": Number,
+  "name": String,
+  "actor_type": Enum,
+  "pos": [ Number, Number ]
+  "sprite": {
+    "sheet_id": Number,
+  },
+  "physics": {
+    "body": {
+      "type": Enum,
+    },
+
+  },
+}
+
+
 class Container : public IActor
 {
 public:
@@ -93,8 +126,6 @@ public:
 
     rdge::uint32 GetActorId (void) const noexcept = 0;
     rdge::math::vec2 GetWorldCenter (void) const noexcept = 0;
-    bool IsActionable (void) const noexcept = 0;
-    rdge::ActionType GetActionType (void) const noexcept = 0;
 
     rdge::sprite_data* sprite = nullptr;
 

@@ -132,7 +132,7 @@ TEST(ObjectTest, VerifyPolygonConstruction)
 
     // 2) Validate base object
     auto base = object.GetPolygon(1.f);
-    EXPECT_EQ(base.count, 5);
+    EXPECT_EQ(base.count, 5u);
     //EXPECT_FLOAT_EQ(base.lo.y, 2.f);
     //EXPECT_FLOAT_EQ(base.hi.x, 7.5f);
     //EXPECT_FLOAT_EQ(base.hi.y, 8.f);
@@ -230,7 +230,7 @@ TEST(ObjectTest, VerifyObjectProperties)
     EXPECT_EQ(object.type, tilemap::ObjectType::POINT);
 
     // 1) Validate proper construction
-    EXPECT_EQ(object.properties.Size(), 1);
+    EXPECT_EQ(object.properties.Size(), 1u);
     EXPECT_EQ(object.properties.GetInt("cust_prop_int"), 5);
 }
 

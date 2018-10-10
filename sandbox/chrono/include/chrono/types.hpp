@@ -9,6 +9,9 @@ namespace physics {
 class Fixture;
 } // namespace physics
 } // namespace rdge
+namespace perch {
+enum class CustomEventType;
+} // namespace perch
 //!@}
 
 
@@ -111,7 +114,7 @@ struct fixture_user_data
 
     struct action_trigger_data
     {
-        rdge::ActionType action_type;
+        perch::CustomEventType action_type;
         chrono_action_id action_id;
         chrono_scene_id scene_id;
         rdge::Direction facing_required;
