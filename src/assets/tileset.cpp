@@ -1,7 +1,6 @@
 #include <rdge/assets/tileset.hpp>
 #include <rdge/assets/pack_file.hpp>
 #include <rdge/assets/surface.hpp>
-#include <rdge/graphics/tex_coords.hpp>
 #include <rdge/util/io/rwops_base.hpp>
 #include <rdge/util/memory/alloc.hpp>
 #include <rdge/util/compiler.hpp>
@@ -35,15 +34,16 @@ ProcessTileset (const json& j, Tileset& tileset)
     JSON_VALIDATE_REQUIRED(j, margin, is_number_unsigned);
     JSON_VALIDATE_REQUIRED(j, tilecount, is_number_unsigned);
     JSON_VALIDATE_REQUIRED(j, columns, is_number_unsigned);
+    JSON_VALIDATE_OPTIONAL(j, tiles, is_array);
 
-    auto tile_count = j["tilecount"].get<size_t>();
     auto tile_width = j["tilewidth"].get<size_t>();
     auto tile_height = j["tileheight"].get<size_t>();
 
-    tileset.cols = j["columns"].get<size_t>();
-    tileset.rows = tile_count / tileset.cols;
-    tileset.spacing = j["spacing"].get<size_t>();
-    tileset.margin = j["margin"].get<size_t>();
+    tileset.spacing = j["spacing"].get<decltype(tileset.spacing)>();
+    tileset.margin = j["margin"].get<decltype(tileset.margin)>();
+    tileset.tile_count = j["tilecount"].get<decltype(tileset.tile_count)>();
+    tileset.cols = j["columns"].get<decltype(tileset.cols)>();
+    tileset.rows = tileset.tile_count / tileset.cols;
     tileset.tile_size = math::vec2(static_cast<float>(tile_width),
                                    static_cast<float>(tile_height));
 
@@ -52,11 +52,14 @@ ProcessTileset (const json& j, Tileset& tileset)
         throw std::invalid_argument("Tile spacing not currently supported");
     }
 
-    if (RDGE_UNLIKELY(!RDGE_TCALLOC(tileset.tiles, tile_count, memory_bucket_assets)))
+    if (RDGE_UNLIKELY(!RDGE_TCALLOC(tileset.tiles,
+                                    tileset.tile_count,
+                                    memory_bucket_assets)))
     {
         throw std::runtime_error("Memory allocation failed");
     }
 
+    // build tile definitions first - they're required for the animations
     auto surface_size = tileset.surface->Size();
     for (size_t row = 0; row < tileset.rows; row++)
     {
@@ -71,10 +74,82 @@ ProcessTileset (const json& j, Tileset& tileset)
             float y2 = normalize(y + tile_height, surface_size.h);
 
             auto& tile = tileset.tiles[(row * tileset.cols) + col];
-            tile.bottom_left  = vec2(x1, y1);
-            tile.bottom_right = vec2(x2, y1);
-            tile.top_left     = vec2(x1, y2);
-            tile.top_right    = vec2(x2, y2);
+            tile.animation_index = -1;
+            tile.uv.bottom_left  = vec2(x1, y1);
+            tile.uv.bottom_right = vec2(x2, y1);
+            tile.uv.top_left     = vec2(x1, y2);
+            tile.uv.top_right    = vec2(x2, y2);
+        }
+    }
+
+    if (j.count("tiles"))
+    {
+        const auto& j_tiles = j["tiles"];
+        tileset.animation_count = j_tiles.size();
+
+        // get the total number of frames for all animations
+        for (size_t i = 0; i < tileset.animation_count; i++)
+        {
+            const auto& j_tile = j_tiles[i];
+            if (j_tile.count("animation"))
+            {
+                const auto& j_animation = j_tile["animation"];
+                tileset.frame_count += j_animation.size();
+            }
+        }
+
+        if (tileset.frame_count > 0)
+        {
+            if (RDGE_UNLIKELY(!RDGE_TCALLOC(tileset.animations,
+                                            tileset.animation_count,
+                                            memory_bucket_assets)))
+            {
+                throw std::runtime_error("Memory allocation failed");
+            }
+
+            if (RDGE_UNLIKELY(!RDGE_TCALLOC(tileset.frames,
+                                            tileset.frame_count,
+                                            memory_bucket_assets)))
+            {
+                throw std::runtime_error("Memory allocation failed");
+            }
+
+            size_t total_frame_count = 0;
+            for (size_t anim_idx = 0; anim_idx < tileset.animation_count; anim_idx++)
+            {
+                const auto& j_tile = j_tiles[anim_idx];
+                JSON_VALIDATE_REQUIRED(j_tile, id, is_number);
+                JSON_VALIDATE_OPTIONAL(j_tile, animation, is_array);
+
+                auto parent_id = j_tile["id"].get<uint32>();
+                tileset.tiles[parent_id].animation_index = static_cast<int32>(anim_idx);
+
+                auto& animation = tileset.animations[anim_idx];
+                if (j_tile.count("animation"))
+                {
+                    const auto& j_animation = j_tile["animation"];
+                    animation.frame_count = j_animation.size();
+                    animation.frames = tileset.frames + total_frame_count;
+
+                    for (size_t frame_idx = 0; frame_idx < animation.frame_count; frame_idx++)
+                    {
+                        const auto& j_frame = j_animation[frame_idx];
+                        JSON_VALIDATE_REQUIRED(j_frame, tileid, is_number);
+                        JSON_VALIDATE_REQUIRED(j_frame, duration, is_number);
+
+                        auto& frame = animation.frames[frame_idx];
+                        frame.tile_id = j_frame["tileid"].get<decltype(frame.tile_id)>();
+                        frame.duration = j_frame["duration"].get<decltype(frame.duration)>();
+                    }
+                }
+                else
+                {
+                    animation.frame_count = 0;
+                    animation.frames = nullptr;
+                }
+
+                total_frame_count += animation.frame_count;
+            }
         }
     }
 }
@@ -143,19 +218,27 @@ Tileset::Tileset (const std::vector<uint8>& msgpack, PackFile& packfile)
 Tileset::~Tileset (void) noexcept
 {
     RDGE_FREE(this->tiles, memory_bucket_assets);
+    RDGE_FREE(this->animations, memory_bucket_assets);
+    RDGE_FREE(this->frames, memory_bucket_assets);
 }
 
 Tileset::Tileset (Tileset&& other) noexcept
-    : rows(other.rows)
+    : tile_size(other.tile_size)
+    , rows(other.rows)
     , cols(other.cols)
     , spacing(other.spacing)
     , margin(other.margin)
-    , tile_size(other.tile_size)
     , tiles(other.tiles)
     , tile_count(other.tile_count)
+    , animations(other.animations)
+    , animation_count(other.animation_count)
+    , frames(other.frames)
+    , frame_count(other.frame_count)
     , surface(std::move(other.surface))
 {
     other.tiles = nullptr;
+    other.animations = nullptr;
+    other.frames = nullptr;
 }
 
 Tileset&
@@ -163,15 +246,19 @@ Tileset::operator= (Tileset&& rhs) noexcept
 {
     if (this != &rhs)
     {
+        this->tile_size = rhs.tile_size;
         this->rows = rhs.rows;
         this->cols = rhs.cols;
         this->spacing = rhs.spacing;
         this->margin = rhs.margin;
-        this->tile_size = rhs.tile_size;
         this->tile_count = rhs.tile_count;
+        this->animation_count = rhs.animation_count;
+        this->frame_count = rhs.frame_count;
         this->surface = std::move(rhs.surface);
 
         std::swap(this->tiles, rhs.tiles);
+        std::swap(this->animations, rhs.animations);
+        std::swap(this->frames, rhs.frames);
     }
 
     return *this;

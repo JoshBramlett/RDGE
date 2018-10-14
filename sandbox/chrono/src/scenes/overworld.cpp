@@ -244,6 +244,10 @@ OverworldScene::OnUpdate (const delta_time& dt)
     collision_graph.Step(1.f / 60.f);
     player.OnUpdate(dt);
     debutante.OnUpdate(dt);
+    for (auto& layer : this->tile_layers)
+    {
+        layer.Update(dt);
+    }
 }
 
 void

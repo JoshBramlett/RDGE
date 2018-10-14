@@ -80,7 +80,7 @@ starts_with (const std::string& source, const std::string& prefix)
 inline bool
 ends_with (const std::string& source, const std::string& suffix)
 {
-    int32 pos = source.length() - suffix.length();
+    int64 pos = source.length() - suffix.length();
     if (pos < 0)
     {
         return false;

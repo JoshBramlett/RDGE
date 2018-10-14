@@ -29,20 +29,20 @@ TEST(IntrusiveForwardListTest, ValidateMove)
     // a) validate move ctor
     intrusive_forward_list<test_node> list_b(std::move(list_a));
     EXPECT_FALSE(list_b.empty());
-    EXPECT_EQ(list_b.size(), 3);
+    EXPECT_EQ(list_b.size(), 3u);
     EXPECT_EQ(&list_b.front(), &c);
 
     // b) validate move assignment
     intrusive_forward_list<test_node> list_c = std::move(list_b);
     EXPECT_FALSE(list_c.empty());
-    EXPECT_EQ(list_c.size(), 3);
+    EXPECT_EQ(list_c.size(), 3u);
     EXPECT_EQ(&list_c.front(), &c);
 
     // c) validate moved from
     EXPECT_TRUE(list_a.empty());
-    EXPECT_EQ(list_a.size(), 0);
+    EXPECT_EQ(list_a.size(), 0u);
     EXPECT_TRUE(list_b.empty());
-    EXPECT_EQ(list_b.size(), 0);
+    EXPECT_EQ(list_b.size(), 0u);
 
     // d) validate members
     EXPECT_EQ(c.next, &b);
@@ -61,12 +61,12 @@ TEST(IntrusiveForwardListTest, ValidateClear)
     list.push_front(c);
 
     EXPECT_FALSE(list.empty());
-    EXPECT_EQ(list.size(), 3);
+    EXPECT_EQ(list.size(), 3u);
 
     list.clear();
 
     EXPECT_TRUE(list.empty());
-    EXPECT_EQ(list.size(), 0);
+    EXPECT_EQ(list.size(), 0u);
     EXPECT_EQ(a.next, nullptr);
     EXPECT_EQ(b.next, nullptr);
     EXPECT_EQ(c.next, nullptr);
@@ -84,7 +84,7 @@ TEST(IntrusiveForwardListTest, ValidatePushFront)
     list.push_front(c);
 
     EXPECT_FALSE(list.empty());
-    EXPECT_EQ(list.size(), 3);
+    EXPECT_EQ(list.size(), 3u);
     EXPECT_EQ(&list.front(), &c);
     EXPECT_EQ(c.next, &b);
     EXPECT_EQ(b.next, &a);
@@ -102,7 +102,7 @@ TEST(IntrusiveForwardListTest, ValidatePushBack)
     list.push_back(c);
 
     EXPECT_FALSE(list.empty());
-    EXPECT_EQ(list.size(), 3);
+    EXPECT_EQ(list.size(), 3u);
     EXPECT_EQ(&list.front(), &a);
     EXPECT_EQ(a.next, &b);
     EXPECT_EQ(b.next, &c);
@@ -121,14 +121,14 @@ TEST(IntrusiveForwardListTest, ValidateInsert)
     list.insert(list.begin(), c);
 
     EXPECT_FALSE(list.empty());
-    EXPECT_EQ(list.size(), 3);
+    EXPECT_EQ(list.size(), 3u);
     EXPECT_EQ(&list.front(), &c);
     EXPECT_EQ(b.next, &a);
     EXPECT_EQ(c.next, &b);
 
     list.clear();
     EXPECT_TRUE(list.empty());
-    EXPECT_EQ(list.size(), 0);
+    EXPECT_EQ(list.size(), 0u);
 
     // b) validate insert middle
     list.push_back(a);
@@ -139,7 +139,7 @@ TEST(IntrusiveForwardListTest, ValidateInsert)
     EXPECT_EQ(++bi, ci);
 
     EXPECT_FALSE(list.empty());
-    EXPECT_EQ(list.size(), 3);
+    EXPECT_EQ(list.size(), 3u);
     EXPECT_EQ(&list.front(), &a);
     EXPECT_EQ(a.next, &b);
     EXPECT_EQ(b.next, &c);
@@ -156,7 +156,7 @@ TEST(IntrusiveForwardListTest, ValidateRemove)
     list.push_back(a);
     list.remove(a);
     EXPECT_TRUE(list.empty());
-    EXPECT_EQ(list.size(), 0);
+    EXPECT_EQ(list.size(), 0u);
     EXPECT_EQ(a.next, nullptr);
 
     // b) remove a middle entry
@@ -166,7 +166,7 @@ TEST(IntrusiveForwardListTest, ValidateRemove)
     list.remove(b);
 
     EXPECT_FALSE(list.empty());
-    EXPECT_EQ(list.size(), 2);
+    EXPECT_EQ(list.size(), 2u);
     EXPECT_EQ(&list.front(), &a);
     EXPECT_EQ(b.next, nullptr);
     EXPECT_EQ(a.next, &c);
@@ -175,7 +175,7 @@ TEST(IntrusiveForwardListTest, ValidateRemove)
     list.remove(c);
 
     EXPECT_FALSE(list.empty());
-    EXPECT_EQ(list.size(), 1);
+    EXPECT_EQ(list.size(), 1u);
     EXPECT_EQ(&list.front(), &a);
     EXPECT_EQ(c.next, nullptr);
 
@@ -184,14 +184,14 @@ TEST(IntrusiveForwardListTest, ValidateRemove)
     list.remove(a);
 
     EXPECT_FALSE(list.empty());
-    EXPECT_EQ(list.size(), 1);
+    EXPECT_EQ(list.size(), 1u);
     EXPECT_EQ(&list.front(), &b);
     EXPECT_EQ(a.next, nullptr);
 
     // e) remove all entries
     list.remove(b);
     EXPECT_TRUE(list.empty());
-    EXPECT_EQ(list.size(), 0);
+    EXPECT_EQ(list.size(), 0u);
     EXPECT_EQ(b.next, nullptr);
 }
 
@@ -226,7 +226,7 @@ TEST(IntrusiveForwardListTest, ValidateForEach)
     });
 
     // list is empty
-    EXPECT_EQ(sum, 0);
+    EXPECT_EQ(sum, 0u);
 
     list.push_back(a);
     list.push_back(b);
@@ -237,9 +237,9 @@ TEST(IntrusiveForwardListTest, ValidateForEach)
         node->value = ++inc;
     });
 
-    EXPECT_EQ(a.value, 1);
-    EXPECT_EQ(b.value, 2);
-    EXPECT_EQ(c.value, 3);
+    EXPECT_EQ(a.value, 1u);
+    EXPECT_EQ(b.value, 2u);
+    EXPECT_EQ(c.value, 3u);
 }
 
 TEST(IntrusiveForwardListTest, ValidateIterators)

@@ -20,6 +20,7 @@ namespace rdge {
 class Tileset;
 class TileBatch;
 class OrthographicCamera;
+struct delta_time;
 namespace tilemap { class Layer; }
 //!@}
 
@@ -57,8 +58,32 @@ struct tilemap_grid
 //! \brief Renderable cell data of a tile map
 struct tile_cell
 {
-    math::vec2 pos; //!< Position in world coordinates
-    tex_coords uvs; //!< UV Coordinates
+    // TODO This should be cleaned up.  The uv_data and uv_datap variables are a
+    //      work-around to get it working correctly.  Originally each tile cell held
+    //      it's uv value, but when animations were added the uvs of the cells were
+    //      changed to a double pointer so the animation could be updated externally
+    //      from the tile_cell.  Now tile_cells which do not reference an animation
+    //      still store the uv, and use the uv_datap as a pointer to that local
+    //      storage, with the uvs being a pointer to uv_datap.  Super ugly.
+    //
+    //      The major benefit of double pointer is that multiple tile_cells can now
+    //      reference the same uv.  Since this is common in a tile map everything
+    //      should be moved to this paradigm.
+    //
+    //      Problem to solve:
+    //      - Cannot simply create a uv list from the Tileset
+    //        - Some cells have rotation/flipping, which would increase the size
+    //        - Not all cells are mapped, which would decrease the size
+    //
+    //      The only way to solve the above is to walk the list from the Tilemap first.
+    //      Ideally this would not be done at runtime, so I'd have to update the
+    //      cooker to include a field which designates the number of distinct mappings
+    //      from the Tilemap.
+
+    math::vec2 pos;       //!< Position in world coordinates
+    tex_coords** uvs;     //!< Pointer to active UV coordinates
+    tex_coords* uv_datap; //!< TODO Cleanup
+    tex_coords uv_data;   //!< TODO Cleanup
 };
 
 //! \struct tile_chunk
@@ -91,6 +116,9 @@ public:
     //! \brief Draw all tiles within the camera bounds
     void Draw (TileBatch& renderer, const OrthographicCamera& camera);
 
+    //! \brief Update animated tiles
+    void Update (const delta_time&);
+
 private:
     friend class rdge::debug::GraphicsWidget;
 
@@ -114,6 +142,34 @@ private:
     physics::aabb m_bounds;        //!< Layer boundary (in pixels)
     color m_color = color::WHITE;  //!< Render color (to store opacity)
     math::vec2 m_inv;              //!< Inverse pixel to chunk ratio
+
+    //! \struct cell_animation
+    //! \brief Animation for a single tile
+    //! \details Tile animations loop and move in a singular forward direction.
+    //!          The \ref tile_cell holds a pointer to the current_uv, which is
+    //!          updated based upon the duration of the frames from the Update call.
+    struct cell_animation
+    {
+        struct cell_frame
+        {
+            tex_coords uvs;     //!< UV coordinates for the frame
+            uint32 duration;    //!< Duration of the frame (in milliseconds)
+        };
+
+        tex_coords* current_uv; //!< Pointer to the current frame in the animation
+        size_t current_frame;   //!< Current frame index
+        size_t elapsed;         //!< Elapsed time in the animation
+
+        cell_frame* frames;     //!< Frame array
+        size_t frame_count;     //!< Number of frames in the animation
+    };
+
+    //!@{ Animation members
+    cell_animation* m_animations = nullptr;
+    size_t m_animationCount = 0;
+    cell_animation::cell_frame* m_frames = nullptr;
+    size_t m_frameCount = 0;
+    //!@}
 
 public:
     std::string name; //!< Layer name

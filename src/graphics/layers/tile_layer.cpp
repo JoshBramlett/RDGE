@@ -7,13 +7,13 @@
 #include <rdge/util/compiler.hpp>
 #include <rdge/util/logger.hpp>
 #include <rdge/util/strings.hpp>
+#include <rdge/gameobjects/iscene.hpp>
 #include <rdge/internal/exception_macros.hpp>
+#include <rdge/debug/assert.hpp>
 
 // debug
 #include <rdge/debug/renderer.hpp>
 #include <rdge/graphics/color.hpp>
-
-#include <SDL_assert.h>
 
 #include <cstring> // strrchr
 #include <sstream>
@@ -32,9 +32,51 @@ constexpr uint32 FLIPPED_ANTIDIAGONALLY = 0x20000000;
 TileLayer::TileLayer (const tilemap::Layer& def, float scale)
     : m_grid(def.tilelayer.grid)
     , m_offset(def.offset * scale)
+    , m_animationCount(def.tilelayer.tileset->animation_count)
+    , m_frameCount(def.tilelayer.tileset->frame_count)
     , name(def.name)
     , texture(*def.tilelayer.tileset->surface)
 {
+    if (m_animationCount > 0)
+    {
+        if (RDGE_UNLIKELY(!RDGE_TCALLOC(m_animations,
+                                        m_animationCount,
+                                        memory_bucket_graphics)))
+        {
+            RDGE_THROW("Memory allocation failed");
+        }
+
+        if (RDGE_UNLIKELY(!RDGE_TCALLOC(m_frames,
+                                        m_frameCount,
+                                        memory_bucket_graphics)))
+        {
+            RDGE_THROW("Memory allocation failed");
+        }
+
+        size_t total_frame_count = 0;
+        for (size_t anim_idx = 0; anim_idx < m_animationCount; anim_idx++)
+        {
+            auto& def_animation = def.tilelayer.tileset->animations[anim_idx];
+            auto& animation = m_animations[anim_idx];
+            animation.frame_count = def_animation.frame_count;
+            animation.frames = m_frames + total_frame_count;
+
+            for (size_t frame_idx = 0; frame_idx < animation.frame_count; frame_idx++)
+            {
+                auto& def_frame = def_animation.frames[frame_idx];
+                auto& frame = animation.frames[frame_idx];
+                frame.uvs = def.tilelayer.tileset->tiles[def_frame.tile_id].uv;
+                frame.duration = def_frame.duration;
+            }
+
+            animation.elapsed = 0;
+            animation.current_frame = 0;
+            animation.current_uv = &animation.frames[0].uvs;
+
+            total_frame_count += animation.frame_count;
+        }
+    }
+
     this->texture.unit_id = TileBatch::TEXTURE_UNIT_ID;
 
     // Convert to y-is-up
@@ -86,14 +128,14 @@ TileLayer::TileLayer (const tilemap::Layer& def, float scale)
     size_t cells_index = 0;
     for (const auto& def_chunk : def.tilelayer.chunks)
     {
-        SDL_assert(cells_in_chunk == def_chunk.data.size());
+        RDGE_ASSERT(cells_in_chunk == def_chunk.data.size());
 
         // x/y in local chunk coordinates
         // NOTE: def_chunk position is still in screen coordinates
         int32 chunk_x = (def_chunk.coord.x - m_grid.pos.x) / m_grid.chunk_size.w;
         int32 chunk_y = (def_chunk.coord.y + m_grid.pos.y) / m_grid.chunk_size.h;
-        SDL_assert(chunk_x >= 0);
-        SDL_assert(chunk_y >= 0);
+        RDGE_ASSERT(chunk_x >= 0);
+        RDGE_ASSERT(chunk_y >= 0);
 
         size_t chunk_index = (chunk_y * m_chunks.cols) + chunk_x;
         auto& chunk = m_chunks.data[chunk_index];
@@ -121,21 +163,32 @@ TileLayer::TileLayer (const tilemap::Layer& def, float scale)
                 bool flip_d = (gid & FLIPPED_ANTIDIAGONALLY);
                 gid &= ~(FLIPPED_HORIZONTALLY | FLIPPED_VERTICALLY | FLIPPED_ANTIDIAGONALLY);
 
-                cell.uvs = def.tilelayer.tileset->tiles[gid];
-                if (flip_x)
+                const auto& def_tile = def.tilelayer.tileset->tiles[gid];
+                if (def_tile.animation_index > 0)
                 {
-                    cell.uvs.flip(TexCoordsFlip::HORIZONTAL);
+                    cell.uvs = &m_animations[def_tile.animation_index].current_uv;
                 }
-
-                if (flip_y)
+                else
                 {
-                    cell.uvs.flip(TexCoordsFlip::VERTICAL);
-                }
+                    cell.uv_data = def_tile.uv;
+                    cell.uv_datap = &cell.uv_data;
+                    cell.uvs = &cell.uv_datap;
 
-                if (flip_d)
-                {
-                    cell.uvs.rotate(TexCoordsRotation::ROTATE_90);
-                    cell.uvs.flip(TexCoordsFlip::VERTICAL);
+                    if (flip_x)
+                    {
+                        cell.uv_data.flip(TexCoordsFlip::HORIZONTAL);
+                    }
+
+                    if (flip_y)
+                    {
+                        cell.uv_data.flip(TexCoordsFlip::VERTICAL);
+                    }
+
+                    if (flip_d)
+                    {
+                        cell.uv_data.rotate(TexCoordsRotation::ROTATE_90);
+                        cell.uv_data.flip(TexCoordsFlip::VERTICAL);
+                    }
                 }
             }
         }
@@ -151,6 +204,8 @@ TileLayer::~TileLayer (void) noexcept
 {
     RDGE_FREE(m_cells, memory_bucket_graphics);
     RDGE_FREE(m_chunks.data, memory_bucket_graphics);
+    RDGE_FREE(m_animations, memory_bucket_graphics);
+    RDGE_FREE(m_frames, memory_bucket_graphics);
 }
 
 TileLayer::TileLayer (TileLayer&& other) noexcept
@@ -161,12 +216,20 @@ TileLayer::TileLayer (TileLayer&& other) noexcept
     , m_bounds(other.m_bounds)
     , m_color(other.m_color)
     , m_inv(other.m_inv)
+    , m_animations(other.m_animations)
+    , m_animationCount(other.m_animationCount)
+    , m_frames(other.m_frames)
+    , m_frameCount(other.m_frameCount)
     , name(std::move(other.name))
     , texture(std::move(other.texture))
 #ifdef RDGE_DEBUG
     , debug_overlay(other.debug_overlay)
 #endif
 {
+    other.m_animations = nullptr;
+    other.m_animationCount = 0;
+    other.m_frames = nullptr;
+    other.m_frameCount = 0;
     other.m_cells = nullptr;
     other.m_chunks.data = nullptr;
 }
@@ -187,6 +250,10 @@ TileLayer::operator= (TileLayer&& rhs) noexcept
         this->debug_overlay = rhs.debug_overlay;
 #endif
 
+        std::swap(m_animations, rhs.m_animations);
+        std::swap(m_animationCount, rhs.m_animationCount);
+        std::swap(m_frames, rhs.m_frames);
+        std::swap(m_frameCount, rhs.m_frameCount);
         std::swap(m_cells, rhs.m_cells);
         std::swap(m_chunks, rhs.m_chunks);
     }
@@ -243,6 +310,29 @@ TileLayer::Draw (TileBatch& renderer, const OrthographicCamera& camera)
     }
 
     renderer.Flush(this->texture);
+}
+
+void
+TileLayer::Update (const delta_time& dt)
+{
+    for (size_t i = 0; i < m_animationCount; i++)
+    {
+        auto& animation = m_animations[i];
+        animation.elapsed += dt.ticks;
+
+        const auto& frame = animation.frames[animation.current_frame];
+        if (animation.elapsed > frame.duration)
+        {
+            animation.elapsed -= frame.duration;
+            animation.current_frame++;
+            if (animation.current_frame == animation.frame_count)
+            {
+                animation.current_frame = 0;
+            }
+
+            animation.current_uv = &animation.frames[animation.current_frame].uvs;
+        }
+    }
 }
 
 std::ostream&

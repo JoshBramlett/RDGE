@@ -9,8 +9,8 @@
 #include <rdge/util/compiler.hpp>
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
+#include <rdge/debug/assert.hpp>
 
-#include <SDL_assert.h>
 #include <GL/glew.h>
 
 #include <sstream>
@@ -211,7 +211,7 @@ TileBatch::operator= (TileBatch&& rhs) noexcept
 void
 TileBatch::SetView (const OrthographicCamera& camera, float depth)
 {
-    SDL_assert(m_vao != 0);
+    RDGE_ASSERT(m_vao != 0);
     m_combined = camera.combined;
     this->depth = (!std::isnan(depth)) ? depth : -camera.far;
 
@@ -223,7 +223,7 @@ TileBatch::SetView (const OrthographicCamera& camera, float depth)
 void
 TileBatch::Prime (void)
 {
-    SDL_assert(m_vao != 0);
+    RDGE_ASSERT(m_vao != 0);
 
     m_shader.Enable();
     m_shader.SetUniformValue(U_SAMPLER, TEXTURE_UNIT_ID);
@@ -238,9 +238,9 @@ TileBatch::Prime (void)
 void
 TileBatch::Draw (const tile_cell_chunk& chunk, color c)
 {
-    SDL_assert(m_vao != 0);
-    SDL_assert(m_vbo == static_cast<uint32>(opengl::GetInt(GL_ARRAY_BUFFER_BINDING)));
-    SDL_assert(m_submissions <= m_capacity);
+    RDGE_ASSERT(m_vao != 0);
+    RDGE_ASSERT(m_vbo == static_cast<uint32>(opengl::GetInt(GL_ARRAY_BUFFER_BINDING)));
+    RDGE_ASSERT(m_submissions <= m_capacity);
 
     const auto& sz = m_tileSize;
     auto ic = static_cast<uint32>(c);
@@ -248,25 +248,27 @@ TileBatch::Draw (const tile_cell_chunk& chunk, color c)
     for (size_t i = 0; i < chunk.cell_count; i++)
     {
         auto& cell = chunk.cells[i];
-        if (!cell.uvs.is_empty())
+        if (cell.uvs)
         {
+            RDGE_ASSERT(*cell.uvs);
+            RDGE_ASSERT(!(*cell.uvs)->is_empty());
             m_cursor->pos   = math::vec3(cell.pos, this->depth);
-            m_cursor->uv    = cell.uvs[0];
+            m_cursor->uv    = (**cell.uvs)[0];
             m_cursor->color = ic;
             m_cursor++;
 
             m_cursor->pos   = math::vec3(cell.pos.x, cell.pos.y + sz.y, this->depth);
-            m_cursor->uv    = cell.uvs[1];
+            m_cursor->uv    = (**cell.uvs)[1];
             m_cursor->color = ic;
             m_cursor++;
 
             m_cursor->pos   = math::vec3(cell.pos.x + sz.x, cell.pos.y + sz.y, this->depth);
-            m_cursor->uv    = cell.uvs[2];
+            m_cursor->uv    = (**cell.uvs)[2];
             m_cursor->color = ic;
             m_cursor++;
 
             m_cursor->pos   = math::vec3(cell.pos.x + sz.x, cell.pos.y, this->depth);
-            m_cursor->uv    = cell.uvs[3];
+            m_cursor->uv    = (**cell.uvs)[3];
             m_cursor->color = ic;
             m_cursor++;
 
@@ -279,7 +281,7 @@ void
 TileBatch::Flush (const Texture& texture)
 {
     // Sanity check the same VBO is bound throughout the draw call
-    SDL_assert(m_vbo == static_cast<uint32>(opengl::GetInt(GL_ARRAY_BUFFER_BINDING)));
+    RDGE_ASSERT(m_vbo == static_cast<uint32>(opengl::GetInt(GL_ARRAY_BUFFER_BINDING)));
 
     opengl::ReleaseBufferPointer(GL_ARRAY_BUFFER);
     opengl::UnbindBuffers(GL_ARRAY_BUFFER);

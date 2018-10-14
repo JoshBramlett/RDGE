@@ -223,6 +223,16 @@ WineryScene::OnUpdate (const delta_time& dt)
 {
     collision_graph.Step(1.f / 60.f);
     player.OnUpdate(dt);
+
+    for (auto& layer : this->background_layers)
+    {
+        layer.Update(dt);
+    }
+
+    for (auto& layer : this->foreground_layers)
+    {
+        layer.Update(dt);
+    }
 }
 
 void
