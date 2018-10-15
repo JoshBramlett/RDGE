@@ -206,28 +206,12 @@ Window::Window (const std::string& title,
         SDL_THROW("SDL failed to create an OpenGL context", "SDL_GL_CreateContext");
     }
 
-    // !!!  IMPORTANT  !!!
-    // There are a couple issues with GLEW initialization (as far as 1.13).
-    //     1) GLEW has a problem with OpenGL 3.2+ core contexts, and the only fix
-    //        is to set glewExperimental to TRUE.
-    //     2) You may get GL_INVALID_ENUM when initializing.  Everything *should*
-    //        work, but a query to glGetError is required to further suppress
-    //        the error going forward.
-    //
-    // http://stackoverflow.com/questions/10857335/opengl-glgeterror-returns-invalid-enum-after-call-to-glewinit
-    // https://www.opengl.org/wiki/OpenGL_Loading_Library#GLEW_.28OpenGL_Extension_Wrangler.29
-
-    // Must be set to true for OpenGL 3.2+ contexts
-    glewExperimental = GL_TRUE;
     GLenum glew_error = glewInit();
     if (RDGE_UNLIKELY(glew_error != GLEW_OK))
     {
         std::string err_msg = reinterpret_cast<const char*>(glewGetErrorString(glew_error));
         RDGE_THROW("Failed to initialize GLEW.  error=" + err_msg);
     }
-
-    // Query for the OpenGL error to clear the value for later lookup
-    glGetError();
 
     ImGui_ImplRDGE_Init(m_window);
 
