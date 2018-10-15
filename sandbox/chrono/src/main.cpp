@@ -22,6 +22,7 @@ int main ()
     //settings.target_height = 1080;
     settings.window_title = "sandbox: chrono";
     settings.resizable    = true;
+    settings.use_vsync    = false;
 
     // 1) Initialize SDL
     Application app(settings);

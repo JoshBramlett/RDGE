@@ -18,6 +18,11 @@
 #   define RDGE_MALLOC(size, bucket) \
     rdge::detail::safe_alloc(size, bucket)
 
+    //! \def RDGE_CALLOC(num, size, bucket)
+    //! \brief Tracked cstdlib style calloc allocation
+#   define RDGE_CALLOC(num, size, bucket) \
+    rdge::detail::safe_calloc(num, size, bucket)
+
     //! \def RDGE_REALLOC(ptr, size, bucket)
     //! \brief Tracked cstdlib style dynamic reallocation (by size)
 #   define RDGE_REALLOC(ptr, size, bucket) \
@@ -51,7 +56,8 @@ namespace rdge {
 enum memory_bucket
 {
     memory_bucket_none = 0,
-    memory_bucket_ext,
+    memory_bucket_stbi,
+    memory_bucket_sdl,
     memory_bucket_debug,
     memory_bucket_assets,
     memory_bucket_graphics,
@@ -67,8 +73,9 @@ namespace detail {
 
 //!@{ Use macros - do not call directly
 void* safe_alloc (size_t, memory_bucket);
-bool safe_alloc (void**, size_t, size_t, bool, memory_bucket);
+void* safe_calloc (size_t, size_t, memory_bucket);
 void* safe_realloc (void**, size_t, memory_bucket);
+bool safe_alloc (void**, size_t, size_t, bool, memory_bucket);
 bool safe_realloc (void**, size_t, size_t, memory_bucket);
 void debug_free (void**, memory_bucket);
 //!@}

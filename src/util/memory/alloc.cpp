@@ -24,13 +24,22 @@ namespace detail {
 
 // The versions of safe_alloc and safe_realloc that return a pointer are
 // to provide a c-style interface for use when overriding allocations in
-// external libraries (namely stb)
+// external libraries (namely stb/sdl)
 
 void*
 safe_alloc (size_t sz, memory_bucket id)
 {
     void* p = nullptr;
     safe_alloc((void**)&(p), sz, 1, false, id);
+
+    return p;
+}
+
+void*
+safe_calloc (size_t num, size_t sz, memory_bucket id)
+{
+    void* p = nullptr;
+    safe_alloc((void**)&(p), sz, num, true, id);
 
     return p;
 }
@@ -183,7 +192,8 @@ to_string (memory_bucket value)
     {
 #define CASE(X) case X: return (strrchr(#X, '_') + 1); break;
         CASE(memory_bucket_none)
-        CASE(memory_bucket_ext)
+        CASE(memory_bucket_stbi)
+        CASE(memory_bucket_sdl)
         CASE(memory_bucket_debug)
         CASE(memory_bucket_assets)
         CASE(memory_bucket_graphics)

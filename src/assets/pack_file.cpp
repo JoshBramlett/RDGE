@@ -102,7 +102,7 @@ PackFile::GetAsset (int32 asset_id)
         auto& info = m_table[asset_id];
         SDL_assert(info.type == asset_type_surface);
 
-        void* pixel_data = RDGE_MALLOC(info.size, memory_bucket_ext);
+        void* pixel_data = RDGE_MALLOC(info.size, memory_bucket_stbi);
         if (RDGE_UNLIKELY(!pixel_data))
         {
             RDGE_THROW("Memory allocation failed");

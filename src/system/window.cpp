@@ -222,20 +222,21 @@ Window::Window (const std::string& title,
     //glEnable(GL_ALPHA_TEST);
     //glAlphaFunc(GL_LEQUAL, 0);
 
-    if (use_vsync)
-    {
-        // TODO SDL docs say the interval can be set to 1 for vsync, and -1 for late
-        //      swap tearing, which is only implemented on some drivers.  Docs suggest
-        //      passing in -1, then passing 1 if the first fails.
-        //      https://wiki.libsdl.org/SDL_GL_SetSwapInterval
+    // TODO SDL docs say the interval can be set to 1 for vsync, and -1 for late
+    //      swap tearing, which is only implemented on some drivers.  Docs suggest
+    //      passing in -1, then passing 1 if the first fails.
+    //      https://wiki.libsdl.org/SDL_GL_SetSwapInterval
 
-        int32 interval = 1;
-        if (RDGE_UNLIKELY(SDL_GL_SetSwapInterval(interval) != 0))
-        {
-            WLOG() << "SDL failed to set swap interval "
-                   << " interval=" << interval
-                   << " error=" << SDL_GetError();
-        }
+    // TODO VSYNC behavior changed with OSX Mojave.  Prior versions VSYNC was disabled
+    //      by default.  Currently it must be explicitly disabled.  Explicitly disabling
+    //      should be tested on previous versions.
+
+    int32 swap_interval = (use_vsync) ? 1 : 0;
+    if (RDGE_UNLIKELY(SDL_GL_SetSwapInterval(swap_interval) != 0))
+    {
+        WLOG() << "SDL failed to set swap interval "
+               << " interval=" << swap_interval
+               << " error=" << SDL_GetError();
     }
 
     ResetViewport();

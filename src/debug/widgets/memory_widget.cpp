@@ -4,6 +4,7 @@
 #include <rdge/util/memory/alloc.hpp>
 
 #include <imgui/imgui.h>
+#include <SDL_stdinc.h>
 
 namespace rdge {
 namespace debug {
@@ -12,7 +13,8 @@ namespace debug {
 memory_bucket_data g_memoryBuckets[memory_bucket_count] =
 {
     { rdge::to_string(memory_bucket_none), 0, 0, 0, 0 },
-    { rdge::to_string(memory_bucket_ext), 0, 0, 0, 0 },
+    { rdge::to_string(memory_bucket_stbi), 0, 0, 0, 0 },
+    { rdge::to_string(memory_bucket_sdl), 0, 0, 0, 0 },
     { rdge::to_string(memory_bucket_debug), 0, 0, 0, 0 },
     { rdge::to_string(memory_bucket_assets), 0, 0, 0, 0 },
     { rdge::to_string(memory_bucket_graphics), 0, 0, 0, 0 },
@@ -86,6 +88,10 @@ MemoryWidget::UpdateWidget (void)
         ImGui::Text("%zu", total_reallocs); ImGui::NextColumn();
         ImGui::Columns(1);
     }
+
+    ImGui::Separator();
+    ImGui::Text("SDL_GetNumAllocations: %d", SDL_GetNumAllocations());
+    ImGui::Separator();
 
     ImGui::End();
 #endif

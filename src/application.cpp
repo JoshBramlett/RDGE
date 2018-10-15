@@ -2,8 +2,10 @@
 #include <rdge/util/io/rwops_base.hpp>
 #include <rdge/internal/exception_macros.hpp>
 #include <rdge/util/compiler.hpp>
+#include <rdge/util/memory/alloc.hpp>
 
 #include <SDL_version.h>
+#include <SDL_stdinc.h>
 #include <nlohmann/json.hpp>
 
 #include <exception>
@@ -19,6 +21,13 @@ Application::Application (const char* filepath)
 
 Application::Application (const app_settings& /* settings */)
 {
+#ifdef RDGE_DEBUG_MEMORY_TRACKER
+    SDL_SetMemoryFunctions([](size_t sz){ return RDGE_MALLOC(sz, memory_bucket_sdl); },
+                           [](size_t num, size_t sz){ return RDGE_CALLOC(num, sz, memory_bucket_sdl); },
+                           [](void* p, size_t sz){ return RDGE_REALLOC(p, sz, memory_bucket_sdl); },
+                           [](void* p){ RDGE_FREE(p, memory_bucket_sdl); });
+#endif
+
     // TODO settings file should be for overriding the default log level
     //      (which depends on whether it's a debug or release build).  Therefore
     //      setting a default value in the settings is wrong - this value

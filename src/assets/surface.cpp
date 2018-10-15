@@ -10,9 +10,9 @@
 #include <SDL_assert.h>
 #include <GL/glew.h>
 
-#define STBI_MALLOC(x) RDGE_MALLOC(x, rdge::memory_bucket_ext)
-#define STBI_FREE(x) RDGE_FREE(x, rdge::memory_bucket_ext)
-#define STBI_REALLOC(x, n) RDGE_REALLOC(x, n, rdge::memory_bucket_ext)
+#define STBI_MALLOC(x) RDGE_MALLOC(x, rdge::memory_bucket_stbi)
+#define STBI_FREE(x) RDGE_FREE(x, rdge::memory_bucket_stbi)
+#define STBI_REALLOC(x, n) RDGE_REALLOC(x, n, rdge::memory_bucket_stbi)
 #define STBI_ONLY_PNG
 #define STB_IMAGE_IMPLEMENTATION
 #include <nothings/stb_image.h>
