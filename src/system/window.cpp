@@ -251,6 +251,8 @@ Window::Window (const std::string& title,
            << " opengl=" << opengl::GetString(GL_VERSION)
            << " vsync=" << std::boolalpha << IsUsingVSYNC()
            << " high_dpi=" << std::boolalpha << IsHighDPI()
+           << " npot=" << std::boolalpha << !!SDL_GL_ExtensionSupported("GL_ARB_texture_non_power_of_two")
+           << " frag=" << std::boolalpha << !!SDL_GL_ExtensionSupported("GL_ARB_fragment_shader")
            << " pixel_format=" << SDL_GetPixelFormatName(PixelFormat());
 
     //ILOG() << debug::DumpRendererDriverInfo();

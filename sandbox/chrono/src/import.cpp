@@ -3,6 +3,7 @@
 #include <chrono/types.hpp>
 #include <chrono/entities/iactor.hpp>
 #include <chrono/entities/static_actor.hpp>
+#include <chrono/entities/sign.hpp>
 
 #include <rdge/assets.hpp>
 #include <rdge/gameobjects.hpp>
@@ -229,8 +230,7 @@ ImportTileObject (const tilemap::Object& obj_def,
     case ActorType::STATIC:
         return std::make_unique<StaticActor>(obj_def, sheet, layer, graph);
     case ActorType::SIGN:
-        return std::make_unique<StaticActor>(obj_def, sheet, layer, graph);
-        //return std::make_unique<SignActor>();
+        return std::make_unique<Sign>(obj_def, sheet, layer, graph);
     //case ActorType::CONTAINER:
         //return std::make_unique<WineryScene>();
     default:

@@ -22,6 +22,7 @@ add_executable (chrono
                 src/entities/player.cpp
                 src/entities/npcs/debutante.cpp
                 src/entities/static_actor.cpp
+                src/entities/sign.cpp
                 src/scenes/contact_handler.cpp
                 src/scenes/scene_manager.cpp
                 src/scenes/overworld.cpp

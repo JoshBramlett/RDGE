@@ -70,44 +70,6 @@ std::string to_string (ActorType);
   },
 }
 
-class Sign : public IActor
-{
-public:
-    explicit Container (const nlohmann::json&);
-    ~Container (void) noexcept = default;
-
-    void OnEvent (const rdge::Event& event) override;
-    void OnUpdate (const rdge::delta_time& dt) override;
-
-    rdge::uint32 GetActorId (void) const noexcept override;
-    rdge::math::vec2 GetWorldCenter (void) const noexcept override;
-
-public:
-
-    rdge::sprite_data* sprite = nullptr;
-
-    rdge::physics::RigidBody* body = nullptr;
-    rdge::physics::Fixture* collision = nullptr;
-    rdge::physics::Fixture* sensor = nullptr;
-    fixture_user_data sensor_user_data;
-
-    enum actor_sign_sensor
-    {
-        actor_sign_sensor_front = 0,
-        actor_sign_sensor_back  = 1,
-
-        actor_sign_sensor_count = 2,
-    };
-
-    struct sensor_data
-    {
-        rdge::physics::Fixture* fixture = nullptr;
-        fixture_user_data user_data;
-    };
-
-    sensor_data[actor_sign_sensor_count] sensors;
-};
-
 
 class Container : public IActor
 {

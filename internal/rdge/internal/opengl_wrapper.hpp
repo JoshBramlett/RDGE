@@ -61,6 +61,30 @@ do { \
 #define GL_CHECK_ERROR(x) x
 #endif
 
+inline std::string
+ErrorCodeToString (uint32 code)
+{
+#define GL_ERROR_STRING(e) case e: return #e;
+    switch(code)
+    {
+    GL_ERROR_STRING(GL_NO_ERROR)
+    GL_ERROR_STRING(GL_INVALID_ENUM)
+    GL_ERROR_STRING(GL_INVALID_VALUE)
+    GL_ERROR_STRING(GL_INVALID_OPERATION)
+    GL_ERROR_STRING(GL_STACK_OVERFLOW)
+    GL_ERROR_STRING(GL_STACK_UNDERFLOW)
+    GL_ERROR_STRING(GL_OUT_OF_MEMORY)
+    GL_ERROR_STRING(GL_INVALID_FRAMEBUFFER_OPERATION)
+    GL_ERROR_STRING(GL_CONTEXT_LOST)
+    GL_ERROR_STRING(GL_TABLE_TOO_LARGE)
+    default:
+        break;
+    }
+#undef GL_ERROR_STRING
+
+    return "UNKNOWN (" + std::to_string(code) + ")";
+}
+
 /******************************************************************
  *                      OpenGL Get Values
  *****************************************************************/
