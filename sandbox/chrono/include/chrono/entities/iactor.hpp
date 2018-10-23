@@ -7,78 +7,8 @@ namespace rdge {
 class Event;
 struct delta_time;
 } // namespace rdge
+struct fixture_user_data;
 //!@}
-
-// Containers
-//   - Actor
-//     - ActorID
-//     - Tile collision
-//     - Tile sensor
-//       - facing
-//       - invoke
-//     - Inventory
-//       - Item list
-//       - Can Insert
-//       - Can Take
-//     - State
-//       - Open/Closed/Locked
-//   - ActorProfile
-//       - sprite
-//       - animation
-//       - sounds
-//
-//
-//    - Tiled
-//      - ActorID (unique to scene)
-//      - ActorType (enum value)
-//      - Tile collision
-//      - Tile sensor
-//        - facing
-//        - invoke
-//    - Config
-//      - Tile sensor
-//        -
-//
-//
-//    - Fixtures
-//      - Tile collision
-//      - Tile sensor
-//    - Actionable
-//      - Inventory
-//    - Properties
-//      - Unique ObjectID (for serialization)
-//      - ActorID
-//      - Open/Closed
-//      - Contained items
-//      - IsSafe (whether items can be randomly added/removed)
-
-// 1) Static
-//    - Tile collision
-// 3) Sign
-//    - Fixtures
-//      - Tile collision
-//      - Tile sensor
-//    - Actionable
-//      - Dialog
-//    - Properties
-//      - Unique ObjectID?
-//      - ActorID (for dialog lookup)
-// 3) NPC
-//    - Tile collision
-//    - Tile sensor
-//    - Actionable
-//    - Dialog
-//    - Inventory
-//
-//
-// GetActorID()
-// GetObjectID()
-// GetWorldCenter()
-//
-// IsActionable()
-// InvokeAction()
-
-
 
 class IActor
 {
@@ -87,14 +17,40 @@ public:
 
     virtual void OnEvent (const rdge::Event&) = 0;
     virtual void OnUpdate (const rdge::delta_time&) = 0;
+    virtual void OnActionTriggered (const fixture_user_data&) = 0;
 
     virtual rdge::uint32 GetActorId (void) const noexcept = 0;
     virtual rdge::math::vec2 GetWorldCenter (void) const noexcept = 0;
 
-
-
-
+    static IActor* Extract (const fixture_user_data*);
 };
+
+namespace perch {
+
+//!\brief Supported derived IActor types
+enum class ActorType
+{
+    NONE = 0,
+    PLAYER = 1,
+
+    // tile objects
+    STATIC    = 100,
+    SIGN      = 101,
+    CONTAINER = 102,
+
+    // npcs
+    DEBUTANTE = 1000,
+};
+
+//! \brief ActorType stream output operator
+std::ostream& operator<< (std::ostream&, ActorType);
+
+//!@{ Direction string conversions
+bool try_parse (const std::string&, ActorType&);
+std::string to_string (ActorType);
+//!@}
+
+} // namespace perch
 
 #if 0
 
@@ -114,18 +70,56 @@ public:
   },
 }
 
+class Sign : public IActor
+{
+public:
+    explicit Container (const nlohmann::json&);
+    ~Container (void) noexcept = default;
+
+    void OnEvent (const rdge::Event& event) override;
+    void OnUpdate (const rdge::delta_time& dt) override;
+
+    rdge::uint32 GetActorId (void) const noexcept override;
+    rdge::math::vec2 GetWorldCenter (void) const noexcept override;
+
+public:
+
+    rdge::sprite_data* sprite = nullptr;
+
+    rdge::physics::RigidBody* body = nullptr;
+    rdge::physics::Fixture* collision = nullptr;
+    rdge::physics::Fixture* sensor = nullptr;
+    fixture_user_data sensor_user_data;
+
+    enum actor_sign_sensor
+    {
+        actor_sign_sensor_front = 0,
+        actor_sign_sensor_back  = 1,
+
+        actor_sign_sensor_count = 2,
+    };
+
+    struct sensor_data
+    {
+        rdge::physics::Fixture* fixture = nullptr;
+        fixture_user_data user_data;
+    };
+
+    sensor_data[actor_sign_sensor_count] sensors;
+};
+
 
 class Container : public IActor
 {
 public:
     explicit Container (const nlohmann::json&);
-    ~Container (void) = default;
+    ~Container (void) noexcept = default;
 
-    void OnEvent (const rdge::Event& event) = 0;
-    void OnUpdate (const rdge::delta_time& dt) = 0;
+    void OnEvent (const rdge::Event& event) override;
+    void OnUpdate (const rdge::delta_time& dt) override;
 
-    rdge::uint32 GetActorId (void) const noexcept = 0;
-    rdge::math::vec2 GetWorldCenter (void) const noexcept = 0;
+    rdge::uint32 GetActorId (void) const noexcept override;
+    rdge::math::vec2 GetWorldCenter (void) const noexcept override;
 
     rdge::sprite_data* sprite = nullptr;
 

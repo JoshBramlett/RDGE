@@ -251,8 +251,10 @@ Player::OnUpdate (const delta_time& dt)
                 //    transition callbacks, but I'm thinking a more thought out
                 //    state machine would be the way to go.
                 m_flags |= (INPUT_LOCKED);
-                QueueCustomEvent(g_game.custom_events[sibling->action_trigger.action_type],
-                                 sibling->action_trigger.scene_id);
+                //QueueCustomEvent(g_game.custom_events[sibling->action_trigger.action_type],
+                                 //sibling->action_trigger.scene_id);
+                IActor* actor = IActor::Extract(sibling);
+                actor->OnActionTriggered(*sibling);
                 ILOG() << "Hooray";
             }
             else
@@ -316,6 +318,12 @@ Player::BeginAttack (void)
             m_lockedVelocity = 3.f;
         }
     }
+}
+
+void
+Player::OnActionTriggered (const fixture_user_data&)
+{
+    SDL_assert(false);
 }
 
 uint32

@@ -18,6 +18,7 @@ add_executable (chrono
                 src/events.cpp
                 src/import.cpp
                 src/main.cpp
+                src/entities/iactor.cpp
                 src/entities/player.cpp
                 src/entities/npcs/debutante.cpp
                 src/entities/static_actor.cpp

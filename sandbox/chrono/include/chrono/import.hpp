@@ -1,15 +1,23 @@
 #pragma once
 
+#include <memory>
+#include <vector>
+
 //!@{ Forward declarations
 struct spawn_point_data;
 struct fixture_user_data;
+class IActor;
 namespace rdge {
+class SpriteSheet;
+class SpriteLayer;
 namespace tilemap {
 class Object;
+class Layer;
 struct extended_object_data;
 } // namespace tilemap
 namespace physics {
 class RigidBody;
+class CollisionGraph;
 } // namespace tilemap
 } // namespace rdge
 //!@}
@@ -41,5 +49,17 @@ fixture_user_data
 ProcessCollidable (rdge::physics::RigidBody*,
                    const rdge::tilemap::Object&,
                    const rdge::tilemap::extended_object_data* = nullptr);
+
+void
+ImportSpriteLayer (const rdge::tilemap::Layer& layer_def,
+                   rdge::SpriteLayer& layer,
+                   rdge::physics::CollisionGraph& graph,
+                   std::vector<std::unique_ptr<IActor>>& actors);
+
+std::unique_ptr<IActor>
+ImportTileObject (const rdge::tilemap::Object& obj_def,
+                  const rdge::SpriteSheet& sheet,
+                  rdge::SpriteLayer& layer,
+                  rdge::physics::CollisionGraph& graph);
 
 } // namespace perch

@@ -88,7 +88,8 @@ ProcessContactStart (rdge::physics::Contact* c)
                 }
                 else
                 {
-                    rdge::QueueCustomEvent(g_game.custom_events[trigger.action_type], 0);
+                    IActor* actor = IActor::Extract(sibling);
+                    actor->OnActionTriggered(*sibling);
                 }
             }
         }

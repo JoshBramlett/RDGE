@@ -11,8 +11,7 @@
 #include <rdge/system.hpp>
 #include <rdge/util.hpp>
 #include <rdge/events/event.hpp>
-
-#include <SDL_assert.h>
+#include <rdge/debug/assert.hpp>
 
 using namespace rdge;
 using namespace rdge::math;
@@ -121,6 +120,12 @@ Debutante::OnUpdate (const delta_time& dt)
     sprite->pos = screen_pos - frame.origin;
     sprite->size = frame.size;
     sprite->uvs = frame.uvs;
+}
+
+void
+Debutante::OnActionTriggered (const fixture_user_data&)
+{
+    RDGE_ASSERT(false);
 }
 
 uint32

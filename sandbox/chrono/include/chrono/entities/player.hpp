@@ -98,6 +98,7 @@ public:
     // IActor
     void OnEvent (const rdge::Event& event) override;
     void OnUpdate (const rdge::delta_time& dt) override;
+    void OnActionTriggered (const fixture_user_data&) override;
 
     rdge::uint32 GetActorId (void) const noexcept override;
     rdge::math::vec2 GetWorldCenter (void) const noexcept override;

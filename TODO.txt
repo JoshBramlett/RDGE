@@ -1,5 +1,26 @@
 Working (enhancements)
 
+    - Test out whether the objects in a spritesheet need to have a positive position.
+      It should not be a requirement that the shape be inside the sprite.
+    - Refactor action_trigger_data
+      - scene_id, action_id, action_type and even invoke_required shouldn't be
+        populated from Tiled.  This may be fine for scene objects, but when the
+        shape is a child of a tile object, you lose scalability.  What defines the
+        action_trigger should be populated elsewhere.
+    - When a trigger is invoked, either the actor or the scene should handle it.
+        - Create IActor::Extract and add an OnActionTriggered(fixture_user_data)
+    - Refactor ext_data
+        - object_types should just be a global and treated as a first class asset.
+          Since both Tilemaps and Tilesets utilize them it doesn't make sense to
+          tie them to a Tilemap.
+        - They should also be added to types.hpp.  Rather than calling all the
+          Getter methods.
+
+    - Move CREATE_TILE_LAYER to import.cpp
+    - Formally define a TileObject?
+      - Importing is tied to Tiled
+
+
     Util:
       - Create a vector-like container for tracking memory
         - Update all asset classes to use that rather than a vector

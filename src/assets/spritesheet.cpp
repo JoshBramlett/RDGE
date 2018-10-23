@@ -50,6 +50,7 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
         // objectsheet only
         JSON_VALIDATE_OPTIONAL(j_region, index, is_number_unsigned);
         JSON_VALIDATE_OPTIONAL(j_region, objects, is_array);
+        JSON_VALIDATE_OPTIONAL(j_region, type, is_string);
 
         // override index if provided through the config
         if (j_region.count("index"))
@@ -143,6 +144,11 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
             auto& origin = region.value.origin;
             origin.x = 0.5f;
             origin.y = 0.5f;
+        }
+
+        if (j_region.count("type"))
+        {
+            region.type = j_region["type"].get<decltype(region.type)>();
         }
 
         if (j_region.count("objects"))

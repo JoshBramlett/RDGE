@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset name="overworld_obj" tilewidth="80" tileheight="96" tilecount="14" columns="0">
+<tileset version="1.2" tiledversion="1.2.0" name="overworld_obj" tilewidth="80" tileheight="96" tilecount="14" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0">
   <image width="80" height="96" source="overworld_obj/tree_01.png"/>
@@ -85,10 +85,15 @@
    </object>
   </objectgroup>
  </tile>
- <tile id="11">
+ <tile id="11" type="sign">
   <image width="36" height="36" source="overworld_obj/sign_post_info_01.png"/>
   <objectgroup draworder="index">
-   <object id="1" name="sign_post_info_01" type="collidable" x="4.34028" y="21.0232" width="27.6693" height="12.207"/>
+   <object id="1" name="collision_rect" type="collidable" x="4.34028" y="21.0232" width="27.6693" height="12.207"/>
+   <object id="2" name="dialog_trigger" type="action_trigger" x="6" y="3" width="24" height="10">
+    <properties>
+     <property name="action_type" value="dialog"/>
+    </properties>
+   </object>
   </objectgroup>
  </tile>
  <tile id="12">

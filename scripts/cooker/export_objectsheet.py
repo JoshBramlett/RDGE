@@ -64,6 +64,12 @@ def parse_tileset(in_file):
         tile_def['index'] = tile['id']
         tile_def['image'] = os.path.join(path, tile['image'])
         tile_def['objects'] = []
+
+        if 'type' in tile:
+            tile_def['type'] = tile['type']
+        else:
+            tile_def['type'] = 'static'
+
         if 'properties' in tile:
             verify_properties(tile_def)
             tile_def['properties'] = tile['properties']
@@ -89,6 +95,7 @@ def merge_data(data_file):
             if name in frame['filename']:
                 frame['index'] = d['index']
                 frame['objects'] = d['objects']
+                frame['type'] = d['type']
                 if 'properties' in d:
                     frame['properties'] = d['properties']
 

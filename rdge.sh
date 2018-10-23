@@ -13,7 +13,6 @@ function chronopack()
         cd -
         cd ~/Documents/Projects/RDGE/debug/tools/asset_packer/
         ./asset_packer ../../../sandbox/chrono/res/export.json --silent
-        cp -f assets.pack ../../../../xcode/sandbox/chrono/Debug/res/
     fi
     cd -
 }

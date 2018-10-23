@@ -66,7 +66,8 @@ struct spritesheet_region
 //! \details Provides further details about the imported region
 struct region_data
 {
-    std::string        name;  //!< Name as specified by import
+    std::string name;         //!< Name as specified by import
+    std::string type;         //!< Type as specified by import
     spritesheet_region value; //!< Core region data, including size, uv coords, etc.
 
     //! \brief Collection of tile objects

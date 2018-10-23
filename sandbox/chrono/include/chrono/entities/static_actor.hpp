@@ -16,17 +16,14 @@ class SpriteLayer;
 class Event;
 struct delta_time;
 struct sprite_data;
-
 namespace physics {
 class CollisionGraph;
 class RigidBody;
 class Fixture;
 } // namespace physics
-
 namespace tilemap {
 class Object;
 } // namespace tilemap
-
 } // namespace rdge
 //!@}
 
@@ -39,8 +36,9 @@ public:
                  rdge::physics::CollisionGraph& graph);
 
     // IActor
-    void OnEvent (const rdge::Event& event) override;
-    void OnUpdate (const rdge::delta_time& dt) override;
+    void OnEvent (const rdge::Event&) override;
+    void OnUpdate (const rdge::delta_time&) override;
+    void OnActionTriggered (const fixture_user_data&) override;
 
     rdge::uint32 GetActorId (void) const noexcept override;
     rdge::math::vec2 GetWorldCenter (void) const noexcept override;

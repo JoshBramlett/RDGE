@@ -1,6 +1,8 @@
 #include <chrono/import.hpp>
 #include <chrono/globals.hpp>
 #include <chrono/types.hpp>
+#include <chrono/entities/iactor.hpp>
+#include <chrono/entities/static_actor.hpp>
 
 #include <rdge/assets.hpp>
 #include <rdge/gameobjects.hpp>
@@ -190,6 +192,53 @@ ProcessCollidable (rdge::physics::RigidBody* body,
 
     RDGE_ASSERT(result.fixture);
     return result;
+}
+
+void
+ImportSpriteLayer (const tilemap::Layer& layer_def,
+                   SpriteLayer& layer,
+                   physics::CollisionGraph& graph,
+                   std::vector<std::unique_ptr<IActor>>& actors)
+{
+    RDGE_ASSERT(layer_def.type == tilemap::LayerType::OBJECTGROUP);
+
+    const auto& sheet = *layer_def.objectgroup.spritesheet;
+    for (const auto& obj_def : layer_def.objectgroup.objects)
+    {
+        RDGE_ASSERT(obj_def.type == tilemap::ObjectType::SPRITE);
+        actors.emplace_back(ImportTileObject(obj_def, sheet, layer, graph));
+    }
+}
+
+std::unique_ptr<IActor>
+ImportTileObject (const tilemap::Object& obj_def,
+                  const SpriteSheet& sheet,
+                  SpriteLayer& layer,
+                  physics::CollisionGraph& graph)
+{
+    const auto& region = sheet.regions[obj_def.sprite.gid];
+    ActorType actor_type = ActorType::NONE;
+    if (!perch::try_parse(region.type, actor_type))
+    {
+        RDGE_ASSERT(false);
+        return nullptr;
+    }
+
+    switch (actor_type)
+    {
+    case ActorType::STATIC:
+        return std::make_unique<StaticActor>(obj_def, sheet, layer, graph);
+    case ActorType::SIGN:
+        return std::make_unique<StaticActor>(obj_def, sheet, layer, graph);
+        //return std::make_unique<SignActor>();
+    //case ActorType::CONTAINER:
+        //return std::make_unique<WineryScene>();
+    default:
+        break;
+    }
+
+    RDGE_ASSERT(false);
+    return nullptr;
 }
 
 } // namespace perch

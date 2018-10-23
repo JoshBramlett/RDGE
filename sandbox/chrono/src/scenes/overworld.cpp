@@ -113,38 +113,14 @@ OverworldScene::OverworldScene (void)
         math::vec2 debutante_pos(550.f, -426.f);
         debutante.Init(debutante_pos, layer, collision_graph);
 
-        for (const auto& obj : def.objectgroup.objects)
-        {
-            // TODO Could set property on the obj to define that it's indeed static
-            //
-            // TODO StaticActors need to be initialized differently than other sprites.
-            //      These objects have the collision object relative to their sprite.
-            //      Dynamic sprites (especially those with animations) render their
-            //      sprite relative to a collision object.  There should be a very
-            //      explicit definition of those two types.
-            if (obj.type == tilemap::ObjectType::SPRITE)
-            {
-                this->static_actors.emplace_back(obj,
-                                                 *def.objectgroup.spritesheet,
-                                                 layer,
-                                                 collision_graph);
-            }
-        }
+        perch::ImportSpriteLayer(def, layer, collision_graph, static_actors);
     }
+
     {
         const auto& def = tilemap->layers[overworld_layer_structures];
         auto& layer = this->sprite_layers.back();
 
-        for (const auto& obj : def.objectgroup.objects)
-        {
-            if (obj.type == tilemap::ObjectType::SPRITE)
-            {
-                this->static_actors.emplace_back(obj,
-                                                 *def.objectgroup.spritesheet,
-                                                 layer,
-                                                 collision_graph);
-            }
-        }
+        perch::ImportSpriteLayer(def, layer, collision_graph, static_actors);
     }
 #endif
 

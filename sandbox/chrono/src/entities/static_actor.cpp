@@ -2,14 +2,14 @@
 #include <chrono/asset_table.hpp>
 #include <chrono/globals.hpp>
 #include <chrono/import.hpp>
+#include <chrono/types.hpp>
 
 #include <rdge/assets.hpp>
 #include <rdge/math.hpp>
 #include <rdge/physics.hpp>
 #include <rdge/system.hpp>
 #include <rdge/util.hpp>
-
-#include <SDL_assert.h>
+#include <rdge/debug/assert.hpp>
 
 using namespace rdge;
 using namespace rdge::math;
@@ -48,13 +48,14 @@ StaticActor::StaticActor (const Object& obj,
         rigid_body_profile bprof;
         bprof.type = RigidBodyType::STATIC;
         bprof.position = sprite->pos * g_game.ratios.screen_to_world;
+        bprof.user_data = this;
         this->body = graph.CreateBody(bprof);
 
         // cache lookup, even if we don't need it
         auto ext_data_a = obj.parent->GetSharedObjectData("collidable");
         auto ext_data_b = obj.parent->GetSharedObjectData("action_trigger");
-        SDL_assert(ext_data_a);
-        SDL_assert(ext_data_b);
+        RDGE_ASSERT(ext_data_a);
+        RDGE_ASSERT(ext_data_b);
 
         for (size_t i = 0; i < region.objects.size(); i++)
         {
@@ -66,6 +67,8 @@ StaticActor::StaticActor (const Object& obj,
             else if (child.ext_type == "action_trigger")
             {
                 this->triggers.emplace_back(perch::ProcessActionTrigger(body, child, ext_data_b));
+                auto& trigger = this->triggers.back();
+                trigger.fixture->user_data = (void*)&trigger;
             }
         }
     }
@@ -74,6 +77,13 @@ StaticActor::StaticActor (const Object& obj,
 void
 StaticActor::OnEvent (const Event&)
 { }
+
+void
+StaticActor::OnActionTriggered (const fixture_user_data&)
+{
+    //RDGE_ASSERT(false);
+    ILOG() << "OnActionTriggered";
+}
 
 void
 StaticActor::OnUpdate (const delta_time&)

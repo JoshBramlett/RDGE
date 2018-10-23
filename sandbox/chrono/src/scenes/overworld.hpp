@@ -65,7 +65,7 @@ public:
     //!@{ Actors
     Player player;
     Debutante debutante;
-    std::vector<StaticActor> static_actors;
+    std::vector<std::unique_ptr<IActor>> static_actors;
     //!@}
 
     //!@{ Spawn Points / Triggers
