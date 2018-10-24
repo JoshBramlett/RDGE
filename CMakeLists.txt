@@ -70,6 +70,7 @@ include_directories (SYSTEM lib)
 
 add_library (imgui STATIC
              lib/imgui/imgui.cpp
+             lib/imgui/imgui_widgets.cpp
              lib/imgui/imgui_draw.cpp
              lib/imgui/imgui_demo.cpp
              lib/imgui/imgui_impl_rdge.cpp)
