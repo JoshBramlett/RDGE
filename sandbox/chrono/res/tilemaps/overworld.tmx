@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="1.1.5" orientation="orthogonal" renderorder="right-down" width="80" height="64" tilewidth="16" tileheight="16" infinite="1" nextobjectid="67">
+<map version="1.2" tiledversion="1.2.0" orientation="orthogonal" renderorder="right-down" width="80" height="64" tilewidth="16" tileheight="16" infinite="1" nextlayerid="11" nextobjectid="67">
  <properties>
   <property name="object_types" type="file" value="objecttypes.json"/>
  </properties>
@@ -7,7 +7,7 @@
  <tileset firstgid="683" source="../objects/overworld_obj.tsx"/>
  <tileset firstgid="697" source="../objects/overworld_houses.tsx"/>
  <tileset firstgid="698" source="../tilesets/indoors.tsx"/>
- <layer name="bg" width="80" height="64">
+ <layer id="1" name="bg" width="80" height="64">
   <data encoding="csv">
    <chunk x="0" y="0" width="16" height="16">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -116,6 +116,24 @@
 33,33,33,33,33,33,33,33,33,33,33,33,0,0,0,0,
 33,33,33,33,33,33,33,33,33,33,33,33,0,0,0,0,
 33,33,33,33,33,33,33,33,33,33,33,33,0,0,0,0
+</chunk>
+   <chunk x="96" y="0" width="16" height="16">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+33,33,33,33,33,0,0,0,0,0,0,0,0,0,0,0,
+33,33,33,33,33,0,0,0,0,0,0,0,0,0,0,0,
+33,33,33,33,33,0,0,0,0,0,0,0,0,0,0,0
 </chunk>
    <chunk x="0" y="16" width="16" height="16">
 0,0,0,0,0,0,0,0,33,33,33,33,33,33,33,33,
@@ -226,11 +244,11 @@
 33,33,33,33,33,33,33,33,33,33,53,116,117,118,116,117
 </chunk>
    <chunk x="96" y="16" width="16" height="16">
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+33,33,33,33,33,0,0,0,0,0,0,0,0,0,0,0,
+33,33,33,33,33,0,0,0,0,0,0,0,0,0,0,0,
+33,33,33,33,33,0,0,0,0,0,0,0,0,0,0,0,
+33,33,33,33,33,0,0,0,0,0,0,0,0,0,0,0,
+33,33,33,33,33,0,0,0,0,0,0,0,0,0,0,0,
 84,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 53,54,55,118,118,0,0,0,0,0,0,0,0,0,0,0,
 84,85,86,87,118,0,0,0,0,0,0,0,0,0,0,0,
@@ -479,7 +497,7 @@
 </chunk>
   </data>
  </layer>
- <layer name="bg_overlay_1" width="80" height="64">
+ <layer id="2" name="bg_overlay_1" width="80" height="64">
   <data encoding="csv">
    <chunk x="32" y="0" width="16" height="16">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -516,6 +534,24 @@
 0,0,0,0,0,319,391,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,422,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,288,33,0,0,0,0,0,0,0,0
+</chunk>
+   <chunk x="80" y="0" width="16" height="16">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,53,118,119,62,
+0,0,0,0,0,0,0,0,0,0,0,0,84,118,119,93,
+0,0,0,0,0,0,0,0,0,0,0,0,53,118,119,62
 </chunk>
    <chunk x="32" y="16" width="16" height="16">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,290,0,
@@ -554,11 +590,11 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </chunk>
    <chunk x="80" y="16" width="16" height="16">
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,246,247,246,246,247,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,84,54,55,93,
+0,0,0,0,0,0,0,0,0,0,0,0,53,85,86,62,
+0,0,0,0,0,0,0,0,0,0,0,0,84,118,119,93,
+0,0,0,0,0,0,0,0,0,0,0,0,53,116,117,62,
+0,0,0,0,0,0,0,246,247,246,246,247,84,147,148,93,
 0,0,0,0,0,0,0,308,309,308,308,309,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 118,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -645,7 +681,7 @@
 </chunk>
   </data>
  </layer>
- <layer name="bg_overlay_2" width="80" height="64">
+ <layer id="3" name="bg_overlay_2" width="80" height="64">
   <data encoding="csv">
    <chunk x="32" y="0" width="16" height="16">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -757,7 +793,7 @@
 </chunk>
   </data>
  </layer>
- <layer name="bg_overlay_4" width="80" height="64">
+ <layer id="4" name="bg_overlay_4" width="80" height="64">
   <data encoding="csv">
    <chunk x="32" y="0" width="16" height="16">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -833,7 +869,7 @@
 </chunk>
   </data>
  </layer>
- <objectgroup name="bg_collision">
+ <objectgroup id="5" name="bg_collision">
   <object id="27" type="collidable" x="619.973" y="589.072">
    <polygon points="0,0 2.45242,29.9196 16.186,59.3486 25.9957,71.6108 32.5621,73.7659 32.2456,25.5503"/>
   </object>
@@ -844,7 +880,7 @@
   </object>
   <object id="35" type="collidable" x="980.96" y="655.251" width="18.2193" height="7.32765"/>
  </objectgroup>
- <objectgroup name="bg_sprites">
+ <objectgroup id="6" name="bg_sprites">
   <object id="15" name="tree_01" gid="683" x="673.115" y="445.504" width="80" height="96"/>
   <object id="16" name="tree_01" gid="683" x="557.353" y="653.362" width="80" height="96"/>
   <object id="17" name="flower_pot_01" gid="684" x="1232" y="416" width="32" height="32"/>
@@ -865,10 +901,10 @@
   <object id="60" gid="683" x="1232" y="240" width="80" height="96"/>
   <object id="61" gid="692" x="992" y="304" width="80" height="96"/>
  </objectgroup>
- <objectgroup name="structures">
+ <objectgroup id="7" name="structures">
   <object id="58" name="winery" gid="697" x="1136" y="384" width="272" height="224"/>
  </objectgroup>
- <layer name="bg_overlay_5" width="80" height="64">
+ <layer id="8" name="bg_overlay_5" width="80" height="64">
   <data encoding="csv">
    <chunk x="80" y="16" width="16" height="16">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -890,7 +926,7 @@
 </chunk>
   </data>
  </layer>
- <objectgroup name="triggers">
+ <objectgroup id="9" name="triggers">
   <object id="62" name="winery_main_entrance" type="action_trigger" x="1196" y="352" width="24" height="16">
    <properties>
     <property name="action_id" type="int" value="1"/>
@@ -905,7 +941,7 @@
   </object>
   <object id="36" name="winery_cave_entrance" type="action_trigger" x="952.894" y="645.11" width="29.7691" height="7.93842"/>
  </objectgroup>
- <objectgroup name="spawns">
+ <objectgroup id="10" name="spawns">
   <object id="65" name="winery_main_exit" type="spawn_point" x="1208" y="416">
    <properties>
     <property name="action_id" type="int" value="1"/>
