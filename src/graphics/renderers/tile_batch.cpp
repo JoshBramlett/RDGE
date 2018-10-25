@@ -4,10 +4,10 @@
 #include <rdge/graphics/texture.hpp>
 #include <rdge/graphics/layers/tile_layer.hpp>
 #include <rdge/math/intrinsics.hpp>
+#include <rdge/util/compiler.hpp>
+#include <rdge/util/exception.hpp>
 #include <rdge/util/logger.hpp>
 #include <rdge/util/memory/alloc.hpp>
-#include <rdge/util/compiler.hpp>
-#include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
 #include <rdge/debug/assert.hpp>
 

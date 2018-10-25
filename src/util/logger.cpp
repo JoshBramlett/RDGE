@@ -1,6 +1,6 @@
 #include <rdge/util/logger.hpp>
 #include <rdge/application.hpp>
-#include <rdge/internal/exception_macros.hpp>
+#include <rdge/util/exception.hpp>
 
 #include <thread>
 #include <iomanip>

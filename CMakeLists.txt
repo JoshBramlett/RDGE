@@ -63,11 +63,6 @@ include_directories (${SDL2_INCLUDE_DIR})
 include_directories (${GLEW_INCLUDE_DIRS})
 include_directories (${OPENGL_INCLUDE_DIR})
 
-# project includes
-include_directories (include)
-include_directories (internal)
-include_directories (SYSTEM lib)
-
 add_library (imgui STATIC
              lib/imgui/imgui.cpp
              lib/imgui/imgui_widgets.cpp
@@ -80,9 +75,111 @@ target_link_libraries (imgui
                        ${GLEW_LIBRARIES}
                        ${OPENGL_LIBRARIES})
 
-# Consider adding headers into the project so they are included in IDEs
-# http://stackoverflow.com/questions/13703647/how-to-properly-add-include-directories-with-cmake
+set(RDGE_HEADER_FILES
+    ${RDGE_INCLUDE_DIR}/rdge/application.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/core.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/type_traits.hpp
+
+    ${RDGE_INCLUDE_DIR}/rdge/assets.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/assets/bitmap_font.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/assets/pack_file.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/assets/shared_asset.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/assets/spritesheet.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/assets/surface.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/assets/tileset.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/assets/file_formats/asset_pack.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/assets/file_formats/bmfont.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/assets/tilemap/layer.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/assets/tilemap/object.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/assets/tilemap/property.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/assets/tilemap/tilemap.hpp
+
+    ${RDGE_INCLUDE_DIR}/rdge/debug.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/debug/assert.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/debug/memory.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/debug/renderer.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/debug/sdl_dumper.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/debug/widgets/camera_widget.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/debug/widgets/graphics_widget.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/debug/widgets/iwidget.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/debug/widgets/memory_widget.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/debug/widgets/physics_widget.hpp
+
+    ${RDGE_INCLUDE_DIR}/rdge/gameobjects.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/gameobjects/game.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/gameobjects/iscene.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/gameobjects/types.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/gameobjects/input/ihandler.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/gameobjects/input/keyboard_directional_input_handler.hpp
+
+    ${RDGE_INCLUDE_DIR}/rdge/graphics.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/graphics/animation.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/graphics/bitmap_charset.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/graphics/blend.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/graphics/color.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/graphics/orthographic_camera.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/graphics/tex_coords.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/graphics/texture.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/graphics/layers/sprite_layer.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/graphics/layers/tile_layer.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/graphics/renderers/sprite_batch.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/graphics/renderers/tile_batch.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/graphics/shaders/shader_program.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/graphics/shaders/sprite_batch_shader.hpp
+
+    ${RDGE_INCLUDE_DIR}/rdge/math.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/math/intrinsics.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/math/mat2.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/math/mat3.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/math/mat4.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/math/random.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/math/vec2.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/math/vec3.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/math/vec4.hpp
+
+    ${RDGE_INCLUDE_DIR}/rdge/physics.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/physics/aabb.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/physics/bvh.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/physics/collision.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/physics/collision_graph.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/physics/contact.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/physics/fixture.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/physics/isometry.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/physics/rigid_body.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/physics/solver.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/physics/joints/base_joint.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/physics/joints/revolute_joint.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/physics/shapes/ishape.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/physics/shapes/circle.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/physics/shapes/polygon.hpp
+
+    ${RDGE_INCLUDE_DIR}/rdge/system.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/system/keyboard.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/system/mouse.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/system/types.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/system/window.hpp
+
+    ${RDGE_INCLUDE_DIR}/rdge/util.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/util/compiler.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/util/exception.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/util/json.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/util/logger.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/util/profiling.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/util/strings.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/util/timer.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/util/containers/disruptor.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/util/containers/freelist.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/util/containers/intrusive_list.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/util/containers/iterators.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/util/containers/stack_array.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/util/containers/threadsafe_queue.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/util/io/rwops_base.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/util/memory/alloc.hpp
+    ${RDGE_INCLUDE_DIR}/rdge/util/memory/small_block_allocator.hpp
+    )
+
 add_library (RDGE SHARED
+             ${RDGE_HEADER_FILES}
              src/application.cpp
 
              src/assets/file_formats/asset_pack.cpp
@@ -120,10 +217,7 @@ add_library (RDGE SHARED
              src/graphics/bitmap_charset.cpp
              src/graphics/blend.cpp
              src/graphics/color.cpp
-             src/graphics/isprite.cpp
              src/graphics/orthographic_camera.cpp
-             src/graphics/sprite_group.cpp
-             src/graphics/sprite.cpp
              src/graphics/tex_coords.cpp
              src/graphics/texture.cpp
 
@@ -161,6 +255,11 @@ add_library (RDGE SHARED
              src/util/logger.cpp
              src/util/timer.cpp)
 
+# project includes
+target_include_directories (RDGE SYSTEM PUBLIC ${RDGE_SOURCE_DIR}/lib)
+target_include_directories (RDGE PUBLIC ${RDGE_INCLUDE_DIR})
+target_include_directories (RDGE PRIVATE ${RDGE_SOURCE_DIR}/internal)
+
 target_link_libraries (RDGE
                        imgui
                        ${SDL2_LIBRARY}
@@ -171,10 +270,6 @@ add_subdirectory (tools/asset_packer)
 add_subdirectory (tools/pyxel2tiled)
 add_subdirectory (sandbox/chrono)
 add_subdirectory (sandbox/physics)
-#add_subdirectory (tutorials/01_textures)
-#add_subdirectory (tutorials/02_layers)
-#add_subdirectory (tutorials/03_spritesheet)
-#add_subdirectory (tutorials/04_scenes)
 
 add_executable (rdge_test
                 tests/main.cpp

@@ -7,7 +7,6 @@
 
 #include <rdge/core.hpp>
 #include <rdge/math/vec2.hpp>
-#include <rdge/graphics/isprite.hpp>
 #include <rdge/graphics/color.hpp>
 
 //!@{ Forward declarations
@@ -155,10 +154,6 @@ void LoadSettings (uint32 flags);
 //!@{ Draw primatives
 void DrawPoint (const math::vec2& pos, const color& c = DEFAULT_COLOR, float size = 1.f);
 void DrawLine (const math::vec2& pa, const math::vec2& pb, const color& c = DEFAULT_COLOR);
-//!@}
-
-//!@{ Draw wireframe
-void DrawWireFrame (const SpriteVertices& vertices, const color& c = DEFAULT_COLOR);
 //!@}
 
 //!@{ Draw wireframe for physics objects (scale is the pixels per meter)

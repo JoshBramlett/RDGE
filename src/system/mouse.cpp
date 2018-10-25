@@ -1,9 +1,9 @@
 #include <rdge/system/mouse.hpp>
-#include <rdge/util/logger.hpp>
-#include <rdge/internal/exception_macros.hpp>
 #include <rdge/util/compiler.hpp>
+#include <rdge/util/logger.hpp>
+#include <rdge/util/exception.hpp>
+#include <rdge/debug/assert.hpp>
 
-#include <SDL_assert.h>
 #include <SDL_events.h>
 
 #include <sstream>
@@ -97,7 +97,7 @@ SetCursor (const Cursor& cursor) noexcept
     //      to be redrawn.  If redrawing a cursor is desired later on we can add
     //      a new function for that.
     auto cursor_ptr = static_cast<SDL_Cursor*>(cursor);
-    SDL_assert(cursor_ptr != nullptr);
+    RDGE_ASSERT(cursor_ptr != nullptr);
 
     SDL_SetCursor(static_cast<SDL_Cursor*>(cursor));
 }

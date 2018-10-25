@@ -1,5 +1,5 @@
 #include <rdge/graphics/color.hpp>
-#include <rdge/internal/exception_macros.hpp>
+#include <rdge/util/exception.hpp>
 
 #include <regex>
 #include <iomanip>

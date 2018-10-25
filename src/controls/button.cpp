@@ -1,5 +1,5 @@
 #include <rdge/controls/button.hpp>
-#include <rdge/internal/exception_macros.hpp>
+#include <rdge/util/exception.hpp>
 #include <rdge/color.hpp>
 
 //! \namespace RDGE Rainbow Drop Game Engine

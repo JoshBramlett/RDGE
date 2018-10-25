@@ -1,9 +1,8 @@
 #include <rdge/util/io/rwops_base.hpp>
 #include <rdge/type_traits.hpp>
-#include <rdge/internal/exception_macros.hpp>
 #include <rdge/util/compiler.hpp>
-
-#include <SDL_assert.h>
+#include <rdge/util/exception.hpp>
+#include <rdge/debug/assert.hpp>
 
 #include <sstream>
 
@@ -121,8 +120,8 @@ rwops_base::tell (void) const noexcept
 /* static */ rwops_base
 rwops_base::from_file (const char* file, const char* mode)
 {
-    SDL_assert(file != nullptr);
-    SDL_assert(mode != nullptr);
+    RDGE_ASSERT(file != nullptr);
+    RDGE_ASSERT(mode != nullptr);
 
     SDL_RWops* sdl_rwops = SDL_RWFromFile(file, mode);
     if (RDGE_UNLIKELY(!sdl_rwops))
@@ -136,7 +135,7 @@ rwops_base::from_file (const char* file, const char* mode)
 /* static */ rwops_base
 rwops_base::from_fp (FILE* file, bool autoclose)
 {
-    SDL_assert(file != nullptr);
+    RDGE_ASSERT(file != nullptr);
 
     SDL_RWops* sdl_rwops = SDL_RWFromFP(file, autoclose ? SDL_TRUE : SDL_FALSE);
     if (RDGE_UNLIKELY(!sdl_rwops))
@@ -150,8 +149,8 @@ rwops_base::from_fp (FILE* file, bool autoclose)
 /* static */ rwops_base
 rwops_base::from_memory (void* mem, int32 size)
 {
-    SDL_assert(mem != nullptr);
-    SDL_assert(size > 0);
+    RDGE_ASSERT(mem != nullptr);
+    RDGE_ASSERT(size > 0);
 
     SDL_RWops* sdl_rwops = SDL_RWFromMem(mem, size);
     if (RDGE_UNLIKELY(!sdl_rwops))
@@ -165,8 +164,8 @@ rwops_base::from_memory (void* mem, int32 size)
 /* static */ rwops_base
 rwops_base::from_const_memory (const void* mem, int32 size)
 {
-    SDL_assert(mem != nullptr);
-    SDL_assert(size > 0);
+    RDGE_ASSERT(mem != nullptr);
+    RDGE_ASSERT(size > 0);
 
     SDL_RWops* sdl_rwops = SDL_RWFromConstMem(mem, size);
     if (RDGE_UNLIKELY(!sdl_rwops))

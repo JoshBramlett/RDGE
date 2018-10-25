@@ -2,8 +2,8 @@
 #include <rdge/assets/pack_file.hpp>
 #include <rdge/assets/file_formats/bmfont.hpp>
 #include <rdge/util/json.hpp>
+#include <rdge/util/exception.hpp>
 #include <rdge/util/strings.hpp>
-#include <rdge/internal/exception_macros.hpp>
 
 #include <SDL_assert.h>
 

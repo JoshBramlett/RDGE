@@ -3,8 +3,8 @@
 #include <rdge/math/vec4.hpp>
 #include <rdge/math/mat4.hpp>
 #include <rdge/util/io/rwops_base.hpp>
+#include <rdge/util/exception.hpp>
 #include <rdge/util/strings.hpp>
-#include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
 
 #include <SDL_assert.h>

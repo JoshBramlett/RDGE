@@ -3,9 +3,9 @@
 #include <rdge/graphics/color.hpp>
 #include <rdge/graphics/orthographic_camera.hpp>
 #include <rdge/util/compiler.hpp>
+#include <rdge/util/exception.hpp>
 #include <rdge/util/logger.hpp>
 #include <rdge/util/memory/alloc.hpp>
-#include <rdge/internal/exception_macros.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
 
 #include <SDL.h>

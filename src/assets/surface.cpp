@@ -2,10 +2,10 @@
 #include <rdge/math/intrinsics.hpp>
 #include <rdge/system/types.hpp>
 #include <rdge/system/window.hpp>
-#include <rdge/util/logger.hpp>
 #include <rdge/util/compiler.hpp>
+#include <rdge/util/exception.hpp>
+#include <rdge/util/logger.hpp>
 #include <rdge/util/memory/alloc.hpp>
-#include <rdge/internal/exception_macros.hpp>
 
 #include <SDL_assert.h>
 #include <GL/glew.h>

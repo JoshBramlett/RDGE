@@ -4,7 +4,7 @@
 #include <rdge/util/logger.hpp>
 #include <rdge/util/timer.hpp>
 #include <rdge/util/memory/alloc.hpp>
-#include <rdge/internal/exception_macros.hpp>
+#include <rdge/util/exception.hpp>
 #include <rdge/internal/opengl_wrapper.hpp>
 #include <rdge/debug/sdl_dumper.hpp>
 

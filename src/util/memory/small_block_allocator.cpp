@@ -1,9 +1,8 @@
 #include <rdge/util/memory/small_block_allocator.hpp>
 #include <rdge/math/intrinsics.hpp>
 #include <rdge/util/compiler.hpp>
-#include <rdge/internal/exception_macros.hpp>
-
-#include <SDL_assert.h>
+#include <rdge/util/exception.hpp>
+#include <rdge/debug/assert.hpp>
 
 #include <cstdlib>
 #include <memory> // call_once
@@ -97,7 +96,7 @@ SmallBlockAllocator::operator= (SmallBlockAllocator&& rhs) noexcept
 void*
 SmallBlockAllocator::Alloc (size_t size)
 {
-    SDL_assert(size > 0);
+    RDGE_ASSERT(size > 0);
 
     if (size > MAX_BLOCK_SIZE)
     {
@@ -114,7 +113,7 @@ SmallBlockAllocator::Alloc (size_t size)
     }
 
     size_t index = s_blockSizeLookup[size];
-    SDL_assert(0 <= index && index < NUM_BLOCK_SIZES);
+    RDGE_ASSERT(0 <= index && index < NUM_BLOCK_SIZES);
 
     if (m_available[index])
     {
@@ -156,7 +155,7 @@ SmallBlockAllocator::Alloc (size_t size)
         auto b = reinterpret_cast<block_node*>(cursor + (c->block_size * i));
         b->next = reinterpret_cast<block_node*>(cursor + (c->block_size * (i + 1)));
 
-        SDL_assert((ptrdiff_t(b->next) - ptrdiff_t(b)) == ptrdiff_t(c->block_size));
+        RDGE_ASSERT((ptrdiff_t(b->next) - ptrdiff_t(b)) == ptrdiff_t(c->block_size));
     }
 
     auto last = reinterpret_cast<block_node*>(cursor + (c->block_size * last_index));
@@ -178,7 +177,7 @@ SmallBlockAllocator::Alloc (size_t size)
 void
 SmallBlockAllocator::Free (void* p, size_t size)
 {
-    SDL_assert(p != nullptr && size > 0);
+    RDGE_ASSERT(p != nullptr && size > 0);
 
     if (size > MAX_BLOCK_SIZE)
     {
@@ -187,7 +186,7 @@ SmallBlockAllocator::Free (void* p, size_t size)
     }
 
     size_t index = s_blockSizeLookup[size];
-    SDL_assert(0 <= index && index < NUM_BLOCK_SIZES);
+    RDGE_ASSERT(0 <= index && index < NUM_BLOCK_SIZES);
 
 #ifdef RDGE_DEBUG
     size_t block_size = s_blockSizes[index];
@@ -206,7 +205,7 @@ SmallBlockAllocator::Free (void* p, size_t size)
         }
     }
 
-    SDL_assert(found);
+    RDGE_ASSERT(found);
 
     usage.frees[index]++;
     usage.claimed -= size;

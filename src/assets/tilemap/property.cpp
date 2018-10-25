@@ -1,8 +1,8 @@
 #include <rdge/assets/tilemap/property.hpp>
 #include <rdge/graphics/color.hpp>
 #include <rdge/util/io/rwops_base.hpp>
+#include <rdge/util/exception.hpp>
 #include <rdge/util/json.hpp>
-#include <rdge/internal/exception_macros.hpp>
 
 namespace rdge {
 namespace tilemap {

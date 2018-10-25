@@ -8,10 +8,9 @@
 #include <rdge/core.hpp>
 #include <rdge/assets/file_formats/asset_pack.hpp>
 #include <rdge/util/compiler.hpp>
+#include <rdge/util/exception.hpp>
 #include <rdge/util/memory/alloc.hpp>
-#include <rdge/internal/exception_macros.hpp>
-
-#include <SDL_assert.h>
+#include <rdge/debug/assert.hpp>
 
 #include <type_traits>
 
@@ -178,7 +177,7 @@ private:
     {
         if (m_block)
         {
-            SDL_assert(m_block->ref_count > 0);
+            RDGE_ASSERT(m_block->ref_count > 0);
             m_block->ref_count--;
             if (m_block->ref_count == 0)
             {

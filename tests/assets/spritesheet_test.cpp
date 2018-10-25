@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 
 #include <rdge/assets/spritesheet.hpp>
-#include <rdge/graphics/sprite.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/math/vec3.hpp>
 

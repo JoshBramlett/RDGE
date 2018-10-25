@@ -1,9 +1,9 @@
 #include <rdge/assets/tilemap/layer.hpp>
 #include <rdge/assets/tilemap/tilemap.hpp>
 #include <rdge/util/compiler.hpp>
+#include <rdge/util/exception.hpp>
 #include <rdge/util/json.hpp>
 #include <rdge/util/strings.hpp>
-#include <rdge/internal/exception_macros.hpp>
 
 #include <sstream>
 #include <cstring> // strrchr

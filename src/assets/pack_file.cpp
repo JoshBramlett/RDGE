@@ -6,8 +6,8 @@
 #include <rdge/assets/tilemap/tilemap.hpp>
 #include <rdge/util/memory/alloc.hpp>
 #include <rdge/util/compiler.hpp>
+#include <rdge/util/exception.hpp>
 #include <rdge/util/json.hpp>
-#include <rdge/internal/exception_macros.hpp>
 
 #include <SDL_assert.h>
 

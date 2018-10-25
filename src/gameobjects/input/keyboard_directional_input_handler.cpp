@@ -1,6 +1,6 @@
 #include <rdge/gameobjects/input/keyboard_directional_input_handler.hpp>
 #include <rdge/math/intrinsics.hpp>
-#include <rdge/internal/exception_macros.hpp>
+#include <rdge/util/exception.hpp>
 
 #include <sstream>
 

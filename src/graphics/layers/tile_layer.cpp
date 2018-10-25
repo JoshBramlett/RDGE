@@ -5,10 +5,10 @@
 #include <rdge/graphics/orthographic_camera.hpp>
 #include <rdge/util/memory/alloc.hpp>
 #include <rdge/util/compiler.hpp>
+#include <rdge/util/exception.hpp>
 #include <rdge/util/logger.hpp>
 #include <rdge/util/strings.hpp>
 #include <rdge/gameobjects/iscene.hpp>
-#include <rdge/internal/exception_macros.hpp>
 #include <rdge/debug/assert.hpp>
 
 // debug

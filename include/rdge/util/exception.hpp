@@ -6,9 +6,25 @@
 #pragma once
 
 #include <rdge/core.hpp>
+#include <rdge/util/logger.hpp>
 
 #include <string>
 #include <exception>
+
+#define RDGE_THROW(msg) do {                                       \
+    ELOG() << "rdge::Exception!  what=" << msg;                    \
+    throw rdge::Exception(msg, __FILE__, __LINE__, FUNCTION_NAME); \
+} while (false)
+
+#define SDL_THROW(msg, fn) do {                                           \
+    ELOG() << "rdge::SDLException!  what=" << msg << " fn=" << fn;        \
+    throw rdge::SDLException(msg, fn, __FILE__, __LINE__, FUNCTION_NAME); \
+} while (false)
+
+#define GL_THROW(msg, fn, code) do {                                                  \
+    ELOG() << "rdge::GLException!  what=" << msg << " fn=" << fn << " code=" << code; \
+    throw rdge::GLException(msg, fn, code, __FILE__, __LINE__, FUNCTION_NAME);        \
+} while (false)
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {

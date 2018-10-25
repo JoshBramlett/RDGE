@@ -1,7 +1,7 @@
 #include <rdge/events/event.hpp>
-#include <rdge/util/logger.hpp>
-#include <rdge/internal/exception_macros.hpp>
 #include <rdge/util/compiler.hpp>
+#include <rdge/util/exception.hpp>
+#include <rdge/util/logger.hpp>
 
 #include <vector>
 #include <sstream>
