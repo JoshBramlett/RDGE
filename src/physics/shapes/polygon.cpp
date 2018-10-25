@@ -96,14 +96,14 @@ polygon::polygon (const PolygonData& verts, size_t num_verts)
         }
     }
 
-    uint32 hull[MAX_VERTICES];
-    uint32 out_count = 0;
-    uint32 index = right_idx;
+    size_t hull[MAX_VERTICES];
+    size_t out_count = 0;
+    size_t index = right_idx;
 
     while (true)
     {
         hull[out_count] = index;
-        uint32 next = 0;
+        size_t next = 0;
 
         for (size_t i = 1; i < count; i++)
         {
@@ -329,8 +329,8 @@ polygon::intersects_with (const polygon& other, collision_manifold& mf) const no
     // define reference and incident polygons
     const polygon* ref_shape = nullptr;
     const polygon* inc_shape = nullptr;
-    uint32 ref_edge = 0;
-    uint32 inc_edge = 0;
+    size_t ref_edge = 0;
+    size_t inc_edge = 0;
 
     if (sep_b.first > sep_a.first + RELATIVE_TOLERANCE)
     {
@@ -365,7 +365,7 @@ polygon::intersects_with (const polygon& other, collision_manifold& mf) const no
     // build the clip vertices for the incident edge
     math::vec2 inc_vertices[2];
     inc_vertices[0] = inc_shape->vertices[inc_edge];
-    uint32 next_v = ((inc_edge + 1) < inc_shape->count) ? (inc_edge + 1) : 0;
+    size_t next_v = ((inc_edge + 1) < inc_shape->count) ? (inc_edge + 1) : 0;
     inc_vertices[1] = inc_shape->vertices[next_v];
 
     // create two orthogonal planes from the reference edge attached to the end points

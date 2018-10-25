@@ -197,7 +197,7 @@ struct polygon : public ishape
             if (sep_axis > sep_max)
             {
                 sep_max = sep_axis;
-                edge_index = i;
+                edge_index = static_cast<int32>(i);
             }
         }
 

@@ -178,7 +178,7 @@ BitmapCharset::BitmapCharset (const BitmapFont& font, float scale)
         //      for setting the texture filters and shader type.
         // NOTE libgdx says to use mipmaps if making the text smaller.
         Texture t(*surface, TextureFilter::LINEAR, TextureFilter::LINEAR);
-        t.unit_id = this->textures.size();
+        t.unit_id = static_cast<uint32>(this->textures.size());
         this->textures.emplace_back(std::move(t));
     }
 

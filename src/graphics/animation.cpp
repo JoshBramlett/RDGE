@@ -27,11 +27,11 @@ Animation::GetFrameIndex (uint32 ticks) noexcept
     }
 
     this->elapsed += ticks;
-    uint32 frame = this->elapsed / this->interval;
+    size_t frame = this->elapsed / this->interval;
     switch (this->mode)
     {
     case PlayMode::NORMAL:
-        frame = std::min(frame, static_cast<uint32>(frame_count - 1));
+        frame = std::min(frame, frame_count - 1);
         break;
     case PlayMode::REVERSE:
         frame = std::max(((frame_count - 1) - frame), 0ul);
@@ -55,7 +55,7 @@ Animation::GetFrameIndex (uint32 ticks) noexcept
         break;
     }
 
-    return frame;
+    return static_cast<uint32>(frame);
 }
 
 const animation_frame&
@@ -71,7 +71,7 @@ Animation::Reset (void) noexcept
     this->elapsed = 0;
 }
 
-uint32
+size_t
 Animation::Duration (void) const noexcept
 {
     return this->frames.size() * this->interval;

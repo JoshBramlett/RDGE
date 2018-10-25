@@ -351,7 +351,7 @@ public:
         opengl::UnbindBuffers(GL_ARRAY_BUFFER);
 
         opengl::BindVertexArray(m_vao);
-        opengl::DrawArrays(GL_LINES, 0, m_submissions);
+        opengl::DrawArrays(GL_LINES, 0, static_cast<uint32>(m_submissions));
         opengl::UnbindVertexArrays();
 
         m_submissions = 0;

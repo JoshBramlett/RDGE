@@ -287,7 +287,7 @@ SpriteBatch::Flush (const std::vector<Texture>& textures)
         opengl::BindVertexArray(m_vao);
         opengl::BindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
 
-        opengl::DrawElements(GL_TRIANGLES, (m_submissions * 6), GL_UNSIGNED_INT, nullptr);
+        opengl::DrawElements(GL_TRIANGLES, static_cast<uint32>(m_submissions * 6), GL_UNSIGNED_INT, nullptr);
 
         opengl::UnbindBuffers(GL_ELEMENT_ARRAY_BUFFER);
         opengl::UnbindVertexArrays();

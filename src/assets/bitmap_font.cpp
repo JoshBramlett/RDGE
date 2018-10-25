@@ -112,7 +112,7 @@ BitmapFont::BitmapFont (const std::vector<uint8>& msgpack, PackFile& packfile)
         this->surfaces.reserve(font.pages.size());
         for (const auto& page : font.pages)
         {
-            this->surfaces.emplace_back(packfile.GetAsset<Surface>(page.image_table_id));
+            this->surfaces.emplace_back(packfile.GetAsset<Surface>(static_cast<uint32>(page.image_table_id)));
         }
 
         ProcessBitmapFont(font, *this);

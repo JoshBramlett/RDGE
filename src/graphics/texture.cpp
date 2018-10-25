@@ -305,15 +305,15 @@ Texture::Height (void) const noexcept
     return ((m_data == nullptr) ? 0 : m_data->height);
 }
 
-math::uivec2
+math::svec2
 Texture::Size (void) const noexcept
 {
     if (m_data)
     {
-        return math::uivec2(m_data->width, m_data->height);
+        return math::svec2(m_data->width, m_data->height);
     }
 
-    return math::uivec2(0, 0);
+    return math::svec2(0, 0);
 }
 
 void

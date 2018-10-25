@@ -25,7 +25,9 @@ SpriteBatchShader::Build (void)
     std::iota(slots.begin(), slots.end(), 0);
 
     this->shader.Enable();
-    this->shader.SetUniformValue(SpriteBatch::U_SAMPLER_ARRAY, slots.size(), slots.data());
+    this->shader.SetUniformValue(SpriteBatch::U_SAMPLER_ARRAY,
+                                 static_cast<uint32>(slots.size()),
+                                 slots.data());
     this->shader.Disable();
 }
 

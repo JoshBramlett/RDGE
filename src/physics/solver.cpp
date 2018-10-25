@@ -114,8 +114,8 @@ Solver::Solve (void)
         data.body_index[0] = body_a->solver_index;
         data.body_index[1] = body_b->solver_index;
 
-        auto& bdata_a = m_bodies[data.body_index[0]];
-        auto& bdata_b = m_bodies[data.body_index[1]];
+        auto& bdata_a = m_bodies[static_cast<uint32>(data.body_index[0])];
+        auto& bdata_b = m_bodies[static_cast<uint32>(data.body_index[1])];
         data.combined_inv_mass = bdata_a.inv_mass + bdata_b.inv_mass;
 
         // build the velocity constraint points
@@ -164,8 +164,8 @@ Solver::Solve (void)
 
     for (auto& j : m_joints)
     {
-        auto& bdata_a = m_bodies[j->body_a->solver_index];
-        auto& bdata_b = m_bodies[j->body_b->solver_index];
+        auto& bdata_a = m_bodies[static_cast<uint32>(j->body_a->solver_index)];
+        auto& bdata_b = m_bodies[static_cast<uint32>(j->body_b->solver_index)];
         j->InitializeSolver(*m_step, bdata_a, bdata_b);
     }
 
@@ -173,8 +173,8 @@ Solver::Solve (void)
     {
         for (auto& j : m_joints)
         {
-            auto& bdata_a = m_bodies[j->body_a->solver_index];
-            auto& bdata_b = m_bodies[j->body_b->solver_index];
+            auto& bdata_a = m_bodies[static_cast<uint32>(j->body_a->solver_index)];
+            auto& bdata_b = m_bodies[static_cast<uint32>(j->body_b->solver_index)];
             j->SolveVelocityConstraints(*m_step, bdata_a, bdata_b);
         }
 
@@ -207,8 +207,8 @@ Solver::Solve (void)
         bool joints_solved = true;
         for (auto& j : m_joints)
         {
-            auto& bdata_a = m_bodies[j->body_a->solver_index];
-            auto& bdata_b = m_bodies[j->body_b->solver_index];
+            auto& bdata_a = m_bodies[static_cast<uint32>(j->body_a->solver_index)];
+            auto& bdata_b = m_bodies[static_cast<uint32>(j->body_b->solver_index)];
             joints_solved = joints_solved && j->SolvePositionConstraints(bdata_a, bdata_b);
         }
 
@@ -289,8 +289,8 @@ Solver::SolveVelocityConstraints (void)
 {
     for (auto& data : m_contacts)
     {
-        auto& bdata_a = m_bodies[data.body_index[0]];
-        auto& bdata_b = m_bodies[data.body_index[1]];
+        auto& bdata_a = m_bodies[static_cast<uint32>(data.body_index[0])];
+        auto& bdata_b = m_bodies[static_cast<uint32>(data.body_index[1])];
 
         const auto& mf = data.contact->manifold;
         math::vec2 tangent = mf.normal.perp_ccw();
@@ -397,8 +397,8 @@ Solver::CorrectPositions (void)
 
     for (auto& data : m_contacts)
     {
-        auto& bdata_a = m_bodies[data.body_index[0]];
-        auto& bdata_b = m_bodies[data.body_index[1]];
+        auto& bdata_a = m_bodies[static_cast<uint32>(data.body_index[0])];
+        auto& bdata_b = m_bodies[static_cast<uint32>(data.body_index[1])];
 
         const auto& mf = data.contact->manifold;
 

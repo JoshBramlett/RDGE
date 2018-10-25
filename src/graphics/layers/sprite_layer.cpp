@@ -55,7 +55,7 @@ SpriteLayer::SpriteLayer (const tilemap::Layer& def, float scale)
         const auto& it = std::find(textures.begin(), textures.end(), t);
         if (it == textures.end())
         {
-            t.unit_id = textures.size();
+            t.unit_id = static_cast<uint32>(textures.size());
             unit_id = t.unit_id;
             textures.emplace_back(std::move(t));
         }
@@ -173,7 +173,7 @@ SpriteLayer::AddSprite (const math::vec2& pos,
         const auto& it = std::find(textures.begin(), textures.end(), t);
         if (it == textures.end())
         {
-            t.unit_id = textures.size();
+            t.unit_id = static_cast<uint32>(textures.size());
             unit_id = t.unit_id;
             textures.emplace_back(std::move(t));
         }

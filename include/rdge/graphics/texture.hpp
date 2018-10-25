@@ -124,7 +124,7 @@ public:
     bool IsUnique (void) const noexcept;
     size_t Width (void) const noexcept;
     size_t Height (void) const noexcept;
-    math::uivec2 Size (void) const noexcept;
+    math::svec2 Size (void) const noexcept;
     //!@}
 
     //! \brief Set texture filter for minification and magnification

@@ -92,7 +92,7 @@ TileBatch::TileBatch (uint16 capacity, const math::vec2& tile_size)
     m_vbo = opengl::CreateBuffer();
     opengl::BindBuffer(GL_ARRAY_BUFFER, m_vbo);
 
-    uint32 vbo_size = m_capacity * TILE_SIZE;
+    std::ptrdiff_t vbo_size = m_capacity * TILE_SIZE;
     opengl::SetBufferData(GL_ARRAY_BUFFER, vbo_size, nullptr, GL_DYNAMIC_DRAW);
 
     opengl::EnableVertexAttribute(VA_POS_INDEX);
@@ -294,7 +294,7 @@ TileBatch::Flush (const Texture& texture)
         opengl::BindVertexArray(m_vao);
         opengl::BindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
 
-        opengl::DrawElements(GL_TRIANGLES, (m_submissions * 6), GL_UNSIGNED_INT, nullptr);
+        opengl::DrawElements(GL_TRIANGLES, static_cast<uint32>(m_submissions * 6), GL_UNSIGNED_INT, nullptr);
 
         opengl::UnbindBuffers(GL_ELEMENT_ARRAY_BUFFER);
         opengl::UnbindVertexArrays();

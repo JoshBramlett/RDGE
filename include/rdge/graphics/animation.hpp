@@ -68,7 +68,7 @@ public:
 
     //! \brief Total duration (in ticks) of the animation
     //! \returns Animation length
-    uint32 Duration (void) const noexcept;
+    size_t Duration (void) const noexcept;
 
     //! \brief Check if animation has finished
     //! \returns True iff the animation has completed, false otherwise
