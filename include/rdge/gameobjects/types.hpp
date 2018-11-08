@@ -8,6 +8,7 @@
 #include <rdge/core.hpp>
 #include <rdge/type_traits.hpp>
 #include <rdge/math/vec2.hpp>
+#include <rdge/util/containers/enum_array.hpp>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
@@ -39,6 +40,19 @@ enum class Direction : uint8
 template<>
 struct rdge::is_enum_bitmask<Direction> : public std::true_type { };
 
+//! \brief Array indexed by \ref Direction
+//! \details Template specialization for an array whose elements are
+//!          accessible by \ref Direction.
+//! \note Only the cardinal directions (NESW) have representation.  The
+//!       least significant bit is favored when passisng a mask which
+//!       contains multiple directions.  For example, indexing on SE
+//!       will return EAST as that's the lsb.
+template <typename T>
+using CardinalDirectionArray = EnumBitmaskArray<T, Direction, 4>;
+
+//! \brief Get the closest cardinal direction of a vector
+//! \note Assumes the tail is at the origin in vector space
+//! \param [in] ab Vector in V
 inline Direction
 GetDirection (const math::vec2& ab)
 {
@@ -67,17 +81,6 @@ GetDirection (const math::vec2& ab)
 
     return result;
 }
-
-template <typename T>
-class CardinalDirectionArray
-{
-public:
-    T& operator[] (Direction d) { return m_arr[math::lsb(to_underlying(d)) - 1]; }
-    const T& operator[] (Direction d) const { return m_arr[math::lsb(to_underlying(d)) - 1]; }
-
-private:
-    T m_arr[4];
-};
 
 //! \brief Direction stream output operator
 std::ostream& operator<< (std::ostream&, Direction);

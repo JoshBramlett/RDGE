@@ -27,11 +27,7 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     using value_type = T;
 
     //! \brief Number of elements
-    //! \returns size_t type
-    constexpr size_t size (void) const
-    {
-        return 2;
-    }
+    constexpr size_t size (void) const { return 2; }
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wgnu-anonymous-struct"
@@ -45,6 +41,13 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     };
 
 #pragma GCC diagnostic pop
+
+    //! \brief Zero initialized (empty) vector
+    static vec2_t<T> ZERO;
+    //! \brief x-coordinate unit vector { 1, 0 }
+    static vec2_t<T> X;
+    //! \brief y-coordinate unit vector { 0, 1 }
+    static vec2_t<T> Y;
 
     //! \brief vec2_t ctor
     //! \details Zero initialization
@@ -166,7 +169,7 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     //! \returns True iff all components are zero
     constexpr bool is_zero (void) const noexcept
     {
-        return x == 0 && y == 0;
+        return math::is_zero(x) && math::is_zero(y);
     }
 
     //! \brief Vector length (magnitude)
@@ -396,10 +399,21 @@ inline std::ostream& operator<< (std::ostream& os, const vec2_t<T>& value)
     return os << "[" << value.x << ", " << value.y << "]";
 }
 
+//!@{ Static member initialization
+template <class T>
+vec2_t<T> vec2_t<T, std::enable_if_t<std::is_arithmetic<T>::value>>::ZERO = { T(0), T(0) };
+template <class T>
+vec2_t<T> vec2_t<T, std::enable_if_t<std::is_arithmetic<T>::value>>::X = { T(1), T(0) };
+template <class T>
+vec2_t<T> vec2_t<T, std::enable_if_t<std::is_arithmetic<T>::value>>::Y = { T(0), T(1) };
+//!@}
+
+//!@{ Common type specializations
 using vec2   = vec2_t<float>;  //!< Default floating point type
 using uivec2 = vec2_t<uint32>;
 using ivec2  = vec2_t<int32>;
 using svec2  = vec2_t<size_t>;
+//!@}
 
 } // namespace math
 

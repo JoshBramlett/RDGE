@@ -4,6 +4,7 @@
 #include <rdge/util/json.hpp>
 #include <rdge/util/io/rwops_base.hpp>
 #include <rdge/util/memory/alloc.hpp>
+#include <rdge/internal/version.hpp>
 
 #include <SDL_version.h>
 #include <SDL_stdinc.h>
@@ -65,11 +66,32 @@ Application::Application (const app_settings& /* settings */)
      **********************************************/
 
     InitializeLogger();
+
+    ILOG() << "Using RDGE v" << Application::Version()
+           << " (" << RDGE_COMMIT_HASH << ")";
 }
 
 Application::~Application (void) noexcept
 {
     SDL_Quit();
+}
+
+/* static */ const std::string&
+Application::Version (void)
+{
+    // cached for multiple lookups
+    static std::string s_version = "";
+    if (s_version.empty())
+    {
+        std::ostringstream ss;
+        ss << static_cast<int>(RDGE_VERSION_MAJOR) << "."
+           << static_cast<int>(RDGE_VERSION_MINOR) << "."
+           << static_cast<int>(RDGE_VERSION_PACKAGE);
+
+        s_version = ss.str();
+    }
+
+    return s_version;
 }
 
 /* static */ const std::string&

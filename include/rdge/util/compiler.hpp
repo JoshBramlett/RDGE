@@ -29,6 +29,18 @@
     #define RDGE_NO_INLINE
 #endif
 
+#if __has_builtin(__builtin_ffsll)
+    #define RDGE_LSB(x) __builtin_ffsll(x)
+#else
+    #error "RDGE_LSB cannot be defined"
+#endif
+
+#if __has_builtin(__builtin_fpclassify)
+    #define RDGE_FPCLASSIFY(x) __builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL, FP_SUBNORMAL, FP_ZERO, x)
+#else
+    #define RDGE_FPCLASSIFY(x) std::fpclassify(x)
+#endif
+
 #ifndef restrict
     #if defined(COMPILER_GCC) || defined(__clang__)
         #define restrict __restrict__

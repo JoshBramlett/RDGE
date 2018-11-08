@@ -1,5 +1,7 @@
 Working (enhancements)
 
+    - Combine compiler.hpp and internal/hints.hpp
+
     - Test out whether the objects in a spritesheet need to have a positive position.
       It should not be a requirement that the shape be inside the sprite.
     - Refactor action_trigger_data

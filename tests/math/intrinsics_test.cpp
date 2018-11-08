@@ -7,6 +7,8 @@
 using namespace rdge;
 using namespace rdge::math;
 
+namespace {
+
 TEST(FloatingPointEqualTest, HandlesIrrational)
 {
     EXPECT_TRUE(fp_eq(qnan32, qnan32));
@@ -55,3 +57,15 @@ TEST(PowerOfTwoTest, HandlesAll)
     // 4) Test odd value
     EXPECT_FALSE(is_pot(11));
 }
+
+TEST(FloatingPointIsZero, HandlesAll)
+{
+    EXPECT_TRUE(is_zero(0.f));
+    EXPECT_TRUE(is_zero(-0.f));
+    EXPECT_FALSE(is_zero(0.f + std::numeric_limits<float>::epsilon()));
+    EXPECT_FALSE(is_zero(0.f - std::numeric_limits<float>::epsilon()));
+    EXPECT_FALSE(is_zero(-0.f + std::numeric_limits<float>::epsilon()));
+    EXPECT_FALSE(is_zero(-0.f - std::numeric_limits<float>::epsilon()));
+}
+
+} // anonymous namespace

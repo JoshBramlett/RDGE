@@ -1,7 +1,6 @@
 #include <rdge/math/vec3.hpp>
 #include <rdge/math/mat4.hpp>
-
-#include <SDL_assert.h>
+#include <rdge/debug/assert.hpp>
 
 #include <sstream>
 #include <iomanip>
@@ -17,14 +16,14 @@ const vec3 vec3::Z (0.f, 0.f, 1.f);
 float&
 vec3::operator[] (uint8 index) noexcept
 {
-    SDL_assert(index < 3);
+    RDGE_ASSERT(index < 3);
     return (&this->x)[index];
 }
 
 float
 vec3::operator[] (uint8 index) const noexcept
 {
-    SDL_assert(index < 3);
+    RDGE_ASSERT(index < 3);
     return (&this->x)[index];
 }
 

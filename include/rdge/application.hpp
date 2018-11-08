@@ -104,9 +104,10 @@ public:
     Application& operator= (Application&&) = delete;
     //!@}
 
-    //! \brief SDL version linked against
-    //! \return String containing the major, minor, and patch
+    //!@{ Version queries
+    static const std::string& Version (void);
     static const std::string& SDLVersion (void);
+    //!@}
 
     //! \brief Application base directory path
     //! \return Directory path where application resides

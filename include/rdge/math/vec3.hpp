@@ -18,17 +18,19 @@ struct mat4;
 //!@}
 
 //! \struct vec3
-//! \brief Three component floating point vector
+//! \brief Three element floating point container
 struct vec3
 {
-    float x = 0.f; //!< x-coordinate
-    float y = 0.f; //!< y-coordinate
-    float z = 0.f; //!< z-coordinate
+    //!@{ Elements
+    float x = 0.f;
+    float y = 0.f;
+    float z = 0.f;
+    //!@}
 
-    static const vec3 ZERO; //!< vec3 defined to { 0.f, 0.f, 0.f }
-    static const vec3 X;    //!< vec3 defined to { 1.f, 0.f, 0.f }
-    static const vec3 Y;    //!< vec3 defined to { 0.f, 1.f, 0.f }
-    static const vec3 Z;    //!< vec3 defined to { 0.f, 0.f, 1.f }
+    static const vec3 ZERO; //!< Zero initialized (empty) vector
+    static const vec3 X;    //!< x-coordinate unit vector { 1, 0, 0 }
+    static const vec3 Y;    //!< y-coordinate unit vector { 0, 1, 0 }
+    static const vec3 Z;    //!< z-coordinate unit vector { 0, 0, 1 }
 
     //! \brief vec3 ctor
     //! \details Zero initialization via default member initialization
@@ -112,10 +114,13 @@ struct vec3
     }
 
     //! \brief Check if vector components are set to zero
+    //! \note Does not perform an epsilon check
     //! \returns True iff all components are zero
     constexpr bool is_zero (void) const noexcept
     {
-        return x == 0.f && y == 0.f && z == 0.f;
+        return math::is_zero(x) &&
+               math::is_zero(y) &&
+               math::is_zero(z);
     }
 
     //! \brief Get the xy coordinate vec2

@@ -6,6 +6,9 @@
 
 #pragma once
 
+#include <rdge/core.hpp>
+#include <rdge/util/compiler.hpp>
+
 //#define _USE_MATH_DEFINES
 #include <cmath>
 #include <algorithm>
@@ -36,6 +39,28 @@ fp_eq (T x, T y)
            (std::isinf(x) && std::isinf(y)) ||
            (std::abs(x - y) * 2) < std::numeric_limits<T>::epsilon() ||
            std::abs(x-y) < std::numeric_limits<T>::min();
+}
+
+//! \brief Zero check floating point specialization
+//! \details Classification is defined as 0.0 or -0.0.
+//! \warning This does not include an epsilon check
+//! \param [in] val Value to check
+//! \returns True iff value is zero
+template <typename T>
+constexpr typename std::enable_if_t<std::is_floating_point<T>::value, bool>
+is_zero (T val)
+{
+    return (RDGE_FPCLASSIFY(val) == FP_ZERO);
+}
+
+//! \brief Zero check integral specialization
+//! \param [in] val Value to check
+//! \returns True iff value is zero
+template <typename T>
+constexpr typename std::enable_if_t<std::is_integral<T>::value, bool>
+is_zero (T val)
+{
+    return (val == 0);
 }
 
 //! \brief Clamp value between upper and lower bounds
@@ -89,8 +114,7 @@ square (T val)
 //! \returns One plus the lsb index, or zero if the parameter is zero
 constexpr int32 lsb (int64 val)
 {
-    // TODO Add Windows support
-    return __builtin_ffsll(val);
+    return RDGE_LSB(val);
 }
 
 //! \brief Check if value is a power of two
