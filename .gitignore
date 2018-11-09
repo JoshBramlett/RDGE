@@ -5,3 +5,4 @@ xcode/
 *.swp
 *.swo
 *.pyc
+.vs/
