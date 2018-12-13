@@ -98,6 +98,7 @@ int main ()
     //settings.target_height = 1080;
     settings.window_title = "sandbox: physics";
     settings.resizable    = true;
+    settings.use_vsync    = false;
 
     // 1) Initialize SDL
     Application app(settings);
@@ -109,41 +110,52 @@ int main ()
     DisableEvent(EventType::MultiGesture);
     DisableEvent(EventType::TextInput);
 
-    // 2) Create game object
-    SceneSwapWidget widget(settings);
-    widget.AddScene("Revolute", std::make_shared<RevoluteScene>());
-    widget.AddScene("Test", std::make_shared<TestScene>());
-    widget.AddScene("Tiles", std::make_shared<TilesScene>());
-    widget.AddScene("Tumbler", std::make_shared<TumblerScene>());
+    try
+    {
+        // 2) Create game object
+        SceneSwapWidget widget(settings);
+        widget.AddScene("Revolute", std::make_shared<RevoluteScene>());
+        widget.AddScene("Test", std::make_shared<TestScene>());
+        widget.AddScene("Tiles", std::make_shared<TilesScene>());
+        widget.AddScene("Tumbler", std::make_shared<TumblerScene>());
 
-    debug::AddWidget(&widget);
-    debug::settings::show_overlay = true;
-    debug::settings::physics::draw_fixtures = true;
+        debug::AddWidget(&widget);
+        debug::settings::show_overlay = true;
+        debug::settings::physics::draw_fixtures = true;
 
-    widget.game.on_event_hook = [&](const Event& event) {
-        if (event.IsQuitEvent())
-        {
-            widget.game.Stop();
-        }
-        else if (event.IsKeyboardEvent())
-        {
-            auto args = event.GetKeyboardEventArgs();
-            if (args.IsRepeating() || !args.IsKeyPressed())
-            {
-                return false;
-            }
-
-            if (args.Key() == KeyCode::ESCAPE)
+        widget.game.on_event_hook = [&](const Event& event) {
+            if (event.IsQuitEvent())
             {
                 widget.game.Stop();
             }
-        }
+            else if (event.IsKeyboardEvent())
+            {
+                auto args = event.GetKeyboardEventArgs();
+                if (args.IsRepeating() || !args.IsKeyPressed())
+                {
+                    return false;
+                }
 
-        return false;
-    };
+                if (args.Key() == KeyCode::ESCAPE)
+                {
+                    widget.game.Stop();
+                }
+            }
 
-    widget.game.PushScene(widget.scenes[0].second);
-    widget.game.Run();
+            return false;
+        };
+
+        widget.game.PushScene(widget.scenes[0].second);
+        widget.game.Run();
+    }
+    catch (const rdge::GLException& ex)
+    {
+        std::cerr << "GLException: " << ex.what() << '\n';
+    }
+    catch (const std::exception& ex)
+    {
+        std::cerr << ex.what() << '\n';
+    }
 
     return 0;
 }

@@ -3,17 +3,26 @@
 
 #include <algorithm>
 #include <array>
-#include <experimental/optional>
+
 #include <sstream>
 #include <string>
 #include <string_view>
 #include <unordered_map>
 #include <vector>
 
+#ifdef __APPLE__
+#include <experimental/optional>
+namespace std_modern = std::experimental;
+#else
+#include <optional>
+namespace std_modern = std;
+#endif
+
 namespace flags {
 namespace detail {
-using argument_map =
-    std::unordered_map<std::string_view, std::experimental::optional<std::string_view>>;
+
+using argument_map = std::unordered_map<std::string_view, std_modern::optional<std::string_view>>;
+
 
 // https://github.com/sailormoon/flags
 
@@ -65,7 +74,7 @@ struct parser {
     }
   }
 
-  void on_value(const std::experimental::optional<std::string_view>& value = std::experimental::nullopt) {
+  void on_value(const std_modern::optional<std::string_view>& value = std_modern::nullopt) {
     // If there's not an option preceding the value, it's a positional argument.
     if (!current_option_) {
       positional_arguments_.emplace_back(*value);
@@ -74,26 +83,26 @@ struct parser {
     // Consume the preceding option and assign its value.
     options_.emplace(*current_option_, value);
     //current_option_.reset();
-    current_option_ = std::experimental::nullopt;
+    current_option_ = std_modern::nullopt;
   }
 
-  std::experimental::optional<std::string_view> current_option_;
+  std_modern::optional<std::string_view> current_option_;
   argument_map options_;
   std::vector<std::string_view> positional_arguments_;
 };
 
 // If a key exists, return an optional populated with its value.
-inline std::experimental::optional<std::string_view> get_value(
+inline std_modern::optional<std::string_view> get_value(
     const argument_map& options, const std::string_view& option) {
   const auto it = options.find(option);
-  return it != options.end() ? std::experimental::make_optional(*it->second) : std::experimental::nullopt;
+  return it != options.end() ? std_modern::make_optional(*it->second) : std_modern::nullopt;
 }
 
 // Coerces the string value of the given option into <T>.
 // If the value cannot be properly parsed or the key does not exist, returns
 // nullopt.
 template <class T>
-std::experimental::optional<T> get(const argument_map& options,
+std_modern::optional<T> get(const argument_map& options,
                      const std::string_view& option) {
   if (const auto view = get_value(options, option)) {
     T value;
@@ -104,18 +113,18 @@ std::experimental::optional<T> get(const argument_map& options,
 
 // Since the values are already stored as strings, there's no need to use `>>`.
 template <>
-std::experimental::optional<std::string_view> get(const argument_map& options,
+std_modern::optional<std::string_view> get(const argument_map& options,
                                     const std::string_view& option) {
   return get_value(options, option);
 }
 
 template <>
-std::experimental::optional<std::string> get(const argument_map& options,
+std_modern::optional<std::string> get(const argument_map& options,
                                const std::string_view& option) {
   if (const auto view = get<std::string_view>(options, option)) {
     return std::string(*view);
   }
-  return std::experimental::nullopt;
+  return std_modern::nullopt;
 }
 
 // Special case for booleans: if the value is any of the below, the option will
@@ -123,13 +132,13 @@ std::experimental::optional<std::string> get(const argument_map& options,
 // present.
 constexpr std::array<const char*, 5> falsities{{"0", "n", "no", "f", "false"}};
 template <>
-std::experimental::optional<bool> get(const argument_map& options,
+std_modern::optional<bool> get(const argument_map& options,
                         const std::string_view& option) {
   if (const auto value = get_value(options, option)) {
     return std::none_of(falsities.begin(), falsities.end(),
                         [&value](auto falsity) { return *value == falsity; });
   }
-  return std::experimental::nullopt;
+  return std_modern::nullopt;
 }
 }  // namespace detail
 
@@ -137,7 +146,7 @@ struct args {
   args(const int argc, char** argv) : parser_(argc, argv) {}
 
   template <class T>
-  std::experimental::optional<T> get(const std::string_view& option) const {
+  std_modern::optional<T> get(const std::string_view& option) const {
     return detail::get<T>(parser_.options(), option);
   }
 

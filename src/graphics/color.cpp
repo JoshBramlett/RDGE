@@ -76,7 +76,7 @@ color::from_rgb (const std::string& value)
 color::from_rgba (const std::string& value)
 {
     // Preceding '#' is supported.  If there, remove it
-    const std::string c = (value.front() == '#')
+    const std::string c = (!value.empty() && (value.front() == '#'))
                             ? value.substr(1)
                             : value;
 
@@ -122,7 +122,9 @@ color::from_rgba (const std::string& value)
 color::from_argb (const std::string& value)
 {
     // remove preceding '#'
-    const std::string c = (value.front() == '#') ? value.substr(1) : value;
+    const std::string c = (!value.empty() && (value.front() == '#'))
+        ? value.substr(1) 
+        : value;
 
     // Expression matches 2 character hex values that appear 3 or 4 times
     // (e.g. FF 00 CC AA)

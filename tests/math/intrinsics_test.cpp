@@ -18,9 +18,9 @@ TEST(FloatingPointEqualTest, HandlesIrrational)
 TEST(FloatingPointEqualTest, HandlesFloat)
 {
     //FLT_EPSILON = 0.00000011920
-    float f_a     = 0.0000001192;
-    float f_true  = 0.0000001692;
-    float f_false = 0.0000003192;
+    float f_a     = 0.0000001192f;
+    float f_true  = 0.0000001692f;
+    float f_false = 0.0000003192f;
     EXPECT_TRUE(fp_eq(f_a, f_true));
     EXPECT_FALSE(fp_eq(f_a, f_false));
 }

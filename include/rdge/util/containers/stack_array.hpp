@@ -124,7 +124,7 @@ struct stack_array
     {
         if (new_cap > m_capacity)
         {
-            m_capacity = (static_cast<float>(new_cap) * OVER_ALLOC_RATIO);
+            m_capacity = static_cast<size_t>(static_cast<float>(new_cap) * OVER_ALLOC_RATIO);
             if (RDGE_UNLIKELY(!RDGE_TREALLOC(m_data, m_capacity, memory_bucket_containers)))
             {
                 throw std::runtime_error("Memory allocation failed");

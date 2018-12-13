@@ -17,6 +17,9 @@
 //#define STBIW_FREE(x) RDGE_FREE(x, rdge::memory_bucket_ext)
 //#define STBIW_REALLOC(x, n) RDGE_REALLOC(x, n, rdge::memory_bucket_ext)
 #define STB_IMAGE_WRITE_IMPLEMENTATION
+#ifdef _MSC_VER
+#define STBI_MSC_SECURE_CRT
+#endif
 #include <nothings/stb_image_write.h>
 
 #include <algorithm>

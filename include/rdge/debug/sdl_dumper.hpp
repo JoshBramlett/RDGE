@@ -127,7 +127,7 @@ DumpRendererDriverInfo (void)
            << "\nSDL_RENDERER_TARGETTEXTURE " << (info.flags&SDL_RENDERER_TARGETTEXTURE)
            << "\n*** TEXTURE FORMATS ***\n";
 
-        for (uint i = 0; i < info.num_texture_formats; ++i)
+        for (uint32 i = 0; i < info.num_texture_formats; ++i)
         {
             ss << DumpPixelFormatEnum(info.texture_formats[i]);
         }

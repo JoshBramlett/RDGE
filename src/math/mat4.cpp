@@ -181,7 +181,7 @@ mat4::inverse (void)
         return mat4();
     }
 
-    float inv_determinant = 1.0 / determinant;
+    float inv_determinant = 1.f / determinant;
     for (int i = 0; i < 16; i++)
     {
         result.elements[i] *= inv_determinant;

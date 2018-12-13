@@ -8,13 +8,12 @@ message (STATUS "RDGE include dir: ${RDGE_SOURCE_DIR}/include")
 # uses parent module path
 #set (CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-link_directories (${RDGE_BINARY_DIR}/lib)
-include_directories (${RDGE_INCLUDE_DIR})
+
 
 # project includes
 include_directories (include)
 
-add_executable (chrono
+add_executable (chrono 
                 src/events.cpp
                 src/import.cpp
                 src/main.cpp
@@ -28,8 +27,9 @@ add_executable (chrono
                 src/scenes/overworld.cpp
                 src/scenes/winery.cpp)
 
-target_link_libraries (chrono
-                       RDGE)
+target_include_directories (chrono PUBLIC ${RDGE_INCLUDE_DIR})
+target_include_directories (chrono SYSTEM PUBLIC ${RDGE_SOURCE_DIR}/lib)
+target_link_libraries (chrono RDGE)
 
 add_custom_command(TARGET chrono PRE_BUILD
                    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:chrono>/res/export)

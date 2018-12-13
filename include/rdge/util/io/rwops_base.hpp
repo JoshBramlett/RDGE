@@ -72,7 +72,7 @@ public:
     //!          function pointers for proper behavior.
     //! \note All functions are based on their corresponding stdio functions
     //! \throws rdge::SDLException Failed to read or write
-    uint64 size (void);
+    size_t size (void);
     int64 seek (int64 offset, seekdir whence);
     int64 tell (void) const noexcept;
     size_t read (void* ptr, size_t size, size_t count = 1);

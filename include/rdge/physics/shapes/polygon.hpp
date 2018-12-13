@@ -45,7 +45,7 @@ struct polygon : public ishape
 
     //! \brief polygon default ctor
     //! \details Zero initialization.
-    constexpr polygon (void)
+    polygon (void)
     {
         vertices.fill(0.f);
         normals.fill(0.f);

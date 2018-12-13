@@ -26,7 +26,7 @@ GetTextFileContent (const char* filepath)
     }
 
     result = std::string((sz + 1u), '\0');
-    rwops.read(result.data(), sizeof(char), sz);
+    rwops.read((void*)result.data(), sizeof(char), sz);
 
     return result;
 }
@@ -60,16 +60,16 @@ rwops_base::operator= (rwops_base&& rhs) noexcept
     return *this;
 }
 
-uint64
+size_t
 rwops_base::size (void)
 {
-    int64 sz = SDL_RWsize(m_rwops);
+    auto sz = SDL_RWsize(m_rwops);
     if (RDGE_UNLIKELY(sz < 0))
     {
         SDL_THROW("Failed to get file size", "SDL_RWsize");
     }
 
-    return static_cast<uint64>(sz);
+    return static_cast<size_t>(sz);
 }
 
 int64

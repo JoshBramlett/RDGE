@@ -9,6 +9,8 @@
 #include <rdge/math/vec2.hpp>
 #include <rdge/graphics/color.hpp>
 
+#include <vector>
+
 //!@{ Forward declarations
 struct SDL_Window;
 

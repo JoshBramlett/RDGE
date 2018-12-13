@@ -6,3 +6,4 @@ xcode/
 *.swo
 *.pyc
 .vs/
+CMakeSettings.json

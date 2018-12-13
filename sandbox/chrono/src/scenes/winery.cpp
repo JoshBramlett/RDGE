@@ -47,8 +47,9 @@ WineryScene::WineryScene (void)
     //      should be no more than the the number of tiles drawn for the maximum
     //      resolution supported.
     size_t tile_count = tilemap->grid.size.w * tilemap->grid.size.h;
+	RDGE_ASSERT(tile_count <= std::numeric_limits<uint16>::max());
     auto tile_size = static_cast<math::vec2>(tilemap->grid.cell_size) * g_game.ratios.base_to_screen;
-    tile_batch = TileBatch(tile_count, tile_size);
+    tile_batch = TileBatch(static_cast<uint16>(tile_count), tile_size);
 
     {
         auto& c = this->background_layers;

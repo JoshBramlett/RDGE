@@ -247,7 +247,7 @@ SmallBlockAllocator::PrintStats (std::ostream& os) const noexcept
     {
         auto bigger = std::max(usage.allocs[i], usage.frees[i]);
         widths[i] = (bigger == 0) ? 1
-                  : (bigger >= std::numeric_limits<int>::max()) ? 10
+                  : (bigger >= static_cast<size_t>(std::numeric_limits<int>::max())) ? 10
                   : static_cast<uint32>(std::log10(static_cast<double>(bigger)) + 1);
     }
 

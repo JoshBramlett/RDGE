@@ -252,7 +252,7 @@ load_bmfont (const char* filepath, bmfont_data& font)
             {
                 char_count = std::stoi(token.substr(p + 1));
             }
-        } catch (const std::exception& ex) {
+        } catch (const std::exception&) {
             RDGE_THROW("Unable to parse required \'chars.count\' value");
         }
     }

@@ -34,7 +34,7 @@ Animation::GetFrameIndex (uint32 ticks) noexcept
         frame = std::min(frame, frame_count - 1);
         break;
     case PlayMode::REVERSE:
-        frame = std::max(((frame_count - 1) - frame), 0ul);
+        frame = std::max(((frame_count - 1) - frame), (size_t)0);
         break;
     case PlayMode::LOOP:
         frame = frame % frame_count;

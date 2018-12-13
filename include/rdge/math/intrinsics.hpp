@@ -112,7 +112,7 @@ square (T val)
 //! \brief Get the position of the least significant bit
 //! \param [in] val Value to check
 //! \returns One plus the lsb index, or zero if the parameter is zero
-constexpr int32 lsb (int64 val)
+inline int32 lsb (int64 val)
 {
     return RDGE_LSB(val);
 }
@@ -132,7 +132,7 @@ template <typename T>
 constexpr typename std::enable_if_t<std::is_floating_point<T>::value, T>
 to_radians (T degrees)
 {
-    return degrees * 0.0174532925199432957;
+    return degrees * T(0.0174532925199432957);
 }
 
 //! \brief Convert radians to degrees
@@ -142,7 +142,7 @@ template <typename T>
 constexpr typename std::enable_if_t<std::is_floating_point<T>::value, T>
 to_degrees (T radians)
 {
-    return radians * 57.295779513082320876;
+    return radians * T(57.295779513082320876);
 }
 
 } // namespace math

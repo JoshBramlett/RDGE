@@ -94,7 +94,7 @@ TileLayer::TileLayer (const tilemap::Layer& def, float scale)
     hi.x += static_cast<float>(m_grid.cell_size.w) * m_grid.size.w;
     m_bounds = physics::aabb(lo, hi);
 
-    m_color.a = 255.f * def.opacity;
+    m_color.a = static_cast<decltype(m_color.a)>(255.f * def.opacity);
 
     m_inv.w = 1.f / (m_grid.cell_size.w * m_grid.chunk_size.w);
     m_inv.h = 1.f / (m_grid.cell_size.h * m_grid.chunk_size.h);

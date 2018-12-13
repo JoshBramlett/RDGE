@@ -19,8 +19,13 @@ add_executable (asset_packer
                 src/import_tilesets.cpp
                 src/main.cpp)
 
+set_target_properties(asset_packer PROPERTIES
+                      CXX_STANDARD 17
+                      CXX_STANDARD_REQUIRED YES
+                      CXX_EXTENSIONS NO)
+
 target_link_libraries (asset_packer
-                       RDGE)
+                       PUBLIC RDGE)
 
 # TODO : Implement install
 #install(TARGETS physics RUNTIME DESTINATION ${BIN_DIR})

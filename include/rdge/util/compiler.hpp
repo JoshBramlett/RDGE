@@ -5,6 +5,31 @@
 
 #pragma once
 
+#if defined(_MSC_VER)
+#include <intrin.h>
+#include <sal.h>
+#endif
+
+#ifndef __has_feature
+# define __has_feature(x) 0
+#endif
+
+#ifndef __has_extension
+# define __has_extension(x) 0
+#endif
+
+#ifndef __has_attribute
+# define __has_attribute(x) 0
+#endif
+
+#ifndef __has_cpp_attribute
+# define __has_cpp_attribute(x) 0
+#endif
+
+#ifndef __has_builtin
+# define __has_builtin(x) 0
+#endif
+
 #if __has_builtin(__builtin_expect)
     #define RDGE_UNLIKELY(x) __builtin_expect(!!(x), 0)
     #define RDGE_LIKELY(x) __builtin_expect(!!(x), 1)
@@ -32,7 +57,17 @@
 #if __has_builtin(__builtin_ffsll)
     #define RDGE_LSB(x) __builtin_ffsll(x)
 #else
-    #error "RDGE_LSB cannot be defined"
+    #pragma intrinsic(_BitScanForward)
+    inline rdge::int32 RDGE_LSB(long long x)
+    {
+		unsigned long index = 0;
+		if (_BitScanForward(&index, static_cast<unsigned long>(x)))
+		{
+			return static_cast<rdge::int32>(index);
+		}
+
+		return 0;
+	}
 #endif
 
 #if __has_builtin(__builtin_fpclassify)

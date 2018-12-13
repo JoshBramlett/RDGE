@@ -256,12 +256,12 @@ else()
     message (FATAL_ERROR "Git not found")
 endif()
 
-set (SDL2_BUILDING_LIBRARY TRUE)
-find_package (SDL2)
+set (SDL2_BUILDING_LIBRARY ON)
+find_package (SDL2 CONFIG REQUIRED)
 if(SDL2_FOUND)
     find_package_message(SDL2
                          "Found Package: SDL2 ${SDL2_LIBRARY}"
-                         "[${SDL2_LIBRARY}] [${SDL2_INCLUDE_DIR}]")
+                         "[${SDL2_LIBRARY}] [${SDL2_INCLUDE_DIR}]")   
 else()
     message (FATAL_ERROR "SDL2 not found")
 endif()
@@ -284,7 +284,9 @@ else()
     message (FATAL_ERROR "OpenGL not found")
 endif()
 
-find_package (GTest)
+enable_testing()
+include(CTest)
+find_package (GTest MODULE REQUIRED)
 if(GTEST_FOUND)
     find_package_message(GTest
                          "Found Package: GTest ${GTEST_BOTH_LIBRARIES}"
@@ -361,13 +363,17 @@ set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DRDGE_DEBUG")
     #add_definitions("-DRDGE_DEBUG")
 #endif ()
 
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 # Set compiler flags
 if (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang") # Matches for "Clang" and "AppleClang"
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -std=c++1z")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic")
     set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${ASAN_FLAGS}")
 
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -std=c++17")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic")
     set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${ASAN_FLAGS}")
 
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
@@ -383,43 +389,63 @@ endif ()
 #include(CTest)
 
 
-include_directories (${GTEST_INCLUDE_DIRS}
-                     ${SDL2_INCLUDE_DIR}
-                     ${GLEW_INCLUDE_DIRS}
-                     ${OPENGL_INCLUDE_DIR})
+#include_directories (${GTEST_INCLUDE_DIRS}
+#                     ${SDL2_INCLUDE_DIR}
+#                     ${GLEW_INCLUDE_DIRS}
+#                     ${OPENGL_INCLUDE_DIR})
 
+set(imgui_SOURCE_FILES
+    ${RDGE_SOURCE_DIR}/lib/imgui/imgui.cpp
+    ${RDGE_SOURCE_DIR}/lib/imgui/imgui.cpp
+    ${RDGE_SOURCE_DIR}/lib/imgui/imgui_widgets.cpp
+    ${RDGE_SOURCE_DIR}/lib/imgui/imgui_draw.cpp
+    ${RDGE_SOURCE_DIR}/lib/imgui/imgui_demo.cpp
+    ${RDGE_SOURCE_DIR}/lib/imgui/imgui_impl_rdge.cpp)
+    
 add_library (imgui STATIC
              lib/imgui/imgui.cpp
              lib/imgui/imgui_widgets.cpp
              lib/imgui/imgui_draw.cpp
              lib/imgui/imgui_demo.cpp
              lib/imgui/imgui_impl_rdge.cpp)
-
 target_link_libraries (imgui
-                       ${SDL2_LIBRARY}
-                       ${GLEW_LIBRARIES}
-                       ${OPENGL_LIBRARIES})
+                       PUBLIC
+                       PRIVATE SDL2::SDL2
+                       PRIVATE GLEW::GLEW)
 
 
-add_library (RDGE SHARED
+
+
+
+
+
+
+
+add_library (RDGE STATIC
              ${RDGE_HEADER_FILES}
              ${RDGE_SOURCE_FILES})
 
 # project includes
+
+
 target_include_directories (RDGE SYSTEM PUBLIC ${RDGE_SOURCE_DIR}/lib)
 target_include_directories (RDGE PUBLIC ${RDGE_INCLUDE_DIR})
 target_include_directories (RDGE PRIVATE ${RDGE_SOURCE_DIR}/internal)
 
 target_link_libraries (RDGE
+                       PUBLIC
                        imgui
-                       ${SDL2_LIBRARY}
-                       ${GLEW_LIBRARIES}
+                       PUBLIC SDL2::SDL2
+                       PUBLIC GLEW::GLEW
+                       #SDL2::SDL2main
+                       #${SDL2_LIBRARY}
+                       #${GLEW_LIBRARIES}
                        ${OPENGL_LIBRARIES})
 
 message ("Adding subdirectories...")
-add_subdirectory (tools/asset_packer)
-add_subdirectory (tools/pyxel2tiled)
-add_subdirectory (sandbox/chrono)
+#add_subdirectory (tools/asset_packer)
+#add_subdirectory (tools/pyxel2tiled)
+#add_subdirectory (sandbox/chrono)
 add_subdirectory (sandbox/physics)
 
 add_executable (rdge_test
@@ -441,9 +467,13 @@ add_executable (rdge_test
                 tests/util/intrusive_forward_list_test.cpp)
 
 target_link_libraries (rdge_test
-                       RDGE
-                       ${GTEST_BOTH_LIBRARIES})
-#add_test(RDGE_UtilTest rdge_test)
+                       PUBLIC RDGE
+                       PRIVATE GTest::GTest GTest::Main)
+                       #${GTEST_BOTH_LIBRARIES})
+#target_include_directories (rdge_test SYSTEM PUBLIC ${RDGE_SOURCE_DIR}/lib)
+#target_include_directories (rdge_test PUBLIC ${RDGE_INCLUDE_DIR})
+
+add_test(Vec2FloatingPointTest rdge_test)
 
 
 

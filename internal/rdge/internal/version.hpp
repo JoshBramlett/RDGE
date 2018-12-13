@@ -1,7 +1,7 @@
 //! \headerfile <rdge/version.hpp>
 //! \author Josh Bramlett
 //! \version 0.0.10
-//! \date 11/08/2018
+//! \date 12/13/2018
 
 /************************************************************/
 /**                 Auto-generated from build              **/
@@ -14,9 +14,9 @@
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
-static constexpr const char* RDGE_COMMIT_HASH = "0008a452b701c9ce0a3eaf61f6f54fee0924f8e8";
-static constexpr const char* RDGE_COMMIT_DATE = "Thu Nov 1 13:07:23 2018";
-static constexpr const char* RDGE_COMMIT_SUBJECT = "Small asset updates";
+static constexpr const char* RDGE_COMMIT_HASH = "e7e182bdb0927802606c1a2d9627579d2223d64a";
+static constexpr const char* RDGE_COMMIT_DATE = "Fri Nov 9 14:16:05 2018";
+static constexpr const char* RDGE_COMMIT_SUBJECT = "Add VS to gitignore";
 
 static constexpr uint8 RDGE_VERSION_MAJOR = 0;
 static constexpr uint8 RDGE_VERSION_MINOR = 0;

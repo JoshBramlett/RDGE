@@ -474,8 +474,8 @@ from_json (const nlohmann::json& j, layer& l)
     l.height = j["height"].get<uint32>();
     l.opacity = j["opacity"].get<float>();
     l.visible = j["visible"].get<bool>();
-    l.offsetx = j["offsetx"].get<uint32>();
-    l.offsety = j["offsety"].get<uint32>();
+    l.offsetx = j["offsetx"].get<float>();
+    l.offsety = j["offsety"].get<float>();
     l.data = j["data"].get<std::vector<uint32>>();
 
     deserialize(j, l.properties);
