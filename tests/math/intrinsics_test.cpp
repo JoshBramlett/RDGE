@@ -50,12 +50,9 @@ TEST(PowerOfTwoTest, HandlesAll)
     // 1) Success
     EXPECT_TRUE(is_pot(128));
 
-    // 2) Zero should fail
-    EXPECT_FALSE(is_pot(0));
-    // 3) Test multiple of two
-    EXPECT_FALSE(is_pot(10));
-    // 4) Test odd value
-    EXPECT_FALSE(is_pot(11));
+    EXPECT_FALSE(is_pot(0));    // zero
+    EXPECT_FALSE(is_pot(11));   // odd
+    EXPECT_FALSE(is_pot(10));   // non-pot even
 }
 
 TEST(FloatingPointIsZero, HandlesAll)
@@ -66,6 +63,23 @@ TEST(FloatingPointIsZero, HandlesAll)
     EXPECT_FALSE(is_zero(0.f - std::numeric_limits<float>::epsilon()));
     EXPECT_FALSE(is_zero(-0.f + std::numeric_limits<float>::epsilon()));
     EXPECT_FALSE(is_zero(-0.f - std::numeric_limits<float>::epsilon()));
+}
+
+TEST(LSBTest, HandlesAll)
+{
+    EXPECT_EQ(math::lsb(24), 4);
+    EXPECT_EQ(math::lsb(8), 4);
+
+    EXPECT_EQ(math::lsb(20), 3);
+    EXPECT_EQ(math::lsb(12), 3);
+    EXPECT_EQ(math::lsb(4), 3);
+
+    EXPECT_EQ(math::lsb(129), 1);
+    EXPECT_EQ(math::lsb(65), 1);
+    EXPECT_EQ(math::lsb(33), 1);
+    EXPECT_EQ(math::lsb(1), 1);
+
+    EXPECT_EQ(math::lsb(0), 0);
 }
 
 } // anonymous namespace
