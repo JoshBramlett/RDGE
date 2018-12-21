@@ -1,8 +1,10 @@
 alias rdge='cd /Users/jbramlett/Documents/Projects/RDGE'
-alias cmakeg='cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug ../'
-alias cmakegr='cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release ../'
+alias cmakeg='cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=/Users/jbramlett/Documents/GitHub/vcpkg/scripts/buildsystems/vcpkg.cmake ../'
+alias cmakegr='cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=/Users/jbramlett/Documents/GitHub/vcpkg/scripts/buildsystems/vcpkg.cmake ../'
 
-alias debm='make -j4 -C/Users/jbramlett/Documents/Projects/RDGE/debug'
+# The redirect gets rid of the annoying ld warnings on the mac
+# https://stackoverflow.com/a/15936384
+alias debm='make -j4 -C/Users/jbramlett/Documents/Projects/RDGE/debug 2> >(grep -v "text-based stub file" 1>&2)'
 
 function chronopack()
 {

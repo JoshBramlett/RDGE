@@ -60,14 +60,14 @@
     #pragma intrinsic(_BitScanForward)
     inline rdge::int32 RDGE_LSB(long long x)
     {
-		unsigned long index = 0;
-		if (_BitScanForward(&index, static_cast<unsigned long>(x)))
-		{
-			return static_cast<rdge::int32>(index);
-		}
+        unsigned long index = 0;
+        if (_BitScanForward(&index, static_cast<unsigned long>(x)))
+        {
+            return static_cast<rdge::int32>(index);
+        }
 
-		return 0;
-	}
+        return 0;
+    }
 #endif
 
 #if __has_builtin(__builtin_fpclassify)
@@ -79,10 +79,37 @@
 #ifndef restrict
     #if defined(COMPILER_GCC) || defined(__clang__)
         #define restrict __restrict__
-    #elif defined(COMPILER_MSVC)
+    #elif defined(_MSC_VER)
         #define restrict __declspec(restrict)
     #else
         #define restrict
     #endif
 #endif
 
+#if defined(_MSC_VER)
+    #define RDGE_DISABLE_WARNING_MSVC(x) __pragma(warning(disable:x))
+    #define RDGE_DISABLE_WARNING_GCC(x)
+    #define RDGE_PUSH_WARNING() __pragma(warning(push))
+    #define RDGE_POP_WARNING() __pragma(warning(pop))
+#elif defined(COMPILER_GCC) || defined(__clang__)
+    #define DO_PRAGMA(x) _Pragma(#x)
+    #define DIAG_PRAGMA(x) DO_PRAGMA(GCC diagnostic x)
+
+    #define RDGE_DISABLE_WARNING_MSVC(x)
+    #define RDGE_DISABLE_WARNING_GCC(x) DIAG_PRAGMA(ignored #x)
+    #define RDGE_PUSH_WARNING() DIAG_PRAGMA(push)
+    #define RDGE_POP_WARNING() DIAG_PRAGMA(pop)
+#else
+    #define RDGE_DISABLE_WARNING_MSVC(x)
+    #define RDGE_DISABLE_WARNING_GCC(x)
+    #define RDGE_PUSH_WARNING()
+    #define RDGE_POP_WARNING()
+#endif
+
+#if defined(COMPILER_GCC)
+    #define FUNCTION_NAME __PRETTY_FUNCTION__
+#elif defined(_MSC_VER)
+    #define FUNCTION_NAME __FUNCSIG__
+#else
+    #define FUNCTION_NAME __func__
+#endif

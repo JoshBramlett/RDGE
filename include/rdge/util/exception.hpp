@@ -6,6 +6,7 @@
 #pragma once
 
 #include <rdge/core.hpp>
+#include <rdge/util/compiler.hpp>
 #include <rdge/util/logger.hpp>
 
 #include <string>

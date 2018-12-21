@@ -20,7 +20,7 @@ add_executable (asset_packer
                 src/main.cpp)
 
 set_target_properties(asset_packer PROPERTIES
-                      CXX_STANDARD 17
+                      CXX_STANDARD 14
                       CXX_STANDARD_REQUIRED YES
                       CXX_EXTENSIONS NO)
 

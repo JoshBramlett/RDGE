@@ -28,14 +28,6 @@
 /    Compiler specific defines
 ***********************************/
 
-#ifndef FUNCTION_NAME
-    #ifdef _MSC_VER
-        #define FUNCTION_NAME __FUNCTION__
-    #else
-        #define FUNCTION_NAME __func__
-    #endif
-#endif
-
 #ifndef FILE_NAME
     #define FILE_NAME (strrchr(__FILE__, '/')                \
                           ? strrchr(__FILE__, '/') + 1       \

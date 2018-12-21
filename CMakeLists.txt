@@ -261,7 +261,7 @@ find_package (SDL2 CONFIG REQUIRED)
 if(SDL2_FOUND)
     find_package_message(SDL2
                          "Found Package: SDL2 ${SDL2_LIBRARY}"
-                         "[${SDL2_LIBRARY}] [${SDL2_INCLUDE_DIR}]")   
+                         "[${SDL2_LIBRARY}] [${SDL2_INCLUDE_DIR}]")
 else()
     message (FATAL_ERROR "SDL2 not found")
 endif()
@@ -401,7 +401,7 @@ set(imgui_SOURCE_FILES
     ${RDGE_SOURCE_DIR}/lib/imgui/imgui_draw.cpp
     ${RDGE_SOURCE_DIR}/lib/imgui/imgui_demo.cpp
     ${RDGE_SOURCE_DIR}/lib/imgui/imgui_impl_rdge.cpp)
-    
+
 add_library (imgui STATIC
              lib/imgui/imgui.cpp
              lib/imgui/imgui_widgets.cpp
@@ -443,9 +443,9 @@ target_link_libraries (RDGE
                        ${OPENGL_LIBRARIES})
 
 message ("Adding subdirectories...")
-#add_subdirectory (tools/asset_packer)
+add_subdirectory (tools/asset_packer)
 #add_subdirectory (tools/pyxel2tiled)
-#add_subdirectory (sandbox/chrono)
+add_subdirectory (sandbox/chrono)
 add_subdirectory (sandbox/physics)
 
 add_executable (rdge_test
@@ -468,8 +468,8 @@ add_executable (rdge_test
 
 target_link_libraries (rdge_test
                        PUBLIC RDGE
-                       PRIVATE GTest::GTest GTest::Main)
-                       #${GTEST_BOTH_LIBRARIES})
+                       #PRIVATE GTest::GTest GTest::Main)
+                       ${GTEST_BOTH_LIBRARIES})
 #target_include_directories (rdge_test SYSTEM PUBLIC ${RDGE_SOURCE_DIR}/lib)
 #target_include_directories (rdge_test PUBLIC ${RDGE_INCLUDE_DIR})
 

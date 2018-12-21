@@ -160,7 +160,7 @@ main (int argc, char** argv)
         auto sz = rwops.size();
 
         std::string file_data(sz + 1, '\0');
-        rwops.read(file_data.data(), sizeof(char), sz);
+        rwops.read((void*)file_data.data(), sizeof(char), sz);
 
         const auto j = json::parse(file_data);
         if ((j.count("cooker") == 0) || (j.count("packer") == 0))

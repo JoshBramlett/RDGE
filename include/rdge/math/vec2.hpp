@@ -29,10 +29,10 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
     //! \brief Number of elements
     constexpr size_t size (void) const { return 2; }
 
-#pragma warning (disable : 4068)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wgnu-anonymous-struct"
-#pragma GCC diagnostic ignored "-Wnested-anon-types"
+RDGE_PUSH_WARNING()
+RDGE_DISABLE_WARNING_MSVC(4068)
+RDGE_DISABLE_WARNING_GCC(-Wgnu-anonymous-struct)
+RDGE_DISABLE_WARNING_GCC(-Wnested-anon-types)
 
     //! \union Member access through x,y or w.h
     union
@@ -41,7 +41,7 @@ struct vec2_t <T, std::enable_if_t<std::is_arithmetic<T>::value>>
         struct { T w, h; }; //!< width/height
     };
 
-#pragma GCC diagnostic pop
+RDGE_POP_WARNING()
 
     //! \brief Zero initialized (empty) vector
     static vec2_t<T> ZERO;
