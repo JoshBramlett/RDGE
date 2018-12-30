@@ -10,6 +10,7 @@
 #include <rdge/assets/surface.hpp>
 #include <rdge/assets/tilemap/object.hpp>
 #include <rdge/graphics/animation.hpp>
+#include <rdge/graphics/color.hpp>
 #include <rdge/graphics/tex_coords.hpp>
 #include <rdge/math/vec2.hpp>
 #include <rdge/system/types.hpp>
@@ -79,11 +80,21 @@ struct region_data
 
 //! \struct animation_data
 //! \brief Expanded read-only \ref Animation container
-//! \details Provides further details about the imported animation
 struct animation_data
 {
     std::string name;  //!< Name as specified by import
-    Animation   value; //!< Imported animation
+    Animation   value; //!< Imported \ref Animation
+};
+
+//! \struct slice_data
+//! \brief Sub-region data defined by the import
+struct slice_data
+{
+    std::string name;   //!< Name as specified by import
+    rdge::color color;  //!< Color as specified by import
+    screen_rect bounds; //!< Slice boundaries relative to the sheet
+    bool is_nine_patch; //!< True iff slice should be broken down into nine regions
+    screen_rect center; //!< Center rect of the nine-patch
 };
 
 //! \class SpriteSheet
@@ -91,8 +102,9 @@ struct animation_data
 //! \details SpriteSheet (aka TextureAtlas) represents the definition of how
 //!          pixel data is broken down to individual sprites.  The definition
 //!          is parsed from an external json resource, and includes support
-//!          for defining the texture regions, and optional support to define
-//!          animations whose frames are regions of the sprite sheet.
+//!          for defining the texture regions.
+//!
+//!          Optional support for parsing Animation and slice data.
 //!
 //!          The sprite sheet may also be imported as an "object sheet", where
 //!          the region data has additional properties defining the collision
@@ -138,10 +150,22 @@ struct animation_data
 //!     "mode": "normal",
 //!     "interval": 100,
 //!     "frames": [ {
-//!       "name": "part_name",
+//!       "name": "frame_name",
 //!       "flip": "horizontal"
 //!     } ]
-//!   } ]
+//!   } ],
+//!   "meta": {
+//!     "slices": [ {
+//!       "name": "slice_name",
+//!       "color": "#0000ffff",
+//!       "data": "",
+//!       "keys": [ {
+//!         "frame": 0,
+//!         "bounds": { "x": 0, "y": 0, "w": 48, "h": 48 },
+//!         "center": { "x": 16, "y": 16, "w": 16, "h": 16 }
+//!       } ]
+//!     } ]
+//!   }
 //! }
 //! \endcode
 //!
@@ -194,6 +218,7 @@ public:
 public:
     std::vector<region_data> regions;       //!< Spritesheet region list
     std::vector<animation_data> animations; //!< Animation definition list
+    std::vector<slice_data> slices;         //!< Slice definition list
 
     shared_asset<Surface> surface; //!< Pixel data of the sprite sheet
 };

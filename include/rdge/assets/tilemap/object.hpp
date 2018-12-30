@@ -12,7 +12,6 @@
 #include <rdge/physics/shapes/polygon.hpp>
 
 //!@{ Forward declarations
-#include <nlohmann/json_fwd.hpp>
 namespace rdge {
 namespace physics { struct circle; }
 namespace tilemap { class Tilemap; }

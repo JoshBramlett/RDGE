@@ -1,14 +1,9 @@
 #include <gtest/gtest.h>
+#include "../dummy_window.hpp"
 
 #include <rdge/assets/spritesheet.hpp>
-#include <rdge/math/vec2.hpp>
-#include <rdge/math/vec3.hpp>
-
-#include <SDL.h>
 
 #include <exception>
-
-#include "../dummy_window.hpp"
 
 namespace {
 
@@ -84,9 +79,51 @@ TEST_F(SpriteSheetTest, HandlesImageDoesNotExist)
                  std::runtime_error);
 }
 
+TEST_F(SpriteSheetTest, ValidatesSlices)
+{
+    SpriteSheet sheet("../tests/testdata/assets/spritesheet_03.json");
+    EXPECT_EQ(sheet.regions.size(), 1u);
+
+    // 1) frame value validation
+    const auto& part1 = sheet["slice_test"];
+    EXPECT_FLOAT_EQ(part1.size.w, 128.f);
+    EXPECT_FLOAT_EQ(part1.size.h, 128.f);
+
+    // 2) slice validation
+    EXPECT_EQ(sheet.slices.size(), 3u);
+
+    {
+        const auto& slice = sheet.slices[0];
+        EXPECT_EQ(slice.name, "nine_patch");
+        EXPECT_EQ(slice.color, rdge::color::RED);
+        EXPECT_EQ(slice.bounds, screen_rect(128, 128, 48, 48));
+        EXPECT_TRUE(slice.is_nine_patch);
+        EXPECT_EQ(slice.center, screen_rect(16, 16, 16, 16));
+    }
+
+    {
+        const auto& slice = sheet.slices[1];
+        EXPECT_EQ(slice.name, "single_slice");
+        EXPECT_EQ(slice.color, rdge::color::GREEN);
+        EXPECT_EQ(slice.bounds, screen_rect(176, 128, 16, 16));
+        EXPECT_FALSE(slice.is_nine_patch);
+        EXPECT_EQ(slice.center, screen_rect());
+    }
+
+    {
+        const auto& slice = sheet.slices[2];
+        EXPECT_EQ(slice.name, "slice_with_data");
+        EXPECT_EQ(slice.color, rdge::color::BLUE);
+        EXPECT_EQ(slice.bounds, screen_rect(176, 144, 16, 16));
+        EXPECT_FALSE(slice.is_nine_patch);
+        EXPECT_EQ(slice.center, screen_rect());
+    }
+}
+
 // TODO Add tests for:
 // - further exception handling
 // - animations
 // - objects
+// - slice user data
 
 } // anonymous namespace

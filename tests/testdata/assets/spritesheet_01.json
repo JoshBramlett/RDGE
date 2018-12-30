@@ -58,7 +58,6 @@
     "version": "1.0",
     "smartupdate": "",
     "image": "../tests/testdata/assets/spritesheet.png",
-    "sheet_type": "spritesheet",
     "size": {
       "h": 256,
       "w": 256

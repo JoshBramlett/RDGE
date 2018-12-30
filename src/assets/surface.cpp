@@ -290,8 +290,8 @@ Surface::CreateSubSurface (const screen_rect& clip)
     int32 depth = Depth();
     auto masks = GetMasks(depth);
     auto s = SDL_CreateRGBSurface(0, // flags (SDL docs say param is unused)
-                                  static_cast<int32>(clip.w),
-                                  static_cast<int32>(clip.h),
+                                  clip.w,
+                                  clip.h,
                                   depth,
                                   masks.r_mask,
                                   masks.g_mask,

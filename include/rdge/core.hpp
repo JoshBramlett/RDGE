@@ -8,7 +8,11 @@
 #include <cstdint>
 #include <limits>
 #include <string>
-#include <ostream>
+
+//!@{ Forward declarations
+#include <iosfwd>
+#include <nlohmann/json_fwd.hpp>
+//!@}
 
 #ifdef RDGE_DEBUG
 #include <iostream>

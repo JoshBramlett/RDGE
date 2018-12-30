@@ -202,6 +202,7 @@ list(APPEND RDGE_HEADER_FILES
 list(APPEND RDGE_SOURCE_FILES
      ${RDGE_SOURCE_DIR}/src/system/keyboard.cpp
      ${RDGE_SOURCE_DIR}/src/system/mouse.cpp
+     ${RDGE_SOURCE_DIR}/src/system/types.cpp
      ${RDGE_SOURCE_DIR}/src/system/window.cpp)
 
  # Util
@@ -461,7 +462,8 @@ add_executable (rdge_test
                 tests/physics/circle_test.cpp
                 tests/physics/polygon_test.cpp
                 tests/math/intrinsics_test.cpp
-                tests/math/vec2.cpp
+                tests/math/vec2_test.cpp
+                tests/system/types_test.cpp
                 tests/util/freelist_test.cpp
                 tests/util/intrusive_list_test.cpp
                 tests/util/intrusive_forward_list_test.cpp)
@@ -474,6 +476,9 @@ target_link_libraries (rdge_test
 #target_include_directories (rdge_test PUBLIC ${RDGE_INCLUDE_DIR})
 
 add_test(Vec2FloatingPointTest rdge_test)
+add_test(SpriteSheetTest rdge_test)
+add_test(ScreenPointTest rdge_test)
+add_test(ScreenRectTest rdge_test)
 
 
 

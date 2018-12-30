@@ -9,8 +9,6 @@
 
 #include <SDL_rect.h>
 
-#include <ostream>
-
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
@@ -44,30 +42,28 @@ struct screen_point : public SDL_Point
 };
 
 //! \struct screen_rect
-//! \brief Structure defining a rectangle in OS screen/display format
-//! \details Origin is located in the upper left and contains integral xy coordinates
-//!          and corresponding width/height, which is the canonical format used
-//!          by operating systems.
-//! \warning Do not use with the graphics system, which uses the standard coordinate
-//!          system of +y pointing up (making the origin at the lower left corner)
+//! \brief Structure defining a rectangle in canonical OS screen/display format
+//! \details The x/y coordinates which make up the origin are situated in the top
+//!          left corner.  Width expands left to right. Height expands top to bottom.
+//! \warning Not for use with the graphics system which uses cartesian coordinates.
 //! \see http://wiki.libsdl.org/SDL_Rect
 struct screen_rect : public SDL_Rect
 {
     //! \brief screen_rect ctor
-    //! \details Initialize rect to [0,0,0,0]
+    //! \details Zero initialization
     constexpr screen_rect (void)
         : SDL_Rect{0, 0, 0, 0}
     { }
 
     //! \brief screen_rect ctor
-    //! \details Initialize from SDL_Rect
+    //! \details Initialize from SDL_Rect.
     //! \param [in] sdl_rect SDL_Rect struct
     explicit constexpr screen_rect (const SDL_Rect& sdl_rect)
         : SDL_Rect{sdl_rect}
     { }
 
     //! \brief screen_rect ctor
-    //! \details Initialize color from x, y, width, height values
+    //! \details Initialize from individual values
     //! \param [in] px x-coordinate
     //! \param [in] py y-coordinate
     //! \param [in] width Width
@@ -79,7 +75,7 @@ struct screen_rect : public SDL_Rect
     //!@{ Edge values
     constexpr int32 top (void) const noexcept { return y; }
     constexpr int32 left (void) const noexcept { return x; }
-    constexpr int32 bottom (void) const noexcept { return y + h; }
+    constexpr int32 bottom (void) const noexcept { return y - h; }
     constexpr int32 right (void) const noexcept { return x + w; }
     //!@}
 
@@ -123,19 +119,18 @@ operator!= (const screen_rect& lhs, const screen_rect& rhs) noexcept
     return !(lhs == rhs);
 }
 
-//! \brief screen_point stream output operator
-inline std::ostream&
-operator<< (std::ostream& os, const screen_point& point)
-{
-    return os << "[ " << point.x << ", " << point.y << " ]";
-}
+//!@{ screen_point output and serialization
+std::ostream& operator<< (std::ostream&, const screen_point&);
+std::string to_string (const screen_point&);
+void to_json (nlohmann::json&, const screen_point&);
+void from_json (const nlohmann::json&, screen_point&);
+//!@}
 
-//! \brief screen_rect stream output operator
-inline std::ostream&
-operator<< (std::ostream& os, const screen_rect& rect)
-{
-    return os << "[ " << screen_point(rect.x, rect.y)
-              << " w=" << rect.w << " h=" << rect.h << " ]";
-}
+//!@{ screen_rect output and serialization
+std::ostream& operator<< (std::ostream&, const screen_rect&);
+std::string to_string (const screen_rect&);
+void to_json (nlohmann::json&, const screen_rect&);
+void from_json (const nlohmann::json&, screen_rect&);
+//!@}
 
 } // namespace rdge

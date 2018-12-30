@@ -7,8 +7,7 @@
 #include <rdge/util/exception.hpp>
 #include <rdge/util/json.hpp>
 #include <rdge/util/strings.hpp>
-
-#include <SDL_assert.h>
+#include <rdge/debug/assert.hpp>
 
 #include <exception>
 #include <sstream>
@@ -26,9 +25,143 @@ constexpr float normalize (uint64 point, uint64 dimension)
 }
 
 void
+ProcessAnimations (const json& j, SpriteSheet& sheet)
+{
+    if (j.count("animations") == 0)
+    {
+        return;
+    }
+
+    const auto& j_animations = j["animations"];
+    std::vector<animation_data>(j_animations.size()).swap(sheet.animations);
+
+    size_t index = 0;
+    for (const auto& j_animation : j_animations)
+    {
+        JSON_VALIDATE_REQUIRED(j_animation, name, is_string);
+        JSON_VALIDATE_REQUIRED(j_animation, mode, is_string);
+        JSON_VALIDATE_REQUIRED(j_animation, frames, is_array);
+        JSON_VALIDATE_OPTIONAL(j_animation, interval, is_number_unsigned);
+
+        auto& animation = sheet.animations.at(index++);
+        animation.name = j_animation["name"].get<decltype(animation.name)>();
+
+        animation.value.interval = 0;
+        if (j_animation.count("interval"))
+        {
+            animation.value.interval = j_animation["interval"].get<uint32>();
+        }
+
+        if (!try_parse(j_animation["mode"].get<std::string>(), animation.value.mode))
+        {
+            std::string msg("animation \"" + animation.name + "\" mode invalid");
+            throw std::invalid_argument(msg);
+        }
+
+        const auto& j_frames = j_animation["frames"];
+        for (const auto& j_frame : j_frames)
+        {
+            JSON_VALIDATE_REQUIRED(j_frame, name, is_string);
+            JSON_VALIDATE_OPTIONAL(j_frame, flip, is_number_unsigned);
+
+            auto frame_name = j_frame["name"].get<std::string>();
+            TexCoordsFlip frame_flip = TexCoordsFlip::NONE;
+            if (j_frame.count("flip"))
+            {
+                frame_flip = static_cast<TexCoordsFlip>(j_frame["flip"].get<uint32>());
+            }
+
+            animation.value.frames.reserve(j_frames.size());
+            bool found = false;
+            for (const auto& region : sheet.regions)
+            {
+                if (region.name == frame_name)
+                {
+                    auto region_copy = region.value;
+                    region_copy.flip(frame_flip);
+
+                    animation_frame frame;
+                    frame.size = region_copy.sprite_size;
+                    frame.origin = region_copy.sprite_size;
+                    frame.origin.x *= region_copy.origin.x;
+                    frame.origin.y *= region_copy.origin.y;
+                    frame.uvs = region_copy.coords;
+
+                    animation.value.frames.push_back(frame);
+
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+            {
+                std::ostringstream ss;
+                ss << "animation \"" << animation.name << "\" cannot find "
+                   << "frame \"" << frame_name << "\" in region list";
+                throw std::invalid_argument(ss.str());
+            }
+        }
+    }
+}
+
+void
+ProcessSlices (const json& j, SpriteSheet& sheet)
+{
+    if (j.count("slices") == 0)
+    {
+        return;
+    }
+
+    const auto& j_slices = j["slices"];
+    std::vector<slice_data>(j_slices.size()).swap(sheet.slices);
+
+    size_t index = 0;
+    for (const auto& j_slice : j_slices)
+    {
+        JSON_VALIDATE_REQUIRED(j_slice, name, is_string);
+        JSON_VALIDATE_REQUIRED(j_slice, color, is_string);
+        JSON_VALIDATE_REQUIRED(j_slice, keys, is_array);
+        JSON_VALIDATE_OPTIONAL(j_slice, data, is_string);
+
+        auto& slice = sheet.slices.at(index++);
+        slice.name = j_slice["name"].get<decltype(slice.name)>();
+        slice.color = color::from_rgba(j_slice["color"].get<std::string>());
+
+        const auto& j_keys = j_slice["keys"];
+        RDGE_ASSERT(j_keys.size() == 1u);
+
+        const auto& j_key = j_keys.at(0);
+        JSON_VALIDATE_REQUIRED(j_key, frame, is_number_unsigned);
+        JSON_VALIDATE_REQUIRED(j_key, bounds, is_object);
+        JSON_VALIDATE_OPTIONAL(j_key, center, is_object);
+
+        auto frame_index = j_key["frame"].get<size_t>();
+        auto& region = sheet.regions.at(frame_index);
+
+        auto bounds = j_key["bounds"].get<screen_rect>();
+        slice.bounds.x = region.value.clip.x + bounds.x;
+        slice.bounds.y = region.value.clip.y + bounds.y;
+        slice.bounds.w = bounds.w;
+        slice.bounds.h = bounds.h;
+
+        slice.is_nine_patch = !!j_key.count("center");
+        if (slice.is_nine_patch)
+        {
+            auto center = j_key["center"].get<screen_rect>();
+            slice.center.x = center.x;
+            slice.center.y = center.y;
+            slice.center.w = center.w;
+            slice.center.h = center.h;
+        }
+    }
+}
+
+void
 ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
 {
     JSON_VALIDATE_REQUIRED(j, frames, is_array);
+    JSON_VALIDATE_REQUIRED(j, meta, is_object);
     JSON_VALIDATE_OPTIONAL(j, animations, is_array);
 
     const auto& j_regions = j["frames"];
@@ -162,89 +295,21 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
                 // must be positive on import.  The object ctor negates the y-axis,
                 // so we can safely assume a negative value.
                 auto& obj = region.objects.back();
-                SDL_assert(obj.pos.y <= 0.f);
-                SDL_assert(obj.type == tilemap::ObjectType::POLYGON ||
-                           obj.type == tilemap::ObjectType::CIRCLE);
+                RDGE_ASSERT(obj.pos.y <= 0.f);
+                RDGE_ASSERT(obj.type == tilemap::ObjectType::POLYGON ||
+                            obj.type == tilemap::ObjectType::CIRCLE);
 
                 obj.pos.y = region.value.sprite_size.h + obj.pos.y;
             }
         }
     }
 
-    if (j.count("animations"))
-    {
-        const auto& j_animations = j["animations"];
-        std::vector<animation_data>(j_animations.size()).swap(sheet.animations);
+    const auto& j_meta = j["meta"];
+    JSON_VALIDATE_OPTIONAL(j_meta, animations, is_array);
+    JSON_VALIDATE_OPTIONAL(j_meta, slices, is_array);
 
-        index = 0;
-        for (const auto& j_animation : j_animations)
-        {
-            JSON_VALIDATE_REQUIRED(j_animation, name, is_string);
-            JSON_VALIDATE_REQUIRED(j_animation, mode, is_string);
-            JSON_VALIDATE_REQUIRED(j_animation, frames, is_array);
-            JSON_VALIDATE_OPTIONAL(j_animation, interval, is_number_unsigned);
-
-            auto& animation = sheet.animations.at(index++);
-            animation.name = j_animation["name"].get<decltype(animation.name)>();
-
-            animation.value.interval = 0;
-            if (j_animation.count("interval"))
-            {
-                animation.value.interval = j_animation["interval"].get<uint32>();
-            }
-
-            if (!try_parse(j_animation["mode"].get<std::string>(), animation.value.mode))
-            {
-                std::string msg("animation \"" + animation.name + "\" mode invalid");
-                throw std::invalid_argument(msg);
-            }
-
-            const auto& j_frames = j_animation["frames"];
-            for (const auto& j_frame : j_frames)
-            {
-                JSON_VALIDATE_REQUIRED(j_frame, name, is_string);
-                JSON_VALIDATE_OPTIONAL(j_frame, flip, is_number_unsigned);
-
-                auto frame_name = j_frame["name"].get<std::string>();
-                TexCoordsFlip frame_flip = TexCoordsFlip::NONE;
-                if (j_frame.count("flip"))
-                {
-                    frame_flip = static_cast<TexCoordsFlip>(j_frame["flip"].get<uint32>());
-                }
-
-                animation.value.frames.reserve(j_frames.size());
-                bool found = false;
-                for (const auto& region : sheet.regions)
-                {
-                    if (region.name == frame_name)
-                    {
-                        auto region_copy = region.value;
-                        region_copy.flip(frame_flip);
-
-                        animation_frame frame;
-                        frame.size = region_copy.sprite_size;
-                        frame.origin = region_copy.sprite_size;
-                        frame.origin.x *= region_copy.origin.x;
-                        frame.origin.y *= region_copy.origin.y;
-                        frame.uvs = region_copy.coords;
-
-                        animation.value.frames.push_back(frame);
-
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (!found)
-                {
-                    std::ostringstream ss;
-                    ss << "animation \"" << animation.name << "\" cannot find "
-                       << "frame \"" << frame_name << "\" in region list";
-                    throw std::invalid_argument(ss.str());
-                }
-            }
-        }
-    }
+    ProcessAnimations(j, sheet);
+    ProcessSlices(j_meta, sheet);
 }
 
 } // anonymous namespace
@@ -314,14 +379,14 @@ SpriteSheet::SpriteSheet (const char* filepath)
         void* pnew = RDGE_MALLOC(sizeof(Surface), memory_bucket_assets);
         if (RDGE_UNLIKELY(!pnew))
         {
-            throw std::invalid_argument("Memory allocation failed");
+            throw std::runtime_error("Memory allocation failed");
         }
 
         Surface* raw = new (pnew) Surface(j_meta["image"].get<std::string>());
         this->surface = shared_asset<Surface>(raw);
         ProcessSpriteSheet(j, *this);
     }
-    catch (const std::logic_error& ex)
+    catch (const std::exception& ex)
     {
         RDGE_THROW(ex.what());
     }
@@ -384,8 +449,8 @@ SpriteSheet::GetAnimation (const std::string& name, float scale) const
 Animation
 SpriteSheet::GetAnimation (int32 animation_id, float scale) const
 {
-    SDL_assert(animation_id >= 0);
-    SDL_assert(static_cast<size_t>(animation_id) < this->animations.size());
+    RDGE_ASSERT(animation_id >= 0);
+    RDGE_ASSERT(static_cast<size_t>(animation_id) < this->animations.size());
 
     auto result = this->animations[animation_id].value;
     for (auto& frame : result.frames)
