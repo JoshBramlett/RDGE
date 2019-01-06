@@ -1,5 +1,23 @@
 Working (enhancements)
 
+    - Finish NinePatch
+      - This includes importing the UI
+    - Script refactor
+      - Asset waterfall should have three steps:
+        1) Aseprite export
+          - Intermediate image export for Tiled
+          - Slices/Animations preps for cooking
+        2) Asset cooking (preps for packing)
+        3) Asset packing
+      - This includes:
+        - Rename cooker/export*.py to cooker/cook*.py
+        - Create scripts for Aseprite export
+          - Scripts must 'touch' the master export file or the changes will be skipped
+    - Animation refactor
+      - Animations are currently hard-coded and should simply be an import from Aseprite
+      - The json will be updated which requires changes to the spritesheet, scripts,
+        and asset_packer.
+
     - Combine compiler.hpp and internal/hints.hpp
 
     - Test out whether the objects in a spritesheet need to have a positive position.
@@ -27,13 +45,13 @@ Working (enhancements)
       - Create a vector-like container for tracking memory
         - Update all asset classes to use that rather than a vector
     Graphics:
+      - Create a better way to sort sprites for rendering
+        - This should include added z-index support.  See Handmade Reference Notes Ep 52
       - Create a more cohesive way to represent sprites
         - Explictly define sprites from object sheet and normal sprites
         - Tie in with physics system (via entity).  Note: SpriteGroup/RigidBody
         - Logically separate position from depth - use vec2 when setting position
           - Remove m_far from TileBatch (really only applicable for bg layers)
-      - Remove ISprite, Sprite, vops, etc.
-        - Clean up SpriteBatch for above
 
 
 Game:
@@ -105,7 +123,6 @@ Util:
   - Enhance global memory tracker
     - Allow containers to use different memory buckets
     - Find solution for properly aligning memory.
-    - Investigate overriding SDL allocation for tracking (like STB is overridden in surface.cpp)
 
   - Add proper logging across the library
   - Normalize and add support for normal print and pretty printing

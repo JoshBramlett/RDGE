@@ -87,7 +87,6 @@ def merge_data(data_file):
     with open(data_file) as json_data:
         j = json.load(json_data)
 
-    j['meta']['sheet_type'] = 'objectsheet'
     for d in tile_defs:
         name = os.path.splitext(os.path.basename(d['image']))[0]
         found = False

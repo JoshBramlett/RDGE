@@ -85,8 +85,8 @@ ImportSpritesheets (global_import_state& global_state)
                         throw std::runtime_error("Spritesheet has no frame data");
                     }
 
-                    auto& meta = j["meta"];
-                    auto image_file = meta["image"].get<std::string>();
+                    auto& j_meta = j["meta"];
+                    auto image_file = j_meta["image"].get<std::string>();
                     auto image_name = rdge::basename(rdge::remove_extension(image_file));
                     uint32 table_id = global_state.get_id(image_name, asset_type_surface);
                     if (table_id == global_import_state::INVALID_TABLE_ID)
@@ -97,7 +97,7 @@ ImportSpritesheets (global_import_state& global_state)
 
                     // sanity check
                     const auto& image_asset = global_state.imported_assets[table_id];
-                    const auto& image_size = meta["size"];
+                    const auto& image_size = j_meta["size"];
                     if (table_id != image_asset.table_id ||
                         image_size["w"].get<int32>() != image_asset.info.surface.width ||
                         image_size["h"].get<int32>() != image_asset.info.surface.height)
@@ -107,14 +107,14 @@ ImportSpritesheets (global_import_state& global_state)
                     }
 
                     // remove unused
-                    meta.erase("app");
-                    meta.erase("version");
-                    meta.erase("smartupdate");
-                    meta.erase("image");
-                    meta.erase("size");
+                    j_meta.erase("app");
+                    j_meta.erase("version");
+                    j_meta.erase("smartupdate");
+                    j_meta.erase("image");
+                    j_meta.erase("size");
 
                     import.info.spritesheet.surface_id = table_id;
-                    meta["image_table_id"] = table_id;
+                    j_meta["image_table_id"] = table_id;
                     std::vector<uint8> msgpack = json::to_msgpack(j);
 
                     free(text_data);
@@ -128,8 +128,11 @@ ImportSpritesheets (global_import_state& global_state)
                     import.info.size = msgpack.size();
                     import.enums = json::array();
 
-                    bool is_obj = meta["sheet_type"].get<std::string>() == "objectsheet";
                     {
+                        /**********************************************************
+                         *               Create enums for each frame
+                         *********************************************************/
+
                         json j_enum = { { "name", import.name + "_spritesheet_frames" },
                                         { "values", json::array() } };
 
@@ -139,7 +142,21 @@ ImportSpritesheets (global_import_state& global_state)
                             std::ostringstream ss;
                             ss << "frame_" << frame["filename"].get<std::string>();
 
-                            if (is_obj)
+                            // Persist the frame index if supplied.  This occurs for variable
+                            // sized tilesets created from the 'Tiled' app and corresponds to
+                            // the 'ID' field of the tileset.
+                            //
+                            // NOTE: It's been a while since implementing this functionality,
+                            //       but I believe the reasoning is so the ID can be used
+                            //       outside of the Tiled app when world building.  For
+                            //       example, I've considered building a web interface to
+                            //       correspond with the tilemap.  A sign defined in the
+                            //       Tiled app could then have it's logic added outside the
+                            //       app, like what it says, etc.
+                            //
+                            //       That said, I'm not sure why it'd be required at all,
+                            //       but I'm choosing to leave it here for now and revisit.
+                            if (frame.count("index"))
                             {
                                 index = frame["index"].get<uint32>();
                             }
@@ -152,14 +169,41 @@ ImportSpritesheets (global_import_state& global_state)
 
                     if (j.count("animations"))
                     {
+                        /**********************************************************
+                         *               Create enums for each animation
+                         *********************************************************/
+
                         json j_enum = { { "name", import.name + "_spritesheet_animations" },
                                         { "values", json::array() } };
 
                         uint32 index = 0;
-                        for (const auto& animation : j["animations"])
+                        const auto& j_animations = j["animations"];
+                        for (const auto& j_animation : j_animations)
                         {
                             std::ostringstream ss;
-                            ss << "animation_" << animation["name"].get<std::string>();
+                            ss << "animation_" << j_animation["name"].get<std::string>();
+
+                            j_enum["values"].push_back({{ "n", ss.str() }, { "v", index++ }});
+                        }
+
+                        import.enums.push_back(j_enum);
+                    }
+
+                    if (j_meta.count("slices"))
+                    {
+                        /**********************************************************
+                         *               Create enums for each slice
+                         *********************************************************/
+
+                        json j_enum = { { "name", import.name + "_spritesheet_slices" },
+                                        { "values", json::array() } };
+
+                        uint32 index = 0;
+                        const auto& j_slices = j_meta["slices"];
+                        for (const auto& j_slice : j_slices)
+                        {
+                            std::ostringstream ss;
+                            ss << "slice_" << j_slice["name"].get<std::string>();
 
                             j_enum["values"].push_back({{ "n", ss.str() }, { "v", index++ }});
                         }

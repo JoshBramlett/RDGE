@@ -59,7 +59,6 @@ def merge_data(data_file, anim_file):
             if found == False:
                 raise Exception('Frame not found: ' + af['name'])
 
-    j_data['meta']['sheet_type'] = 'spritesheet'
     j_data.update(j_anim)
 
     with open(data_file, 'w') as f:

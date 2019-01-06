@@ -16,6 +16,12 @@ def usage():
     print "Usage:"
     print "export_all.py -f <config.json>"
 
+def is_modified_after(f, t):
+    if os.path.isfile(f):
+        return (os.path.getmtime(f) > t)
+    else:
+        raise IOError('File does not exist: %s' % f)
+
 def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hf:v", ["help", "file="])
@@ -38,9 +44,10 @@ def main():
         sys.exit(2)
 
     if not os.path.isfile(config_file):
-        print "Cannot file config file"
+        print "Cannot find config file"
         sys.exit(2)
 
+    skip_asset_packer = True
     try:
         with open(config_file) as json_data:
             j = json.load(json_data)
@@ -50,21 +57,52 @@ def main():
         if not os.path.isdir(export_dir):
             raise Exception('Cannot find export directory')
 
+        pack_file = j["packer"]["data_file"]
+        pack_file_modified = 0
+        if os.path.isfile(pack_file):
+            pack_file_modified = os.path.getmtime(pack_file)
+
         config_dir = os.path.dirname(config_file)
         for f in cooker['animations']:
-            export_animation.process(os.path.join(config_dir, f), export_dir)
+            animation_file = os.path.join(config_dir, f)
+            if is_modified_after(animation_file, pack_file_modified):
+                export_animation.process(animation_file, export_dir)
+                skip_asset_packer = False
+            else:
+                print('Skipped cooking: %s' % (f))
 
         for f in cooker['fonts']:
-            export_font.process(os.path.join(config_dir, f), export_dir)
+            font_file = os.path.join(config_dir, f)
+            if is_modified_after(font_file, pack_file_modified):
+                export_font.process(font_file, export_dir)
+                skip_asset_packer = False
+            else:
+                print('Skipped cooking: %s' % (f))
 
         for f in cooker['objectsheets']:
-            export_objectsheet.process(os.path.join(config_dir, f), export_dir)
+            objectsheet_file = os.path.join(config_dir, f)
+            if is_modified_after(objectsheet_file, pack_file_modified):
+                export_objectsheet.process(objectsheet_file, export_dir)
+                skip_asset_packer = False
+            else:
+                print('Skipped cooking: %s' % (f))
 
         for f in cooker['tilemaps']:
-            export_tilemap.process(os.path.join(config_dir, f), export_dir)
+            tilemap_file = os.path.join(config_dir, f)
+            if is_modified_after(tilemap_file, pack_file_modified):
+                export_tilemap.process(tilemap_file, export_dir)
+                skip_asset_packer = False
+            else:
+                print('Skipped cooking: %s' % (f))
 
         for f in cooker['tilesets']:
-            export_tileset.process(os.path.join(config_dir, f), export_dir)
+            tileset_file = os.path.join(config_dir, f)
+            if is_modified_after(tileset_file, pack_file_modified):
+                export_tileset.process(tileset_file, export_dir)
+                skip_asset_packer = False
+            else:
+                print('Skipped cooking: %s' % (f))
+
     except ValueError as err:
         print('ValueError: %s' % str(err))
         sys.exit(2)
@@ -74,6 +112,10 @@ def main():
     except Exception as err:
         print('Rumtime exception: %s' % str(err))
         sys.exit(2)
+
+    if skip_asset_packer:
+        print "All files skipped."
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
