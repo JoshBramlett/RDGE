@@ -1,4 +1,23 @@
 {
+  "image_exporter": {
+    "export_path": "/Users/jbramlett/Documents/Projects/RDGE/sandbox/chrono/res/",
+    "subdirectories": [
+      {
+        "name": "ui",
+        "import_path": "/Users/jbramlett/Creative Cloud Files/ui",
+        "options": [
+          [ "--list-slices", "" ],
+          [ "--format", "json-array" ],
+          [ "--filename-format", "ui_{title}" ],
+          [ "--sheet", "png" ],
+          [ "--data", "json" ]
+        ],
+        "files": [
+          "dialog.aseprite"
+        ]
+      }
+    ]
+  },
   "cooker": {
     "animations": [
       "animations/animals.tps",

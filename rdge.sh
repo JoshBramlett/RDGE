@@ -6,6 +6,10 @@ alias cmakegr='cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOL
 # https://stackoverflow.com/a/15936384
 alias debm='make -j4 -C/Users/jbramlett/Documents/Projects/RDGE/debug 2> >(grep -v "text-based stub file" 1>&2)'
 
+alias rdgepy='PYTHONPATH=/Users/jbramlett/Documents/Projects/RDGE/scripts python'
+export RDGE_ASEPRITE_PATH='/Applications/Aseprite.app/Contents/MacOS/aseprite'
+alias aseprite='/Applications/Aseprite.app/Contents/MacOS/aseprite'
+
 function chronopack()
 {
     cd ~/Documents/Projects/RDGE/scripts/cooker/

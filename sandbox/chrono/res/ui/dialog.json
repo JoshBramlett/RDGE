@@ -1,0 +1,47 @@
+{ "frames": [
+   {
+    "filename": "ui_dialog",
+    "frame": { "x": 0, "y": 0, "w": 144, "h": 80 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 80 },
+    "sourceSize": { "w": 144, "h": 80 },
+    "duration": 100
+   }
+ ],
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.9",
+  "image": "/Users/jbramlett/Documents/Projects/RDGE/sandbox/chrono/res/ui/dialog.png",
+  "format": "RGBA8888",
+  "size": { "w": 144, "h": 80 },
+  "scale": "1",
+  "slices": [
+   { "name": "dialog_nine_patch", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 0, "y": 0, "w": 48, "h": 48 }, "center": {"x": 16, "y": 16, "w": 16, "h": 16 } }] },
+   { "name": "dialog_red_top_left", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 48, "y": 0, "w": 16, "h": 16 } }] },
+   { "name": "dialog_red_top_right", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 64, "y": 0, "w": 16, "h": 16 } }] },
+   { "name": "dialog_alt_left_01", "color": "#0000ffff", "data": "dialog_nine_patch", "keys": [{ "frame": 0, "bounds": {"x": 48, "y": 16, "w": 16, "h": 16 } }] },
+   { "name": "dialog_alt_right_01", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 64, "y": 16, "w": 16, "h": 16 } }] },
+   { "name": "dialog_red_bottom_left", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 48, "y": 32, "w": 16, "h": 16 } }] },
+   { "name": "dialog_purple_top_left", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 48, "y": 48, "w": 16, "h": 16 } }] },
+   { "name": "dialog_red_bottom_right", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 64, "y": 32, "w": 16, "h": 16 } }] },
+   { "name": "dialog_green_top_left", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 80, "y": 0, "w": 16, "h": 16 } }] },
+   { "name": "dialog_green_top_right", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 96, "y": 0, "w": 16, "h": 16 } }] },
+   { "name": "dialog_green_bottom_left", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 80, "y": 32, "w": 16, "h": 16 } }] },
+   { "name": "dialog_green_bottom_right", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 96, "y": 32, "w": 16, "h": 16 } }] },
+   { "name": "dialog_blue_top_left", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 112, "y": 0, "w": 16, "h": 16 } }] },
+   { "name": "dialog_green_top_right", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 128, "y": 0, "w": 16, "h": 16 } }] },
+   { "name": "dialog_green_bottom_left", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 112, "y": 32, "w": 16, "h": 16 } }] },
+   { "name": "dialog_green_bottom_right", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 128, "y": 32, "w": 16, "h": 16 } }] },
+   { "name": "dialog_purple_top_right", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 128, "y": 48, "w": 16, "h": 16 } }] },
+   { "name": "dialog_purple_bottom_left", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 48, "y": 64, "w": 16, "h": 16 } }] },
+   { "name": "dialog_purple_bottom_right", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 128, "y": 64, "w": 16, "h": 16 } }] },
+   { "name": "dialog_alt_left_02", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 80, "y": 16, "w": 16, "h": 16 } }] },
+   { "name": "dialog_alt_left_03", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 112, "y": 16, "w": 16, "h": 16 } }] },
+   { "name": "dialog_alt_right_02", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 96, "y": 16, "w": 16, "h": 16 } }] },
+   { "name": "dialog_alt_right_03", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 128, "y": 16, "w": 16, "h": 16 } }] },
+   { "name": "dialog_alt_top_01", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 64, "y": 48, "w": 64, "h": 16 } }] },
+   { "name": "dialog_alt_bottom_01", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 64, "y": 64, "w": 64, "h": 16 } }] }
+  ]
+ }
+}
