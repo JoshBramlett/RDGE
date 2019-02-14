@@ -215,6 +215,7 @@ list(APPEND RDGE_HEADER_FILES
      ${RDGE_INCLUDE_DIR}/rdge/util/profiling.hpp
      ${RDGE_INCLUDE_DIR}/rdge/util/strings.hpp
      ${RDGE_INCLUDE_DIR}/rdge/util/timer.hpp
+     ${RDGE_INCLUDE_DIR}/rdge/util/adt/simple_varray.hpp
      ${RDGE_INCLUDE_DIR}/rdge/util/containers/disruptor.hpp
      ${RDGE_INCLUDE_DIR}/rdge/util/containers/enum_array.hpp
      ${RDGE_INCLUDE_DIR}/rdge/util/containers/freelist.hpp

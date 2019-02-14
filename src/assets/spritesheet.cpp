@@ -11,6 +11,7 @@
 
 #include <exception>
 #include <sstream>
+#include <vector>
 
 namespace rdge {
 
@@ -33,7 +34,7 @@ ProcessAnimations (const json& j, SpriteSheet& sheet)
     }
 
     const auto& j_animations = j["animations"];
-    std::vector<animation_data>(j_animations.size()).swap(sheet.animations);
+    sheet.animations = simple_varray<animation_data, memory_bucket_assets>(j_animations.size());
 
     size_t index = 0;
     for (const auto& j_animation : j_animations)
@@ -114,7 +115,7 @@ ProcessSlices (const json& j, SpriteSheet& sheet)
     }
 
     const auto& j_slices = j["slices"];
-    std::vector<slice_data>(j_slices.size()).swap(sheet.slices);
+    sheet.slices = simple_varray<slice_data, memory_bucket_assets>(j_slices.size());
 
     size_t index = 0;
     for (const auto& j_slice : j_slices)
@@ -139,20 +140,20 @@ ProcessSlices (const json& j, SpriteSheet& sheet)
         auto frame_index = j_key["frame"].get<size_t>();
         auto& region = sheet.regions.at(frame_index);
 
-        auto bounds = j_key["bounds"].get<screen_rect>();
-        slice.bounds.x = region.value.clip.x + bounds.x;
-        slice.bounds.y = region.value.clip.y + bounds.y;
-        slice.bounds.w = bounds.w;
-        slice.bounds.h = bounds.h;
+        auto j_bounds = j_key["bounds"].get<screen_rect>();
+        slice.bounds.x = region.value.clip.x + j_bounds.x;
+        slice.bounds.y = region.value.clip.y + j_bounds.y;
+        slice.bounds.w = j_bounds.w;
+        slice.bounds.h = j_bounds.h;
 
         slice.is_nine_patch = !!j_key.count("center");
         if (slice.is_nine_patch)
         {
-            auto center = j_key["center"].get<screen_rect>();
-            slice.center.x = center.x;
-            slice.center.y = center.y;
-            slice.center.w = center.w;
-            slice.center.h = center.h;
+            auto j_center = j_key["center"].get<screen_rect>();
+            slice.center.x = j_center.x;
+            slice.center.y = j_center.y;
+            slice.center.w = j_center.w;
+            slice.center.h = j_center.h;
         }
     }
 }
@@ -165,7 +166,7 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
     JSON_VALIDATE_OPTIONAL(j, animations, is_array);
 
     const auto& j_regions = j["frames"];
-    std::vector<region_data>(j_regions.size()).swap(sheet.regions);
+    sheet.regions = simple_varray<region_data, memory_bucket_assets>(j_regions.size());
 
     auto surface_size = sheet.surface->Size();
     size_t index = 0;
@@ -286,15 +287,18 @@ ProcessSpriteSheet (const json& j, SpriteSheet& sheet)
 
         if (j_region.count("objects"))
         {
-            region.objects.reserve(j_region["objects"].size());
-            for (const auto& j_obj : j_region["objects"])
+            const auto& j_objects = j_region["objects"];
+            region.objects = simple_varray<tilemap::Object, memory_bucket_assets>(j_objects.size());
+
+            size_t obj_index = 0;
+            for (const auto& j_obj : j_objects)
             {
-                region.objects.emplace_back(j_obj);
+                auto& obj = region.objects.at(obj_index++);
+                obj = tilemap::Object(j_obj);
 
                 // The object has relative position to the sprite, so it's y-axis
                 // must be positive on import.  The object ctor negates the y-axis,
                 // so we can safely assume a negative value.
-                auto& obj = region.objects.back();
                 RDGE_ASSERT(obj.pos.y <= 0.f);
                 RDGE_ASSERT(obj.type == tilemap::ObjectType::POLYGON ||
                             obj.type == tilemap::ObjectType::CIRCLE);

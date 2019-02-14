@@ -42,8 +42,8 @@ Working (enhancements)
 
 
     Util:
-      - Create a vector-like container for tracking memory
-        - Update all asset classes to use that rather than a vector
+      - Update all asset classes to use simple_varray rather than a vector
+      - Move all containers to adt
     Graphics:
       - Create a better way to sort sprites for rendering
         - This should include added z-index support.  See Handmade Reference Notes Ep 52

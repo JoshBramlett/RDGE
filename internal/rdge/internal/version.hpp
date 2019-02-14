@@ -1,7 +1,7 @@
 //! \headerfile <rdge/version.hpp>
 //! \author Josh Bramlett
 //! \version 0.0.10
-//! \date 12/30/2018
+//! \date 02/14/2019
 
 /************************************************************/
 /**                 Auto-generated from build              **/
@@ -14,9 +14,9 @@
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 
-static constexpr const char* RDGE_COMMIT_HASH = "0d96247a0a1925594368532553a2de123f35b6d3";
-static constexpr const char* RDGE_COMMIT_DATE = "Thu Dec 20 23:20:10 2018";
-static constexpr const char* RDGE_COMMIT_SUBJECT = "Misc fixes after vcpkg addition";
+static constexpr const char* RDGE_COMMIT_HASH = "8ddeeb08f7009f5556c50345e37962463842b764";
+static constexpr const char* RDGE_COMMIT_DATE = "Tue Feb 5 11:21:15 2019";
+static constexpr const char* RDGE_COMMIT_SUBJECT = "Image Exporter script";
 
 static constexpr uint8 RDGE_VERSION_MAJOR = 0;
 static constexpr uint8 RDGE_VERSION_MINOR = 0;

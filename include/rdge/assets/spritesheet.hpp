@@ -13,9 +13,8 @@
 #include <rdge/graphics/color.hpp>
 #include <rdge/graphics/tex_coords.hpp>
 #include <rdge/math/vec2.hpp>
+#include <rdge/util/adt/simple_varray.hpp>
 #include <rdge/system/types.hpp>
-
-#include <vector>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
@@ -75,7 +74,7 @@ struct region_data
     //! \details Used with object sheets, tile objects are shapes for creating the
     //!          collision data for the provided region.
     //! \note The position of the object is relative to the region.
-    std::vector<tilemap::Object> objects;
+    simple_varray<tilemap::Object, memory_bucket_assets> objects;
 };
 
 //! \struct animation_data
@@ -216,9 +215,9 @@ public:
     //!@}
 
 public:
-    std::vector<region_data> regions;       //!< Spritesheet region list
-    std::vector<animation_data> animations; //!< Animation definition list
-    std::vector<slice_data> slices;         //!< Slice definition list
+    simple_varray<region_data, memory_bucket_assets> regions;
+    simple_varray<animation_data, memory_bucket_assets> animations;
+    simple_varray<slice_data, memory_bucket_assets> slices;
 
     shared_asset<Surface> surface; //!< Pixel data of the sprite sheet
 };
