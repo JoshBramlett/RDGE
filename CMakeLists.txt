@@ -3,7 +3,7 @@ project (RDGE)
 
 set (RDGE_VERSION_MAJOR 0)
 set (RDGE_VERSION_MINOR 0)
-set (RDGE_VERSION_PACKAGE 10)
+set (RDGE_VERSION_PACKAGE 11)
 set (RDGE_VERSION_STRING "${RDGE_VERSION_MAJOR}.${RDGE_VERSION_MINOR}.${RDGE_VERSION_PACKAGE}")
 string(TIMESTAMP TODAY "%m/%d/%Y")
 
@@ -216,12 +216,12 @@ list(APPEND RDGE_HEADER_FILES
      ${RDGE_INCLUDE_DIR}/rdge/util/strings.hpp
      ${RDGE_INCLUDE_DIR}/rdge/util/timer.hpp
      ${RDGE_INCLUDE_DIR}/rdge/util/adt/simple_varray.hpp
+     ${RDGE_INCLUDE_DIR}/rdge/util/adt/stack_array.hpp
      ${RDGE_INCLUDE_DIR}/rdge/util/containers/disruptor.hpp
      ${RDGE_INCLUDE_DIR}/rdge/util/containers/enum_array.hpp
      ${RDGE_INCLUDE_DIR}/rdge/util/containers/freelist.hpp
      ${RDGE_INCLUDE_DIR}/rdge/util/containers/intrusive_list.hpp
      ${RDGE_INCLUDE_DIR}/rdge/util/containers/iterators.hpp
-     ${RDGE_INCLUDE_DIR}/rdge/util/containers/stack_array.hpp
      ${RDGE_INCLUDE_DIR}/rdge/util/containers/threadsafe_queue.hpp
      ${RDGE_INCLUDE_DIR}/rdge/util/io/rwops_base.hpp
      ${RDGE_INCLUDE_DIR}/rdge/util/memory/alloc.hpp

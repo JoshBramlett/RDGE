@@ -7,8 +7,9 @@
 
 #include <rdge/core.hpp>
 #include <rdge/math/intrinsics.hpp>
+#include <rdge/debug/assert.hpp>
 
-#include <cassert>
+#include <type_traits>
 #include <sstream>
 
 //! \namespace rdge Rainbow Drop Game Engine
@@ -84,7 +85,7 @@ RDGE_POP_WARNING()
     //! \returns Reference to element
     constexpr T& operator[] (uint8 index)
     {
-        assert(index < size());
+        RDGE_ASSERT_CONSTEXPR(index < size());
         return (&x)[index];
     }
 
@@ -93,7 +94,7 @@ RDGE_POP_WARNING()
     //! \returns Const reference to element
     constexpr const T& operator[] (uint8 index) const
     {
-        assert(index < size());
+        RDGE_ASSERT_CONSTEXPR(index < size());
         return (&x)[index];
     }
 

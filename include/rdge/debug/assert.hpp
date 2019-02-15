@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <cassert>
 #include <SDL_assert.h>
 
 #define RDGE_ASSERT(x) SDL_assert(x)
+#define RDGE_ASSERT_CONSTEXPR(x) assert(x)

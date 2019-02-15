@@ -6,9 +6,9 @@
 #include <rdge/util/strings.hpp>
 #include <rdge/util/timer.hpp>
 #include <rdge/util/adt/simple_varray.hpp>
+#include <rdge/util/adt/stack_array.hpp>
 #include <rdge/util/containers/freelist.hpp>
 #include <rdge/util/containers/intrusive_list.hpp>
-#include <rdge/util/containers/stack_array.hpp>
 #include <rdge/util/containers/threadsafe_queue.hpp>
 #include <rdge/util/io/rwops_base.hpp>
 #include <rdge/util/memory/alloc.hpp>

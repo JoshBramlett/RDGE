@@ -27,6 +27,8 @@
     throw rdge::GLException(msg, fn, code, __FILE__, __LINE__, FUNCTION_NAME);        \
 } while (false)
 
+#define RDGE_THROW_ALLOC_FAILED() RDGE_THROW("Memory allocation failed")
+
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 

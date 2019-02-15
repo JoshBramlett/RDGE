@@ -9,9 +9,7 @@
 #include <rdge/physics/collision.hpp>
 #include <rdge/math/intrinsics.hpp>
 #include <rdge/math/vec2.hpp>
-#include <rdge/util/containers/stack_array.hpp>
-
-#include <vector>
+#include <rdge/util/adt/stack_array.hpp>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
@@ -155,9 +153,9 @@ public:
 private:
 
     //!@{ Private members which are used and reset every time step
-    stack_array<solver_body_data>    m_bodies;
-    stack_array<solver_contact_data> m_contacts;
-    stack_array<BaseJoint*>          m_joints;
+    stack_array<solver_body_data, memory_bucket_physics>    m_bodies;
+    stack_array<solver_contact_data, memory_bucket_physics> m_contacts;
+    stack_array<BaseJoint*, memory_bucket_physics>          m_joints;
     const time_step* m_step = nullptr;
     bool m_positionsSolved;
     //!@}

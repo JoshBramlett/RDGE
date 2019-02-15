@@ -1,4 +1,4 @@
-//! \headerfile <rdge/util/containers/stack_array.hpp>
+//! \headerfile <rdge/util/adt/stack_array.hpp>
 //! \author Josh Bramlett
 //! \version 0.0.10
 //! \date 06/27/2017
@@ -9,11 +9,10 @@
 #include <rdge/util/containers/iterators.hpp>
 #include <rdge/util/memory/alloc.hpp>
 #include <rdge/util/compiler.hpp>
-
-#include <SDL_assert.h>
+#include <rdge/util/exception.hpp>
+#include <rdge/debug/assert.hpp>
 
 #include <utility>
-#include <stdexcept>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
@@ -26,7 +25,7 @@ namespace rdge {
 //!          size exceeds the capacity.  In that way behavior is similar to a
 //!          std::vector, but has the added benefit of avoiding the uneccessary
 //!          push_back copy.
-template <typename T>
+template <typename T, memory_bucket Bucket = memory_bucket_containers>
 struct stack_array
 {
     using iterator = detail::ra_iterator<T>;
@@ -38,16 +37,16 @@ struct stack_array
     explicit stack_array (size_t capacity = 0)
         : m_capacity(capacity)
     {
-        if (RDGE_UNLIKELY(!RDGE_TMALLOC(m_data, m_capacity, memory_bucket_containers)))
+        if (RDGE_UNLIKELY(!RDGE_TMALLOC(m_data, m_capacity, Bucket)))
         {
-            throw std::runtime_error("Memory allocation failed");
+            RDGE_THROW_ALLOC_FAILED();
         }
     }
 
     //! \brief stack_array dtor
     ~stack_array (void) noexcept
     {
-        RDGE_FREE(m_data, memory_bucket_containers);
+        RDGE_FREE(m_data, Bucket);
     }
 
     //!@{ Non-copyable, move enabled
@@ -55,10 +54,11 @@ struct stack_array
     stack_array& operator= (const stack_array&) = delete;
 
     stack_array (stack_array&& rhs) noexcept
-        : m_count(rhs.m_count)
+        : m_data(rhs.m_data)
+        , m_count(rhs.m_count)
         , m_capacity(rhs.m_capacity)
     {
-        std::swap(m_data, rhs.m_data);
+        rhs.m_data = nullptr;
     }
 
     stack_array& operator= (stack_array&& rhs) noexcept
@@ -66,7 +66,6 @@ struct stack_array
         if (this != &rhs)
         {
             std::swap(m_data, rhs.m_data);
-
             m_count = rhs.m_count;
             m_capacity = rhs.m_capacity;
         }
@@ -82,11 +81,11 @@ struct stack_array
 
     //! \brief stack_array Subscript Operator
     //! \returns Reference to the data at the provided index
-    T& operator[] (uint32 index) const noexcept
+    T& operator[] (size_t index) const noexcept
     {
-        SDL_assert(m_data);
-        SDL_assert(m_count > 0);
-        SDL_assert(index < m_count);
+        RDGE_ASSERT(m_data);
+        RDGE_ASSERT(m_count > 0);
+        RDGE_ASSERT(index < m_count);
 
         return m_data[index];
     }
@@ -96,9 +95,9 @@ struct stack_array
     //! \returns Reference to the data at the next available index
     T& next (void) noexcept
     {
-        SDL_assert(m_data);
-        SDL_assert(m_capacity > 0);
-        SDL_assert(m_count < m_capacity);
+        RDGE_ASSERT(m_data);
+        RDGE_ASSERT(m_capacity > 0);
+        RDGE_ASSERT(m_count < m_capacity);
 
         return m_data[m_count++];
     }
@@ -108,9 +107,9 @@ struct stack_array
     //! \returns Reference to the data at the next available index
     T& next_clean (void) noexcept
     {
-        SDL_assert(m_data);
-        SDL_assert(m_capacity > 0);
-        SDL_assert(m_count < m_capacity);
+        RDGE_ASSERT(m_data);
+        RDGE_ASSERT(m_capacity > 0);
+        RDGE_ASSERT(m_count < m_capacity);
 
         memset(m_data + m_count, 0, sizeof(T));
         return m_data[m_count++];
@@ -125,9 +124,9 @@ struct stack_array
         if (new_cap > m_capacity)
         {
             m_capacity = static_cast<size_t>(static_cast<float>(new_cap) * OVER_ALLOC_RATIO);
-            if (RDGE_UNLIKELY(!RDGE_TREALLOC(m_data, m_capacity, memory_bucket_containers)))
+            if (RDGE_UNLIKELY(!RDGE_TREALLOC(m_data, m_capacity, Bucket)))
             {
-                throw std::runtime_error("Memory allocation failed");
+                RDGE_THROW_ALLOC_FAILED();
             }
         }
     }

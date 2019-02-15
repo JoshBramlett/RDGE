@@ -8,10 +8,11 @@
 #include <rdge/core.hpp>
 #include <rdge/util/memory/alloc.hpp>
 #include <rdge/util/compiler.hpp>
+#include <rdge/util/exception.hpp>
 #include <rdge/debug/assert.hpp>
 
+#include <type_traits>
 #include <utility>
-#include <stdexcept>
 
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
@@ -24,6 +25,9 @@ namespace rdge {
 template <typename T, memory_bucket Bucket = memory_bucket_containers>
 struct simple_varray
 {
+    static_assert(std::is_default_constructible<T>::value,
+                  "simple_varray requires types to be default constructable");
+
     using value_type = T;
     using reference = T&;
     using const_reference = const T&;
@@ -45,7 +49,7 @@ struct simple_varray
     {
         if (RDGE_UNLIKELY(!RDGE_TMALLOC(m_data, m_capacity, Bucket)))
         {
-            throw std::runtime_error("Memory allocation failed");
+            RDGE_THROW_ALLOC_FAILED();
         }
 
         for (size_t i = 0; i < m_capacity; i++)
@@ -100,7 +104,7 @@ struct simple_varray
     //!@}
 
     //!@{ simple_varray Subscript Operators
-    T& operator[] (size_t index) noexcept
+    reference operator[] (size_t index) noexcept
     {
         RDGE_ASSERT(m_data);
         RDGE_ASSERT(m_capacity > 0);
@@ -109,7 +113,7 @@ struct simple_varray
         return m_data[index];
     }
 
-    const T& operator[] (size_t index) const noexcept
+    const_reference operator[] (size_t index) const noexcept
     {
         RDGE_ASSERT(m_data);
         RDGE_ASSERT(m_capacity > 0);
@@ -121,7 +125,7 @@ struct simple_varray
 
     //! /brief Element access with bounds checking
     //! /throws std::out_of_range
-    T& at (size_t index)
+    reference at (size_t index)
     {
         RDGE_ASSERT(m_data);
         if (index < m_capacity)
@@ -134,7 +138,7 @@ struct simple_varray
 
     //! /brief Const element access with bounds checking
     //! /throws std::out_of_range
-    const T& at (size_t index) const
+    const_reference at (size_t index) const
     {
         RDGE_ASSERT(m_data);
         if (index < m_capacity)
