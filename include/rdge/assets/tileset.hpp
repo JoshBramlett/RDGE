@@ -11,8 +11,6 @@
 #include <rdge/graphics/tex_coords.hpp>
 #include <rdge/math/vec2.hpp>
 
-#include <vector>
-
 //! \namespace rdge Rainbow Drop Game Engine
 namespace rdge {
 

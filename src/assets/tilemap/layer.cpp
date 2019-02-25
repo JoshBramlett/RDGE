@@ -32,7 +32,7 @@ from_json (const nlohmann::json& j, Layer::tilelayer_data& layer)
     // fixed size map
     if (j.count("data"))
     {
-        std::vector<Layer::tilelayer_data::tile_chunk>(1).swap(layer.chunks);
+        layer.chunks = decltype(layer.chunks)(1);
 
         auto& chunk = layer.chunks.at(0);
         chunk.coord.x = 0;
@@ -43,7 +43,7 @@ from_json (const nlohmann::json& j, Layer::tilelayer_data& layer)
     else if (j.count("chunks"))
     {
         const auto& j_chunks = j["chunks"];
-        std::vector<Layer::tilelayer_data::tile_chunk>(j_chunks.size()).swap(layer.chunks);
+        layer.chunks = decltype(layer.chunks)(j_chunks.size());
 
         size_t index = 0;
         for (const auto& j_chunk : j_chunks)
@@ -118,9 +118,13 @@ Layer::Layer (const nlohmann::json& j, Tilemap* tilemap)
                 throw std::invalid_argument("Invalid SpriteRenderOrder");
             }
 
-            for (const auto& j_obj : j["objects"])
             {
-                this->objectgroup.objects.emplace_back(j_obj, this->parent);
+                const auto& j_objects = j["objects"];
+                this->objectgroup.objects.reserve(j_objects.size());
+                for (const auto& j_obj : j_objects)
+                {
+                    this->objectgroup.objects.emplace_back(j_obj, this->parent);
+                }
             }
             break;
         case LayerType::IMAGELAYER:

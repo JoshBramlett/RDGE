@@ -14,6 +14,7 @@
 #include <rdge/graphics/layers/tile_layer.hpp>
 #include <rdge/graphics/layers/sprite_layer.hpp>
 #include <rdge/math/vec2.hpp>
+#include <rdge/util/adt/simple_varray.hpp>
 
 //!@{ Forward declarations
 #include <nlohmann/json_fwd.hpp>
@@ -144,8 +145,10 @@ public:
             std::vector<uint32> data; //!< Array of GIDs
         };
 
+        using TileChunkArray = simple_varray<tile_chunk, memory_bucket_assets>;
+
         tilemap_grid grid;              //!< Grid local to the Layer
-        std::vector<tile_chunk> chunks; //!< List of chunks that make up the mapping
+        TileChunkArray chunks;          //!< List of chunks that make up the mapping
         shared_asset<Tileset> tileset;  //!< Associated asset
     } tilelayer;
     //!@}

@@ -34,7 +34,7 @@ ProcessAnimations (const json& j, SpriteSheet& sheet)
     }
 
     const auto& j_animations = j["animations"];
-    sheet.animations = simple_varray<animation_data, memory_bucket_assets>(j_animations.size());
+    sheet.animations = decltype(sheet.animations)(j_animations.size());
 
     size_t index = 0;
     for (const auto& j_animation : j_animations)
@@ -115,7 +115,7 @@ ProcessSlices (const json& j, SpriteSheet& sheet)
     }
 
     const auto& j_slices = j["slices"];
-    sheet.slices = simple_varray<slice_data, memory_bucket_assets>(j_slices.size());
+    sheet.slices = decltype(sheet.slices)(j_slices.size());
 
     size_t index = 0;
     for (const auto& j_slice : j_slices)

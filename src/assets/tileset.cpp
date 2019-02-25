@@ -7,9 +7,7 @@
 #include <rdge/util/exception.hpp>
 #include <rdge/util/json.hpp>
 
-#include <SDL_assert.h>
-
-#include <exception>
+#include <vector>
 #include <sstream>
 
 namespace rdge {
@@ -56,7 +54,7 @@ ProcessTileset (const json& j, Tileset& tileset)
                                     tileset.tile_count,
                                     memory_bucket_assets)))
     {
-        throw std::runtime_error("Memory allocation failed");
+        RDGE_THROW_ALLOC_FAILED();
     }
 
     // build tile definitions first - they're required for the animations
@@ -104,14 +102,14 @@ ProcessTileset (const json& j, Tileset& tileset)
                                             tileset.animation_count,
                                             memory_bucket_assets)))
             {
-                throw std::runtime_error("Memory allocation failed");
+                RDGE_THROW_ALLOC_FAILED();
             }
 
             if (RDGE_UNLIKELY(!RDGE_TCALLOC(tileset.frames,
                                             tileset.frame_count,
                                             memory_bucket_assets)))
             {
-                throw std::runtime_error("Memory allocation failed");
+                RDGE_THROW_ALLOC_FAILED();
             }
 
             size_t total_frame_count = 0;
@@ -168,7 +166,7 @@ Tileset::Tileset (const char* filepath)
         void* pnew = RDGE_MALLOC(sizeof(Surface), memory_bucket_assets);
         if (RDGE_UNLIKELY(!pnew))
         {
-            throw std::invalid_argument("Memory allocation failed");
+            RDGE_THROW_ALLOC_FAILED();
         }
 
         Surface* raw = new (pnew) Surface(j["image"].get<std::string>());
