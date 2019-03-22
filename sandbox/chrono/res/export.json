@@ -1,48 +1,129 @@
 {
   "image_exporter": {
-    "export_path": "/Users/jbramlett/Documents/Projects/RDGE/sandbox/chrono/res/",
-    "subdirectories": [
-      {
-        "name": "ui",
-        "import_path": "/Users/jbramlett/Creative Cloud Files/ui",
-        "options": [
+    "import": {
+      "path": "/Users/jbramlett/Creative Cloud Files/",
+      "sheets": [
+        {
+          "type": "npcs",
+          "name": "town",
+          "sprites": [
+            {
+              "name": "dominic",
+              "animations": [ "battle", "idle_blink", "run", "walk" ],
+              "static_frames": [ "dead", "gestures" ]
+            },
+            {
+              "name": "natalia",
+              "animations": [ "battle", "idle_blink", "run", "walk" ],
+              "static_frames": [ "dead", "gestures" ]
+            }
+          ]
+        }, {
+          "chef": "ui",
+          "sheet": "in_game",
+          "files": [
+            { "file": "dialog.aseprite", "template": "slice" }
+          ]
+        }
+      ]
+    },
+    "export": {
+      "path": "/Users/jbramlett/Documents/Projects/RDGE/sandbox/chrono/res/",
+      "templates": {
+        "slice": [
           [ "--list-slices", "" ],
+          [ "--layer", "[title]" ],
+          [ "[filepath]", "" ],
+          [ "--save-as", "[path]/[title]/{layer}.png" ],
+          [ "--filename-format", "{layer}" ],
           [ "--format", "json-array" ],
-          [ "--filename-format", "ui_{title}" ],
-          [ "--sheet", "png" ],
-          [ "--data", "json" ]
+          [ "--data", "[path]/[title]/data.json" ]
         ],
-        "files": [
-          "dialog.aseprite"
+        "directional_frame": [
+          [ "--all-layers", "" ],
+          [ "--list-layers", "" ],
+          [ "--split-layers", "" ],
+          [ "[filepath]", "" ],
+          [ "--save-as", "[path]/[title]/{layer}.png" ],
+          [ "--filename-format", "{layer}" ],
+          [ "--format", "json-array" ],
+          [ "--data", "[path]/[title]/data.json" ]
+        ],
+        "directional_animation": [
+          [ "--list-tags", "" ],
+          [ "--list-layers", "" ],
+          [ "--layer", "[title]" ],
+          [ "[filepath]", "" ],
+          [ "--save-as", "[path]/[title]/{layer}_{tag}_{tagframe00}.png" ],
+          [ "--filename-format", "{layer}_{tag}_{tagframe00}" ],
+          [ "--format", "json-array" ],
+          [ "--data", "[path]/[title]/data.json" ]
         ]
       }
-    ]
+    }
   },
   "cooker": {
-    "animations": [
-      "animations/animals.tps",
-      "animations/npcs.tps",
-      "animations/player.tps"
-    ],
-    "fonts": [
-      "fonts/bitpotion/bitpotion.fnt"
-    ],
-    "objectsheets": [
-      "objects/overworld_obj.tsx",
-      "objects/overworld_houses.tsx",
-      "objects/indoors_obj.tsx"
-    ],
-    "tilemaps": [
-      "tilemaps/overworld.tmx",
-      "tilemaps/winery.tmx"
-    ],
-    "tilesets": [
-      "tilesets/overworld_bg.tsx",
-      "tilesets/indoors.tsx"
-    ],
-    "export_dir": "/Users/jbramlett/Documents/Projects/RDGE/debug/sandbox/chrono/res/export/"
+    "import": {
+      "path": "/Users/jbramlett/Documents/Projects/RDGE/sandbox/chrono/res/",
+      "chefs": [
+        {
+          "name": "animations",
+          "files": [
+            "animations/animals.tps",
+            "animations/npcs.tps",
+            "animations/player.tps"
+          ]
+        }, {
+          "name": "fonts",
+          "files": [
+            "fonts/bitpotion/bitpotion.fnt"
+          ]
+        }, {
+          "name": "objectsheets",
+          "files": [
+            "objects/overworld_obj.tsx",
+            "objects/overworld_houses.tsx",
+            "objects/indoors_obj.tsx"
+          ]
+        }, {
+          "name": "objecttypes",
+          "files": [
+            "tilemaps/objecttypes.json"
+          ]
+        }, {
+          "name": "tilemaps",
+          "files": [
+            "tilemaps/overworld.tmx",
+            "tilemaps/winery.tmx"
+          ]
+        }, {
+          "name": "tilesets",
+          "files": [
+            "tilesets/overworld_bg.tsx",
+            "tilesets/indoors.tsx"
+          ]
+        }, {
+          "name": "ui",
+          "files": [
+            "ui/in_game.tps"
+          ]
+        }
+      ]
+    },
+    "export": {
+      "path": "/Users/jbramlett/Documents/Projects/RDGE/debug/sandbox/chrono/res/export/",
+      "subdirectories": {
+        "image": "images",
+        "font": "fonts",
+        "objecttype": "objecttypes",
+        "spritesheet": "spritesheets",
+        "tileset": "tilesets",
+        "tilemap": "tilemaps"
+      }
+    }
   },
   "packer": {
+    "executable": "/Users/jbramlett/Documents/Projects/RDGE/debug/tools/asset_packer/asset_packer",
     "data_file": "/Users/jbramlett/Documents/Projects/RDGE/debug/sandbox/chrono/res/assets.pack",
     "header_file": "/Users/jbramlett/Documents/Projects/RDGE/sandbox/chrono/include/chrono/asset_table.hpp"
   }

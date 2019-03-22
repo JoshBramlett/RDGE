@@ -6,6 +6,10 @@ import subprocess
 
 from export_common import *
 
+# Animation Cooking
+#
+# Cooking
+
 def usage():
     print ""
     print "Builds a spritesheet from animation frames"

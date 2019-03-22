@@ -7,7 +7,10 @@ alias cmakegr='cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOL
 alias debm='make -j4 -C/Users/jbramlett/Documents/Projects/RDGE/debug 2> >(grep -v "text-based stub file" 1>&2)'
 
 alias rdgepy='PYTHONPATH=/Users/jbramlett/Documents/Projects/RDGE/scripts python'
-export RDGE_ASEPRITE_PATH='/Applications/Aseprite.app/Contents/MacOS/aseprite'
+export RDGE_ASEPRITE_PATH="/Applications/Aseprite.app/Contents/MacOS/aseprite"
+export RDGE_TEXTURE_PACKER_PATH="/usr/local/bin/TexturePacker"
+export RDGE_TILED_PATH="/Users/jbramlett/Documents/GitHub/tiled/build/bin/Tiled.app/Contents/MacOS/Tiled"
+
 alias aseprite='/Applications/Aseprite.app/Contents/MacOS/aseprite'
 
 function chronopack()

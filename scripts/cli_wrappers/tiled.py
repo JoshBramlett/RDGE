@@ -4,7 +4,7 @@ import getopt
 
 from utils import rwops
 
-class AsepriteCLI:
+class TiledCLI:
     __SHORT_OPTIONS_ARGS = '?'
     __SHORT_OPTIONS = 'bvp'
     __LONG_OPTIONS = [ 'shell',
@@ -52,9 +52,9 @@ class AsepriteCLI:
 
 
     def __init__(self):
-        self.__PATH = os.environ.get('RDGE_ASEPRITE_PATH')
+        self.__PATH = os.environ.get('RDGE_TILED_PATH')
         if self.__PATH is None:
-            raise Exception('EnvVar \"RDGE_ASEPRITE_PATH\" is not set')
+            raise Exception('EnvVar \"RDGE_TILED_PATH\" is not set')
 
 
     def __format_option(self, opt, arg):
@@ -99,34 +99,35 @@ class AsepriteCLI:
 
 
     def execute(self, in_file, cli_options, out_path):
+        print('Aseprite executing file: %s' % (in_file))
         in_file = rwops.get_file(in_file)
-        out_path = rwops.get_dir(out_path)
 
-        # Determine what the output files are, and check if the input file has a newer
-        # modified date.  Skip the process entirely if possible.
-        #
-        # Note:  These options accept arguments that have dynamic formatting (which doesn't
-        #        work for shit) that we don't support.  This'll fail if used.
+        # A hack to work-around aseprite CLI limitations:
+        # We pre-format the output files to their explicit names b/c the 'filename-format'
+        # option is inconsistent in it's meaning depending on how it's used.  Despite
+        # the documentation the input file is not used when formatting, and when used with
+        # the 'data' option the format will be applied to the json elements, not the
+        # actual file name.
         out_files = []
+        basename = os.path.splitext(os.path.basename(in_file))[0]
         for o in cli_options:
             opt, arg = o
             if (opt == '--sheet') or (opt == '--data') or (opt == '--save-as'):
-                if '{' in arg:
-                    raise Exception('Dynamic formatting not supported')
-                out_files.append(os.path.join(out_path, arg))
+                out_file = os.path.join(out_path, basename + '.' + arg)
+                o[1] = out_file
+                out_files.append(out_file)
 
         if len(out_files) == 0:
             raise Exception('Invalid options.  No output file(s) provided.')
 
         if not rwops.is_dirty(in_file, out_files):
+            print('Execution skipped.')
             return False
 
         cmd = self.__generate_command(in_file, cli_options)
         self.__validate_command(cmd)
-        p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, cwd=out_path)
-        stdout = p.communicate()
-        print stdout
-        if p.returncode is not 0:
-            raise Exception('Aseprite call failed.  code=%s' % os.strerror(code))
+        code = subprocess.call(cmd, shell=True)
+        if code is not 0:
+            raise Exception('Aseprite call failed.  code=%s' % str(code))
 
         return True

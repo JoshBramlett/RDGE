@@ -168,18 +168,18 @@ main (int argc, char** argv)
             throw std::invalid_argument("Invalid config format");
         }
 
-        const auto& cooker = j["cooker"];
-        const auto& packer = j["packer"];
-        if ((cooker.count("export_dir") == 0) ||
-            (packer.count("data_file") == 0) ||
-            (packer.count("header_file") == 0))
+        const auto& j_cooker = j["cooker"];
+        const auto& j_packer = j["packer"];
+        if ((j_cooker.count("export_path") == 0) ||
+            (j_packer.count("data_file") == 0) ||
+            (j_packer.count("header_file") == 0))
         {
             throw std::invalid_argument("Invalid config format");
         }
 
-        global_state.parent_dir = cooker["export_dir"].get<std::string>();
-        global_state.data_file = packer["data_file"].get<std::string>();
-        global_state.header_file = packer["header_file"].get<std::string>();
+        global_state.parent_dir = j_cooker["export_path"].get<std::string>();
+        global_state.data_file = j_packer["data_file"].get<std::string>();
+        global_state.header_file = j_packer["header_file"].get<std::string>();
     } catch (const std::exception& ex) {
         std::cout << "Exception reading config file: " << ex.what() << '\n';
         return EXIT_FAILURE;
